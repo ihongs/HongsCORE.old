@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<db xmlns="http://hongs-core"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://hongs-core db.xsd">
+    <driver drv="com.mysql.jdbc.Driver"
+            url="jdbc:mysql://localhost:3306/hongs_core?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull"
+            user="root"
+            password="123456"/>
+    <source name="jdbc/hongs_core"
+            user="root"
+            password="123456"/>
+    <config tablePrefix=""/>
+    <tables>
+        <table name="ai_item_base_info"
+               primaryKey="id">
+            <assoc type="HAS_MANY"
+                   name="ai_item_attr_info"
+                   foreignKey="item_id"
+                   primaryKey="item_id"/>
+            <assoc type="HAS_MANY"
+                   name="ai_item_asoc"
+                   foreignKey="item1_id">
+                <assoc type="BLS_TO"
+                       name="ai_item_base_info"
+                       alais="ai_item2_base_info"
+                       foreignKey="item2_id"/>
+            </assoc>
+        </table>
+        <table name="ai_item_attr_info"
+               primaryKey="id">
+        </table>
+        <table name="ai_item_asoc"/>
+    </tables>
+</db>

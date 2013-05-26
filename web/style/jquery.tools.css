@@ -1,0 +1,76 @@
+
+.tooltip {
+    display:none;
+    z-index:10000;
+    background-color:#fff;
+    border: 1px solid #666;
+
+    /* CSS3 styling for latest browsers */
+    /*
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    */
+    -moz-box-shadow:0 0 10px 5px #666;
+    -webkit-box-shadow:0 0 10px #666;
+}
+
+/* the overlayed element */
+.overlay {
+    /* must be initially hidden */
+    display:none;
+
+    /* place overlay on top of other elements */
+    z-index:9999;
+
+    /* styling */
+    background-color:#fff;
+    border:1px solid #666;
+    min-width:100px;
+    min-height:80px;
+    padding:10px;
+
+    /* CSS3 styling for latest browsers */
+    -moz-border-radius:10px;
+    -webkit-border-radius:10px;
+    -moz-box-shadow:0 0 20px 5px #000;
+    -webkit-box-shadow:0 0 20px #000;
+}
+
+/* close button positioned on upper right corner */
+.overlay .close {
+    background-image:url(image/overlay-close.png);
+    position:absolute;
+    right:-15px;
+    top:-15px;
+    cursor:pointer;
+    height:35px;
+    width:35px;
+}
+
+/* error message */
+.error {
+  z-index: 9999;
+
+  /* supply height to ensure consistent positioning for every browser */
+  height:15px;
+  background-color:#FFFE36;
+  border:1px solid #E1E16D;
+  font-size:11px;
+  color:#000;
+  padding:3px 10px;
+  margin-left:-2px;
+
+  /* CSS3 spicing for mozilla and webkit */
+  -moz-border-radius:4px;
+  -webkit-border-radius:4px;
+  -moz-border-radius-bottomleft:0;
+  -moz-border-radius-topleft:0;
+  -webkit-border-bottom-left-radius:0;
+  -webkit-border-top-left-radius:0;
+
+  -moz-box-shadow:0 0 6px #ddd;
+  -webkit-box-shadow:0 0 6px #ddd;
+}
+.error p {
+    margin: 0;
+}

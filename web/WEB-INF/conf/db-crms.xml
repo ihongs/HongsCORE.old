@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<db xmlns="http://hongs-core"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://hongs-core db.xsd">
+    <config link="default"/>
+    <driver link="default"/>
+    <source link="default"/>
+    <tables>
+        <table name="a_ad_base_info"
+               primaryKey="ad_id">
+            <assoc type="BLS_TO"
+                   name="a_ad_order_base_info"
+                   foreignKey="order_id"/>
+            <assoc type="BLS_TO"
+                   name="a_ad_owner_base_info"
+                   foreignKey="owner_id"/>
+            <assoc type="BLS_TO"
+                   name="a_ad_style_base_info"
+                   foreignKey="style_id"/>
+            <assoc type="HAS_MANY"
+                   name="a_ad_stuff_asoc"
+                   foreignKey="ad_id"/>
+            <assoc type="HAS_MANY"
+                   name="a_ad_place_asoc"
+                   foreignKey="ad_id"/>
+            <assoc type="HAS_MANY"
+                   name="a_ad_time_info"
+                   foreignKey="ad_id"/>
+        </table>
+        <table name="a_ad_order_base_info"
+               primaryKey="order_id">
+            <assoc type="BLS_TO"
+                   name="a_ad_owner_base_info"
+                   foreignKey="owner_id"/>
+        </table>
+        <table name="a_ad_owner_base_info"
+               primaryKey="owner_id">
+        </table>
+        <table name="a_ad_stuff_base_info"
+               primaryKey="stuff_id">
+            <assoc type="BLS_TO"
+                   name="a_ad_owner_base_info"
+                   foreignKey="owner_id"/>
+        </table>
+        <table name="a_ad_place_base_info"
+               primaryKey="place_id">
+            <assoc type="BLS_TO"
+                   name="a_ad_class_base_info"
+                   foreignKey="class_id"/>
+        </table>
+        <table name="a_ad_class_base_info"
+               primaryKey="class_id">
+        </table>
+        <table name="a_ad_style_base_info"
+               primaryKey="style_id">
+        </table>
+        <table name="a_ad_order_asoc"/>
+        <table name="a_ad_stuff_asoc"/>
+        <table name="a_ad_place_asoc"/>
+        <table name="a_ad_time_info"/>
+    </tables>
+</db>

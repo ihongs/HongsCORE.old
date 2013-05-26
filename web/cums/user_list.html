@@ -1,0 +1,38 @@
+<div id="cums_user_list">
+    <object class="config" name="hsList" data="">
+        <param name="loadUrl" value="('cums/User/List.do?dept_id='+H$('&dept_id',this))"/>
+        <param name="openUrls[]" value="['.create', 'cums/user_form.html?dept_id='+H$('&dept_id',this)]"/>
+        <param name="openUrls[]" value="['.modify', 'cums/user_form.html?id=$ID']"/>
+        <param name="sendUrls[]" value="['.remove', 'cums/User/Remove.do']"/>
+        <param name="idKey" value="user_id"/>
+    </object>
+    <div class="tool-bar">
+        <form class="fl tool-box ct" action="" method="GET">
+            <button type="button" class="create">创建</button>
+            <button type="button" class="modify bind-to-single">修改</button>
+            <button type="button" class="remove bind-to-select">删除</button>
+        </form>
+        <form class="fr find-box ct" action="" method="GET">
+            <input type="text" name="find"/>
+            <button type="submit">查找</button>
+        </form>
+        <div class="cb"></div>
+    </div>
+    <div class="list-box">
+        <table>
+            <thead>
+                <tr>
+                    <td data-fn="_check" class="_check">
+                        <input type="checkbox" class="check-all" name="id[]"/>
+                    </td>
+                    <td data-fn="username">邮箱</td>
+                    <td data-fn="name">昵称</td>
+                    <td data-fn="note">备注</td>
+                    <td data-fn="password">密码</td>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="fl page-box"></div>
+</div>

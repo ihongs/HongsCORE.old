@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<db xmlns="http://hongs-core"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://hongs-core db.xsd">
+    <source link="default"/>
+    <driver link="default"/>
+    <tables>
+        <table name="au_user_base_info"
+               primaryKey="user_id">
+            <assoc type="HAS_MANY"
+                   name="au_user_dept_asoc"
+                   foreignKey="user_id"/>
+            <assoc type="HAS_MANY"
+                   name="au_user_group_asoc"
+                   foreignKey="user_id"/>
+        </table>
+        <table name="au_dept_base_info"
+               primaryKey="dept_id">
+            <assoc type="HAS_MANY"
+                   name="au_user_dept_asoc"
+                   foreignKey="dept_id"/>
+            <assoc type="HAS_MANY"
+                   name="au_dept_group_asoc"
+                   foreignKey="dept_id"/>
+        </table>
+        <table name="au_user_dept_asoc"/>
+        <table name="au_user_group_asoc"/>
+        <table name="au_dept_group_asoc"/>
+    </tables>
+</db>

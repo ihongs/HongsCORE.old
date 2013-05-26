@@ -1,0 +1,139 @@
+html, body, input, button, select, textarea {
+    color: #666;
+    font-size: 14px;
+}
+object.config {
+    display: none;
+}
+
+/** 常用样式缩写 **/
+
+.cb {clear: both;}
+.fl {float: left;}
+.fr {float: right;}
+.tl {text-align: left;}
+.tr {text-align: right;}
+.tc {text-align: center;}
+.vh {width: 0px; height: 0px; overflow: hidden; visibility: hidden;}
+
+.disabled, [disabled] {color: #bbb;}
+
+/** 表单 **/
+
+form label {
+    display: inline-block;
+    min-width: 10em;
+    padding-top: 0.35em;
+    text-align: right;
+    vertical-align: top;
+}
+form input {
+    min-width: 15em;
+    line-height: 1.25em;
+}
+form select {
+    min-width: 15em;
+    line-height: 1.25em;
+}
+form textarea {
+    min-width: 30em;
+    min-height: 5em;
+    line-height: 1.25em;
+}
+.form-buttons {
+    border-top: 1px solid #aaa;
+    margin-top: 0.5em;
+    padding-top: 0.5em;
+    padding-left: 10.4em;
+}
+.form-inputs, .form-checks, .form-radios {
+    display: inline-block;
+    max-width: 30em;
+}
+.form-inputs label, .form-checks label, .form-radios label,
+form input.button, form input.submit, form input.reset, form input.image,
+form input.checkbox, form input.radio, form input.file, form input.hidden  {
+    min-width: auto;
+}
+
+/** 列表 **/
+
+.list-box table {
+    border: 0;
+    border-spacing: 1px;
+    table-layout: fixed;
+    line-height: 2em;
+    width: 100%;
+}
+.list-box thead {
+    background: #f5f5f5 url(image/list-head.gif) repeat-x bottom center;
+}
+.list-box td {
+    border-bottom: 1px solid #ddd;
+    padding: 0 0.25em;
+}
+.list-box ._check,
+.list-box ._radio,
+.list-box ._admin {
+    width: 1.5em;
+}
+
+.page-curr {
+    font-weight: bold;
+}
+
+/** 树 **/
+
+.tree-node {
+    border-left: 1px dotted #000;
+    margin-left: 7px;
+    padding-left: 7px;
+    cursor: pointer;
+}
+.tree-root {
+    border-left: 0;
+    margin-left: 0;
+    padding-left: 0;
+}
+.tree-node table,
+.tree-node table td {
+    border: 0;
+    border-spacing: 0;
+}
+
+.tree-curr>table,
+.tree-curr>table td{
+    color: #000;
+    text-decoration: underline;
+}
+
+.tree-hand {
+    width: 16px;
+    height: 20px;
+    background-image: url(image/tree-hand.gif);
+}
+.tree-fold>table .tree-hand {
+    background-image: url(image/tree-hand-fold.gif);
+}
+.tree-open>table .tree-hand {
+    background-image: url(image/tree-hand-open.gif);
+}
+
+.tree-cnum {
+    display: none;
+}
+
+/** 容器 **/
+
+.main-container {
+    display: table-row;
+}
+.main-context {
+    display: table-cell;
+    vertical-align: top;
+}
+.side-context {
+    display: table-cell;
+    vertical-align: top;
+    width: 20em;
+}

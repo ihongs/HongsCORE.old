@@ -1,0 +1,52 @@
+<object class="config" name="hsInitOpen" data="">
+    <param name="width" value="600px"/>
+</object>
+
+<h2 class="show-in-overlay show-in-load">编辑用户</h2>
+<div id="cums_user_form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="cums/User/Info.do"/>
+        <param name="saveUrl" value="cums/User/Save.do"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="user_id"/>
+        <input type="hidden" name="au_user_dept_asoc..dept_id" data-pn="dept_id"/>
+        <button onclick="$(this).css('height', '20em')"></button>
+        <div>
+            <label>邮箱</label>
+            <input type="email" name="username"/>
+        </div>
+        <div>
+            <label>密码</label>
+            <input type="password" name="password"/>
+        </div>
+        <div>
+            <label>重复输入密码</label>
+            <div class='form-inputs'>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <label><input type="checkbox" />你好</label>
+            <input type="password" name="password2"/>
+            </div>
+        </div>
+        <div>
+            <label>昵称</label>
+            <input type="text" name="name"/>
+        </div>
+        <div>
+            <label>备注</label>
+            <textarea name="note"></textarea>
+        </div>
+        <div class="form-buttons">
+            <button type="submit" class="ensure">提交</button>
+            <a href="javascript:;" class="cancel">取消</a>
+        </div>
+    </form>
+</div>

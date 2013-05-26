@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--DOCTYPE ac SYSTEM "db.dtd"-->
+<!--
+    Document   : db.default.xml
+    Created on : March 11, 2010, 10:56 AM
+    Author     : Hongs
+    Description:
+        fields,where,groupBy,orderBy等中,
+        用"."表示当前表, 用".."表示上级表.
+        注意: 仅当有设置join时可使用"..".
+-->
+
+<db xmlns="http://hongs-core"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://hongs-core db.xsd">
+  <!--
+  <config dbClass="[DB类, 仅在使用"DB.getInstance(dbName)"时有效]"
+          tableClass="[Table类, 仅在使用"DB.getTable(tableName)"时有效]"
+          tablePrefix="[表前缀]"
+          tableSuffix="[表后缀]"/>
+  -->
+  <driver drv="com.mysql.jdbc.Driver"
+          url="jdbc:mysql://localhost:3306/hongs_core?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull"
+          user="root"
+          password="123456"/>
+  <source name="jdbc/hongs-core"/>
+  <tables>
+    <!-- 结构说明
+    <table name="[表名]"
+           alias="[别名]"
+           primaryKey="[主键]"
+           tableClass="[Table类, 仅在使用"DB.getTable(tableName)"时有效]"
+           tablePrefix="[表前缀]"
+           tableSuffix="[表后缀]">
+      <assoc type="[BLS_TO|HAS_ONE|HAS_MANY]"
+             join="[INNER|LEFT|RIGHT|FULL]"
+             name="[关联表名]"
+             alias="[关联别名]"
+             foreignKey="[关联外键]"
+             primaryKey="[关联主键]"
+             fields="[限制字段]"
+             where="[查询条件]"
+             groupBy="[附加分组]"
+             orderBy="[附加排序]"/>
+    </table>
+    -->
+    <!-- 演示举例
+    <table name="hs_demo"
+           primaryKey="id">
+      <assoc type="BLS_TO"
+             join="LEFT"
+             name="hs_demo"
+             alias="hs_demo_bls_to"
+             foreignKey="pid"/>
+      <assoc type="HAS_ONE"
+             join="LEFT"
+             name="hs_demo"
+             alias="hs_demo_has_one"
+             foreignKey="pid"/>
+      <assoc type="HAS_MANY"
+             name="hs_demo"
+             alias="hs_demo_has_many"
+             foreignKey="pid"/>
+    </table>
+    -->
+  </tables>
+</db>

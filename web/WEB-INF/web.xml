@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <display-name>Hongs CORE Framework</display-name>
+    <context-param>
+        <param-name>debug</param-name>
+        <param-value>3</param-value>
+    </context-param>
+    <!-- Shell Servlet -->
+    <servlet>
+        <servlet-name>Shell</servlet-name>
+        <servlet-class>app.hongs.ShellAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Shell</servlet-name>
+        <url-pattern>*.sh</url-pattern>
+    </servlet-mapping>
+    <!-- Action Servlet -->
+    <servlet>
+        <servlet-name>Action</servlet-name>
+        <servlet-class>app.hongs.action.Action</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Action</servlet-name>
+        <url-pattern>*.do</url-pattern>
+    </servlet-mapping>
+    <!-- Has Action Servlet -->
+    <servlet>
+        <servlet-name>Detect</servlet-name>
+        <servlet-class>app.hongs.action.DetectAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Detect</servlet-name>
+        <url-pattern>*.de</url-pattern>
+    </servlet-mapping>
+    <!-- Config Data Servlet -->
+    <servlet>
+        <servlet-name>Config</servlet-name>
+        <servlet-class>app.hongs.action.JsConfAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Config</servlet-name>
+        <url-pattern>*.jsc</url-pattern>
+    </servlet-mapping>
+    <!-- Language Data Servlet -->
+    <servlet>
+        <servlet-name>Language</servlet-name>
+        <servlet-class>app.hongs.action.JsLangAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Language</servlet-name>
+        <url-pattern>*.jsl</url-pattern>
+    </servlet-mapping>
+    <!-- Filters -->
+    <filter>
+        <filter-name>GetFilterDemo</filter-name>
+        <filter-class>app.hongs.action.DatumsFilter</filter-class>
+        <init-param>
+            <param-name>config-name</param-name>
+            <param-value>default</param-value>
+        </init-param>
+        <init-param>
+            <param-name>request-key</param-name>
+            <param-value>datkeys</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>GetFilterDemo</filter-name>
+        <url-pattern>/action/Demo/Test</url-pattern>
+    </filter-mapping>
+    <!-- Default Tags -->
+    <jsp-config>
+        <taglib>
+            <taglib-uri>/hs.tags</taglib-uri>
+            <taglib-location>/WEB-INF/conf/default.tld</taglib-location>
+        </taglib>
+    </jsp-config>
+    <!-- Other Settings -->
+    <session-config>
+        <session-timeout>480</session-timeout>
+    </session-config>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+</web-app>
