@@ -46,6 +46,11 @@ public class ActionHelper
   public HttpServletResponse response;
 
   /**
+   * 会话数据
+   */
+  protected Map<String, Object> sessionData;
+
+  /**
    * 请求数据
    */
   protected Map<String, Object> requestData;
@@ -96,7 +101,7 @@ public class ActionHelper
    * @param req
    * @param rsp
    */
-  public void init(Map<String, String[]> req)
+  public void init(Map<String, String[]> req, Map<String, String[]> ses)
   {
     if (req != null)
     {
@@ -105,6 +110,14 @@ public class ActionHelper
     else
     {
       this.requestData = new HashMap(   );
+    }
+    if (ses != null)
+    {
+      this.sessionData = parseParams(ses);
+    }
+    else
+    {
+      this.sessionData = new HashMap(  );
     }
   }
 
@@ -214,8 +227,11 @@ public class ActionHelper
    */
   public Object getSession(String name)
   {
-      return this.request.getSession( )
-                    .getAttribute(name);
+      if (this.sessionData != null)
+          return this.sessionData.get(name);
+      else
+          return this.request.getSession( )
+                        .getAttribute(name);
   }
 
   /**
@@ -225,8 +241,11 @@ public class ActionHelper
    */
   public void setSession(String name, Object value)
   {
-      this.request.getSession(  true  )
-             .setAttribute(name, value);
+      if (this.sessionData != null)
+          this.sessionData.put(name, value);
+      else
+          this.request.getSession(  true  )
+                 .setAttribute(name, value);
   }
 
   /**

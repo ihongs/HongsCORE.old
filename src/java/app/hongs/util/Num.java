@@ -18,40 +18,66 @@ public class Num
    * 正所谓: 阳中有阴, 阴中有阳, 呵呵^________________^
    * </pre>
    */
-  private final static char[] rad = {
+  private final static char[] rad36 = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-    'U', 'V', 'W', 'X', 'Y', 'Z',
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-    'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-    'u', 'v', 'w', 'x', 'y', 'z'
+    'U', 'V', 'W', 'X', 'Y', 'Z'
+  };
+  private final static char[] rad26 = {
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+    'U', 'V', 'W', 'X', 'Y', 'Z'
   };
 
   /** 进制 **/
 
   /**
    * 十进制转其他进制
-   * @param num
-   * @param arr
-   * @param x 进制长度
-   * @param o 起始位置
-   * @return 指定进制的串
+   * 进制为arr的长度
+   * @param num 待转数字
+   * @param arr 转换序列
+   * @return 
    */
-  public static String toXRadix(long num, char[] arr, int x, int o)
+  public static String toXRadix(long num, char[] arr)
   {
-    StringBuilder sb = new StringBuilder();
-
+    StringBuilder str = new StringBuilder();
+    int x = arr.length;
+    
     while (num > 0)
     {
-      int idx = (int) (num % x) + o;
-          num = (long)(num / x);
-          sb.append(arr[idx]);
+      int idx = (int) ( num % x );
+          num = (long)( num / x );
+          str.insert(0, arr[idx]);
     }
 
-    return sb.reverse().toString();
+    return str.toString();
   }
+  
+  /**
+   * 十进制转其他进制
+   * 进制为arr的长度, 但进位从首位开始, 如26个字母的进制, 0是A, 26是AA而非BA
+   * @param num 待转数字
+   * @param arr 转换序列
+   * @return 
+   */
+  public static String toYRadix(long num, char[] arr)
+  {
+    StringBuilder str = new StringBuilder();
+    int x = arr.length;
+    
+    num += 1;
+    while (num > 0)
+    {
+      num -= 1;
+      int idx = (int) ( num % x );
+          num = (long)( num / x );
+          str.insert(0, arr[idx]);
+    }
 
+    return str.toString();
+  }
+  
   /**
    * 十进制转36进制(0~9A-Z)
    * @param num
@@ -59,47 +85,17 @@ public class Num
    */
   public static String to36Radix(long num)
   {
-    return toXRadix(num, rad, 36, 0);
+    return toXRadix(num, rad36);
   }
 
   /**
-   * 十进制转62进制(0~9A-Za-z)
-   * @param num
-   * @return 62进制串
-   */
-  public static String to62Radix(long num)
-  {
-    return toXRadix(num, rad, 62, 0);
-  }
-
-  /**
-   * 十进制转字母形式(A-Za-z)
-   * @param num
-   * @return 52进制串
-   */
-  public static String toCSRadix(long num)
-  {
-    return toXRadix(num, rad, 52, 10);
-  }
-
-  /**
-   * 十进制转大写字母形式(A-Z)
+   * 十进制转26进制(A-Z)
    * @param num
    * @return 26进制串
    */
-  public static String toUCRadix(long num)
+  public static String to26Radix(long num)
   {
-    return toXRadix(num, rad, 26, 10);
-  }
-
-  /**
-   * 十进制转小写字母形式(a-z)
-   * @param num
-   * @return 26进制串
-   */
-  public static String toLCRadix(long num)
-  {
-    return toXRadix(num, rad, 26, 36);
+    return toYRadix(num, rad26);
   }
 
   /** 格式 **/

@@ -283,8 +283,13 @@ public class shell
     {
         req  = parseQueryString(str);
     }
+    Map<String, String[]>  ses = null;
+    if (str != null && str.length( ) > 0)
+    {
+        req  = parseQueryString(str);
+    }
 
-    helper.init(req);
+    helper.init(req, ses);
   }
 
   /**

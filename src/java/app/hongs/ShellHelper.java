@@ -62,7 +62,7 @@ public class ShellHelper
     List<String> opt = new ArrayList();
     String n = "";
 
-    Pattern p1 = Pattern.compile("^-{1,2}([^\\d\\-][\\w\\-]*)$");
+    Pattern p1 = Pattern.compile("^-{1,2}([^\\d\\-][\\w\\-\\.]*)$");
     Pattern p2 = Pattern.compile("^\\\\");
     Matcher m3;
 

@@ -24,7 +24,7 @@ public class test {
     //app.hongs.util.JSON.print(opts);
     Map<String, Object> optz = ShellHelper.getOpts(opts,
       "test-text:b", "test-rate:b", "test-left:b",
-      "test-opts:b", "test-serially:b",
+      "test-opts:b","test-radix:i", "test-serially:b",
       "show-env:b", "show-properties:b",
       "make-demo-data:b");
     //app.hongs.util.JSON.print(optz);
@@ -49,6 +49,10 @@ public class test {
       testOpts(opts);
     }
 
+    if (optz.containsKey("test-radix")) {
+      testRadix((long)optz.get("test-radix"));
+    }
+    
     if (optz.containsKey("test-serially")
     && (Boolean)optz.get("test-serially")) {
       new TestSerially();
@@ -126,6 +130,11 @@ public class test {
       "!U", "!V", "?Useage:\ncmd opt-o xxx opt-m xxx... [opt-n xxx...]"
     );
     app.hongs.util.JSON.print(optz);
+  }
+  
+  private static void testRadix(long num) {
+    app.hongs.util.JSON.print("36 Radix: "+app.hongs.util.Num.to36Radix(num));
+    app.hongs.util.JSON.print("26 Radix: "+app.hongs.util.Num.to26Radix(num));
   }
 
   private static class TestSerially extends CoreSerially {
