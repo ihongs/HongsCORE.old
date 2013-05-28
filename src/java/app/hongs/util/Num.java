@@ -90,6 +90,7 @@ public class Num
 
   /**
    * 十进制转26进制(A-Z)
+   * 请注意: 进位从首位开始, 26是AA而非BA
    * @param num
    * @return 26进制串
    */
