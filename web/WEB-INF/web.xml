@@ -12,7 +12,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Shell</servlet-name>
-        <url-pattern>*.sh</url-pattern>
+        <url-pattern>*.if</url-pattern>
     </servlet-mapping>
     <!-- Action Servlet -->
     <servlet>

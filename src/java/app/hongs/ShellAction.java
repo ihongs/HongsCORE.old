@@ -11,7 +11,7 @@ import app.hongs.action.*;
 /**
  * <h1>外壳程序动作</h1>
  * <pre>
- * 在 app.shell 中建立一个类, 指定一个
+ * 在 app.xxx.shell 中建立一个类, 指定一个
  * public void action(app.hongs.action.ActionHelper helper)
  * 方法接收来自 Web 的请求动作.
  * </pre>
@@ -51,28 +51,38 @@ public class ShellAction
   public void _actService(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core   core   = Core.getInstance();
-    String action = core.ACTION.substring( 1 ,
-                    core.ACTION.length() - 3);
-    /*
-    int pos = action.lastIndexOf( '.' );
-    if (pos > 0)
-    {
-      action = action.substring(0, pos);
+    Core         core   = Core.getInstance();
+    ActionHelper helper = (ActionHelper)
+                          Core.getInstance("app.hongs.action.ActionHelper");
+    String       action = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
+
+    if (action.length() == 0) {
+        helper.print404Code("Can not find action name.");
+        return;
     }
-        pos = action.lastIndexOf( '.' );
-    if (pos > 0)
-    */
-    if (action.indexOf('.') != -1)
-    {
-      action = action.replace('/', '.');
-      this.doAction(action, null, null);
+
+    if (action.indexOf('.') != -1 || action.startsWith("hongs/shell")) {
+        helper.print404Code("Illegal action '"+core.ACTION+"'.");
+        return;
     }
-    else
-    {
-      action = action.replace('/', '.');
-      this.doAction(action + ".action", "app.shell");
+
+    /** 提取action路径里的"包.类" **/
+
+    int pos;
+    String cls, mtd;
+    action = action.replace('/', '.');
+
+    pos = action.lastIndexOf('.');
+    if (pos == -1) {
+        helper.print404Code("Wrong action '"+core.ACTION+"'.");
+        return;
     }
+    cls    = action.substring(pos+1);
+    action = action.substring(0,pos);
+
+
+    // app.包.action.类, action方法
+    doAction("app."+action+".action."+cls, "action", helper);
   }
 
 }

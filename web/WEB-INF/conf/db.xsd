@@ -43,6 +43,7 @@
       <xs:attribute ref="realName"/>
       <xs:attribute ref="foreignKey" use="required"/>
       <xs:attribute ref="primaryKey"/>
+      <xs:attribute ref="updateKeys"/>
       <!-- 其他限定 -->
       <xs:attribute ref="select"/>
       <xs:attribute ref="where"/>

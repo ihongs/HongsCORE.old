@@ -1,9 +1,9 @@
-package app.action.cums;
+package app.hcum.action;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.model.cums.UserBaseInfo;
+import app.hcum.model.UserBaseInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class User {
     private UserBaseInfo model;
 
     public User() {
-        model = (UserBaseInfo)Core.getInstance("app.model.cums.UserBaseInfo");
+        model = (UserBaseInfo)Core.getInstance("app.hcum.model.UserBaseInfo");
     }
 
     public void actionList(ActionHelper helper)

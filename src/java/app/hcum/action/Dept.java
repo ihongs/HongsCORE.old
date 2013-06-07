@@ -1,11 +1,11 @@
-package app.action.cums;
+package app.hcum.action;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.model.cums.DeptBaseInfo;
-import app.model.cums.DeptBaseTree;
-import app.model.cums.UserBaseInfo;
+import app.hcum.model.DeptBaseInfo;
+import app.hcum.model.DeptBaseTree;
+import app.hcum.model.UserBaseInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ public class Dept {
     private DeptBaseTree model;
 
     public Dept() {
-        model = (DeptBaseTree)Core.getInstance("app.model.cums.DeptBaseTree");
+        model = (DeptBaseTree)Core.getInstance("app.hcum.model.DeptBaseTree");
     }
 
     public void actionTree(ActionHelper helper)
@@ -65,7 +65,7 @@ public class Dept {
         String id = helper.getParameter("id");
         if (id != null) {
             DeptBaseInfo model2 = (DeptBaseInfo)
-                Core.getInstance("app.model.cums.DeptBaseInfo");
+                Core.getInstance("app.hcum.model.DeptBaseInfo");
             Set deptGroups = model2.getGroups(id);
             data.put("userGroups", deptGroups);
         }

@@ -95,8 +95,8 @@ public class ShellHelper
    * "="表示1个, ":"表示0个或1个, "+"表示1个或多个, "*"表示0个或多个<br/>
    * 本规则参考自Perl的Getopt::Long模块, 为兼容, ":+"也表示0个或多个<br/>
    * "s"表示字串, "i"表示整数, "f"表示浮点数, "b"表示布尔值<br/>
-   * 规则"!U"(不含引号)表示不检查未知选项<br/>
-   * 规则"!V"(不含引号)表示不检查匿名选项<br/>
+   * 规则"!U"(不含引号)表示不支持未知选项<br/>
+   * 规则"!A"(不含引号)表示不支持匿名选项<br/>
    * </p>
    * <pre>
    * 例如:
@@ -152,7 +152,7 @@ public class ShellHelper
             continue F;
         }
         else
-        if (chk.equals("!V"))
+        if (chk.equals("!A"))
         {
             vb  = true;
             continue F;

@@ -107,7 +107,7 @@ public abstract class AbstractServlet
   {
     try
     {
-      this._actInit   (req, rsp);
+      this._actPrepare(req, rsp);
       this._actService(req, rsp);
     }
     finally
@@ -116,7 +116,7 @@ public abstract class AbstractServlet
     }
   }
 
-  protected void _actInit(HttpServletRequest req, HttpServletResponse rsp)
+  protected void _actPrepare(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException
   {
     /**

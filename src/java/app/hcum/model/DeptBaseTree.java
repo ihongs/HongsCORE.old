@@ -1,4 +1,4 @@
-package app.model.cums;
+package app.hcum.model;
 
 import app.hongs.Core;
 import app.hongs.db.AbstractTreeModel;
@@ -11,7 +11,7 @@ public class DeptBaseTree
 extends AbstractTreeModel {
 
   public DeptBaseTree() {
-      super((DeptBaseInfo)Core.getInstance("app.model.cums.DeptBaseInfo"));
+      super((DeptBaseInfo)Core.getInstance("app.hcum.model.DeptBaseInfo"));
       this.cnumKey = "cnum";
   }
 

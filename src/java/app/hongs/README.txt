@@ -63,8 +63,8 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
   - var             变化文件(如上传)
 
 文件映射:
-Class.sh            调用 app.shell.Class.action
-Class/Method.do     调用 app.action.Class.actionMethod
+xxx/class.if        调用 app.xxx.shell.class.action
+xxx/Class/Method.do 调用 app.xxx.action.Class.actionMethod
 URL.de              判断是否能访问该动作或页面
 name.jsc            读取 WEB-INF/conf/js-name.properties
 name.jsl            读取 WEB-INF/lang/js-name.xx-xx.properties

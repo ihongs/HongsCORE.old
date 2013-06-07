@@ -50,7 +50,15 @@ public class shell
       return;
     }
 
-    String cls = "app.shell." + core.ACTION;
+    int pos = core.ACTION.lastIndexOf('.');
+    if (pos == -1)
+    {
+      ShellHelper.print("ERROR: Can not parse shell name '"+core.ACTION + "'.");
+      return;
+    }
+
+    String cls =   "app." + core.ACTION.substring(0,pos)
+               +".shell." + core.ACTION.substring(pos+1);
     String mtd = "shell";
 
     /** 执行指定程序 **/
@@ -93,7 +101,7 @@ public class shell
     {
       method.invoke(null, new Object[] {opts});
 
-      ShellHelper.print(core.ACTION + " complete.");
+      //ShellHelper.print(core.ACTION + " complete.");
     }
     catch (IllegalAccessException ex)
     {
@@ -151,7 +159,9 @@ public class shell
        * 输出总的运行时间
        * 并清除参数及核心
        */
-      ShellHelper.printETime("Total exec time", core.TIME);
+      if (Core.IN_DEBUG_MODE)
+          ShellHelper.printETime("Total exec time", core.TIME);
+
       Core.destroyAll();
       opts = null;
       args = null;

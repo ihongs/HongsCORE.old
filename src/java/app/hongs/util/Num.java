@@ -37,14 +37,16 @@ public class Num
    * 进制为arr的长度
    * @param num 待转数字
    * @param arr 转换序列
-   * @return 
+   * @return
    */
   public static String toXRadix(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
-    
-    while (num > 0)
+
+    if   (num == 0)
+          str.insert(0, arr[ 0 ]);
+    while(num >= 1)
     {
       int idx = (int) ( num % x );
           num = (long)( num / x );
@@ -53,23 +55,23 @@ public class Num
 
     return str.toString();
   }
-  
+
   /**
    * 十进制转其他进制
-   * 进制为arr的长度, 但进位从首位开始, 如26个字母的进制, 0是A, 26是AA而非BA
+   * 进制为arr的长度, 但最左边可以是arr首位, 如26个字母的进制, 0是A, 26是AA而非BA
    * @param num 待转数字
    * @param arr 转换序列
-   * @return 
+   * @return
    */
   public static String toYRadix(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
-    
-    num += 1;
-    while (num > 0)
+
+          num += 1;
+    while(num >= 1)
     {
-      num -= 1;
+          num -= 1;
       int idx = (int) ( num % x );
           num = (long)( num / x );
           str.insert(0, arr[idx]);
@@ -77,7 +79,7 @@ public class Num
 
     return str.toString();
   }
-  
+
   /**
    * 十进制转36进制(0~9A-Z)
    * @param num

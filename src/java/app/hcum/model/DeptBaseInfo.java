@@ -1,4 +1,4 @@
-package app.model.cums;
+package app.hcum.model;
 
 import app.hongs.HongsException;
 import app.hongs.db.AbstractBaseModel;
@@ -18,7 +18,7 @@ extends AbstractBaseModel {
 
     public DeptBaseInfo()
     throws HongsException {
-        super("cums", "au_dept_base_info");
+        super("hcum", "au_dept_base_info");
     }
 
     public Set<String> getGroups(String deptId)

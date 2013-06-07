@@ -1,4 +1,4 @@
-package app.action;
+package app.hongs.util.action;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
@@ -19,7 +19,7 @@ public class Jump {
         String uri = core.ACTION + "?page=" + helper.getParameter("page");
 
         Map<String, Map> page = conf.getPage(uri);
-        if (page.containsKey("pages")) {
+        if (page != null  && page.containsKey("pages")) {
             Map<String, Map> pages = (Map)page.get("pages");
             for (Map.Entry et : pages.entrySet()) {
                 String uri2 = (String)et.getKey();

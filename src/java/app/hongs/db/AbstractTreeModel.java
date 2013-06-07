@@ -112,9 +112,16 @@ abstract public class AbstractTreeModel
     this.db = model.db;
   }
 
-  public AbstractTreeModel(String modelName)
+  /**
+   * 构造方法
+   * 
+   * 使用AbstractBaseModel的名称进行构建
+   * 
+   * @param model 
+   */
+  public AbstractTreeModel(String model)
   {
-    this((AbstractBaseModel)Core.getInstance("app.model." + modelName));
+    this((AbstractBaseModel)Core.getInstance(model));
   }
 
   /** 标准动作方法 **/

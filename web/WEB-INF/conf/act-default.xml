@@ -34,27 +34,27 @@ xsi:schemaLocation="http://hongs-core ac.xsd">
                 <page name="{opt}广告形式" uri="/adms/style_form.jsp"/>
             </page>
         </page>
-        <page name="报表中心" uri="/action/Jump/To?page=report">
+        <page name="报表中心" uri="/hongs/util/Jump/To?page=report">
             <page name="数据概览" uri="/crms/ad_index">
             </page>
             <page name="自由报表" uri="/crms/ad_report">
             </page>
         </page>
-        <page name="控制中心" uri="/action/Jump/To?page=system">
-            <page name="用户管理" uri="/cums/user_list.jsp">
-                <page name="{opt}部门" uri="/cums/dept_form.jsp"/>
-                <page name="{opt}用户" uri="/cums/user_form.jsp"/>
-                <group name="部门管理" key="cums.dept.manage">
-                    <action>/action/cums/Dept/Tree</action>
-                    <action>/action/cums/Dept/Info</action>
-                    <action>/action/cums/Dept/Save</action>
-                    <action>/action/cums/Dept/Remove</action>
+        <page name="控制中心" uri="/hongs/util/Jump/To?page=system">
+            <page name="用户管理" uri="/hcum/user_list.jsp">
+                <page name="{opt}部门" uri="/hcum/dept_form.jsp"/>
+                <page name="{opt}用户" uri="/hcum/user_form.jsp"/>
+                <group name="部门管理" key="hcum.dept.manage">
+                    <action>/action/hcum/Dept/Tree</action>
+                    <action>/action/hcum/Dept/Info</action>
+                    <action>/action/hcum/Dept/Save</action>
+                    <action>/action/hcum/Dept/Remove</action>
                 </group>
-                <group name="用户管理" key="cums.user.manage">
-                    <action>/action/cums/Dept/Tree</action>
-                    <action>/action/cums/Dept/Info</action>
-                    <action>/action/cums/Dept/Save</action>
-                    <action>/action/cums/Dept/Remove</action>
+                <group name="用户管理" key="hcum.user.manage">
+                    <action>/action/hcum/Dept/Tree</action>
+                    <action>/action/hcum/Dept/Info</action>
+                    <action>/action/hcum/Dept/Save</action>
+                    <action>/action/hcum/Dept/Remove</action>
                 </group>
             </page>
             <page name="系统设置" uri="/"/>

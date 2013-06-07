@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
+import java.util.Arrays;
 
 /**
  * <h1>关联查询及更新</h1>
@@ -299,14 +300,14 @@ public class FetchMore
   }
 
   /** 静态方法 **/
-  
+
   /**
    * 关联查询
    * @param table 主表
    * @param assocs 关联配置
    * @param bean 查询体
    * @return 结果列表
-   * @throws HongsException 
+   * @throws HongsException
    */
   public static List assocSelect
     (Table table, Map assocs, FetchBean bean)
@@ -327,7 +328,7 @@ public class FetchMore
     String tn = bean.name;
     if (tn == null || tn.length() == 0)
            tn = bean.tableName;
-    
+
     for(Map.Entry et : (Set<Map.Entry>)assocs.entrySet()) {
         Map assoc = (Map) et.getValue();
         String tp = (String)assoc.get("type");
@@ -335,7 +336,7 @@ public class FetchMore
         String an = (String)assoc.get("name");
         String rn = (String)assoc.get("realName");
         if (rn == null || rn.length() == 0) rn = an;
-        
+
         // 检查是否许可关联
         if (tns != null && !tns.contains(rn) && !tns.contains(an)) {
             continue;
@@ -352,14 +353,14 @@ public class FetchMore
             lnks .add(assoc);
             continue;
         }
-        
+
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
         FetchBean bean2 = bean.join(an)
                  .setTableName(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
-        
+
         // 建立关联关系
         if ("BLS_TO".equals(tp)) {
             // 上级外键连接下级主键, 交换主外键
@@ -381,7 +382,7 @@ public class FetchMore
         } else {
             fk = "`"+tn+"`.`"+fk+"`";
         }   pk = "`"+an+"`.`"+pk+"`";
-        
+
         // 转化关联类型
         short ji;
         if ("INNER".equals(jn)) {
@@ -402,18 +403,18 @@ public class FetchMore
         else {
             throw new HongsException(0x10c4, "Unrecognized assoc join '"+jn+"'");
         }
-        
+
         // 设置关联关系
         bean2.setJoinParam(pk+"="+fk, ji);
-        
+
         setBean(bean2,assoc);
-        
+
         if (assocs2 != null) {
             assocSelect(table2, assocs2, bean2, lnks);
         }
     }
   }
-  
+
   private static void assocSelect
     (Table table, Map assocs, FetchBean bean, List lnks, List rows)
   throws HongsException {
@@ -429,7 +430,7 @@ public class FetchMore
         String rn = (String)assoc.get("realName");
         String tn = (String)assoc.get("linkName");
         if (rn == null || rn.length() == 0) rn = an;
-        
+
         // 检查是否许可关联
         if (tns != null && !tns.contains(rn) && !tns.contains(an)) {
             continue;
@@ -437,14 +438,14 @@ public class FetchMore
         if (tps != null && !tps.contains(tp)) {
             continue;
         }
-        
+
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
         FetchBean bean2 = bean.join(an)
                  .setTableName(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
-        
+
         // 准备关联关系
         if ("BLS_TO".equals(tp)) {
             // 上级外键连接下级主键, 交换主外键
@@ -467,13 +468,13 @@ public class FetchMore
         if (tn != null && tn.length() != 0) {
             fk = tn+"."+fk;
         }
-        
+
         setBean(bean2,assoc);
-        
+
         if (assocs2 != null) {
             assocSelect(table2, assocs2, bean2, lnks2);
         }
-        
+
         more.fetchMore (table2, pk , fk, bean2);
     }
         lnks = lnks2;
@@ -503,7 +504,66 @@ public class FetchMore
         bean.orderBy(str);
     }
   }
-  
+
+    public static void assocUpdate(
+            Table                       table,
+            List<Map<String,Object>>    rows,
+            List<String>                keys,
+            String                      where,
+            Object...                   params)
+            throws HongsException
+    {
+        List<Object> params1 = Arrays.asList(params);
+        List<Object> params2;
+        Object[]     params3;
+
+        StringBuilder where2 = new StringBuilder(where);
+        String        where3;
+        for (String k : keys)
+        {
+            where2.append(" AND `"+k+"`=?" );
+        }
+        where3 = where2.toString();
+
+        List ids = new ArrayList();
+
+        for (Map<String, Object> row : rows)
+        {
+            params2 = new ArrayList(params1);
+            for (String k : keys)
+            {
+                params2.add(row.get(k));
+            }
+            params3 = params2.toArray();
+
+            String sql = "SELECT `"+table.primaryKey+"` FROM `"+table.tableName+"` WHERE "+where2;
+            Map<String, Object> one = table.db.fetchOne( sql , params3 );
+            if (!one.isEmpty())
+            {
+                //  有则更新
+                if (!row.containsKey(table.primaryKey) || "".equals(row.get(table.primaryKey)))
+                    row.put(table.primaryKey, one.get(table.primaryKey));
+                table.update(row, where3, params3);
+            }
+            else
+            {
+                // 没则插入
+                if (!row.containsKey(table.primaryKey) || "".equals(row.get(table.primaryKey)))
+                    row.put(table.primaryKey, Core.getUniqueId());
+                table.insert(row);
+            }
+
+            ids.add(row.get(table.primaryKey));
+        }
+
+        // 删除多余
+        where2 = new StringBuilder(where);
+        where2.append(" AND `"+table.primaryKey+"` NOT IN (?)");
+        params2 = new ArrayList(params1 );
+        params2.add(ids);
+        table .delete( where2.toString( ), params2.toArray( ) );
+    }
+
   /**
    * 关联插入
    *
@@ -546,11 +606,9 @@ public class FetchMore
           realName =  name;
       }
 
-      // 先删除旧数据
       Table tb = table.db.getTable(realName);
       List  pa = new ArrayList();
             pa.add(id);
-      tb.delete(foreignKey+" = ?", pa);
 
       // 都整理成List方便处理
       Object subValues = values.get(name);
@@ -585,7 +643,24 @@ public class FetchMore
         }
       }
 
-      // 再插入数据
+      /**
+       * Add by Hong on 2013/6/6
+       * 有时候子数据会被其他数据引用, 如果更新子数据, 子数据的ID就会改变.
+       * 通常这种情况存在以下规则: 如果某些字段值没发生改变则不要重新插入.
+       * 所以当有指定updateKeys时, 使用assocUpdate方法更新数据, 其原理为:
+       * 找出没改变的数据并更新, 然后插入新增数据, 最后删除更新和新增之外的数据.
+       */
+      List<String> updateKeys = (List<String>)config.get("updateKeys");
+      if (updateKeys != null && !updateKeys.isEmpty())
+      {
+          assocUpdate(tb, subValues2, updateKeys, "`"+foreignKey+"`=?", pa);
+          continue;
+      }
+
+      // 先删除旧数据
+      tb.delete("`"+foreignKey+"`=?", pa);
+
+      // 再插入新数据
       Iterator it2 = subValues2.iterator();
       while (it2.hasNext())
       {
@@ -639,11 +714,12 @@ public class FetchMore
           realName =  name;
       }
 
-      // 直接删除数据
       Table tb = table.db.getTable(realName);
       List  pa = new ArrayList();
             pa.add(id);
-      tb.delete(foreignKey+" = ?", pa);
+
+      // 直接删除数据
+      tb.delete("`"+foreignKey+"`=?", pa);
     }
   }
 

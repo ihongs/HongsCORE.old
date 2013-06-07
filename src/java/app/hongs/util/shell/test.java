@@ -1,4 +1,4 @@
-package app.shell;
+package app.hongs.util.shell;
 
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
@@ -133,8 +133,8 @@ public class test {
   }
   
   private static void testRadix(long num) {
-    app.hongs.util.JSON.print("36 Radix: "+app.hongs.util.Num.to36Radix(num));
-    app.hongs.util.JSON.print("26 Radix: "+app.hongs.util.Num.to26Radix(num));
+    ShellHelper.print("36 Radix: "+app.hongs.util.Num.to36Radix(num));
+    ShellHelper.print("26 Radix: "+app.hongs.util.Num.to26Radix(num));
   }
 
   private static class TestSerially extends CoreSerially {

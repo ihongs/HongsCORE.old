@@ -37,8 +37,8 @@ public abstract class AbstractFilter
   {
     try
     {
-      super._actInit((HttpServletRequest)req, (HttpServletResponse)rsp);
-      this._actFilter(req, rsp, chain);
+      super._actPrepare((HttpServletRequest)req, (HttpServletResponse)rsp);
+       this._actFilter ( req , rsp , chain );
     }
     finally
     {
@@ -71,12 +71,6 @@ public abstract class AbstractFilter
     throws ServletException, IOException
   {
     throw new UnsupportedOperationException("Not supported, use _actFilter.");
-  }
-
-  @Override
-  public void destroy()
-  {
-    super.destroy();
   }
 
 }

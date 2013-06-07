@@ -1,0 +1,27 @@
+<object class="config" name="hsInitOpen" data="">
+    <param name="width" value="600px"/>
+</object>
+
+<h2 class="show-in-overlay show-in-load">编辑部门</h2>
+<div id="hcum_user_form" style="position: relative;">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcum/Dept/Info.do"/>
+        <param name="saveUrl" value="hcum/Dept/Save.do"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="dept_id"/>
+        <input type="hidden" name="pid"/>
+        <div>
+            <label>名称</label>
+            <input type="text" name="name"/>
+        </div>
+        <div>
+            <label>备注</label>
+            <textarea name="note"></textarea>
+        </div>
+        <div class="form-buttons">
+            <button type="submit" class="ensure">提交</button>
+            <a href="javascript:;" class="cancel">取消</a>
+        </div>
+    </form>
+</div>
