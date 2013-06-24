@@ -2,7 +2,8 @@ package app.hongs.action.annotation;
 
 import app.hongs.Core;
 import app.hongs.db.DB;
-import java.lang.reflect.Method;
+import app.hongs.action.ActionHelper;
+import java.lang.annotation.Annotation;
 
 /**
  * 操作成功才提交
@@ -10,13 +11,13 @@ import java.lang.reflect.Method;
  * @author Hongs
  */
 public class CommitInvoker {
-    public static void invoke(Method method, Object object, Object[] params)
+    public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Exception {
         Core core = Core.getInstance();
         try {
             core.put("__DB_AUTO_COMMIT__", false);
 
-            method.invoke(object, params);
+            chain.doAction();
 
             commit();
         }

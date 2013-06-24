@@ -236,11 +236,12 @@ public class ActionFilter
      */
     if (helper.request.getRequestURI().endsWith(".do")) {
         Map rsp = new HashMap();
+            rsp.put("__success__", false);
+            rsp.put("__message__", msg);
         if (uri != null || uri.length() != 0) {
             rsp.put("__refresh__", uri);
         }
-            rsp.put("__message__", msg);
-        helper.fail(rsp);
+        helper.back(rsp);
     }
     else {
         if (uri != null || uri.length() != 0) {

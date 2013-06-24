@@ -12,8 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsThrowable;
-import app.hongs.action.annotation.CommitInvoker;
-import app.hongs.action.annotation.CommitSuccess;
+import app.hongs.action.annotation.ActionChain;
 
 /**
  * <h1>动作启动器</h2>
@@ -188,16 +187,8 @@ public class Action
     // 执行方法
     try
     {
-      /**
-       * 如果动作函数有绑定 CommitSuccess 注解
-       * 则开启事务模式, 仅当操作成功时提交更改
-       */
-      if (method.isAnnotationPresent(CommitSuccess.class )) {
-          CommitInvoker.invoke(method, object, new Object[] {helper});
-          return;
-      }
-
-      method.invoke(object, new Object[] {helper});
+      ActionChain chain = new ActionChain(method, object, helper);
+      chain.doAction();
     }
     catch (IllegalAccessException ex)
     {

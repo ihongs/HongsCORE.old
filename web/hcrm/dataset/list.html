@@ -1,0 +1,36 @@
+<div id="hcrm-dataset-list">
+    <object class="config" name="hsList" data="">
+        <param name="loadUrl" value="hcrm/Dataset/List.do?rows=5"/>
+        <param name="openUrls[]" value="['.create', 'hcrm/dataset/form.html', '$loadBox']"/>
+        <param name="openUrls[]" value="['.modify', 'hcrm/dataset/form.html?id=$ID', '$loadBox']"/>
+        <param name="sendUrls[]" value="['.remove', 'hcrm/Dataset/Remove.do', '您确定要删除?']"/>
+    </object>
+    <div class="tool-bar">
+        <form class="fl ct tool-box" onsubmit="return false;">
+            <button type="button" class="create">创建</button>
+            <button type="button" class="modify bind-to-single">修改</button>
+            <button type="button" class="remove bind-to-select">删除</button>
+        </form>
+        <form class="fr ct find-box" onsubmit="return false;">
+            <input type="text" name="find"/>
+            <button type="submit">查找</button>
+        </form>
+        <div class="cb"></div>
+    </div>
+    <div class="list-box">
+        <table>
+            <thead>
+                <tr>
+                    <td data-fn="_check" class="_check">
+                        <input type="checkbox" class="check-all" name="id[]"/>
+                    </td>
+                    <td data-fn="name">数据集名称</td>
+                    <td data-fn="class">类型</td>
+                    <td data-fn="stat">状态</td>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="page-box"></div>
+</div>

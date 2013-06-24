@@ -1,18 +1,17 @@
 package app.hongs.db;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-
-import app.hongs.Core;
 import app.hongs.HongsException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <h1>树模型</h1>
+ *
  * <pre>
  * 用于与树JS组件进行交互
  * </pre>
@@ -34,25 +33,11 @@ import app.hongs.HongsException;
  *   获取节点: ?ids[]=xxx&only_id=1&with_path=1
  * </pre>
  *
- * @author Hongs
+ * @author Hong
  */
-abstract public class AbstractTreeModel
+public class AbstractTreeModel
+extends AbstractBaseModel
 {
-
-  /**
-   * 所属库对象
-   */
-  protected DB db;
-
-  /**
-   * 所属表对象
-   */
-  protected Table table;
-
-  /**
-   * 所属模型对象
-   */
-  protected AbstractBaseModel model;
 
   /**
    * 根节点id
@@ -99,29 +84,27 @@ abstract public class AbstractTreeModel
   /**
    * 构造方法
    *
-   * 需指定对应的基础模型.
-   * 如pid/name等参数或字段名不同,
-   * 可在构造时分别指定.
+   * 需指定该模型对应的表对象.
+   * 如传递的id/ids等参数名不同,
+   * 可在构造时分别指定;
+   * 请指定被搜索的字段.
    *
-   * @param model
+   * @param table
    */
-  public AbstractTreeModel(AbstractBaseModel model)
+  public AbstractTreeModel(Table table)
+    throws HongsException
   {
-    this.model = model;
-    this.table = model.table;
-    this.db = model.db;
+    super(table);
   }
-
-  /**
-   * 构造方法
-   * 
-   * 使用AbstractBaseModel的名称进行构建
-   * 
-   * @param model 
-   */
-  public AbstractTreeModel(String model)
+  public AbstractTreeModel(String tableName)
+    throws HongsException
   {
-    this((AbstractBaseModel)Core.getInstance(model));
+    this("default", tableName);
+  }
+  public AbstractTreeModel(String dbName, String tableName)
+    throws HongsException
+  {
+    this(DB.getInstance(dbName).getTable(tableName));
   }
 
   /** 标准动作方法 **/
@@ -267,235 +250,6 @@ abstract public class AbstractTreeModel
     return this.getTree(req, null);
   }
 
-  /**
-   * 获取列表
-   *
-   * @param req
-   * @param fs
-   * @return 单页节点列表
-   */
-  public Map getPage(Map req, FetchBean fs)
-    throws HongsException
-  {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (fs == null)
-    {
-      fs = new FetchBean();
-    }
-    this.getFilter(req, fs);
-
-    return this.model.getPage(req, fs);
-  }
-
-  /**
-   * 获取列表(无查询结构)
-   *
-   * @param req
-   * @return 单页节点列表
-   */
-  public Map getPage(Map req)
-    throws HongsException
-  {
-    return this.getPage(req, null);
-  }
-
-  /**
-   * 获取全部节点
-   *
-   * @param req
-   * @param fs
-   * @return 全部节点列表
-   */
-  public Map getList(Map req, FetchBean fs)
-    throws HongsException
-  {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (fs == null)
-    {
-      fs = new FetchBean();
-    }
-    this.getFilter(req, fs);
-
-    return this.model.getList(req, fs);
-  }
-
-  /**
-   * 获取全部节点(无查询结构)
-   *
-   * @param req
-   * @return 全部节点列表
-   */
-  public Map getList(Map req)
-    throws HongsException
-  {
-    return this.getList(req, null);
-  }
-
-  /**
-   * 获取单个节点(同model.getInfo)
-   *
-   * @param req
-   * @param fs
-   * @return 节点信息
-   * @throws app.hongs.HongsException
-   */
-  public Map getInfo(Map req, FetchBean fs)
-    throws HongsException
-  {
-    return this.model.getInfo(req, fs);
-  }
-
-  /**
-   * 获取单个节点(无查询结构)
-   *
-   * @param req
-   * @return 节点信息
-   * @throws app.hongs.HongsException
-   */
-  public Map getInfo(Map req)
-    throws HongsException
-  {
-    return this.getInfo(req, null);
-  }
-
-  /**
-   * 添加/修改节点
-   *
-   * @param req
-   * @return 节点ID
-   * @throws app.hongs.HongsException
-   */
-  public String save(Map<String, Object> req)
-    throws HongsException
-  {
-    String id = (String)req.get(this.table.primaryKey);
-    if (id != null && id.length() != 0)
-    {
-      return this.put(id, req);
-    }
-    else
-    {
-      return this.add(req);
-    }
-  }
-
-  /**
-   * 更新节点
-   *
-   * @param req
-   * @param fs
-   * @return 更新条数
-   * @throws app.hongs.HongsException
-   */
-  public int update(Map req, FetchBean fs)
-    throws HongsException
-  {
-    List<String> ids = new ArrayList();
-    if (req.containsKey(this.model.idVar)) {
-        Object obj = req.get(this.model.idVar);
-        if (obj instanceof List) {
-            ids.addAll((List<String>)obj);
-        }
-        else {
-            ids.add(obj.toString());
-        }
-    }
-    if (ids.isEmpty()) this.put("", null);
-
-    int i = 0;
-    String pk = this.table.primaryKey;
-    fs = fs.clone();
-    fs.setSelect(pk).where(pk+" IN (?)", ids);
-    List<Map> rows = this.table.fetchMore(fs);
-    for (Map  row  : rows)
-    {
-      this.put(row.get("id").toString(), req);
-      i += 1;
-    }
-    return i;
-  }
-
-  public int update(Map req)
-    throws HongsException
-  {
-    return this.update(req, null);
-  }
-
-  /**
-   * 删除节点
-   *
-   * @param req
-   * @return 删除条数
-   * @throws app.hongs.HongsException
-   */
-  public int remove(Map req, FetchBean fs)
-    throws HongsException
-  {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (fs == null)
-    {
-      fs = new FetchBean();
-    }
-
-    List<String> ids = new ArrayList();
-    if (req.containsKey(this.model.idVar)) {
-        Object obj = req.get(this.model.idVar);
-        if (obj instanceof List) {
-            ids.addAll((List<String>)obj);
-        }
-        else {
-            ids.add(obj.toString());
-        }
-    }
-    if (ids.isEmpty()) this.del("", null);
-
-    int i = 0;
-    String pk = this.table.primaryKey;
-    fs = fs.clone();
-    fs.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
-    List<Map> rows = this.table.fetchMore(fs);
-    for (Map  row  : rows)
-    {
-        i += this.del(row.get(pk).toString());
-    }
-    return i;
-  }
-
-  public int remove(Map req)
-    throws HongsException
-  {
-    return this.remove(req, null);
-  }
-
-  /**
-   * 检查是否存在(同BaseModel.exists)
-   *
-   * @param req
-   * @param fs
-   * @return 存在为true, 反之为false
-   * @throws app.hongs.HongsException
-   */
-  public boolean exists(Map req, FetchBean fs)
-    throws HongsException
-  {
-    return this.model.exists(req, fs);
-  }
-
-  public boolean exists(Map req)
-    throws HongsException
-  {
-    return this.exists(req, null);
-  }
-
   /** 标准模型方法 **/
 
   /**
@@ -505,6 +259,7 @@ abstract public class AbstractTreeModel
    * @return 节点ID
    * @throws app.hongs.HongsException
    */
+  @Override
   public String add(Map data)
     throws HongsException
   {
@@ -535,7 +290,7 @@ abstract public class AbstractTreeModel
       data.put(this.cnumKey, "0");
     }
 
-    String id = this.model.add(data);
+    String id = super.add(data);
 
     // 将父节点的子节点数量加1
     this.setChildsOffset(pid, 1);
@@ -551,6 +306,7 @@ abstract public class AbstractTreeModel
    * @return 节点ID
    * @throws app.hongs.HongsException
    */
+  @Override
   public String put(String id, Map data)
     throws HongsException
   {
@@ -579,7 +335,7 @@ abstract public class AbstractTreeModel
     String oldPid = this.getParentId(id);
     int ordNum = this.getSerialNum(id);
 
-    id = this.model.put(id, data);
+    id = super.put(id, data);
 
     /**
      * 如果有指定新的pid且不同于旧的pid
@@ -641,18 +397,20 @@ abstract public class AbstractTreeModel
   }
 
   /**
-   * 删除指定节点
+   * 删除节点
    *
    * @param id
+   * @param fs
    * @return 删除条数
    */
+  @Override
   public int del(String id, FetchBean fs)
     throws HongsException
   {
     String pid = this.getParentId(id);
     int on = this.getSerialNum(id);
 
-    int i = this.model.del(id, fs);
+    int i = super.del(id, fs);
 
     // 父级节点子节点数目减1
     this.setChildsOffset(pid, -1);
@@ -670,43 +428,12 @@ abstract public class AbstractTreeModel
     return i;
   }
 
-  public int del(String id)
+  @Override
+  protected void getFilter(Map req, FetchBean fs)
     throws HongsException
   {
-    return this.del(id, null);
-  }
+    super.getFilter(req, fs);
 
-  /**
-   * 获取指定节点(同BaseModel.get)
-   *
-   * @param id
-   * @return 节点数据
-   * @throws app.hongs.HongsException
-   */
-  public Map get(String id, FetchBean fs)
-    throws HongsException
-  {
-    return this.model.get(id, fs);
-  }
-
-  /**
-   * 获取指定节点(无查询结构)
-   *
-   * @param id
-   * @return 节点数据
-   * @throws app.hongs.HongsException
-   */
-  public Map get(String id)
-    throws HongsException
-  {
-    return this.get(id, null);
-  }
-
-  /** 私有过滤器 **/
-
-  private void getFilter(Map req, FetchBean fs)
-    throws HongsException
-  {
     if (!this.pidKey.equals(this.pidVar))
     {
       if (req.containsKey(this.pidVar))
@@ -722,7 +449,7 @@ abstract public class AbstractTreeModel
       }
     }
 
-    if (!req.containsKey(this.model.sortVar))
+    if (!req.containsKey(this.sortVar))
     {
       if (this.snumKey != null)
       {

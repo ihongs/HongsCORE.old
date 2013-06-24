@@ -465,7 +465,7 @@ public class FetchMore
         else {
             throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
         }
-        if (tn != null && tn.length() != 0) {
+        if (tn != null && tn.length() != 0 && !tn.equals(bean.name)) {
             fk = tn+"."+fk;
         }
 
@@ -475,7 +475,7 @@ public class FetchMore
             assocSelect(table2, assocs2, bean2, lnks2);
         }
 
-        more.fetchMore (table2, pk , fk, bean2);
+        more.fetchMore (table2, fk , pk, bean2);
     }
         lnks = lnks2;
     }

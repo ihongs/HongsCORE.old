@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root>
+    <data key="LOADER_CLASSES" type="json">
+        [
+            {
+                "class": "JDBCLoader",
+                "datasrc": [
+                    ["url", 2],
+                    ["username", 2],
+                    ["password", 2]
+                ],
+                "dataset": [
+                    ["tablename", 2]
+                ]
+            }, {
+                "class": "CSVNativeLoader",
+                "manual": [
+                    ["file", 3]
+                ]
+            }, {
+                "class": "CSVRemoteLoader",
+                "dataset": [
+                    ["url", 4]
+                ]
+            }
+        ]
+    </data>
+</root>

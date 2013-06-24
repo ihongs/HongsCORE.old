@@ -1,6 +1,7 @@
 package app.hongs.db;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,9 +9,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import app.hongs.Core;
+import app.hongs.CoreConfig;
 import app.hongs.util.Text;
 import app.hongs.HongsException;
-import java.util.ArrayList;
 
 /**
  * <h1>基础模型</h1>
@@ -93,6 +94,11 @@ abstract public class AbstractBaseModel
   protected String[] findKeys = new String[] {"name"};
 
   /**
+   * 受影响的ID
+   */
+  protected List<String> affectedIds;
+
+  /**
    * 构造方法
    *
    * 需指定该模型对应的表对象.
@@ -105,20 +111,18 @@ abstract public class AbstractBaseModel
   public AbstractBaseModel(Table table)
     throws HongsException
   {
-    this.table = table;
     this.db = table.db;
+    this.table = table;
   }
-
-  public AbstractBaseModel(String dbName, String tableName)
-    throws HongsException
-  {
-    this(DB.getInstance(dbName).getTable(tableName));
-  }
-
   public AbstractBaseModel(String tableName)
     throws HongsException
   {
     this("default", tableName);
+  }
+  public AbstractBaseModel(String dbName, String tableName)
+    throws HongsException
+  {
+    this(DB.getInstance(dbName).getTable(tableName));
   }
 
   /** 标准动作方法 **/
@@ -315,16 +319,19 @@ abstract public class AbstractBaseModel
   public String save(Map req)
     throws HongsException
   {
-    String id = (String) req.get(this.table.primaryKey);
-    if (id == null || id.length() == 0)
-    {
-        id = (String) req.get(this.idVar);
-    if (id == null || id.length() == 0)
-    {
-        return this.add(req); // 添加
-    }
-    }
-    return this.put(id, req); // 修改
+    String id = (String)req.get(this.table.primaryKey);
+    if (id == null || id.length() == 0 )
+        id = (String)req.get(this.idVar);
+    if (id == null || id.length() == 0 )
+        id =  this.add(    req);
+    else
+        id =  this.put(id, req);
+
+    // 记录为受影响的ID
+    this.affectedIds = new ArrayList(  );
+    this.affectedIds.add(id);
+
+    return id;
   }
 
   /**
@@ -364,9 +371,11 @@ abstract public class AbstractBaseModel
     fs = fs.clone();
     fs.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
     List<Map> rows = this.table.fetchMore(fs);
+    this.affectedIds = new ArrayList();
     for (Map  row  : rows)
     {
-      this.put(row.get("id").toString(), req);
+      this.put( row.get(pk).toString(), req );
+      this.affectedIds.add(row.get(pk).toString());
       i += 1;
     }
     return i;
@@ -422,9 +431,11 @@ abstract public class AbstractBaseModel
     fs = fs.clone();
     fs.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
     List<Map> rows = this.table.fetchMore(fs);
+    this.affectedIds = new ArrayList();
     for (Map  row  : rows)
     {
         i += this.del(row.get(pk).toString());
+        this.affectedIds.add(row.get(pk).toString());
     }
     return i;
   }
@@ -632,18 +643,23 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a0, "ID can not be empty for remove");
     }
 
-    if (fs == null) fs = new FetchBean( );
-    fs.setOption("MODEL_METHOD", "remove");
+    if (fs == null) fs = new FetchBean();
+    fs.setOption("MODEL_METHOD", "del");
     if (this.idCheck(id, fs)  !=  true)
     {
       throw new HongsException(0x10a8, "Can not remove the resource for id '"+id+"'");
     }
 
-    // 删除主数据
-    int i = this.table.delete(this.table.primaryKey + " = ?", id);
+    // 删除子数据(当有dflag时不删除子数据)
+    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
+    if (!this.table.getColumns().containsKey(dflag))
+    {
+      this.table.deleteSubValues(id);
+    }
 
-    // 删除子数据
-    this.table.deleteSubValues(id);
+    // 删除主数据
+    int i = this.table.delete("`"+this.table.primaryKey+"` = ?", id);
 
     return i;
   }
@@ -805,98 +821,29 @@ abstract public class AbstractBaseModel
       // 搜索
       if (key.equals(this.findVar))
       {
-        this.findFilter(value, this.findKeys, not, fs);
+        this.findFilter(this.findKeys, value, not, fs);
         continue;
       }
 
       // 主键
       if (key.equals(this.idVar))
       {
-        this.idFilter(value, not, fs);
+        this.mkeyFilter(this.table.primaryKey, value, not, fs);
         continue;
       }
 
-      // 如果当前表里有对应的字段, 则加入查询条件
+      // 当前表字段
       if (columns.containsKey(key))
       {
-        if (value instanceof String)
-        {
-          String id = (String)value;
-          if (id.length() == 0)
-          {
-            continue;
-          }
-
-          fs.where(".`"+key+(not?"` != ?":"` = ?"), id);
-        }
-        else
-        if (value instanceof List)
-        {
-          List<String> ids = (List)value;
-          if (ids.isEmpty())
-          {
-            continue;
-          }
-
-          fs.where(".`"+key+(not?"` NOT IN (?)":"` IN (?)"), ids);
-        }
+        this.mkeyFilter(key, value, not, fs);
         continue;
       }
 
-      // 如果关联表里有对应字段, 则加入查询条件
+      // 关联表字段
       if (value instanceof Map)
       {
-        Set<String> tns = (Set<String>)fs.getOption("ASSOC_TABLES");
-        if (tns == null)
-        {
-            tns =  new HashSet();
-        }
-
-        Map   tc;
-        Map   cs;
-        Table tb;
-        List<String> ts;
-        tc = this.table.getAssoc(key);
-        if (tc == null) continue;
-        tb = this.db.getTable(Table.getAssocName(tc));
-        ts = Table.getAssocPath (tc );
-        cs = tb.getColumns();
-
-        Map<String, Object> vs = (Map) value;
-        for (Map.Entry et2 : vs.entrySet( ))
-        {
-          String key2 = (String)et2.getKey();
-          Object value2 = et2.getValue();
-
-          if (! cs.containsKey( key2 )) {
-              continue;
-          }
-          if (value2 instanceof String)
-          {
-            String id = (String)value2;
-            if (id.length() == 0)
-            {
-              continue;
-            }
-
-            tns.add(key);tns.addAll(ts);
-            FetchBean fs2 = fs.join(ts).join( key );
-            fs2.where(".`"+key2+(not?"` != ?":"` = ?"), id);
-          }
-          else
-          if (value2 instanceof List)
-          {
-            List<String> ids = (List)value2;
-            if (ids.isEmpty())
-            {
-              continue;
-            }
-
-            tns.add(key);tns.addAll(ts);
-            FetchBean fs2 = fs.join(ts).join( key );
-            fs2.where(".`"+key2+(not?"` NOT IN (?)":"` IN (?)"), ids);
-          }
-        }
+        this.skeyFilter(key, value, not, fs);
+        continue;
       }
     }
   }
@@ -1037,19 +984,19 @@ abstract public class AbstractBaseModel
 
   /**
    * 搜索过滤(被getFilter调用)
-   * @param value
    * @param keys
+   * @param val
    * @param not
    * @param fs
    */
-  protected void findFilter(Object value, String[] keys, boolean not, FetchBean fs)
+  protected void findFilter(String[] keys, Object val, boolean not, FetchBean fs)
   {
     if (keys   ==   null
-    ||!(value instanceof String))
+    ||!(val instanceof String))
     {
       return;
     }
-    String text = (String)value;
+    String text = (String)val;
     if (text.length() == 0)
     {
       return;
@@ -1081,30 +1028,82 @@ abstract public class AbstractBaseModel
     }
   }
 
-  protected void idFilter(Object value, boolean not, FetchBean fs)
+  protected void mkeyFilter(String key, Object val, boolean not, FetchBean fs)
   {
-    if (value instanceof String) {
-        String id = (String)value;
-        if (!"".equals(value))
-            fs.where(".`"+this.table.primaryKey+(not?"` != ?":"` = ?"), id);
+    if (val instanceof String)
+    {
+      String id = (String)val;
+      if (!"".equals(id))
+        fs.where(".`"+key+(not?"` != ?":"` = ?"), id);
     }
     else
-    if (value instanceof List) {
-        List ids = (List)value;
+    if (val instanceof List)
+    {
+      List<String> ids = (List)val;
+      if (!ids.isEmpty())
+        fs.where(".`"+key+(not?"` NOT IN (?)":"` IN (?)"), ids);
+    }
+  }
+
+  protected void skeyFilter(String key, Object val, boolean not, FetchBean fs)
+  throws HongsException
+  {
+    Set<String> tns = (Set<String>)fs.getOption("ASSOC_TABLES");
+    if (tns == null)
+    {
+        tns = new HashSet();
+        fs.setOption("ASSOC_TABLES", tns);
+    }
+
+    Map tc = this.table.getAssoc(key);
+    if (tc == null) return;
+    List<String> ts = Table.getAssocPath(tc);
+    String       tn = Table.getAssocName(tc);
+    Table        tb =  this.db.getTable (tn);
+    Map cs = tb.getColumns();
+
+    Map<String, Object> vs = (Map) val;
+    for (Map.Entry et2 : vs.entrySet( ))
+    {
+      String key2 = (String)et2.getKey();
+      Object val2 = et2.getValue();
+
+      if (! cs.containsKey(key2))
+          continue;
+
+      if (val2 instanceof String)
+      {
+        String id = (String)val2;
+        if (!"".equals(id))
+        {
+          tns.add(key);tns.addAll(ts);
+          FetchBean fs2 = fs.join(ts).join( key );
+          fs2.where(".`"+key2+(not?"` != ?":"` = ?"), id);
+        }
+      }
+      else
+      if (val2 instanceof List)
+      {
+        List<String> ids = (List)val2;
         if (!ids.isEmpty())
-            fs.where(".`"+this.table.primaryKey+(not?"` NOT IN (?)":"` IN (?)"), ids);
+        {
+          tns.add(key);tns.addAll(ts);
+          FetchBean fs2 = fs.join(ts).join( key );
+          fs2.where(".`"+key2+(not?"` NOT IN (?)":"` IN (?)"), ids);
+        }
+      }
     }
   }
 
   /**
-   * "设置"检验
+   * 检查id对应的数据是否可获取/修改/删除
    *
-   * 作用于put,get,remove上
+   * 作用于get,put,del上
    *
    * 默认调用"getFilter"来判断id是否允许操作;
    * 如需对以上方法进行其他过滤,可覆盖该方法.
    * 在"getFilter"方法中可以通过
-   * "idCheck".equals(FetchBean.getOption("MODEL_METHOD"))
+   * "idCheck".equals(FetchBean.getOption("CHECK_METHOD"))
    * 来区分是不是"idCheck"发起的
    *
    * @param id
@@ -1122,21 +1121,16 @@ abstract public class AbstractBaseModel
     {
       fs = new FetchBean();
     }
-    if (!fs.hasOption("MODEL_METHOD"))
-    {
-      fs.setOption("MODEL_METHOD", "idCheck");
-    }
 
+    fs.setOption("CHECK_METHOD", "idCheck");
     fs.setOption("ASSOC_TABLES", new HashSet( ));
     fs.setSelect(".`"+this.table.primaryKey+"`")
           .where(".`"+this.table.primaryKey+"`=?", id);
 
-    // 调用getFilter
-    Map req = new HashMap();
-    this.getFilter(req, fs);
+    // 默认调用getFilter进行校验
+    this.getFilter(new HashMap(), fs );
 
-    Map row =  this.table.fetchLess(fs);
-    return row.isEmpty() ? false : true;
+    return !this.table.fetchLess( fs ).isEmpty();
   }
 
 }

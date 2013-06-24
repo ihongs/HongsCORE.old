@@ -456,6 +456,16 @@ public class FetchBean
   }
 
   /**
+   * 删除选项
+   * @param key
+   * @return
+   */
+  public Object delOption(String key)
+  {
+    return this.options.remove(key);
+  }
+
+  /**
    * 获取选项
    * @param key
    * @return 指定选项
@@ -688,7 +698,7 @@ public class FetchBean
     List paramz = new ArrayList();
     List wparamz = new ArrayList();
     List hparamz = new ArrayList();
-    
+
     // 查询参数
     this.getParamsDeep(wparamz, hparamz);
     paramz.addAll(wparamz);

@@ -3,6 +3,7 @@ HongsCORE(Javascript)
 作者: 黄弘 <kevin.hongs@gmail.com>
 创建: 2013/01/01
 修改: 2013/05/25
+依赖: jquery.tools.js(Overlay, Tooltip, Tab, Validator, Dateinput, Expose), jquery.js
 
 自定义属性:
 data-fn HsForm|HsList|HsTree中为field name
@@ -19,9 +20,7 @@ data-load-in 点击后在指定区域加载
 data-open-in 点击后在指定区域打开
 
 功能类说明:
-.load 点击后在所在区域加载
-.open 点击后在所在区域打开
-.open-new 点击后在浮窗打开
+.open 浮窗打开链接
 .close 浮窗关闭按钮
 .cancel 表单取消按钮
 .check-all
@@ -43,9 +42,9 @@ data-open-in 点击后在指定区域打开
 .tree-cnum
 */
 
-if(typeof(HsCONF)=="undefined")HsCONF={};
-if(typeof(HsLANG)=="undefined")HsLANG={};
-if(typeof(HsAUTH)=="undefined")HsAUTH={};
+if (typeof(HsCONF) === "undefined") HsCONF = {};
+if (typeof(HsLANG) === "undefined") HsLANG = {};
+if (typeof(HsAUTH) === "undefined") HsAUTH = {};
 
 /**
  * 快捷方式
@@ -114,9 +113,16 @@ function hsResponObj(rst) {
     }
     else
     if (rst.charAt( 0 ) == '<') {
-        hsWarn(rst);
+        // 某些时候服务器可能出错, 返回错误消息的页面
+        // 需要清理其中的html代码, 以供输出简洁的消息
         rst = {
-            "__success__" : false
+            "__success__" : false,
+            "__message__" :  rst
+                .replace(/<script.*?>.*?<\/script>/img, "")
+                .replace(/<style.*?>.*?<\/style>/img, "")
+                .replace(/<[^>]*?>/g, "")
+                .replace(/&[^&;]*;/g, "")
+                .replace(/^\s*(\r\n|\r|\n)/mg, "")
         };
     }
     else {
@@ -165,7 +171,7 @@ function hsSerialArr(obj) {
         }
     }
     else if (jQuery.isPlainObject(obj)) {
-        _hsWalkInto(obj, function(val,key) {
+        _hsEachLeaf(obj, function(val,key) {
             if (key.length < 1 || val.length < 1) return;
             arr.push({name : key.join("."),
                       value: val});
@@ -246,9 +252,16 @@ function hsSetParam (url, name, value) {
 }
 
 function hsGetValue (obj, path, def) {
+    if (jQuery.isArray(path)) {
+        return hsGetArray(obj, path, def);
+    }
+    if (typeof path == "number") {
+        return obj[path] || def;
+    }
     if (typeof path != "string") {
         throw("hsGetValue: 'path' must be a string");
     }
+
     path = path.replace(/\]\[/g, ".")
                .replace(/\[/   , ".")
                .replace(/\]/   , "" )
@@ -257,6 +270,9 @@ function hsGetValue (obj, path, def) {
     return hsGetArray(obj, path, def);
 }
 function hsGetArray (obj, keys, def) {
+    if (!obj) {
+        return null;
+    }
     if (!jQuery.isPlainObject(obj)) {
         throw("hsGetArray: 'obj' must be an object");
     }
@@ -284,6 +300,12 @@ function hsGetArray (obj, keys, def) {
  a[][k] 空键将作为字符串对待, 但放在末尾可表示push
  */
 function hsSetValue (obj, path, val) {
+    if (jQuery.isArray(path)) {
+        hsSetArray(obj, path, val); return;
+    }
+    if (typeof path == "number") {
+        obj[path] = val; return;
+    }
     if (typeof path != "string") {
         throw("hsSetValue: 'path' must be a string");
     }
@@ -294,6 +316,9 @@ function hsSetValue (obj, path, val) {
     hsSetArray(obj, path, val);
 }
 function hsSetArray (obj, keys, val) {
+    if (!obj) {
+        return;
+    }
     if (!jQuery.isPlainObject(obj)) {
         throw("hsSetArray: 'obj' must be an object");
     }
@@ -346,6 +371,7 @@ function hsGetLang  (key, rep) {
         }
         rep = x;
     }
+
     if (rep instanceof Object) {
         key = key.replace( /\$(\{\w+\}|\w+)/gm, function(w) {
             if (w.substring(0 , 2) == "${") {
@@ -689,54 +715,25 @@ function hsFmtDate(date, format) {
 }
 
 function hsNote(msg) {
-    var box = jQuery("#note-box");
+    var box = jQuery("#note-box").show();
     var div = jQuery('<div class="note-msg""></div>');
-    div.appendTo(box).append(msg).hide();
-        div.effect("slide",{mode:"show",direction:"up"},500);
+    div.appendTo(box).append(msg).hide()
+       .slideDown(500);
     setTimeout( function() {
-        div.effect("slide",{mode:"hide",direction:"up"},500,
-                function() {div.remove();});
-    },  5000);
+        div.slideUp(500, function() {
+            div.remove  ();
+            if (box.children().length == 0) {
+                box.hide();
+            }
+        });
+    }, 5000);
     return div;
 }
-function hsWarn(htm) {
-    var div = jQuery('<div class="overlay warn-box"><div class="close"></div><div class="warn-msg"></div></div>');
-    var box = div.find('.warn-msg');
-    div.appendTo(document.body)
-       .overlay({
-        top     : "center",
-        left    : "center",
-        load    :  true ,
-        mask    : {
-            color       : "#000",
-            opacity     : 0.8,
-            loadSpeed   : 0
-        },
-          close : div.find(".close"),
-        onClose : function() {
-            HsClose.call  (   box   );
-            box.removeData("overlay");
-            div.remove();
-        }
-    });
-    box.data("overlay", div.data("overlay"));
-    box.html(htm);
-    return box;
-}
-
 function hsOpen(url, data, callback) {
-    var div = jQuery('<div class="overlay open-box"><div class="close"></div><div class="load-box"></div></div>');
-    var box = div.find('.load-box');
+    var div = jQuery('<div class="overlay"><div class="close"></div><div class="open-box"></div></div>');
+    var box = div.find('.open-box');
     div.appendTo(document.body)
        .overlay({
-        top     : "center",
-        left    : "center",
-        load    :  false,
-        mask    : {
-            color       : "#000",
-            opacity     : 0.8,
-            loadSpeed   : 0
-        },
           close : div.find('.close' ),
         onClose : function() {
             HsClose.call  (   box   );
@@ -749,7 +746,7 @@ function hsOpen(url, data, callback) {
     return box;
 }
 function HsOpen(url, data, callback) {
-    var box = jQuery(this);
+    var box = jQuery( this ).addClass ( "open-box" );
     if (box.closest(".tabs").length) {
         var tabs = box.closest(".tabs").data("tabs");
         var oldTab = tabs.getCurrentTab();
@@ -783,6 +780,7 @@ function HsClose() {
         box.contents(  ).remove(  );
         box.append(baks).removeData("baks");
     }
+    box.removeClass("open-box");
     return box;
 }
 function HsReady() {
@@ -790,8 +788,8 @@ function HsReady() {
     box.trigger("hsReady");
     box.find("show-in-overlay,.show-in-tabs,.show-in-load").hide();
     if (box.data( "overlay" )) {
-        box.find(".show-in-overlay").show();
         box.data( "overlay" ).load();
+        box.find(".show-in-overlay").show();
     }
     else if (box.data("tabs")) {
         box.find(".show-in-tabs").show();
@@ -799,8 +797,8 @@ function HsReady() {
     else {
         box.find(".show-in-load").show();
     }
-    box.find(".close,.cancel").click(function() {
-        HsClose.call(box );
+    box.on("click", ".close,.cancel", function() {
+        HsClose.call(box);
     });
     return box;
 }
@@ -809,13 +807,15 @@ function HsForm(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsForm");
     if (data)  return data;
 
-        context  = jQuery( context);
+    context  =  jQuery( context );
+    context.data( "HsForm", this).addClass( "HsForm");
+
     var loadBox  = context.closest(".load-box");
     var formBox  = context.find   ( "form"    );
     var saveUrl  = hsGetValue(opts, "saveUrl" );
     var loadUrl  = hsGetValue(opts, "loadUrl" );
-    var loadNoLd = hsGetValue(opts, "loadNoLd");
     var loadNoId = hsGetValue(opts, "loadNoId");
+    var loadNoLd = hsGetValue(opts, "loadNoLd");
     var idKey    = hsGetValue(opts, "idKey", "id");
 
     if (formBox.length === 0) formBox = context;
@@ -826,7 +826,7 @@ function HsForm(opts, context) {
 
     var ld, id, a, i;
 
-    ld = hsSerialArr(loadUrl );
+    ld = hsSerialArr( loadUrl );
     if (!loadNoLd) {
         a = hsSerialArr(loadBox.data("url" ));
         for(i = 0; i < a.length; i ++) {
@@ -837,12 +837,12 @@ function HsForm(opts, context) {
             ld.push(a[i]);
         }
     }
-    id = hsGetSerias(ld,idKey);
-    if (loadNoId || id.length) {
-        this.load(loadUrl, ld);
+    id = hsGetSerias(ld, idKey);
+    if ( loadNoId || id.length) {
+        this.load(loadUrl , ld);
     }
     else {
-        this.fillData([ ]);
+        this.fillData([]);
     }
 
     /**
@@ -858,9 +858,8 @@ function HsForm(opts, context) {
         formBox.find("[data-pn='"+n+"']").val(v);
     }
 
+    this.validate();
     this.saveInit(saveUrl);
-
-    this.validator = formBox.validator().data("validator");
 }
 HsForm.prototype = {
     load     : function(url, data) {
@@ -910,7 +909,17 @@ HsForm.prototype = {
                 if (! v) continue;
             }
 
-            if (inp.hasClass(".form-checks") || inp.hasClass(".form-radios")) {
+            if (inp.prop("tagName") == "SELECT" && i == 1) {
+                vk = inp.attr("data-vk"); if(!vk) vk = 0;
+                tk = inp.attr("data-tk"); if(!tk) tk = 1;
+                for (i = 0; i < v.length; i ++) {
+                    opt = jQuery('<option></option>');
+                    opt.val (hsGetValue(v[i], vk));
+                    opt.text(hsGetValue(v[i], tk));
+                    inp.append(opt);
+                }
+            }
+            else if (inp.hasClass(".form-checks") || inp.hasClass(".form-radios")) {
                 tp = inp.hasClass(".form-checks") ? "checkbox" : "radio";
                 vk = inp.attr("data-vk"); if(!vk) vk = 0;
                 tk = inp.attr("data-tk"); if(!tk) tk = 1;
@@ -920,16 +929,6 @@ HsForm.prototype = {
                                      .val (hsGetValue(v[i], vk));
                     lab.find("span" ).text(hsGetValue(v[i], tk));
                     inp.append(lab);
-                }
-            }
-            else if (inp.atrr("tagName") == "SELECT" && i == 1) {
-                vk = inp.attr("data-vk"); if(!vk) vk = 0;
-                tk = inp.attr("data-tk"); if(!tk) tk = 1;
-                for (i = 0; i < v.length; i ++) {
-                    opt = jQuery('<option></option>');
-                    opt.val (hsGetValue(v[i], vk));
-                    opt.text(hsGetValue(v[i], tk));
-                    inp.append(opt);
                 }
             }
         }
@@ -952,7 +951,7 @@ HsForm.prototype = {
         this._info = info;
         for(n in infos) {
             v = infos[n];
-            i = 0
+            i = 0;
             inp = this.formBox.find( '[data-fn="'+n+'"]');
             if (inp.length == 0) {
                 i = 1;
@@ -968,12 +967,15 @@ HsForm.prototype = {
                 inp.text(v);
             }
             else {
-                inp.val (v);
+                inp.val (v).change();
             }
         }
         delete this._info;
     },
 
+    validate : function() {
+        this.formBox.validator();
+    },
     saveInit : function(act) {
         var url  = this.formBox.attr("action" ) || act;
         var type = this.formBox.attr("method" );
@@ -981,8 +983,9 @@ HsForm.prototype = {
         var data = this.formBox;
         var that = this;
 
-        data.on("submit", function( evt ) {
-            return that.validator.checkValidity();
+        this.formBox.attr(  "action", url  );
+        this.formBox.on("submit", function() {
+            return that.formBox.data("validator").checkValidity();
         });
 
         if (enct ===  "multipart/form-data") {
@@ -1040,7 +1043,9 @@ function HsList(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsList");
     if (data)  return data;
 
-        context  = jQuery( context);
+    context  =  jQuery( context );
+    context.data( "HsList", this).addClass( "HsList");
+
     var loadBox  = context.closest(".load-box");
     var listBox  = context.find   (".list-box");
     var pageBox  = context.find   (".page-box");
@@ -1065,6 +1070,11 @@ function HsList(opts, context) {
         var m = evt.data[1];
         var u = evt.data[2];
 
+        switch (m) {
+            case "{context}": m = context; break;
+            case "{loadBox}": m = loadBox; break;
+        }
+
         /*
         if (typeof n == "string")
             n = loadBox.find(n);
@@ -1085,7 +1095,7 @@ function HsList(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("$ID") ) {
+        if (0 <= u.indexOf("{ID}")) {
             var cks;
             if (0 <= jQuery.inArray(listBox[0], n.parents())) {
                 cks = that.getRow(n);
@@ -1094,8 +1104,9 @@ function HsList(opts, context) {
                 cks = that.getOne( );
             }
             if (cks == null) return ;
+            var sid = cks.val();
 
-            u = u.replace("$ID", encodeURIComponent(cks.val()));
+            u = u.replace ("{ID}", encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
@@ -1107,8 +1118,8 @@ function HsList(opts, context) {
         switch (a.length) {
         case 3:
             n = a[0];
-            m = a[1];
-            u = a[2];
+            u = a[1];
+            m = a[2];
             break;
         case 2:
             n = a[0];
@@ -1164,8 +1175,8 @@ function HsList(opts, context) {
         switch (a.length) {
         case 3:
             n = a[0];
-            m = a[1];
-            u = a[2];
+            u = a[1];
+            m = a[2];
             break;
         case 2:
             n = a[0];
@@ -1188,15 +1199,16 @@ function HsList(opts, context) {
         });
     }
 
-    this.listBox.on("change", ".check-all:checkbox", function() {
+    this.listBox.on("change", ".check-all", function() {
+        var ck  =  jQuery(this);
         that.listBox.find(".check-one")
-                    .prop("checked", jQuery(this).prop( "checked" ))
-                    .trigger( "change");
+                    .prop("checked", ck.prop("checked")).trigger( "change" );
     });
-    this.listBox.on("change", ".check-one:checkbox", function() {
+    this.listBox.on("change", ".check-one", function() {
+        var cks = that.listBox.find(".check-one");
+        var ckd =        cks.filter(":checked"  );
         that.listBox.find(".check-all")
-                    .prop("checked", that.listBox.find(".check-one").length  ==
-                                     that.listBox.find(".check-one:checked").length);
+                    .prop("checked", cks.length && cks.length == ckd.length);
     });
 
     this["fill_"+this.idKey] = HsList.fill_check;
@@ -1405,7 +1417,7 @@ HsList.prototype = {
                     this.getTip().data("trigger", this.getTrigger());
                 }
             });
-            jQuery('<button class="admin-btn">'+hsGetLang('list.admin.txt')+'</button>')
+            jQuery('<button class="admin-btn">'+hsGetLang('list.admin.col')+'</button>')
                 .attr("title", th.text())
                 .tooltip (tp)
                 .appendTo(td);
@@ -1417,7 +1429,9 @@ function HsTree(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsTree");
     if (data)  return data;
 
-        context  = jQuery( context);
+    context  =  jQuery( context );
+    context.data( "HsTree", this).addClass( "HsTree");
+
     var loadBox  = context.closest(".load-box");
     var treeBox  = context.find   (".tree-box");
     var findBox  = context.find   (".find-box");
@@ -1446,6 +1460,11 @@ function HsTree(opts, context) {
         var m = evt.data[1];
         var u = evt.data[2];
 
+        switch (m) {
+            case "{context}": m = context; break;
+            case "{loadBox}": m = loadBox; break;
+        }
+
         /*
         if (typeof n == "string")
             n = loadBox.find(n);
@@ -1461,12 +1480,12 @@ function HsTree(opts, context) {
         if (tip.length)
             n   = tip.data ( "trigger");
 
-        if (typeof u == "function" ) {
+        if (typeof u == "function") {
             u.call( that, n, m );
             return;
         }
 
-        if (0 <= u.search(/\$(ID|PID)/)) {
+        if (0 <= u.indexOf("{ID}")) {
             var sid;
             if (0 <= jQuery.inArray(treeBox[0], n.parents())) {
                 sid = that.getId (n);
@@ -1476,7 +1495,7 @@ function HsTree(opts, context) {
             }
             if (sid == null) return ;
 
-            u = u.replace(/\$(ID|PID)/, encodeURIComponent(sid));
+            u = u.replace ("{ID}", encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
@@ -1488,8 +1507,8 @@ function HsTree(opts, context) {
         switch (a.length) {
         case 3:
             n = a[0];
-            m = a[1];
-            u = a[2];
+            u = a[1];
+            m = a[2];
             break;
         case 2:
             n = a[0];
@@ -1548,8 +1567,8 @@ function HsTree(opts, context) {
         switch (a.length) {
         case 3:
             n = a[0];
-            m = a[1];
-            u = a[2];
+            u = a[1];
+            m = a[2];
             break;
         case 2:
             n = a[0];
@@ -1570,7 +1589,7 @@ function HsTree(opts, context) {
         treeBox.on("select", function(evt, id) {
             for (var i = 0; i < linkUrls.length; i ++) {
                 jQuery(linkUrls[i][0]).load(linkUrls[i][1]
-                  .replace('$ID', encodeURIComponent(id)));
+                 .replace('{ID}', encodeURIComponent(id)));
             }
         });
     }
@@ -1822,19 +1841,24 @@ HsTree.prototype = {
 
 /** 功能辅助函数 **/
 
-function _hsWalkInto(data, func) {
+/**
+ * 遍历对象或数组的全部叶子节点
+ * @param object|array data
+ * @param function func
+ */
+function _hsEachLeaf(data, func) {
     var path = [];
     if (arguments.length>2) {
         path = arguments[2];
     }
     if (jQuery.isPlainObject(data)) {
         for (var k in data) {
-            _hsWalkInto(data[k], func, path.concat([k]));
+            _hsEachLeaf(data[k], func, path.concat([k]));
         }
     }
     else if (jQuery.isArray (data)) {
         for (var i = 0; i < data.length; i ++) {
-            _hsWalkInto(data[i], func, path.concat([i]));
+            _hsEachLeaf(data[i], func, path.concat([i]));
         }
     }
     else {
@@ -1842,6 +1866,12 @@ function _hsWalkInto(data, func) {
     }
 }
 
+/**
+ * 标准文档对象操作类初始化方法
+ * @param object opts
+ * @param string name
+ * @returns object|null
+ */
 function _HsInitOpts(opts, name) {
         var func = self[name];
     if (!(this instanceof func)) {
@@ -1854,8 +1884,8 @@ function _HsInitOpts(opts, name) {
     }
     else {
         if (opts) for (var k in opts) {
-            // 允许扩展已有方法, 添加或重写"fill"方法
-            if (this[k] != undefined || /^fill/.test(k)) {
+            // 允许扩展已有方法, 添加或重写"fill"/"user"方法/属性
+            if (this[k] != undefined || /^(fill|user)/.test(k)) {
                 this[k]  = opts[k];
             }
         }
@@ -1863,9 +1893,14 @@ function _HsInitOpts(opts, name) {
     }
 }
 
-function _HsReadOpts() {
+/**
+ * 获取配置选项
+ * @param Selector that
+ * @returns object
+ */
+function _HsReadOpts(that) {
     var obj = {};
-    var arr = jQuery(this).find("param");
+    var arr = jQuery(that).find("param");
     for(var i = 0; i < arr.length; i ++) {
         var n = jQuery(arr[i]).attr("name" );
         var v = jQuery(arr[i]).attr("value");
@@ -1912,6 +1947,7 @@ function _hs2jtDF(format) {
 
 // 常用jQuery扩展
 jQuery.extend({
+    hsNote  : hsNote,
     hsOpen  : hsOpen
 });
 jQuery.fn.extend({
@@ -1952,8 +1988,16 @@ jQuery.fn.extend({
         if (!$.isFunction(complate)) {
             complate = function() {};
         }
-        this.data( "url" , url ).data( "data" , data )
-            .addClass("load-box").addClass("load-ing");
+
+        // 解决重载区域后内部区域未关闭的问题
+        if ($.fn.load.caller != hsOpen
+        &&  $.fn.load.caller != HsOpen) {
+            this.find(".open-box").hsClose();
+            this.filter(".open-box").hsClose();
+        }
+
+        this.data( "url" , url ).data( "data" , data );
+        this.addClass("load-box").addClass("load-ing");
         return _load.call(this, url, data, function( ) {
             var that  = $(this);
             that.removeClass ( "load-ing" );
@@ -1964,14 +2008,18 @@ jQuery.fn.extend({
 
     /** 设置jQueryTools参数 **/
 
-    // 设置jquery tools浮动层
-    $.tools.overlay.conf.fixed = true;
-    $.tools.overlay.conf.oneInstance = false;
-    $.tools.overlay.conf.closeOnClick = false;
-
     // 设置jquery tools国际化
+    $(function() {
+    $.tools.dateinput.conf.format = _hs2jtDF(hsGetLang("date.format"));
+    $.tools.dateinput.conf.firstDay = hsGetLang("date.first.day");
+    $.tools.dateinput.localize("en", {
+        "days"            : hsGetLang("date.LE").join(","),
+        "shortDays"       : hsGetLang("date.SE").join(","),
+        "months"          : hsGetLang("date.LM").join(","),
+        "shortMonths"     : hsGetLang("date.SM").join(",")
+    });
     $.tools.validator.localize("en", {
-        "*"               : "",
+        "*"               : hsGetLang("form.validate"),
         ":number"         : hsGetLang("form.is.not.number"),
         ":url"            : hsGetLang("form.is.not.url"),
         ":email"          : hsGetLang("form.is.not.email"),
@@ -1986,16 +2034,24 @@ jQuery.fn.extend({
         "[data-equals]"   : hsGetLang("form.is.not.equals"),
         "[data-unique]"   : hsGetLang("form.is.not.unique")
     });
-    $.tools.dateinput.localize("en", {
-        "days"            : hsGetLang("date.LE").join(","),
-        "shortDays"       : hsGetLang("date.SE").join(","),
-        "months"          : hsGetLang("date.LM").join(","),
-        "shortMonths"     : hsGetLang("date.SM").join(",")
     });
-    $.tools.dateinput.conf.format = _hs2jtDF(hsGetLang("date.format"));
-    $.tools.dateinput.conf.firstDay =  hsGetLang("date.first.day");
 
-    // 设置jquery tools表单校验方法
+    // 设置jquery tools覆盖层
+    $.tools.overlay.conf.top = "center",
+    $.tools.overlay.conf.left = "center",
+    $.tools.overlay.conf.load = false,
+    $.tools.overlay.conf.fixed = false,
+    $.tools.overlay.conf.oneInstance = false,
+    $.tools.overlay.conf.closeOnClick = false,
+    $.tools.overlay.conf.mask = {
+        color       : "#000",
+        opacity     : 0.8,
+        loadSpeed   : 0
+    };
+
+    // 设置jquery tools表单校验
+    $.tools.validator.conf.formEvent = null;
+    $.tools.validator.conf.inputEvent = "change";
     $.tools.validator.fn("[minlength]", function(input, value) {
         return input.attr("minlength") >= value.length;
     });
@@ -2013,28 +2069,125 @@ jQuery.fn.extend({
     });
     $.tools.validator.fn("[data-unique]", function(input, value) {
         var ret = true;
-        var act = this.getForm().attr("action");
-        var data = hsGetParamsMap(act);
-        data["n"] = input.attr("name");
-        data["v"] = value;
+        var obj = input.closest(  "form"  );
+        var url = input.attr("data-unique");
+        var data = {
+            "n" : input.attr("name"),
+            "v" : value
+        };
+        url = url.replace(/\{(.*?)\}/, function(x, n) {
+            return obj.find("[name='" +n+ "']").val();
+        });
         $.ajax({
-            "url": input.attr("data-unique"),
+            "url": url,
             "data": data,
             "type": "POST",
             "dataType": "json",
             "async": false,
             "cache": false,
-            "success": function(rst) {
-               ret = rst["success"];
-            }
+            "success": function(rst) { ret = rst["__success__"]; }
         });
         return ret;
     });
+    $.tools.validator.addEffect("default", function(errs) {
+        var conf = this.getConf();
 
-    /** 自定义标签化语义 **/
+        $.each(errs, function(i, err) {
+            var inp = err.input.addClass(conf.errorClass);
+            var msg = inp.data("msg.el");
+            if (msg == null) {
+                msg = $(conf.message).addClass(conf.messageClass).insertAfter(inp);
+                inp.data("msg.el" , msg);
+            }
 
-    $.fn.hsInit = function( ) {
-        $(this).hsInitLoad( );
+            inp.parent().css({position: "relative"});
+            msg.css({visibility: 'hidden'}).empty( );
+            $.each(err.messages, function(i, txt) {
+                $("<span/>").text(txt).appendTo(msg);
+            });
+
+            var p1 =  inp.position();
+            var p2 = conf.position.split(/,?\s+/);
+            var s1 = [inp.outerHeight(true), inp.outerWidth(true)];
+            var s2 = [msg.outerHeight(true), msg.outerWidth(true)];
+
+            // adjust Y
+            if (p2[0] == 'bottom') p1.top  +=  s1[0];
+            if (p2[0] == 'center') p1.top  += (s1[0] / 2) - (s2[0] / 2);
+
+            // adjust X
+            if (p2[1] == 'right' ) p1.left +=  s1[1];
+            if (p2[1] == 'center') p1.left += (s1[1] / 2) - (s2[1] / 2);
+
+            msg.css({visibility: 'visible', position: 'absolute', top: p1.top, left: p1.left}).show();
+        });
+    }, function(inputs) {
+        var conf = this.getConf();
+
+        inputs.removeClass(conf.errorClass).each(function() {
+            var msg = $(this).data ( "msg.el" );
+            if (msg) {
+                msg.css({visibility: "hidden"});
+            }
+        });
+    });
+
+    /** 自定义语义属性/标签 **/
+
+    $.fn.hsInit = function(cnf) {
+        /** jquery tools 初始配置处理 **/
+
+        if (cnf) {
+            var v, o, c;
+            var box = $(this).closest(".load-box");
+            if (box.data( "overlay" )) {
+                o = box.data( "overlay" ); c = o.getConf();
+                v = hsGetValue(cnf, "top"); if (v) c.top = v;
+                v = hsGetValue(cnf, "left"); if (v) c.left = v;
+                v = hsGetValue(cnf, "width"); if (v) box.css("width", v);
+                o.getOverlay( ).overlay( c );
+            }
+            else if (box.data("tabs")) {
+                v = hsGetValue(cnf, "title"); if (v) box.data("curTab").text(v);
+            }
+            return this;
+        }
+
+        /** jquery tools 语义属性解析 **/
+
+        $(this).find(".overlay-trigger").each(function() {
+            var o = {}, n = $(this).next(".overlay");
+            if ($(this).attr("rel")) {
+                o.target = $(this).attr("rel");
+            }
+            else if (n.length) {
+                o.target = n;
+            }
+            o.mask = {
+                color     : "#000",
+                opacity   : 0.8,
+                loadSpeed : 0
+            };
+            $(this).overlay(o);
+        });
+        $(this).find(".tooltip-trigger").each(function() {
+            var o = {}, n = $(this).next(".tooltip");
+            if ($(this).attr("rel")) {
+                o.tip = $(this).attr("rel");
+            }
+            else if (n.length) {
+                o.tip = n;
+            }
+            o.relative = true ;
+            $(this).tooltip(o);
+        });
+        $(this).find(".tabs").each(function() {
+            $(this).tabs($(this).next(".panes").children("div"));
+        });
+        $(this).find("[type=date]").dateinput();
+
+        /** 自定义语义属性/标签解析 **/
+
         $(this).find("div[data-eval]").each(function() {
             eval($(this).attr("data-eval"));
         });
@@ -2047,69 +2200,21 @@ jQuery.fn.extend({
         $(this).find("object.config" ).each(function() {
             var prt = $(this).parent();
             var fun = $(this).attr("name");
-            var cnf = _HsReadOpts.call( this );
-            if (typeof prt[fun] == "function") {
-                prt[fun](cnf);
-            }
+            var cnf = _HsReadOpts ( this );
+            if (typeof prt[fun] == "function") prt[fun](cnf);
         }).remove();
 
-        // 为所有的input加上type class, 方便设置样式, 兼容老浏览器
-        $(this).find('input').each(function() {
+        /** 样式相关处理 **/
+
+        $(this).find('*').contents().filter(function() {
+            // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
+            return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
+        }).remove();
+        $(this).find( 'input' ).each( function(  ) {
+            // 为所有的input加上type class, 方便设置样式, 兼容老浏览器
             $(this).addClass($(this).attr("type"));
         });
 
-        // 清除文本节点
-        $(this).find('.ct').each(function() {
-        $(this).contents( ).each(function() {
-            if (this.nodeType == 3)
-                this.remove();
-        });});
-
-        // 工具按钮状态初始化
-        $(this).find(".bind-to-select,.bind-to-single").prop("disabled", true);
-
-        return this;
-    };
-    $.fn.hsInitLoad = function() {
-        $(this).find("[type=date]").dateinput();
-        $(this).find(".tabs").each(function() {
-            $(this).tabs($(this).next(".panes").children("div"));
-        });
-        $(this).find(".overlay-trigger").each(function() {
-            var o = {}, n = $(this).next(".overlay");
-            if ($(this).attr("rel")) {
-                o.target = $(this).attr("rel");
-            }
-            else if (n.length) {
-                o.target = n;
-            }
-            $(this).overlay(o);
-        });
-        $(this).find(".tooltip-trigger").each(function() {
-            var o = {}, n = $(this).next(".tooltip");
-            if ($(this).attr("rel")) {
-                o.tip = $(this).attr("rel");
-            }
-            else if (n.length) {
-                o.tip = n;
-            }
-            $(this).tooltip(o);
-        });
-        return this;
-    };
-    $.fn.hsInitOpen = function(cnf) {
-        var v, o, c;
-        var box = $(this).closest(".load-box");
-        if (box.data( "overlay" )) {
-            o = box.data( "overlay" ); c = o.getConf();
-            v = hsGetValue(cnf, "top"); if (v) c.top = v;
-            v = hsGetValue(cnf, "left"); if (v) c.left = v;
-            v = hsGetValue(cnf, "width"); if (v) box.css("width",v);
-            o.getOverlay( ).overlay( c );
-        }
-        else if (box.data("tabs")) {
-            v = hsGetValue(cnf, "title"); if (v) box.data("curTab").text(v);
-        }
         return this;
     };
 
@@ -2122,26 +2227,24 @@ jQuery.fn.extend({
     })
     .on("hsClose", ".load-box", function() {
         // 解决表单"窗口"关闭后validator的错误消息仍然存在的问题
-        $(this).find(".HsForm").data("HsForm").validator.destroy();
+        // 已经将错误消息位置修改改为相对input, 不需要下列代码了
+        //var obj = $(this).find(".HsForm").data("HsForm");
+        //if (obj) obj.formBox.data("validator").destroy();
     })
     .on("click", "[data-load-in]", function() {
-        $($(this).attr("data-load-in")).load($(this).attr("href"));
-        return false;
-    })
-    .on("click", ".load", function() {
-        $(this).closest(".load-box").load($(this).attr("href"));
+        var s = $(this).attr("data-load-in");
+        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
+        s.load($(this).attr("href"));
         return false;
     })
     .on("click", "[data-open-in]", function() {
-        $($(this).attr("data-open-in")).hsOpen($(this).attr("href"));
+        var s = $(this).attr("data-load-in");
+        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
+        s.hsOpen($(this).attr("href"));
         return false;
     })
     .on("click", ".open", function() {
-        $(this).closest(".load-box").hsOpen($(this).attr("href"));
-        return false;
-    })
-    .on("click", ".open-new", function() {
-        $.hsOpen( $(this).attr("href") );
+        $.hsOpen($(this).attr("href"));
         return false;
     })
     .on("click", ".list-box tbody td", function(evt) {
@@ -2152,10 +2255,9 @@ jQuery.fn.extend({
         if (this != evt.target) return;
         var tr = $(this).closest("tr");
         var ck = tr.find(".check-one");
-        if (this !=  ck .closest("td")) {
+        if (this !=  ck .closest("td"))
             tr.closest("tbody").find(".check-one").not(ck)
-                               .prop( "checked"   , false);
-        }
+                               .prop( "checked"  ,  false);
         ck.prop("checked", ! ck.prop( "checked")).change();
     })
     .on("change", ".HsList .check-one", function() {
@@ -2168,7 +2270,14 @@ jQuery.fn.extend({
     .on("select", ".HsTree .tree-node", function() {
         // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
         var box = $(this).closest(".HsTree");
-        var obj = box.data("HsTree");
+        var obj =     box.data   ( "HsTree");
         box.find(".bind-to-select").prop("disabled", obj.getSid()==obj.getRid());
+    })
+    .on("loadBack", ".HsList", function() {
+        $(this).find(".check-all").prop("checked", false);
+        $(this).find(".bind-to-select,.bind-to-single").prop("disabled", true);
+    })
+    .on("loadBack", ".HsTree", function() {
+        $(this).find(".bind-to-select,.bind-to-single").prop("disabled", true);
     });
 })(jQuery);

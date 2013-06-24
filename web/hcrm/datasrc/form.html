@@ -1,0 +1,69 @@
+<h2>编辑数据源</h2>
+<div id="hcrm-datasrc-form" style="min-width: 600px;">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcrm/Datasrc/Info.do"/>
+        <param name="saveUrl" value="hcrm/Datasrc/Save.do"/>
+        <param name="loadNoId" value="true"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <div>
+            <label>名称:</label>
+            <input type="text" name="name" required="required" data-unique="hcrm/Datasrc/Unique.do?id={id}"/>
+        </div>
+        <div>
+            <label>类型:</label>
+            <select name="class" required="required">
+                <option value="">--请选择--</option>
+            </select>
+        </div>
+        <div class="conf-box"></div>
+        <div class="button-box">
+            <button type="submit">保存</button>
+            <a href="javascript:;" class="cancel">取消</a>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+(function($) {
+    var context = $("#hcrm-datasrc-form");
+    context.find("[name=class]").change(function() {
+        var box = $(".conf-box",context).empty();
+        var cls = $(this).val();
+        var inf = context.data("HsForm")._info;
+        var dat = {};
+
+        if (inf && inf.ar_datasrc_conf_info) {
+            for(var i = 0; i < inf.ar_datasrc_conf_info.length; i ++) {
+                var a = inf.ar_datasrc_conf_info[i];
+                dat[a.name] = a.value;
+            }
+        }
+
+        if (cls) {
+            $.ajax({
+                url: "hcrm/Datasrc/Conf.do?class="+cls,
+                async: false,
+                dataType: "json",
+                success : function(rst) {
+                    for(var i = 0; i < rst.list.length; i ++) {
+                        var v   = rst.list[i][0];
+                        var t   = H$(":hcrm.loader."+cls+"."+v );
+                        var div = $('<div></div>').appendTo(box);
+                        $('<label></label>')
+                            .appendTo(div).text(t+":");
+                        $('<input type="hidden" name="ar_datasrc_conf_info['+i+'][name]"/>')
+                            .appendTo(div).val (v);
+                        $('<input type="text" name="ar_datasrc_conf_info['+i+'][value]" required="required"/>')
+                            .appendTo(div).val (hsGetValue(dat, v));
+                    }
+
+                    // 重置验证
+                    context.data("HsForm").validate();
+                }
+            });
+        }
+    });
+})( jQuery );
+</script>

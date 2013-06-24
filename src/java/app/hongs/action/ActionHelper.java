@@ -328,7 +328,8 @@ public class ActionHelper
   {
     if (!this.response.isCommitted())
     {
-      this.setContentType(type);
+      if (type.indexOf(";") == -1) type += "; charset=utf-8";
+      this.response.setContentType(type);
     }
 
     try
@@ -427,121 +428,6 @@ public class ActionHelper
     this.printJSON(JSON.toString(data));
   }
 
-  /**
-   * 发送一个成功信号
-   *
-   * @param rst 通讯数据
-   */
-  public void pass(Map<String, Object> rst)
-  {
-    rst.put("__success__", true);
-    this.responseData = rst;
-    this.printJSON(rst);
-  }
-
-  /**
-   * 发送一个成功信号
-   *
-   * @param msg 成功消息
-   */
-  public void pass(String msg)
-  {
-    Map arr = new HashMap();
-    arr.put("__message__", msg);
-    this.pass(arr);
-  }
-
-  /**
-   * 发送一个成功信号
-   *
-   */
-  public void pass()
-  {
-    Map arr = new HashMap();
-    this.pass(arr);
-  }
-
-  /**
-   * 发送一个失败信号
-   *
-   * @param rst 通讯数据
-   */
-  public void fail(Map<String, Object> rst)
-  {
-    rst.put("__success__",false);
-    this.responseData = rst;
-    this.printJSON(rst);
-  }
-
-  /**
-   * 发送一个失败信号
-   *
-   * @param msg 失败消息
-   */
-  public void fail(String msg)
-  {
-    Map arr = new HashMap();
-    arr.put("__message__", msg);
-    this.fail(arr);
-  }
-
-  /**
-   * 发送一个失败信号
-   *
-   */
-  public void fail()
-  {
-    Map arr = new HashMap();
-    this.fail(arr);
-  }
-
-  /** 快捷动作 **/
-
-  /**
-   * 返回指定数据
-   * 针对model的getList,getInfo方法
-   * @param data
-   */
-  public void back(Map<String, Object> rst)
-  {
-    this.pass(rst);
-  }
-
-  /**
-   * 返回指定数据
-   * 针对model的save方法
-   * @param id
-   */
-  public void back(String id)
-  {
-    Map data = new HashMap();
-    data.put("id", id);
-    this.pass(data);
-  }
-
-  /**
-   * 返回操作数量
-   * 针对model的remove方法
-   * @param num
-   */
-  public void back(Number num)
-  {
-    Map data = new HashMap();
-    data.put("num", num);
-    this.pass(data);
-  }
-
-  /**
-   * 返回检验结果
-   * 针对model的exists方法
-   * @param rst
-   */
-  public void back(Boolean rst)
-  {
-    if (rst) this.pass();
-    else     this.fail();
-  }
-
   /** HTTP常用状态 **/
 
   /**
@@ -594,23 +480,100 @@ public class ActionHelper
     this.print(msg);
   }
 
-  /** HTTP内容类型 **/
-
-  /**
-   * 设置Content-Type
-   * @param type
-   */
-  public void setContentType(String type)
+  public void print500Code(Exception ex)
   {
-    if (type.indexOf(";") == -1) type += "; charset=utf-8";
-    this.response.setContentType(type);
+    print500Code(ex.getMessage());
   }
 
-  public void setLastModified(Date date)
+  /** 快捷动作 **/
+
+  /**
+   * 返回指定数据
+   * 针对model的getList,getInfo方法
+   * @param data
+   */
+  public void back(Map<String, Object> data)
   {
-    SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.ENGLISH);
-                     sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-    this.response.setHeader("Last-Modified", sdf.format(date));
+    // 默认为成功
+    if (!data.containsKey("__success__"))
+         data.put("__success__" , true );
+
+    this.responseData = data;
+    this.printJSON(data);
+  }
+
+  /**
+   * 返回操作的ID
+   * 针对model的save方法
+   * @param id
+   * @param msg
+   */
+  public void back(String id, String msg)
+  {
+    Map data = new HashMap();
+    data.put("__success__", true);
+    data.put("__message__", msg );
+    data.put("ID", id);
+    back(data);
+  }
+
+  /**
+   * 返回操作的ID
+   * 针对model的save方法
+   * @param id
+   */
+  public void back(String id)
+  {
+    back(id, "");
+  }
+
+  /**
+   * 返回操作数量
+   * 针对model的remove|update方法
+   * @param ar
+   * @param msg
+   */
+  public void back(Number ar, String msg)
+  {
+    Map data = new HashMap();
+    data.put("__success__", true);
+    data.put("__message__", msg );
+    data.put("AR", ar);
+    back(data);
+  }
+
+  /**
+   * 返回操作数量
+   * 针对model的remove|update方法
+   * @param ar
+   */
+  public void back(Number ar)
+  {
+    back(ar, "");
+  }
+
+  /**
+   * 返回检验结果
+   * 针对model的exists方法
+   * @param rst
+   * @param msg
+   */
+  public void back(Boolean rst, String msg)
+  {
+    Map data = new HashMap();
+    data.put("__success__", rst);
+    data.put("__message__", msg);
+    back(data);
+  }
+
+  /**
+   * 返回检验结果
+   * 针对model的exists方法
+   * @param rst
+   */
+  public void back(Boolean rst)
+  {
+    back(rst, "");
   }
 
   /** 静态工具方法 **/

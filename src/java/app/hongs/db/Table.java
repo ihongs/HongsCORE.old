@@ -32,7 +32,7 @@ import app.hongs.CoreLanguage;
  * <h2>错误代码:</h2>
  * <pre>
  * 区间: 0x1070~0x109f
- * 
+ *
  * 0x1070 缺少数据库对象
  * 0x1072 配置不能为空
  * 0x1074 缺少表名
@@ -160,8 +160,19 @@ public class Table
   public List fetchMore(FetchBean more)
     throws HongsException
   {
-    more.setTableName(tableName );
     more.setName(name);
+    more.setTableName(tableName);
+
+    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
+
+    this.getColumns();
+
+    // 默认不查询已经删除的记录
+    if (this.columns.containsKey(dflag) && !more.hasOption("FETCH_DFLAG"))
+    {
+        more.where("`"+dflag+"` != 1" );
+    }
 
     return FetchMore.assocSelect(this, assocs, more);
   }
@@ -176,15 +187,15 @@ public class Table
     throws HongsException
   {
     less.limit(1);
-    List<Map<String, Object>> rows = this.fetchMore(less);
+    List<Map> rows = this.fetchMore(less);
 
-    if (!rows.isEmpty())
+    if (! rows.isEmpty( ))
     {
-      return rows.get(0);
+      return rows.get( 0 );
     }
     else
     {
-      return new HashMap<String, Object>();
+      return new HashMap();
     }
   }
 
@@ -198,9 +209,9 @@ public class Table
     throws HongsException
   {
     CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
-    String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
     String ctime = conf.getProperty("core.table.field.ctime", "__ctime__");
     String etime = conf.getProperty("core.table.field.etime", "__etime__");
+    String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
 
     long time = System.currentTimeMillis();
 
@@ -350,6 +361,18 @@ public class Table
   public int delete(String where, Object... params)
     throws HongsException
   {
+    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
+
+    this.getColumns();
+
+    // 存在__dflag__字段则将删除标识设置为1
+    if (this.columns.containsKey(dflag))
+    {
+      Map data=new HashMap();data.put(dflag,1);
+      return  this.update(data, where, params);
+    }
+
     return this.db.delete(this.tableName, where, params);
   }
 
@@ -393,12 +416,12 @@ public class Table
     return (Map)this.scossa.get(name);
     return null;
   }
-  
+
   /**
    * 获取关联表对象
    * @param name 关联名
    * @return 关联表对象
-   * @throws HongsException 
+   * @throws HongsException
    */
   public Table getAssocTable(String name)
     throws HongsException
@@ -407,13 +430,13 @@ public class Table
     if (tc == null) return  null ;
     return this.db.getTable(Table.getAssocName(tc));
   }
-  
+
   /**
    * 获取关联查询体
    * @param bean 查询体
    * @param name 关联名
    * @return 关联查询体
-   * @throws HongsException 
+   * @throws HongsException
    */
   public FetchBean getAssocBean(FetchBean bean, String name)
     throws HongsException
@@ -422,7 +445,7 @@ public class Table
     if (tc == null) return  null ;
     return bean.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
   }
-  
+
   /**
    * 获取关联表名
    * @param assoc 关联信息
@@ -435,7 +458,7 @@ public class Table
            tn = (String)assoc.get(  "name"  );
     return tn;
   }
-  
+
   /**
    * 获取关联路径
    * @param assoc 关联信息
@@ -506,7 +529,7 @@ public class Table
         // 空串被视为null
         if ("".equals(value))
             value =  null;
-        
+
         if (value == null
         && (Integer)column.get("isNullable")
         ==  java.sql.ResultSetMetaData.columnNoNulls)

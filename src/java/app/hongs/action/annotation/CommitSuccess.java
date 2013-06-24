@@ -7,9 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * 操作成功才提交
- * 非自动调用不起作用, 仅能用于actoin方法
  * @author Hongs
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@ActionAnnotation(CommitInvoker.class)
 public @interface CommitSuccess { }

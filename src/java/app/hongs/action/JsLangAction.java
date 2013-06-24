@@ -58,10 +58,10 @@ public class JsLangAction
     Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)Core.getInstance("app.hongs.action.ActionHelper");
 
-    String conf = core.ACTION.substring(1, core.ACTION.length() - 4);
+    String conf = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
     String type = helper.getParameter("t");
     String lang = helper.getParameter("l");
-    if (lang == null || lang.length() == 0)
+    if (lang == null || lang.length()==0 )
            lang = core.LANGUAGE;
     String name = conf+"."+lang;
     String m, s;
@@ -192,7 +192,8 @@ public class JsLangAction
        * .C   代码
        * .L   链接
        */
-      String name = key.substring(8);
+      String name = key;
+      name = name.replaceFirst("^(core|user)\\.js\\.", "");
       name = name.replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {

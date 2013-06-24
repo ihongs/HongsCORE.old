@@ -58,7 +58,7 @@ public class JsConfAction
     Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)Core.getInstance("app.hongs.action.ActionHelper");
 
-    String name = core.ACTION.substring(1, core.ACTION.length() - 4);
+    String name = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
     String type = req.getParameter("t");
     String m, s;
 
@@ -67,9 +67,9 @@ public class JsConfAction
      * 则直接返回 304 Not modified
      */
     m = helper.request.getHeader("If-Modified-Since");
-    if (m != null  &&  m.equals(JsConfAction.lastModified.get(name)))
+    if (m != null && m.equals(JsConfAction.lastModified.get(name)) )
     {
-      helper.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED );
+      helper.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
 
@@ -193,7 +193,8 @@ public class JsConfAction
        * .C   代码
        * .L   链接
        */
-      String name = key.substring(8);
+      String name = key;
+      name = name.replaceFirst("^(core|user)\\.js\\.", "");
       name = name.replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {
