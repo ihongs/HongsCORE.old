@@ -7,6 +7,23 @@
  */
 
 (function($) {
+    self.hsFillSelect = function(box, v, n, t) {
+        if (t != "info") return;
+        box.empty();
+        if (v ==  null ) return;
+        $.each(v, function(v2, t2) {
+            $('<div class="option-box"></div>')
+              .append($('<input type="hidden"')
+                .attr("name", n)
+                .val ( v2 ))
+              .append($('<span class="option-txt"></span>')
+                .text( t2 ))
+              .append($('<span class="option-btn"></span>'))
+              .appendTo(box);
+        });
+        box.append($('<div class="cb"></div>'));
+    };
+    
     $.fn.hsSelect = function(conf) {
         /** 选择按钮 **/
 
@@ -63,17 +80,7 @@
             $(this).tooltip({tip : tip}).show();
         });
         $(this).on("selectBack", function() {
-            box.empty();
-            var ids  = tip.data("ids" );
-            for (var k in ids) {
-                $('<div class="option-box"></div>')
-                  .append($('<input type="hidden"')
-                    .attr("name", name)
-                    .val ( ids[k][0] ))
-                  .append($('<span></span>')
-                    .text( ids[k][1] ))
-                  .appendTo(box);
-            }
+            hsFillSelect(box, tip.data("ids"), name);
             return false;
         });
 

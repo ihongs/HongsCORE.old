@@ -107,10 +107,10 @@ public class JsConfAction
 
     // 输出配置信息
     if ("json".equals(type)) {
-      helper.printJSON(s);
+      helper.printJSON( s );
     }
     else {
-      helper.printJS("if(typeof(HsCONF)==\"undefined\")HsCONF={};$.extend(HsCONF,"+s+");");
+      helper.printJS("if(!HsCONF)HsCONF={};$.extend(HsCONF,"+s+");");
     }
   }
 
@@ -145,7 +145,7 @@ public class JsConfAction
     sb.append("{\r\n");
 
     // 公共配置
-    if (confName.equals("default"))
+    if ("default".equals(confName))
     {
       sb.append("DEBUG:")
         .append(String.valueOf(Core.IN_DEBUG_MODE))
@@ -180,7 +180,7 @@ public class JsConfAction
 
     public Maker(String name)
     {
-      this.conf = new CoreConfig(name+".js");
+      this.conf = new CoreConfig(name);
     }
 
     public String make(String key)
@@ -193,9 +193,12 @@ public class JsConfAction
        * .C   代码
        * .L   链接
        */
-      String name = key;
-      name = name.replaceFirst("^(core|user)\\.js\\.", "");
-      name = name.replaceFirst("\\.[B|N|C|L]$", "");
+      if (!key.startsWith("core.js.")
+      &&  !key.startsWith("user.js.")) {
+          return "";
+      }
+      String name = key.substring( 8 )
+                       .replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {
         return this.makeLink(name, key);

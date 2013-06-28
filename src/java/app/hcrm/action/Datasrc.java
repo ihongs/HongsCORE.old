@@ -25,45 +25,27 @@ public class Datasrc {
 
     public void actionList(ActionHelper helper)
     throws HongsException {
-        Map data = model.getPage(helper.getRequestData());
-        helper.back(data);
+        Map view = model.getPage(helper.getRequestData());
+        helper.back(view);
     }
 
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map view = model.getInfo(helper.getRequestData());
 
-        // 添加类型选择
-        DatumsConfig conf = new DatumsConfig("hcrm");
-        CoreLanguage lang = new CoreLanguage("hcrm.js");
-        Map  data = new HashMap();
-        List clss = new ArrayList();
-        List clsz = (List)conf.getDataByKey("LOADER_CLASSES");
-        for (Map m : (List<Map>)clsz) {
-            if (!m.containsKey("datasrc")) continue;
-            String v = (String)m.get("class");
-            String t = lang.translate("hcrm.loader."+v);
-            List a = new ArrayList();
-            a.add(v); a.add(t); clss.add(a);
-        }
-        data.put("class", clss);
-        view.put("data" , data);
+        Map data = new HashMap();
+        view.put("data" , data );
+        data.put("class", model.getClassSelect());
 
         helper.back(view);
     }
 
     public void actionConf(ActionHelper helper)
     throws HongsException {
-        String cls = helper.getParameter("class");
-        DatumsConfig conf = new DatumsConfig("hcrm");
-        Map  data = new HashMap();
-        List clsz = (List)conf.getDataByKey("LOADER_CLASSES");
-        for (Map m : (List<Map>)clsz) {
-            String c = (String) m.get("class");
-            if (!c.equals(cls)) continue;
-            data.put("list", m.get("datasrc"));
-        }
-        helper.back(data);
+        Map view = new HashMap();
+        List list = model.getClassConfig(helper.getParameter("class"));
+        view.put( "list", list );
+        helper.back(view);
     }
 
     @CommitSuccess

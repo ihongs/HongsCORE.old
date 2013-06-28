@@ -16,10 +16,10 @@ import java.util.Set;
  * 用户基础信息模型
  * @author Hongs
  */
-public class UserBaseInfo
+public class User
 extends AbstractBaseModel {
 
-    public UserBaseInfo()
+    public User()
     throws HongsException {
         super("hcum", "au_user_base_info");
     }

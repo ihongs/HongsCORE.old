@@ -14,7 +14,7 @@ object.config {
 
 label, input, select, textarea {
     margin: 2px;
-    padding: 2px;
+    padding: 2px 2px;
 }
 button, .button,.submit, .reset,.image {
     margin: 2px;
@@ -35,7 +35,7 @@ label, input, select, button, textarea {
 .tl {text-align: left;}
 .tr {text-align: right;}
 .tc {text-align: center;}
-.vh {width: 0px; height: 0px; overflow: hidden; visibility: hidden;}
+.vh {visibility: hidden; overflow: hidden; width: 0; height: 0; magin: 0; padding: 0;}
 
 /** 消息 **/
 
@@ -174,7 +174,7 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 }
 
 .page-curr {
-    font-weight: bold;
+    color: #66f;
 }
 
 /** 树 **/

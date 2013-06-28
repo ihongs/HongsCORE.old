@@ -714,18 +714,19 @@ function hsFmtDate(date, format) {
   return format.replace(/M+|d+|y+|H+|k+|K+|h+|m+|s+|S+|E+|a+/g, _replace);
 }
 
-function hsNote(msg) {
+function hsNote(msg, cls) {
+    var div = jQuery('<div class="note-msg"></div>');
     var box = jQuery("#note-box").show();
-    var div = jQuery('<div class="note-msg""></div>');
+    if (cls) div.addClass(cls);
     div.appendTo(box).append(msg).hide()
        .slideDown(500);
     setTimeout( function() {
-        div.slideUp(500, function() {
-            div.remove  ();
+      div.slideUp(500, function() {
+            div. remove ();
             if (box.children().length == 0) {
                 box.hide();
             }
-        });
+      });
     }, 5000);
     return div;
 }
@@ -842,7 +843,7 @@ function HsForm(opts, context) {
         this.load(loadUrl , ld);
     }
     else {
-        this.fillData([]);
+        this.fillData({});
     }
 
     /**
@@ -882,7 +883,7 @@ HsForm.prototype = {
     },
     fillData : function(data) {
         var nodes, datas, i, n, v, inp, opt, lab, vk, tk, tp;
-        nodes = this.formBox.find("select[name],.form-checks[name],.form-radios[name]");
+        nodes = this.formBox.find("select[name],.check-box[name],.radio-box[name]");
         datas = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr( "name" );
@@ -914,18 +915,19 @@ HsForm.prototype = {
                 tk = inp.attr("data-tk"); if(!tk) tk = 1;
                 for (i = 0; i < v.length; i ++) {
                     opt = jQuery('<option></option>');
-                    opt.val (hsGetValue(v[i], vk));
-                    opt.text(hsGetValue(v[i], tk));
+                    opt.val (hsGetValue(v[i], vk))
+                       .text(hsGetValue(v[i], tk))
+                       .data("data", v);
                     inp.append(opt);
                 }
             }
-            else if (inp.hasClass(".form-checks") || inp.hasClass(".form-radios")) {
-                tp = inp.hasClass(".form-checks") ? "checkbox" : "radio";
+            else if (inp.hasClass(".check-box") || inp.hasClass(".radio-box")) {
+                tp = inp.hasClass(".check-box") ?  "checkbox" :  "radio";
                 vk = inp.attr("data-vk"); if(!vk) vk = 0;
                 tk = inp.attr("data-tk"); if(!tk) tk = 1;
                 for (i = 0; i < v.length; i ++) {
                     lab = jQuery('<label><input type="'+tp+'"/><span></span></label>');
-                    lab.find("input").attr("name", n)
+                    lab.find("input").attr("name", n).data("data", v)
                                      .val (hsGetValue(v[i], vk));
                     lab.find("span" ).text(hsGetValue(v[i], tk));
                     inp.append(lab);
@@ -1071,8 +1073,8 @@ function HsList(opts, context) {
         var u = evt.data[2];
 
         switch (m) {
-            case "{context}": m = context; break;
-            case "{loadBox}": m = loadBox; break;
+            case "{CONTEXT}": m = context; break;
+            case "{LOADBOX}": m = loadBox; break;
         }
 
         /*
@@ -1461,8 +1463,8 @@ function HsTree(opts, context) {
         var u = evt.data[2];
 
         switch (m) {
-            case "{context}": m = context; break;
-            case "{loadBox}": m = loadBox; break;
+            case "{CONTEXT}": m = context; break;
+            case "{LOADBOX}": m = loadBox; break;
         }
 
         /*
@@ -2222,6 +2224,10 @@ jQuery.fn.extend({
         $(this).hsInit()
     });
     $(document )
+    .on("ajaxError", function(evt, xhr) {
+        hsResponObj(xhr);
+        hsNote(H$(":ajax.error.err"), "warn-msg");
+    })
     .on("hsReady", ".load-box", function() {
         $(this).hsInit();
     })

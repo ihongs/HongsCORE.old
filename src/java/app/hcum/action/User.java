@@ -3,7 +3,6 @@ package app.hcum.action;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hcum.model.UserBaseInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +14,10 @@ import java.util.Set;
  */
 public class User {
 
-    private UserBaseInfo model;
+    private app.hcum.model.User model;
 
     public User() {
-        model = (UserBaseInfo)Core.getInstance("app.hcum.model.UserBaseInfo");
+        model = (app.hcum.model.User)Core.getInstance("app.hcum.model.UserBaseInfo");
     }
 
     public void actionList(ActionHelper helper)
@@ -57,7 +56,7 @@ public class User {
         Map data = new HashMap();
 
         // 全部权限分组
-        List pageGroups = UserBaseInfo.getPageGroups("default");
+        List pageGroups = app.hcum.model.User.getPageGroups("default");
         data.put("pageGroups", pageGroups);
 
         // 用户动作分组

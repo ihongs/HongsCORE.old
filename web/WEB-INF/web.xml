@@ -39,7 +39,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Config</servlet-name>
-        <url-pattern>*.jsc</url-pattern>
+        <url-pattern>*.js-conf</url-pattern>
     </servlet-mapping>
     <!-- Language Data Servlet -->
     <servlet>
@@ -48,7 +48,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Language</servlet-name>
-        <url-pattern>*.jsl</url-pattern>
+        <url-pattern>*.js-lang</url-pattern>
     </servlet-mapping>
     <!-- Filters -->
     <filter>

@@ -1,7 +1,7 @@
 package app.hcum.model;
 
 import app.hongs.HongsException;
-import app.hongs.db.AbstractBaseModel;
+import app.hongs.db.AbstractTreeModel;
 import app.hongs.db.FetchBean;
 import app.hongs.db.Table;
 import java.util.HashSet;
@@ -10,16 +10,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 部门基础信息模型
+ * 部门基础信息树模型
  * @author Hongs
  */
-public class DeptBaseInfo
-extends AbstractBaseModel {
+public class Dept
+extends AbstractTreeModel {
 
-    public DeptBaseInfo()
-    throws HongsException {
-        super("hcum", "au_dept_base_info");
-    }
+  public Dept() throws HongsException {
+      super("hcum", "au_dept_base_info");
+  }
 
     public Set<String> getGroups(String deptId)
     throws HongsException {
@@ -50,7 +49,7 @@ extends AbstractBaseModel {
          */
         if (req.containsKey("user_id")) {
             fa.join("au_user_dept_asoc",
-                    ".dept_id = :id")
+                    ".dept_id = ..id")
               .where("user_id = ?", req.get("user_id"));
         }
     }

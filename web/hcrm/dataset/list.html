@@ -1,8 +1,8 @@
 <div id="hcrm-dataset-list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="hcrm/Dataset/List.do?rows=5"/>
-        <param name="openUrls[]" value="['.create', 'hcrm/dataset/form.html', '$loadBox']"/>
-        <param name="openUrls[]" value="['.modify', 'hcrm/dataset/form.html?id=$ID', '$loadBox']"/>
+        <param name="openUrls[]" value="['.create', 'hcrm/dataset/form.html', '{LOADBOX}']"/>
+        <param name="openUrls[]" value="['.modify', 'hcrm/dataset/form.html?id={ID}', '{LOADBOX}']"/>
         <param name="sendUrls[]" value="['.remove', 'hcrm/Dataset/Remove.do', '您确定要删除?']"/>
     </object>
     <div class="tool-bar">

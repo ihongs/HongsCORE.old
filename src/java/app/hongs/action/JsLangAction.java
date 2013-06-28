@@ -111,10 +111,10 @@ public class JsLangAction
 
     // 输出语言信息
     if ("json".equals(type)) {
-      helper.printJSON(s);
+      helper.printJSON( s );
     }
     else {
-      helper.printJS("if(typeof(HsLANG)==\"undefined\")HsLANG={};$.extend(HsLANG,"+s+");");
+      helper.printJS("if(!HsLANG)HsLANG={};$.extend(HsLANG,"+s+");");
     }
   }
 
@@ -149,12 +149,21 @@ public class JsLangAction
     // 公共语言
     if ("default".equals(confName))
     {
-      CoreLanguage conf = (CoreLanguage)Core.getInstance("app.hongs.CoreLanguage");
-      sb.append("\"error.err\":\"" + conf.getProperty("core.error.label", "ERROR") + "\",\r\n");
-      sb.append("\"error.ukw\":\"" + conf.getProperty("core.error.unkwn", "UNKWN") + "\",\r\n");
-      sb.append("\"time.format\":\"" + conf.getProperty("core.default.time.format", "HH:mm:ss") + "\",\r\n");
-      sb.append("\"date.format\":\"" + conf.getProperty("core.default.date.format", "yyyy/MM/dd") + "\",\r\n");
-      sb.append("\"datetime.format\":\"" + conf.getProperty("core.default.datetime.format", "yyyy/MM/dd HH:mm:ss") + "\",\r\n");
+      sb.append("\"error.err\":\"")
+        .append(mk.lang.getProperty("core.error.label", "ERROR"))
+        .append("\",\n")
+        .append("\"error.ukw\":\"")
+        .append(mk.lang.getProperty("core.error.unkwn", "UNKWN"))
+        .append("\",\n")
+        .append("'date.format':\"")
+        .append(mk.lang.getProperty("core.default.date.format", "yyyy/MM/dd"))
+        .append("\",\n")
+        .append("'time.format':\"")
+        .append(mk.lang.getProperty("core.default.time.format",  "HH:mm:ss" ))
+        .append("\",\n")
+        .append("'datetime.format':\"")
+        .append(mk.lang.getProperty("core.default.datetime.format", "yyyy/MM/dd HH:mm:ss"))
+        .append("\",\n");
     }
 
     // 查找扩展语言信息
@@ -179,7 +188,7 @@ public class JsLangAction
 
     public Maker(String name, String lang)
     {
-      this.lang = new CoreLanguage(name+".js", lang);
+      this.lang = new CoreLanguage(name, lang);
     }
 
     public String make(String key)
@@ -192,9 +201,12 @@ public class JsLangAction
        * .C   代码
        * .L   链接
        */
-      String name = key;
-      name = name.replaceFirst("^(core|user)\\.js\\.", "");
-      name = name.replaceFirst("\\.[B|N|C|L]$", "");
+      if (!key.startsWith("core.js.")
+      &&  !key.startsWith("user.js.")) {
+          return "";
+      }
+      String name = key.substring( 8 )
+                       .replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {
         return this.makeLink(name, key);

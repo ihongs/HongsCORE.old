@@ -3,6 +3,9 @@ package app.hcrm.action;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.annotation.CommitSuccess;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,26 +22,48 @@ public class Dataset {
 
     public void actionList(ActionHelper helper)
     throws HongsException {
-        Map data = model.getPage(helper.getRequestData());
-        helper.back(data);
+        Map view = model.getPage(helper.getRequestData());
+        helper.back(view);
     }
 
     public void actionInfo(ActionHelper helper)
     throws HongsException {
-        Map data = model.getInfo(helper.getRequestData());
-        helper.back(data);
+        Map view = model.getInfo(helper.getRequestData());
+
+        Map data = new HashMap();
+        view.put("data" , data );
+        data.put("class", model.getClassSelect());
+
+        helper.back(view);
     }
 
+    public void actionConf(ActionHelper helper)
+    throws HongsException {
+        Map view = new HashMap();
+        List list = model.getClassConfig(helper.getParameter("class"));
+        view.put( "list", list );
+        helper.back(view);
+    }
+
+    @CommitSuccess
     public void actionSave(ActionHelper helper)
     throws HongsException {
         String id = model.save(helper.getRequestData());
-        helper.back(id);
+
+        String nms = model.getAffectedNames();
+        String msg = "删除数据集 "+nms+" 成功";
+
+        helper.back(id, msg);
     }
 
     public void actionRemove(ActionHelper helper)
     throws HongsException {
-        int num = model.remove(helper.getRequestData());
-        helper.back(num);
+        int ar = model.remove(helper.getRequestData());
+
+        String nms = model.getAffectedNames();
+        String msg = "删除数据集 "+nms+" 成功";
+
+        helper.back(ar, msg);
     }
 
     public void actionUnique(ActionHelper helper)

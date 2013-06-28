@@ -3,9 +3,7 @@ package app.hcum.action;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hcum.model.DeptBaseInfo;
-import app.hcum.model.DeptBaseTree;
-import app.hcum.model.UserBaseInfo;
+import app.hcum.model.User;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +15,10 @@ import java.util.Set;
  */
 public class Dept {
 
-    private DeptBaseTree model;
+    private app.hcum.model.Dept model;
 
     public Dept() {
-        model = (DeptBaseTree)Core.getInstance("app.hcum.model.DeptBaseTree");
+        model = (app.hcum.model.Dept)Core.getInstance("app.hcum.model.DeptBaseTree");
     }
 
     public void actionTree(ActionHelper helper)
@@ -58,14 +56,14 @@ public class Dept {
         Map data = new HashMap();
 
         // 全部权限分组
-        List pageGroups = UserBaseInfo.getPageGroups("default");
+        List pageGroups = User.getPageGroups("default");
         data.put("pageGroups", pageGroups);
 
         // 用户动作分组
         String id = helper.getParameter("id");
         if (id != null) {
-            DeptBaseInfo model2 = (DeptBaseInfo)
-                Core.getInstance("app.hcum.model.DeptBaseInfo");
+            app.hcum.model.Dept model2 = (app.hcum.model.Dept)
+                Core.getInstance("app.hcum.model.DeptBaseTree");
             Set deptGroups = model2.getGroups(id);
             data.put("userGroups", deptGroups);
         }

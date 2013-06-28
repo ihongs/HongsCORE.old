@@ -44,12 +44,12 @@ abstract public class AbstractBaseModel
   /**
    * 所属库对象
    */
-  protected DB db;
+  public DB db;
 
   /**
    * 所属表对象
    */
-  protected Table table;
+  public Table table;
 
   /**
    * id参数名
