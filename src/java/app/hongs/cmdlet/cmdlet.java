@@ -5,8 +5,8 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
 import app.hongs.HongsThrowable;
-import java.io.File;
 import java.net.URLDecoder;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -62,8 +62,8 @@ public class cmdlet
       return;
     }
 
-    String cls =    "app." + core.ACTION.substring(0,pos)
-               +".cmdlet." + core.ACTION.substring(pos+1);
+    String cls =    "app."+core.ACTION.substring(0,pos)
+               +".cmdlet."+core.ACTION.substring(pos+1);
     String mtd = "cmdlet";
 
     /** 执行指定程序 **/
