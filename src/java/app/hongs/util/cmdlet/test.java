@@ -1,8 +1,8 @@
-package app.hongs.util.shell;
+package app.hongs.util.cmdlet;
 
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-import app.hongs.ShellHelper;
+import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.JSON;
 import app.hongs.util.Text;
@@ -19,10 +19,10 @@ public class test {
     helper.print("HELLO!!!");
   }
 
-  public static void shell(Map<String, String[]> opts)
+  public static void cmdlet(Map<String, String[]> opts)
           throws app.hongs.HongsException {
     //app.hongs.util.JSON.print(opts);
-    Map<String, Object> optz = ShellHelper.getOpts(opts,
+    Map<String, Object> optz = CmdletHelper.getOpts(opts,
       "test-text:b", "test-rate:b", "test-left:b",
       "test-opts:b","test-radix:i", "test-serially:b",
       "show-env:b", "show-properties:b",
@@ -82,11 +82,11 @@ public class test {
     String s = "This is Hong's Framework. Ask: \\\"Who ar you?\"\r\n"
              + "这是弘的框架, 问: \\\"你是谁?\"\r\n"
              + "%abc,$def.";
-    ShellHelper.print("actual: " + s);
+    CmdletHelper.print("actual: " + s);
     String s1 = Text.escape(s);
-    ShellHelper.print("escape: " + s1);
+    CmdletHelper.print("escape: " + s1);
     String s2 = Text.resume(s1);
-    ShellHelper.print("resume: " + s2);
+    CmdletHelper.print("resume: " + s2);
   }
 
   private static void testRate() {
@@ -99,7 +99,7 @@ public class test {
         } else {
           e++;
         }
-        ShellHelper.printERate(100, o, e);
+        CmdletHelper.printERate(100, o, e);
       }
     } catch (InterruptedException ex) {
     }
@@ -116,7 +116,7 @@ public class test {
         } else {
           e++;
         }
-        ShellHelper.printELeft(t, 100, o, e);
+        CmdletHelper.printELeft(t, 100, o, e);
       }
     } catch (InterruptedException ex) {
     }
@@ -124,7 +124,7 @@ public class test {
 
   private static void testOpts(Map<String, String[]> opts) throws HongsException {
     app.hongs.util.JSON.print(opts);
-    Map optz = ShellHelper.getOpts(opts,
+    Map optz = CmdletHelper.getOpts(opts,
       "opt_s|opt-s:s", "opt_i|opt-i:i", "opt_f|opt-f:f", "opt_b|opt-b:b",
       "opt_o|opt-o=s", "opt_m|opt-m+s", "opt_n|opt-n*s", "opt_r|opt-r=/(a|b)/i",
       "!U", "!V", "?Useage:\ncmd opt-o xxx opt-m xxx... [opt-n xxx...]"
@@ -133,8 +133,8 @@ public class test {
   }
   
   private static void testRadix(long num) {
-    ShellHelper.print("36 Radix: "+app.hongs.util.Num.to36Radix(num));
-    ShellHelper.print("26 Radix: "+app.hongs.util.Num.to26Radix(num));
+    CmdletHelper.print("36 Radix: "+app.hongs.util.Num.to36Radix(num));
+    CmdletHelper.print("26 Radix: "+app.hongs.util.Num.to26Radix(num));
   }
 
   private static class TestSerially extends CoreSerially {

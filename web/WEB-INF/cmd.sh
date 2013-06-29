@@ -10,5 +10,5 @@ CLASSPATH="$BASE_PATH/classes":\
 
 "$JAVA_HOME/bin/java" \
 -classpath "$CLASSPATH" \
-app.hongs.shell $@ \
+app.hongs.cmdlet.cmdlet $@ \
 -base-path "$BASE_PATH"

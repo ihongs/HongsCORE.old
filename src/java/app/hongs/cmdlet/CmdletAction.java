@@ -1,5 +1,6 @@
-package app.hongs;
+package app.hongs.cmdlet;
 
+import app.hongs.Core;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -31,7 +32,7 @@ import app.hongs.action.*;
  *
  * @author Hongs
  */
-public class ShellAction
+public class CmdletAction
   extends Action
 {
 
@@ -69,7 +70,7 @@ public class ShellAction
     /** 提取action路径里的"包.类" **/
 
     int pos;
-    String cls, mtd;
+    String pkg, cls;
     action = action.replace('/', '.');
 
     pos = action.lastIndexOf('.');
@@ -77,12 +78,11 @@ public class ShellAction
         helper.print404Code("Wrong action '"+core.ACTION+"'.");
         return;
     }
-    cls    = action.substring(pos+1);
-    action = action.substring(0,pos);
+    pkg = action.substring(0,pos);
+    cls = action.substring(pos+1);
 
-
-    // app.包.action.类, action方法
-    doAction("app."+action+".action."+cls, "action", helper);
+    // app.包.cmdlet.类, action方法
+    doAction("app."+pkg+".cmdlet."+cls, "action", helper);
   }
 
 }

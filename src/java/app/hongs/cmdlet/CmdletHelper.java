@@ -1,5 +1,9 @@
-package app.hongs;
+package app.hongs.cmdlet;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
+import app.hongs.CoreLogger;
+import app.hongs.HongsError;
 import app.hongs.util.Num;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +26,7 @@ import java.text.SimpleDateFormat;
  *
  * @author Hongs
  */
-public class ShellHelper
+public class CmdletHelper
 {
 
   /** 参数相关 **/
@@ -423,8 +427,8 @@ public class ShellHelper
    */
   public static void printAndLog(String text)
   {
-    ShellHelper.print(text);
-    ShellHelper.printToLog(text);
+    CmdletHelper.print(text);
+    CmdletHelper.printToLog(text);
   }
 
   /**

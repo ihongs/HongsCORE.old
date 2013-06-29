@@ -1,6 +1,6 @@
-package app.hongs.util.shell;
+package app.hongs.util.cmdlet;
 
-import app.hongs.ShellHelper;
+import app.hongs.cmdlet.CmdletHelper;
 import java.util.Map;
 
 /**
@@ -11,7 +11,7 @@ import java.util.Map;
 public class make {
     public static void shell(Map<String, String[]> opts)
     throws app.hongs.HongsException {
-        Map optz = ShellHelper.getOpts(opts,
+        Map optz = CmdletHelper.getOpts(opts,
             "module=s",
             "with-shell",
             "with-shell-action",

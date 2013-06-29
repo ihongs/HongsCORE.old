@@ -5,15 +5,6 @@
         <param-name>debug</param-name>
         <param-value>3</param-value>
     </context-param>
-    <!-- Shell Servlet -->
-    <servlet>
-        <servlet-name>Shell</servlet-name>
-        <servlet-class>app.hongs.ShellAction</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Shell</servlet-name>
-        <url-pattern>*.if</url-pattern>
-    </servlet-mapping>
     <!-- Action Servlet -->
     <servlet>
         <servlet-name>Action</servlet-name>
@@ -23,7 +14,7 @@
         <servlet-name>Action</servlet-name>
         <url-pattern>*.do</url-pattern>
     </servlet-mapping>
-    <!-- Has Action Servlet -->
+    <!-- Detect Servlet -->
     <servlet>
         <servlet-name>Detect</servlet-name>
         <servlet-class>app.hongs.action.DetectAction</servlet-class>
@@ -32,22 +23,31 @@
         <servlet-name>Detect</servlet-name>
         <url-pattern>*.de</url-pattern>
     </servlet-mapping>
-    <!-- Config Data Servlet -->
+    <!-- Cmdlet Servlet -->
     <servlet>
-        <servlet-name>Config</servlet-name>
+        <servlet-name>Cmdlet</servlet-name>
+        <servlet-class>app.hongs.cmdlet.CmdletAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Cmdlet</servlet-name>
+        <url-pattern>*.if</url-pattern>
+    </servlet-mapping>
+    <!-- JsConf Servlet -->
+    <servlet>
+        <servlet-name>JsConf</servlet-name>
         <servlet-class>app.hongs.action.JsConfAction</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Config</servlet-name>
+        <servlet-name>JsConf</servlet-name>
         <url-pattern>*.js-conf</url-pattern>
     </servlet-mapping>
-    <!-- Language Data Servlet -->
+    <!-- JsLang Servlet -->
     <servlet>
-        <servlet-name>Language</servlet-name>
+        <servlet-name>JsLang</servlet-name>
         <servlet-class>app.hongs.action.JsLangAction</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Language</servlet-name>
+        <servlet-name>JsLang</servlet-name>
         <url-pattern>*.js-lang</url-pattern>
     </servlet-mapping>
     <!-- Filters -->

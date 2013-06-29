@@ -1,5 +1,10 @@
-package app.hongs;
+package app.hongs.cmdlet;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
+import app.hongs.CoreLanguage;
+import app.hongs.HongsError;
+import app.hongs.HongsThrowable;
 import java.io.File;
 import java.net.URLDecoder;
 import java.io.IOException;
@@ -26,7 +31,7 @@ import app.hongs.action.ActionHelper;
  *
  * @author Hongs
  */
-public class shell
+public class cmdlet
 {
 
   private static Map<String, String[]> opts;
@@ -34,32 +39,32 @@ public class shell
   public static void main(String[] args)
     throws IOException
   {
-    shell.init(args);
+    cmdlet.init(args);
 
     Core core = Core.getInstance();
 
     if (core.ACTION == null || core.ACTION.length() == 0)
     {
-      ShellHelper.print("ERROR: Shell name can not be empty.");
+      CmdletHelper.print("ERROR: Cmdlet name can not be empty.");
       return;
     }
 
     if (core.ACTION.startsWith(".") || core.ACTION.endsWith("."))
     {
-      ShellHelper.print("ERROR: Can not parse shell name '"+core.ACTION + "'.");
+      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+core.ACTION + "'.");
       return;
     }
 
     int pos = core.ACTION.lastIndexOf('.');
     if (pos == -1)
     {
-      ShellHelper.print("ERROR: Can not parse shell name '"+core.ACTION + "'.");
+      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+core.ACTION + "'.");
       return;
     }
 
-    String cls =   "app." + core.ACTION.substring(0,pos)
-               +".shell." + core.ACTION.substring(pos+1);
-    String mtd = "shell";
+    String cls =    "app." + core.ACTION.substring(0,pos)
+               +".cmdlet." + core.ACTION.substring(pos+1);
+    String mtd = "cmdlet";
 
     /** 执行指定程序 **/
 
@@ -71,7 +76,7 @@ public class shell
     }
     catch (ClassNotFoundException ex)
     {
-      ShellHelper.print("ERROR: Can not find class '" + cls + "'.");
+      CmdletHelper.print("ERROR: Can not find class '" + cls + "'.");
       return;
     }
 
@@ -83,12 +88,12 @@ public class shell
     }
     catch (NoSuchMethodException ex)
     {
-      ShellHelper.print("ERROR: Can not find method '" + cls + "." + mtd + "'.");
+      CmdletHelper.print("ERROR: Can not find method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (SecurityException ex)
     {
-      ShellHelper.print("ERROR: Can not execute method  '" + cls + "." + mtd + "'.");
+      CmdletHelper.print("ERROR: Can not execute method  '" + cls + "." + mtd + "'.");
       return;
     }
     finally
@@ -105,12 +110,12 @@ public class shell
     }
     catch (IllegalAccessException ex)
     {
-      ShellHelper.print("ERROR: Illegal access for method '" + cls + "." + mtd + "'.");
+      CmdletHelper.print("ERROR: Illegal access for method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (IllegalArgumentException ex)
     {
-      ShellHelper.print("ERROR: Illegal argument for method '" + cls + "." + mtd + "'.");
+      CmdletHelper.print("ERROR: Illegal argument for method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (InvocationTargetException ex)
@@ -134,7 +139,7 @@ public class shell
                   + ": " + error;
       }
 
-      ShellHelper.print(error);
+      CmdletHelper.print(error);
 
       /**
        * 记录跟踪信息
@@ -160,7 +165,7 @@ public class shell
        * 并清除参数及核心
        */
       if (Core.IN_DEBUG_MODE)
-          ShellHelper.printETime("Total exec time", core.TIME);
+          CmdletHelper.printETime("Total exec time", core.TIME);
 
       Core.destroyAll();
       opts = null;
@@ -172,8 +177,8 @@ public class shell
     throws IOException
   {
     Map<String, Object>        optz ;
-    opts = ShellHelper.getOpts(args);
-    optz = ShellHelper.getOpts(opts ,":+s",
+    opts = CmdletHelper.getOpts(args);
+    optz = CmdletHelper.getOpts(opts ,":+s",
       "request:s","session:s","language:s",
       "debug:b","base-path:s","base-href:s"
     );
@@ -274,7 +279,7 @@ public class shell
           lang = CoreLanguage.getAcceptLanguage(lang);
       if (lang == null)
       {
-        ShellHelper.print("ERROR: Unsupported language: "+lang+".");
+        CmdletHelper.print("ERROR: Unsupported language: "+lang+".");
         System.exit(1);
       }
     }
