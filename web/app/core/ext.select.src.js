@@ -23,7 +23,7 @@
         });
         box.append($('<div class="cb"></div>'));
     };
-    
+
     $.fn.hsSelect = function(conf) {
         /** 选择按钮 **/
 
@@ -35,11 +35,12 @@
         }
 
         if (!conf) conf = {};
-        
+
         var box  = conf["box"]  || $(this).attr("data-select-box" );
         var tip  = conf["tip"]  || $(this).attr("data-select-tip" );
         var url  = conf["url"]  || $(this).attr("data-select-url" );
         var name = conf["name"] || $(this).attr("data-select-name");
+        var hsFillSelect = conf["fill"] || self.hsFillSelect;
 
         if (box && typeof box == "string")
             box = /^\$/.test(box) ? $(box.substring(1), this) : $(box);

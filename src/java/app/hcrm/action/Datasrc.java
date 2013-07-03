@@ -56,18 +56,18 @@ public class Datasrc {
         String nms = model.getAffectedNames();
         String msg = "保存数据源 "+nms+" 成功";
 
-        helper.back(id, msg);
+        helper.back(id , msg);
     }
 
     @CommitSuccess
     public void actionRemove(ActionHelper helper)
     throws HongsException {
-        int ar = model.remove(helper.getRequestData());
+        int num = model.remove(helper.getRequestData());
 
         String nms = model.getAffectedNames();
         String msg = "删除数据源 "+nms+" 成功";
 
-        helper.back(ar, msg);
+        helper.back(num, msg);
     }
 
     public void actionUnique(ActionHelper helper)

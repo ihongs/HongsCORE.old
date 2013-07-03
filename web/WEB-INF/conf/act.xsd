@@ -42,7 +42,7 @@
   </xs:element>
 
   <!-- 总配置 -->
-  <xs:element name="act">
+  <xs:element name="root">
     <xs:complexType>
       <xs:all>
         <xs:element ref="page" maxOccurs="unbounded"/>

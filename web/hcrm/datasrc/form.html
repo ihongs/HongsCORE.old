@@ -13,12 +13,13 @@
         </div>
         <div>
             <label>类型:</label>
-            <select name="class" required="required">
+            <select name="class" requires="requires">
                 <option value="">--请选择--</option>
             </select>
         </div>
         <div class="conf-box"></div>
         <div class="button-box">
+            <label>&nbsp;</label>
             <button type="submit">保存</button>
             <a href="javascript:;" class="cancel">取消</a>
         </div>
@@ -28,6 +29,9 @@
 <script type="text/javascript">
 (function($) {
     var context = $("#hcrm-datasrc-form");
+
+    /** 加载类 **/
+
     context.find("[name=class]").change(function() {
         var box = $(".conf-box",context).empty();
         var cls = $(this).val();
@@ -39,6 +43,10 @@
                 var a = inf.ar_datasrc_conf_info[i];
                 dat[a.name] = a.value;
             }
+            $(this).data("dat" , dat);
+        }
+        else if ( $(this).data("dat") ) {
+            dat = $(this).data("dat");
         }
 
         if (cls) {

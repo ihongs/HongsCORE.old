@@ -1,5 +1,5 @@
 <h2>编辑数据集</h2>
-<div id="hcrm-datasrc-form" style="min-width: 600px;">
+<div id="hcrm-dataset-form" style="min-width: 600px;">
     <object class="config" name="hsForm" data="">
         <param name="loadUrl" value="hcrm/Dataset/Info.do"/>
         <param name="saveUrl" value="hcrm/Dataset/Save.do"/>
@@ -12,15 +12,148 @@
             <input type="text" name="name" required="required" data-unique="hcrm/Dataset/Unique.do?id={id}"/>
         </div>
         <div>
-            <label>数据源:</label>
+            <label>加载类:</label>
             <select name="class" required="required">
                 <option value="">--请选择--</option>
             </select>
         </div>
         <div class="conf-box"></div>
+        <div class="cols-box">
+            <label>&nbsp;</label>
+            <div class="input-box list-box" style="width: 35em;">
+                <table>
+                    <thead>
+                        <tr>
+                            <td>字段名称</td>
+                            <td style="width: 5em;">区域</td>
+                            <td style="width: 5em;">类型</td>
+                            <td style="width: 4em;">长度</td>
+                            <td style="width: 4em;">精度</td>
+                            <td style="width: 3em;">&nbsp;</td>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button type="button" class="add-col">添加字段</button>
+            </div>
+        </div>
         <div class="button-box">
+            <label>&nbsp;</label>
             <button type="submit">保存</button>
             <a href="javascript:;" class="cancel">取消</a>
         </div>
     </form>
 </div>
+
+<style type="text/css">
+    #hcrm-dataset-form .list-box tbody td {padding: 0;}
+    #hcrm-dataset-form .list-box tbody td input,
+    #hcrm-dataset-form .list-box tbody td select
+        {min-width: 100%; width: 100%; height: 100%;
+         border: 0; margin: 0; padding: 0;}
+</style>
+
+<script type="text/javascript">
+(function($) {
+    var context = $("#hcrm-dataset-form");
+
+    /** 加载类 **/
+
+    context.find("[name=class]").change(function() {
+        var box = $(".conf-box",context).empty();
+        var cls = $(this).val();
+        var inf = context.data("HsForm")._info;
+        var dat = {};
+
+        cls = cls.replace(/^\w+\+/, "");
+
+        if (inf && inf.ar_dataset_conf_info) {
+            for(var i = 0; i < inf.ar_dataset_conf_info.length; i ++) {
+                var a = inf.ar_dataset_conf_info[i];
+                dat[a.name] = a.value;
+            }
+            $(this).data("dat" , dat);
+        }
+        else if ( $(this).data("dat") ) {
+            dat = $(this).data("dat");
+        }
+
+        if (cls) {
+            $.ajax({
+                url: "hcrm/Dataset/Conf.do?class="+cls,
+                async: false,
+                dataType: "json",
+                success : function(rst) {
+                    for(var i = 0; i < rst.list.length; i ++) {
+                        var v   = rst.list[i][0];
+                        var t   = H$(":hcrm.loader."+cls+"."+v );
+                        var div = $('<div></div>').appendTo(box);
+                        $('<label></label>')
+                            .appendTo(div).text(t+":");
+                        $('<input type="hidden" name="ar_dataset_conf_info['+i+'][name]"/>')
+                            .appendTo(div).val (v);
+                        $('<input type="text" name="ar_dataset_conf_info['+i+'][value]" required="required"/>')
+                            .appendTo(div).val (hsGetValue(dat, v));
+                    }
+
+                    // 重置验证
+                    context.data("HsForm").validate();
+                }
+            });
+        }
+    });
+
+    /** 字段设置 **/
+
+    var tab = "ar_dataset_cols_info";
+    var idx = 0;
+
+    function addCol(col) {
+        idx ++;
+        var tp = $('<select name="'+tab+'['+idx+'][type]">'
+                 + '<option value="1">维度</option>'
+                 + '<option value="2">指标</option>'
+                 + '<option value="3">其他</option>'
+                 + '</select>');
+        var ft = $('<select name="'+tab+'['+idx+'][value_type]">'
+                 + '<option value="1">文字</option>'
+                 + '<option value="2">数字</option>'
+                 + '<option value="3">日期</option>'
+                 + '<option value="4">时间</option>'
+                 + '<option value="5">时间戳</option>'
+                 + '</select>');
+        var fs = $('<input type="number" name="'+tab+'['+idx+'][value_size]"/>' );
+        var fc = $('<input type="number" name="'+tab+'['+idx+'][value_scale]"/>');
+        var nm = $('<input type="text" name="'+tab+'['+idx+'][name]"/>' );
+        var bt = $('<button type="button" class="del-col">删除</button>');
+        $('<tr></tr>').appendTo(context.find(".cols-box tbody"))
+            .append($('<td></td>').append(nm))
+            .append($('<td></td>').append(tp))
+            .append($('<td></td>').append(ft))
+            .append($('<td></td>').append(fs))
+            .append($('<td></td>').append(fc))
+            .append($('<td></td>').append(bt));
+        if (col) {
+            nm.val(col.name);
+            tp.val(col.type);
+            ft.val(col.value_type);
+            fs.val(col.value_size);
+            fc.val(col.value_scale);
+        }
+    }
+
+    context.on("loadBack", function(evt, rst) {
+        if (rst.info) {
+            var a = rst.info.ar_dataset_cols_info, i = 0;
+            if (a) for (; i < a.length; i ++)
+                addCol (a[i]);
+        }
+    });
+    context.on("click", ".add-col", function() {
+        addCol();
+    });
+    context.on("click", ".del-col", function() {
+        $(this).closest("tr").remove();
+    });
+})( jQuery );
+</script>

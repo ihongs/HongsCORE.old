@@ -33,23 +33,6 @@ extends AbstractModel {
         DatumsConfig conf = new DatumsConfig("hcrm");
         CoreLanguage lang = new CoreLanguage("hcrm");
 
-        // 获取数据源
-        rows = this.db.getTable ("ar_datasrc_base_info")
-                      .fetchMore(new FetchBean());
-        for (Map row : rows) {
-            String v = (String)row.get("id")+"_datasrc";
-            String t = (String)row.get("name");
-            String c = (String)row.get("class");
-            List a = new ArrayList();
-            list.add(a); a.add(v); a.add(t); a.add(c); // 多了class值
-        }
-
-        // 分割栏
-        if (!rows.isEmpty()) {
-            List a = new ArrayList();
-            list.add(a); a.add(""); a.add(lang.translate("hcrm.loader.class"));
-        }
-
         // 获取类别
         rows = (List)conf.getDataByKey("LOADER_CLASSES");
         for (Map row : rows) {
@@ -57,6 +40,23 @@ extends AbstractModel {
             if (!row.containsKey("dataset")) continue;
             String v = (String)row.get("class");
             String t = lang.translate("user.js.hcrm.loader."+v);
+            List a = new ArrayList();
+            list.add(a); a.add(v); a.add(t);
+        }
+
+        // 分割栏
+        if (!rows.isEmpty()) {
+            List a = new ArrayList();
+            list.add(a); a.add(""); a.add(lang.translate("user.js.hcrm.loader.datasrc"));
+        }
+
+        // 获取数据源
+        rows = this.db.getTable ("ar_datasrc_base_info")
+                      .fetchMore(new FetchBean());
+        for (Map row : rows) {
+            String c = (String)row.get("class");
+            String v = (String)row.get("id")+"+"+c;
+            String t = (String)row.get("name" );
             List a = new ArrayList();
             list.add(a); a.add(v); a.add(t);
         }
@@ -79,7 +79,7 @@ extends AbstractModel {
         for (Map row : rows) {
             String v = (String)row.get("class");
             if (v.equals(c)) {
-                return (List)row.get("datasrc");
+                return (List)row.get("dataset");
             }
         }
 

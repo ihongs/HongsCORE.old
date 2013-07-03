@@ -30,6 +30,14 @@ public class Dataset {
     throws HongsException {
         Map view = model.getInfo(helper.getRequestData());
 
+        // class参数的格式是: datasrc_id+class
+        Map info = (Map)view.get( "info" );
+        String cls = (String)info.get("class");
+        String src = (String)info.get("datasrc_id");
+        if (!"0".equals(src)) {
+            info.put("class", src+"+"+cls);
+        }
+
         Map data = new HashMap();
         view.put("data" , data );
         data.put("class", model.getClassSelect());
@@ -48,22 +56,35 @@ public class Dataset {
     @CommitSuccess
     public void actionSave(ActionHelper helper)
     throws HongsException {
-        String id = model.save(helper.getRequestData());
+        // class参数的格式是：datasrc_id+class 或 class
+        Map data = helper.getRequestData(  );
+        String c = (String)data.get("class");
+        String[] a = c.split( "\\+", 2 );
+        if (a.length == 2) {
+            data.put("class" , a[1]);
+            data.put("datasrc_id", a[0]);
+        }
+        else if (!data.containsKey("datasrc_id")) {
+            data.put("datasrc_id",  "0");
+        }
+
+        String id = model.save(data);
 
         String nms = model.getAffectedNames();
         String msg = "删除数据集 "+nms+" 成功";
 
-        helper.back(id, msg);
+        helper.back(id , msg);
     }
 
+    @CommitSuccess
     public void actionRemove(ActionHelper helper)
     throws HongsException {
-        int ar = model.remove(helper.getRequestData());
+        int num = model.remove(helper.getRequestData());
 
         String nms = model.getAffectedNames();
         String msg = "删除数据集 "+nms+" 成功";
 
-        helper.back(ar, msg);
+        helper.back(num, msg);
     }
 
     public void actionUnique(ActionHelper helper)

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<act xmlns="http://hongs-core"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://hongs-core ac.xsd">
+<root xmlns="http://hongs-core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://hongs-core ac.xsd">
     <page name="报告" uri="/hongs/util/Jump/To.do?page=hcrm">
         <page name="数据源" uri="/hcrm/datasrc/list.html"></page>
         <page name="数据集" uri="/hcrm/dataset/list.html"></page>
     </page>
-</act>
+</root>

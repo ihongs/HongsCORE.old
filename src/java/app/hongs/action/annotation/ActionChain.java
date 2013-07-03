@@ -10,10 +10,12 @@ import java.lang.reflect.InvocationTargetException;
  * <h1>动作注解链</h1>
  * <pre>
  * 异常代码区间: 0x1100~0x110f
- * 错误代码：
- * 0x1101 动作链索引溢出
- * 0x1103 找不到链的动作方法，不存在或遇安全问题
- * 0x1105 无法执行链动作方法，无法访问或参数错误
+ * 错误代码:
+ * 0x1102 没有找到动作链方法，不存在或遇安全问题
+ * 0x1104 无法执行动作链方法，无法访问或参数错误
+ * 0x1106 无法执行动作方法，无法访问或参数错误
+ * 0x1108 动作链索引溢出
+ * 0x1100 动作内异常，当动作内产生异常需要直接抛出时，都可以使用此代号
  * </pre>
  * @author Hong
  */
@@ -32,47 +34,82 @@ public class ActionChain {
         this.idx = 0;
     }
 
-    public void doAction() throws HongsException,
-           IllegalAccessException,
-           IllegalArgumentException,
-           InvocationTargetException {
-        // 如果超出链长度, 终止并记录日志
+    public void doAction() throws HongsException {
+        // 如果超出链长度, 终止执行
         if ( idx  >  annotations.length) {
-            throw new HongsException(0x1101, "Action annotation out of index: "
+            throw new HongsException(0x1108, "Action annotation out of index: "
             +idx+">"+annotations.length);
         }
 
         // 如果已到达链尾, 则执行动作函数
         if ( idx ==  annotations.length) {
-            method.invoke(object,helper);
+            invokeAction();
             return;
         }
 
         // 如果不是动作链, 则跳过注解检查
-        ActionAnnotation anno  =  annotations[idx++]
-             .annotationType()
-             .getAnnotation (ActionAnnotation.class);
-        if (anno == null) {
+        ActionAnnotation ann1;
+        Annotation ann2 = annotations[idx++];
+        if (ann2 instanceof ActionAnnotation) {
+            ann1 = ( ActionAnnotation ) ann2;
+        }
+        else {
+            ann1 = ann2.annotationType().getAnnotation(ActionAnnotation.class);
+        }
+        if (ann1 == null) {
             doAction();
             return;
         }
 
-        Class  cls  =  anno.value();
-        Method mtd  =  null;
+        invokeFilter(ann1, ann2);
+    }
 
+    private void invokeAction() throws HongsException {
         try {
-            mtd = anno.value().getMethod("invoke", new Class[] {ActionHelper.class, ActionChain.class, Annotation.class});
-            mtd.invoke(null, helper, this, anno);
-        } catch (NoSuchMethodException ex) {
-            throw new HongsException(0x1103, "Can not find invoke method for "+cls.getName());
-        } catch (SecurityException ex) {
-            throw new HongsException(0x1103, "Can not exec invoke method for "+cls.getName());
+            method.invoke(object, helper);
         } catch (IllegalAccessException ex) {
-            throw new HongsException(0x1105, "Illegal access for "+cls.getName()+"."+mtd.getName());
+            throw new HongsException(0x1106, "Illegal access for "+object.getClass().getName()+"."+method.getName());
         } catch (IllegalArgumentException ex) {
-            throw new HongsException(0x1105, "Illegal argument for "+cls.getName()+"."+mtd.getName());
+            throw new HongsException(0x1106, "Illegal argument for "+object.getClass().getName()+"."+method.getName());
         } catch (InvocationTargetException ex) {
-            throw ex;
+            throw new HongsException(0x1100, ex.getCause());
         }
     }
+
+    private void invokeFilter(ActionAnnotation ann1, Annotation ann2) throws HongsException {
+        Class  cls = ann1.value();
+        Method mtd;
+
+        try {
+            mtd = cls.getMethod("invoke", new Class[] {
+                ActionHelper.class, ActionChain.class, Annotation.class
+            });
+        } catch (NoSuchMethodException ex) {
+            throw new HongsException(0x1102, "Can not find invoke method for "+cls.getName());
+        } catch (SecurityException ex) {
+            throw new HongsException(0x1102, "Can not exec invoke method for "+cls.getName());
+        }
+
+        try {
+            mtd.invoke(null, helper, this, ann2);
+        }
+        catch (IllegalAccessException ex) {
+            throw new HongsException(0x1104, "Illegal access for "+cls.getName()+"."+mtd.getName());
+        } catch (IllegalArgumentException ex) {
+            throw new HongsException(0x1104, "Illegal argument for "+cls.getName()+"."+mtd.getName());
+        } catch (InvocationTargetException ex) {
+            // 如果异常是动作方法内产生的
+            // 则将这个异常直接向上层抛出
+            Throwable ta = ex.getCause();
+            if  (ta instanceof HongsException) {
+                HongsException he = (HongsException) ta;
+                if ( 0x1100 == he.getCode( ) ) {
+                      ta = ta.getCause();
+                }
+            }
+
+            throw new HongsException(0x1100, ta);
+        }
+    }
+
 }

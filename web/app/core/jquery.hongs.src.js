@@ -25,8 +25,8 @@ data-open-in 点击后在指定区域打开
 .cancel 表单取消按钮
 .check-all
 .check-one
-.bind-to-select
-.bind-to-single
+.for-select
+.for-single
 
 定位类说明:
 .form-checks
@@ -419,12 +419,12 @@ function hsFixUri   (uri) {
  * 格式化数字
  *
  * @author HuangHong
- * @param num:Number
- * @param len:Number 总长度(不含小数点)
- * @param dec:Number 小数位
- * @param sep:String 千分符
- * @param dot:String 小数点
- * @return String
+ * @param {Number} num
+ * @param {Number} len 总长度(不含小数点)
+ * @param {Number} dec 小数位
+ * @param {String} sep 千分符
+ * @param {String} dot 小数点
+ * @return {String}
  */
 function hsFmtNum(num, len, dec, sep, dot) {
   if (typeof len == "undefined") {
@@ -506,9 +506,9 @@ function hsFmtNum(num, len, dec, sep, dot) {
  * 解析日期
  *
  * @author HuangHong
- * @param text:String
- * @param format:String
- * @return Date
+ * @param {String} text
+ * @param {String} format
+ * @return {Date}
  */
 function hsPrsDate(text, format) {
   var a = text.split(/\W+/);
@@ -610,9 +610,9 @@ function hsPrsDate(text, format) {
  * 格式化日期
  *
  * @author HuangHong
- * @param date:Date
- * @param format:String
- * @return String
+ * @param { Date } date
+ * @param {String} format
+ * @return {String}
  */
 function hsFmtDate(date, format) {
   if (typeof(date) == "string") {
@@ -938,7 +938,7 @@ HsForm.prototype = {
     },
     fillInfo : function(info) {
         var nodes, infos, i, n, v, inp;
-        nodes = this.formBox.find("input[name],select[name],textarea[name],.form-checks[name],.form-radios[name]");
+        nodes = this.formBox.find("input[name],select[name],textarea[name],.check-box[name],.radio-box[name]");
         infos = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr( "name" );
@@ -1020,7 +1020,7 @@ HsForm.prototype = {
                     "async"     : false,
                     "cache"     : false,
                     "context"   : that,
-                    "complete"  : that.saveBack
+                    "success"   : that.saveBack
                 });
             });
         }
@@ -1845,8 +1845,8 @@ HsTree.prototype = {
 
 /**
  * 遍历对象或数组的全部叶子节点
- * @param object|array data
- * @param function func
+ * @param {object,array} data
+ * @param {function} func
  */
 function _hsEachLeaf(data, func) {
     var path = [];
@@ -1870,9 +1870,9 @@ function _hsEachLeaf(data, func) {
 
 /**
  * 标准文档对象操作类初始化方法
- * @param object opts
- * @param string name
- * @returns object|null
+ * @param {object} opts
+ * @param {string} name
+ * @returns {object,null}
  */
 function _HsInitOpts(opts, name) {
         var func = self[name];
@@ -1897,12 +1897,11 @@ function _HsInitOpts(opts, name) {
 
 /**
  * 获取配置选项
- * @param Selector that
  * @returns object
  */
-function _HsReadOpts(that) {
+function _HsReadOpts() {
     var obj = {};
-    var arr = jQuery(that).find("param");
+    var arr = jQuery(this).find("param");
     for(var i = 0; i < arr.length; i ++) {
         var n = jQuery(arr[i]).attr("name" );
         var v = jQuery(arr[i]).attr("value");
@@ -1912,23 +1911,21 @@ function _HsReadOpts(that) {
             break;
         case "N:": // Number
             v = v.substring(2);
-            v = parseFloat (v);
+            v =  parseFloat(v);
             break;
         case "B:": // Boolean
             v = v.substring(2);
-            v =/true/i.test(v);
+            v = /(true|yes|ok)/i.test(v);
             break;
         case "D:": // Data
             v = v.substring(2);
-            v = jQuery(arr[i]).parent().data(v);
-            break;
-        case "E:": // Eval
-            v = v.substring(2);
-            v = eval(v);
+            v = jQuery(arr[i]).parent( ).data(v);
             break;
         default:
-            if (/^\s*(\(.*\)|\[.*\]|\{.*\})\s*$/.test(v))
+            if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
                 v = eval('('+v+')');
+            else  if  (/^\s*(\(.*\))\s*$/.test(v))
+                v = eval(    v    );
         }
         if (n == "") continue;
         hsSetValue(obj, n, v);
@@ -2022,11 +2019,11 @@ jQuery.fn.extend({
     });
     $.tools.validator.localize("en", {
         "*"               : hsGetLang("form.validate"),
-        ":number"         : hsGetLang("form.is.not.number"),
         ":url"            : hsGetLang("form.is.not.url"),
         ":email"          : hsGetLang("form.is.not.email"),
-        ":radio"          : hsGetLang("form.required"),
+        ":number"         : hsGetLang("form.is.not.number"),
         "[required]"      : hsGetLang("form.required"),
+        "[requires]"      : hsGetLang("form.requires"),
         "[max]"           : hsGetLang("form.gt.max"),
         "[min]"           : hsGetLang("form.lt.min"),
         "[minlength]"     : hsGetLang("form.lt.minlength"),
@@ -2054,6 +2051,20 @@ jQuery.fn.extend({
     // 设置jquery tools表单校验
     $.tools.validator.conf.formEvent = null;
     $.tools.validator.conf.inputEvent = "change";
+    $.tools.validator.fn("[requires]", function(input, value) {
+        switch (input.prop("tagName")) {
+            case "BUTTON":
+                return !!input.prev().find(":hidden").length;
+                break;
+            case "SPAN":
+            case "DIV":
+                return !!input.find(":checked").length;
+                break;
+            default:
+                return !!value;
+                break;
+        }
+    });
     $.tools.validator.fn("[minlength]", function(input, value) {
         return input.attr("minlength") >= value.length;
     });
@@ -2202,7 +2213,7 @@ jQuery.fn.extend({
         $(this).find("object.config" ).each(function() {
             var prt = $(this).parent();
             var fun = $(this).attr("name");
-            var cnf = _HsReadOpts ( this );
+            var cnf = _HsReadOpts.call( this );
             if (typeof prt[fun] == "function") prt[fun](cnf);
         }).remove();
 
@@ -2224,9 +2235,8 @@ jQuery.fn.extend({
         $(this).hsInit()
     });
     $(document )
-    .on("ajaxError", function(evt, xhr) {
+    .on("ajaxError", function( evt , xhr ) {
         hsResponObj(xhr);
-        hsNote(H$(":ajax.error.err"), "warn-msg");
     })
     .on("hsReady", ".load-box", function() {
         $(this).hsInit();
@@ -2270,20 +2280,20 @@ jQuery.fn.extend({
         // 当选中行时, 开启工具按钮, 否则禁用相关按钮
         var box = $(this).closest(".HsList");
         var len = box.find(".check-one:checked").length;
-        box.find(".bind-to-select").prop("disabled", len == 0);
-        box.find(".bind-to-single").prop("disabled", len != 1);
+        box.find(".for-select").prop("disabled", len == 0);
+        box.find(".for-single").prop("disabled", len != 1);
     })
     .on("select", ".HsTree .tree-node", function() {
         // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
         var box = $(this).closest(".HsTree");
         var obj =     box.data   ( "HsTree");
-        box.find(".bind-to-select").prop("disabled", obj.getSid()==obj.getRid());
+        box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
     })
     .on("loadBack", ".HsList", function() {
         $(this).find(".check-all").prop("checked", false);
-        $(this).find(".bind-to-select,.bind-to-single").prop("disabled", true);
+        $(this).find(".for-select,.for-single").prop("disabled", true);
     })
     .on("loadBack", ".HsTree", function() {
-        $(this).find(".bind-to-select,.bind-to-single").prop("disabled", true);
+        $(this).find(".for-select,.for-single").prop("disabled", true);
     });
 })(jQuery);

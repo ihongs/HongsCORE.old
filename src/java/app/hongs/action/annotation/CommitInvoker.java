@@ -12,7 +12,7 @@ import java.lang.annotation.Annotation;
  */
 public class CommitInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
-    throws Exception {
+    throws Throwable {
         Core core = Core.getInstance();
         try {
             core.put("__DB_AUTO_COMMIT__", false);
@@ -21,11 +21,7 @@ public class CommitInvoker {
 
             commit();
         }
-        catch (Exception ex) {
-            rollback();
-            throw ex;
-        }
-        catch (Error ex) {
+        catch (Throwable ex) {
             rollback();
             throw ex;
         }

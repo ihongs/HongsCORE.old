@@ -51,11 +51,12 @@
   </xs:element>
 
   <!-- 总配置 -->
-  <xs:element name="dat">
+  <xs:element name="root">
     <xs:complexType>
       <xs:all>
+        <xs:element ref="data" maxOccurs="unbounded"/>
         <xs:element ref="ref" maxOccurs="unbounded"/>
-        <xs:element ref="get" maxOccurs="unbounded"/>
+        <xs:element ref="req" maxOccurs="unbounded"/>
       </xs:all>
     </xs:complexType>
   </xs:element>

@@ -42,7 +42,7 @@ import app.hongs.util.Text;
  * <h2>异常代码:</h2>
  * <pre>
  * 区间: 0x1010~0x105f
- * 
+ *
  * 0x1011  找不到数据源名称配置
  * 0x1013  连接数据源失败
  * 0x1015  找不到数据库驱动配置
@@ -315,7 +315,7 @@ public class DB
     } while (false);
 
     /** 初始化设置 **/
-    
+
     Core core = Core.getInstance();
 
     // 自动提交设置
@@ -1008,7 +1008,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x104b, ex);
+      throw new app.hongs.HongsException(0x1049, ex);
     }
     finally
     {

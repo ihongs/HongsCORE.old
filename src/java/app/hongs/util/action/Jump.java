@@ -8,7 +8,7 @@ import app.hongs.action.ActionHelper;
 import java.util.Map;
 
 /**
- * 跳转动作
+ * 跳转
  * @author Hongs
  */
 public class Jump {

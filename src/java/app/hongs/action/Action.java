@@ -1,9 +1,7 @@
 package app.hongs.action;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
+import app.hongs.HongsException;
 import app.hongs.HongsThrowable;
 import app.hongs.action.annotation.ActionChain;
 
@@ -165,51 +164,32 @@ public class Action
     }
     catch (InstantiationException ex)
     {
-      helper.print500Code("Can not instantiate class '" + cls + ".");
+      helper.print500Code("Cannot instantiate class '" + cls + "'.");
       return;
     }
     catch (IllegalAccessException ex)
     {
-      helper.print500Code("Illegal access  for class '" + cls + ".");
-      return;
-    }
-    catch (Exception ex)
-    {
-      doThrown(ex, helper);
-      return;
-    }
-    catch (Error ex)
-    {
-      doThrown(ex, helper);
+      helper.print500Code("Illegal access for class '" + cls + "'.");
       return;
     }
 
     // 执行方法
+    ActionChain chain = new ActionChain(method, object, helper);
     try
     {
-      ActionChain chain = new ActionChain(method, object, helper);
       chain.doAction();
     }
-    catch (IllegalAccessException ex)
+    catch (HongsException ex )
     {
-      helper.print500Code("Illegal access for method '"+cls+"."+mtd+"'.");
-    }
-    catch (IllegalArgumentException ex)
-    {
-      helper.print500Code("Illegal argument for method '"+cls+"."+mtd+"'.");
-    }
-    catch (InvocationTargetException ex)
-    {
-      Throwable ta = ex.getCause();
-      doThrown(ta, helper);
-    }
-    catch (Exception ex)
-    {
-      doThrown(ex, helper);
-    }
-    catch (Error ex)
-    {
-      doThrown(ex, helper);
+      // 0x1100为方法内部错误
+      if (ex.getCode() == 0x1100)
+      {
+        doThrown(ex.getCause(), helper);
+      }
+      else
+      {
+        doThrown(ex , helper );
+      }
     }
   }
 

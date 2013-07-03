@@ -6,13 +6,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 动作注解执行器
- * 非自动调用不起作用, 仅能用于actoin方法
- * 其他动作注解需要从此注解继承, 并指定invoker
+ * <h1>动作注解执行器</h1>
+ * <pre>
+ * 非自动调用不起作用, 仅能用于动作方法上
+ * 其他动作注解需声明此注解, 并指定调用类
+ * </pre>
  * @author Hong
  */
-@Target(ElementType.ANNOTATION_TYPE)
-@Retention (RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface ActionAnnotation {
     Class value();
 }
