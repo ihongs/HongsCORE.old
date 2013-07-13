@@ -4,6 +4,9 @@
         <param name="loadUrl" value="hcrm/Dataset/Info.do"/>
         <param name="saveUrl" value="hcrm/Dataset/Save.do"/>
         <param name="loadNoId" value="true"/>
+        <param name="fill_day" value="(HsForm.fill_day)"/>
+        <param name="fill_date" value="(HsForm.fill_range)"/>
+        <param name="fill_hour" value="(HsForm.fill_range)"/>
     </object>
     <form action="" method="POST">
         <input type="hidden" name="id"/>
@@ -18,6 +21,12 @@
             </select>
         </div>
         <div class="conf-box"></div>
+        <div>
+            <label>类型:</label>
+            <select name="type" required="required">
+                <option value="">--请选择--</option>
+            </select>
+        </div>
         <div class="cols-box">
             <label>&nbsp;</label>
             <div class="input-box list-box" style="width: 35em;">
@@ -36,6 +45,30 @@
                 </table>
                 <button type="button" class="add-col">添加字段</button>
             </div>
+        </div>
+        <div>
+            <label>周期:</label>
+            <select name="exec_type" required="required">
+                <option value="">--请选择--</option>
+            </select>
+        </div>
+        <div>
+            <label>每周几:</label>
+            <select name="exec_day" required="required">
+                <option value="">--请选择--</option>
+            </select>
+        </div>
+        <div>
+            <label>每月几号:</label>
+            <select name="exec_date" required="required" min="1" max="28">
+                <option value="">--请选择--</option>
+            </select>
+        </div>
+        <div>
+            <label>几点执行:</label>
+            <select name="exec_hour" required="required" min="0" max="23">
+                <option value="">--请选择--</option>
+            </select>
         </div>
         <div class="button-box">
             <label>&nbsp;</label>
@@ -154,6 +187,44 @@
     });
     context.on("click", ".del-col", function() {
         $(this).closest("tr").remove();
+    });
+    
+    /** 周期设置 **/
+    
+    context.find("[name=exec_type]").change(function() {
+        switch ($(this).val()) {
+            case "0":
+            case "1":
+            case "2":
+                context.find("[name=exec_hour],[name=exec_date],[name=exec_day]")
+                       .prop("disabled", true  ) 
+                       .parent().hide();
+                break;
+            case "3":
+                context.find("[name=exec_date],[name=exec_day]")
+                       .prop("disabled", true  )
+                       .parent().hide();
+                context.find("[name=exec_hour]")
+                       .prop("disabled", false )
+                       .parent().show();
+                break;
+            case "4":
+                context.find("[name=exec_date]")
+                       .prop("disabled", true  )
+                       .parent().hide();
+                context.find("[name=exec_hour],[name=exec_day]")
+                       .prop("disabled", false )
+                       .parent().show();
+                break;
+            case "5":
+                context.find("[name=exec_day]")
+                       .prop("disabled", true )
+                       .parent().hide();
+                context.find("[name=exec_hour],[name=exec_date]")
+                       .prop("disabled", false)
+                       .parent().show();
+                break;
+        }
     });
 })( jQuery );
 </script>

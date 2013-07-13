@@ -4,6 +4,8 @@ import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.CommitSuccess;
+import app.hongs.action.annotation.SelectData;
+import app.hongs.action.annotation.SelectList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +22,24 @@ public class Dataset {
                 Core.getInstance("app.hcrm.model.Dataset");
     }
 
+    @SelectList(conf="hcrm", lang="hcrm", keys={
+        "type=DATASET_TYPES",
+        "exec_type=DATASET_EXEC_TYPES",
+        "dflag=DATASET_STATS"
+    })
     public void actionList(ActionHelper helper)
     throws HongsException {
         Map view = model.getPage(helper.getRequestData());
         helper.back(view);
     }
 
+    @SelectData(conf="hcrm", lang="hcrm", keys={
+        "type=DATASET_TYPES",
+        "exec_type=DATASET_EXEC_TYPES",
+        "exec_hour=DATASET_EXEC_HOURS",
+        "exec_date=DATASET_EXEC_DATES",
+        "exec_day=DATASET_EXEC_DAYS"
+    })
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map view = model.getInfo(helper.getRequestData());
@@ -41,7 +55,7 @@ public class Dataset {
         Map data = new HashMap();
         view.put("data" , data );
         data.put("class", model.getClassSelect());
-
+        
         helper.back(view);
     }
 

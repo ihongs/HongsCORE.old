@@ -36,13 +36,34 @@
     <div id="main-context"></div>
     <script type="text/javascript">
     (function($) {
-        $("#main-menubar .menu a").click(function() {
-            $("#main-context").load($(this).attr("data-href"));
+        $("#main-menubar .menu a")
+          .each (function() {
+            var href = $(this).attr("data-href");
+            var hash = $(this).attr("data-hash");
+            if (hash ==  null) {
+                hash = href.replace(/\.\w+$/,"");
+                $(this).attr("data-hash", hash );
+            }
+        }).click(function() {
+            var href = $(this).attr("data-href");
+            var hash = $(this).attr("data-hash");
+            $("#main-context").load(href);
+            location.hash = hash;
+
             $(this).addClass("selected")
                 .siblings( )
                 .removeClass("selected");
+
             return  false;
-        }).first( ).click( );
+        });
+
+        if (location.hash) {
+            var hash = location.hash.substr(1);
+            $("#main-menubar .menu a[data-hash='"+hash+"']").click();
+        }
+        else {
+            $("#main-menubar .menu a").first().click();
+        }
     })( jQuery );
     </script>
 </body>

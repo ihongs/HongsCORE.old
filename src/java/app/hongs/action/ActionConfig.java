@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
 import app.hongs.Core;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
+import static app.hongs.action.DatumsConfig.getInstance;
 
 /**
  * <h1>动作配置工具</h1>
@@ -389,4 +390,23 @@ public class ActionConfig
     return as;
   }
 
+  /** 工厂方法 **/
+
+  public static ActionConfig getInstance(String name) throws HongsException {
+      String key = "__DAT__." + name;
+      Core core = Core.getInstance();
+      ActionConfig inst;
+      if (core.containsKey(key)) {
+          inst = (ActionConfig)core.get(key);
+      }
+      else {
+          inst = new ActionConfig(name);
+          core.put( key, inst );
+      }
+      return inst;
+  }
+
+  public static ActionConfig getInstance() throws HongsException {
+      return getInstance("default");
+  }
 }

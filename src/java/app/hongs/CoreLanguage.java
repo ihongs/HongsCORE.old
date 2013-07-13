@@ -260,6 +260,21 @@ public class CoreLanguage
     return lang;
   }
 
+  public static CoreLanguage getInstance(String name)
+  {
+    String key = "__CONF__." + name;
+    Core  core = Core.getInstance();
+    if (! core.containsKey( key ) )
+    {
+      CoreLanguage conf = new CoreLanguage(name);
+      core.put( key, conf ); return conf;
+    }
+    else
+    {
+      return (CoreLanguage)core.get(key);
+    }
+  }
+
   /**
    * 从HEAD串中获取支持的语言
    * @param lang

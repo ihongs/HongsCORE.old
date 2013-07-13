@@ -26,7 +26,7 @@ data-open-in 点击后在指定区域打开
 .check-all
 .check-one
 .for-select
-.for-single
+.for-checks
 
 定位类说明:
 .form-checks
@@ -256,7 +256,7 @@ function hsGetValue (obj, path, def) {
         return hsGetArray(obj, path, def);
     }
     if (typeof path == "number") {
-        return obj[path] || def;
+        return hsGetArray(obj,[path],def);
     }
     if (typeof path != "string") {
         throw("hsGetValue: 'path' must be a string");
@@ -273,8 +273,8 @@ function hsGetArray (obj, keys, def) {
     if (!obj) {
         return null;
     }
-    if (!jQuery.isPlainObject(obj)) {
-        throw("hsGetArray: 'obj' must be an object");
+    if (!jQuery.isArray(obj ) && !jQuery.isPlainObject(obj )) {
+        throw("hsGetArray: 'obj' must be an array or object");
     }
     if (!jQuery.isArray(keys)) {
         throw("hsGetArray: 'keys' must be an array");
@@ -887,11 +887,11 @@ HsForm.prototype = {
         datas = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr( "name" );
-            if (typeof datas[n] != "undefined")
-                continue;
+//          if (typeof datas[n] != "undefined")
+//              continue;
             v = hsGetValue(data, n);
-            if (typeof v == "undefined")
-                continue;
+//          if (typeof v == "undefined")
+//              continue;
             datas[n] = v;
         }
 
@@ -907,7 +907,7 @@ HsForm.prototype = {
 
             if (typeof this["fill_"+n] !="undefined") {
                 v = this["fill_"+n].call(this, inp, v, n, "data");
-                if (! v) continue;
+                if (!v) continue;
             }
 
             if (inp.prop("tagName") == "SELECT" && i == 1) {
@@ -917,7 +917,7 @@ HsForm.prototype = {
                     opt = jQuery('<option></option>');
                     opt.val (hsGetValue(v[i], vk))
                        .text(hsGetValue(v[i], tk))
-                       .data("data", v);
+                       .data("data", v[i]);
                     inp.append(opt);
                 }
             }
@@ -930,6 +930,7 @@ HsForm.prototype = {
                     lab.find("input").attr("name", n).data("data", v)
                                      .val (hsGetValue(v[i], vk));
                     lab.find("span" ).text(hsGetValue(v[i], tk));
+                    lab.data("data", v[i]);
                     inp.append(lab);
                 }
             }
@@ -938,15 +939,15 @@ HsForm.prototype = {
     },
     fillInfo : function(info) {
         var nodes, infos, i, n, v, inp;
-        nodes = this.formBox.find("input[name],select[name],textarea[name],.check-box[name],.radio-box[name]");
+        nodes = this.formBox.find("input[name],textarea[name],select[name],.check-box[name],.radio-box[name]");
         infos = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr( "name" );
-            if (typeof infos[n] != "undefined")
-                continue;
+//          if (typeof infos[n] != "undefined")
+//              continue;
             v = hsGetValue(info, n);
-            if (typeof v == "undefined")
-                continue;
+//          if (typeof v == "undefined")
+//              continue;
             infos[n] = v;
         }
 
@@ -962,7 +963,7 @@ HsForm.prototype = {
 
             if (typeof this["fill_"+n] !="undefined") {
                 v = this["fill_"+n].call(this, inp, v, n, "info");
-                if (! v) continue;
+                if (!v) continue;
             }
 
             if (i == 0) {
@@ -1394,6 +1395,7 @@ HsList.prototype = {
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
+        return false;
     },
     fill__radio : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
@@ -1401,6 +1403,7 @@ HsList.prototype = {
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
+        return false;
     },
     fill__admin : function(td, v, n) {
         var box = this.loadBox.find('.'+n+'-btn');
@@ -1424,6 +1427,7 @@ HsList.prototype = {
                 .tooltip (tp)
                 .appendTo(td);
         }
+        return false;
     }
 };
 
@@ -1919,13 +1923,13 @@ function _HsReadOpts() {
             break;
         case "D:": // Data
             v = v.substring(2);
-            v = jQuery(arr[i]).parent( ).data(v);
+            v = jQuery(arr[i]).parent( ).data( v );
             break;
         default:
             if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
                 v = eval('('+v+')');
             else  if  (/^\s*(\(.*\))\s*$/.test(v))
-                v = eval(    v    );
+                v = eval( v );
         }
         if (n == "") continue;
         hsSetValue(obj, n, v);
@@ -2102,9 +2106,9 @@ jQuery.fn.extend({
         });
         return ret;
     });
+    // 让错误消息紧贴输入框
     $.tools.validator.addEffect("default", function(errs) {
         var conf = this.getConf();
-
         $.each(errs, function(i, err) {
             var inp = err.input.addClass(conf.errorClass);
             var msg = inp.data("msg.el");
@@ -2136,7 +2140,6 @@ jQuery.fn.extend({
         });
     }, function(inputs) {
         var conf = this.getConf();
-
         inputs.removeClass(conf.errorClass).each(function() {
             var msg = $(this).data ( "msg.el" );
             if (msg) {
@@ -2208,7 +2211,7 @@ jQuery.fn.extend({
             $(this).load($(this).attr("data-load"));
         });
         $(this).find("div[data-open]").each(function() {
-            $(this).hsOpen($(this).attr("data-load"));
+            $(this).hsOpen($(this).attr("data-open"));
         });
         $(this).find("object.config" ).each(function() {
             var prt = $(this).parent();
@@ -2273,27 +2276,27 @@ jQuery.fn.extend({
         var ck = tr.find(".check-one");
         if (this !=  ck .closest("td"))
             tr.closest("tbody").find(".check-one").not(ck)
-                               .prop( "checked"  ,  false);
+                               .prop( "checked"  , false );
         ck.prop("checked", ! ck.prop( "checked")).change();
     })
     .on("change", ".HsList .check-one", function() {
         // 当选中行时, 开启工具按钮, 否则禁用相关按钮
         var box = $(this).closest(".HsList");
         var len = box.find(".check-one:checked").length;
-        box.find(".for-select").prop("disabled", len == 0);
-        box.find(".for-single").prop("disabled", len != 1);
+        box.find(".for-select").prop("disabled", len != 1);
+        box.find(".for-checks").prop("disabled", len == 0);
     })
     .on("select", ".HsTree .tree-node", function() {
         // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
         var box = $(this).closest(".HsTree");
-        var obj =     box.data   ( "HsTree");
+        var obj =        box.data( "HsTree");
         box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
     })
     .on("loadBack", ".HsList", function() {
         $(this).find(".check-all").prop("checked", false);
-        $(this).find(".for-select,.for-single").prop("disabled", true);
+        $(this).find(".for-select,.for-checks").prop("disabled", true);
     })
     .on("loadBack", ".HsTree", function() {
-        $(this).find(".for-select,.for-single").prop("disabled", true);
+        $(this).find(".for-select,.for-checks").prop("disabled", true);
     });
 })(jQuery);

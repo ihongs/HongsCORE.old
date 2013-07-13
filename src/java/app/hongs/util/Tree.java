@@ -3,8 +3,10 @@ package app.hongs.util;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * <h1>树型操作工具</h1>
@@ -198,6 +200,48 @@ public class Tree
   {
     String[] keys = key.split("\\.", -1);
     Tree.setTreeValue(tree, keys, value);
+  }
+
+  /**
+   * 将map2追加到map1中
+   * @param map1
+   * @param map2
+   */
+  public static void putAllDeep(Map map1, Map map2) {
+      putAllDeep(map1, map2, new ArrayList());
+  }
+
+  /**
+   * 将map2追加到map1的keys层级中
+   * @param map1
+   * @param map2
+   * @param keys 
+   */
+  public static void putAllDeep(Map map1, Map map2, String[] keys) {
+      putAllDeep(map1, map2, Arrays.asList(keys));
+  }
+  
+  /**
+   * 将map2追加到map1的keys层级中
+   * @param map1
+   * @param map2
+   * @param keys 
+   */
+  public static void putAllDeep(Map map1, Map map2, List<String> keys) {
+      Iterator it = map2.entrySet().iterator();
+      while (it.hasNext()) {
+          Map.Entry et = (Map.Entry) it.next();
+          Object key = et.getKey(  );
+          Object val = et.getValue();
+          List<String> keyz = new ArrayList(keys);
+                       keyz.add( key.toString() );
+          if (val instanceof Map) {
+              putAllDeep( map1, (Map) val, keyz );
+          }
+          else {
+              setTreeValue(map1, keyz.toArray(new String[]{}), val);
+          }
+      }
   }
 
 }

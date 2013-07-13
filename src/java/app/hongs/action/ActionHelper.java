@@ -3,10 +3,6 @@ package app.hongs.action;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.text.SimpleDateFormat;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -334,16 +330,7 @@ public class ActionHelper
 
     try
     {
-      /*
-      String ae = this.request.getHeader("Accept-Encoding");
-      if (ae != null && ae.indexOf("compress") != -1 && ae.indexOf("gzip") != -1)
-      {
-        // TODO: 将数据进行压缩处理
-        return;
-      }
-      */
-      PrintWriter out = this.response.getWriter();
-      out.print(text);
+      this.response.getWriter().print(text);
     }
     catch (IOException ex)
     {

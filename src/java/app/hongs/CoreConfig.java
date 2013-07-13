@@ -230,4 +230,19 @@ public class CoreConfig
 
     return conf;
   }
+  
+  public static CoreConfig getInstance(String name)
+  {
+    String key = "__CONF__." + name;
+    Core  core = Core.getInstance();
+    if (! core.containsKey( key ) )
+    {
+      CoreConfig conf = new CoreConfig(name);
+      core.put(key, conf); return conf;
+    }
+    else
+    {
+      return (CoreConfig)core.get(key);
+    }
+  }
 }

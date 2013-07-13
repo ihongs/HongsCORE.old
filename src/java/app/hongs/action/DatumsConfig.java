@@ -27,7 +27,7 @@ import app.hongs.util.JSON;
 
 /**
  * <h1>数据配置工具</h1>
- * 
+ *
  * @author Hongs
  */
 public class DatumsConfig
@@ -39,6 +39,7 @@ public class DatumsConfig
   public Map<String, Object> datas;
   public Map<String, Set<String[]>> getDatas;
   public Map<String, Set<String[]>> refDatas;
+  public Map<String, Set<String[]>> rspDatas;
 
   public DatumsConfig(String name)
     throws HongsException
@@ -74,6 +75,7 @@ public class DatumsConfig
     this.datas = new HashMap();
     this.getDatas = new HashMap();
     this.refDatas = new HashMap();
+    this.rspDatas = new HashMap();
 
     try
     {
@@ -82,7 +84,7 @@ public class DatumsConfig
       Document doc = dbn.parse(df);
 
       this.parseDatTree(doc.getDocumentElement( ),
-        this.datas, null, this.getDatas, this.refDatas);
+        this.datas, null, this.getDatas, this.refDatas, this.rspDatas);
 
       // 测试
       /*
@@ -105,7 +107,8 @@ public class DatumsConfig
     }
   }
 
-  private void parseDatTree(Element element, Object datas, Set links, Map getDatas, Map refDatas)
+  private void parseDatTree(Element element, Object datas, Set links,
+                            Map getDatas, Map refDatas, Map rspDatas)
     throws HongsException
   {
     if (!element.hasChildNodes())
@@ -168,7 +171,7 @@ public class DatumsConfig
           ((Map)datas).put(key, data2);
         }
 
-        this.parseDatTree(element2, data2, null, null, null);
+        this.parseDatTree(element2, data2, null, null, null, null);
       }
       else
       if ("link".equals(tagName2))
@@ -180,12 +183,13 @@ public class DatumsConfig
       }
       else
       if ("req".equals(tagName2)
-      ||  "ref".equals(tagName2))
+      ||  "ref".equals(tagName2)
+      ||  "rsp".equals(tagName2))
       {
         Map data2 = new HashMap();
         Set link2 = new HashSet();
 
-        this.parseDatTree(element2, data2, link2, null, null);
+        this.parseDatTree(element2, data2, link2, null, null, null);
 
         String uri = element2.getAttribute("uri");
 
@@ -204,6 +208,11 @@ public class DatumsConfig
         if ("ref".equals(tagName2))
         {
           refDatas.put(uri, link2);
+        }
+        else
+        if ("rsp".equals(tagName2))
+        {
+          rspDatas.put(uri, link2);
         }
         else
         {
@@ -257,14 +266,48 @@ public class DatumsConfig
   public Map getDataByRef(String uri)
   {
     Map map = new HashMap();
-    if (this.getDatas.containsKey(uri))
+    if (this.refDatas.containsKey(uri))
     {
-      Set <String[]> data = this.getDatas.get(uri);
+      Set <String[]> data = this.refDatas.get(uri);
       for (String[] key : data)
       {
         map.put(key[0], this.getDataByKey(key[1]));
       }
     }
     return map;
+  }
+
+  public Map getDataByRsp(String uri)
+  {
+    Map map = new HashMap();
+    if (this.rspDatas.containsKey(uri))
+    {
+      Set <String[]> data = this.rspDatas.get(uri);
+      for (String[] key : data)
+      {
+        map.put(key[0], this.getDataByKey(key[1]));
+      }
+    }
+    return map;
+  }
+
+  /** 工厂方法 **/
+
+  public static DatumsConfig getInstance(String name) throws HongsException {
+      String key = "__DAT__." + name;
+      Core core = Core.getInstance();
+      DatumsConfig inst;
+      if (core.containsKey(key)) {
+          inst = (DatumsConfig)core.get(key);
+      }
+      else {
+          inst = new DatumsConfig(name);
+          core.put( key, inst );
+      }
+      return inst;
+  }
+
+  public static DatumsConfig getInstance() throws HongsException {
+      return getInstance("default");
   }
 }

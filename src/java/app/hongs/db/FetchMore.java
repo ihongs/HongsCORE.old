@@ -38,35 +38,135 @@ public class FetchMore
 
   private List rows;
 
-  public FetchMore(List rows)
+  public FetchMore(List<Map> rows)
   {
     this.rows = rows;
   }
 
   /**
-   * 获取关联数据
-   *
-   * @param table 关联表
-   * @param field 关联字段
-   * @param key   源表关联键
-   * @throws app.hongs.HongsException
+   * 追加关联数据
+   * @param rows 要追加的数据
+   * @param col  追加数据的关联键
+   * @param key  目标数据的关联键
+   * @param name 追加到目标的键
    */
-  public void fetchMore(Table table, String field, String key)
-    throws HongsException
+  public void fetchMore(List<Map> rows, String col, String key, String name)
   {
-    this.fetchMore(table, field, key, new FetchBean());
+    fetchMore(rows, name, col, key, false, false);
+  }
+
+  /**
+   * 追加关联数据
+   * @param rows 要追加的数据
+   * @param col  追加数据的关联键
+   * @param key  目标数据的关联键
+   * @param name 追加到目标的键
+   * @param multiAssoc 目标数据与追加数据是一对多的关系
+   * @param unityAssoc 将追加数据放入目标数据的同一层下(name将无效)
+   */
+  public void fetchMore(List<Map> rows, String col, String key, String name,
+                        Boolean multiAssoc, Boolean unityAssoc)
+  {
+    // 获取id及行号
+    Map<String, List> map = new HashMap();
+    Set<String> ids = new HashSet();
+    this.fetchIdsMap(key, ids, map);
+
+    Iterator rs = rows.iterator(  );
+
+    Map     row, sub;
+    List    lst;
+    String  id;
+
+    if (! multiAssoc)
+    {
+      while (rs.hasNext())
+      {
+        sub = ( Map  ) rs.next(   );
+        id  = (String) sub.get(col);
+        lst = ( List ) map.get(id );
+
+        if (lst == null)
+        {
+          //throw new HongsException(0x10c0, "Line nums is null");
+          continue;
+        }
+
+        Iterator it = lst.iterator();
+        while (it.hasNext())
+        {
+          row = (Map) it.next();
+
+          if (! unityAssoc)
+          {
+            row.put(name, sub);
+          }
+          else
+          {
+            sub.putAll(row);
+            row.putAll(sub);
+          }
+        }
+      }
+    }
+    else
+    {
+      while (rs.hasNext())
+      {
+        sub = ( Map  ) rs.next(   );
+        id  = (String) sub.get(col);
+        lst = ( List ) map.get(id );
+
+        if (lst == null)
+        {
+          //throw new HongsException(0x10c0, "Line nums is null");
+          continue;
+        }
+
+        Iterator it = lst.iterator();
+        while (it.hasNext())
+        {
+          row = (Map) it.next();
+
+          if (row.containsKey(name))
+          {
+            (( List ) row.get(name)).add(sub);
+          }
+          else
+          {
+            List lzt = new ArrayList();
+            row.put(name, lzt);
+            lzt.add(sub);
+          }
+        }
+      }
+    }
   }
 
   /**
    * 获取关联数据
    *
    * @param table 关联表
-   * @param field 关联字段
+   * @param col   关联字段
+   * @param key   源表关联键
+   * @throws app.hongs.HongsException
+   */
+  public void fetchMore(Table table, String col, String key)
+    throws HongsException
+  {
+    this.fetchMore(table, col, key, new FetchBean());
+  }
+
+  /**
+   * 获取关联数据
+   *
+   * @param table 关联表
+   * @param col   关联字段
    * @param key   源表关联键
    * @param fs    限制查询结构
    * @throws app.hongs.HongsException
    */
-  public void fetchMore(Table table, String field, String key, FetchBean fs)
+  public void fetchMore(Table table, String col, String key, FetchBean fs)
     throws HongsException
   {
     if (this.rows.isEmpty())
@@ -86,8 +186,8 @@ public class FetchMore
     }
 
     // 获取id及行号
-    Map map = new HashMap<String, List>();
-    Set ids = new HashSet<String>();
+    Map<String, List> map = new HashMap();
+    Set<String> ids = new HashSet();
     this.fetchIdsMap(key, ids, map);
 
     if (ids.isEmpty() || map.isEmpty())
@@ -97,28 +197,28 @@ public class FetchMore
     }
 
     // 识别字段别名
-    String alias = field;
-    if (!table.getColumns().containsKey(field))
+    String col2 = col;
+    if (!table.getColumns().containsKey(col))
     {
       Pattern pattern = Pattern.compile(
              "^(.+?)\\s+(?:AS\\s+)?`?(.+?)`?$",
                      Pattern.CASE_INSENSITIVE);
-      Matcher matcher = pattern.matcher(field);
+      Matcher matcher = pattern.matcher(col);
       if (matcher.find())
       {
-        field = matcher.group(1);
-        alias = matcher.group(2);
+        col  = matcher.group(1);
+        col2 = matcher.group(2);
       }
     }
     else
     {
-      field = ".`" + field + "`";
+      col = ".`" + col + "`";
     }
 
     // 构建查询结构
     fs.setName(name)
       .setTableName(tableName)
-      .where(field+" IN (?)", ids);
+      .where(col+" IN (?)", ids);
 
     /**
      * 根据 id 获取关联数据,
@@ -126,14 +226,17 @@ public class FetchMore
      */
 
     ResultSet rs = db.query(fs.getSQL(), fs.getParams());
-    Map row, sub;
+
+    Map     row, sub;
+    List    lst;
+    String  id;
 
     if (! multiAssoc)
     {
       while ((sub = db.fetch(rs)) != null)
       {
-        String id = (String) sub.get(alias);
-        List lst = (List) map.get(id);
+        id  = (String) sub.get(col2);
+        lst = ( List ) map.get( id );
 
         if (lst == null)
         {
@@ -162,8 +265,8 @@ public class FetchMore
     {
       while ((sub = db.fetch(rs)) != null)
       {
-        String id = (String) sub.get(alias);
-        List lst = (List) map.get(id);
+        id  = (String) sub.get(col2);
+        lst = ( List ) map.get( id );
 
         if (lst == null)
         {
@@ -178,7 +281,7 @@ public class FetchMore
 
           if (row.containsKey(name))
           {
-            ((List)row.get(name)).add(sub);
+            (( List ) row.get(name)).add(sub);
           }
           else
           {
@@ -722,5 +825,83 @@ public class FetchMore
       tb.delete("`"+foreignKey+"`=?", pa);
     }
   }
+
+  public abstract class Assoc {
+      public void loop(Map map, String field) {
+        Map     row,
+                sub;
+        List    lst;
+        String  lnk;
+
+        while ((sub = getSub()) != null)
+        {
+          lnk   = (String) sub.get(field);
+          lst   = ( List ) map.get( lnk );
+
+          if (lst == null)
+          {
+            //throw new HongsException(0x10c0, "Line nums is null");
+            continue;
+          }
+
+          Iterator it = lst.iterator();
+          while (it.hasNext())
+          {
+            row = (Map) it.next();
+            this.addSub(row, sub);
+          }
+        }
+      }
+
+      abstract public Map  getSub();
+
+      abstract public void addSub(Map row, Map sub);
+  }
+
+private abstract class MultiAssoc extends Assoc {
+    String name;
+
+    public MultiAssoc(List rows, String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void addSub(Map row, Map sub) {
+        List lzt;
+        if (row.containsKey(name))
+        {
+            lzt = ( List ) row.get(name);
+        }
+        else
+        {
+            lzt = new ArrayList( );
+            row.put(  name, lzt  );
+        }
+        lzt.add(sub);
+    }
+}
+
+private abstract class AssocMore extends Assoc {
+    String name;
+
+    public AssocMore(List rows, String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void addSub(Map row, Map sub) {
+        List lzt;
+        if (row.containsKey(name))
+        {
+            lzt = ( List ) row.get(name);
+        }
+        else
+        {
+            lzt = new ArrayList( );
+            row.put(  name, lzt  );
+        }
+        lzt.add(sub);
+    }
+}
 
 }

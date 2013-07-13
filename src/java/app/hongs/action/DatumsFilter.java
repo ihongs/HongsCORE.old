@@ -9,9 +9,11 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
+import app.hongs.util.Tree;
 
 /**
  * <h1>请求数据过滤器</h1>
@@ -37,7 +39,6 @@ public class DatumsFilter
     throws ServletException
   {
     super.init(config);
-
 
     /**
      * 获取权限配置名
@@ -70,7 +71,7 @@ public class DatumsFilter
     DatumsConfig ac;
     try
     {
-      ac = new DatumsConfig(this.configName);
+      ac = DatumsConfig.getInstance(this.configName);
     }
     catch (HongsException ex)
     {
@@ -79,11 +80,12 @@ public class DatumsFilter
     }
 
     Map map = new HashMap();
+    Map dat = new HashMap();
 
     String[] keys = req.getParameterValues(this.requestKey);
     if (null  !=  keys)
     {
-      for (String key  :  keys)
+      for (String key : keys)
       {
         Object obj = ac.getDataByKey(key);
         if (obj instanceof Map)
@@ -103,6 +105,7 @@ public class DatumsFilter
     {
       uri = uri.substring(Core.BASE_HREF.length());
       map.putAll(ac.getDataByUri(uri));
+      dat.putAll(ac.getDataByRsp(uri));
     }
     if (ref.startsWith(Core.BASE_HREF))
     {
@@ -112,11 +115,37 @@ public class DatumsFilter
 
     if (!map.isEmpty())
     {
-      helper.getRequestData();
-      helper.requestData.putAll(map);
+      helper.getRequestData( );
+      Tree.putAllDeep(helper.requestData, map);
     }
 
-    chain.doFilter(req, rsp);
-  }
+    if ( dat.isEmpty())
+    {
+      chain.doFilter(req, rsp);
+      return;
+    }
 
+    /** 输出过滤 **/
+
+    HttpServletResponse rsp2;
+    WrapServletResponse rsp3;
+    rsp2 = helper.response;
+    rsp3 = new WrapServletResponse(rsp2);
+    helper.response = rsp3;
+    chain.doFilter(req, rsp3);
+    helper.response = rsp2;
+
+    Map data = helper.getResponseData( );
+    if (data != null
+    && (data.get("__success__") == null
+    ||  data.get("__success__") == true))
+    {
+      Tree.putAllDeep (data,dat);
+      helper.printJSON(  data  );
+    }
+    else
+    {
+      helper.print(rsp3.toString());
+    }
+  }
 }
