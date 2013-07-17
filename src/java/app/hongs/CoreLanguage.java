@@ -1,5 +1,6 @@
 package app.hongs;
 
+import app.hongs.util.Text;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -30,9 +31,6 @@ public class CoreLanguage
 
   public String lang;
 
-  private Pattern pattern;
-  private Matcher matcher;
-
   /**
    * 加载指定路径\语言和名称的配置
    * @param path
@@ -43,9 +41,7 @@ public class CoreLanguage
   {
     super(path, null);
 
-    this.lang = lang;
-    this.pattern = null;
-    this.matcher = null;
+    this.lang = lang ;
 
     if (name != null)
     {
@@ -107,14 +103,8 @@ public class CoreLanguage
    */
   public String translate(String key)
   {
-    String str = this.getProperty(key, null);
-
-    if (str == null)
-    {
-      str = key;
-    }
-
-    return str;
+    String str  = this.getProperty(key, null);
+    return str != null  ?  str  :  key;
   }
 
   /**
@@ -122,57 +112,18 @@ public class CoreLanguage
    * 参数名为$xxx或${xxx}($one,${two}...)
    * @param key
    * @param rep
-   * @return 翻译后的语句, 会体会特定标识
+   * @return 翻译后的语句, 会替换特定标识
    */
   public String translate(String key, Map<String, String> rep)
   {
     String str = this.translate(key);
-
-    if (rep == null)
-    {
-      return str;
-    }
+    if (  rep == null  ) return str ;
 
     /**
      * 将语句中的$xxx或${xxx}替换成指定文字
      * 如果指定的替换文字不存在, 则替换为空
      */
-
-    if (pattern == null)
-    {
-      pattern = Pattern.compile("\\$(\\{\\w+\\}|\\w+)");
-    }
-    matcher = pattern.matcher(str);
-
-    StringBuffer sb = new StringBuffer();
-
-    while (matcher.find())
-    {
-      String st = matcher.group();
-      if (st.startsWith("${"))
-      {
-        st = st.substring(2, st.length() - 1);
-      }
-      else
-      {
-        st = st.substring(1);
-      }
-      if (rep.containsKey(st))
-      {
-        st = rep.get(st);
-      }
-      else
-      {
-        st = "";
-      }
-
-      st = Matcher.quoteReplacement(st);
-      matcher.appendReplacement(sb, st);
-    }
-    matcher.appendTail(sb);
-    matcher = null;
-
-    return sb.toString();
+    return Text.assign(str, rep);
   }
 
   /**
@@ -184,21 +135,13 @@ public class CoreLanguage
    */
   public String translate(String key, List<String> rep)
   {
-    if (rep == null)
-    {
-      return this.translate(key);
-    }
+    String str = this.translate(key);
+    if (  rep == null  ) return str ;
 
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
      */
-    Map<String, String> rep2 = new HashMap<String, String>();
-    for (int i = 0; i < rep.size(); i ++)
-    {
-      rep2.put(String.valueOf(i), rep.get(i));
-    }
-
-    return this.translate(key, rep2);
+    return Text.assign(str, rep);
   }
 
   /**
@@ -210,21 +153,13 @@ public class CoreLanguage
    */
   public String translate(String key, String... rep)
   {
-    if (rep == null)
-    {
-      return this.translate(key);
-    }
+    String str = this.translate(key);
+    if (  rep == null  ) return str ;
 
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
      */
-    Map<String, String> rep2 = new HashMap<String, String>();
-    for (int i = 0; i < rep.length; i ++)
-    {
-      rep2.put(String.valueOf(i), rep[i]);
-    }
-
-    return this.translate(key, rep2);
+    return Text.assign(str, rep);
   }
 
   /** 静态属性及方法 **/

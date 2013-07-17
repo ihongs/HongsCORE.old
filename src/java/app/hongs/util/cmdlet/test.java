@@ -21,6 +21,14 @@ public class test {
 
   public static void cmdlet(Map<String, String[]> opts)
           throws app.hongs.HongsException {
+    
+    Map vars = new java.util.HashMap();
+    vars.put("var",  "var1");
+    vars.put("var.2", "var2");
+    System.out.println(app.hongs.util.Text.assign("This is $var and that is ${var.2}.", vars));
+
+    System.out.println(app.hongs.util.Text.assign("This is $0 and that is ${1}2.", "name", "var"));
+      
     //app.hongs.util.JSON.print(opts);
     Map<String, Object> optz = CmdletHelper.getOpts(opts,
       "test-text:b", "test-rate:b", "test-left:b",

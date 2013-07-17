@@ -1,11 +1,14 @@
 package app.hcrm.model;
 
 import app.hcrm.util.AbstractModel;
+import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.DatumsConfig;
 import app.hongs.db.FetchBean;
+import app.hongs.util.Text;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -84,5 +87,52 @@ extends AbstractModel {
         }
 
         return null;
+    }
+    
+    public void createTable(String id) throws HongsException {
+        FetchBean bean = new FetchBean(db.getTable("ar_dataset_cols_info"));
+        bean.where("dataset_id=?", id);
+        List<Map> rows = db.fetchMore(bean);
+        StringBuilder dims = new StringBuilder();
+        StringBuilder mets = new StringBuilder();
+        String pk;
+        for (Map row : rows) {
+            String col = Core.getUniqueId();
+            String name = row.get("name").toString();
+            String type = row.get("type").toString();
+            String valueType = row.get("value_type").toString();
+            String valueSize = row.get("value_size").toString();
+            String valueScale = row.get("value_scale").toString();
+            StringBuilder sb = null;
+            
+            switch (type) {
+                case "1": sb = dims; break;
+                case "2": sb = mets; break;
+                default : continue ;
+            }
+            
+            switch (valueType) {
+                case "1":
+                    valueType = "NUMBERIC("+valueSize+","+valueScale+")";
+                    break;
+                case "2":
+                    valueType = "VARCHAR("+valueSize+")";
+                    break;
+                case "3":
+                    valueType = "DATE";
+                case "4":
+                    valueType = "TIME";
+                case "5":
+                    valueType = "TIMESTAMP";
+            }
+            
+            sb.append("`"+col+"` "+valueType+" DEFAULT NULL COMMENT '"+name+"';");
+        }
+        Map<String, String> rep = new HashMap();
+        rep.put("cols_set", dims.toString());
+        
+        DatumsConfig conf = new DatumsConfig("hcrm");
+        String dct = conf.getDataByKey("DATASET_CREATE_TABLE").toString();
+        Text.assign(dct, rep);
     }
 }

@@ -93,4 +93,13 @@
             [21, "21"], [22, "22"], [23, "23"]
         ]
     </data>
+    <data key="DATASET_CREATE_TABLE">
+        <![CDATA[
+CREATE TABLE `$name` (
+  $pk_set
+  $cols_set
+  PRIMARY KEY (`$pk`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8
+        ]]>
+    </data>
 </root>

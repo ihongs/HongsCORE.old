@@ -1,6 +1,10 @@
 package app.hongs.util;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * <h1>文本操作工具</h1>
@@ -111,6 +115,59 @@ public final class Text
     return Text.resume(str, "'\"", "\\");
   }
 
+  /** 替换 **/
+
+  private static Pattern assignPattern = Pattern.compile("\\$((\\w+)|\\{(.*?)\\})");
+
+  public static String assign(String str, Map<String, String> vars) {
+      Matcher matcher = assignPattern.matcher(str);
+      StringBuffer sb = new StringBuffer();
+
+      while (matcher.find()) {
+          String st = matcher.group(2);
+          if (null == st) {
+                 st = matcher.group(3);
+          }
+          if (vars.containsKey(st)) {
+              st = vars.get(st);
+          } else {
+              st = "";
+          }
+
+          st = Matcher.quoteReplacement(st);
+          matcher.appendReplacement(sb, st);
+      }
+      matcher.appendTail(sb);
+
+      return sb.toString(  );
+  }
+
+  public static String assign(String str, List<String> vars)
+  {
+    /**
+     * 将语句中替换$n或${n}为指定的文字, n从0开始
+     */
+      Map<String, String> rep2 = new HashMap();
+      for (int i = 0; i < vars.size(); i ++) {
+          rep2.put(String.valueOf(i), vars.get(i));
+      }
+
+      return assign(str, rep2);
+  }
+
+  public static String assign(String str, String... vars)
+  {
+    /**
+     * 将语句中替换$n或${n}为指定的文字, n从0开始
+     */
+      Map<String, String> rep2 = new HashMap();
+      for (int i = 0; i < vars.length; i ++) {
+          rep2.put(String.valueOf(i), vars[i]);
+      }
+
+      return assign(str, rep2);
+  }
+
   /** 清理 **/
 
   /**
@@ -174,72 +231,6 @@ public final class Text
     pat = Pattern.compile("<script.*?>.*?</script>", Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
     str = pat.matcher(str).replaceAll("");
     return   cleanXML(str);
-  }
-
-  /** 替换 **/
-
-  /**
-   * 替换全部
-   * @param str
-   * @param ts
-   * @param rs
-   * @return
-   */
-  public static String replaceAll(String str, String[] ts, String[] rs)
-  {
-    for (int i = 0; i < ts.length; i ++)
-    {
-      str = str.replaceAll(ts[i], rs[i]);
-    }
-    return  str;
-  }
-
-  /**
-   * 替换全部
-   * @param str
-   * @param ps
-   * @param rs
-   * @return
-   */
-  public static String replaceAll(String str, Pattern[] ps, String[] rs)
-  {
-    for (int i = 0; i < ps.length; i ++)
-    {
-      str = ps[i].matcher(str).replaceAll(rs[i]);
-    }
-    return str;
-  }
-
-  /**
-   * 替换一个
-   * @param str
-   * @param ts
-   * @param rs
-   * @return
-   */
-  public static String replaceFirst(String str, String[] ts, String[] rs)
-  {
-    for (int i = 0; i < ts.length; i ++)
-    {
-      str = str.replaceFirst(ts[i], rs[i]);
-    }
-    return  str;
-  }
-
-  /**
-   * 替换一个
-   * @param str
-   * @param ps
-   * @param rs
-   * @return
-   */
-  public static String replaceFirst(String str, Pattern[] ps, String[] rs)
-  {
-    for (int i = 0; i < ps.length; i ++)
-    {
-      str = ps[i].matcher(str).replaceFirst(rs[i]);
-    }
-    return str;
   }
 
 }

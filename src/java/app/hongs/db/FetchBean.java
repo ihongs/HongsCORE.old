@@ -30,10 +30,11 @@ import app.hongs.HongsException;
  *
  * <h2>注意:</h2>
  * <pre>
- * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表
- * 本想自动识别字段的所属表的(至少部分区域), 但总是出问题;
- * 好的规则总胜过万行代码, 特定此规矩, 多敲了一个符号而已.
- * setOption用于登记特定查询选项, 以备组织查询结构的过程中读取
+ * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表.
+ * 关联字段, 用"表.列"描述字段时, "."的两侧不得有空格.
+ * 本想自动识别字段的所属表(可部分区域), 但总是出问题;
+ * 好的规则胜过万行代码, 定此规矩, 多敲了一个符号而已.
+ * setOption用于登记特定查询选项, 以备组织查询结构的过程中读取.
  * </pre>
  *
  * <h2>系统已定义的"options":</h2>
@@ -453,16 +454,6 @@ public class FetchBean
   public boolean hasOption(String key)
   {
     return this.options.containsKey(key);
-  }
-
-  /**
-   * 删除选项
-   * @param key
-   * @return
-   */
-  public Object delOption(String key)
-  {
-    return this.options.remove(key);
   }
 
   /**

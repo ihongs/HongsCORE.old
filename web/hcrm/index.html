@@ -41,7 +41,7 @@
             var href = $(this).attr("data-href");
             var hash = $(this).attr("data-hash");
             if (hash ==  null) {
-                hash = href.replace(/\.\w+$/,"");
+                hash = href.replace(/^\w+\/|\.\w+$/g,"");
                 $(this).attr("data-hash", hash );
             }
         }).click(function() {
