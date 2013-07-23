@@ -93,9 +93,16 @@ extends AbstractModel {
         FetchBean bean = new FetchBean(db.getTable("ar_dataset_cols_info"));
         bean.where("dataset_id=?", id);
         List<Map> rows = db.fetchMore(bean);
+        
         StringBuilder dims = new StringBuilder();
         StringBuilder mets = new StringBuilder();
         String pk;
+        
+        DatumsConfig conf = new DatumsConfig("hcrm");
+        String dct = conf.getDataByKey("DATASET_CREATE_TABLE").toString();
+        String dcs = null;
+        Map<String, String> rep = new HashMap();
+        
         for (Map row : rows) {
             String col = Core.getUniqueId();
             String name = row.get("name").toString();
@@ -128,11 +135,15 @@ extends AbstractModel {
             
             sb.append("`"+col+"` "+valueType+" DEFAULT NULL COMMENT '"+name+"';");
         }
-        Map<String, String> rep = new HashMap();
-        rep.put("cols_set", dims.toString());
         
-        DatumsConfig conf = new DatumsConfig("hcrm");
-        String dct = conf.getDataByKey("DATASET_CREATE_TABLE").toString();
-        Text.assign(dct, rep);
+        if (dims.length() != 0) {
+            rep.put("cols_set", dims.toString());
+            dcs = Text.assign(dct, rep);
+        }
+        
+        if (mets.length() != 0) {
+            rep.put("cols_set", mets.toString());
+            dcs = Text.assign(dct, rep);
+        }
     }
 }

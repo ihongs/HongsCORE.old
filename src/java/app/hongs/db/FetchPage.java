@@ -61,8 +61,7 @@ public class FetchPage
     this(table.db, fs);
     this.table = table;
 
-    this.fs.setTableName(table.tableName);
-    this.fs.setName(table.name);
+    this.fs.from(table.tableName, table.name);
   }
 
   public void setPage(int page)

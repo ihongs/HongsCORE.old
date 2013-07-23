@@ -160,8 +160,7 @@ public class Table
   public List fetchMore(FetchBean more)
     throws HongsException
   {
-    more.setName(name);
-    more.setTableName(tableName);
+    more.from(tableName, name);
 
     CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
     String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");

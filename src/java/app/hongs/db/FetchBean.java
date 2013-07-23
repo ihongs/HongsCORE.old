@@ -1,5 +1,9 @@
 package app.hongs.db;
 
+import app.hongs.HongsException;
+import app.hongs.HongsError;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -9,10 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.regex.Pattern;
-
-import java.io.Serializable;
-
-import app.hongs.HongsException;
 
 /**
  * <h1>查询结构体</h1>
@@ -51,8 +51,9 @@ import app.hongs.HongsException;
  * <h2>异常代码:</h2>
  * <pre>
  * 区间: 0x10b0~0x10bf
- * 0x10b0 无法识别的关联类型(JOIN)
- * 0x10b2 (FULL|LEFT|RIGHT)_JOIN必须指定关联条件
+ * 0x10b0 无法识别关联类型(JOIN)
+ * 0x10b2 必须指定关联条件(FULL|LEFT|RIGHT)_JOIN
+ * 0x10b4 没有指定查询表名
  * </ul>
  *
  * @author Hongs
@@ -97,35 +98,66 @@ public class FetchBean
   /** 构造 **/
 
   /**
+   * 构造表结构对象
+   * @param fs 复制其全部属性
+   */
+  public FetchBean(FetchBean fs)
+  {
+    this.tableName  = fs.tableName;
+    this.name       = fs.name;
+    this.fields     = new StringBuilder(fs.fields);
+    this.wheres     = new StringBuilder(fs.wheres);
+    this.groups     = new StringBuilder(fs.groups);
+    this.havins     = new StringBuilder(fs.havins);
+    this.orders     = new StringBuilder(fs.orders);
+    this.limits     = fs.limits;
+    this.wparams    = new ArrayList(fs.wparams);
+    this.hparams    = new ArrayList(fs.hparams);
+    this.options    = new HashMap(fs.options);
+    this.joinType   = fs.joinType;
+    this.joinExpr   = fs.joinExpr;
+    this.joinList   = new LinkedHashSet(fs.joinList);
+  }
+
+  /**
+   * 构造表结构对象
+   * @param table 取tableName和name
+   */
+  public FetchBean(Table  table)
+  {
+    this(table.tableName, table.name);
+  }
+
+  /**
    * 构建表结构对象
    * @param name
    * @param tableName
    */
-  public FetchBean(String name, String tableName)
+  public FetchBean(String tableName, String name)
   {
-    this.name       = name;
     this.tableName  = tableName;
+    this.name       = name;
     this.fields     = new StringBuilder();
     this.wheres     = new StringBuilder();
     this.groups     = new StringBuilder();
     this.havins     = new StringBuilder();
     this.orders     = new StringBuilder();
     this.limits     = new int[0];
-    this.joinType   = 0;
-    this.joinExpr   = "";
-    this.joinList   = new LinkedHashSet();
     this.wparams    = new ArrayList();
     this.hparams    = new ArrayList();
     this.options    = new HashMap();
+    this.joinType   = 0 ;
+    this.joinExpr   = "";
+    this.joinList   = new LinkedHashSet();
   }
 
   /**
    * 构建表结构对象
    * @param tableName
    */
-  public FetchBean(String name)
+  public FetchBean(String tableName)
   {
-    this(name, name);
+    this(tableName, tableName);
   }
 
   /**
@@ -133,41 +165,36 @@ public class FetchBean
    */
   public FetchBean()
   {
-    this("", "");
-  }
-
-  /**
-   * 构造表结构对象
-   * @param table 取tableName和name
-   */
-  public FetchBean(Table table)
-  {
-    this(table.name, table.tableName);
-  }
-
-  /**
-   * 构造表结构对象
-   * @param fs 复制其全部属性
-   */
-  public FetchBean(FetchBean fs)
-  {
-    this.name       = fs.name;
-    this.tableName  = fs.tableName;
-    this.fields     = new StringBuilder(fs.fields);
-    this.wheres     = new StringBuilder(fs.wheres);
-    this.groups     = new StringBuilder(fs.groups);
-    this.havins     = new StringBuilder(fs.havins);
-    this.orders     = new StringBuilder(fs.orders);
-    this.limits     = fs.limits;
-    this.joinType   = fs.joinType;
-    this.joinExpr   = fs.joinExpr;
-    this.options    = new HashMap(fs.options);
-    this.wparams    = new ArrayList(fs.wparams);
-    this.hparams    = new ArrayList(fs.hparams);
-    this.joinList = new LinkedHashSet(fs.joinList);
+    this(null, null);
   }
 
   /** 查询 **/
+
+  /***
+   * 设置查询表和别名
+   * @param tableName
+   * @param name
+   * @return
+   */
+  public FetchBean from(String tableName, String name)
+  {
+    this.tableName = tableName;
+    this.name = name;
+    return this;
+  }
+
+  /**
+   * 设置查询表(如果别名已设置则不会更改)
+   * @param tableName
+   * @return
+   */
+  public FetchBean from(String tableName)
+  {
+    this.tableName = tableName;
+    if (this.name == null)
+    this.name = tableName;
+    return this;
+  }
 
   /**
    * 追加查询字段
@@ -316,14 +343,14 @@ public class FetchBean
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
-  public FetchBean join(Table table,
+  public FetchBean join(Table  table,
     String joinExpr, short joinType)
     throws HongsException
   {
     return this.link(new FetchBean(table),
            joinExpr, joinType);
   }
-  public FetchBean join(Table table,
+  public FetchBean join(Table  table,
     String joinExpr)
     throws HongsException
   {
@@ -340,41 +367,41 @@ public class FetchBean
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
-  public FetchBean join(String name, String tableName,
+  public FetchBean join(String tableName, String name,
     String joinExpr, short joinType)
     throws HongsException
   {
-    return this.link(new FetchBean(name, tableName),
+    return this.link(new FetchBean(tableName, name),
            joinExpr, joinType);
   }
-  public FetchBean join(String name, String tableName,
+  public FetchBean join(String tableName, String name,
     String joinExpr)
     throws HongsException
   {
-    return this.link(new FetchBean(name, tableName),
+    return this.link(new FetchBean(tableName, name),
            joinExpr, INNER);
   }
 
   /**
    * 关联一个表(采用指定表名或别名的方式)
-   * @param name
+   * @param tableName
    * @param joinExpr
    * @param joinType
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
-  public FetchBean join(String name,
+  public FetchBean join(String tableName,
     String joinExpr, short joinType)
     throws HongsException
   {
-    return this.link(new FetchBean(name),
+    return this.link(new FetchBean(tableName),
            joinExpr, joinType);
   }
-  public FetchBean join(String name,
+  public FetchBean join(String tableName,
     String joinExpr)
     throws HongsException
   {
-    return this.link(new FetchBean(name),
+    return this.link(new FetchBean(tableName),
            joinExpr, INNER);
   }
 
@@ -395,7 +422,7 @@ public class FetchBean
         bean =  this.link(new FetchBean(name), null, (short)0);
     return bean;
   }
-  public FetchBean join(String[] path)
+  public FetchBean join(String... path)
     throws HongsException
   {
     FetchBean bean = this;
@@ -411,28 +438,11 @@ public class FetchBean
   }
 
   /**
-   * 是否有关联指定表
-   * @param name
-   * @return 存在为true, 反之为false
-   */
-  protected boolean hasJoin(String name)
-  {
-    for (FetchBean bean : this.joinList)
-    {
-      if (this.name.equals(name))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * 获取关联的表查询结构
-   * @param tableName
+   * @param name
    * @return 指定关联的表查询结构对象
    */
-  protected FetchBean getJoin(String name)
+  public FetchBean getJoin(String name)
   {
     for (FetchBean bean : this.joinList)
     {
@@ -442,6 +452,19 @@ public class FetchBean
       }
     }
     return null;
+  }
+
+  /**
+   * 设置管理的表查询关系
+   * @param joinExpr
+   * @param joinType
+   * @return
+   */
+  public FetchBean setJoin(String joinExpr, short joinType)
+  {
+    this.joinExpr = joinExpr;
+    this.joinType = joinType;
+    return this;
   }
 
   /** 选项 **/
@@ -576,27 +599,38 @@ public class FetchBean
                           StringBuilder w, StringBuilder h,
                           String rp2)
   {
-    // 替换表别名
-    String rp = "$1`" + this.name + "`.$2";
+    if (this.tableName == null
+    ||  this.tableName.length() == 0)
+    {
+        throw new Error( new HongsException(0x10b4) );
+    }
 
-    // 表名
+    // 表名/替换
+    String rp;
     StringBuilder b = new StringBuilder();
-    b.append("`")
-     .append(this.tableName )
-     .append("` AS `")
-     .append(this.name)
-     .append("`");
+    b.append("`").append(this.tableName ).append("`");
+    if (this.name != null
+    &&  this.name.length() != 0
+    && !this.name.equals(this.tableName))
+    {
+      b.append(" AS `").append(this.name).append("`");
+      rp = "$1`"+this.name+"`.$2";
+    }
+    else
+    {
+      rp = "$1`"+this.tableName+"`.$2";
+    }
 
     // 关联
     if (rp2 != null)
     {
       switch (this.joinType)
       {
-        case FetchBean.INNER: b.insert(0, " INNER JOIN "); break;
-        case FetchBean.LEFT : b.insert(0,  " LEFT JOIN "); break;
-        case FetchBean.RIGHT: b.insert(0, " RIGHT JOIN "); break;
-        case FetchBean.FULL : b.insert(0,  " FULL JOIN "); break;
-        case FetchBean.CROSS: b.insert(0, " CROSS JOIN "); break;
+        case FetchBean.INNER: b.insert(0," INNER JOIN "); break;
+        case FetchBean.LEFT : b.insert(0, " LEFT JOIN "); break;
+        case FetchBean.RIGHT: b.insert(0," RIGHT JOIN "); break;
+        case FetchBean.FULL : b.insert(0, " FULL JOIN "); break;
+        case FetchBean.CROSS: b.insert(0," CROSS JOIN "); break;
         default: return;
       }
       if (this.joinExpr != null && this.joinExpr.length() != 0)
@@ -757,38 +791,6 @@ public class FetchBean
   }
 
   /** 不推荐的和废弃的方法 **/
-
-  /**
-   * 设置别名
-   * @param name
-   * @return 当前查询结构对象
-   */
-  public FetchBean setName(String name)
-  {
-    this.name = name != null ? name : "";
-    if (this.tableName.length() == 0)
-        this.tableName = this.name;
-    return this;
-  }
-
-  /**
-   * 设置表名
-   * @param tableName
-   * @return 当前查询结构对象
-   */
-  public FetchBean setTableName(String tableName)
-  {
-    this.tableName = tableName != null ? tableName : "";
-    if (this.name.length( )  ==  0)
-        this.name = this.tableName;
-    return this;
-  }
-
-  public FetchBean setJoinParam(String expr, short type) {
-      this.joinExpr = expr;
-      this.joinType = type;
-      return this;
-  }
 
   /**
    * 是否有设置查询字段

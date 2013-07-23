@@ -216,8 +216,7 @@ public class FetchMore
     }
 
     // 构建查询结构
-    fs.setName(name)
-      .setTableName(tableName)
+    fs.from (tableName, name)
       .where(col+" IN (?)", ids);
 
     /**
@@ -460,7 +459,7 @@ public class FetchMore
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
         FetchBean bean2 = bean.join(an)
-                 .setTableName(table2.tableName);
+                              .from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
 
@@ -508,7 +507,7 @@ public class FetchMore
         }
 
         // 设置关联关系
-        bean2.setJoinParam(pk+"="+fk, ji);
+        bean2.setJoin(pk+"="+fk, ji);
 
         setBean(bean2,assoc);
 
@@ -545,7 +544,7 @@ public class FetchMore
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
         FetchBean bean2 = bean.join(an)
-                 .setTableName(table2.tableName);
+                              .from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
 
