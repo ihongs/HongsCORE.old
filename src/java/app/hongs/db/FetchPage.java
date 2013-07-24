@@ -82,12 +82,12 @@ public class FetchPage
     if (this.page == 0)
     {
       CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
-      this.page = (int)conf.getProperty("core.first.of.page", 1);
+      this.page = (int)conf.getProperty("core.first.of.page", 1 );
     }
     if (this.rows == 0)
     {
       CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
-      this.rows = (int)conf.getProperty("core.rows.per.page", 1);
+      this.rows = (int)conf.getProperty("core.rows.per.page", 10);
     }
 
     /**
@@ -99,7 +99,7 @@ public class FetchPage
       this.page = 1;
     }
     else
-    if (this.page < 0)
+    if (this.page <  0)
     {
       this.getInfo();
       int tp = (Integer)this.info.get("total_pages");
@@ -152,8 +152,8 @@ public class FetchPage
   {
     if (this.info.containsKey("errno") && (Integer)this.info.get("errno") == 1)
     {
+      this.info.put("total_rows" , 0);
       this.info.put("total_pages", 0);
-      this.info.put("total_rows", 0);
       return this.info;
     }
 
@@ -186,8 +186,8 @@ public class FetchPage
     {
       int tr = Integer.parseInt(row.get("__count__").toString());
       int tp = (int)Math.ceil((float)tr / this.rows);
+      this.info.put("total_rows" , tr);
       this.info.put("total_pages", tp);
-      this.info.put("total_rows", tr);
     }
 
     return this.info;
