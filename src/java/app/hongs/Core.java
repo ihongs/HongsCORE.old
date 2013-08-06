@@ -26,7 +26,7 @@ import java.lang.reflect.InvocationTargetException;
  * <h2>静态属性:</h2>
  * <pre>
  * IN_DEBUG_MODE    标识是否处于调试模式
- * IN_SHELL_MODE    标识是否处于动作模式
+ * IN_SHELL_MODE    标识是否处于外壳模式(cmdlet)
  * BASE_HREF        应用访问路径(WEB应用中为ContextPath)
  * BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
  * CONF_PATH        配置信息存放目录
