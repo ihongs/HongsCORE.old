@@ -317,7 +317,7 @@ extends HashMap<String, Object>
   public static boolean IN_DEBUG_MODE;
 
   /**
-   * 是否处于外壳模式
+   * 是否处于外壳模式(cmdlet)
    */
   public static boolean IN_SHELL_MODE;
 
