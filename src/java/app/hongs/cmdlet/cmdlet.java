@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * <h1>外壳程序启动器</h1>
+ * <h1>外壳程序启动器(原名shell)</h1>
  *
  * <h2>配置选项:</h2>
  * <pre>
