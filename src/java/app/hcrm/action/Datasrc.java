@@ -17,7 +17,7 @@ public class Datasrc {
 
     public Datasrc() {
         model = (app.hcrm.model.Datasrc)
-                Core.getInstance("app.hcrm.model.Datasrc");
+                Core.getInstance(app.hcrm.model.Datasrc.class);
     }
 
     public void actionList(ActionHelper helper)

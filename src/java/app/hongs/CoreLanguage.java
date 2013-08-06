@@ -182,7 +182,7 @@ public class CoreLanguage
 
     CoreLanguage lang = new CoreLanguage();
 
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     if (conf.getProperty("core.load.language.once", false))
     {
       if (CoreLanguage.instances == null)
@@ -217,7 +217,7 @@ public class CoreLanguage
    */
   public static String getAcceptLanguage(String lang)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String[]   arr1 = lang.toLowerCase().split(",");
     String[]   arr2;
 

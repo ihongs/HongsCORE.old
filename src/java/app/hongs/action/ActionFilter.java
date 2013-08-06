@@ -130,7 +130,7 @@ public class ActionFilter
   public void _actFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
     throws IOException, ServletException
   {
-    ActionHelper helper = (ActionHelper)Core.getInstance("app.hongs.action.ActionHelper");
+    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
     if (helper.INITID == 1) ActionFilter.clearCache();
 
     /** 开始判断动作权限 **/
@@ -177,8 +177,8 @@ public class ActionFilter
 
   private void sayError(int type)
   {
-    CoreLanguage lang   = (CoreLanguage)Core.getInstance("app.hongs.CoreLanguage");
-    ActionHelper helper = (ActionHelper)Core.getInstance("app.hongs.action.ActionHelper");
+    CoreLanguage lang   = (CoreLanguage)Core.getInstance(app.hongs.CoreLanguage.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
 
     ActionFilter.clearCache();
 
@@ -318,7 +318,7 @@ public class ActionFilter
       return sessionList.get(sessionKey);
     }
 
-    ActionHelper helper = (ActionHelper)Core.getInstance("app.hongs.action.ActionHelper");
+    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
     String[ ] keys = sessionKey.split("\\.");
     Object subs = helper.getSession(keys[0]);
 

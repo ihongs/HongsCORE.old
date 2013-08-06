@@ -1,0 +1,37 @@
+<div id="tm-var-list">
+    <object class="config" name="hsList" data="">
+        <param name="loadUrl" value="tm/Var/List.do?rows=5"/>
+        <param name="openUrls[]" value="['.create', 'tm/var/form.html', '{LOADBOX}']"/>
+        <param name="openUrls[]" value="['.modify', 'tm/var/form.html?id={ID}', '{LOADBOX}']"/>
+        <param name="sendUrls[]" value="['.remove', 'tm/Var/Remove.do', '您确定要删除?']"/>
+    </object>
+    <div class="tool-bar">
+        <form class="fl tool-box" onsubmit="return false;">
+            <button type="button" class="create">创建</button>
+            <button type="button" class="modify for-select">修改</button>
+            <button type="button" class="remove for-checks">删除</button>
+        </form>
+        <form class="fr find-box" onsubmit="return false;">
+            <input type="text" name="find"/>
+            <button type="submit">查找</button>
+        </form>
+        <div class="cb"></div>
+    </div>
+    <div class="list-box">
+        <table>
+            <thead>
+                <tr>
+                    <td data-fn="_check" class="_check">
+                        <input type="checkbox" class="check-all" name="id[]"/>
+                    </td>
+                    <td data-fn="name">宏名称</td>
+                    <td data-fn="class">类型</td>
+                    <td data-fn="dflag_disp">状态</td>
+                    <td data-fn="exec_type_disp">周期</td>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="page-box"></div>
+</div>

@@ -66,7 +66,7 @@ public class DatumsFilter
     throws ServletException, IOException
   {
     ActionHelper helper = (ActionHelper)
-      Core.getInstance("app.hongs.action.ActionHelper");
+      Core.getInstance(app.hongs.action.ActionHelper.class);
 
     DatumsConfig ac;
     try

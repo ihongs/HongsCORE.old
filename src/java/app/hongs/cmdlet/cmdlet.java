@@ -5,6 +5,8 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
 import app.hongs.HongsThrowable;
+import app.hongs.action.ActionHelper;
+
 import java.net.URLDecoder;
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +18,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-
-import app.hongs.action.ActionHelper;
 
 /**
  * <h1>外壳程序启动器</h1>
@@ -129,7 +129,7 @@ public class cmdlet
       if (!(ta instanceof HongsThrowable))
       {
         CoreLanguage lang = (CoreLanguage)
-          Core.getInstance("app.hongs.CoreLanguage");
+          Core.getInstance(app.hongs.CoreLanguage.class);
         if (error == null || error.length() == 0)
         {
           error = lang.translate("core.error.unkwn");
@@ -212,7 +212,7 @@ public class cmdlet
     Core.LOGS_PATH = Core.BASE_PATH + File.separator + "logs";
     Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
 
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
     Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
     Core.SERVER_ID  = conf.getProperty("core.server.id", "0");
@@ -289,7 +289,7 @@ public class cmdlet
     Core core = Core.getInstance();
       core.init(act, lang);
     ActionHelper helper = (ActionHelper)
-      core.get("app.hongs.action.ActionHelper");
+      core.get(app.hongs.action.ActionHelper.class);
 
     String str;
     str = (String)optz.get("request");

@@ -1398,7 +1398,7 @@ public class DB
      * 如有设置dbName的单次加载则将其放入静态映射
      */
 
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     if (conf.getProperty("core.load.db."+dbName+".once", false))
     {
       if (DB.instances == null)

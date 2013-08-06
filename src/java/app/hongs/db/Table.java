@@ -162,7 +162,7 @@ public class Table
   {
     more.from(tableName, name);
 
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
 
     this.getColumns();
@@ -207,7 +207,7 @@ public class Table
   public int insert(Map<String, Object> values)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String ctime = conf.getProperty("core.table.field.ctime", "__ctime__");
     String etime = conf.getProperty("core.table.field.etime", "__etime__");
     String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
@@ -312,7 +312,7 @@ public class Table
   public int update(Map<String, Object> values, String where, Object... params)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
 
     long time = System.currentTimeMillis();
@@ -360,7 +360,7 @@ public class Table
   public int delete(String where, Object... params)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
 
     this.getColumns();
@@ -828,7 +828,7 @@ public class Table
       }
     }
 
-    CoreConfig conf = (CoreConfig) Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig) Core.getInstance(app.hongs.CoreConfig.class);
     return conf.getProperty("core.disable.check.values", false);
   }
 
@@ -852,7 +852,7 @@ public class Table
     else
       dftFmt = "yyyy/MM/dd HH:mm:ss";
 
-    CoreConfig conf = (CoreConfig) Core.getInstance("app.hongs.CoreLanguage");
+    CoreConfig conf = (CoreConfig) Core.getInstance(app.hongs.CoreLanguage.class);
     return conf.getProperty("core.default."+type+".format", dftFmt);
   }
 
@@ -894,7 +894,7 @@ public class Table
   private HongsException validateException(int code, String error, String fieldName, String... otherParams)
   {
     CoreLanguage lang = (CoreLanguage)
-    Core.getInstance("app.hongs.CoreLanguage");
+    Core.getInstance(app.hongs.CoreLanguage.class);
 
     String tl = lang.getProperty("user.table."+name, name);
     String fl = lang.getProperty("user.field."+name+"."+fieldName);

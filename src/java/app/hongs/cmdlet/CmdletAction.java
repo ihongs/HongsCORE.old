@@ -54,7 +54,7 @@ public class CmdletAction
   {
     Core         core   = Core.getInstance();
     ActionHelper helper = (ActionHelper)
-                          Core.getInstance("app.hongs.action.ActionHelper");
+                          Core.getInstance(app.hongs.action.ActionHelper.class);
     String       action = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
 
     if (action.length() == 0) {

@@ -56,7 +56,7 @@ public class JsLangAction
     throws IOException, ServletException
   {
     Core core = Core.getInstance();
-    ActionHelper helper = (ActionHelper)Core.getInstance("app.hongs.action.ActionHelper");
+    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
 
     String conf = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
     String type = helper.getParameter("t");

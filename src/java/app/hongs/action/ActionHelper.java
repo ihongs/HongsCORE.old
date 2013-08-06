@@ -297,7 +297,7 @@ public class ActionHelper
    */
   public void setLangToSession(String lang)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String name = conf.getProperty("core.language.session", "lang");
     this.setSession(name, lang);
   }
@@ -308,7 +308,7 @@ public class ActionHelper
    */
   public void setLangToCookie(String lang)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String name = conf.getProperty("core.language.session", "lang");
     this.setCookie(name, lang);
   }

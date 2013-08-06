@@ -414,10 +414,14 @@ public class FetchMore
   public static List assocSelect
     (Table table, Map assocs, FetchBean bean)
   throws HongsException {
+    if ( assocs == null ) assocs = new HashMap();
+
     List<Map> lnks = new ArrayList();
+
     assocSelect(table, assocs, bean, lnks);
     List rows = table.db.fetchMore( bean );
     assocSelect(table, assocs, bean, lnks, rows);
+
     return rows;
   }
 
@@ -677,10 +681,7 @@ public class FetchMore
   protected static void assocInsert(Table table, Map assocs, Map values)
     throws HongsException
   {
-    if (assocs.isEmpty())
-    {
-      return;
-    }
+    if ( assocs == null || assocs.isEmpty() ) return;
 
     String id = (String)values.get(table.primaryKey);
 

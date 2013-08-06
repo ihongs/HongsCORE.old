@@ -139,32 +139,16 @@ extends HashMap<String, Object>
     }
   }
 
-  /**
-   * 获取名称对应的唯一对象
-   *
-   * @param name [包路径.]类名
-   * @return 唯一对象
-   */
-  public Object get(String name)
+  private Object check(Core core, String name)
   {
-    /**
-     * 如果当前核心中有对应实例
-     * 则立即返回该唯一实例
-     * 如果全局核心中有对应实例
-     * 则立即返回该全局实例
-     * 否则尝试构建实例
-     */
-
     if (super.containsKey(name))
     {
       return super.get(name);
     }
 
-    Core core = Core.getInstance(0);
-
-    if (core.containsKey(name))
+    if ( core.containsKey(name))
     {
-      return core.get(name);
+      return  core.get(name);
     }
 
     if (name == null || name.length() == 0)
@@ -172,29 +156,28 @@ extends HashMap<String, Object>
       throw new HongsError(0x25, "Instance name can not be empty.");
     }
 
-    /**
-     * 创建一个新的实例, 并存入当前线程的实例列表中;
-     * 如果下次再请求该实例, 则直接从列表中获取;
-     * 整个线程的实例会在Servlet结束时清理掉.
-     */
+    return null;
+  }
+
+  private Object build(Core core, String name)
+  {
+    Class klass;
 
     // 获取类
-    Class klass;
     try
     {
-      klass = Class.forName(name);
+      klass  =  Class.forName( name );
     }
     catch (ClassNotFoundException ex)
     {
       throw new HongsError(0x27, "Can not find class by name '" + name + "'.");
     }
 
-    /**
-     * 如果类中提供了getInstance方法(静态,无参),
-     * 则调用该类的getInstance方法来获取实例,
-     * 否则调用其无参构造方法来初始化实例.
-     */
+    return build( core, name, klass );
+  }
 
+  private Object build(Core core, String name, Class klass)
+  {
     try
     {
       // 获取工厂方法
@@ -271,16 +254,43 @@ extends HashMap<String, Object>
   }
 
   /**
+   * 获取类对应的唯一对象
+   *
+   * @param klass [包路径.]类名.class
+   * @return 唯一对象
+   */
+  public Object get(Class klass)
+  {
+    Core core = Core.getInstance(0);
+    String name = klass.getName ( );
+    Object inst = check(core, name);
+    return inst != null ? inst : build(core, name, klass);
+  }
+
+  /**
+   * 获取名称对应的唯一对象
+   *
+   * @param name [包路径.]类名
+   * @return 唯一对象
+   */
+  public Object get(String name)
+  {
+    Core core = Core.getInstance(0);
+    Object inst = check(core, name);
+    return inst != null ? inst : build(core, name);
+  }
+
+  /**
    * 不支持get(Object), 仅支持get(String)
    * @param name
    * @return 异常
-   * @deprecated 
+   * @deprecated
    */
   @Override
   public Object get(Object name)
   {
     throw new HongsError(0x10,
-      "May cause an error on 'get(Object)', use 'get(String)'");
+      "May cause an error on 'get(Object)', use 'get(String)' or 'get(Class)'");
   }
 
   /*
@@ -349,7 +359,7 @@ extends HashMap<String, Object>
   /**
    * 核心实例表
    */
-  public static Map<Long, Core> INSTANCES = new HashMap<Long, Core>();
+  public static Map<Long, Core> INSTANCES = new HashMap<>();
 
   /**
    * 获取核心实例
@@ -379,6 +389,29 @@ extends HashMap<String, Object>
   public static Core getInstance()
   {
     return Core.getInstance(Core.getThreadId());
+  }
+
+  /**
+   * 获取应用实例
+   *
+   * @param id 线程ID
+   * @param klass [包路径.]类名.class
+   * @return 应用实例
+   */
+  public static Object getInstance(long id, Class klass)
+  {
+    return Core.getInstance(id).get(klass);
+  }
+
+  /**
+   * 获取当前应用实例
+   *
+   * @param klass [包路径.]类名.class
+   * @return 当前应用实例
+   */
+  public static Object getInstance(Class klass)
+  {
+    return Core.getInstance(Core.getThreadId()).get(klass);
   }
 
   /**

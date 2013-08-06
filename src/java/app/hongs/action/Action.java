@@ -58,7 +58,7 @@ public class Action
   {
     Core         core   = Core.getInstance();
     ActionHelper helper = (ActionHelper)
-                          Core.getInstance("app.hongs.action.ActionHelper");
+                          Core.getInstance(app.hongs.action.ActionHelper.class);
     String       action = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
 
     if (action.length() == 0) {
@@ -203,7 +203,7 @@ public class Action
     if (!(ta instanceof HongsThrowable))
     {
       CoreLanguage lang = (CoreLanguage)
-        Core.getInstance("app.hongs.CoreLanguage");
+        Core.getInstance(app.hongs.CoreLanguage.class);
       if (error == null || error.length() == 0)
       {
         error = lang.translate("core.error.unkwn");

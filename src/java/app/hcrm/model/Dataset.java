@@ -5,12 +5,15 @@ import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.DatumsConfig;
+import app.hongs.db.DB;
 import app.hongs.db.FetchBean;
 import app.hongs.util.Text;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 数据集模型
@@ -90,18 +93,22 @@ extends AbstractModel {
     }
     
     public void createTable(String id) throws HongsException {
+        DB baseDB = DB.getInstance( "hcrm_base");
+
         FetchBean bean = new FetchBean(db.getTable("ar_dataset_cols_info"));
-        bean.where("dataset_id=?", id);
+                  bean.where("dataset_id=?", id);
         List<Map> rows = db.fetchMore(bean);
         
         StringBuilder dims = new StringBuilder();
         StringBuilder mets = new StringBuilder();
-        String pk;
         
         DatumsConfig conf = new DatumsConfig("hcrm");
         String dct = conf.getDataByKey("DATASET_CREATE_TABLE").toString();
         String dcs = null;
-        Map<String, String> rep = new HashMap();
+
+        Map<String , String> rep = new HashMap();
+        rep.put( "id" , id );
+        rep.put( "pk_set" , "`id` INTEGER(11) NOT NULL AUTO_INCREMENT," );
         
         for (Map row : rows) {
             String col = Core.getUniqueId();
@@ -120,7 +127,7 @@ extends AbstractModel {
             
             switch (valueType) {
                 case "1":
-                    valueType = "NUMBERIC("+valueSize+","+valueScale+")";
+                    valueType = "NUMERIC("+valueSize+","+valueScale+")";
                     break;
                 case "2":
                     valueType = "VARCHAR("+valueSize+")";
@@ -133,17 +140,41 @@ extends AbstractModel {
                     valueType = "TIMESTAMP";
             }
             
-            sb.append("`"+col+"` "+valueType+" DEFAULT NULL COMMENT '"+name+"';");
+            sb.append("`C"+col+"` "+valueType+" DEFAULT NULL COMMENT '"+name+"',");
         }
         
         if (dims.length() != 0) {
+            rep.put("type", "dim");
             rep.put("cols_set", dims.toString());
             dcs = Text.assign(dct, rep);
+            
+            baseDB.execute(dcs);
         }
         
         if (mets.length() != 0) {
+            rep.put("type", "met");
             rep.put("cols_set", mets.toString());
             dcs = Text.assign(dct, rep);
+            baseDB.execute(dcs);
         }
+    }
+    
+    private void createTable(String sql, DB baseDB) throws HongsException {
+        Pattern p = Pattern.compile("table `.*?`", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(sql);
+        String tableName = m.group(1);
+        String sql2 = "SELECT COUNT(*) FROM `"+tableName+"`";
+        Map row;
+        try {
+            row = baseDB.fetchOne(sql2);
+        }
+        catch (HongsException ex) {
+            throw ex;
+        }
+        if (! row.isEmpty()) {
+            throw new HongsException(0x1000);
+        }
+        
+        baseDB.execute(sql);
     }
 }

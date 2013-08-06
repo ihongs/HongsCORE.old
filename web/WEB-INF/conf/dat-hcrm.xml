@@ -95,10 +95,10 @@
     </data>
     <data key="DATASET_CREATE_TABLE">
         <![CDATA[
-CREATE TABLE `$name` (
+CREATE TABLE `br_${id}_${type}_info` (
   $pk_set
   $cols_set
-  PRIMARY KEY (`$pk`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8
         ]]>
     </data>

@@ -79,7 +79,7 @@ public abstract class AbstractServlet
     Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
 
     // 默认开启字符串模式
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
     Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
     Core.SERVER_ID  = conf.getProperty("core.server.id", "0");
@@ -133,7 +133,7 @@ public abstract class AbstractServlet
 
     Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)
-      Core.getInstance("app.hongs.action.ActionHelper");
+      Core.getInstance(app.hongs.action.ActionHelper.class);
 
     if (action.equals(  core.ACTION)
     &&  aprsid.equals(helper.APRSID)
@@ -165,7 +165,7 @@ public abstract class AbstractServlet
      */
 
     CoreConfig conf = (CoreConfig)
-      Core.getInstance("app.hongs.CoreConfig");
+      Core.getInstance(app.hongs.CoreConfig.class);
 
     if (conf.getProperty("core.language.detect", false))
     {
@@ -240,7 +240,7 @@ public abstract class AbstractServlet
      */
 
     ActionHelper helper = (ActionHelper)
-      Core.getInstance("app.hongs.action.ActionHelper");
+      Core.getInstance(app.hongs.action.ActionHelper.class);
 
     if (helper.INITID > 0)
     {

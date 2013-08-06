@@ -19,7 +19,7 @@ public class Dataset {
 
     public Dataset() {
         model = (app.hcrm.model.Dataset)
-                Core.getInstance("app.hcrm.model.Dataset");
+                Core.getInstance(app.hcrm.model.Dataset.class);
     }
 
     @SelectList(conf="hcrm", lang="hcrm", keys={
@@ -83,6 +83,8 @@ public class Dataset {
         }
 
         String id = model.save(data);
+        
+        model.createTable(id);
 
         String nms = model.getAffectedNames();
         String msg = "删除数据集 "+nms+" 成功";

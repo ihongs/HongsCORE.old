@@ -18,7 +18,8 @@ public class Dept {
     private app.hcum.model.Dept model;
 
     public Dept() {
-        model = (app.hcum.model.Dept)Core.getInstance("app.hcum.model.DeptBaseTree");
+        model = (app.hcum.model.Dept)
+                Core.getInstance(app.hcum.model.Dept.class);
     }
 
     public void actionTree(ActionHelper helper)
@@ -63,7 +64,7 @@ public class Dept {
         String id = helper.getParameter("id");
         if (id != null) {
             app.hcum.model.Dept model2 = (app.hcum.model.Dept)
-                Core.getInstance("app.hcum.model.DeptBaseTree");
+                Core.getInstance(app.hcum.model.Dept.class);
             Set deptGroups = model2.getGroups(id);
             data.put("userGroups", deptGroups);
         }

@@ -36,9 +36,9 @@ public class NavTag extends SimpleTagSupport {
 
         Core core = Core.getInstance(  );
         cl = (CoreLanguage)
-             core.get("app.hongs.CoreLanguage");
+             core.get(app.hongs.CoreLanguage.class);
         ah = (ActionHelper)
-             core.get("app.hongs.action.ActionHelper");
+             core.get(app.hongs.action.ActionHelper.class);
         ActionConfig ac;
         try {
             ac = new ActionConfig(conf );

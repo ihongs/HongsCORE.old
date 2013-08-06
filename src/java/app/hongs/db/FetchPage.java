@@ -81,12 +81,12 @@ public class FetchPage
 
     if (this.page == 0)
     {
-      CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+      CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
       this.page = (int)conf.getProperty("core.first.of.page", 1 );
     }
     if (this.rows == 0)
     {
-      CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+      CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
       this.rows = (int)conf.getProperty("core.rows.per.page", 10);
     }
 

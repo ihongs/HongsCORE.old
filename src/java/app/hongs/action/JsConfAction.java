@@ -56,7 +56,7 @@ public class JsConfAction
     throws IOException, ServletException
   {
     Core core = Core.getInstance();
-    ActionHelper helper = (ActionHelper)Core.getInstance("app.hongs.action.ActionHelper");
+    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
 
     String name = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
     String type = req.getParameter("t");

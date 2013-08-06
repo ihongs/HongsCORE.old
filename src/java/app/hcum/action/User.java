@@ -17,7 +17,8 @@ public class User {
     private app.hcum.model.User model;
 
     public User() {
-        model = (app.hcum.model.User)Core.getInstance("app.hcum.model.UserBaseInfo");
+        model = (app.hcum.model.User)
+                Core.getInstance(app.hcum.model.User.class);
     }
 
     public void actionList(ActionHelper helper)

@@ -651,7 +651,7 @@ abstract public class AbstractBaseModel
     }
 
     // 删除子数据(当有dflag时不删除子数据)
-    CoreConfig conf = (CoreConfig)Core.getInstance("app.hongs.CoreConfig");
+    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
     String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
     if (!this.table.getColumns().containsKey(dflag))
     {

@@ -82,7 +82,7 @@ find: 查找的关键词
 
 [特定请求参数规则]
 
-表示字段等于:       field=vlaue
+表示字段等于:       field=value
 表示字段不等于:     -field=value
 查找匹配的行:       find=word1+word2
 查找不匹配的行:     -find=word1+word2
@@ -90,21 +90,21 @@ find: 查找的关键词
 
 [数据模型命名规范]
 
-表名由"分区_主题名称[_二级主题[三级主题]]_类型"组成;
-主题名称区分大小写, 一般情况最多只有两级主题;
-关联表命名为"分区_来源名_目标名_asoc".
+表名由"分区_模块_主题[_二级主题]"组成, 推荐最多两级主题.
 分区分别为:
   a: 应用区, 存放应用数据
   b: 仓库区, 存放历史数据
   m: 市场区, 存放结果数据
   s: 缓冲区, 存放缓冲数据
-类型分别为:
-  info: 信息表(id)
-  tree: 树形表(id, pid)
-  rel:  关联表(id, x_id, y_id)
-  list: 链式表(id, ctime, etime)
-  node: 节点表(id, ctime)
-  log:  日志表(ctime)
+字段名推荐:
+  id        主键, CHAR(20)
+  pid       父键, CHAR(20)
+  x_id      外键, CHAR(20), x为关联表缩写
+  dflag     删除标识, 0为正常, 1为删除
+  ctime     创建时间, DATETIME或TIMESTAMP
+  mtime     修改时间, DATETIME或TIMESTAMP
+  btime     开始时间, DATETIME或TIMESTAMP
+  etime     结束时间, DATETIME或TIMESTAMP
 
 <<KEEP IT SIMPLE, STUPID!>>
 
