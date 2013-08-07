@@ -21,7 +21,7 @@ extends AbstractBaseModel {
 
     public User()
     throws HongsException {
-        super("hcum", "au_user_base_info");
+        super("hcum", "a_hcum_user");
     }
 
     public Set<String> getGroups(String userId)

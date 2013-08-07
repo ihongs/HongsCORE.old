@@ -17,7 +17,7 @@ extends AbstractModel {
 
     public Datasrc()
     throws HongsException {
-        super("hcrm", "ar_datasrc_base_info");
+        super("hcrm", "a_hcrm_datasrc");
     }
 
     /**

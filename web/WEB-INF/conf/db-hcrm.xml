@@ -7,35 +7,35 @@ xsi:schemaLocation="http://hongs-core db.xsd">
     <driver link="default"/>
     <source link="default"/>
     <tables>
-        <table name="ar_datasrc_base_info"
+        <table name="a_hcrm_datasrc"
                primaryKey="id">
             <assoc type="HAS_MANY"
-                   name="ar_datasrc_conf_info"
+                   name="a_hcrm_datasrc"
                    foreignKey="datasrc_id"/>
         </table>
-        <table name="ar_dataset_base_info"
+        <table name="a_hcrm_dataset"
                primaryKey="id">
             <assoc type="BLS_TO"
-                   name="ar_datasrc_base_info"
+                   name="a_hcrm_datasrc"
                    foreignKey="datasrc_id"/>
             <assoc type="HAS_MANY"
-                   name="ar_dataset_conf_info"
+                   name="a_hcrm_dataset_conf"
                    foreignKey="dataset_id"/>
             <assoc type="HAS_MANY"
-                   name="ar_dataset_cols_info"
+                   name="a_hcrm_dataset_cols"
                    foreignKey="dataset_id"
                    orderBy=".type,.name"/>
             <assoc type="HAS_MANY"
-                   name="ar_dataset_load_log"
+                   name="a_hcrm_dataset_logs"
                    foreignKey="dataset_id"/>
         </table>
-        <table name="ar_datasrc_conf_info"
+        <table name="a_hcrm_datasrc_conf"
                primaryKey="id"/>
-        <table name="ar_dataset_conf_info"
+        <table name="a_hcrm_dataset_conf"
                primaryKey="id"/>
-        <table name="ar_dataset_cols_info"
+        <table name="a_hcrm_dataset_cols"
                primaryKey="id"/>
-        <table name="ar_dataset_load_log"
+        <table name="a_hcrm_dataset_logs"
                primaryKey="id"/>
     </tables>
 </db>

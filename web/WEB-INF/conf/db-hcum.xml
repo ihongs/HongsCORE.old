@@ -6,26 +6,27 @@ xsi:schemaLocation="http://hongs-core db.xsd">
     <source link="default"/>
     <driver link="default"/>
     <tables>
-        <table name="au_user_base_info"
-               primaryKey="user_id">
-            <assoc type="HAS_MANY"
-                   name="au_user_dept_asoc"
-                   foreignKey="user_id"/>
-            <assoc type="HAS_MANY"
-                   name="au_user_group_asoc"
-                   foreignKey="user_id"/>
-        </table>
-        <table name="au_dept_base_info"
+        <table name="a_hcum_dept"
                primaryKey="dept_id">
             <assoc type="HAS_MANY"
-                   name="au_user_dept_asoc"
-                   foreignKey="dept_id"/>
-            <assoc type="HAS_MANY"
-                   name="au_dept_group_asoc"
+                   name="a_hcum_dept_group"
                    foreignKey="dept_id"/>
         </table>
-        <table name="au_user_dept_asoc"/>
-        <table name="au_user_group_asoc"/>
-        <table name="au_dept_group_asoc"/>
+        <table name="a_hcum_user"
+               primaryKey="user_id">
+            <assoc type="HAS_MANY"
+                   name="a_hcum_user_group"
+                   foreignKey="user_id"/>
+            <assoc type="HAS_MANY"
+                   name="a_hcum_user_dept"
+                   foreignKey="user_id">
+                <assoc type="BLS_TO"
+                       name="a_hcum_dept"
+                       foreignKey="dept_id"/>
+            </assoc>
+        </table>
+        <table name="a_hcum_dept_group"/>
+        <table name="a_hcum_user_group"/>
+        <table name="a_hcum_user_dept"/>
     </tables>
 </db>

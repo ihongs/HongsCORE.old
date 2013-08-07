@@ -17,7 +17,7 @@ public class Dept
 extends AbstractTreeModel {
 
   public Dept() throws HongsException {
-      super("hcum", "au_dept_base_info");
+      super("hcum", "a_hcum_dept");
   }
 
     public Set<String> getGroups(String deptId)

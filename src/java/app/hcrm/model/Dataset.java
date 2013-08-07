@@ -24,7 +24,7 @@ extends AbstractModel {
 
     public Dataset()
     throws HongsException {
-        super("hcrm", "ar_dataset_base_info");
+        super("hcrm", "a_hcrm_dataset");
     }
 
     /**

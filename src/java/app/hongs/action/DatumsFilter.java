@@ -128,9 +128,9 @@ public class DatumsFilter
     /** 输出过滤 **/
 
     HttpServletResponse rsp2;
-    WrapServletResponse rsp3;
+    ResponseWrapper rsp3;
     rsp2 = helper.response;
-    rsp3 = new WrapServletResponse(rsp2);
+    rsp3 = new ResponseWrapper(rsp2);
     helper.response = rsp3;
     chain.doFilter(req, rsp3);
     helper.response = rsp2;

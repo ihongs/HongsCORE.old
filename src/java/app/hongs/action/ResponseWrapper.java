@@ -14,12 +14,12 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * 返回数据包裹
  * @author Hong
  */
-public class WrapServletResponse extends HttpServletResponseWrapper {
+public class ResponseWrapper extends HttpServletResponseWrapper {
 
     private StringWriter output;
     private  PrintWriter writer;
 
-    public WrapServletResponse(HttpServletResponse response) {
+    public ResponseWrapper(HttpServletResponse response) {
         super( response );
         output = new StringWriter();
         writer = new  PrintWriter(output);

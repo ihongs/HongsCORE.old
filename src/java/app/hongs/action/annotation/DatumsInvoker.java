@@ -2,7 +2,7 @@ package app.hongs.action.annotation;
 
 import app.hongs.action.ActionHelper;
 import app.hongs.action.DatumsConfig;
-import app.hongs.action.WrapServletResponse;
+import app.hongs.action.ResponseWrapper;
 import app.hongs.util.Tree;
 import java.util.Map;
 import java.util.HashMap;
@@ -45,9 +45,9 @@ public class DatumsInvoker {
         /** 输出过滤 **/
 
         HttpServletResponse rsp2;
-        WrapServletResponse rsp3;
+        ResponseWrapper rsp3;
         rsp2 = helper.response;
-        rsp3 = new WrapServletResponse(rsp2);
+        rsp3 = new ResponseWrapper(rsp2);
         helper.response = rsp3;
         chain.doAction();
         helper.response = rsp2;
