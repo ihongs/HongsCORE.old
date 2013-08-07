@@ -7,10 +7,9 @@
   Phone: +8618621523173
   Email: kevin.hongs@gmail.com
 
-本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库,
-使用jQueryTools作为UI组件库. 以hs开头的为普通函数; 以Hs开头
-的为伪类函数, this指向调用的容器对象. 依赖的jQueryTools组件:
-tabs, overlay, tooltip, validator
+本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库, 使用jQueryTools作为UI
+组件库. 以hs开头的为普通函数; 以Hs开头的为伪类函数, this指向调用的容器对象.
+依赖的jQueryTools组件: tabs, overlay, tooltip, validator
 
 [Class]
 
