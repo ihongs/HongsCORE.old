@@ -96,18 +96,18 @@ public class TableDesc
 
       if (key.equals("PRI"))
       {
-        this.primaryKey.add(key);
+        this.primaryKey.add(field);
       }
       else if (key.equals("UNI"))
       {
         Set<String> keys = new HashSet<String>();
-        keys.add(key);
+        keys.add(field);
         this.uniqueKeys.put(key, keys);
       }
       else if (key.equals("MUL"))
       {
         Set<String> keys = new HashSet<String>();
-        keys.add(key);
+        keys.add(field);
         this.indexKeys.put(key, keys);
       }
     }

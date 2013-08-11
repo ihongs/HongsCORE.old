@@ -35,8 +35,7 @@ import java.util.Set;
  *
  * @author Hong
  */
-public class AbstractTreeModel
-extends AbstractBaseModel
+public class AbstractTreeModel extends AbstractBaseModel
 {
 
   /**

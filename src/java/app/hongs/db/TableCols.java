@@ -67,8 +67,8 @@ public class TableCols
         column.put("isNullable",      md.isNullable(i));
         column.put("isWritable",      md.isWritable(i));
         column.put("isReadOnly",      md.isReadOnly(i));
-        column.put("isAutoIncrement", md.isAutoIncrement(i));
         column.put("isCaseSensitive", md.isCaseSensitive(i));
+        column.put("isAutoIncrement", md.isAutoIncrement(i));
 
         // 在这里没什么意义的属性:
         /*

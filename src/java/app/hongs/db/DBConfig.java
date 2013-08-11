@@ -456,8 +456,7 @@ public class DBConfig
           // 关联更新键, Add by Hong on 2013/6/6
           else if ("updateKeys".contains(name))
           {
-            assoc.put(name, Arrays.asList(value.split(","),
-                            new ArrayList< String >( ) ) );
+            assoc.put(name, Arrays.asList(value.split(",")));
           }
         }
 

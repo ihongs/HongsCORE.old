@@ -612,12 +612,12 @@ public class FetchMore
   }
 
     public static void assocUpdate(
-            Table                       table,
-            List<Map<String,Object>>    rows,
-            List<String>                keys,
-            String                      where,
-            Object...                   params)
-            throws HongsException
+        Table           table,
+        List<Map>       rows,
+        List<String>    keys,
+        String          where,
+        Object...       params
+    )   throws HongsException
     {
         List<Object> params1 = Arrays.asList(params);
         List<Object> params2;
@@ -633,7 +633,7 @@ public class FetchMore
 
         List ids = new ArrayList();
 
-        for (Map<String, Object> row : rows)
+        for (Map row : rows)
         {
             params2 = new ArrayList(params1);
             for (String k : keys)
@@ -753,30 +753,39 @@ public class FetchMore
        * 所以当有指定updateKeys时, 使用assocUpdate方法更新数据, 其原理为:
        * 找出没改变的数据并更新, 然后插入新增数据, 最后删除更新和新增之外的数据.
        */
-      List<String> updateKeys = (List<String>)config.get("updateKeys");
+      List<String> updateKeys = (List<String>) config.get( "updateKeys" );
       if (updateKeys != null && !updateKeys.isEmpty())
       {
-          assocUpdate(tb, subValues2, updateKeys, "`"+foreignKey+"`=?", pa);
-          continue;
-      }
-
-      // 先删除旧数据
-      tb.delete("`"+foreignKey+"`=?", pa);
-
-      // 再插入新数据
-      Iterator it2 = subValues2.iterator();
-      while (it2.hasNext())
-      {
-        Map subValues3=(Map)it2.next();
-        subValues3.put(foreignKey, id);
-
-        // 如果存在主键而没给定主键值,则帮其添加上唯一ID
-        if (tb.primaryKey != null && tb.primaryKey.length() != 0
-        &&  ! subValues3.containsKey(tb.primaryKey)) {
-          subValues3.put(tb.primaryKey, Core.getUniqueId());
+        // 填充外键
+        Iterator it2 = subValues2.iterator();
+        while (it2.hasNext())
+        {
+          Map subValues3=(Map)it2.next();
+          subValues3.put(foreignKey, id);
         }
 
-        tb.insert(subValues3);
+        assocUpdate(tb, subValues2, updateKeys, "`"+foreignKey+"`=?", pa);
+      }
+      else
+      {
+        // 先删除旧数据
+        tb.delete("`"+foreignKey+"`=?" , pa);
+
+        // 再插入新数据
+        Iterator it2 = subValues2.iterator();
+        while (it2.hasNext())
+        {
+          Map subValues3=(Map)it2.next();
+          subValues3.put(foreignKey, id);
+
+          // 如果存在主键而没给定主键值,则帮其添加上唯一ID
+          if (tb.primaryKey != null && tb.primaryKey.length() != 0
+          &&  ! subValues3.containsKey(tb.primaryKey)) {
+            subValues3.put(tb.primaryKey, Core.getUniqueId());
+          }
+
+          tb.insert(subValues3);
+        }
       }
     }
   }
@@ -825,83 +834,5 @@ public class FetchMore
       tb.delete("`"+foreignKey+"`=?", pa);
     }
   }
-
-  public abstract class Assoc {
-      public void loop(Map map, String field) {
-        Map     row,
-                sub;
-        List    lst;
-        String  lnk;
-
-        while ((sub = getSub()) != null)
-        {
-          lnk   = (String) sub.get(field);
-          lst   = ( List ) map.get( lnk );
-
-          if (lst == null)
-          {
-            //throw new HongsException(0x10c0, "Line nums is null");
-            continue;
-          }
-
-          Iterator it = lst.iterator();
-          while (it.hasNext())
-          {
-            row = (Map) it.next();
-            this.addSub(row, sub);
-          }
-        }
-      }
-
-      abstract public Map  getSub();
-
-      abstract public void addSub(Map row, Map sub);
-  }
-
-private abstract class MultiAssoc extends Assoc {
-    String name;
-
-    public MultiAssoc(List rows, String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void addSub(Map row, Map sub) {
-        List lzt;
-        if (row.containsKey(name))
-        {
-            lzt = ( List ) row.get(name);
-        }
-        else
-        {
-            lzt = new ArrayList( );
-            row.put(  name, lzt  );
-        }
-        lzt.add(sub);
-    }
-}
-
-private abstract class AssocMore extends Assoc {
-    String name;
-
-    public AssocMore(List rows, String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void addSub(Map row, Map sub) {
-        List lzt;
-        if (row.containsKey(name))
-        {
-            lzt = ( List ) row.get(name);
-        }
-        else
-        {
-            lzt = new ArrayList( );
-            row.put(  name, lzt  );
-        }
-        lzt.add(sub);
-    }
-}
 
 }

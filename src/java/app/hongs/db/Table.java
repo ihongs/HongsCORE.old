@@ -77,19 +77,19 @@ public class Table
   public String tableName;
 
   /**
-   * 表前缀
-   */
-  public String tablePrefix;
-
-  /**
-   * 表后缀
-   */
-  public String tableSuffix;
-
-  /**
    * 主键名
    */
   public String primaryKey;
+
+  /**
+   * 表前缀(用于生成tableName, 构造后设置无效)
+   */
+  protected String tablePrefix;
+
+  /**
+   * 表后缀(用于生成tableName, 构造后设置无效)
+   */
+  protected String tableSuffix;
 
   private Map columns;
   private Map assocs;
@@ -119,7 +119,7 @@ public class Table
     {
       this.tablePrefix = (String)tableConfig.get("prefix");
     }
-    else
+    else if (this.tablePrefix == null)
     {
       this.tablePrefix = "";
     }
@@ -128,7 +128,7 @@ public class Table
     {
       this.tableSuffix = (String)tableConfig.get("suffix");
     }
-    else
+    else if (this.tableSuffix == null)
     {
       this.tableSuffix = "";
     }
@@ -139,7 +139,7 @@ public class Table
     {
       this.primaryKey = (String)tableConfig.get("primaryKey");
     }
-    else
+    else if (this.primaryKey == null)
     {
       this.primaryKey = "";
     }
@@ -149,6 +149,19 @@ public class Table
       this.assocs = (Map)tableConfig.get("assocs");
       this.scossa = (Map)tableConfig.get("scossa");
     }
+  }
+
+  public Table (DB db, String tableName)
+    throws HongsException
+  {
+    this(db, buildTableConfig(tableName));
+  }
+
+  private static Map buildTableConfig(String name)
+  {
+    Map tableConfig = new HashMap();
+    tableConfig.put( "name", name );
+    return tableConfig;
   }
 
   /**

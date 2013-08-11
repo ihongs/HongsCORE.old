@@ -64,7 +64,7 @@ public final class Text
      */
 
     if (esc.indexOf(sym) == -1)
-        esc   +=    sym;
+        esc    +=   sym;
 
     String esc2 = Text.escapeRegular(esc);
     String sym2 = Text.escapeReplace(sym);

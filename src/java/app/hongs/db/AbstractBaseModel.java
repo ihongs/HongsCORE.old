@@ -12,6 +12,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.util.Text;
 import app.hongs.HongsException;
+import java.util.Arrays;
 
 /**
  * <h1>基础模型</h1>
@@ -741,12 +742,14 @@ abstract public class AbstractBaseModel
    * 3. 按照sort参数设置排序方式,
    *    多个字段排序: sort=a+b+c或sort=-a+b+c, -表示该字段逆序;
    * 1. 按照find参数设置模糊查询,
-   *    多关键词搜索: find=a+b+c或-find=a+b+c, -表示排除式搜索;
+   *    多关键词搜索: find=x+y+z或-find=x+y+z, -表示排除式搜索;
+   *    指定字段搜索: find.a=x或find.a.b=y, 同样适用上面的规则,
+   *    a.b为搜索关联表, 但需注意: a,a.b必须在findKeys中有指定;
    * 4. 如果有id或ids参数则仅获取id或ids对应的记录,
    *    可使用-id=x或-id[]=x表示排除;
    * 5. 如果有字段名相同的参数则获取与之对应的记录,
    *    可使用-field=xxx表示排除条件.
-   * 注: "+"在URL中为空格
+   * 注: "+"在URL中表示空格.
    * </pre>
    *
    * @param req
@@ -821,7 +824,39 @@ abstract public class AbstractBaseModel
       // 搜索
       if (key.equals(this.findVar))
       {
-        this.findFilter(this.findKeys, value, not, fs);
+        /**
+         * 为实现对指定的字段进行模糊搜索
+         * 增加find.col和find.sub.col的用法
+         * Add by Hongs, 2013.8.9
+         */
+        if (value instanceof Map) {
+            List ks = Arrays.asList(this.findKeys);
+            Map  m1 = (Map) value;
+            for (Object o1 : m1.entrySet()) {
+                Map.Entry e1 = (Map.Entry) o1;
+                String k1 = e1.getKey().toString();
+                Object v1 = e1.getValue();
+
+                if (v1 instanceof Map) {
+                    Map m2 = (Map) v1;
+                    for (Object o2 : m2.entrySet()) {
+                        Map.Entry e2 = (Map.Entry) o2;
+                        String k2 = k1+"."+e2.getKey().toString();
+                        String v2 = e2.getValue().toString();
+
+                        if (ks.contains(k2)) {
+                            this.findFilter(new String[]{k2}, v2, not, fs);
+                        }
+                    }
+                } else {
+                    if (ks.contains(k1)) {
+                        this.findFilter(new String[]{k1}, v1, not, fs);
+                    }
+                }
+            }
+        } else {
+                this.findFilter(this.findKeys, value, not, fs);
+        }
         continue;
       }
 
@@ -887,7 +922,7 @@ abstract public class AbstractBaseModel
           continue;
         }
 
-        fs.select(".`"+col+"`");
+        fs.select( ".`" + col + "`" );
       }
       else
       {
@@ -907,7 +942,7 @@ abstract public class AbstractBaseModel
 
         tns.add(tn); tns.addAll(ts);
         FetchBean fs2 = fs.join(ts).join(tn);
-        fs2.select(".`"+fn+"`");
+        fs2.select(".`" + fn + "`");
       }
     }
   }
@@ -950,14 +985,12 @@ abstract public class AbstractBaseModel
       int pos = sort.indexOf('.');
       if (pos == -1)
       {
-        /**
-         * 检查排序的字段是否存在
-         * 如果不存在则跳过
-         */
         if (!columns.containsKey(sort))
         {
-          return;
+          continue;
         }
+
+        fs.orderBy(sort +(desc?" DESC":""));
       }
       else
       {
@@ -973,11 +1006,12 @@ abstract public class AbstractBaseModel
         tb = this.db.getTable(Table.getAssocName(tc));
         ts = Table.getAssocPath(tc);
         cs = tb.getColumns();
-        if (! cs.containsKey( fn )) continue;
+        if (!cs.containsKey( fn )) continue;
 
-        tns.add(tn); tns.addAll(ts);
-        FetchBean fs2 = fs.join(ts).join(tn);
-        fs2.orderBy(sort + (desc ? " DESC" : " ASC"));
+        tns.add(tn);
+        tns.addAll(ts);
+        fs.join(ts).join(tn);
+        fs.orderBy(sort +(desc?" DESC":""));
       }
     }
   }
@@ -991,7 +1025,7 @@ abstract public class AbstractBaseModel
    */
   protected void findFilter(String[] keys, Object val, boolean not, FetchBean fs)
   {
-    if (keys   ==   null
+    if (keys  ==  null
     ||!(val instanceof String))
     {
       return;
@@ -1012,18 +1046,22 @@ abstract public class AbstractBaseModel
        * 需要对这些符号进行转义;
        * 前后加"%"用于模糊匹配.
        */
-      find = Text.escape(  find, "%_", "/"  );
+      find = Text.escape( find, "%_", "/" );
       find = "%" + find + "%";
 
-      for (int j = 0; j < keys.length; j ++)
+      for (String key : keys)
       {
-        String field = keys[j];
-        if (field.indexOf('.') == -1)
+        if (key.indexOf('.') != -1 )
         {
-            field = ".`"+field+"`";
+          String[] b = key.split("\\.", 2 );
+          key = "`"+ b[0] +"`.`"+ b[1] +"`";
+        }
+        else
+        {
+          key = ".`" + key + "`";
         }
 
-        fs.where(field+(not?" NOT LIKE ?":" LIKE ?")+" ESCAPE '\\\\'", find);
+        fs.where(key + (not?" NOT LIKE ?":" LIKE ?") + " ESCAPE '/'", find);
       }
     }
   }

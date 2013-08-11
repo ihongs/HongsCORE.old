@@ -11,7 +11,7 @@ import app.hongs.db.Table;
 /**
  * <h1>表结构同步器(Table structure synchronizer)</h1>
  *
- * <b>注意: 参考MySQL编写, 可能不适用于其他数据库</b>
+ * <b>注意: 参考MySQL编写, 可能不适用于其他数据库(使用了SHOW语句)</b>
  *
  * @author Hongs
  */
@@ -22,6 +22,7 @@ public class TableSync
   private TableDesc td;
   private Table slaver;
   private TableDesc sd;
+  private String field;
 
   /**
    * 通过表对象构造
@@ -33,23 +34,7 @@ public class TableSync
   {
     this.table = table;
     this.td = TableDesc.getInstance(table);
-  }
-
-  /**
-   * 同步从表结构(多个)
-   * @param slavers
-   * @param delExtraFields 删除多余的字段
-   * @throws app.hongs.HongsException
-   */
-  public void syncSlavers(List<Table> slavers, boolean delExtraFields)
-  throws HongsException
-  {
-    Iterator it = slavers.iterator();
-    while (it.hasNext())
-    {
-      Table slaver = (Table)it.next();
-      this.syncSlaver(slaver, delExtraFields);
-    }
+    this.field = this.td.fields.keySet().toArray()[0].toString();
   }
 
   /**
@@ -61,28 +46,41 @@ public class TableSync
   public void syncSlaver(Table slaver, boolean delExtraFields)
   throws HongsException
   {
-    // 没有表则创建
-    String sql = "CREATE TABLE IF NOT EXISTS `"+slaver.tableName+"` (`c` char(1) DEFAULT NULL)";
-    slaver.db.execute(sql);
+    // 没有表则创建表
+    String sql = "SHOW TABLES LIKE '"+slaver.tableName+"'" ;
+    Map row = slaver.db.fetchOne(sql);
+    if (row.isEmpty())
+    {
+        sql = "SHOW CRAETE TABLE `"+table.tableName+"`";
+        sql = ((Map) table.db.fetchAll(sql).get( 0 ))
+                    .get("Create Table").toString( );
+        sql = sql.replaceFirst("^CREATE TABLE `.*?`",
+              "CREATE TABLE `"+slaver.tableName+"`");
 
-    // 注册子表及表结构
+        slaver.db.execute(sql);
+
+        return;
+    }
+
+    // 注册从表及结构
     this.slaver = slaver;
     this.sd = TableDesc.getInstance(slaver);
 
-    Iterator it;
+    Iterator  it;
     Map.Entry et;
 
     /**
      * 第一步:
      * 根据子表对比主表结构
-     * 找出不存在或已改变了的键并删除
-     * 找出不存在的字段并删除
+     * 找出缺失或改变了的键并删除
+     * 找出缺失的字段并删除
      */
 
     if (delExtraFields)
     {
       // 主键
-      if (!this.sd.primaryKey.equals(this.td.primaryKey))
+      if (!this.sd.primaryKey.isEmpty()
+      &&  !this.sd.primaryKey.equals(this.td.primaryKey))
       {
         this.alterKey(TableDesc.DROP, TableDesc.PRIMARY);
       }
@@ -145,7 +143,7 @@ public class TableSync
       String fieldName = (String)et.getKey();
       String fieldSql = (String)et.getValue();
 
-      if (!this.sd.fields.containsKey(fieldName))
+      if (! this.sd.fields.containsKey(fieldName))
       {
         this.alterField(TableDesc.ADD, fieldName);
       }
@@ -153,7 +151,7 @@ public class TableSync
       {
         String fieldSql2 = (String)this.sd.fields.get(fieldName);
 
-        if (!fieldSql2.equals(fieldSql))
+        if (! fieldSql2.equals(fieldSql))
         {
           this.alterField(TableDesc.CHANGE, fieldName);
         }
@@ -168,9 +166,9 @@ public class TableSync
 
     // 主键
     if (!this.td.primaryKey.isEmpty()
-    &&   this.td.primaryKey.equals(this.sd.primaryKey))
+    &&  !this.td.primaryKey.equals(this.sd.primaryKey))
     {
-      this.alterKey(TableDesc.ADD, TableDesc.PRIMARY);
+      this.alterKey(TableDesc.ADD , TableDesc.PRIMARY);
     }
 
     // 唯一键
@@ -201,6 +199,23 @@ public class TableSync
       {
         this.alterKey(TableDesc.ADD, key);
       }
+    }
+  }
+
+  /**
+   * 同步从表结构(多个)
+   * @param slavers
+   * @param delExtraFields 删除多余的字段
+   * @throws app.hongs.HongsException
+   */
+  public void syncSlavers(List<Table> slavers, boolean delExtraFields)
+  throws HongsException
+  {
+    Iterator it = slavers.iterator();
+    while (it.hasNext())
+    {
+      Table slave = (Table)it.next();
+      this.syncSlaver(slave, delExtraFields);
     }
   }
 

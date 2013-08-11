@@ -1,14 +1,15 @@
 package app.hongs.db;
 
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Properties;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Properties;
+import java.util.regex.Pattern;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -886,7 +887,11 @@ public class DB
   public Map<String, Object> fetchOne(String sql, Object... params)
     throws HongsException
   {
-    sql += " LIMIT 1";
+    if (!Pattern.compile("LIMIT[\\s\\d,]+$", Pattern.CASE_INSENSITIVE).matcher(sql).find()
+    &&  !Pattern.compile( "^\\s*SHOW\\s+"  , Pattern.CASE_INSENSITIVE).matcher(sql).find())
+    {
+      sql += " LIMIT 1";
+    }
 
     List<Map<String, Object>> rows = this.fetchAll(sql, params);
 
@@ -896,7 +901,7 @@ public class DB
     }
     else
     {
-      return new HashMap<String, Object>();
+      return new HashMap();
     }
   }
 
@@ -923,9 +928,7 @@ public class DB
   public Map fetchLess(FetchBean less)
     throws HongsException
   {
-    less.limit(1);
-
-    List<Map<String, Object>> rows = this.fetchMore(less);
+    List<Map<String, Object>> rows = this.fetchMore(less.limit(1));
 
     if (!rows.isEmpty())
     {
@@ -933,7 +936,7 @@ public class DB
     }
     else
     {
-      return new HashMap<String, Object>();
+      return new HashMap();
     }
   }
 

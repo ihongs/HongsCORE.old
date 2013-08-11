@@ -86,12 +86,10 @@ public class DBSync
       Table table = this.db.getTable(tab);
 
       Map config = new HashMap();
-      config.put("name", table.name);
-      config.put("prefix", tablePrefix != null ? tablePrefix : table.tablePrefix);
-      config.put("suffix", tableSuffix != null ? tableSuffix : table.tableSuffix);
+      config.put("name", table.tableName);
       Table table2 = new Table(slaver, config);
 
-      TableSync sst = new TableSync(table);
+      TableSync sst = new TableSync( table );
       sst.syncSlaver(table2, delExtraFields);
 
       if (delExtraTables)
