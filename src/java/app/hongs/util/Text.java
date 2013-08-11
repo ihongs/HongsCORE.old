@@ -226,7 +226,7 @@ public final class Text
   public static String cleanHTML(String str)
   {
     Pattern pat;
-    pat = Pattern.compile("<style.*?>.*?</style>", Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
+    pat = Pattern.compile( "<style.*?>.*?</style>" , Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
     str = pat.matcher(str).replaceAll("");
     pat = Pattern.compile("<script.*?>.*?</script>", Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
     str = pat.matcher(str).replaceAll("");
