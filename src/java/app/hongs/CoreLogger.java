@@ -3,7 +3,6 @@ package app.hongs;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
-import java.util.regex.Pattern;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -14,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import app.hongs.action.ActionHelper;
+import app.hongs.util.Str;
 
 /**
  * <h1>日志记录工具</h2>
@@ -54,13 +54,6 @@ public class CoreLogger
    * 日志写句柄
    */
   private PrintWriter out;
-
-  /**
-   * 清理的正则
-   */
-  private Pattern p1 = Pattern.compile("^\\s*(\\r\\n|\\r|\\n)",
-                                            Pattern.MULTILINE);
-  private Pattern p2 = Pattern.compile("^", Pattern.MULTILINE);
 
   /**
    * 以指定路径名称构造日志对象
@@ -155,8 +148,7 @@ public class CoreLogger
      * 去掉空行, 行首缩进
      */
     sb.append("\r\n");
-    sb.append(p2.matcher(p1.matcher(text.trim())
-              .replaceAll("")).replaceAll("\t"));
+    sb.append(Str.indent(Str.clearEL(text.trim())));
 
     /*
     try

@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
  *
  * @author Hongs
  */
-public final class Text
+public final class Str
 {
 
   /** 引用 **/
@@ -66,8 +66,8 @@ public final class Text
     if (esc.indexOf(sym) == -1)
         esc    +=   sym;
 
-    String esc2 = Text.escapeRegular(esc);
-    String sym2 = Text.escapeReplace(sym);
+    String esc2 = Str.escapeRegular(esc);
+    String sym2 = Str.escapeReplace(sym);
 
     return str.replaceAll("(["+esc2+"])", sym2+"$1");
     /*
@@ -77,11 +77,11 @@ public final class Text
   }
   public static String escape(String str, String esc)
   {
-    return Text.escape(str, esc, "\\");
+    return Str.escape(str, esc, "\\");
   }
   public static String escape(String str)
   {
-    return Text.escape(str, "'\"", "\\");
+    return Str.escape(str, "'\"", "\\");
   }
 
   /**
@@ -101,39 +101,46 @@ public final class Text
     if (esc.indexOf(sym) == -1)
         esc   +=    sym;
 
-    String esc2 = Text.escapeRegular(esc);
-    String sym2 = Text.escapeRegular(sym);
+    String esc2 = Str.escapeRegular(esc);
+    String sym2 = Str.escapeRegular(sym);
 
     return str.replaceAll(sym2 + "(["+esc2+"])", "$1");
   }
   public static String resume(String str, String esc)
   {
-    return Text.resume(str, esc, "\\");
+    return Str.resume(str, esc, "\\");
   }
   public static String resume(String str)
   {
-    return Text.resume(str, "'\"", "\\");
+    return Str.resume(str, "'\"", "\\");
   }
 
   /** 替换 **/
 
-  private static Pattern assignPattern = Pattern.compile("\\$((\\w+)|\\{(.*?)\\})");
+  private static Pattern assignPattern = Pattern.compile("(^|[^\\\\])\\$(?:(\\w+)|\\{(.*?)\\})");
 
-  public static String assign(String str, Map<String, String> vars) {
+  /**
+   * 注入参数
+   * @param str
+   * @param vars
+   * @return
+   */
+  public static String inject(String str, Map<String, String> vars) {
       Matcher matcher = assignPattern.matcher(str);
       StringBuffer sb = new StringBuffer();
+      String       st;
 
       while (matcher.find()) {
-          String st = matcher.group(2);
-          if (null == st) {
-                 st = matcher.group(3);
+          st = matcher.group(2);
+          if (st == null) {
+              st = matcher.group(3);
           }
           if (vars.containsKey(st)) {
               st = vars.get(st);
           } else {
               st = "";
           }
-
+          st = matcher.group(1) + st;
           st = Matcher.quoteReplacement(st);
           matcher.appendReplacement(sb, st);
       }
@@ -142,7 +149,13 @@ public final class Text
       return sb.toString(  );
   }
 
-  public static String assign(String str, List<String> vars)
+  /**
+   * 注入参数
+   * @param str
+   * @param vars
+   * @return
+   */
+  public static String inject(String str, List<String> vars)
   {
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
@@ -152,10 +165,16 @@ public final class Text
           rep2.put(String.valueOf(i), vars.get(i));
       }
 
-      return assign(str, rep2);
+      return inject(str, rep2);
   }
 
-  public static String assign(String str, String... vars)
+  /**
+   * 注入参数
+   * @param str
+   * @param vars
+   * @return
+   */
+  public static String inject(String str, String... vars)
   {
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
@@ -165,7 +184,29 @@ public final class Text
           rep2.put(String.valueOf(i), vars[i]);
       }
 
-      return assign(str, rep2);
+      return inject(str, rep2);
+  }
+
+  /** 缩进 **/
+
+  /**
+   * 行首缩进
+   * @param str
+   * @param ind
+   * @return
+   */
+  public static String indent(String str, String ind) {
+      return Pattern.compile("^", Pattern.MULTILINE)
+                    .matcher(str).replaceAll(ind);
+  }
+
+  /**
+   * 行首缩进
+   * @param str
+   * @return
+   */
+  public static String indent(String str) {
+      return indent(str, "\t");
   }
 
   /** 清理 **/

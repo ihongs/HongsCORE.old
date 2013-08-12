@@ -11,7 +11,7 @@ import javax.servlet.jsp.tagext.DynamicAttributes;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
-import app.hongs.util.Text;
+import app.hongs.util.Str;
 
 /**
  * <h1>语言信息读取标签</h1>
@@ -69,10 +69,10 @@ public class LangTag extends TagSupport implements DynamicAttributes {
       && ! "".equals(this.esc)
       && ! "no".equals(this.esc)) {
         if ("yes".equals(this.esc)) {
-          str = Text.escape(str);
+          str = Str.escape(str);
         }
         else {
-          str = Text.escape(str, this.esc);
+          str = Str.escape(str, this.esc);
         }
       }
 

@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.util.Text;
+import app.hongs.util.Str;
 import app.hongs.HongsException;
 import java.util.Arrays;
 
@@ -1046,7 +1046,7 @@ abstract public class AbstractBaseModel
        * 需要对这些符号进行转义;
        * 前后加"%"用于模糊匹配.
        */
-      find = Text.escape( find, "%_", "/" );
+      find = Str.escape( find, "%_", "/" );
       find = "%" + find + "%";
 
       for (String key : keys)

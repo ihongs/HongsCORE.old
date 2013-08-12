@@ -31,7 +31,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.Text;
+import app.hongs.util.Str;
 
 /**
  * <h1>数据库基础类</h1>
@@ -131,6 +131,23 @@ public class DB
   private Map       source;
   private String[]  labels;
 
+  public DB(Map cf)
+    throws HongsException
+  {
+    if (cf == null) cf = new HashMap();
+
+    this.name         = "";
+    this.driver       = (Map) cf.get("driver");
+    this.source       = (Map) cf.get("source");
+    this.tableClass   = "";
+    this.tablePrefix  = "";
+    this.tableSuffix  = "";
+    this.tableConfigs = new  HashMap( );
+    this.tableObjects = new  HashMap( );
+
+    this.connection   = null;
+  }
+
   public DB(DBConfig cf)
     throws HongsException
   {
@@ -144,8 +161,6 @@ public class DB
     this.tableObjects = new  HashMap( );
 
     this.connection   = null;
-
-    this.init();
   }
 
   public DB (String db)
@@ -172,7 +187,7 @@ public class DB
     this(DBConfig.parseByDocument(db));
   }
 
-  public final void init()
+  public final void open()
     throws HongsException
   {
     TOP: do {
@@ -347,8 +362,8 @@ public class DB
 
       if (Core.IN_DEBUG_MODE)
       {
-        //CoreLogger.debug("Close database connection, URL: "
-        //        + this.connection.getMetaData().getURL());
+        CoreLogger.debug("Close database connection, URL: "
+          + this.connection.getMetaData().getURL());
       }
 
       this.connection.close();
@@ -759,7 +774,7 @@ public class DB
   public ResultSet query(String sql, Object... params)
     throws HongsException
   {
-    this.init();
+    this.open();
     this.labels = null;
 
     if (Core.IN_DEBUG_MODE)
@@ -952,7 +967,7 @@ public class DB
   public boolean execute(String sql, Object... params)
     throws HongsException
   {
-    this.init();
+    this.open();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -992,7 +1007,7 @@ public class DB
   public int update(String sql, Object... params)
     throws HongsException
   {
-    this.init();
+    this.open();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -1039,7 +1054,7 @@ public class DB
 
     /** 组织语言 **/
 
-    String sql = "UPDATE `" + app.hongs.util.Text.escape(table, "`") + "` SET ";
+    String sql = "UPDATE `" + Str.escape(table, "`") + "` SET ";
     List params2 = new ArrayList();
 
     Iterator it = values.entrySet().iterator();
@@ -1049,7 +1064,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      sql += "`" + app.hongs.util.Text.escape(field, "`") + "` = ?, ";
+      sql += "`" + Str.escape(field, "`") + "` = ?, ";
     }
 
     sql = sql.substring(0, sql.length()  - 2);
@@ -1087,7 +1102,7 @@ public class DB
 
     /** 组织语句 **/
 
-    String sql = "INSERT INTO `" + app.hongs.util.Text.escape(table, "`") + "`";
+    String sql = "INSERT INTO `" + Str.escape(table, "`") + "`";
     List params2 = new ArrayList();
     String fs = "", vs = "";
 
@@ -1098,7 +1113,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      fs += "`" + app.hongs.util.Text.escape(field, "`") + "`, ";
+      fs += "`" + Str.escape(field, "`") + "`, ";
       vs += "?, ";
     }
 
@@ -1125,7 +1140,7 @@ public class DB
   {
     /** 组织语句 **/
 
-    String sql = "DELETE FROM `" + app.hongs.util.Text.escape(table, "`") + "`";
+    String sql = "DELETE FROM `" + Str.escape(table, "`") + "`";
 
     if (where != null && where.length() != 0)
     {
@@ -1146,7 +1161,7 @@ public class DB
    */
   public static String quoteField(String field)
   {
-    return "`" + Text.escape(field, "`") + "`";
+    return "`" + Str.escape(field, "`") + "`";
   }
 
   /**
@@ -1156,7 +1171,7 @@ public class DB
    */
   public static String quoteValue(String value)
   {
-    return "'" + Text.escape(value, "'") + "'";
+    return "'" + Str.escape(value, "'") + "'";
   }
 
   /**
