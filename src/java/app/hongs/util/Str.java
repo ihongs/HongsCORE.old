@@ -117,7 +117,8 @@ public final class Str
 
   /** 替换 **/
 
-  private static Pattern assignPattern = Pattern.compile("(^|[^\\\\])\\$(?:(\\w+)|\\{(.*?)\\})");
+  // 偶数个转义符$单词或{文本}
+  private static Pattern assignPattern = Pattern.compile("((?:[\\\\][\\\\])*)\\$(?:(\\w+)|\\{(.*?)\\})");
 
   /**
    * 注入参数
