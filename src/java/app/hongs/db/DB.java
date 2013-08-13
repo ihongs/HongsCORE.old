@@ -877,7 +877,7 @@ public class DB
     throws HongsException
   {
     if (!Pattern.compile("LIMIT[\\s\\d,]+$", Pattern.CASE_INSENSITIVE).matcher(sql).find()
-    &&  !Pattern.compile( "^\\s*SHOW\\s+"  , Pattern.CASE_INSENSITIVE).matcher(sql).find())
+    &&  !Pattern.compile("^\\s*SHOW\\s+", Pattern.CASE_INSENSITIVE).matcher(sql).find())
     {
       sql += " LIMIT 1";
     }
