@@ -8,6 +8,6 @@ package app.hcrm.util.loader;
  *
  * @author Hong
  */
-public class CSVRemoteLoader {
+public class HTTPLoader {
     
 }

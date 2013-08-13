@@ -118,7 +118,7 @@ public final class Str
   /** 替换 **/
 
   // 偶数个转义符$单词或{文本}
-  private static Pattern assignPattern = Pattern.compile("((?:[\\\\][\\\\])*)\\$(?:(\\w+)|\\{(.*?)\\})");
+  private static Pattern injectPattern = Pattern.compile("((?:[\\\\][\\\\])*)\\$(?:(\\w+)|\\{(.*?)\\})");
 
   /**
    * 注入参数
@@ -127,7 +127,7 @@ public final class Str
    * @return
    */
   public static String inject(String str, Map<String, String> vars) {
-      Matcher matcher = assignPattern.matcher(str);
+      Matcher matcher = injectPattern.matcher(str);
       StringBuffer sb = new StringBuffer();
       String       st;
 
@@ -193,12 +193,12 @@ public final class Str
   /**
    * 行首缩进
    * @param str
-   * @param ind
+   * @param inds
    * @return
    */
-  public static String indent(String str, String ind) {
+  public static String indent(String str, String inds) {
       return Pattern.compile("^", Pattern.MULTILINE)
-                    .matcher(str).replaceAll(ind);
+                    .matcher(str).replaceAll(inds);
   }
 
   /**

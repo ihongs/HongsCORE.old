@@ -38,9 +38,9 @@
         var inf = context.data("HsForm")._info;
         var dat = {};
 
-        if (inf && inf.ar_datasrc_conf_info) {
-            for(var i = 0; i < inf.ar_datasrc_conf_info.length; i ++) {
-                var a = inf.ar_datasrc_conf_info[i];
+        if (inf && inf.a_hcrm_datasrc_conf) {
+            for(var i = 0; i < inf.a_hcrm_datasrc_conf.length; i ++) {
+                var a = inf.a_hcrm_datasrc_conf[i];
                 dat[a.name] = a.value;
             }
             $(this).data("dat" , dat);
@@ -61,9 +61,9 @@
                         var div = $('<div></div>').appendTo(box);
                         $('<label></label>')
                             .appendTo(div).text(t+":");
-                        $('<input type="hidden" name="ar_datasrc_conf_info['+i+'][name]"/>')
+                        $('<input type="hidden" name="a_hcrm_datasrc_conf['+i+'][name]"/>')
                             .appendTo(div).val (v);
-                        $('<input type="text" name="ar_datasrc_conf_info['+i+'][value]" required="required"/>')
+                        $('<input type="text" name="a_hcrm_datasrc_conf['+i+'][value]" required="required"/>')
                             .appendTo(div).val (hsGetValue(dat, v));
                     }
 

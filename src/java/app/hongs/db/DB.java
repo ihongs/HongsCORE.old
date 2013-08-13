@@ -775,7 +775,6 @@ public class DB
     throws HongsException
   {
     this.open();
-    this.labels = null;
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -790,7 +789,9 @@ public class DB
 
     try
     {
-      return ps.executeQuery();
+      ResultSet rs =   ps.executeQuery(  );
+      this.labels  = this.getColLabels(rs);
+      return rs;
     }
     catch (SQLException ex)
     {
@@ -804,7 +805,8 @@ public class DB
    * 可使用while ((row = db.fetch(rs)) != null)获取每一行,
    * 全部获取结束会自动执行closeStatement和closeResultSet;
    * 如果您仅需要获取一行, 可自行判断结果是否非空,
-   * 然后手动调用closeStatement和closeResultSet.
+   * 但需手动调用closeStatement和closeResultSet.
+   * 注意: 不能在多线程共享DB对象的情况下使用.
    * </p>
    * @param rs
    * @return 行数据
@@ -813,38 +815,28 @@ public class DB
   public Map<String, Object> fetch(ResultSet rs)
     throws HongsException
   {
-    Statement ps = null ;
-    boolean   gs = false;
+    Statement ps = null;
 
     try
     {
       if (rs.next())
       {
-          gs = true;
-        if (this.labels == null)
-        {
-            this.labels =  this.getColLabels( rs);
-        }
         return this.getRowValues(rs, this.labels);
       }
 
+      this.labels = null;
+      this.closeResultSet(rs);
       ps = rs.getStatement();
+      this.closeStatement(ps);
     }
     catch (SQLException  ex)
     {
+      this.labels = null;
+      this.closeResultSet(rs);
+      if (ps != null)
+      this.closeStatement(ps);
+
       throw new app.hongs.HongsException(0x1042, ex);
-    }
-    finally
-    {
-      if (gs == false)
-      {
-        // 清空labels缓存
-        this.labels = null;
-        // 关闭ResultSet对象
-        this.closeResultSet(rs);
-        // 关闭Statement对象
-        this.closeStatement(ps);
-      }
     }
 
     return null;
@@ -861,31 +853,13 @@ public class DB
   public List<Map<String, Object>> fetchAll(String sql, Object... params)
     throws HongsException
   {
-    List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+    List<Map<String, Object>> rows = new ArrayList();
+         Map<String, Object>  row;
 
-    Statement ps = null;
-    ResultSet rs = this.query(sql, params);
-    String[ ] ls = this.getColLabels( rs );
-
-    try
+    ResultSet rs = this.query( sql, params );
+    while ( (row = this.fetch(rs)) != null )
     {
-      while (rs.next())
-      {
-        rows.add(this.getRowValues(rs,ls));
-      }
-
-      ps = rs.getStatement();
-    }
-    catch (SQLException  ex)
-    {
-      throw new app.hongs.HongsException(0x1042, ex);
-    }
-    finally
-    {
-      // 关闭ResultSet对象
-      this.closeResultSet(rs);
-      // 关闭Statement对象
-      this.closeStatement(ps);
+      rows.add(row);
     }
 
     return rows;

@@ -1,60 +1,46 @@
 package app.hcrm.util;
 
 import app.hongs.HongsException;
+import app.hongs.db.DB;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 写入器接口
  * @author Hong
  */
 public interface Writer {
-    /**
-     * 设置要写入的字段
-     * @param cols {当前表字段: 来源表字段}
-     */
-    public void setCols(Map cols);
+    public void setCols(Map<String, String> cols);
+
+    public void setDims(List<String> dims);
     
-    /**
-     * 设置写入的区域名称
-     * @param name 
-     */
     public void setName(String name);
     
-    /**
-     * 设置写入的片段标识
-     * @param name 
-     */
-    public void setFlag(String name);
+    public Set<String> getKeys();
     
     /**
-     * 获取写入的起始位置
-     * @return 
-     */
-    public int getPos();
-    
-    /**
-     * 获取写入的数据长度
-     * @return 
-     */
-    public int getLen();
-    
-    /**
-     * 打开连接
+     * 打开
+     * @throws HongsException 
      */
     public void open() throws HongsException;
-    
+
     /**
-     * 清理数据
-     */
-    public void clean() throws HongsException;
-    
-    /**
-     * 写入数据
+     * 写入(临时表)
+     * @param data
+     * @throws HongsException 
      */
     public void write(Map data) throws HongsException;
+
+    /**
+     * 应用(真实表)
+     * @throws HongsException 
+     */
+    public void apply() throws HongsException;
     
     /**
-     * 断开连接
+     * 关闭
+     * @throws HongsException 
      */
     public void close() throws HongsException;
 }

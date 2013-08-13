@@ -1,6 +1,7 @@
 package app.hcrm.util;
 
 import app.hongs.HongsException;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -10,34 +11,25 @@ import java.util.Map;
 public interface Loader {
     /**
      * 设置加载参数
-     * @param conf datasrc,dataset,manual的并集
+     * @param conf datasrc,dataset,execset的并集
      */
     public void setConf(Map conf);
-    
+
+    public void setTime(Date time);
+
     /**
-     * 设置加载字段
-     */
-    public void setCols(Map cols);
-    
-    /**
-     * 获取标识
-     * @return 
-     */
-    public String getFlag();
-    
-    /**
-     * 打开连接
+     * 打开
      */
     public void open() throws HongsException;
-    
+
     /**
-     * 加载数据, 并调用Writer写入
-     * @param writer 
+     * 加载, 并调用Writer写入
+     * @param writer
      */
     public void load(Writer writer) throws HongsException;
-    
+
     /**
-     * 关闭连接
+     * 关闭
      */
     public void close() throws HongsException;
 }

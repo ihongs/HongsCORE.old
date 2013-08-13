@@ -23,8 +23,8 @@ public class Dataset {
     }
 
     @SelectList(conf="hcrm", lang="hcrm", keys={
-        "type=DATASET_TYPES",
         "exec_type=DATASET_EXEC_TYPES",
+        "exec_wday=DATASET_EXEC_WDAYS",
         "dflag=DATASET_STATS"
     })
     public void actionList(ActionHelper helper)
@@ -34,11 +34,10 @@ public class Dataset {
     }
 
     @SelectData(conf="hcrm", lang="hcrm", keys={
-        "type=DATASET_TYPES",
         "exec_type=DATASET_EXEC_TYPES",
         "exec_hour=DATASET_EXEC_HOURS",
-        "exec_date=DATASET_EXEC_DATES",
-        "exec_day=DATASET_EXEC_DAYS"
+        "exec_wday=DATASET_EXEC_WDAYS",
+        "exec_mday=DATASET_EXEC_MDAYS"
     })
     public void actionInfo(ActionHelper helper)
     throws HongsException {
@@ -55,7 +54,7 @@ public class Dataset {
         Map data = new HashMap();
         view.put("data" , data );
         data.put("class", model.getClassSelect());
-        
+
         helper.back(view);
     }
 
@@ -83,11 +82,9 @@ public class Dataset {
         }
 
         String id = model.save(data);
-        
-        model.createTable(id);
 
         String nms = model.getAffectedNames();
-        String msg = "删除数据集 "+nms+" 成功";
+        String msg = "保存数据集 "+nms+" 成功";
 
         helper.back(id , msg);
     }

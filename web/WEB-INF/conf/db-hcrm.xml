@@ -10,7 +10,7 @@ xsi:schemaLocation="http://hongs-core db.xsd">
         <table name="a_hcrm_datasrc"
                primaryKey="id">
             <assoc type="HAS_MANY"
-                   name="a_hcrm_datasrc"
+                   name="a_hcrm_dataset_conf"
                    foreignKey="datasrc_id"/>
         </table>
         <table name="a_hcrm_dataset"
@@ -24,10 +24,17 @@ xsi:schemaLocation="http://hongs-core db.xsd">
             <assoc type="HAS_MANY"
                    name="a_hcrm_dataset_cols"
                    foreignKey="dataset_id"
+                   updateKeys="name,type,value_type,value_size,value_scale"
                    orderBy=".type,.name"/>
-            <assoc type="HAS_MANY"
-                   name="a_hcrm_dataset_logs"
+        </table>
+        <table name="a_hcrm_loadlog"
+               primaryKey="id">
+            <assoc type="BLS_TO"
+                   name="a_hcrm_dataset"
                    foreignKey="dataset_id"/>
+            <assoc type="HAS_MANY"
+                   name="a_hcrm_loadlog_dims"
+                   foreignKey="loadlog_id"/>
         </table>
         <table name="a_hcrm_datasrc_conf"
                primaryKey="id"/>
@@ -35,7 +42,7 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                primaryKey="id"/>
         <table name="a_hcrm_dataset_cols"
                primaryKey="id"/>
-        <table name="a_hcrm_dataset_logs"
+        <table name="a_hcrm_loadlog_dims"
                primaryKey="id"/>
     </tables>
 </db>

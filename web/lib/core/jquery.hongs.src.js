@@ -907,8 +907,8 @@ HsForm.prototype = {
 
             if (typeof this["fill_"+n] !="undefined") {
                 v = this["fill_"+n].call(this, inp, v, n, "data");
-                if (!v) continue;
             }
+            if (! v) continue;
 
             if (inp.prop("tagName") == "SELECT" && i == 1) {
                 vk = inp.attr("data-vk"); if(!vk) vk = 0;
@@ -1920,10 +1920,6 @@ function _HsReadOpts() {
         case "B:": // Boolean
             v = v.substring(2);
             v = /(true|yes|ok)/i.test(v);
-            break;
-        case "D:": // Data
-            v = v.substring(2);
-            v = jQuery(arr[i]).parent( ).data( v );
             break;
         default:
             if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))

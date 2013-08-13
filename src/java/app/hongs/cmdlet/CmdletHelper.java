@@ -99,8 +99,8 @@ public class CmdletHelper
    * "="表示1个, ":"表示0个或1个, "+"表示1个或多个, "*"表示0个或多个<br/>
    * 本规则参考自Perl的Getopt::Long模块, 为兼容, ":+"也表示0个或多个<br/>
    * "s"表示字串, "i"表示整数, "f"表示浮点数, "b"表示布尔值<br/>
-   * 规则"!U"(不含引号)表示不支持未知选项<br/>
    * 规则"!A"(不含引号)表示不支持匿名选项<br/>
+   * 规则"!U"(不含引号)表示不支持未知选项<br/>
    * </p>
    * <pre>
    * 例如:
@@ -114,9 +114,9 @@ public class CmdletHelper
   public static Map<String, Object> getOpts(Map<String, String[]> opts, String... chks)
   throws HongsError
   {
-    Map<String, Object> newOpts = new HashMap<String, Object>();
+    Map<String, Object> newOpts = new HashMap();
     StringBuilder       errMsgs = new StringBuilder();
-    Pattern  p = Pattern.compile("^([\\w\\.\\-\\|]*)(=|:|\\+|\\*|:\\+)([sifb]|\\/(.+)\\/(i)?(\\d+)?)$");
+    Pattern  p = Pattern.compile("^([\\w\\.\\-\\|]*)(=|:|\\+|\\*|:\\+)([sifb]|\\/(.+)\\/(i)?( .*)?)$");
     Pattern bp = Pattern.compile("^(true|false|yes|no|y|n|1|0)$", Pattern.CASE_INSENSITIVE);
     Pattern fp = Pattern.compile("^\\d+(\\.\\d+)?$");
     Pattern ip = Pattern.compile("^\\d+$");
@@ -305,8 +305,7 @@ public class CmdletHelper
          */
         String mat = m.group(4);
         String cas = m.group(5);
-        String eno = m.group(6);
-        String err;
+        String err = m.group(6);
         Pattern rp;
         if (cas != null)
         {
@@ -316,9 +315,9 @@ public class CmdletHelper
         {
           rp = Pattern.compile(mat);
         }
-        if (eno != null)
+        if (err != null)
         {
-          err = errs[Integer.parseInt(eno)];
+          err = err.trim();
         }
         else
         {
@@ -331,7 +330,7 @@ public class CmdletHelper
           {
             // 6号错误
             errMsgs.append(pre).append(err.replace("%opt", key2)
-                              .replace("%mat", mat));
+                                          .replace("%mat", mat));
             continue F;
           }
           valuez.add(value);

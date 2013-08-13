@@ -1,19 +1,16 @@
 package app.hcrm.model;
 
 import app.hcrm.util.AbstractModel;
-import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.DatumsConfig;
 import app.hongs.db.DB;
 import app.hongs.db.FetchBean;
-import app.hongs.util.Text;
+import app.hongs.util.Str;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 数据集模型
@@ -25,6 +22,37 @@ extends AbstractModel {
     public Dataset()
     throws HongsException {
         super("hcrm", "a_hcrm_dataset");
+    }
+
+    @Override
+    public String add(Map<String, Object> data)
+    throws HongsException {
+        String id = super.add(data);
+
+        buildDataTable(id);
+
+        return id;
+    }
+
+    @Override
+    public String put(String id, Map<String, Object> data)
+    throws HongsException {
+        /**
+         * 获取旧的列特征
+         */
+        List<String> oldColsFeature = getColsFeature(id);
+
+        id = super.put(id, data);
+
+        /**
+         * 获取新的列特征, 如果不一致则重建数据表
+         */
+        List<String> newColsFeature = getColsFeature(id);
+        if (! oldColsFeature.equals(newColsFeature)) {
+            buildDataTable(id);
+        }
+
+        return id;
     }
 
     /**
@@ -57,7 +85,7 @@ extends AbstractModel {
         }
 
         // 获取数据源
-        rows = this.db.getTable ("ar_datasrc_base_info")
+        rows = this.db.getTable ("a_hcrm_datasrc")
                       .fetchMore(new FetchBean());
         for (Map row : rows) {
             String c = (String)row.get("class");
@@ -91,90 +119,92 @@ extends AbstractModel {
 
         return null;
     }
-    
-    public void createTable(String id) throws HongsException {
-        DB baseDB = DB.getInstance( "hcrm_base");
 
-        FetchBean bean = new FetchBean(db.getTable("ar_dataset_cols_info"));
-                  bean.where("dataset_id=?", id);
+    private List<String> getColsFeature(String id) throws HongsException {
+        FetchBean bean = new FetchBean(db.getTable("a_hcrm_dataset_cols"));
+                  bean.where("dataset_id=?", id)
+                      .orderBy("name,type,value_type,value_size,value_scale");
         List<Map> rows = db.fetchMore(bean);
-        
-        StringBuilder dims = new StringBuilder();
-        StringBuilder mets = new StringBuilder();
-        
-        DatumsConfig conf = new DatumsConfig("hcrm");
-        String dct = conf.getDataByKey("DATASET_CREATE_TABLE").toString();
-        String dcs = null;
+
+        List<String> feature = new ArrayList();
+
+        for (Map row : rows) {
+            feature.add(row.get("name").toString());
+            feature.add(row.get("type").toString());
+            feature.add(row.get("value_type").toString());
+            feature.add(row.get("value_size").toString());
+            feature.add(row.get("value_scale").toString());
+        }
+
+        return feature;
+    }
+
+    private void buildDataTable(String id) throws HongsException {
+        FetchBean bean = new FetchBean(db.getTable("a_hcrm_dataset_cols"));
+                  bean.where("dataset_id=?", id)
+                      .orderBy("type,name");
+        List<Map> rows = db.fetchMore(bean);
+
+        DatumsConfig conf =  new DatumsConfig("hcrm");
+        String dct = conf.getDataByKey("DATASET_CREATE_TABLE").toString( );
 
         Map<String , String> rep = new HashMap();
-        rep.put( "id" , id );
-        rep.put( "pk_set" , "`id` INTEGER(11) NOT NULL AUTO_INCREMENT," );
-        
+        StringBuilder colsSet = new StringBuilder();
+        StringBuilder idxsSet = new StringBuilder();
+
         for (Map row : rows) {
-            String col = Core.getUniqueId();
+            String col  = row.get("id").toString();
             String name = row.get("name").toString();
             String type = row.get("type").toString();
             String valueType = row.get("value_type").toString();
             String valueSize = row.get("value_size").toString();
             String valueScale = row.get("value_scale").toString();
-            StringBuilder sb = null;
-            
-            switch (type) {
-                case "1": sb = dims; break;
-                case "2": sb = mets; break;
-                default : continue ;
-            }
-            
+
             switch (valueType) {
                 case "1":
-                    valueType = "NUMERIC("+valueSize+","+valueScale+")";
+                    valueType = "VARCHAR("+valueSize+") NOT NULL DEFAULT ''";
                     break;
                 case "2":
-                    valueType = "VARCHAR("+valueSize+")";
+                    valueType = "DECIMAL("+valueSize+","+valueScale+") NOT NULL DEFAULT 0";
                     break;
                 case "3":
-                    valueType = "DATE";
+                    valueType = "DATE DEFAULT";
+                    break;
                 case "4":
-                    valueType = "TIME";
+                    valueType = "TIME DEFAULT";
+                    break;
                 case "5":
-                    valueType = "TIMESTAMP";
+                    valueType = "DATETIME DEFAULT";
+                    break;
             }
-            
-            sb.append("`C"+col+"` "+valueType+" DEFAULT NULL COMMENT '"+name+"',");
+            colsSet.append("`C"+col+"` "+valueType+" COMMENT '"+name+"',");
+
+            if ("1".equals(type)) {
+                idxsSet.append("INDEX I"+col+" (C"+col+"),");
+            }
         }
-        
-        if (dims.length() != 0) {
-            rep.put("type", "dim");
-            rep.put("cols_set", dims.toString());
-            dcs = Text.assign(dct, rep);
-            
-            baseDB.execute(dcs);
-        }
-        
-        if (mets.length() != 0) {
-            rep.put("type", "met");
-            rep.put("cols_set", mets.toString());
-            dcs = Text.assign(dct, rep);
-            baseDB.execute(dcs);
-        }
-    }
-    
-    private void createTable(String sql, DB baseDB) throws HongsException {
-        Pattern p = Pattern.compile("table `.*?`", Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(sql);
-        String tableName = m.group(1);
-        String sql2 = "SELECT COUNT(*) FROM `"+tableName+"`";
-        Map row;
-        try {
-            row = baseDB.fetchOne(sql2);
-        }
-        catch (HongsException ex) {
-            throw ex;
-        }
+
+        rep.put("table_name", "m_hcrm_data_"+id);
+        rep.put("cols_set", colsSet.toString( ));
+        rep.put("idxs_set", idxsSet.toString( ));
+        rep.put("pk_set", "`id` INTEGER(11) NOT NULL AUTO_INCREMENT,");
+
+        /**
+         * 先检查表里是否有记录
+         * 有记录, 则报错
+         * 无记录, 则删除
+         * 最后重新创建表
+         */
+
+        String tab = rep.get("table_name").toString();
+        Map row = db.fetchOne("SHOW TABLES LIKE '"+tab+"'");
         if (! row.isEmpty()) {
-            throw new HongsException(0x1000);
+            throw new HongsException( 0x10012 );
         }
-        
-        baseDB.execute(sql);
+
+        DB baseDB = DB.getInstance("hcrm_base");
+        baseDB.execute( "DROP TABLE `"+tab+"`");
+        baseDB.execute( Str.inject(dct , rep));
     }
+
 }

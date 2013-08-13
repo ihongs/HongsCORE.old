@@ -20,8 +20,8 @@ extends AbstractBaseModel {
 
     public String getAffectedNames() throws HongsException {
         StringBuilder sb = new StringBuilder();
-        FetchBean fs = new FetchBean(  );
-        fs.setOption("FETCH_DFLAG",true);
+        FetchBean     fs = new FetchBean();
+        fs.setOption("FETCH_DFLAG", true );
         fs.select("name").where("id IN (?)", this.affectedIds);
         List<Map> rows = this.table.fetchMore(fs);
         for (Map  row  : rows) {

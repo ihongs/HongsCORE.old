@@ -2,27 +2,59 @@
 
 <root>
     <!-- 加载器配置项 -->
+    <!--
+    Input types:
+        1：字符
+        2: 数字
+        3: 密码
+        4: URL
+        5: 上传
+        6: 文本
+       []: 选项
+    //-->
     <data key="LOADER_CLASSES" type="json">
         [
             {
                 "class": "JDBCLoader",
                 "datasrc": [
-                    ["url", 2],
-                    ["username", 2],
-                    ["password", 2]
+                    ["drv", 1],
+                    ["url", 1],
+                    ["username", 1],
+                    ["password", 3]
                 ],
                 "dataset": [
-                    ["tablename", 2]
+                    ["type", ["Table", "SQL"]],
+                    ["tablename", 1],
+                    ["condition", 1],
+                    ["sql", 6]
                 ]
             }, {
-                "class": "CSVNativeLoader",
-                "execset": [
-                    ["file", 3]
-                ]
-            }, {
-                "class": "CSVRemoteLoader",
+                "class": "FTPLoader",
+                "datasrc": [
+                    ["host", 1],
+                    ["port", 2],
+                    ["protocal", ["FTP", "SFTP"]]
+                    ["username", 1],
+                    ["password", 3]
+                ],
                 "dataset": [
-                    ["url", 4]
+                    ["path", 1],
+                    ["delimiter", 1, ","],
+                    ["encoding", ["UTF-8", "GBK"]]
+                ]
+            }, {
+                "class": "HTTPLoader",
+                "dataset": [
+                    ["url" , 4],
+                    ["delimiter", 1, ","],
+                    ["encoding", ["UTF-8", "GBK"]]
+                ]
+            }, {
+                "class": "LocalLoader",
+                "execset": [
+                    ["file", 5],
+                    ["delimiter", 1, ","],
+                    ["encoding", ["UTF-8", "GBK"]]
                 ]
             }
         ]
@@ -32,14 +64,6 @@
         [
             [0, "正常"],
             [1, "删除"]
-        ]
-    </data>
-    <!-- 数据集类型 -->
-    <data key="DATASET_TYPES" type="json">
-        [
-            [1, "维度表"],
-            [2, "事实表"],
-            [0, "两者兼顾"]
         ]
     </data>
     <!-- 数据集执行类型  -->
@@ -54,7 +78,7 @@
         ]
     </data>
     <!-- 数据集执行类型  -->
-    <data key="DATASET_EXEC_DAYS" type="json">
+    <data key="DATASET_EXEC_WDAYS" type="json">
         [
             [0, "星期天"],
             [1, "星期一"],
@@ -66,7 +90,7 @@
         ]
     </data>
     <!-- 数据集执行类型  -->
-    <data key="DATASET_EXEC_DATES" type="json">
+    <data key="DATASET_EXEC_MDAYS" type="json">
         [
             [1, "1"], [2, "2"], [3, "3"],
             [4, "4"], [5, "5"], [6, "6"],
@@ -95,9 +119,10 @@
     </data>
     <data key="DATASET_CREATE_TABLE">
         <![CDATA[
-CREATE TABLE `br_${id}_${type}_info` (
+CREATE TABLE `$table_name` (
   $pk_set
   $cols_set
+  $idxs_set
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8
         ]]>
