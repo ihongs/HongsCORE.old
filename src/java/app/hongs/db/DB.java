@@ -876,8 +876,9 @@ public class DB
   public Map<String, Object> fetchOne(String sql, Object... params)
     throws HongsException
   {
-    if (!Pattern.compile("LIMIT[\\s\\d,]+$", Pattern.CASE_INSENSITIVE).matcher(sql).find()
-    &&  !Pattern.compile("^\\s*SHOW\\s+", Pattern.CASE_INSENSITIVE).matcher(sql).find())
+    if (Pattern.compile("^SELECT\\s+.*\\s+(?!LIMIT[\\s\\d,]+)$",
+                Pattern.CASE_INSENSITIVE)
+               .matcher( sql ).matches())
     {
       sql += " LIMIT 1";
     }
