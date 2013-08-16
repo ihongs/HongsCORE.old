@@ -19,7 +19,7 @@
                 "datasrc": [
                     ["drv", 1],
                     ["url", 1],
-                    ["username", 1],
+                    ["user", 1],
                     ["password", 3]
                 ],
                 "dataset": [
@@ -34,7 +34,7 @@
                     ["host", 1],
                     ["port", 2],
                     ["protocal", ["FTP", "SFTP"]]
-                    ["username", 1],
+                    ["user", 1],
                     ["password", 3]
                 ],
                 "dataset": [

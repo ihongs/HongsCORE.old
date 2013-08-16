@@ -10,14 +10,18 @@ xsi:schemaLocation="http://hongs-core db.xsd">
         <table name="a_hcrm_datasrc"
                primaryKey="id">
             <assoc type="HAS_MANY"
-                   name="a_hcrm_dataset_conf"
+                   name="a_hcrm_datasrc_conf"
                    foreignKey="datasrc_id"/>
         </table>
         <table name="a_hcrm_dataset"
                primaryKey="id">
             <assoc type="BLS_TO"
                    name="a_hcrm_datasrc"
-                   foreignKey="datasrc_id"/>
+                   foreignKey="datasrc_id">
+                <assoc type="HAS_MANY"
+                       name="a_hcrm_datasrc_conf"
+                       foreignKey="datasrc_id"/>
+            </assoc>
             <assoc type="HAS_MANY"
                    name="a_hcrm_dataset_conf"
                    foreignKey="dataset_id"/>

@@ -41,7 +41,7 @@ public class cmdlet
   {
     cmdlet.init(args);
 
-    Core core = Core.getInstance();
+    Core core = Core.getInstance(0);
 
     if (core.ACTION == null || core.ACTION.length() == 0)
     {
@@ -286,10 +286,10 @@ public class cmdlet
 
     /** 初始化核心 **/
 
-    Core core = Core.getInstance();
-      core.init(act, lang);
+    Core core = Core.getInstance(0);
+         core.init(act, lang);
     ActionHelper helper = (ActionHelper)
-      core.get(app.hongs.action.ActionHelper.class);
+         core.get (app.hongs.action.ActionHelper.class);
 
     String str;
     str = (String)optz.get("request");

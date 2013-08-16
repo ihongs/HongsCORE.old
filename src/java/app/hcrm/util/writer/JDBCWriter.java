@@ -7,6 +7,7 @@ import app.hongs.db.DB;
 import app.hongs.db.Table;
 import app.hongs.db.sync.TableSync;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,8 +50,10 @@ public class JDBCWriter implements Writer {
     public void open() throws HongsException {
         DB db = DB.getInstance("hcrm_base");
         realTable = new Table(db, name);
-        tempTable = new Table(db, name+"_"+Core.getUniqueId());
+        tempTable = new Table(db, name.replaceFirst("^m", "s")
+                                  + "_" + Core.getUniqueId( ));
         (new TableSync(realTable)).syncSlaver(tempTable, true); // 同步临时表结构
+        keys = new HashSet();
     }
 
     @Override
@@ -65,8 +68,8 @@ public class JDBCWriter implements Writer {
 
         StringBuilder sb = new StringBuilder();
         for (String dim : dims) {
-            sb.append(new byte[] {0x01})
-              .append( info.get( dim ) );
+            sb.append('|')
+              .append(info.get(dim));
         }
         keys.add(sb.substring(1));
     }
@@ -81,17 +84,15 @@ public class JDBCWriter implements Writer {
 
         StringBuilder sb = new StringBuilder();
         for (String dim : dims) {
-            sb.append( ",'")
-              .append(new byte[] {0x01})
-              .append("',`")
-              .append( dim )
-              .append(  "`");
+            sb.append( ",'|',`")
+              .append(dim)
+              .append("`");
         }
         realTable.delete("CONCAT("+sb.substring(5)+") IN (?)", keys);
 
         String sql;
 
-        sql = "INSERT INTO `"+realTable.tableName+"` SELECT * FROM `"+realTable.tableName+"`";
+        sql = "INSERT INTO `"+realTable.tableName+"` SELECT * FROM `"+tempTable.tableName+"`";
         this.realTable.db.execute(sql);
 
         sql = "DROP TABLE `"+tempTable.tableName+"`";

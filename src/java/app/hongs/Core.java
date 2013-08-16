@@ -376,7 +376,12 @@ extends HashMap<String, Object>
     else
     {
       Core core = new Core();
-      Core.INSTANCES.put(id, core);
+      if (id != 0)
+      {
+        Core cora  =  Core.getInstance(  0  );
+        core.init(cora.ACTION, cora.LANGUAGE);
+      }
+      Core.INSTANCES.put(id , core);
       return core;
     }
   }

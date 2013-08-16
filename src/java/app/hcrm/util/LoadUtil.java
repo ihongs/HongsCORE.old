@@ -18,7 +18,7 @@ public class LoadUtil {
         StringBuffer sb = new StringBuffer();
         String       st;
 
-        Pattern timePattern = Pattern.compile("(time|date)(([+\\-])(\\d+[HDWM])+)?(|(.+))?");
+        Pattern timePattern = Pattern.compile("(time|date)(([+\\-])(\\d+[HDWM])+)?(\\|(.+))?");
         Pattern secsPattern = Pattern.compile("(\\d)([HDWM])");
         Matcher timeMatcher;
         SimpleDateFormat df;

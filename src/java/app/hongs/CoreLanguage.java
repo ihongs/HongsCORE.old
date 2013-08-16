@@ -1,13 +1,12 @@
 package app.hongs;
 
-import app.hongs.util.Str;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import java.io.File;
+
+import app.hongs.util.Str;
 
 /**
  * <h1>语言资源读取工具</h1>

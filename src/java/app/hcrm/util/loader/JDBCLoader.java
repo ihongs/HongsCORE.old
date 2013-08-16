@@ -5,9 +5,8 @@ import app.hcrm.util.Loader;
 import app.hcrm.util.Writer;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
-import java.sql.ResultSet;
+import app.hongs.db.DBFetch;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,39 +32,35 @@ public class JDBCLoader implements Loader {
 
     @Override
     public void open() throws HongsException {
-        String drv = conf.get("drv").toString();
-        String url = conf.get("url").toString();
-        String username = conf.get("username").toString();
-        String password = conf.get("password").toString();
+        String drv = (String) conf.get("drv");
+        String url = (String) conf.get("url");
+        String user = (String) conf.get("user");
+        String password = (String) conf.get("password");
         Properties prop = new Properties();
-        if (null != username && !"".equals(username)) {
-            prop.put("username", username);
+        if (null != user && !"".equals(user)) {
+            prop.put("user", user);
         }
         if (null != password && !"".equals(password)) {
             prop.put("password", password);
         }
 
-        Map config = new HashMap();
-        Map driver = new HashMap();
-        driver.put("drv", drv);
-        driver.put("url", url);
-        driver.put("info", "prop");
-        config.put("driver", driver);
-        db = new DB(config);
+        db = DB.getInstanceByDriver(drv, url, prop);
     }
 
     @Override
     public void load(Writer writer) throws HongsException {
-        String sql = (String) conf.get("sql");
-        if (sql == null || sql.length() == 0) {
+        String type = (String) conf.get("type");
+        String sql  = (String) conf.get("sql" );
+        if ("Table".equals(type)) {
             sql = "SELECT * FROM `"+conf.get("tablename")
-            +"` WHERE "+conf.get("condition");
+              +"` WHERE "+conf.get("condition");
+            
         }
-        sql = LoadUtil.injectParams(sql,time);
+        sql = LoadUtil.injectParams(sql , time);
 
         Map row;
-        ResultSet rs = db.query(sql);
-        while ( (row = db.fetch(rs)) != null) {
+        DBFetch rs = db.query(sql);
+        while ( (row = rs.fetch( )) != null ) {
             writer.write(row);
         }
     }

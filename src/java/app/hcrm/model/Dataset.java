@@ -190,21 +190,25 @@ extends AbstractModel {
         rep.put("pk_set", "`id` INTEGER(11) NOT NULL AUTO_INCREMENT,");
 
         /**
-         * 先检查表里是否有记录
-         * 有记录, 则报错
-         * 无记录, 则删除
-         * 最后重新创建表
+         * 先检查表是否存在
+         * 再检查表里是否有记录
+         * 如已经有记录, 则报错
+         * 如表存在而没记录, 则删除表
+         * 最后重建表
          */
 
         String tab = rep.get("table_name").toString();
+        DB baseDB = DB.getInstance("hcrm_base");
         Map row = db.fetchOne("SHOW TABLES LIKE '"+tab+"'");
         if (! row.isEmpty()) {
-            throw new HongsException( 0x10012 );
+            row = db.fetchOne("SELECT * FROM `"+tab+"`");
+            if (! row.isEmpty()) {
+                throw new HongsException(0x10012 );
+            }
+            baseDB.execute("DROP TABLE `"+tab+"`");
         }
 
-        DB baseDB = DB.getInstance("hcrm_base");
-        baseDB.execute( "DROP TABLE `"+tab+"`");
-        baseDB.execute( Str.inject(dct , rep));
+        baseDB.execute(Str.inject(dct, rep));
     }
 
 }

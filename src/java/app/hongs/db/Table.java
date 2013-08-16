@@ -535,6 +535,7 @@ public class Table
        * 如果存在该值, 而该值为空
        * 或不存在该值, 而处于新建
        * 则判断该字段是否可以为空
+       * 新建时自增值为空跳过
        */
       if (values.containsKey(namc))
       {
@@ -552,6 +553,7 @@ public class Table
       else
       {
         if (isNew == true
+        &&!(Boolean)column.get("isAutoIncrement")
         && (Integer)column.get("isNullable")
         ==  java.sql.ResultSetMetaData.columnNoNulls)
         {
