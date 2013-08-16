@@ -25,7 +25,7 @@ public class Tree
    * @param keys
    * @return 键对应的值
    */
-  public static Object getTreeValue(Map tree, String[] keys)
+  public static Object getTreeValue(Map tree, String... keys)
   {
     Object obj = tree;
     for (int i = 0; i < keys.length; i ++)

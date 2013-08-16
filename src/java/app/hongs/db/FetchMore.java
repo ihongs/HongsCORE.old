@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import java.sql.ResultSet;
-
 import app.hongs.Core;
 import app.hongs.HongsException;
 import java.util.Arrays;
@@ -224,7 +222,7 @@ public class FetchMore
      * 并根据之前的 id=>行 关系以表名为键放入列表中
      */
 
-    ResultSet rs = db.query(fs.getSQL(), fs.getParams());
+    DBFetch rs = db.query(fs.getSQL(), fs.getParams());
 
     Map     row, sub;
     List    lst;
@@ -232,7 +230,7 @@ public class FetchMore
 
     if (! multiAssoc)
     {
-      while ((sub = db.fetch(rs)) != null)
+      while ((sub = rs.fetch()) != null)
       {
         id  = (String) sub.get(col2);
         lst = ( List ) map.get( id );
@@ -262,7 +260,7 @@ public class FetchMore
     }
     else
     {
-      while ((sub = db.fetch(rs)) != null)
+      while ((sub = rs.fetch()) != null)
       {
         id  = (String) sub.get(col2);
         lst = ( List ) map.get( id );
@@ -572,7 +570,7 @@ public class FetchMore
             throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
         }
         if (tn != null && tn.length() != 0 && !tn.equals(bean.name)) {
-            fk = tn+"."+fk;
+            pk = tn+"."+pk;
         }
 
         setBean(bean2,assoc);

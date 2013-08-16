@@ -51,7 +51,7 @@ public class TableSync
     Map row = slaver.db.fetchOne(sql);
     if (row.isEmpty())
     {
-        sql = "SHOW CRAETE TABLE `"+table.tableName+"`";
+        sql = "SHOW CREATE TABLE `"+table.tableName+"`";
         sql = ((Map) table.db.fetchAll(sql).get( 0 ))
                     .get("Create Table").toString( );
         sql = sql.replaceFirst("^CREATE TABLE `.*?`",

@@ -129,24 +129,6 @@ public class DB
 
   private Map       driver;
   private Map       source;
-  private String[]  labels;
-
-  public DB(Map cf)
-    throws HongsException
-  {
-    if (cf == null) cf = new HashMap();
-
-    this.name         = "";
-    this.driver       = (Map) cf.get("driver");
-    this.source       = (Map) cf.get("source");
-    this.tableClass   = "";
-    this.tablePrefix  = "";
-    this.tableSuffix  = "";
-    this.tableConfigs = new  HashMap( );
-    this.tableObjects = new  HashMap( );
-
-    this.connection   = null;
-  }
 
   public DB(DBConfig cf)
     throws HongsException
@@ -209,7 +191,7 @@ public class DB
 
     do
     {
-      if (source.isEmpty())
+      if (source == null || source.isEmpty())
       {
         break;
       }
@@ -268,7 +250,7 @@ public class DB
 
     do
     {
-      if (driver.isEmpty())
+      if (driver == null || driver.isEmpty())
       {
         break;
       }
@@ -771,7 +753,7 @@ public class DB
    * @return 查询结果
    * @throws HongsException
    */
-  public ResultSet query(String sql, Object... params)
+  public DBFetch query(String sql, Object... params)
     throws HongsException
   {
     this.open();
@@ -786,60 +768,18 @@ public class DB
     }
 
     PreparedStatement ps = this.prepareStatement(sql, params);
+            ResultSet rs;
 
     try
     {
-      ResultSet rs =   ps.executeQuery(  );
-      this.labels  = this.getColLabels(rs);
-      return rs;
+      rs = ps.executeQuery();
     }
-    catch (SQLException ex)
+    catch (SQLException ex )
     {
       throw new app.hongs.HongsException(0x1041, ex);
     }
-  }
 
-  /**
-   * 获取记录
-   * <p>
-   * 可使用while ((row = db.fetch(rs)) != null)获取每一行,
-   * 全部获取结束会自动执行closeStatement和closeResultSet;
-   * 如果您仅需要获取一行, 可自行判断结果是否非空,
-   * 但需手动调用closeStatement和closeResultSet.
-   * 注意: 不能在多线程共享DB对象的情况下使用.
-   * </p>
-   * @param rs
-   * @return 行数据
-   * @throws HongsException
-   */
-  public Map<String, Object> fetch(ResultSet rs)
-    throws HongsException
-  {
-    Statement ps = null;
-
-    try
-    {
-      if (rs.next())
-      {
-        return this.getRowValues(rs, this.labels);
-      }
-
-      this.labels = null;
-      this.closeResultSet(rs);
-      ps = rs.getStatement();
-      this.closeStatement(ps);
-    }
-    catch (SQLException  ex)
-    {
-      this.labels = null;
-      this.closeResultSet(rs);
-      if (ps != null)
-      this.closeStatement(ps);
-
-      throw new app.hongs.HongsException(0x1042, ex);
-    }
-
-    return null;
+    return new DBFetch(this, ps, rs);
   }
 
   /**
@@ -856,8 +796,8 @@ public class DB
     List<Map<String, Object>> rows = new ArrayList();
          Map<String, Object>  row;
 
-    ResultSet rs = this.query( sql, params );
-    while ( (row = this.fetch(rs)) != null )
+    DBFetch rs  = this.query(sql, params);
+    while ((row = rs.fetch( ) ) != null )
     {
       rows.add(row);
     }
@@ -1402,6 +1342,58 @@ public class DB
     }
 
     return db;
+  }
+
+  public static DB getInstanceByDriver(String drv, String url, Properties info)
+  throws HongsException {
+      Map config = new HashMap();
+      Map driver = new HashMap();
+
+      config.put("driver", driver);
+      driver.put("drv" , drv );
+      driver.put("url" , url );
+      driver.put("info", info);
+
+      return new DB(config);
+  }
+
+  public static DB getInstanceByDriver(String drv, String url)
+  throws HongsException {
+      return getInstanceByDriver(drv, url, new Properties());
+  }
+
+  public static DB getInstanceBySource(String name, Properties info)
+  throws HongsException {
+      Map config = new HashMap();
+      Map source = new HashMap();
+
+      config.put("source", source);
+      source.put("name", name);
+      source.put("info", info);
+
+      return new DB(config);
+  }
+
+  public static DB getInstanceBySource(String name)
+  throws HongsException {
+      return getInstanceBySource(name, new Properties());
+  }
+
+  private DB(Map cf)
+    throws HongsException
+  {
+    if (cf == null) cf = new HashMap();
+
+    this.name         = "";
+    this.driver       = (Map) cf.get("driver");
+    this.source       = (Map) cf.get("source");
+    this.tableClass   = "";
+    this.tablePrefix  = "";
+    this.tableSuffix  = "";
+    this.tableConfigs = new  HashMap( );
+    this.tableObjects = new  HashMap( );
+
+    this.connection   = null;
   }
 
 }

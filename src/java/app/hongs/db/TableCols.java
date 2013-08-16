@@ -3,7 +3,6 @@ package app.hongs.db;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
-import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
@@ -47,11 +46,11 @@ public class TableCols
   {
     this.columns = new HashMap();
 
+    DBFetch rs = this.table.db.query("SELECT * FROM "
+                + this.table.tableName + " LIMIT 1" );
     try
     {
-      String s = "SELECT * FROM " + this.table.tableName + " LIMIT 1";
-      ResultSet rs = this.table.db.query(s);
-      ResultSetMetaData md = rs.getMetaData();
+      ResultSetMetaData md = rs.getReusltSet().getMetaData();
 
       for (int i = 1; i <= md.getColumnCount(); i ++)
       {
@@ -82,15 +81,15 @@ public class TableCols
 
         this.columns.put(md.getColumnName(i), column);
       }
-
-      s = null;
-      rs = null;
-      md = null;
     }
     catch (SQLException ex)
     {
       // 抛出Table的异常代号
       throw new HongsException(0x1080, ex);
+    }
+    finally
+    {
+      rs.close();
     }
   }
 
