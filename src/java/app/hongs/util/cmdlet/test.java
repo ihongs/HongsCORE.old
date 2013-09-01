@@ -6,7 +6,13 @@ import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.JSON;
 import app.hongs.util.Str;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 测试
@@ -22,6 +28,16 @@ public class test {
   public static void cmdlet(Map<String, String[]> opts)
           throws app.hongs.HongsException {
     
+      Calendar cal = Calendar.getInstance();
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+      try {
+        cal.setTime(sdf.parse("2013-01-31"));
+        cal.add(Calendar.MONTH, 1);
+        System.out.println(sdf.format(cal.getTime()));
+      } catch (ParseException ex) {
+          Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+      }
+      
     Map vars = new java.util.HashMap();
     vars.put("var",  "var1");
     vars.put("var.2", "var2");
