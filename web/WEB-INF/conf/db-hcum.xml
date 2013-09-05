@@ -6,14 +6,8 @@ xsi:schemaLocation="http://hongs-core db.xsd">
     <source link="default"/>
     <driver link="default"/>
     <tables>
-        <table name="a_hcum_dept"
-               primaryKey="dept_id">
-            <assoc type="HAS_MANY"
-                   name="a_hcum_dept_group"
-                   foreignKey="dept_id"/>
-        </table>
         <table name="a_hcum_user"
-               primaryKey="user_id">
+               primaryKey="id">
             <assoc type="HAS_MANY"
                    name="a_hcum_user_group"
                    foreignKey="user_id"/>
@@ -25,8 +19,14 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                        foreignKey="dept_id"/>
             </assoc>
         </table>
-        <table name="a_hcum_dept_group"/>
-        <table name="a_hcum_user_group"/>
+        <table name="a_hcum_dept"
+               primaryKey="id">
+            <assoc type="HAS_MANY"
+                   name="a_hcum_dept_group"
+                   foreignKey="dept_id"/>
+        </table>
         <table name="a_hcum_user_dept"/>
+        <table name="a_hcum_user_group"/>
+        <table name="a_hcum_dept_group"/>
     </tables>
 </db>

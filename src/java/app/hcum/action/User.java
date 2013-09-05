@@ -30,7 +30,7 @@ public class User {
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
-        data.remove("password"); // Remove the password field, don't show password in page
+        ((Map)data.get("info")).remove("password"); // Remove the password field, don't show password in page
         helper.back(data);
     }
 

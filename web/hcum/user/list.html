@@ -1,10 +1,10 @@
 <div id="hcum_user_list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcum/User/List.do?dept_id='+H$('&dept_id',this))"/>
-        <param name="openUrls[]" value="['.create', 'hcum/user_form.html?dept_id='+H$('&dept_id',this)]"/>
-        <param name="openUrls[]" value="['.modify', 'hcum/user_form.html?id=$ID']"/>
+        <param name="openUrls[]" value="['.create', 'hcum/user/form.html?dept_id='+H$('&dept_id',this),'.main-context']"/>
+        <param name="openUrls[]" value="['.modify', 'hcum/user/form.html?id={ID}','.main-context']"/>
         <param name="sendUrls[]" value="['.remove', 'hcum/User/Remove.do']"/>
-        <param name="idKey" value="user_id"/>
+        <param name="idKey" value="id"/>
     </object>
     <div class="tool-bar">
         <form class="fl tool-box" action="" method="GET">

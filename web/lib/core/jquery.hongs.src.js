@@ -11,7 +11,7 @@ data-pn HsForm中为param name, HsList中为page num
 data-vk HsForm中为value key
 data-tk HsForm中为text key
 data-tp HsList中为操作菜单的tooltip params
-data-equals 表单验证的是否相等
+data-repeat 表单验证的是否相等
 data-unique 表单验证的是否唯一
 data-eval 自动执行
 data-load 自动加载
@@ -1084,9 +1084,10 @@ function HsList(opts, context) {
         else if (n)
             n = jQuery(n);
         */
+        /*
         if (typeof m == "string")
             m = loadBox.find(m);
-        else if (m)
+        else*/ if (m)
             m = jQuery(m);
 
         var t = n.closest(".tooltip");
@@ -1228,7 +1229,7 @@ HsList.prototype = {
             "type"      :"POST",
             "dataType"  :"json",
             "context"   : this,
-            "complete"  : this.loadBack
+            "success"   : this.loadBack
         });
     },
     loadBack : function(rst) {
@@ -1325,7 +1326,7 @@ HsList.prototype = {
             "type"      : "POST",
             "dataType"  : "json",
             "context"   : this,
-            "complete"  : function(rst) {
+            "success"   : function(rst) {
                 this.sendBack(btn, rst, dat2);
             }
         });
@@ -1477,9 +1478,10 @@ function HsTree(opts, context) {
         else if (n)
             n = jQuery(n);
         */
+        /*
         if (typeof m == "string")
             m = loadBox.find(m);
-        else if (m)
+        else*/ if (m)
             m = jQuery(m);
 
         var tip = n.closest(".tooltip");
@@ -1594,8 +1596,8 @@ function HsTree(opts, context) {
     if (linkUrls) {
         treeBox.on("select", function(evt, id) {
             for (var i = 0; i < linkUrls.length; i ++) {
-                jQuery(linkUrls[i][0]).load(linkUrls[i][1]
-                 .replace('{ID}', encodeURIComponent(id)));
+                jQuery(linkUrls[i][0])
+                 .load(linkUrls[i][1].replace('{ID}', encodeURIComponent(id)));
             }
         });
     }
@@ -1631,7 +1633,7 @@ HsTree.prototype = {
             "type"      : "POST",
             "dataType"  : "json",
             "context"   : this,
-            "complete"  : function(rst) {
+            "success"   : function(rst) {
                 this.loadBack(rst, pid);
             }
         });
@@ -1752,7 +1754,7 @@ HsTree.prototype = {
             "type"      : "POST",
             "dataType"  : "json",
             "context"   : this,
-            "complete"  : function(rst) {
+            "success"   : function(rst) {
                 this.sendBack(btn, rst, dat2);
             }
         });
@@ -1819,15 +1821,6 @@ HsTree.prototype = {
         lst.toggle(); nod.trigger("toggle", [id]);
     },
 
-    getId    : function(id) {
-        if (typeof id === "object")
-            return this.getId(id.attr("id"));
-        else
-            return id.toString( ).substr(10);
-    },
-    getPid   : function(id) {
-        return this.getId(this.getPnode(id));
-    },
     getNode  : function(id) {
         if (typeof id === "object")
             return id.closest(".tree-node" );
@@ -1837,11 +1830,20 @@ HsTree.prototype = {
     getPnode : function(id) {
         return this.getNode(id).parent().closest(".tree-node");
     },
-    getSid   : function() {
-        return this.getId(this.treeBox.find(".tree-curr"));
+    getId    : function(id) {
+        if (typeof id === "object")
+            return this.getId(id.attr("id"));
+        else
+            return id.toString( ).substr(10);
+    },
+    getPid   : function(id) {
+        return this.getId(this.getPnode(id));
     },
     getRid   : function() {
         return this.getId(this.treeBox.find(".tree-root"));
+    },
+    getSid   : function() {
+        return this.getId(this.treeBox.find(".tree-curr"));
     }
 };
 
@@ -1890,8 +1892,8 @@ function _HsInitOpts(opts, name) {
     }
     else {
         if (opts) for (var k in opts) {
-            // 允许扩展已有方法, 添加或重写"fill"/"user"方法/属性
-            if (this[k] != undefined || /^(fill|user)/.test(k)) {
+            // 允许扩展已有方法, 添加或重写方法/属性
+            if (this[k] != undefined || /^(user|fill)/.test(k)) {
                 this[k]  = opts[k];
             }
         }
@@ -2030,7 +2032,7 @@ jQuery.fn.extend({
         "[type=date]"     : hsGetLang("form.is.not.date"),
         "[type=time]"     : hsGetLang("form.is.not.time"),
         "[type=datetime]" : hsGetLang("form.is.not.datetime"),
-        "[data-equals]"   : hsGetLang("form.is.not.equals"),
+        "[data-repeat]"   : hsGetLang("form.is.not.repeat"),
         "[data-unique]"   : hsGetLang("form.is.not.unique")
     });
     });
@@ -2077,8 +2079,11 @@ jQuery.fn.extend({
     $.tools.validator.fn("[type=datetime]", function(input, value) {
         return /^\d{4}\/\d{1,2}\/\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/.test(value);
     });
-    $.tools.validator.fn("[data-equals]", function(input, value) {
-        return this.getInputs().filter("[name="+input.attr("equals")+"]").val() == value;
+    $.tools.validator.fn("[data-validate]", function(input, value) {
+        return input.data(input.attr("data-validate"))(input, value);
+    });
+    $.tools.validator.fn("[data-repeat]", function(input, value) {
+        return this.getInputs().filter("[name="+input.attr("data-repeat")+"]").val() == value;
     });
     $.tools.validator.fn("[data-unique]", function(input, value) {
         var ret = true;
@@ -2230,8 +2235,10 @@ jQuery.fn.extend({
         return this;
     };
 
+    /** 初始化 **/
+
     $(function() {
-        $(this).hsInit()
+        $(this).hsInit();
     });
     $(document )
     .on("ajaxError", function( evt , xhr ) {
@@ -2240,12 +2247,14 @@ jQuery.fn.extend({
     .on("hsReady", ".load-box", function() {
         $(this).hsInit();
     })
+    /*
     .on("hsClose", ".load-box", function() {
         // 解决表单"窗口"关闭后validator的错误消息仍然存在的问题
         // 已经将错误消息位置修改改为相对input, 不需要下列代码了
-        //var obj = $(this).find(".HsForm").data("HsForm");
-        //if (obj) obj.formBox.data("validator").destroy();
+        var obj = $(this).find(".HsForm").data("HsForm");
+        if (obj) obj.formBox.data("validator").destroy();
     })
+    */
     .on("click", "[data-load-in]", function() {
         var s = $(this).attr("data-load-in");
         s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
@@ -2293,6 +2302,8 @@ jQuery.fn.extend({
         $(this).find(".for-select,.for-checks").prop("disabled", true);
     })
     .on("loadBack", ".HsTree", function() {
+        var tree = $(this).data("HsTree");
+        if (tree.getSid()!=tree.getRid()) return;
         $(this).find(".for-select,.for-checks").prop("disabled", true);
     });
 })(jQuery);

@@ -1,10 +1,10 @@
 <div id="hcum_dept_tree">
     <object class="config" name="hsTree" data="">
         <param name="loadUrl" value="hcum/Dept/Tree.do"/>
-        <param name="openUrls[]" value="['.create','hcum/dept_form.html?pid=$PID']"/>
-        <param name="openUrls[]" value="['.modify','hcum/dept_form.html?id=$ID']"/>
+        <param name="openUrls[]" value="['.create','hcum/dept/form.html?pid={ID}','.main-context']"/>
+        <param name="openUrls[]" value="['.modify','hcum/dept/form.html?id={ID}','.main-context']"/>
         <param name="sendUrls[]" value="['.remove','hcum/Dept/Remove.do']"/>
-        <param name="linkUrls[]" value="['.mian-context','hcum/user_list.html?dept_id=$ID']"/>
+        <param name="linkUrls[]" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
     </object>
     <div class="tool-box">
         <button  type="button" class="create">添加</button>

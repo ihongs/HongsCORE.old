@@ -6,8 +6,8 @@
     Author     : Hongs
     Description:
         fields,where,groupBy,orderBy等中,
-        用"."表示当前表, 用".."表示上级表.
-        注意: 仅当有设置join时可使用"..".
+        用"."表示当前表, 用":"表示上级表.
+        注意: 仅当有设置join时可使用":".
 -->
 
 <db xmlns="http://hongs-core"

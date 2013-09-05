@@ -28,15 +28,15 @@ extends AbstractBaseModel {
     throws HongsException {
         if (userId == null) throw new HongsException(0x10000, "User Id required!");
 
-        Table asoc = this.db.getTable("au_user_group_asoc");
+        Table asoc = this.db.getTable("a_hcum_user_group");
         FetchBean fa = new FetchBean();
-        fa.setSelect(".group_name")
-          .setWhere(".user_id = ?", userId);
+        fa.select(".group_key")
+          .where(".user_id = ?", userId);
 
         List<Map> rows = asoc.fetchMore(fa);
         Set<String> groups = new HashSet( );
         for (Map row : rows) {
-            groups.add((String)row.get("group_name"));
+            groups.add((String)row.get("group_key"));
         }
 
         return groups;
@@ -111,11 +111,11 @@ extends AbstractBaseModel {
 
         /**
          * 如果有指定dept_id
-         * 则关联a_user_detp_asoc来约束范围
+         * 则关联a_hcum_user_detp来约束范围
          */
         if (req.containsKey("dept_id")) {
-            fa.join("au_user_dept_asoc",
-                    ".user_id = :user_id")
+            fa.join("a_hcum_user_dept",
+                    ".user_id = :id")
               .where("dept_id = ?", req.get("dept_id"));
         }
     }

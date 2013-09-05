@@ -1,3 +1,6 @@
+/**
+ * HongsCORE 公共样式
+ */
 
 html, body, label, input, select, button, textarea {
     color: #666;
@@ -219,6 +222,16 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 }
 
 /** 应用样式 **/
+
+.side-context {
+    width: 20em;
+    display: table-cell;
+    vertical-align: top;
+}
+.main-context {
+    display: table-cell;
+    vertical-align: top;
+}
 
 #main-menubar {
     position: fixed;

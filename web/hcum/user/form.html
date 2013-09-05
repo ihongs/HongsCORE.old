@@ -9,44 +9,44 @@
         <param name="saveUrl" value="hcum/User/Save.do"/>
     </object>
     <form action="" method="POST">
-        <input type="hidden" name="user_id"/>
-        <input type="hidden" name="au_user_dept_asoc..dept_id" data-pn="dept_id"/>
-        <button onclick="$(this).css('height', '20em')"></button>
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="a_hcum_user_dept.0.dept_id" data-pn="dept_id"/>
         <div>
             <label>邮箱</label>
-            <input type="email" name="username"/>
+            <input type="email" name="username" required="required"/>
         </div>
         <div>
-            <label>密码</label>
-            <input type="password" name="password"/>
+            <label>口令</label>
+            <input type="password" name="password" data-validate="validate"/>
         </div>
         <div>
-            <label>重复输入密码</label>
-            <div class='form-inputs'>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <label><input type="checkbox" />你好</label>
-            <input type="password" name="password2"/>
-            </div>
+            <label>重复口令</label>
+            <input type="password" name="password2" data-repeat="password"/>
         </div>
         <div>
             <label>昵称</label>
-            <input type="text" name="name"/>
+            <input type="text" name="name" required="required"/>
         </div>
         <div>
             <label>备注</label>
             <textarea name="note"></textarea>
         </div>
-        <div class="form-buttons">
+        <div class="button-box">
             <button type="submit" class="ensure">提交</button>
             <a href="javascript:;" class="cancel">取消</a>
         </div>
     </form>
 </div>
+
+<script type="text/javascript">
+(function() {
+    var context = $("#hcum_user_form");
+    
+    $("[name=password]", context).data("validate", function(input, value) {
+        if (!value && !$("[name=id]", context).val()) {
+            return "必须填写2";
+        }
+        return true;
+    });
+})();
+</script>
