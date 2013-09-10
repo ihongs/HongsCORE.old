@@ -146,7 +146,7 @@ public class ActionFilter
       }
     }
 
-    String act = Core.getInstance().ACTION;
+    String act = Core.ACTION.get();
 
     Map<String, Boolean> configData = getConfig(this.configName);
 

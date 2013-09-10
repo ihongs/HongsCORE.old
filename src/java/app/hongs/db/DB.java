@@ -327,9 +327,9 @@ public class DB
     }
 
     // 对象模式设置
-    if (core.containsKey("__IN_OBJECT_MODE__"))
-        IN_OBJECT_MODE = (Boolean)
-                core.get("__IN_OBJECT_MODE__");
+    CoreConfig conf = (CoreConfig)
+                       Core.getInstance( app.hongs.CoreConfig.class);
+     IN_OBJECT_MODE =  conf.getProperty("core.in.object.mode",false);
   }
 
   public void close()

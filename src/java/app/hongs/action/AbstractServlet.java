@@ -45,15 +45,15 @@ public abstract class AbstractServlet
     throws ServletException
   {
     /**
-     * 如果核心类中实例集合不为空, 则表示已经被实例过了
-     * 即无需再重复获取配置信息了
+     * 初始化判断, 无需重复初始化
      */
-    if (!Core.INSTANCES.isEmpty())
+    synchronized (Core.GLOBAL_CORE)
     {
-      return;
+      if (Core.GLOBAL_CORE != null)
+          return;
+      Core.GLOBAL_CORE = new Core();
+      Core.GLOBAL_TIME = System.currentTimeMillis();
     }
-
-    Core.getInstance();
 
     System.setProperty("file.encoding", "UTF-8");
 
@@ -83,8 +83,6 @@ public abstract class AbstractServlet
     Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
     Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
     Core.SERVER_ID  = conf.getProperty("core.server.id", "0");
-    Core.getInstance(0).put("__IN_OBJECT_MODE__",
-                      conf.getProperty("core.in.object.mode", false));
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -126,16 +124,16 @@ public abstract class AbstractServlet
      */
 
     String action = req.getRequestURI()
-           .substring(Core.BASE_HREF.length());
+           .substring(Core.BASE_HREF.length( ));
     String aprsid = req.getRemoteAddr()
             + "|" + req.getRemotePort()
             + "|" + req.getRequestedSessionId();
 
     Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)
-      Core.getInstance(app.hongs.action.ActionHelper.class);
+         core.get(app.hongs.action.ActionHelper.class);
 
-    if (action.equals(  core.ACTION)
+    if (action.equals(Core.ACTION.get())
     &&  aprsid.equals(helper.APRSID)
     &&  0     <       helper.INITID)
     {
@@ -154,8 +152,9 @@ public abstract class AbstractServlet
      * 同时初始化助手对象
      */
 
-    core.init(action, "");
-    helper.init(req, rsp);
+    Core.ACTION_TIME.set(System.currentTimeMillis());
+    Core.ACTION.set(action);
+    helper.init( req, rsp );
 
     /** 实例属性配置 **/
 
@@ -194,26 +193,26 @@ public abstract class AbstractServlet
       }
       if (lang != null)
       {
-        core.LANGUAGE = lang;
+        Core.ACTION_LANG.set(lang);
       }
       else
       {
-        core.LANGUAGE = conf.getProperty("core.language.default");
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default"));
       }
     }
     else
     {
-        core.LANGUAGE = conf.getProperty("core.language.default");
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default"));
     }
 
     if (Core.IN_DEBUG_MODE)
     {
       System.out.println(
         "--------------------------------------------------\r\n"
-        + "ID              : " + core.ID + "\r\n"
-        + "TIME            : " + core.TIME + "\r\n"
-        + "ACTION          : " + core.ACTION + "\r\n"
-        + "LANGUAGE        : " + core.LANGUAGE + "\r\n"
+        + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
+        + "ACTION          : " + Core.ACTION + "\r\n"
+        + "LANG            : " + Core.ACTION_LANG.get() + "\r\n"
+        + "TIME            : " + Core.ACTION_TIME.get() + "\r\n"
         + "User Address    : " + req.getRemoteAddr() + " "
                                + req.getRemotePort() + "\r\n"
       );
@@ -255,11 +254,11 @@ public abstract class AbstractServlet
 
     if (Core.IN_DEBUG_MODE)
     {
-      long  time = new Date().getTime();
-      float secs = (float) (time - core.TIME) / 1000;
+      long  time = Core.ACTION_TIME.get();
+      float secs = (float)(System.currentTimeMillis() - time) / 1000;
       System.out.println(
         "--------------------------------------------------\r\n"
-        + "ID              : " + core.ID + "\r\n"
+        + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
         + "Used Seconds    : " + secs    + "\r\n"
         + "Used Objects    : " + core.keySet().toString() + "\r\n"
       );
@@ -273,29 +272,30 @@ public abstract class AbstractServlet
   {
     super.destroy();
 
-    /**
-     * 如果核心类中实例集合为空, 则表示已经被销毁过了
-     * 即无需再重复的进行销毁了
-     */
-    if (Core.INSTANCES.isEmpty())
+    Core core;
+    long time;
+    synchronized (Core.GLOBAL_CORE)
     {
-      return;
+      if (Core.GLOBAL_CORE == null)
+          return;
+      core = Core.GLOBAL_CORE;
+      time = Core.GLOBAL_TIME;
+      Core.GLOBAL_CORE = null;
+      Core.GLOBAL_TIME = null;
     }
 
     if (Core.IN_DEBUG_MODE)
     {
-      Core  core = Core.getInstance(0);
-      long  time = new Date().getTime();
-      float secs = (float) (time - core.TIME) / 1000;
+      float secs = (float)(System.currentTimeMillis() - time) / 1000;
       System.out.println(
         "--------------------------------------------------\r\n"
         + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
         + "Used Seconds    : " + secs           + "\r\n"
-        + "Used Threads    : " + Core.INSTANCES.keySet().toString() + "\r\n"
+        + "Used Objects    : " + core.keySet().toString() + "\r\n"
       );
     }
-
-    Core.destroyAll();
+ 
+    core.destroy();
   }
 
 }

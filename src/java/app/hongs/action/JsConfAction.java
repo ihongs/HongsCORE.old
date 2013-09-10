@@ -58,7 +58,8 @@ public class JsConfAction
     Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
 
-    String name = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
+    String name = Core.ACTION.get();
+           name = name.substring(1, name.lastIndexOf('.'));
     String type = req.getParameter("t");
     String m, s;
 

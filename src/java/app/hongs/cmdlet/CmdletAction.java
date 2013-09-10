@@ -53,17 +53,17 @@ public class CmdletAction
     throws IOException, ServletException
   {
     Core         core   = Core.getInstance();
+    String       action = Core.ACTION.get ();
     ActionHelper helper = (ActionHelper)
                           Core.getInstance(app.hongs.action.ActionHelper.class);
-    String       action = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
 
     if (action.length() == 0) {
         helper.print404Code("Can not find action name.");
         return;
     }
 
-    if (action.indexOf('.') != -1 || action.startsWith("hongs/shell")) {
-        helper.print404Code("Illegal action '"+core.ACTION+"'.");
+    if (action.indexOf('.') != -1) {
+        helper.print404Code("Illegal action '"+Core.ACTION.get()+"'.");
         return;
     }
 
@@ -71,11 +71,11 @@ public class CmdletAction
 
     int pos;
     String pkg, cls;
-    action = action.replace('/', '.');
+    action = action.substring(1).replace('/', '.');
 
     pos = action.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+core.ACTION+"'.");
+        helper.print404Code("Wrong action '"+Core.ACTION.get()+"'.");
         return;
     }
     pkg = action.substring(0,pos);

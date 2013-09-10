@@ -57,9 +57,9 @@ public class Action
     throws IOException, ServletException
   {
     Core         core   = Core.getInstance();
+    String       action = Core.ACTION.get ();
     ActionHelper helper = (ActionHelper)
                           Core.getInstance(app.hongs.action.ActionHelper.class);
-    String       action = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
 
     if (action.length() == 0) {
         helper.print404Code("Can not find action name.");
@@ -67,7 +67,7 @@ public class Action
     }
 
     if (action.indexOf('.') != -1 || action.startsWith("hongs/action")) {
-        helper.print404Code("Illegal action '"+core.ACTION+"'.");
+        helper.print404Code("Illegal action '"+Core.ACTION.get()+"'.");
         return;
     }
 
@@ -75,11 +75,11 @@ public class Action
 
     int pos;
     String cls, mtd;
-    action = action.replace('/', '.');
+    action = action.substring(1).replace('/', '.');
 
     pos = action.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+core.ACTION+"'.");
+        helper.print404Code("Wrong action '"+Core.ACTION.get()+"'.");
         return;
     }
     mtd    = action.substring(pos+1);
@@ -87,7 +87,7 @@ public class Action
 
     pos = action.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+core.ACTION+"'.");
+        helper.print404Code("Wrong action '"+Core.ACTION.get()+"'.");
         return;
     }
     cls    = action.substring(pos+1);

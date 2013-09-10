@@ -416,8 +416,8 @@ public class CmdletHelper
    */
   public static void printToLog(String text)
   {
-    Core core = Core.getInstance( );
-    CoreLogger.log(core.ACTION, text, 0);
+    Core core = Core.getInstance(  );
+    CoreLogger.log(Core.ACTION.get(), text, 0);
   }
 
   /**

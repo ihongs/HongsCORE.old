@@ -58,11 +58,12 @@ public class JsLangAction
     Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
 
-    String conf = core.ACTION.substring(1, core.ACTION.lastIndexOf('.'));
+    String conf = Core.ACTION.get();
+           conf = conf.substring(1, conf.lastIndexOf('.'));
     String type = helper.getParameter("t");
     String lang = helper.getParameter("l");
     if (lang == null || lang.length()==0 )
-           lang = core.LANGUAGE;
+           lang = Core.ACTION_LANG.get(  );
     String name = conf+"."+lang;
     String m, s;
 

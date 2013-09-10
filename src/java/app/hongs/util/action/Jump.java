@@ -16,7 +16,7 @@ public class Jump {
     throws HongsException {
         Core core = Core.getInstance();
         ActionConfig conf = new ActionConfig("default");
-        String uri = core.ACTION + "?page=" + helper.getParameter("page");
+        String uri = Core.ACTION.get() + "?page=" + helper.getParameter("page");
 
         Map<String, Map> page = conf.getPage(uri);
         if (page != null  && page.containsKey("pages")) {

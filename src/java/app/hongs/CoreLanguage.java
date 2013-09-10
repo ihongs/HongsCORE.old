@@ -64,7 +64,7 @@ public class CoreLanguage
    */
   public CoreLanguage(String name)
   {
-    this(Core.LANG_PATH, name, Core.getInstance().LANGUAGE);
+    this(Core.LANG_PATH, name, Core.ACTION_LANG.get());
   }
 
   /**
@@ -72,7 +72,7 @@ public class CoreLanguage
    */
   public CoreLanguage()
   {
-    this(Core.LANG_PATH, "default", Core.getInstance().LANGUAGE);
+    this(Core.LANG_PATH, "default", Core.ACTION_LANG.get());
   }
 
   /**
@@ -172,11 +172,12 @@ public class CoreLanguage
    */
   public static CoreLanguage getInstance()
   {
-    Core core = Core.getInstance();
+    Core   core = Core.getInstance();
+    String name = Core.ACTION_LANG.get();
     if (CoreLanguage.instances != null
-    &&  CoreLanguage.instances.containsKey(core.LANGUAGE))
+    &&  CoreLanguage.instances.containsKey(name))
     {
-      return CoreLanguage.instances.get(core.LANGUAGE);
+      return CoreLanguage.instances.get(name);
     }
 
     CoreLanguage lang = new CoreLanguage();
@@ -188,7 +189,7 @@ public class CoreLanguage
       {
         CoreLanguage.instances = new HashMap<String, CoreLanguage>();
       }
-      CoreLanguage.instances.put(core.LANGUAGE, lang);
+      CoreLanguage.instances.put(name, lang);
     }
 
     return lang;
@@ -196,7 +197,7 @@ public class CoreLanguage
 
   public static CoreLanguage getInstance(String name)
   {
-    String key = "__CONF__." + name;
+    String key = "__LANG__." + name;
     Core  core = Core.getInstance();
     if (! core.containsKey( key ) )
     {

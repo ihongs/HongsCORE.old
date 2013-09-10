@@ -41,29 +41,30 @@ public class cmdlet
   {
     cmdlet.init(args);
 
-    Core core = Core.getInstance(0);
+    Core core = Core.getInstance();
+    String act = Core.ACTION.get();
 
-    if (core.ACTION == null || core.ACTION.length() == 0)
+    if (act == null || act.length() == 0)
     {
       CmdletHelper.print("ERROR: Cmdlet name can not be empty.");
       return;
     }
 
-    if (core.ACTION.startsWith(".") || core.ACTION.endsWith("."))
+    if (act.startsWith(".") || act.endsWith("."))
     {
-      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+core.ACTION + "'.");
+      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+act+"'.");
       return;
     }
 
-    int pos = core.ACTION.lastIndexOf('.');
+    int pos = act.lastIndexOf('.');
     if (pos == -1)
     {
-      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+core.ACTION + "'.");
+      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+act+"'.");
       return;
     }
 
-    String cls =    "app."+core.ACTION.substring(0,pos)
-               +".cmdlet."+core.ACTION.substring(pos+1);
+    String cls =    "app."+act.substring(0,pos)
+               +".cmdlet."+act.substring(pos+1);
     String mtd = "cmdlet";
 
     /** 执行指定程序 **/
@@ -165,23 +166,27 @@ public class cmdlet
        * 并清除参数及核心
        */
       if (Core.IN_DEBUG_MODE)
-          CmdletHelper.printETime("Total exec time", core.TIME);
+          CmdletHelper.printETime("Total exec time", core.GLOBAL_TIME);
 
-      Core.destroyAll();
+      core.destroy();
       opts = null;
-      args = null;
     }
   }
 
   public static void init(String[] args)
     throws IOException
   {
-    Map<String, Object>        optz ;
+    Map<String, Object> optz;
     opts = CmdletHelper.getOpts(args);
     optz = CmdletHelper.getOpts(opts ,":+s",
-      "request:s","session:s","language:s",
-      "debug:b","base-path:s","base-href:s"
+      "debug:b","base-path:s","base-href:s",
+      "language:s","session:s","request:s"
     );
+
+    Core.GLOBAL_CORE = new Core();
+    Core.GLOBAL_TIME = System.currentTimeMillis();
+    Core.THREAD_CORE.set(Core.GLOBAL_CORE);
+    Core.ACTION_TIME.set(Core.GLOBAL_TIME);
 
     /** 静态属性配置 **/
 
@@ -216,8 +221,6 @@ public class cmdlet
     Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
     Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
     Core.SERVER_ID  = conf.getProperty("core.server.id", "0");
-    Core.getInstance(0).put("__IN_OBJECT_MODE__",
-                      conf.getProperty("core.in.object.mode", false));
 
     /** 实例属性配置 **/
 
@@ -286,11 +289,6 @@ public class cmdlet
 
     /** 初始化核心 **/
 
-    Core core = Core.getInstance(0);
-         core.init(act, lang);
-    ActionHelper helper = (ActionHelper)
-         core.get (app.hongs.action.ActionHelper.class);
-
     String str;
     str = (String)optz.get("request");
     Map<String, String[]>  req = null;
@@ -304,6 +302,11 @@ public class cmdlet
         req  = parseQueryString(str);
     }
 
+    Core core = Core.getInstance();
+    ActionHelper helper = (ActionHelper)
+         core.get (app.hongs.action.ActionHelper.class);
+    Core.ACTION_LANG.set(lang);
+    Core.ACTION.set( act);
     helper.init(req, ses);
   }
 

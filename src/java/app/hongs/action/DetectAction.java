@@ -27,8 +27,8 @@ public class DetectAction
         PrintWriter out = rsp.getWriter();
         //int pos = core.ACTION.lastIndexOf('.') - 1;
         //String act = core.ACTION.substring(0, pos);
-        String act = core.ACTION.substring( 0 ,
-                     core.ACTION.length() - 3);
+        String act  = Core.ACTION.get();
+               act  = act.substring(0, act.length()-3);
         String conf = req.getParameter("conf");
         String sess = req.getParameter("sess");
         String logn = req.getParameter("logn");

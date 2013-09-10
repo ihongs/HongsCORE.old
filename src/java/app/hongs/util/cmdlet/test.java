@@ -27,17 +27,7 @@ public class test {
 
   public static void cmdlet(Map<String, String[]> opts)
           throws app.hongs.HongsException {
-    
-      Calendar cal = Calendar.getInstance();
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-      try {
-        cal.setTime(sdf.parse("2013-01-31"));
-        cal.add(Calendar.MONTH, 1);
-        System.out.println(sdf.format(cal.getTime()));
-      } catch (ParseException ex) {
-          Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
-      }
-      
+
     Map vars = new java.util.HashMap();
     vars.put("var",  "var1");
     vars.put("var.2", "var2");
@@ -47,11 +37,26 @@ public class test {
       
     //app.hongs.util.JSON.print(opts);
     Map<String, Object> optz = CmdletHelper.getOpts(opts,
-      "test-text:b", "test-rate:b", "test-left:b",
-      "test-opts:b","test-radix:i", "test-serially:b",
-      "show-env:b", "show-properties:b",
-      "make-demo-data:b");
+      "show-env:b",
+      "show-properties:b",
+      "test-text:b",
+      "test-rate:b",
+      "test-left:b",
+      "test-opts:b",
+      "test-radix:i",
+      "test-inject:b",
+      "test-serially:b");
     //app.hongs.util.JSON.print(optz);
+
+    if (optz.containsKey("show-env")
+    && (Boolean)optz.get("show-env")) {
+      JSON.print(System.getenv());
+    }
+
+    if (optz.containsKey("show-properties")
+    && (Boolean)optz.get("show-properties")) {
+      JSON.print(System.getProperties());
+    }
 
     if (optz.containsKey("test-text")
     && (Boolean)optz.get("test-text")) {
@@ -80,16 +85,6 @@ public class test {
     if (optz.containsKey("test-serially")
     && (Boolean)optz.get("test-serially")) {
       new TestSerially();
-    }
-
-    if (optz.containsKey("show-env")
-    && (Boolean)optz.get("show-env")) {
-      JSON.print(System.getenv());
-    }
-
-    if (optz.containsKey("show-properties")
-    && (Boolean)optz.get("show-properties")) {
-      JSON.print(System.getProperties());
     }
 
     if (optz.containsKey("make-demo-data")

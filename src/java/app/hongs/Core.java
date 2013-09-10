@@ -53,55 +53,54 @@ extends HashMap<String, Object>
 {
 
   /**
-   * 以下部分属性需要在 Action 或 shell 执行时自行配置;
-   * ACTION   动作名称(ACTION名称/SHELL名称/URI),
-   * LANGUAGE 当前服务所采用的语言.
+   * 获取类对应的唯一对象
+   *
+   * @param klass [包路径.]类名.class
+   * @return 唯一对象
    */
-
-  /**
-   * 当前线程ID
-   */
-  public long ID;
-
-  /**
-   * 线程起始时间
-   */
-  public long TIME;
-
-  /**
-   * 动作
-   */
-  public String ACTION;
-
-  /**
-   * 语言
-   */
-  public String LANGUAGE;
-
-  /**
-   * 核心构造方法
-   * 自动放入线程ID和起始时间
-   */
-  public Core()
+  public Object get(Class klass)
   {
-    this.ID       = Thread.currentThread().getId();
-    this.TIME     = System.currentTimeMillis();
-    this.ACTION   = "";
-    this.LANGUAGE = "";
+    Core   core = Core.GLOBAL_CORE ;
+    String name = klass.getName ( );
+    Object inst = check(core, name);
+    return inst != null ? inst : build(core, name, klass);
   }
 
   /**
-   * 初始化核心
+   * 获取名称对应的唯一对象
    *
-   * @param action 动作
-   * @param language 语言
+   * @param name [包路径.]类名
+   * @return 唯一对象
    */
-  public final void init(String action, String language)
+  public Object get(String name)
   {
-    this.ID       = Thread.currentThread().getId();
-    this.TIME     = System.currentTimeMillis();
-    this.ACTION   = action;
-    this.LANGUAGE = language;
+    Core   core = Core.GLOBAL_CORE ;
+    Object inst = check(core, name);
+    return inst != null ? inst : build(core, name);
+  }
+
+  /**
+   * 不支持get(Object), 仅支持get(String)
+   * @param name
+   * @return 异常
+   * @deprecated
+   */
+  @Override
+  public Object get(Object name)
+  {
+    throw new HongsError(0x10,
+      "May cause an error on 'get(Object)', use 'get(String)' or 'get(Class)'");
+  }
+
+  /**
+   * 不支持clear
+   * @deprecated
+   */
+  @Override
+  public void clear()
+  {
+    throw new HongsError(0x10,
+      "May cause an error on 'clear', use the 'destroy'");
   }
 
   /**
@@ -253,62 +252,6 @@ extends HashMap<String, Object>
     }
   }
 
-  /**
-   * 获取类对应的唯一对象
-   *
-   * @param klass [包路径.]类名.class
-   * @return 唯一对象
-   */
-  public Object get(Class klass)
-  {
-    Core core = Core.getInstance(0);
-    String name = klass.getName ( );
-    Object inst = check(core, name);
-    return inst != null ? inst : build(core, name, klass);
-  }
-
-  /**
-   * 获取名称对应的唯一对象
-   *
-   * @param name [包路径.]类名
-   * @return 唯一对象
-   */
-  public Object get(String name)
-  {
-    Core core = Core.getInstance(0);
-    Object inst = check(core, name);
-    return inst != null ? inst : build(core, name);
-  }
-
-  /**
-   * 不支持get(Object), 仅支持get(String)
-   * @param name
-   * @return 异常
-   * @deprecated
-   */
-  @Override
-  public Object get(Object name)
-  {
-    throw new HongsError(0x10,
-      "May cause an error on 'get(Object)', use 'get(String)' or 'get(Class)'");
-  }
-
-  /*
-  @Override
-  public Object remove(Object name)
-  {
-    throw new HongsError(0x10,
-      "May cause an error on 'remove', wait the 'destroy'");
-  }
-
-  @Override
-  public void clear()
-  {
-    throw new HongsError(0x10,
-      "May cause an error on 'clear', use the 'destroy'");
-  }
-  */
-
   /** 静态属性及方法 **/
 
   /**
@@ -357,89 +300,64 @@ extends HashMap<String, Object>
   public static String SERVER_ID;
 
   /**
-   * 核心实例表
+   * 全局核心对象
    */
-  public static Map<Long, Core> INSTANCES = new HashMap<>();
+  public static Core GLOBAL_CORE;
+  /**
+   * 全局开始时间
+   */
+  public static Long GLOBAL_TIME;
 
   /**
-   * 获取核心实例
-   *
-   * @param id 线程ID
-   * @return 核心实例
+   * 线程核心对象
    */
-  public static Core getInstance(long id)
-  {
-    if (Core.INSTANCES.containsKey(id))
-    {
-      return Core.INSTANCES.get(id);
-    }
-    else
-    {
-      Core core = new Core();
-      if (id != 0)
-      {
-        Core cora  =  Core.getInstance(  0  );
-        core.init(cora.ACTION, cora.LANGUAGE);
+  public static ThreadLocal<Core> THREAD_CORE
+         =  new ThreadLocal() {
+      @Override
+      protected Core initialValue() {
+            return new Core();
       }
-      Core.INSTANCES.put(id , core);
-      return core;
-    }
+  };
+  /**
+   * 动作路径标识
+   */
+  public static InheritableThreadLocal<String> ACTION
+         =  new InheritableThreadLocal();
+  /**
+   * 动作语言标识
+   */
+  public static InheritableThreadLocal<String> ACTION_LANG
+         =  new InheritableThreadLocal();
+  /**
+   * 动作开始时间
+   */
+  public static InheritableThreadLocal< Long > ACTION_TIME
+         =  new InheritableThreadLocal();
+
+  /**
+   * 获取核心对象
+   * @return 
+   */
+  public static Core getInstance() {
+    return THREAD_CORE.get();
   }
 
   /**
-   * 获取当前核心实例
-   *
-   * @return 核心实例
+   * 按类获取单例
+   * @param klass
+   * @return 
    */
-  public static Core getInstance()
-  {
-    return Core.getInstance(Core.getThreadId());
+  public static Object getInstance(Class klass) {
+    return getInstance().get(klass);
   }
 
   /**
-   * 获取应用实例
-   *
-   * @param id 线程ID
-   * @param klass [包路径.]类名.class
-   * @return 应用实例
+   * 按名获取单例
+   * @param name
+   * @return 
    */
-  public static Object getInstance(long id, Class klass)
-  {
-    return Core.getInstance(id).get(klass);
-  }
-
-  /**
-   * 获取当前应用实例
-   *
-   * @param klass [包路径.]类名.class
-   * @return 当前应用实例
-   */
-  public static Object getInstance(Class klass)
-  {
-    return Core.getInstance(Core.getThreadId()).get(klass);
-  }
-
-  /**
-   * 获取应用实例
-   *
-   * @param id 线程ID
-   * @param name [包路径.]类名
-   * @return 应用实例
-   */
-  public static Object getInstance(long id, String name)
-  {
-    return Core.getInstance(id).get(name);
-  }
-
-  /**
-   * 获取当前应用实例
-   *
-   * @param name [包路径.]类名
-   * @return 当前应用实例
-   */
-  public static Object getInstance(String name)
-  {
-    return Core.getInstance(Core.getThreadId()).get(name);
+  public static Object getInstance(String name) {
+    return getInstance().get( name);
   }
 
   /**
@@ -480,41 +398,6 @@ extends HashMap<String, Object>
   public static String getUniqueId()
   {
     return Core.getUniqueId(Core.SERVER_ID);
-  }
-
-  /**
-   * 获取当前核心ID(即线程ID)
-   *
-   * @return 核心ID(线程ID)
-   */
-  private static long getThreadId()
-  {
-    return Thread.currentThread().getId();
-  }
-
-  /**
-   * 销毁全部核心对象
-   */
-  public static void destroyAll()
-  {
-    /**
-     * 逐一销毁核心对象
-     */
-    Iterator it = Core.INSTANCES.entrySet().iterator();
-    while (  it.hasNext()  )
-    {
-      Map.Entry et = (Map.Entry)it.next();
-      Core    core = (Core)et.getValue();
-              core.destroy();
-    }
-
-    /**
-     * 清空重要对象集合
-     */
-    app.hongs.db.DB.instances = null;
-    CoreLanguage.instances = null;
-    CoreConfig.instance = null;
-    Core.INSTANCES.clear();
   }
 
   /** 核心接口 **/

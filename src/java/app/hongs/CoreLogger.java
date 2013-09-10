@@ -139,9 +139,9 @@ public class CoreLogger
     Core core = Core.getInstance();
     sb.append(' ')
       .append('[')
-      .append(core.ACTION)
+      .append(  Core.ACTION.get () )
       .append(' ')
-      .append(core.ID)
+      .append(Thread.currentThread().getId())
       .append(']');
 
     /**

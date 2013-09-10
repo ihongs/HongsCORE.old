@@ -48,7 +48,7 @@ public class NavTag extends SimpleTagSupport {
 
         try {
             if ("title".equals(type)) {
-                Map page = ac.getPage(core.ACTION);
+                Map page = ac.getPage(Core.ACTION.get());
                 if (page == null) {
                     out.print(cl.translate("page.untitled") );
                 }
