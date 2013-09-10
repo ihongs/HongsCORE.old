@@ -89,7 +89,7 @@ extends HashMap<String, Object>
   public Object get(Object name)
   {
     throw new HongsError(0x10,
-      "May cause an error on 'get(Object)', use 'get(String)' or 'get(Class)'");
+      "May cause an error on 'get(Object)', use 'get(String|Class)'");
   }
 
   /**
