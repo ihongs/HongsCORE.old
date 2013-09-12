@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.IOException;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletRequest;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.util.Tree;
+import app.hongs.action.annotation.DatumsWrapper;
 
 /**
  * <h1>请求数据过滤器</h1>
@@ -21,7 +23,7 @@ import app.hongs.util.Tree;
  * @author Hongs
  */
 public class DatumsFilter
-  extends AbstractFilter
+  implements Filter
 {
 
   /**
@@ -38,10 +40,8 @@ public class DatumsFilter
   public void init(FilterConfig config)
     throws ServletException
   {
-    super.init(config);
-
     /**
-     * 获取权限配置名
+     * 获取配置名
      */
     String cn = config.getInitParameter("config-name");
     if (cn == null)
@@ -51,7 +51,7 @@ public class DatumsFilter
     this.configName = cn;
 
     /**
-     * 获取权限会话键
+     * 获取请求键
      */
     String sk = config.getInitParameter("request-key");
     if (sk == null)
@@ -62,7 +62,14 @@ public class DatumsFilter
   }
 
   @Override
-  public void _actFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
+  public void destroy()
+  {
+    configName = null;
+    requestKey = null;
+  }
+
+  @Override
+  public void doFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
     throws ServletException, IOException
   {
     ActionHelper helper = (ActionHelper)
@@ -128,9 +135,9 @@ public class DatumsFilter
     /** 输出过滤 **/
 
     HttpServletResponse rsp2;
-    ResponseWrapper rsp3;
+    DatumsWrapper rsp3;
     rsp2 = helper.response;
-    rsp3 = new ResponseWrapper(rsp2);
+    rsp3 = new DatumsWrapper(rsp2);
     helper.response = rsp3;
     chain.doFilter(req, rsp3);
     helper.response = rsp2;
@@ -148,4 +155,5 @@ public class DatumsFilter
       helper.print(rsp3.toString());
     }
   }
+
 }

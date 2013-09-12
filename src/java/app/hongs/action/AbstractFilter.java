@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * </pre>
  *
  * @author Hongs
+ * @deprecated 
  */
 public abstract class AbstractFilter
   extends AbstractServlet

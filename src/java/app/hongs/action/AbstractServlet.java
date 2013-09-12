@@ -1,7 +1,5 @@
 package app.hongs.action;
 
-import java.util.Date;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -26,6 +24,7 @@ import app.hongs.*;
  * </pre>
  *
  * @author Hongs
+ * @deprecated
  */
 public abstract class AbstractServlet
   extends HttpServlet
@@ -49,13 +48,12 @@ public abstract class AbstractServlet
      */
     synchronized (Core.GLOBAL_CORE)
     {
-      if (Core.GLOBAL_CORE != null)
+      if ( Core.BASE_PATH != null )
           return;
-      Core.GLOBAL_CORE = new Core();
-      Core.GLOBAL_TIME = System.currentTimeMillis();
+      Core.BASE_PATH = "";
     }
 
-    System.setProperty("file.encoding", "UTF-8");
+    System.setProperty( "file.encoding" , "UTF-8" );
 
     /** 静态属性配置 **/
 
@@ -133,7 +131,7 @@ public abstract class AbstractServlet
     ActionHelper helper = (ActionHelper)
          core.get(app.hongs.action.ActionHelper.class);
 
-    if (action.equals(Core.ACTION.get())
+    if (action.equals(Core.ACTION_PATH.get())
     &&  aprsid.equals(helper.APRSID)
     &&  0     <       helper.INITID)
     {
@@ -153,7 +151,7 @@ public abstract class AbstractServlet
      */
 
     Core.ACTION_TIME.set(System.currentTimeMillis());
-    Core.ACTION.set(action);
+    Core.ACTION_PATH.set(action);
     helper.init( req, rsp );
 
     /** 实例属性配置 **/
@@ -210,9 +208,9 @@ public abstract class AbstractServlet
       System.out.println(
         "--------------------------------------------------\r\n"
         + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
-        + "ACTION          : " + Core.ACTION + "\r\n"
-        + "LANG            : " + Core.ACTION_LANG.get() + "\r\n"
-        + "TIME            : " + Core.ACTION_TIME.get() + "\r\n"
+        + "ACTION_PATH     : " + Core.ACTION_PATH.get() + "\r\n"
+        + "ACTION_LANG     : " + Core.ACTION_LANG.get() + "\r\n"
+        + "ACTION_TIME     : " + Core.ACTION_TIME.get() + "\r\n"
         + "User Address    : " + req.getRemoteAddr() + " "
                                + req.getRemotePort() + "\r\n"
       );
@@ -241,7 +239,7 @@ public abstract class AbstractServlet
     ActionHelper helper = (ActionHelper)
       Core.getInstance(app.hongs.action.ActionHelper.class);
 
-    if (helper.INITID > 0)
+    if (0 < helper.INITID)
     {
       helper.INITID --;
     }
@@ -250,10 +248,9 @@ public abstract class AbstractServlet
       return;
     }
 
-    Core core = Core.getInstance();
-
     if (Core.IN_DEBUG_MODE)
     {
+      Core  core = Core.THREAD_CORE.get();
       long  time = Core.ACTION_TIME.get();
       float secs = (float)(System.currentTimeMillis() - time) / 1000;
       System.out.println(
@@ -264,7 +261,7 @@ public abstract class AbstractServlet
       );
     }
 
-    core.destroy();
+    Core.THREAD_CORE.get().destroy();
   }
 
   @Override
@@ -272,20 +269,17 @@ public abstract class AbstractServlet
   {
     super.destroy();
 
-    Core core;
-    long time;
     synchronized (Core.GLOBAL_CORE)
     {
-      if (Core.GLOBAL_CORE == null)
+      if ( Core.BASE_PATH == null )
           return;
-      core = Core.GLOBAL_CORE;
-      time = Core.GLOBAL_TIME;
-      Core.GLOBAL_CORE = null;
-      Core.GLOBAL_TIME = null;
+      Core.BASE_PATH = null;
     }
 
     if (Core.IN_DEBUG_MODE)
     {
+      Core  core = Core.GLOBAL_CORE;
+      long  time = Core.GLOBAL_TIME;
       float secs = (float)(System.currentTimeMillis() - time) / 1000;
       System.out.println(
         "--------------------------------------------------\r\n"
@@ -294,8 +288,8 @@ public abstract class AbstractServlet
         + "Used Objects    : " + core.keySet().toString() + "\r\n"
       );
     }
- 
-    core.destroy();
+
+    Core.GLOBAL_CORE.destroy();
   }
 
 }

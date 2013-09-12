@@ -58,11 +58,13 @@ public class ActionHelper
 
   /**
    * 初始化层级
+   * @deprecated 
    */
   protected short INITID;
 
   /**
    * 初始化标识
+   * @deprecated 
    */
   protected String APRSID;
 

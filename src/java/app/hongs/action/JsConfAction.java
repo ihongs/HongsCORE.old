@@ -7,10 +7,10 @@ import java.util.Locale;
 import java.util.Date;
 import java.util.TimeZone;
 import java.text.SimpleDateFormat;
-
 import java.io.IOException;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,7 +38,7 @@ import app.hongs.util.Str;
  * @author Hongs
  */
 public class JsConfAction
-  extends AbstractServlet
+  extends HttpServlet
 {
   private static Map<String, String> config = new HashMap<String, String>();
   private static Map<String, String> lastModified = new HashMap<String, String>();
@@ -52,15 +52,15 @@ public class JsConfAction
    * @throws javax.servlet.ServletException
    */
   @Override
-  public void _actService(HttpServletRequest req, HttpServletResponse rsp)
-    throws IOException, ServletException
+  public void service(HttpServletRequest req, HttpServletResponse rsp)
+    throws ServletException, IOException
   {
     Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
 
-    String name = Core.ACTION.get();
+    String name = Core.ACTION_PATH.get();
            name = name.substring(1, name.lastIndexOf('.'));
-    String type = req.getParameter("t");
+    String type = req.getParameter( "t");
     String m, s;
 
     /**

@@ -136,10 +136,9 @@ public class CoreLogger
     /**
      * 记录请求的动作
      */
-    Core core = Core.getInstance();
     sb.append(' ')
       .append('[')
-      .append(  Core.ACTION.get () )
+      .append(Core.ACTION_PATH.get())
       .append(' ')
       .append(Thread.currentThread().getId())
       .append(']');

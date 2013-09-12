@@ -48,13 +48,12 @@ public class NavTag extends SimpleTagSupport {
 
         try {
             if ("title".equals(type)) {
-                Map page = ac.getPage(Core.ACTION.get());
+                Map page = ac.getPage(Core.ACTION_PATH.get());
                 if (page == null) {
-                    out.print(cl.translate("page.untitled") );
+                    out.print( cl.translate("page.untitled"));
                 }
                 else {
-                    out.print(
-                    this.translate((String)page.get("name")));
+                    out.print(this.translate((String)page.get("name")));
                 }
             }
             else if ("menu".equals(type)) {

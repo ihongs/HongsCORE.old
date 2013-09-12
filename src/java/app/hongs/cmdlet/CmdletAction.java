@@ -1,13 +1,14 @@
 package app.hongs.cmdlet;
 
-import app.hongs.Core;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import app.hongs.action.*;
+import app.hongs.Core;
+import app.hongs.action.Action;
+import app.hongs.action.ActionHelper;
 
 /**
  * <h1>外壳程序动作</h1>
@@ -21,12 +22,12 @@ import app.hongs.action.*;
  * <pre>
  * &lt;!-- Shell Servlet --&gt;
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;Shell&lt;/servlet-name&gt;
- *   &lt;servlet-class&gt;app.hongs.action.ShellAction&lt;/servlet-class&gt;
+ *   &lt;servlet-name&gt;Cmdlet&lt;/servlet-name&gt;
+ *   &lt;servlet-class&gt;app.hongs.cmdlet.CmdletAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;Shell&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.sh&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;Cmdlet&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;*.if&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;<br/>
  * <pre>
  *
@@ -49,21 +50,21 @@ public class CmdletAction
    * @throws javax.servlet.ServletException
    */
   @Override
-  public void _actService(HttpServletRequest req, HttpServletResponse rsp)
+  public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core         core   = Core.getInstance();
-    String       action = Core.ACTION.get ();
     ActionHelper helper = (ActionHelper)
-                          Core.getInstance(app.hongs.action.ActionHelper.class);
+    Core.getInstance(app.hongs.action.ActionHelper.class);
+    String action = Core.ACTION_PATH.get();
+    action = action.substring(1, action.lastIndexOf('.')); // 去掉前导"/", 去掉扩展名
 
-    if (action.length() == 0) {
+    if (action != null && action.length() == 0) {
         helper.print404Code("Can not find action name.");
         return;
     }
 
-    if (action.indexOf('.') != -1) {
-        helper.print404Code("Illegal action '"+Core.ACTION.get()+"'.");
+    if (action.indexOf('.') != -1 || action.startsWith("hongs/cmdlet")) {
+        helper.print404Code("Illegal action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
 
@@ -71,11 +72,11 @@ public class CmdletAction
 
     int pos;
     String pkg, cls;
-    action = action.substring(1).replace('/', '.');
+    action = action.replace('/', '.');
 
     pos = action.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION.get()+"'.");
+        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
     pkg = action.substring(0,pos);

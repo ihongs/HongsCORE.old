@@ -1,12 +1,13 @@
 package app.hongs.action;
 
+import java.io.PrintWriter;
 import java.io.IOException;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import app.hongs.Core;
-import java.io.PrintWriter;
 
 /**
  * <h1>是否可执行动作</h1>
@@ -17,18 +18,15 @@ import java.io.PrintWriter;
  * @author Hongs
  */
 public class DetectAction
-  extends AbstractServlet
+  extends HttpServlet
 {
 
     @Override
-    public void _actService(HttpServletRequest req, HttpServletResponse rsp)
-    throws ServletException, IOException {
-        Core core = Core.getInstance();
+    public void service(HttpServletRequest req, HttpServletResponse rsp)
+    throws IOException, ServletException {
         PrintWriter out = rsp.getWriter();
-        //int pos = core.ACTION.lastIndexOf('.') - 1;
-        //String act = core.ACTION.substring(0, pos);
-        String act  = Core.ACTION.get();
-               act  = act.substring(0, act.length()-3);
+        String act  = Core.ACTION_PATH.get();
+               act  = act.substring(0, act.lastIndexOf('.') - 1); // 去掉扩展名
         String conf = req.getParameter("conf");
         String sess = req.getParameter("sess");
         String logn = req.getParameter("logn");

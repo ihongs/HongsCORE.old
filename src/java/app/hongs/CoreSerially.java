@@ -1,19 +1,21 @@
 package app.hongs;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.IOException;
 
 /**
  * <h1>临时数据工具</h1>
@@ -44,6 +46,8 @@ import java.io.Serializable;
 public abstract class CoreSerially
   implements Serializable
 {
+    
+  private static ReadWriteLock lock = new ReentrantReadWriteLock();  
 
   /**
    * 以有效到期时间方式构造实例
@@ -252,12 +256,14 @@ public abstract class CoreSerially
   {
     try
     {
-      FileOutputStream fos = new FileOutputStream(file);
-      ObjectOutputStream oos = new ObjectOutputStream(fos);
+      lock.writeLock().lock(); 
 
-      fos.getChannel().tryLock();
-      Map map = new HashMap( );
-      this.saveData(  map  );
+        FileOutputStream fos = new   FileOutputStream(file);
+      ObjectOutputStream oos = new ObjectOutputStream(fos );
+
+//    fos.getChannel().tryLock();
+      Map map = new HashMap();
+        this.saveData(map);
       oos.writeObject(map);
 
       oos.flush();
@@ -271,6 +277,10 @@ public abstract class CoreSerially
     {
       throw new HongsException(0x10d2, ex);
     }
+    finally
+    {
+      lock.writeLock().unlock();
+    }
   }
 
   /**
@@ -283,11 +293,13 @@ public abstract class CoreSerially
   {
     try
     {
-      FileInputStream fis = new FileInputStream(file);
-      ObjectInputStream ois = new ObjectInputStream(fis);
+      lock.readLock().lock();
+
+        FileInputStream fis = new   FileInputStream(file);
+      ObjectInputStream ois = new ObjectInputStream(fis );
 
       Map map = (Map)ois.readObject();
-      this.loadData(map);
+        this.loadData(map);
 
       ois.close();
     }
@@ -302,6 +314,10 @@ public abstract class CoreSerially
     catch (IOException ex)
     {
       throw new HongsException(0x10d4, ex);
+    }
+    finally
+    {
+      lock.readLock().unlock();
     }
   }
 

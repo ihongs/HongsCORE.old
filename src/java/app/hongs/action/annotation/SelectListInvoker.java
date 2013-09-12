@@ -3,7 +3,6 @@ package app.hongs.action.annotation;
 import app.hongs.CoreLanguage;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.DatumsConfig;
-import app.hongs.action.ResponseWrapper;
 import app.hongs.util.Tree;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,9 @@ public class SelectListInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
         HttpServletResponse rsp2;
-        ResponseWrapper rsp3;
+        DatumsWrapper rsp3;
         rsp2 = helper.response;
-        rsp3 = new ResponseWrapper(rsp2);
+        rsp3 = new DatumsWrapper(rsp2);
         helper.response = rsp3;
         chain.doAction();
         helper.response = rsp2;

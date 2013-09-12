@@ -15,6 +15,7 @@ import javax.servlet.jsp.HttpJspPage;
  * </pre>
  *
  * @author Hongs
+ * @deprecated 
  */
 public class AbstractJspPage
   extends AbstractServlet

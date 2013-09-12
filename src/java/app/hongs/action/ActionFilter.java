@@ -5,10 +5,11 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import java.io.UnsupportedEncodingException;
-import java.io.IOException;
 import java.net.URLEncoder;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletRequest;
@@ -43,7 +44,7 @@ import app.hongs.HongsException;
  * @author Hongs
  */
 public class ActionFilter
-  extends AbstractFilter
+  implements Filter
 {
 
   /**
@@ -75,8 +76,6 @@ public class ActionFilter
   public void init(FilterConfig config)
     throws ServletException
   {
-    super.init(config);
-
     /**
      * 获取首页URL
      */
@@ -127,11 +126,25 @@ public class ActionFilter
   }
 
   @Override
-  public void _actFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
+  public void destroy()
+  {
+    indexPath  = null;
+    loginPath  = null;
+    configName = null;
+    sessionKey = null;
+  }
+
+  @Override
+  public void doFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
     throws IOException, ServletException
   {
     ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
-    if (helper.INITID == 1) ActionFilter.clearCache();
+    /*
+    if (  helper.INITID == 1  )
+    {
+      ActionFilter.clearCache();
+    }
+    */
 
     /** 开始判断动作权限 **/
 
@@ -146,7 +159,7 @@ public class ActionFilter
       }
     }
 
-    String act = Core.ACTION.get();
+    String act = Core.ACTION_PATH.get();
 
     Map<String, Boolean> configData = getConfig(this.configName);
 

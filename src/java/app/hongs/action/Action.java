@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,7 +38,7 @@ import app.hongs.action.annotation.ActionChain;
  * @author Hongs
  */
 public class Action
-  extends AbstractServlet
+  extends HttpServlet
 {
 
   /**
@@ -53,21 +54,21 @@ public class Action
    * @throws javax.servlet.ServletException
    */
   @Override
-  public void _actService(HttpServletRequest req, HttpServletResponse rsp)
+  public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core         core   = Core.getInstance();
-    String       action = Core.ACTION.get ();
     ActionHelper helper = (ActionHelper)
-                          Core.getInstance(app.hongs.action.ActionHelper.class);
+    Core.getInstance(app.hongs.action.ActionHelper.class);
+    String action = Core.ACTION_PATH.get();
+    action = action.substring(1, action.lastIndexOf('.')); // 去掉前导"/", 去掉扩展名
 
-    if (action.length() == 0) {
+    if (action != null && action.length() == 0) {
         helper.print404Code("Can not find action name.");
         return;
     }
 
     if (action.indexOf('.') != -1 || action.startsWith("hongs/action")) {
-        helper.print404Code("Illegal action '"+Core.ACTION.get()+"'.");
+        helper.print404Code("Illegal action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
 
@@ -75,11 +76,11 @@ public class Action
 
     int pos;
     String cls, mtd;
-    action = action.substring(1).replace('/', '.');
+    action = action.replace('/', '.');
 
     pos = action.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION.get()+"'.");
+        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
     mtd    = action.substring(pos+1);
@@ -87,7 +88,7 @@ public class Action
 
     pos = action.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION.get()+"'.");
+        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
     cls    = action.substring(pos+1);

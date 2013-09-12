@@ -12,7 +12,7 @@ D:\Applications\apache-tomcat-7.0.39\lib\servlet-api.jar;^
 
 "%JAVA_HOME%\bin\java" ^
 -classpath "%CLASSPATH%" ^
-app.hongs.cmdlet.cmdlet %* ^
+app.hongs.cmdlet.Cmdlet %* ^
 -base.path "%BASE_PATH%"
 
 set CLASSPATH=%KLASSPATH%

@@ -14,9 +14,8 @@ import java.util.Map;
 public class Jump {
     public void actionTo(ActionHelper helper)
     throws HongsException {
-        Core core = Core.getInstance();
         ActionConfig conf = new ActionConfig("default");
-        String uri = Core.ACTION.get() + "?page=" + helper.getParameter("page");
+        String uri = Core.ACTION_PATH.get()+"?page="+helper.getParameter("page");
 
         Map<String, Map> page = conf.getPage(uri);
         if (page != null  && page.containsKey("pages")) {

@@ -302,11 +302,11 @@ extends HashMap<String, Object>
   /**
    * 全局核心对象
    */
-  public static Core GLOBAL_CORE;
+  public static Core GLOBAL_CORE = new Core();
   /**
    * 全局开始时间
    */
-  public static Long GLOBAL_TIME;
+  public static Long GLOBAL_TIME = System.currentTimeMillis();
 
   /**
    * 线程核心对象
@@ -319,19 +319,19 @@ extends HashMap<String, Object>
       }
   };
   /**
+   * 动作开始时间
+   */
+  public static InheritableThreadLocal< Long > ACTION_TIME
+         =  new InheritableThreadLocal();
+  /**
    * 动作路径标识
    */
-  public static InheritableThreadLocal<String> ACTION
+  public static InheritableThreadLocal<String> ACTION_PATH
          =  new InheritableThreadLocal();
   /**
    * 动作语言标识
    */
   public static InheritableThreadLocal<String> ACTION_LANG
-         =  new InheritableThreadLocal();
-  /**
-   * 动作开始时间
-   */
-  public static InheritableThreadLocal< Long > ACTION_TIME
          =  new InheritableThreadLocal();
 
   /**
