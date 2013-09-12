@@ -118,9 +118,9 @@ implements Filter {
             System.out.println(
                 "--------------------------------------------------\r\n"
                 + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
+                + "ACTION_TIME     : " + Core.ACTION_TIME.get() + "\r\n"
                 + "ACTION_PATH     : " + Core.ACTION_PATH.get() + "\r\n"
                 + "ACTION_LANG     : " + Core.ACTION_LANG.get() + "\r\n"
-                + "ACTION_TIME     : " + Core.ACTION_TIME.get() + "\r\n"
                 + "User Address    : " + req.getRemoteAddr() + " "
                                        + req.getRemotePort() + "\r\n");
         }
