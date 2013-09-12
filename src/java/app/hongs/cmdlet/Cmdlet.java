@@ -31,7 +31,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author Hongs
  */
-public class Cmdlet2
+public class Cmdlet
 {
 
   private static Map<String, String[]> opts;
