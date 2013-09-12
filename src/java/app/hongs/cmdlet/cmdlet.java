@@ -39,10 +39,10 @@ public class cmdlet
   public static void main(String[] args)
     throws IOException
   {
-    cmdlet.init(args);
+    init(args);
 
     Core core = Core.getInstance();
-    String act = Core.ACTION.get();
+    String act = Core.ACTION_PATH.get();
 
     if (act == null || act.length() == 0)
     {
@@ -107,7 +107,7 @@ public class cmdlet
     {
       method.invoke(null, new Object[] {opts});
 
-      //ShellHelper.print(core.ACTION + " complete.");
+      //ShellHelper.print(core.ACTION_PATH + " complete.");
     }
     catch (IllegalAccessException ex)
     {
@@ -183,8 +183,6 @@ public class cmdlet
       "language:s","session:s","request:s"
     );
 
-    Core.GLOBAL_CORE = new Core();
-    Core.GLOBAL_TIME = System.currentTimeMillis();
     Core.THREAD_CORE.set(Core.GLOBAL_CORE);
     Core.ACTION_TIME.set(Core.GLOBAL_TIME);
 
@@ -235,6 +233,7 @@ public class cmdlet
       act  =  (String)optx.remove(0);
       opts.put("", (String[])optx.toArray(new String[0]));
     }
+    Core.ACTION_PATH.set(act);
 
     String lang = null;
     if (optz.containsKey("language"))
@@ -286,6 +285,7 @@ public class cmdlet
         System.exit(1);
       }
     }
+    Core.ACTION_LANG.set(lang);
 
     /** 初始化核心 **/
 
@@ -302,12 +302,9 @@ public class cmdlet
         req  = parseQueryString(str);
     }
 
-    Core core = Core.getInstance();
     ActionHelper helper = (ActionHelper)
-         core.get (app.hongs.action.ActionHelper.class);
-    Core.ACTION_LANG.set(lang);
-    Core.ACTION.set( act);
-    helper.init(req, ses);
+                 Core.getInstance(app.hongs.action.ActionHelper.class);
+                 helper.init( req, ses );
   }
 
   /**
