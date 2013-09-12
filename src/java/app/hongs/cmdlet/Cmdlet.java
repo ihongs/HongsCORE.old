@@ -39,7 +39,7 @@ public class Cmdlet
   public static void main(String[] args)
     throws IOException
   {
-    Cmdlet.init(args);
+    init(args);
 
     Core core = Core.getInstance();
     String act = Core.ACTION_PATH.get();
