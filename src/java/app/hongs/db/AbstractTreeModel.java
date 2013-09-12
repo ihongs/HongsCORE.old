@@ -494,7 +494,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     throws HongsException
   {
     String sql;
-    if (all && this.cnumKey == null)
+    if (this.cnumKey == null)
     {
       sql = "SELECT `"
             + this.table.primaryKey +
@@ -507,9 +507,9 @@ public class AbstractTreeModel extends AbstractBaseModel
     else
     {
       sql = "SELECT `"
-            + this.table.primaryKey +
-            "`, `"
             + this.cnumKey +
+            "`, `"
+            + this.table.primaryKey +
             "` FROM `"
             + this.table.tableName +
             "` WHERE `"
@@ -534,7 +534,7 @@ public class AbstractTreeModel extends AbstractBaseModel
         int num;
         if (this.cnumKey == null)
         {
-          num = this.getChildsNum(cid);
+          num = 1; // 总是尝试获取就行了 //this.getChildsNum(cid);
         }
         else
         {
@@ -579,7 +579,7 @@ public class AbstractTreeModel extends AbstractBaseModel
         int num;
         if (this.cnumKey == null)
         {
-          num = this.getChildsNum(cid);
+          num = 1; // 总是尝试获取就行了 //this.getChildsNum(cid);
         }
         else
         {
