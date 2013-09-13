@@ -9,4 +9,4 @@ First, download this project to your disk, unzip it and create project in NetBea
 
 Then, open doc/ERM/hcum.mwb by MysqlWorkbench, use Database->Synchronize Model to create tables. Change your database,username,password in web/META-INF/context.xml and web/WEB-INF/conf/db-default.xml.
 
-Now you can build project, open browser and goto http://localhost:8080/HongsCORE/hcum/.
+Now you can build this project, open browser and goto http://localhost:8080/HongsCORE/hcum/.
