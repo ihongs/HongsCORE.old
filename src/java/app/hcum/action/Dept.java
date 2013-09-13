@@ -3,6 +3,7 @@ package app.hcum.action;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.annotation.CommitSuccess;
 import app.hcum.model.User;
 import java.util.HashMap;
 import java.util.List;
@@ -34,12 +35,14 @@ public class Dept {
         helper.back(data);
     }
 
+    @CommitSuccess
     public void actionSave(ActionHelper helper)
     throws HongsException {
         String id = model.save(helper.getRequestData());
         helper.back(id);
     }
 
+    @CommitSuccess
     public void actionRemove(ActionHelper helper)
     throws HongsException {
         int num = model.remove(helper.getRequestData());
