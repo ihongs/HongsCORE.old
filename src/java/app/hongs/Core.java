@@ -11,15 +11,15 @@ import java.lang.reflect.InvocationTargetException;
  * <pre>
  * 承担"唯一实例"(线程内唯一)的申请与注销操作
  * 必须存在一个无参构造函数或无参"getInstance"方法
- * 获取当前Core的唯一实例总是使用"Core.getInstance()"
+ * 获取当前 Core 的唯一实例总是使用"Core.getInstance()"
  * </pre>
  *
  * <h2>特性解释:</h2>
  * <pre>
- * Servlet在众多实现中总是以单实例多线程的方式工作, 对于某一个请求有且仅有一个线程为
+ * Servlet 在众多实现中总是以单实例多线程的方式工作, 对于某一个请求有且仅有一个线程为
  * 其服务.
- * Core类为框架的对象请求器, 其分配原则为线程内分配, 除个别类通过getInstance自定规则
- * 外, 其他类的实例均在线程内唯一. 故不需要同步即可确保程序的线程安全, 而同时兼顾单例
+ * Core 类为框架的对象请求器, 其分配原则为线程内分配, 除个别类通过 getInstance 自定规
+ * 则外, 其他类的实例均在线程内唯一. 故不需要同步即可确保程序的线程安全, 而同时兼顾单例
  * 模式的特点(节省资源, 共享状态).
  * </pre>
  *
@@ -34,12 +34,12 @@ import java.lang.reflect.InvocationTargetException;
  * LOGS_PATH        日志文件存放目录
  * TMPS_PATH        临时文件存放目录
  * SERVER_ID        服务器ID
- * 注: 以上属性需要在 Servlet/Filter/shell 初始化时进行设置.
+ * 注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
  * </p>
  *
  * <h2>错误代码:</h2>
  * <pre>
- * 0x25 实例名称不能为空\
+ * 0x25 实例名称不能为空
  * 0x27 无法获取对应的类
  * 0x28 禁止访问工厂方法
  * 0x2b 无法执行工厂方法
@@ -81,8 +81,9 @@ extends HashMap<String, Object>
 
   /**
    * 不支持get(Object), 仅支持get(String)
+   * 
    * @param name
-   * @return 异常
+   * @return 抛出错误
    * @deprecated
    */
   @Override
@@ -94,6 +95,8 @@ extends HashMap<String, Object>
 
   /**
    * 不支持clear
+   * 
+   * @return 抛出错误
    * @deprecated
    */
   @Override
@@ -344,6 +347,7 @@ extends HashMap<String, Object>
 
   /**
    * 按类获取单例
+   *
    * @param klass
    * @return 
    */
@@ -352,7 +356,8 @@ extends HashMap<String, Object>
   }
 
   /**
-   * 按名获取单例
+   * 按类名获取单例
+   *
    * @param name
    * @return 
    */
