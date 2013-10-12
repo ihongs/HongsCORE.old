@@ -446,8 +446,12 @@ public class CmdletHelper
 
   /**
    * 输出执行进度
-   * @param scale 0~100的浮点数
-   * @param notes 最多220个字符
+   *
+   * 由于现在的终端(命令行)宽度普遍是80个字符,
+   * 所以请将 notes 控制在50个字符以内(一个中文字符占两位).
+   *
+   * @param scale 百分比, 0~100的浮点数
+   * @param notes 说明文本
    */
   public static void printERate(float scale, String notes)
   {
@@ -457,11 +461,6 @@ public class CmdletHelper
 
     StringBuilder sb = new StringBuilder();
     Formatter     ft = new Formatter( sb );
-
-    for (int i = 0; i < 255; i += 1)
-    {
-      sb.append(" \b\b");
-    }
 
     for (int i = 0; i < 100; i += 5)
     {
@@ -476,6 +475,14 @@ public class CmdletHelper
     }
 
     ft.format(" %6.2f%% %s", scale, notes);
+
+    // 清除末尾多余的字符, 并将光标返回行首
+    // 每行按最少80个字符来计算
+    for (int i = sb.length(); i < 79; i += 1)
+    {
+      sb.append(" ");
+    }
+    sb.append("\r");
 
     if (scale == 100)
     {

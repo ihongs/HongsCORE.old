@@ -104,7 +104,7 @@ public class Num
   /** 格式 **/
 
   /**
-   * 友好的时间格式
+   * 友好的时间格式(精确到秒)
    * @param time 毫秒数
    * @return
    */
@@ -116,14 +116,14 @@ public class Num
     time = time % 3600000;
     int m = (int) Math.floor(time / 60000);
     time = time % 60000;
-    float s = time/1000;
+    int s = (int) Math.floor(time / 1000);
 
     StringBuilder sb = new StringBuilder();
-    if (d > 0) sb.append(d).append(" D ");
-    if (h > 0) sb.append(h).append(" H ");
-    if (m > 0) sb.append(m).append(" M ");
-    if (s > 0) sb.append(s).append(" S ");
-    if (sb.length() < 1) sb.append("0 S");
+    if (d > 0) sb.append(d).append("D");
+    if (h > 0) sb.append(h).append("H");
+    if (m > 0) sb.append(m).append("M");
+    if (s > 0) sb.append(s).append("S");
+    if (sb.length() < 1) sb.append("0S");
 
     return sb.toString().trim();
   }
@@ -144,11 +144,11 @@ public class Num
     int b = (int) size;
 
     StringBuilder sb = new StringBuilder();
-    if (g > 0) sb.append(g).append(" G ");
-    if (m > 0) sb.append(m).append(" M ");
-    if (k > 0) sb.append(k).append(" K ");
-    if (b > 0) sb.append(b).append(" B ");
-    if (sb.length() < 1) sb.append("0 B");
+    if (g > 0) sb.append(g).append("G");
+    if (m > 0) sb.append(m).append("M");
+    if (k > 0) sb.append(k).append("K");
+    if (b > 0) sb.append(b).append("B");
+    if (sb.length() < 1) sb.append("0B");
 
     return sb.toString().trim();
   }

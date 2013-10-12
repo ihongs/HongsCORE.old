@@ -16,7 +16,7 @@ import app.hongs.action.ActionHelper;
 import app.hongs.util.Str;
 
 /**
- * <h1>日志记录工具</h2>
+ * <h1>日志记录工具</h1>
  *
  * <h2>配置选项:</h2>
  * <pre>

@@ -258,7 +258,7 @@ extends HashMap<String, Object>
   /** 静态属性及方法 **/
 
   /**
-   * 是否处于调试模式
+   * 是否处于调试模式(devlop)
    */
   public static boolean IN_DEBUG_MODE;
 

@@ -13,7 +13,9 @@ import app.hongs.Core;
  * <h1>是否可执行动作</h1>
  * <pre>
  * Servlet Mapping: *.de
- * 如: /action/uri.do.de
+ * 如:
+ * /action/uri.do.de
+ * /cmdlet/uri.if.de
  * </pre>
  * @author Hongs
  */
@@ -25,11 +27,11 @@ public class DetectAction
     public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException {
         PrintWriter out = rsp.getWriter();
-        String act  = Core.ACTION_PATH.get();
-               act  = act.substring(0, act.lastIndexOf('.') - 1); // 去掉扩展名
-        String conf = req.getParameter("conf");
-        String sess = req.getParameter("sess");
-        String logn = req.getParameter("logn");
+        String act = Core.ACTION_PATH.get();
+               act = act.substring(0, act.lastIndexOf('.') - 1); // 去掉扩展名
+        String conf = req.getParameter("c");
+        String sess = req.getParameter("s");
+        String logn = req.getParameter("l");
         if (conf == null || "".equals(conf)) conf = "default";
         if (sess == null || "".equals(sess)) sess = "actions";
         if (ActionFilter.checkAction(act, conf, sess, "1".equals(logn))) {
