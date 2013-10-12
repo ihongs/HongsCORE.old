@@ -87,9 +87,9 @@ public class FetchBean
   public static final short     CROSS = 5;
 
   private static final Pattern p1 = Pattern
-          .compile("(^|[^`\\w\\.])\\.([`\\w\\*])");
+          .compile("(^|[^`\\w])\\.([`\\w\\*])");
   private static final Pattern p2 = Pattern
-          .compile("(^|[^`\\w\\.])\\:([`\\w\\*])");
+          .compile("(^|[^`\\w])\\:([`\\w\\*])");
   private static final Pattern pf = Pattern
           .compile("^\\s*,\\s*", Pattern.CASE_INSENSITIVE);
   private static final Pattern pw = Pattern
@@ -117,15 +117,6 @@ public class FetchBean
     this.joinType   = fs.joinType;
     this.joinExpr   = fs.joinExpr;
     this.joinList   = new LinkedHashSet(fs.joinList);
-  }
-
-  /**
-   * 构造表结构对象
-   * @param table 取tableName和name
-   */
-  public FetchBean(Table  table)
-  {
-    this(table.tableName, table.name);
   }
 
   /**
@@ -158,6 +149,15 @@ public class FetchBean
   public FetchBean(String tableName)
   {
     this(tableName, tableName);
+  }
+
+  /**
+   * 构造表结构对象
+   * @param table 取tableName和name
+   */
+  public FetchBean(Table  table)
+  {
+    this(table.tableName, table.name);
   }
 
   /**
