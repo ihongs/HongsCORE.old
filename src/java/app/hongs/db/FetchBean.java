@@ -315,7 +315,7 @@ public class FetchBean
    * 需追加查询参数请接收其返回的对象,
    * 并在该对象上进行相应的操作.
    * @param fs
-   * @param joinExpr
+   * @param joinExpr .被join的表 :执行join的表
    * @param joinType
    * @return 返回该关联的查询结构
    * @throws HongsException
@@ -332,29 +332,6 @@ public class FetchBean
     throws HongsException
   {
     return this.link(new FetchBean(fs),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 关联一个表(采用指定表对象的方式)
-   * @param table
-   * @param joinExpr
-   * @param joinType
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchBean join(Table  table,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchBean(table),
-           joinExpr, joinType);
-  }
-  public FetchBean join(Table  table,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchBean(table),
            joinExpr, INNER);
   }
 
@@ -362,7 +339,7 @@ public class FetchBean
    * 关联一个表(采用指定表名和别名的方式)
    * @param tableName
    * @param name
-   * @param joinExpr
+   * @param joinExpr .被join的表 :执行join的表
    * @param joinType
    * @return 返回该关联的查询结构
    * @throws HongsException
@@ -385,7 +362,7 @@ public class FetchBean
   /**
    * 关联一个表(采用指定表名或别名的方式)
    * @param tableName
-   * @param joinExpr
+   * @param joinExpr .被join的表 :执行join的表
    * @param joinType
    * @return 返回该关联的查询结构
    * @throws HongsException
@@ -402,6 +379,29 @@ public class FetchBean
     throws HongsException
   {
     return this.link(new FetchBean(tableName),
+           joinExpr, INNER);
+  }
+
+  /**
+   * 关联一个表(采用指定表对象的方式)
+   * @param table
+   * @param joinExpr .被join的表 :执行join的表
+   * @param joinType
+   * @return 返回该关联的查询结构
+   * @throws HongsException
+   */
+  public FetchBean join(Table  table,
+    String joinExpr, short joinType)
+    throws HongsException
+  {
+    return this.link(new FetchBean(table),
+           joinExpr, joinType);
+  }
+  public FetchBean join(Table  table,
+    String joinExpr)
+    throws HongsException
+  {
+    return this.link(new FetchBean(table),
            joinExpr, INNER);
   }
 
@@ -456,7 +456,7 @@ public class FetchBean
 
   /**
    * 设置管理的表查询关系
-   * @param joinExpr
+   * @param joinExpr .被join的表 :执行join的表
    * @param joinType
    * @return
    */
