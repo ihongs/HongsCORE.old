@@ -19,9 +19,9 @@ import java.util.regex.Pattern;
  *
  * <h2>将SQL语句拆解成以下对应部分:</h2>
  * <pre>
- * fields       SELECT field1, field2...
+ * fields         SELECT field1, field2...
  * tableName name FROM tableName AS name
- * wheres         WHERE  expr1 AND expr2...
+ * wheres         WHERE expr1 AND expr2...
  * groups         GROUP BY field1, field2...
  * havins         HAVING expr1 AND expr2...
  * orders         ORDER BY field1, field2...
@@ -316,7 +316,7 @@ public class FetchBean
    * 并在该对象上进行相应的操作.
    * @param fs
    * @param joinExpr .被join的表 :执行join的表
-   * @param joinType
+   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
@@ -340,7 +340,7 @@ public class FetchBean
    * @param tableName
    * @param name
    * @param joinExpr .被join的表 :执行join的表
-   * @param joinType
+   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
@@ -363,7 +363,7 @@ public class FetchBean
    * 关联一个表(采用指定表名或别名的方式)
    * @param tableName
    * @param joinExpr .被join的表 :执行join的表
-   * @param joinType
+   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
@@ -386,7 +386,7 @@ public class FetchBean
    * 关联一个表(采用指定表对象的方式)
    * @param table
    * @param joinExpr .被join的表 :执行join的表
-   * @param joinType
+   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
@@ -457,7 +457,7 @@ public class FetchBean
   /**
    * 设置管理的表查询关系
    * @param joinExpr .被join的表 :执行join的表
-   * @param joinType
+   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
    * @return
    */
   public FetchBean setJoin(String joinExpr, short joinType)
