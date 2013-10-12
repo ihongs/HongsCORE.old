@@ -609,6 +609,16 @@ public class FetchMore
     }
   }
 
+    /**
+     * 关联更新
+     *
+     * @param table 主表
+     * @param rows 要插入的数据
+     * @param keys 判断改变的键
+     * @param where 更新/删除范围
+     * @param params where 的参数
+     * @throws HongsException
+     */
     public static void assocUpdate(
         Table           table,
         List<Map>       rows,
@@ -670,6 +680,8 @@ public class FetchMore
 
   /**
    * 关联插入
+   *
+   * 关联配置中有指定 updateKeys 的话, 会调用 assocUpdate 进行更新
    *
    * @param table 主表
    * @param assocs 关联配置
