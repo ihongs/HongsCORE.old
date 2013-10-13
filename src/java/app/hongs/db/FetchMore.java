@@ -38,11 +38,11 @@ import java.util.regex.Pattern;
  *
  * <h2>系统已定义的"options":</h2>
  * <pre>
- * ASSOC_TABLES : Set         仅对某些表做关联; 作用域: FetchMore.assocSelect
- * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchMore.assocSelect
- * ASSOC_JOINS  : Set         仅对某些类型连接; 作用域: FetchMore.assocSelect
- * MULTI_ASSOC  : boolean     多行关联(使用IN方式关联); 作用域: FetchMore
- * UNITY_ASSOC  : boolean     单体关联(仅限非多行关联); 作用域: FetchMore
+ * ASSOC_TABLES : Set         仅对某些表做关联; 作用域: FetchJoin.assocSelect
+ * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchJoin.assocSelect
+ * ASSOC_JOINS  : Set         仅对某些类型连接; 作用域: FetchJoin.assocSelect
+ * MULTI_ASSOC  : boolean     多行关联(使用IN方式关联); 作用域: FetchJoin
+ * UNITY_ASSOC  : boolean     单体关联(仅限非多行关联); 作用域: FetchJoin
  * page         : int|String  分页页码; 作用域: FetchPage
  * rows         : int|String  分页行数; 作用域: FetchPage
  * </pre>
@@ -98,24 +98,24 @@ public class FetchMore
 
   /**
    * 构造表结构对象
-   * @param fs 复制其全部属性
+   * @param more 复制其全部属性
    */
-  public FetchMore(FetchMore fs)
+  public FetchMore(FetchMore more)
   {
-    this.tableName  = fs.tableName;
-    this.name       = fs.name;
-    this.fields     = new StringBuilder(fs.fields);
-    this.wheres     = new StringBuilder(fs.wheres);
-    this.groups     = new StringBuilder(fs.groups);
-    this.havins     = new StringBuilder(fs.havins);
-    this.orders     = new StringBuilder(fs.orders);
-    this.limits     = fs.limits;
-    this.wparams    = new ArrayList(fs.wparams);
-    this.hparams    = new ArrayList(fs.hparams);
-    this.options    = new HashMap(fs.options);
-    this.joinType   = fs.joinType;
-    this.joinExpr   = fs.joinExpr;
-    this.joinList   = new LinkedHashSet(fs.joinList);
+    this.tableName  = more.tableName;
+    this.name       = more.name;
+    this.fields     = new StringBuilder(more.fields);
+    this.wheres     = new StringBuilder(more.wheres);
+    this.groups     = new StringBuilder(more.groups);
+    this.havins     = new StringBuilder(more.havins);
+    this.orders     = new StringBuilder(more.orders);
+    this.limits     = more.limits;
+    this.wparams    = new ArrayList(more.wparams);
+    this.hparams    = new ArrayList(more.hparams);
+    this.options    = new HashMap(more.options);
+    this.joinType   = more.joinType;
+    this.joinExpr   = more.joinExpr;
+    this.joinList   = new LinkedHashSet(more.joinList);
   }
 
   /**
@@ -282,7 +282,7 @@ public class FetchMore
 
   /** 关联 **/
 
-  private FetchMore link(FetchMore fs,
+  private FetchMore link(FetchMore more,
     String joinExpr, short joinType)
     throws HongsException
   {
@@ -301,11 +301,11 @@ public class FetchMore
         "JoinExpr be required in (FULL|LEFT|RIGHT)");
     }
 
-    this.joinList.add(fs);
-    fs.joinExpr  = joinExpr;
-    fs.joinType  = joinType;
-    fs.options   = this.options;
-    return fs;
+    this.joinList.add(more);
+    more.joinExpr  = joinExpr;
+    more.joinType  = joinType;
+    more.options   = this.options;
+    return more;
   }
 
   /**
@@ -313,24 +313,24 @@ public class FetchMore
    * 注意: 此方法将自动克隆原查询结构,
    * 需追加查询参数请接收其返回的对象,
    * 并在该对象上进行相应的操作.
-   * @param fs
+   * @param more
    * @param joinExpr .被join的表 :执行join的表
    * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
    * @return 返回该关联的查询结构
    * @throws HongsException
    */
-  public FetchMore join(FetchMore fs,
+  public FetchMore join(FetchMore more,
     String joinExpr, short joinType)
     throws HongsException
   {
-    return this.link(new FetchMore(fs),
+    return this.link(new FetchMore(more),
            joinExpr, joinType);
   }
-  public FetchMore join(FetchMore fs,
+  public FetchMore join(FetchMore more,
     String joinExpr)
     throws HongsException
   {
-    return this.link(new FetchMore(fs),
+    return this.link(new FetchMore(more),
            joinExpr, INNER);
   }
 
@@ -416,24 +416,24 @@ public class FetchMore
   public FetchMore join(String name)
     throws HongsException
   {
-    FetchMore bean = this.getJoin(name);
-    if (bean == null)
-        bean =  this.link(new FetchMore(name), null, (short)0);
-    return bean;
+    FetchMore more = this.getJoin(name);
+    if (more == null)
+        more =  this.link(new FetchMore(name), null, (short)0);
+    return more;
   }
   public FetchMore join(String... path)
     throws HongsException
   {
-    FetchMore bean = this;
-    for (String n : path) bean = bean.join(n);
-    return bean;
+    FetchMore more = this;
+    for (String n : path) more = more.join(n);
+    return more;
   }
   public FetchMore join(List<String> path)
     throws HongsException
   {
-    FetchMore bean = this;
-    for (String n : path) bean = bean.join(n);
-    return bean;
+    FetchMore more = this;
+    for (String n : path) more = more.join(n);
+    return more;
   }
 
   /**
@@ -443,11 +443,11 @@ public class FetchMore
    */
   public FetchMore getJoin(String name)
   {
-    for (FetchMore bean : this.joinList)
+    for (FetchMore more : this.joinList)
     {
       if (this.name.equals(name))
       {
-        return bean;
+        return more;
       }
     }
     return null;
@@ -693,13 +693,13 @@ public class FetchMore
     }
 
     // 追加子级查询片段
-    Iterator it = this.joinList.iterator();
+    Iterator it = this.joinList.iterator( );
     while (it.hasNext())
     {
-      FetchMore fs = (FetchMore)it.next( );
-      if (0  !=  fs.joinType)
+      FetchMore more = (FetchMore)it.next();
+      if (0  != more.joinType)
       {
-                 fs.getSQLDeep(t, f, g, o, w, h, rp);
+        more.getSQLDeep(t, f, g,o, w,h, rp);
       }
     }
   }
@@ -747,14 +747,14 @@ public class FetchMore
     wparamz.addAll(this.wparams);
     hparamz.addAll(this.hparams);
 
-    for (FetchMore fs : this.joinList)
+    for (FetchMore more  :  this.joinList)
     {
-      if (0 == fs.joinType)
+      if (0 == more.joinType)
       {
         continue;
       }
 
-      fs.getParamsDeep(wparamz, hparamz);
+      more.getParamsDeep(wparamz, hparamz);
     }
   }
 

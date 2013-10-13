@@ -112,26 +112,26 @@ public class AbstractTreeModel extends AbstractBaseModel
    * <b>获取树</p>
    *
    * @param req
-   * @param fs
+   * @param more
    * @return 树列表
    */
-  public Map getTree(Map req, FetchMore fs)
+  public Map getTree(Map req, FetchMore more)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (more == null)
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
-    if (!fs.hasOption("ASSOC_TABLES")
-    &&  !fs.hasOption("ASSOC_TYPES")
-    &&  !fs.hasOption("ASSOC_JOINS"))
+    if (!more.hasOption("ASSOC_TABLES")
+    &&  !more.hasOption("ASSOC_TYPES")
+    &&  !more.hasOption("ASSOC_JOINS"))
     {
-      fs.setOption("ASSOC_TABLES", new HashSet());
+      more.setOption("ASSOC_TABLES", new HashSet());
     }
 
     boolean onlyId = req.containsKey("only_id")
@@ -146,37 +146,37 @@ public class AbstractTreeModel extends AbstractBaseModel
 
     if (onlyId)
     {
-      fs.select(".`" + this.table.primaryKey + "` AS `id`");
+      more.select(".`" + this.table.primaryKey + "` AS `id`");
     }
     else
     {
-      fs.select(".`" + this.table.primaryKey + "` AS `id`")
+      more.select(".`" + this.table.primaryKey + "` AS `id`")
         .select(".`" + this.pidKey  + "` AS `pid`" )
         .select(".`" + this.nameKey + "` AS `name`");
 
       if (this.noteKey != null)
       {
-        fs.select(".`" + this.noteKey + "` AS `note`");
+        more.select(".`" + this.noteKey + "` AS `note`");
       }
       if (this.typeKey != null)
       {
-        fs.select(".`" + this.typeKey + "` AS `type`");
+        more.select(".`" + this.typeKey + "` AS `type`");
       }
       if (this.cnumKey != null)
       {
-        fs.select(".`" + this.cnumKey + "` AS `cnum`");
+        more.select(".`" + this.cnumKey + "` AS `cnum`");
       }
       else
       {
-        fs.select("'1' AS `cnum`");
+        more.select("'1' AS `cnum`");
       }
       if (this.snumKey != null)
       {
-        fs.select(".`" + this.snumKey + "` AS `snum`");
+        more.select(".`" + this.snumKey + "` AS `snum`");
       }
       else
       {
-        fs.select("'0' AS `snum`");
+        more.select("'0' AS `snum`");
       }
     }
 
@@ -191,13 +191,13 @@ public class AbstractTreeModel extends AbstractBaseModel
         List pids = this.getChildIds(pid, true);
         pids.add(0, pid);
 
-        fs.where("."+this.pidKey+" IN (?)", pids);
+        more.where("."+this.pidKey+" IN (?)", pids);
 
         req.remove(this.pidVar);
       }
     }
 
-    Map  data = this.getList(req , fs);
+    Map  data = this.getList(req , more);
     List list = (List)data.get("list");
 
     if (withPath)
@@ -399,17 +399,17 @@ public class AbstractTreeModel extends AbstractBaseModel
    * 删除节点
    *
    * @param id
-   * @param fs
+   * @param more
    * @return 删除条数
    */
   @Override
-  public int del(String id, FetchMore fs)
+  public int del(String id, FetchMore more)
     throws HongsException
   {
     String pid = this.getParentId(id);
     int on = this.getSerialNum(id);
 
-    int i = super.del(id, fs);
+    int i = super.del(id, more);
 
     // 父级节点子节点数目减1
     this.setChildsOffset(pid, -1);
@@ -428,23 +428,23 @@ public class AbstractTreeModel extends AbstractBaseModel
   }
 
   @Override
-  protected void getFilter(Map req, FetchMore fs)
+  protected void getFilter(Map req, FetchMore more)
     throws HongsException
   {
-    super.getFilter(req, fs);
+    super.getFilter(req, more);
 
     if (!this.pidKey.equals(this.pidVar))
     {
       if (req.containsKey(this.pidVar))
       {
-        fs.where(".`" + this.pidKey + "` = ?",
+        more.where(".`" + this.pidKey + "` = ?",
                 req.get(this.pidVar).toString());
       }
       else
       if (req.containsKey(this.pidKey+"!"))
       {
-        fs.where(".`" + this.pidKey + "` != ?",
-                req.get(this.pidVar).toString());
+        more.where(".`" + this.pidKey + "` != ?",
+                  req.get(this.pidVar).toString());
       }
     }
 
@@ -452,13 +452,13 @@ public class AbstractTreeModel extends AbstractBaseModel
     {
       if (this.snumKey != null)
       {
-        fs.orderBy(this.snumKey);
+        more.orderBy(this.snumKey);
       }
       else if (this.cnumKey != null)
       {
-        fs.orderBy("(CASE WHEN `"
-                      + this.cnumKey +
-                      "` > 0 THEN 1 END) DESC");
+        more.orderBy("(CASE WHEN `"
+             + this.cnumKey +
+           "` > 0 THEN 1 END) DESC");
       }
     }
   }
@@ -516,12 +516,12 @@ public class AbstractTreeModel extends AbstractBaseModel
             + this.pidKey +
             "` = ?";
     }
-    List list = this.db.fetchAll(sql, id);
+    List list = this.db.fetchAll(sql,id);
 
-    Set ids = new HashSet();
-    FetchJoin fa = new FetchJoin(list);
-    fa.fetchIds(this.table.primaryKey, ids);
-    List cids = new ArrayList(ids);
+    Set        ids = new  HashSet ();
+    FetchJoin join = new FetchJoin(list);
+    join.fetchIds(this.table.primaryKey,ids);
+    List      cids = new ArrayList( ids);
 
     if (all)
     {

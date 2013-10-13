@@ -161,10 +161,10 @@ public class FetchJoin
    * @param table 关联表
    * @param col   关联字段
    * @param key   源表关联键
-   * @param fs    限制查询结构
+   * @param more  限制查询结构
    * @throws app.hongs.HongsException
    */
-  public void fetchJoin(Table table, String col, String key, FetchMore fs)
+  public void fetchJoin(Table table, String col, String key, FetchMore more)
     throws HongsException
   {
     if (this.rows.isEmpty())
@@ -173,10 +173,10 @@ public class FetchJoin
     }
 
     DB db = table.db;
-    String       name   = fs.name;
+    String       name   = more.name;
     String  tableName   = table.tableName;
-    boolean multiAssoc  = fs.getOption("MULTI_ASSOC", false);
-    boolean unityAssoc  = fs.getOption("UNITY_ASSOC", false);
+    boolean multiAssoc  = more.getOption("MULTI_ASSOC", false);
+    boolean unityAssoc  = more.getOption("UNITY_ASSOC", false);
 
     if (name == null || name.length() == 0)
     {
@@ -214,7 +214,7 @@ public class FetchJoin
     }
 
     // 构建查询结构
-    fs.from (tableName, name)
+    more.from (tableName, name)
       .where(col+" IN (?)", ids);
 
     /**
@@ -222,7 +222,7 @@ public class FetchJoin
      * 并根据之前的 id=>行 关系以表名为键放入列表中
      */
 
-    FetchNext rs = db.query(fs.getSQL(), fs.getParams());
+    FetchNext rs = db.query(more.getSQL(), more.getParams());
 
     Map     row, sub;
     List    lst;
@@ -405,33 +405,33 @@ public class FetchJoin
    * 关联查询
    * @param table 主表
    * @param assocs 关联配置
-   * @param bean 查询体
+   * @param join 查询体
    * @return 结果列表
    * @throws HongsException
    */
   public static List assocSelect
-    (Table table, Map assocs, FetchMore bean)
+    (Table table, Map assocs, FetchMore more)
   throws HongsException {
     if ( assocs == null ) assocs = new HashMap();
 
     List<Map> lnks = new ArrayList();
 
-    assocSelect(table, assocs, bean, lnks);
-    List rows = table.db.fetchMore( bean );
-    assocSelect(table, assocs, bean, lnks, rows);
+    assocSelect(table, assocs, more, lnks);
+    List rows = table.db.fetchMore( more );
+    assocSelect(table, assocs, more, lnks, rows);
 
     return rows;
   }
 
   private static void assocSelect
-    (Table table, Map assocs, FetchMore bean, List lnks)
+    (Table table, Map assocs, FetchMore more, List lnks)
   throws HongsException {
-    Set tps = (Set)bean.getOption("ASSOC_TYPES" );
-    Set jns = (Set)bean.getOption("ASSOC_JOINS" );
-    Set tns = (Set)bean.getOption("ASSOC_TABLES");
-    String tn = bean.name;
+    Set tps = (Set)more.getOption("ASSOC_TYPES" );
+    Set jns = (Set)more.getOption("ASSOC_JOINS" );
+    Set tns = (Set)more.getOption("ASSOC_TABLES");
+    String tn = more.name;
     if (tn == null || tn.length() == 0)
-           tn = bean.tableName;
+           tn = more.tableName;
 
     for(Map.Entry et : (Set<Map.Entry>)assocs.entrySet()) {
         Map assoc = (Map) et.getValue();
@@ -460,7 +460,7 @@ public class FetchJoin
 
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
-        FetchMore bean2 = bean.join(an)
+        FetchMore more2 = more.join(an)
                               .from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
@@ -509,22 +509,22 @@ public class FetchJoin
         }
 
         // 设置关联关系
-        bean2.setJoin(pk+"="+fk, ji);
+        more2.setJoin(pk+"="+fk, ji);
 
-        setBean(bean2,assoc);
+        setMore(more2,assoc);
 
         if (assocs2 != null) {
-            assocSelect(table2, assocs2, bean2, lnks);
+            assocSelect(table2, assocs2, more2, lnks);
         }
     }
   }
 
   private static void assocSelect
-    (Table table, Map assocs, FetchMore bean, List lnks, List rows)
+    (Table table, Map assocs, FetchMore more, List lnks, List rows)
   throws HongsException {
-    Set tps = (Set)bean.getOption("ASSOC_TYPES" );
-    Set tns = (Set)bean.getOption("ASSOC_TABLES");
-    FetchJoin more = new FetchJoin(rows);
+    Set tps = (Set)more.getOption("ASSOC_TYPES" );
+    Set tns = (Set)more.getOption("ASSOC_TABLES");
+    FetchJoin join = new FetchJoin(rows);
 
     while (!lnks.isEmpty()) {
         List lnks2 = new ArrayList();
@@ -545,7 +545,7 @@ public class FetchJoin
 
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
-        FetchMore bean2 = bean.join(an)
+        FetchMore more2 = more.join(an)
                               .from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
@@ -559,53 +559,53 @@ public class FetchJoin
         else if ("HAS_ONE".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
-            bean2.setOption("MULTI_ASSOC", false);
+            more2.setOption("MULTI_ASSOC", false);
         }
         else if ("HAS_MANY".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
-            bean2.setOption("MULTI_ASSOC", true );
+            more2.setOption("MULTI_ASSOC", true );
         }
         else {
             throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
         }
-        if (tn != null && tn.length() != 0 && !tn.equals(bean.name)) {
+        if (tn != null && tn.length() != 0 && !tn.equals(more.name)) {
             pk = tn+"."+pk;
         }
 
-        setBean(bean2,assoc);
+        setMore(more2,assoc);
 
         if (assocs2 != null) {
-            assocSelect(table2, assocs2, bean2, lnks2);
+            assocSelect(table2, assocs2, more2, lnks2);
         }
 
-        more.fetchJoin (table2, fk , pk, bean2);
+        join.fetchJoin (table2, fk , pk, more2);
     }
         lnks = lnks2;
     }
   }
 
-  private static void setBean(FetchMore bean, Map assoc) {
+  private static void setMore(FetchMore more, Map assoc) {
     String str;
     str = (String)assoc.get("select");
     if (str != null && str.length() != 0) {
-        bean.select(str);
+        more.select(str);
     }
     str = (String)assoc.get("where");
     if (str != null && str.length() != 0) {
-        bean.where(str);
+        more.where(str);
     }
     str = (String)assoc.get("groupBy");
     if (str != null && str.length() != 0) {
-        bean.groupBy(str);
+        more.groupBy(str);
     }
     str = (String)assoc.get("having");
     if (str != null && str.length() != 0) {
-        bean.having(str);
+        more.having(str);
     }
     str = (String)assoc.get("orderBy");
     if (str != null && str.length() != 0) {
-        bean.orderBy(str);
+        more.orderBy(str);
     }
   }
 

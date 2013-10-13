@@ -25,12 +25,12 @@ extends AbstractTreeModel {
         if (deptId == null) throw new HongsException(0x10000, "Dept Id required!");
 
         Table asoc = this.db.getTable("a_hcum_dept_group");
-        FetchMore fa = new FetchMore();
-        fa.select(".group_key")
-          .where(".dept_id = ?", deptId);
+        FetchMore more = new FetchMore();
+        more.select(".group_key")
+            .where(".dept_id = ?", deptId);
 
-        List<Map> rows = asoc.fetchMore(fa);
-        Set<String> groups = new HashSet( );
+        Set<String> groups = new HashSet();
+        List<Map>   rows   = asoc.fetchMore(more);
         for (Map row : rows) {
             groups.add((String)row.get("group_key"));
         }
@@ -39,18 +39,17 @@ extends AbstractTreeModel {
     }
 
     @Override
-    protected void getFilter(Map req, FetchMore fa)
+    protected void getFilter(Map req, FetchMore more)
     throws HongsException {
-        super.getFilter(req, fa);
+        super.getFilter(req, more);
 
         /**
          * 如果有指定user_id
          * 则关联a_hcum_user_detp来约束范围
          */
         if (req.containsKey("user_id")) {
-            fa.join("a_hcum_user_dept",
-                    ".dept_id = :id")
-              .where("user_id = ?", req.get("user_id"));
+            more.join ("a_hcum_user_dept", ":id = .dept_id")
+                .where("user_id = ?" , req.get( "user_id" ));
         }
     }
 

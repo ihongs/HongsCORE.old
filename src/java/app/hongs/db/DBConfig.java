@@ -218,7 +218,7 @@ public class DBConfig
      * 仅当type为BLS_TO或HAS_ONE时join可用;
      * 当type为BLS_TO时, foreignKey为基本表的外键,
      * 当type为HAS_ONE或HAS_MANY时, foreignKey为关联表的外键;
-     * 关联表其他可选配置fields|where|groupBy|orderBy|limit见FetchBean说明.
+     * 关联表其他可选配置fields|where|groupBy|orderBy|limit见FetchMore说明.
      */
 
     Element root = doc.getDocumentElement();

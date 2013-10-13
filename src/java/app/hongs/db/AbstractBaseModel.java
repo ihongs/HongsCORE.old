@@ -134,24 +134,24 @@ abstract public class AbstractBaseModel
    * 为空则errno为1, 页码超出则errno为2
    *
    * @param req
-   * @param fs
+   * @param more
    * @return 单页列表
    * @throws app.hongs.HongsException
    */
-  public Map getPage(Map req, FetchMore fs)
+  public Map getPage(Map req, FetchMore more)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (more == null)
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
-    fs.setOption("MODEL_METHOD", "getPage");
-    this.getFilter(req, fs);
+    more.setOption("MODEL_METHOD", "getPage");
+    this.getFilter(req, more);
 
     // 获取页码, 默认为第一页
     int page = 0;
@@ -168,7 +168,7 @@ abstract public class AbstractBaseModel
     }
 
     // 构建分页对象
-    FetchPage fp = new FetchPage(this.table, fs);
+    FetchPage fp = new FetchPage(this.table, more);
     fp.setPage(page);
     fp.setRows(rows);
     List list = fp.getList();
@@ -207,27 +207,27 @@ abstract public class AbstractBaseModel
    * 为空则errno为1
    *
    * @param req
-   * @param fs
+   * @param more
    * @return 全部列表
    * @throws app.hongs.HongsException
    */
-  public Map getList(Map req, FetchMore fs)
+  public Map getList(Map req, FetchMore more)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (more == null)
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
-    fs.setOption("MODEL_METHOD", "getList");
-    this.getFilter(req, fs);
+    more.setOption("MODEL_METHOD", "getList");
+    this.getFilter(req, more);
 
     // 获取列表
-    List list = this.table.fetchMore(fs);
+    List list = this.table.fetchMore(more);
     int errno = list.isEmpty() ? 1 : 0;
 
     // 组织数据
@@ -259,20 +259,20 @@ abstract public class AbstractBaseModel
    * 为空则errno为1
    *
    * @param req
-   * @param fs
+   * @param more
    * @return 记录信息
    * @throws app.hongs.HongsException
    */
-  public Map getInfo(Map req, FetchMore fs)
+  public Map getInfo(Map req, FetchMore more)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (more == null)
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
     String id = (String)req.get(this.idVar);
@@ -280,7 +280,7 @@ abstract public class AbstractBaseModel
     Map info;
     if (id != null && id.length() != 0)
     {
-      info = this.get(id, fs);
+      info = this.get(id, more);
     }
     else
     {
@@ -339,20 +339,20 @@ abstract public class AbstractBaseModel
    * 更新记录
    *
    * @param req
-   * @param fs
+   * @param more
    * @return 更新条数
    * @throws app.hongs.HongsException
    */
-  public int update(Map req, FetchMore fs)
+  public int update(Map req, FetchMore more)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (more == null)
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
     List<String> ids = new ArrayList();
@@ -369,9 +369,9 @@ abstract public class AbstractBaseModel
 
     int i = 0;
     String pk = this.table.primaryKey;
-    fs = fs.clone();
-    fs.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
-    List<Map> rows = this.table.fetchMore(fs);
+    more = more.clone();
+    more.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
+    List<Map> rows = this.table.fetchMore(more);
     this.affectedIds = new ArrayList();
     for (Map  row  : rows)
     {
@@ -399,20 +399,20 @@ abstract public class AbstractBaseModel
    * 删除记录
    *
    * @param req
-   * @param fs
+   * @param more
    * @return 删除条数
    * @throws app.hongs.HongsException
    */
-  public int remove(Map req, FetchMore fs)
+  public int remove(Map req, FetchMore more)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (more == null)
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
     List<String> ids = new ArrayList();
@@ -429,9 +429,9 @@ abstract public class AbstractBaseModel
 
     int i = 0;
     String pk = this.table.primaryKey;
-    fs = fs.clone();
-    fs.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
-    List<Map> rows = this.table.fetchMore(fs);
+    more = more.clone();
+    more.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
+    List<Map> rows = this.table.fetchMore(more);
     this.affectedIds = new ArrayList();
     for (Map  row  : rows)
     {
@@ -458,27 +458,27 @@ abstract public class AbstractBaseModel
    * 检查是否存在
    *
    * @param req
-   * @param fs
+   * @param more
    * @return 存在为true, 反之为false
    * @throws app.hongs.HongsException
    */
-  public boolean exists(Map req, FetchMore fs)
+  public boolean exists(Map req, FetchMore more)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (more == null)
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
-    if (!fs.hasOption("ASSOC_TABLES")
-    &&  !fs.hasOption("ASSOC_TYPES")
-    &&  !fs.hasOption("ASSOC_JOINS"))
+    if (!more.hasOption("ASSOC_TABLES")
+    &&  !more.hasOption("ASSOC_TYPES")
+    &&  !more.hasOption("ASSOC_JOINS"))
     {
-      fs.setOption("ASSOC_TABLES", new HashSet());
+      more.setOption("ASSOC_TABLES", new HashSet());
     }
 
     // 是否缺少n或v参数
@@ -498,7 +498,7 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a4, "Column " + n + " is not exists");
     }
 
-    fs.where(".`"+n+"` = ?", v);
+    more.where(".`"+n+"` = ?", v);
 
     Iterator it = req.entrySet().iterator();
     while (it.hasNext())
@@ -512,16 +512,16 @@ abstract public class AbstractBaseModel
         if (field.equals(this.table.primaryKey)
         ||  field.equals(this.idVar))
         {
-          fs.where(".`"+ this.table.primaryKey+"` != ?", value);
+          more.where(".`"+ this.table.primaryKey+"` != ?", value);
         }
         else
         {
-          fs.where(".`"+field+"` = ?", value);
+          more.where(".`"+field+"` = ?", value);
         }
       }
     }
 
-    Map row = this.table.fetchLess(fs);
+    Map row = this.table.fetchLess(more);
     if (row.isEmpty())
     {
       return false;
@@ -545,10 +545,10 @@ abstract public class AbstractBaseModel
     return this.exists(req, null);
   }
 
-  public boolean unique(Map req, FetchMore fs)
+  public boolean unique(Map req, FetchMore more)
     throws HongsException
   {
-    return !exists(req, fs);
+    return !exists(req, more);
   }
 
   public boolean unique(Map req)
@@ -601,9 +601,9 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a6, "Primary Key can not be empty");
     }
 
-    FetchMore fs = new FetchMore();
-    fs.setOption("MODEL_METHOD", "put");
-    if (this.idCheck(id, fs)  !=  true)
+    FetchMore more = new FetchMore();
+    more.setOption("MODEL_METHOD", "put");
+    if (this.idCheck(id, more)  !=  true)
     {
       throw new HongsException(0x10a8, "Can not update the resource for id '"+id+"'");
     }
@@ -632,11 +632,11 @@ abstract public class AbstractBaseModel
    * 请总是重写该方法.
    *
    * @param id
-   * @param fs
+   * @param more
    * @return 删除条数
    * @throws app.hongs.HongsException
    */
-  public int del(String id, FetchMore fs)
+  public int del(String id, FetchMore more)
     throws HongsException
   {
     if (id == null || id.length() == 0)
@@ -644,9 +644,9 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a0, "ID can not be empty for remove");
     }
 
-    if (fs == null) fs = new FetchMore();
-    fs.setOption("MODEL_METHOD", "del");
-    if (this.idCheck(id, fs)  !=  true)
+    if (more == null) more = new FetchMore();
+    more.setOption("MODEL_METHOD", "del");
+    if (this.idCheck(id, more)  !=  true)
     {
       throw new HongsException(0x10a8, "Can not remove the resource for id '"+id+"'");
     }
@@ -686,11 +686,11 @@ abstract public class AbstractBaseModel
    * 请总是重写该方法.
    *
    * @param id
-   * @param fs
+   * @param more
    * @return 记录数据
    * @throws app.hongs.HongsException
    */
-  public Map get(String id, FetchMore fs)
+  public Map get(String id, FetchMore more)
     throws HongsException
   {
     if (id == null || id.length() == 0)
@@ -698,16 +698,16 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a0, "ID can not be empty for get");
     }
 
-    if (fs == null) fs = new FetchMore();
-    fs.setOption("MODEL_METHOD", "get");
-    if (this.idCheck(id, fs)  !=  true)
+    if (more == null) more = new FetchMore();
+    more.setOption("MODEL_METHOD", "get");
+    if (this.idCheck(id, more)  !=  true)
     {
       throw new HongsException(0x10a8, "Can not get the resource for id '"+id+"'");
     }
 
-    fs.where(".`"+this.table.primaryKey+"` = ?", id);
+    more.where(".`"+this.table.primaryKey+"` = ?", id);
 
-    return this.table.fetchLess(fs);
+    return this.table.fetchLess(more);
   }
 
   /**
@@ -734,8 +734,8 @@ abstract public class AbstractBaseModel
    * 如需添加过滤条件, 请重写此方法.
    * 注意: 此处需要类似引用参数, 故调用前请务必实例化req和fs.
    * 默认仅关联join类型为LEFT,INNER和link类型为BLS_TO,HAS_ONE的表,
-   * 如需指定关联方式请设置FetchBean的option: ASSOC_JOINS, ASSOC_TYEPS,
-   * 如需指定关联的表请设置FetchBean的option: ASSOC_TABLES
+   * 如需指定关联方式请设置FetchMore的option: ASSOC_JOINS, ASSOC_TYEPS,
+   * 如需指定关联的表请设置FetchMore的option: ASSOC_TABLES
    *
    * 设计目标:
    * 2. 按照cols参数设置查询字段;
@@ -753,28 +753,28 @@ abstract public class AbstractBaseModel
    * </pre>
    *
    * @param req
-   * @param fs
+   * @param more
    * @throws app.hongs.HongsException
    */
-  protected void getFilter(Map req, FetchMore fs)
+  protected void getFilter(Map req, FetchMore more)
     throws HongsException
   {
     // 默认仅连接类型为LEFT,INNER的表(必须满足左表)
-    if (fs.getOption("ASSOC_JOINS") == null)
+    if (more.getOption("ASSOC_JOINS") == null)
     {
       Set types = new HashSet();
       types.add( "LEFT"  );
       types.add( "INNER" );
-      fs.setOption("ASSOC_JOINS", types);
+      more.setOption("ASSOC_JOINS", types);
     }
 
     // 默认仅关联类型为BLS_TO,HAS_ONE的表(仅能关联一个)
-    if (fs.getOption("ASSOC_TYPES") == null)
+    if (more.getOption("ASSOC_TYPES") == null)
     {
       Set types = new HashSet();
       types.add("BLS_TO" );
       types.add("HAS_ONE");
-      fs.setOption("ASSOC_TYPES", types);
+      more.setOption("ASSOC_TYPES", types);
     }
 
     // 如果req为空则返回
@@ -804,14 +804,14 @@ abstract public class AbstractBaseModel
       // 字段
       if (key.equals(this.colsVar))
       {
-        this.colsFilter(value, columns, fs);
+        this.colsFilter(value, columns, more);
         continue;
       }
 
       // 排序
       if (key.equals(this.sortVar))
       {
-        this.sortFilter(value, columns, fs);
+        this.sortFilter(value, columns, more);
         continue;
       }
 
@@ -845,17 +845,17 @@ abstract public class AbstractBaseModel
                         String v2 = e2.getValue().toString();
 
                         if (ks.contains(k2)) {
-                            this.findFilter(new String[]{k2}, v2, not, fs);
+                            this.findFilter(new String[]{k2}, v2, not, more);
                         }
                     }
                 } else {
                     if (ks.contains(k1)) {
-                        this.findFilter(new String[]{k1}, v1, not, fs);
+                        this.findFilter(new String[]{k1}, v1, not, more);
                     }
                 }
             }
         } else {
-                this.findFilter(this.findKeys, value, not, fs);
+                this.findFilter(this.findKeys, value, not, more);
         }
         continue;
       }
@@ -863,21 +863,21 @@ abstract public class AbstractBaseModel
       // 主键
       if (key.equals(this.idVar))
       {
-        this.mkeyFilter(this.table.primaryKey, value, not, fs);
+        this.mkeyFilter(this.table.primaryKey, value, not, more);
         continue;
       }
 
       // 当前表字段
       if (columns.containsKey(key))
       {
-        this.mkeyFilter(key, value, not, fs);
+        this.mkeyFilter(key, value, not, more);
         continue;
       }
 
       // 关联表字段
       if (value instanceof Map)
       {
-        this.skeyFilter(key, value, not, fs);
+        this.skeyFilter(key, value, not, more);
         continue;
       }
     }
@@ -888,13 +888,13 @@ abstract public class AbstractBaseModel
    * 根据请求的字段设置查询及判断需要关联的表
    * @param value
    * @param columns
-   * @param fs
+   * @param more
    * @throws HongsException
    */
-  protected void colsFilter(Object value, Map columns, FetchMore fs)
+  protected void colsFilter(Object value, Map columns, FetchMore more)
     throws HongsException
   {
-    if (fs.hasSelect()
+    if (more.hasSelect()
     ||!(value instanceof List))
     {
       return;
@@ -905,11 +905,11 @@ abstract public class AbstractBaseModel
       return;
     }
 
-    Set<String> tns = (Set<String>)fs.getOption("ASSOC_TABLES");
+    Set<String> tns = (Set<String>)more.getOption("ASSOC_TABLES");
     if (tns == null)
     {
         tns =  new HashSet();
-        fs.setOption("ASSOC_TABLES", tns);
+        more.setOption("ASSOC_TABLES", tns);
     }
 
     for (String col : cols)
@@ -917,12 +917,12 @@ abstract public class AbstractBaseModel
       int pos = col.indexOf(".");
       if (pos == -1)
       {
-        if (!columns.containsKey(col))
+        if (! columns.containsKey(col))
         {
           continue;
         }
 
-        fs.select( ".`" + col + "`" );
+        more.select( ".`" + col + "`" );
       }
       else
       {
@@ -941,8 +941,8 @@ abstract public class AbstractBaseModel
         if (! cs.containsKey( fn )) continue;
 
         tns.add(tn); tns.addAll(ts);
-        FetchMore fs2 = fs.join(ts).join(tn);
-        fs2.select(".`" + fn + "`");
+        FetchMore more2 = more.join(ts).join(tn);
+        more2.select(".`" +fn+ "`");
       }
     }
   }
@@ -952,13 +952,13 @@ abstract public class AbstractBaseModel
    * 根据请求的第二个参数来决定是逆序还是正序
    * @param value
    * @param columns
-   * @param fs
+   * @param more
    * @throws HongsException
    */
-  protected void sortFilter(Object value, Map columns, FetchMore fs)
+  protected void sortFilter(Object value, Map columns, FetchMore more)
     throws HongsException
   {
-    if (fs.hasOrderBy()
+    if (more.hasOrderBy()
     ||!(value instanceof String))
     {
       return;
@@ -969,7 +969,7 @@ abstract public class AbstractBaseModel
       return;
     }
 
-    Set<String> tns = (Set<String>)fs.getOption("ASSOC_TABLES");
+    Set<String> tns = (Set<String>)more.getOption("ASSOC_TABLES");
     if (tns == null)
     {
         tns =  new HashSet();
@@ -990,7 +990,7 @@ abstract public class AbstractBaseModel
           continue;
         }
 
-        fs.orderBy(sort +(desc?" DESC":""));
+        more.orderBy(sort +(desc?" DESC":""));
       }
       else
       {
@@ -1010,8 +1010,8 @@ abstract public class AbstractBaseModel
 
         tns.add(tn);
         tns.addAll(ts);
-        fs.join(ts).join(tn);
-        fs.orderBy(sort +(desc?" DESC":""));
+        more.join(ts).join(tn);
+        more.orderBy(sort +(desc?" DESC":""));
       }
     }
   }
@@ -1021,9 +1021,9 @@ abstract public class AbstractBaseModel
    * @param keys
    * @param val
    * @param not
-   * @param fs
+   * @param more
    */
-  protected void findFilter(String[] keys, Object val, boolean not, FetchMore fs)
+  protected void findFilter(String[] keys, Object val, boolean not, FetchMore more)
   {
     if (keys  ==  null
     ||!(val instanceof String))
@@ -1061,36 +1061,36 @@ abstract public class AbstractBaseModel
           key = ".`" + key + "`";
         }
 
-        fs.where(key + (not?" NOT LIKE ?":" LIKE ?") + " ESCAPE '/'", find);
+        more.where(key + (not?" NOT LIKE ?":" LIKE ?") + " ESCAPE '/'", find);
       }
     }
   }
 
-  protected void mkeyFilter(String key, Object val, boolean not, FetchMore fs)
+  protected void mkeyFilter(String key, Object val, boolean not, FetchMore more)
   {
     if (val instanceof String)
     {
       String id = (String)val;
       if (!"".equals(id))
-        fs.where(".`"+key+(not?"` != ?":"` = ?"), id);
+        more.where(".`"+key+(not?"` != ?":"` = ?"), id);
     }
     else
     if (val instanceof List)
     {
       List<String> ids = (List)val;
       if (!ids.isEmpty())
-        fs.where(".`"+key+(not?"` NOT IN (?)":"` IN (?)"), ids);
+        more.where(".`"+key+(not?"` NOT IN (?)":"` IN (?)"), ids);
     }
   }
 
-  protected void skeyFilter(String key, Object val, boolean not, FetchMore fs)
+  protected void skeyFilter(String key, Object val, boolean not, FetchMore more)
   throws HongsException
   {
-    Set<String> tns = (Set<String>)fs.getOption("ASSOC_TABLES");
+    Set<String> tns = (Set<String>)more.getOption("ASSOC_TABLES");
     if (tns == null)
     {
         tns = new HashSet();
-        fs.setOption("ASSOC_TABLES", tns);
+        more.setOption("ASSOC_TABLES", tns);
     }
 
     Map tc = this.table.getAssoc(key);
@@ -1114,9 +1114,9 @@ abstract public class AbstractBaseModel
         String id = (String)val2;
         if (!"".equals(id))
         {
-          tns.add(key);tns.addAll(ts);
-          FetchMore fs2 = fs.join(ts).join( key );
-          fs2.where(".`"+key2+(not?"` != ?":"` = ?"), id);
+          tns.add( key ); tns.addAll( ts );
+          FetchMore more2 = more.join(ts ).join( key );
+          more2.where(".`"+key2+(not?"` != ?":"` = ?"), id);
         }
       }
       else
@@ -1125,9 +1125,9 @@ abstract public class AbstractBaseModel
         List<String> ids = (List)val2;
         if (!ids.isEmpty())
         {
-          tns.add(key);tns.addAll(ts);
-          FetchMore fs2 = fs.join(ts).join( key );
-          fs2.where(".`"+key2+(not?"` NOT IN (?)":"` IN (?)"), ids);
+          tns.add( key ); tns.addAll( ts );
+          FetchMore more2 = more.join(ts ).join( key );
+          more2.where(".`"+key2+(not?"` NOT IN (?)":"` IN (?)"), ids);
         }
       }
     }
@@ -1141,34 +1141,34 @@ abstract public class AbstractBaseModel
    * 默认调用"getFilter"来判断id是否允许操作;
    * 如需对以上方法进行其他过滤,可覆盖该方法.
    * 在"getFilter"方法中可以通过
-   * "idCheck".equals(FetchBean.getOption("CHECK_METHOD"))
+   * "idCheck".equals(FetchMore.getOption("CHECK_METHOD"))
    * 来区分是不是"idCheck"发起的
    *
    * @param id
-   * @param fs
+   * @param more
    * @return 可操作则返回true, 反之返回false
    */
-  protected boolean idCheck(String id, FetchMore fs)
+  protected boolean idCheck(String id, FetchMore more)
     throws HongsException
   {
-    if (fs != null)
+    if (more != null)
     {
-      fs = fs.clone();
+      more = more.clone();
     }
     else
     {
-      fs = new FetchMore();
+      more = new FetchMore();
     }
 
-    fs.setOption("CHECK_METHOD", "idCheck");
-    fs.setOption("ASSOC_TABLES", new HashSet( ));
-    fs.setSelect(".`"+this.table.primaryKey+"`")
+    more.setOption("CHECK_METHOD", "idCheck");
+    more.setOption("ASSOC_TABLES", new HashSet( ));
+    more.setSelect(".`"+this.table.primaryKey+"`")
           .where(".`"+this.table.primaryKey+"`=?", id);
 
     // 默认调用getFilter进行校验
-    this.getFilter(new HashMap(), fs );
+    this.getFilter(new HashMap(), more );
 
-    return !this.table.fetchLess( fs ).isEmpty();
+    return !this.table.fetchLess( more ).isEmpty();
   }
 
 }

@@ -445,17 +445,17 @@ public class Table
 
   /**
    * 获取关联查询体
-   * @param bean 查询体
+   * @param more 查询体
    * @param name 关联名
    * @return 关联查询体
    * @throws HongsException
    */
-  public FetchMore getAssocBean(FetchMore bean, String name)
+  public FetchMore getAssocInst(FetchMore more, String name)
     throws HongsException
   {
     Map tc =  this.getAssoc(name);
     if (tc == null) return  null ;
-    return bean.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
+    return more.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
   }
 
   /**

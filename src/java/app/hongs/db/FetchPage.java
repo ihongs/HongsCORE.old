@@ -29,7 +29,7 @@ public class FetchPage
 
   private Table table;
 
-  private FetchMore fs;
+  private FetchMore more;
 
   private int page;
 
@@ -37,31 +37,31 @@ public class FetchPage
 
   private Map info;
 
-  public FetchPage(DB db, FetchMore fs)
+  public FetchPage(DB db, FetchMore more)
   {
     this.db    = db;
-    this.fs    = fs;
+    this.more  = more;
     this.table = null;
 
-    Object page2 = fs.getOption("page");
+    Object page2 = more.getOption("page");
     if (page2 != null && page2.equals(""))
     {
       this.page = Integer.parseInt(page2.toString());
     }
 
-    Object rows2 = fs.getOption("rows");
+    Object rows2 = more.getOption("rows");
     if (rows2 != null && page2.equals(""))
     {
       this.rows = Integer.parseInt(rows2.toString());
     }
   }
 
-  public FetchPage(Table table, FetchMore fs)
+  public FetchPage(Table table, FetchMore more)
   {
-    this(table.db, fs);
-    this.table = table;
+    this(table.db, more);
+    this.table  =  table;
 
-    this.fs.from(table.tableName, table.name);
+    this.more.from(table.tableName, table.name);
   }
 
   public void setPage(int page)
@@ -114,15 +114,15 @@ public class FetchPage
     this.info.put("rows", this.rows);
 
     // 查询列表
-    fs.limit(rows * (page - 1), rows);
+    more.limit(rows * (page - 1), rows);
     List list;
     if (null != this.table)
     {
-      list = this.table.fetchMore(fs);
+      list = this.table.fetchMore(more);
     }
     else
     {
-      list = this.db.fetchMore(fs);
+      list = this.db.fetchMore(more);
     }
 
     // 获取真实行数
@@ -160,24 +160,24 @@ public class FetchPage
     // 查询总行数
     String   sql;
     Object[] params;
-    FetchMore      fs2 = this.fs.clone();
-    for (FetchMore fs3 : fs2.joinList)
+    FetchMore      more2 = this.more.clone();
+    for (FetchMore more3 : more2.joinList)
     {
-      fs3.setSelect("");
+      more3.setSelect("");
     }
-    fs2.limit(0);
-    fs2.setOrderBy("");
-    if (fs2.hasGroupBy( ))
+    more2.limit(0);
+    more2.setOrderBy( "");
+    if (more2.hasGroupBy( ))
     {
       sql    = "SELECT COUNT(*) AS __count__ FROM ("
-             + fs2.getSQL( )+") AS __table__";
-      params = fs2.getParams( );
+             + more2.getSQL( )+") AS __table__";
+      params = more2.getParams( );
     }
     else
     {
-      fs2.setSelect(  "COUNT(*) AS __count__"  );
-      sql    = fs2.getSQL(    );
-      params = fs2.getParams( );
+      more2.setSelect(  "COUNT(*) AS __count__"  );
+      sql    = more2.getSQL(    );
+      params = more2.getParams( );
     }
 
     // 计算总行数及总页数

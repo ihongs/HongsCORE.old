@@ -127,7 +127,7 @@ public class DatumsConfig
       }
 
       Element element2 = (Element)node;
-      String  tagName2  = element2.getTagName();
+      String  tagName2 = element2.getTagName();
 
       if ("data".equals(tagName2))
       {
