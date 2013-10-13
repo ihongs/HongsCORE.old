@@ -2,7 +2,7 @@ package app.hcum.model;
 
 import app.hongs.HongsException;
 import app.hongs.db.AbstractTreeModel;
-import app.hongs.db.FetchBean;
+import app.hongs.db.FetchMore;
 import app.hongs.db.Table;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +25,7 @@ extends AbstractTreeModel {
         if (deptId == null) throw new HongsException(0x10000, "Dept Id required!");
 
         Table asoc = this.db.getTable("a_hcum_dept_group");
-        FetchBean fa = new FetchBean();
+        FetchMore fa = new FetchMore();
         fa.select(".group_key")
           .where(".dept_id = ?", deptId);
 
@@ -39,7 +39,7 @@ extends AbstractTreeModel {
     }
 
     @Override
-    protected void getFilter(Map req, FetchBean fa)
+    protected void getFilter(Map req, FetchMore fa)
     throws HongsException {
         super.getFilter(req, fa);
 

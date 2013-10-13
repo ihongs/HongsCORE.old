@@ -115,7 +115,7 @@ public class AbstractTreeModel extends AbstractBaseModel
    * @param fs
    * @return 树列表
    */
-  public Map getTree(Map req, FetchBean fs)
+  public Map getTree(Map req, FetchMore fs)
     throws HongsException
   {
     if (req == null)
@@ -124,7 +124,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     }
     if (fs == null)
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     if (!fs.hasOption("ASSOC_TABLES")
@@ -403,7 +403,7 @@ public class AbstractTreeModel extends AbstractBaseModel
    * @return 删除条数
    */
   @Override
-  public int del(String id, FetchBean fs)
+  public int del(String id, FetchMore fs)
     throws HongsException
   {
     String pid = this.getParentId(id);
@@ -428,7 +428,7 @@ public class AbstractTreeModel extends AbstractBaseModel
   }
 
   @Override
-  protected void getFilter(Map req, FetchBean fs)
+  protected void getFilter(Map req, FetchMore fs)
     throws HongsException
   {
     super.getFilter(req, fs);
@@ -519,7 +519,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     List list = this.db.fetchAll(sql, id);
 
     Set ids = new HashSet();
-    FetchMore fa = new FetchMore(list);
+    FetchJoin fa = new FetchJoin(list);
     fa.fetchIds(this.table.primaryKey, ids);
     List cids = new ArrayList(ids);
 

@@ -29,7 +29,7 @@ public class FetchPage
 
   private Table table;
 
-  private FetchBean fs;
+  private FetchMore fs;
 
   private int page;
 
@@ -37,7 +37,7 @@ public class FetchPage
 
   private Map info;
 
-  public FetchPage(DB db, FetchBean fs)
+  public FetchPage(DB db, FetchMore fs)
   {
     this.db    = db;
     this.fs    = fs;
@@ -56,7 +56,7 @@ public class FetchPage
     }
   }
 
-  public FetchPage(Table table, FetchBean fs)
+  public FetchPage(Table table, FetchMore fs)
   {
     this(table.db, fs);
     this.table = table;
@@ -160,8 +160,8 @@ public class FetchPage
     // 查询总行数
     String   sql;
     Object[] params;
-    FetchBean      fs2 = this.fs.clone();
-    for (FetchBean fs3 : fs2.joinList)
+    FetchMore      fs2 = this.fs.clone();
+    for (FetchMore fs3 : fs2.joinList)
     {
       fs3.setSelect("");
     }

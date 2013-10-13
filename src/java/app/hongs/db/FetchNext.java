@@ -10,13 +10,13 @@ import java.util.Map;
  * 数据库查询结果
  * @author Hong
  */
-public class DBFetch {
+public class FetchNext {
     private DB db;
     private ResultSet rs;
     private Statement ps;
     private String[ ] ls;
 
-    protected DBFetch(DB db, Statement ps, ResultSet rs) {
+    protected FetchNext(DB db, Statement ps, ResultSet rs) {
         this.db = db;
         this.ps = ps;
         this.rs = rs;

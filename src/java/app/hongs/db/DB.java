@@ -753,7 +753,7 @@ public class DB
    * @return 查询结果
    * @throws HongsException
    */
-  public DBFetch query(String sql, Object... params)
+  public FetchNext query(String sql, Object... params)
     throws HongsException
   {
     this.open();
@@ -779,7 +779,7 @@ public class DB
       throw new app.hongs.HongsException(0x1041, ex);
     }
 
-    return new DBFetch(this, ps, rs);
+    return new FetchNext(this, ps, rs);
   }
 
   /**
@@ -796,8 +796,8 @@ public class DB
     List<Map<String, Object>> rows = new ArrayList();
          Map<String, Object>  row;
 
-    DBFetch rs  = this.query(sql, params);
-    while ((row = rs.fetch( ) ) != null )
+    FetchNext rs  = this.query(sql, params);
+    while ( ( row = rs.fetch( ) ) != null )
     {
       rows.add(row);
     }
@@ -842,7 +842,7 @@ public class DB
    * @return 全部数据
    * @throws app.hongs.HongsException
    */
-  public List fetchMore(FetchBean more)
+  public List fetchMore(FetchMore more)
     throws HongsException
   {
     return this.fetchAll(more.getSQL(), more.getParams());
@@ -855,7 +855,7 @@ public class DB
    * @return 单条数据
    * @throws app.hongs.HongsException
    */
-  public Map fetchLess(FetchBean less)
+  public Map fetchLess(FetchMore less)
     throws HongsException
   {
     List<Map<String, Object>> rows = this.fetchMore(less.limit(1));

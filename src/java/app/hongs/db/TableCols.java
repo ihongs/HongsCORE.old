@@ -46,8 +46,8 @@ public class TableCols
   {
     this.columns = new HashMap();
 
-    DBFetch rs = this.table.db.query("SELECT * FROM "
-               + this.table.tableName + " LIMIT 1"  );
+    FetchNext rs = this.table.db.query("SELECT * FROM "
+                 + this.table.tableName + " LIMIT 1" );
     try
     {
       ResultSetMetaData md = rs.getReusltSet().getMetaData();

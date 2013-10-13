@@ -3,7 +3,7 @@ package app.hcum.model;
 import app.hongs.HongsException;
 import app.hongs.action.ActionConfig;
 import app.hongs.db.AbstractBaseModel;
-import app.hongs.db.FetchBean;
+import app.hongs.db.FetchMore;
 import app.hongs.db.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ extends AbstractBaseModel {
         if (userId == null) throw new HongsException(0x10000, "User Id required!");
 
         Table asoc = this.db.getTable("a_hcum_user_group");
-        FetchBean fa = new FetchBean();
+        FetchMore fa = new FetchMore();
         fa.select(".group_key")
           .where(".user_id = ?", userId);
 
@@ -105,7 +105,7 @@ extends AbstractBaseModel {
     }
 
     @Override
-    protected void getFilter(Map req, FetchBean fa)
+    protected void getFilter(Map req, FetchMore fa)
     throws HongsException {
         super.getFilter(req, fa);
 

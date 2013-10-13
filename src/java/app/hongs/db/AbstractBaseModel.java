@@ -138,7 +138,7 @@ abstract public class AbstractBaseModel
    * @return 单页列表
    * @throws app.hongs.HongsException
    */
-  public Map getPage(Map req, FetchBean fs)
+  public Map getPage(Map req, FetchMore fs)
     throws HongsException
   {
     if (req == null)
@@ -147,7 +147,7 @@ abstract public class AbstractBaseModel
     }
     if (fs == null)
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     fs.setOption("MODEL_METHOD", "getPage");
@@ -211,7 +211,7 @@ abstract public class AbstractBaseModel
    * @return 全部列表
    * @throws app.hongs.HongsException
    */
-  public Map getList(Map req, FetchBean fs)
+  public Map getList(Map req, FetchMore fs)
     throws HongsException
   {
     if (req == null)
@@ -220,7 +220,7 @@ abstract public class AbstractBaseModel
     }
     if (fs == null)
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     fs.setOption("MODEL_METHOD", "getList");
@@ -263,7 +263,7 @@ abstract public class AbstractBaseModel
    * @return 记录信息
    * @throws app.hongs.HongsException
    */
-  public Map getInfo(Map req, FetchBean fs)
+  public Map getInfo(Map req, FetchMore fs)
     throws HongsException
   {
     if (req == null)
@@ -272,7 +272,7 @@ abstract public class AbstractBaseModel
     }
     if (fs == null)
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     String id = (String)req.get(this.idVar);
@@ -343,7 +343,7 @@ abstract public class AbstractBaseModel
    * @return 更新条数
    * @throws app.hongs.HongsException
    */
-  public int update(Map req, FetchBean fs)
+  public int update(Map req, FetchMore fs)
     throws HongsException
   {
     if (req == null)
@@ -352,7 +352,7 @@ abstract public class AbstractBaseModel
     }
     if (fs == null)
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     List<String> ids = new ArrayList();
@@ -403,7 +403,7 @@ abstract public class AbstractBaseModel
    * @return 删除条数
    * @throws app.hongs.HongsException
    */
-  public int remove(Map req, FetchBean fs)
+  public int remove(Map req, FetchMore fs)
     throws HongsException
   {
     if (req == null)
@@ -412,7 +412,7 @@ abstract public class AbstractBaseModel
     }
     if (fs == null)
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     List<String> ids = new ArrayList();
@@ -462,7 +462,7 @@ abstract public class AbstractBaseModel
    * @return 存在为true, 反之为false
    * @throws app.hongs.HongsException
    */
-  public boolean exists(Map req, FetchBean fs)
+  public boolean exists(Map req, FetchMore fs)
     throws HongsException
   {
     if (req == null)
@@ -471,7 +471,7 @@ abstract public class AbstractBaseModel
     }
     if (fs == null)
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     if (!fs.hasOption("ASSOC_TABLES")
@@ -545,7 +545,7 @@ abstract public class AbstractBaseModel
     return this.exists(req, null);
   }
 
-  public boolean unique(Map req, FetchBean fs)
+  public boolean unique(Map req, FetchMore fs)
     throws HongsException
   {
     return !exists(req, fs);
@@ -601,7 +601,7 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a6, "Primary Key can not be empty");
     }
 
-    FetchBean fs = new FetchBean(   );
+    FetchMore fs = new FetchMore();
     fs.setOption("MODEL_METHOD", "put");
     if (this.idCheck(id, fs)  !=  true)
     {
@@ -636,7 +636,7 @@ abstract public class AbstractBaseModel
    * @return 删除条数
    * @throws app.hongs.HongsException
    */
-  public int del(String id, FetchBean fs)
+  public int del(String id, FetchMore fs)
     throws HongsException
   {
     if (id == null || id.length() == 0)
@@ -644,7 +644,7 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a0, "ID can not be empty for remove");
     }
 
-    if (fs == null) fs = new FetchBean();
+    if (fs == null) fs = new FetchMore();
     fs.setOption("MODEL_METHOD", "del");
     if (this.idCheck(id, fs)  !=  true)
     {
@@ -690,7 +690,7 @@ abstract public class AbstractBaseModel
    * @return 记录数据
    * @throws app.hongs.HongsException
    */
-  public Map get(String id, FetchBean fs)
+  public Map get(String id, FetchMore fs)
     throws HongsException
   {
     if (id == null || id.length() == 0)
@@ -698,7 +698,7 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a0, "ID can not be empty for get");
     }
 
-    if (fs == null) fs = new FetchBean();
+    if (fs == null) fs = new FetchMore();
     fs.setOption("MODEL_METHOD", "get");
     if (this.idCheck(id, fs)  !=  true)
     {
@@ -756,7 +756,7 @@ abstract public class AbstractBaseModel
    * @param fs
    * @throws app.hongs.HongsException
    */
-  protected void getFilter(Map req, FetchBean fs)
+  protected void getFilter(Map req, FetchMore fs)
     throws HongsException
   {
     // 默认仅连接类型为LEFT,INNER的表(必须满足左表)
@@ -891,7 +891,7 @@ abstract public class AbstractBaseModel
    * @param fs
    * @throws HongsException
    */
-  protected void colsFilter(Object value, Map columns, FetchBean fs)
+  protected void colsFilter(Object value, Map columns, FetchMore fs)
     throws HongsException
   {
     if (fs.hasSelect()
@@ -941,7 +941,7 @@ abstract public class AbstractBaseModel
         if (! cs.containsKey( fn )) continue;
 
         tns.add(tn); tns.addAll(ts);
-        FetchBean fs2 = fs.join(ts).join(tn);
+        FetchMore fs2 = fs.join(ts).join(tn);
         fs2.select(".`" + fn + "`");
       }
     }
@@ -955,7 +955,7 @@ abstract public class AbstractBaseModel
    * @param fs
    * @throws HongsException
    */
-  protected void sortFilter(Object value, Map columns, FetchBean fs)
+  protected void sortFilter(Object value, Map columns, FetchMore fs)
     throws HongsException
   {
     if (fs.hasOrderBy()
@@ -1023,7 +1023,7 @@ abstract public class AbstractBaseModel
    * @param not
    * @param fs
    */
-  protected void findFilter(String[] keys, Object val, boolean not, FetchBean fs)
+  protected void findFilter(String[] keys, Object val, boolean not, FetchMore fs)
   {
     if (keys  ==  null
     ||!(val instanceof String))
@@ -1066,7 +1066,7 @@ abstract public class AbstractBaseModel
     }
   }
 
-  protected void mkeyFilter(String key, Object val, boolean not, FetchBean fs)
+  protected void mkeyFilter(String key, Object val, boolean not, FetchMore fs)
   {
     if (val instanceof String)
     {
@@ -1083,7 +1083,7 @@ abstract public class AbstractBaseModel
     }
   }
 
-  protected void skeyFilter(String key, Object val, boolean not, FetchBean fs)
+  protected void skeyFilter(String key, Object val, boolean not, FetchMore fs)
   throws HongsException
   {
     Set<String> tns = (Set<String>)fs.getOption("ASSOC_TABLES");
@@ -1115,7 +1115,7 @@ abstract public class AbstractBaseModel
         if (!"".equals(id))
         {
           tns.add(key);tns.addAll(ts);
-          FetchBean fs2 = fs.join(ts).join( key );
+          FetchMore fs2 = fs.join(ts).join( key );
           fs2.where(".`"+key2+(not?"` != ?":"` = ?"), id);
         }
       }
@@ -1126,7 +1126,7 @@ abstract public class AbstractBaseModel
         if (!ids.isEmpty())
         {
           tns.add(key);tns.addAll(ts);
-          FetchBean fs2 = fs.join(ts).join( key );
+          FetchMore fs2 = fs.join(ts).join( key );
           fs2.where(".`"+key2+(not?"` NOT IN (?)":"` IN (?)"), ids);
         }
       }
@@ -1148,7 +1148,7 @@ abstract public class AbstractBaseModel
    * @param fs
    * @return 可操作则返回true, 反之返回false
    */
-  protected boolean idCheck(String id, FetchBean fs)
+  protected boolean idCheck(String id, FetchMore fs)
     throws HongsException
   {
     if (fs != null)
@@ -1157,7 +1157,7 @@ abstract public class AbstractBaseModel
     }
     else
     {
-      fs = new FetchBean();
+      fs = new FetchMore();
     }
 
     fs.setOption("CHECK_METHOD", "idCheck");

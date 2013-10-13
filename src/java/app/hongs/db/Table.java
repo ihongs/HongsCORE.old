@@ -170,7 +170,7 @@ public class Table
    * @return 全部记录
    * @throws app.hongs.HongsException
    */
-  public List fetchMore(FetchBean more)
+  public List fetchMore(FetchMore more)
     throws HongsException
   {
     more.from(tableName, name);
@@ -186,7 +186,7 @@ public class Table
         more.where("`"+dflag+"` != 1" );
     }
 
-    return FetchMore.assocSelect(this, assocs, more);
+    return FetchJoin.assocSelect(this, assocs, more);
   }
 
   /**
@@ -195,7 +195,7 @@ public class Table
    * @return 单条记录
    * @throws app.hongs.HongsException
    */
-  public Map fetchLess(FetchBean less)
+  public Map fetchLess(FetchMore less)
     throws HongsException
   {
     less.limit(1);
@@ -450,7 +450,7 @@ public class Table
    * @return 关联查询体
    * @throws HongsException
    */
-  public FetchBean getAssocBean(FetchBean bean, String name)
+  public FetchMore getAssocBean(FetchMore bean, String name)
     throws HongsException
   {
     Map tc =  this.getAssoc(name);
@@ -813,7 +813,7 @@ public class Table
   protected void insertSubValues(Map values)
     throws HongsException
   {
-    FetchMore.assocInsert(this, assocs, values);
+    FetchJoin.assocInsert(this, assocs, values);
   }
 
   /**
@@ -827,7 +827,7 @@ public class Table
   protected void deleteSubValues(String id)
     throws HongsException
   {
-    FetchMore.assocDelete(this, assocs, id);
+    FetchJoin.assocDelete(this, assocs, id);
   }
 
   /** 其他私有方法 **/
