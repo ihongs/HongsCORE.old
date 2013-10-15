@@ -53,4 +53,16 @@ extends AbstractTreeModel {
         }
     }
 
+    public String getAffectedNames() throws HongsException {
+        StringBuilder sb = new StringBuilder();
+        FetchMore     fm = new FetchMore();
+        fm.setOption("FETCH_DFLAG", true );
+        fm.select("name").where("id IN (?)", this.affectedIds);
+        List<Map> rows = this.table.fetchMore(fm);
+        for (Map  row  : rows) {
+            sb.append(",").append(row.get("name").toString( ));
+        }
+        return sb.length()>0 ? sb.substring(1) : sb.toString();
+    }
+
 }

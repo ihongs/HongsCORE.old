@@ -39,13 +39,21 @@ public class Dept {
     public void actionSave(ActionHelper helper)
     throws HongsException {
         String id = model.save(helper.getRequestData());
-        helper.back(id);
+
+        String nms = model.getAffectedNames();
+        String msg = "保存部门 "+nms+" 成功";
+
+        helper.back(id, msg);
     }
 
     @CommitSuccess
     public void actionRemove(ActionHelper helper)
     throws HongsException {
         int num = model.remove(helper.getRequestData());
+
+        String nms = model.getAffectedNames();
+        String msg = "删除部门 "+nms+" 成功";
+
         helper.back(num);
     }
 

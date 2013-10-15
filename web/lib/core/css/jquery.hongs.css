@@ -2,12 +2,12 @@
  * HongsCORE 公共样式
  */
 
+/*
 html, body, label, input, select, button, textarea {
     color: #666;
     font-size: 14px;
     font-family: 'Microsoft Yahei', SimSun;
 }
-/*
 html, body {
     margin: 0;
     padding: 0;
@@ -17,6 +17,7 @@ object.config {
     display: none;
 }
 
+/*
 label, input, select, textarea {
     margin: 2px;
     padding: 2px 2px;
@@ -31,6 +32,7 @@ label, input, select, button, textarea {
 [disabled], .disabled {
     color: #bbb;
 }
+*/
 
 /** 常用样式缩写 **/
 
@@ -44,6 +46,7 @@ label, input, select, button, textarea {
 
 /** 消息 **/
 
+/*
 .warn-box {
     background: #FFFE36;
     max-width: 100em;
@@ -53,46 +56,19 @@ label, input, select, button, textarea {
     -moz-opacity:0.8;
     opacity: 0.8;
 }
+*/
 
 #note-box {
-    background: #FFFEFE;
-    padding-bottom: 5px;
-    border: 1px solid #888;
-    border-top: 0;
-
     position: fixed;
     display: none;
     z-index: 9999;
     width: 40%;
     left: 30%;
-
-    filter: alpha(opacity=80);
-    -webket-opacity: 0.8;
-    -moz-opacity:0.8;
-    opacity: 0.8;
-
-    -webkit-box-shadow: 0 0.5em 1em #888;
-　　-moz-box-shadow: 0 0.5em 1em #888;
-　　box-shadow: 0 0.5em 1em #888;
-
-    -webkit-border-radius: 5px;
-    -webkit-border-top-left-radius: 0;
-    -webkit-border-top-right-radius: 0;
-
-    -moz-border-radius: 5px;
-    -moz-border-radius-topleft: 0;
-    -moz-border-radius-topright: 0;
-
-    border-radius: 5px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-}
-#note-box .note-msg {
-    padding: 0.5em;
 }
 
 /** 表单 **/
 
+/*
 form label {
     display: inline-block;
     vertical-align: top;
@@ -140,14 +116,15 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
     margin: 0 6px;
     vertical-align: middle;
 }
+*/
 
 /** 列表 **/
 
+/*
 .tool-box input, .tool-box button, .tool-box select,
 .find-box input, .find-box button, .find-box select {
     margin: 0;
 }
-/*
 .tool-bar {
     margin-bottom: 0.25em;
 }
@@ -176,6 +153,7 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
     background: #f8f8f8;
 }
 */
+/*
 .list-box ._check,
 .list-box ._radio,
 .list-box ._admin {
@@ -192,6 +170,7 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 .page-curr {
     color: #66f;
 }
+*/
 
 /** 树 **/
 
@@ -248,6 +227,7 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 }
 */
 
+/*
 #main-menubar {
     position: fixed;
     z-index: 888;
@@ -281,9 +261,26 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 #main-context {
     padding-top: 3em;
 }
+*/
 
 /** bootstrap 补充 **/
 
-.pagination ul {
-    padding: 0;
+.list-box .table {
+    margin: 0;
+}
+.page-box .pagination {
+    margin: 0;
+}
+.find-box.input-group {
+    width: 20em;
+}
+
+form .popover-content {
+    color: #b94a48;
+}
+form input.form-control {
+    max-width: 25em;
+}
+form textarea.form-control {
+    min-height: 5em;
 }

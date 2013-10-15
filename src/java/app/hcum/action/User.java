@@ -50,14 +50,22 @@ public class User {
     public void actionSave(ActionHelper helper)
     throws HongsException {app.hongs.util.JSON.print(helper.getRequestData());
         String id = model.save(helper.getRequestData());
-        helper.back(id);
+
+        String nms = model.getAffectedNames();
+        String msg = "保存用户 "+nms+" 成功";
+
+        helper.back(id, msg);
     }
 
     @CommitSuccess
     public void actionRemove(ActionHelper helper)
     throws HongsException {
         int num = model.remove(helper.getRequestData());
-        helper.back(num);
+
+        String nms = model.getAffectedNames();
+        String msg = "删除用户 "+nms+" 成功";
+
+        helper.back(num, msg);
     }
 
     public void actionExists(ActionHelper helper)

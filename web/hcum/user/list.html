@@ -1,20 +1,22 @@
 <div id="hcum_user_list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcum/User/List.do?dept_id='+H$('&dept_id',this))"/>
-        <param name="openUrls[]" value="['.create', 'hcum/user/form.html?dept_id='+H$('&dept_id',this),'.main-context']"/>
+        <param name="openUrls[]" value="['.create', 'hcum/user/form.html?dept_id='+H$('&dept_id',this)]"/>
         <param name="openUrls[]" value="['.modify', 'hcum/user/form.html?id={ID}','.main-context']"/>
         <param name="sendUrls[]" value="['.remove', 'hcum/User/Remove.do']"/>
         <param name="idKey" value="id"/>
     </object>
     <div>
-        <form class="fl tool-box btn-group" action="" method="GET">
-            <button type="button" class="btn create">创建</button>
-            <button type="button" class="btn modify for-select">修改</button>
-            <button type="button" class="btn remove for-checks btn-danger">删除</button>
-        </form>
-        <form class="fr find-box input-append" action="" method="GET">
-            <input type="text" name="find"/>
-            <button type="submit" class="btn btn-primary">查找</button>
+        <div class="fl tool-box btn-group">
+            <button type="button" class="create btn btn-default">创建</button>
+            <button type="button" class="modify for-select btn btn-default">修改</button>
+            <button type="button" class="remove for-checks btn btn-danger">删除</button>
+        </div>
+        <form class="fr find-box input-group" action="" method="POST">
+            <input type="search" name="find" class="form-control"/>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-default">查找</button>
+            </span>
         </form>
         <div class="cb"></div>
     </div>
@@ -35,5 +37,5 @@
             <tbody></tbody>
         </table>
     </div>
-    <div class="page-box pagination"></div>
+    <div class="page-box"></div>
 </div>

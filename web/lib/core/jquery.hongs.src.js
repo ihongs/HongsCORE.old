@@ -5,8 +5,8 @@ HongsCORE(Javascript)
 修改: 2013/05/25
 依赖:
     jquery.js,
-    jquery.tools.js(Overlay, Tooltip, Tab, Validator, Dateinput, Expose)
-    bootstrap.css(.alert)
+    jquery.tools.js (Tab, Tooltip, Overlay, Validator, Dateinput, Expose)
+    bootstrap.js    (Tab, Tooltip, Modal)
 
 自定义属性:
 data-fn HsForm|HsList中为field name
@@ -154,7 +154,7 @@ function hsResponObj(rst) {
         }
         if (rst["__message__"]) {
         if (rst["__success__"]) {
-            hsNote(rst["__message__"]);
+            hsNote(rst["__message__"], 'alert-success');
         }
         else {
             alert (rst["__message__"]);
@@ -841,7 +841,7 @@ function hsPrsDate(text, format) {
  * @return {jQuery} 消息框对象
  */
 function hsNote(msg, cls) {
-    var div = jQuery('<div class="note-msg"></div>');
+    var div = jQuery('<div class="note-msg alert"></div>');
     var box = jQuery("#note-box").show();
     if (cls) div.addClass(cls);
     div.appendTo(box).append(msg).hide()
@@ -859,12 +859,12 @@ function hsNote(msg, cls) {
 /**
  * 打开浮窗
  * @param {String} url 浮窗内容URL
- * @param {hsSerialArr_obj} 附加参数
+ * @param {hsSerialArr_obj} data 附加参数
  * @param {Function} callback
  * @return {jQuery} 浮窗对象
  */
 function hsOpen(url, data, callback) {
-    var div = jQuery('<div class="overlay"><div class="close"></div><div class="open-box"></div></div>');
+    var div = jQuery('<div class="overlay"><div class="close">&times;</div><div class="open-box"></div></div>');
     var box = div.find('.open-box');
     div.appendTo(document.body)
        .overlay({
@@ -882,7 +882,7 @@ function hsOpen(url, data, callback) {
 /**
  * 在tab或指定区域中打开
  * @param {String} url 内容URL
- * @param {hsSerialArr_obj} 附加参数
+ * @param {hsSerialArr_obj} data 附加参数
  * @param {Function} callback
  * @return {jQuery} 区域对象
  */
@@ -1458,7 +1458,7 @@ HsList.prototype = {
     fillPage : function(page) {
         switch (page.errno) {
             case 1:
-                this.pageBox.empty().append('<div class="alert">'+hsGetLang('list.empty')+'</div>');
+                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
                 this.listBox.hide(); return;
             default:
                 this.listBox.show();
@@ -1473,7 +1473,7 @@ HsList.prototype = {
         pmax = pmin+pn - 1; if (t<pmax) pmax = t;
 
         this.pageBox.empty();
-        var ul = jQuery("<ul></ul>").appendTo(this.pageBox);
+        var ul = jQuery('<ul class="pagination"></ul>').appendTo(this.pageBox);
 
         if (1 != p) {
             ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(p-1)+'">'+hsGetLang("list.prev.page")+'</a></li>'));
@@ -2262,6 +2262,7 @@ $.fn.load = function(url, data, complate) {
     // 设置jquery tools表单校验
     $.tools.validator.conf.formEvent = null;
     $.tools.validator.conf.inputEvent = "change";
+    $.tools.validator.conf.messageClass = "tooltip fade right in";
     $.tools.validator.fn("[requires]", function(input, value) {
         switch (input.prop("tagName")) {
             case "BUTTON":
@@ -2330,7 +2331,8 @@ $.fn.load = function(url, data, complate) {
             inp.parent().css({position: "relative"});
             msg.css({visibility: 'hidden'}).empty( );
             $.each(err.messages, function(i, txt) {
-                $("<span/>").text(txt).appendTo(msg);
+                msg.append($('<div class="tooltip-inner"></div>').text(txt))
+                   .append($('<div class="tooltip-arrow"></div>'));
             });
 
             var p1 =  inp.position();
