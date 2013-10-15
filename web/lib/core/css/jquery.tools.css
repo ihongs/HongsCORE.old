@@ -16,7 +16,7 @@
     border-radius: 10px;
 }
 .overlay .close {
-    background-image: url(image/overlay-close.png);
+    background-image: url(../img/overlay-close.png);
     position: absolute;
     top: -15px;
     right: -15px;

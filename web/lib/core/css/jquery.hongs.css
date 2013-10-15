@@ -7,10 +7,12 @@ html, body, label, input, select, button, textarea {
     font-size: 14px;
     font-family: 'Microsoft Yahei', SimSun;
 }
+/*
 html, body {
     margin: 0;
     padding: 0;
 }
+*/
 object.config {
     display: none;
 }
@@ -145,10 +147,13 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 .find-box input, .find-box button, .find-box select {
     margin: 0;
 }
+/*
 .tool-bar {
     margin-bottom: 0.25em;
 }
+*/
 
+/*
 .list-box table {
     border: 0;
     border-spacing: 1px;
@@ -170,10 +175,18 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 .list-box tbody tr:hover td {
     background: #f8f8f8;
 }
+*/
 .list-box ._check,
 .list-box ._radio,
 .list-box ._admin {
     width: 1.5em;
+}
+.list-box .datetime {
+    width: 12em;
+}
+.list-box .date,
+.list-box .time {
+    width: 6em;
 }
 
 .page-curr {
@@ -208,13 +221,13 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 .tree-hand {
     width: 16px;
     height: 20px;
-    background-image: url(image/tree-hand.gif);
+    background-image: url(../img/tree-hand.gif);
 }
 .tree-fold>table .tree-hand {
-    background-image: url(image/tree-hand-fold.gif);
+    background-image: url(../img/tree-hand-fold.gif);
 }
 .tree-open>table .tree-hand {
-    background-image: url(image/tree-hand-open.gif);
+    background-image: url(../img/tree-hand-open.gif);
 }
 
 .tree-cnum {
@@ -223,6 +236,7 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 
 /** 应用样式 **/
 
+/*
 .side-context {
     width: 20em;
     display: table-cell;
@@ -232,6 +246,7 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
     display: table-cell;
     vertical-align: top;
 }
+*/
 
 #main-menubar {
     position: fixed;
@@ -265,4 +280,10 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 
 #main-context {
     padding-top: 3em;
+}
+
+/** bootstrap 补充 **/
+
+.pagination ul {
+    padding: 0;
 }

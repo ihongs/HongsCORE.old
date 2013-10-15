@@ -3,7 +3,7 @@
  * 作者：黄弘 <kevin.hongs@gmail.com>
  * 创建: 2013/06/20
  * 修改: 2013/06/21
- * 依赖: jquery.hongs.js, jquery.tools.js, jquery.js
+ * 依赖: jquery.js, jquery.tools.js, jquery.hongs.js
  */
 
 (function($) {

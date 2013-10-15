@@ -6,33 +6,34 @@
         <param name="sendUrls[]" value="['.remove', 'hcum/User/Remove.do']"/>
         <param name="idKey" value="id"/>
     </object>
-    <div class="tool-bar">
-        <form class="fl tool-box" action="" method="GET">
-            <button type="button" class="create">创建</button>
-            <button type="button" class="modify for-select">修改</button>
-            <button type="button" class="remove for-checks">删除</button>
+    <div>
+        <form class="fl tool-box btn-group" action="" method="GET">
+            <button type="button" class="btn create">创建</button>
+            <button type="button" class="btn modify for-select">修改</button>
+            <button type="button" class="btn remove for-checks btn-danger">删除</button>
         </form>
-        <form class="fr find-box" action="" method="GET">
+        <form class="fr find-box input-append" action="" method="GET">
             <input type="text" name="find"/>
-            <button type="submit">查找</button>
+            <button type="submit" class="btn btn-primary">查找</button>
         </form>
         <div class="cb"></div>
     </div>
     <div class="list-box">
-        <table>
+        <table class="table table-hover table-striped">
             <thead>
                 <tr>
-                    <td data-fn="_check" class="_check">
+                    <th data-fn="_check" class="_check">
                         <input type="checkbox" class="check-all" name="id[]"/>
-                    </td>
-                    <td data-fn="username">邮箱</td>
-                    <td data-fn="name">昵称</td>
-                    <td data-fn="note">备注</td>
-                    <td data-fn="password">密码</td>
+                    </th>
+                    <th data-fn="username">邮箱</th>
+                    <th data-fn="name">昵称</th>
+                    <th data-fn="note">备注</th>
+                    <th data-fn="mtime" data-ft="htime" class="datetime">修改时间</th>
+                    <th data-fn="ctime" data-ft="htime" class="datetime">创建时间</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
-    <div class="fl page-box"></div>
+    <div class="page-box pagination"></div>
 </div>

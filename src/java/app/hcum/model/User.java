@@ -114,7 +114,7 @@ extends AbstractBaseModel {
          * 则关联a_hcum_user_detp来约束范围
          */
         if (req.containsKey("dept_id")) {
-            more.join ("a_hcum_user_dept", ".id = :user_id")
+            more.join ("a_hcum_user_dept", ".user_id = :id")
                 .where("dept_id = ?" , req.get( "dept_id" ));
         }
     }

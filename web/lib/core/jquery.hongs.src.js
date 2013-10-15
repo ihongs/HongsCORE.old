@@ -3,10 +3,13 @@ HongsCORE(Javascript)
 作者: 黄弘 <kevin.hongs@gmail.com>
 创建: 2013/01/01
 修改: 2013/05/25
-依赖: jquery.tools.js(Overlay, Tooltip, Tab, Validator, Dateinput, Expose), jquery.js
+依赖:
+    jquery.js,
+    jquery.tools.js(Overlay, Tooltip, Tab, Validator, Dateinput, Expose)
 
 自定义属性:
-data-fn HsForm|HsList|HsTree中为field name
+data-fn HsForm|HsList中为field name
+data-ft HsForm|HsList中位field type(用于按类型填充)
 data-pn HsForm中为param name, HsList中为page num
 data-vk HsForm中为value key
 data-tk HsForm中为text key
@@ -223,7 +226,9 @@ function hsGetParams(url, name) {
     var reg = new RegExp("[\\?&]"+_hsEscParam(name)+"=([^&]*)", "g");
     var arr = null;
     var val = [];
-    while ( (arr = reg.exec(url)) != null ) {
+    while (true) {
+        arr = reg.exec(url);
+        if (arr == null) break;
         val.push(decodeURIComponent(arr[1]));
     }
     return val;
@@ -283,8 +288,8 @@ function hsGetArray (obj, keys, def) {
         throw("hsGetArray: 'keys' can not be empty");
     }
 
-    var i , k;
-    for(i = 0; i < keys.length; i++) {
+    var i; var k;
+    for(i = 0; i < keys.length; i ++) {
         k = keys[i];
         if(typeof obj[k] != "undefined") {
            obj  = obj[k];
@@ -294,12 +299,12 @@ function hsGetArray (obj, keys, def) {
     }
         return  obj;
 }
-/**
- 需要注意的键:
- a[1]   数字将作为字符串对待, 但可用hsSetArray完成
- a[][k] 空键将作为字符串对待, 但放在末尾可表示push
- */
 function hsSetValue (obj, path, val) {
+    /**
+     需要注意的键:
+     a[1]   数字将作为字符串对待, 但可用hsSetArray完成
+     a[][k] 空键将作为字符串对待, 但放在末尾可表示push
+     */
     if (jQuery.isArray(path)) {
         hsSetArray(obj, path, val); return;
     }
@@ -329,8 +334,8 @@ function hsSetArray (obj, keys, val) {
         throw("hsSetArray: 'keys' can not be empty");
     }
 
-    var i , k, t = keys[0];
-    for(i = 0; i < keys.length-1; i ++ ) {
+    var i; var k; var t = keys[0];
+    for(i = 0; i < keys.length -1; i ++ ) {
         k = keys[ i ];
         t = keys[i+1];
         if (!t) t = 0;
@@ -882,7 +887,7 @@ HsForm.prototype = {
         this.formBox.trigger("loadBack", [rst]);
     },
     fillData : function(data) {
-        var nodes, datas, i, n, v, inp, opt, lab, vk, tk, tp;
+        var nodes, datas, i, n, t, v, inp, opt, lab, vk, tk, tp;
         nodes = this.formBox.find("select[name],.check-box[name],.radio-box[name]");
         datas = {};
         for(i = 0; i < nodes.length; i ++) {
@@ -908,6 +913,12 @@ HsForm.prototype = {
             if (typeof this["fill_"+n] !="undefined") {
                 v = this["fill_"+n].call(this, inp, v, n, "data");
             }
+            // 按类型填充
+            else if (inp.data("data-ft")) {
+                t =  inp.attr("data-ft");
+            if (typeof this["fill_"+t] !="undefined") {
+                v = this["fill_"+t].call(this, inp, v, t, "data");
+            }}
             if (! v) continue;
 
             if (inp.prop("tagName") == "SELECT" && i == 1) {
@@ -938,7 +949,7 @@ HsForm.prototype = {
         delete this._data;
     },
     fillInfo : function(info) {
-        var nodes, infos, i, n, v, inp;
+        var nodes, infos, i, n, t, v, inp;
         nodes = this.formBox.find("input[name],textarea[name],select[name],.check-box[name],.radio-box[name]");
         infos = {};
         for(i = 0; i < nodes.length; i ++) {
@@ -965,6 +976,13 @@ HsForm.prototype = {
                 v = this["fill_"+n].call(this, inp, v, n, "info");
                 if (!v) continue;
             }
+            // 按类型填充
+            else if (inp.data("data-ft")) {
+                t =  inp.attr("data-ft");
+            if (typeof this["fill_"+t] !="undefined") {
+                v = this["fill_"+t].call(this, inp, v, t, "info");
+                if (!v) continue;
+            }}
 
             if (i == 0) {
                 inp.text(v);
@@ -1240,14 +1258,17 @@ HsList.prototype = {
         this.listBox.trigger("loadBack", [rst]);
     },
     fillList : function(list) {
-        var tb, tr, td, tds, cls, fns, i, j, n, v, a ;
+        var tb, tr, td, tds, cls, fns, i, j, n, t, v;
         tb  = this.listBox.find("tbody"); tb.empty( );
         tds = this.listBox.find("thead th, thead td");
-        cls = []; fns = [];
+        cls = []; fns = []; fts = {};
         for (i = 0; i < tds .length; i ++) {
             td = jQuery(tds[i]);
             cls.push(td.attr( "class" ));
             fns.push(td.attr("data-fn"));
+            if (     td.attr("data-ft")) {
+                fts [td.attr("data-fn")] = td.attr("data-ft");
+            }
         }
         for (i = 0; i < list.length; i ++) {
             tr = jQuery('<tr></tr>');
@@ -1267,6 +1288,13 @@ HsList.prototype = {
                     v = this["fill_"+n].call(this, td,v,n);
                     if(!v) continue;
                 }
+                // 按类型填充
+                else if (typeof fts[n] != "undefined") {
+                    t =  fts[n];
+                if (typeof this["fill_"+t] != "undefined") {
+                    v = this["fill_"+t].call(this, td,v,t);
+                    if(!v) continue;
+                }}
 
                 td.text(v);
             }
@@ -1275,9 +1303,12 @@ HsList.prototype = {
             delete this._info;
     },
     fillPage : function(page) {
-        if (page.errno == 1) {
-            this.pageBox.empty().append('<span>'+hsGetLang('list.empty')+'</span>');
-            return;
+        switch (page.errno) {
+            case 1:
+                this.pageBox.empty().append('<div class="alert">'+hsGetLang('list.empty')+'</div>');
+                this.listBox.hide(); return;
+            default:
+                this.listBox.show();
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
@@ -1287,26 +1318,33 @@ HsList.prototype = {
         pn = pn ? parseInt(pn) : 10;
         pmin = Math.floor((p - 1) / pn) * pn + 1;
         pmax = pmin+pn - 1; if (t<pmax) pmax = t;
+
         this.pageBox.empty();
+        var ul = jQuery("<ul></ul>").appendTo(this.pageBox);
 
         if (1 != p) {
-            this.pageBox.append(jQuery('<button data-pn="'+(p-1)+'">'+hsGetLang("list.prev.page")+'</button>'));
+            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(p-1)+'">'+hsGetLang("list.prev.page")+'</a></li>'));
+        } else {
+            // ul.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.prev.page")+'</a></li>'));
         }
         if (1 < pmin-1) {
-            this.pageBox.append(jQuery('<button data-pn="'+1+'">'+1+'</button>'));
-            this.pageBox.append(jQuery('<span>...</span>'));
-            this.pageBox.append(jQuery('<button data-pn="'+(pmin-1)+'">'+(pmin-1)+'</button>'));
+            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+1+'">'+1+'</a></li>'));
+            ul.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
+            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmin-1)+'">'+(pmin-1)+'</a></li>'));
         }
         for(i = pmin; i < pmax+1; i++) {
-            this.pageBox.append(jQuery('<button data-pn="'+i+'">'+i+'</button>'));
+            var cl = i == p ? ' class="active"' : '';
+            ul.append(jQuery('<li'+cl+'><a href="javascript:;" data-pn="'+i+'">'+i+'</a></li>'));
         }
         if (t > pmax+1) {
-            this.pageBox.append(jQuery('<button data-pn="'+(pmax+1)+'">'+(pmax+1)+'</button>'));
-            this.pageBox.append(jQuery('<span>...</span>'));
-            this.pageBox.append(jQuery('<button data-pn="'+t+'">'+t+'</button>'));
+            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmax+1)+'">'+(pmax+1)+'</a></li>'));
+            ul.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
+            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
         }
         if (t != p) {
-            this.pageBox.append(jQuery('<button data-pn="'+(p+1)+'">'+hsGetLang("list.next.page")+'</button>'));
+            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(p+1)+'">'+hsGetLang("list.next.page")+'</a></li>'));
+        } else {
+            // ul.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.next.page")+'</a></li>'));
         }
 
         this.pageBox.find("[data-pn="+p+"]").addClass("page-curr");
@@ -1388,8 +1426,20 @@ HsList.prototype = {
         }
     },
 
-    /** 填充函数 **/
+    // /** 填充函数 **/
 
+    fill_htime: function(td, v, n) {
+        var d1 = new Date();
+        var d2 = hsPrsDate(v, H$(":datetime.format"));
+        if (d1.getYear()  == d2.getYear()
+        &&  d1.getMonth() == d2.getMonth()
+        &&  d1.getDate()  == d2.getDate()) {
+            return H$(":time.today", {time: hsFmtDate(v, H$(":time.format"))});
+        }
+        else {
+            return hsFmtDate(v, H$(":datetime.format"));
+        }
+    },
     fill__check : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
         jQuery('<input type="checkbox" class="check-one"/>')
@@ -1701,11 +1751,11 @@ HsTree.prototype = {
         }
         if (typeof this.typeKey != "undefined") {
             t = hsGetValue(info , this.typeKey);
-            nod.addClass("tree-type-" + t );
+            nod.addClass("tree-type-" + t);
         }
         if (typeof this.cnumKey != "undefined") {
             n = hsGetValue(info , this.cnumKey);
-            tab.find(".tree-cnum").text(n );
+            tab.find(".tree-cnum").text(n);
             if (n)
                 nod.addClass("tree-fold");
         }
@@ -1960,15 +2010,16 @@ jQuery.fn.extend({
     hsTree  : HsTree
 });
 
-/** 应用支持部分 **/
+// /** 应用支持部分 **/
 
-/*
-编码原则:
-1. 尽可能的少写程序, 用描标记述化代替
-2. 使用事件驱动应用, 而不是初始化程序
-*/
 ( function($) {
-    /** 重写jQuery函数 **/
+    /*
+    编码原则:
+    1. 尽可能的少写程序, 用描标记述化代替
+    2. 使用事件驱动应用, 而不是初始化程序
+    */
+
+    // /** 重写jQuery函数 **/
 
     var _ajax = $.ajax;
     var _load = $.fn.load;
@@ -2007,7 +2058,7 @@ jQuery.fn.extend({
         });
     };
 
-    /** 设置jQueryTools参数 **/
+    // /** 设置jQueryTools参数 **/
 
     // 设置jquery tools国际化
     $(function() {
@@ -2149,7 +2200,7 @@ jQuery.fn.extend({
         });
     });
 
-    /** 自定义语义属性/标签 **/
+    // /** 自定义语义属性/标签 **/
 
     $.fn.hsInit = function(cnf) {
         /** jquery tools 初始配置处理 **/
