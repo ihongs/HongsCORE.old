@@ -6,6 +6,7 @@ HongsCORE(Javascript)
 依赖:
     jquery.js,
     jquery.tools.js(Overlay, Tooltip, Tab, Validator, Dateinput, Expose)
+    bootstrap.css(.alert)
 
 自定义属性:
 data-fn HsForm|HsList中为field name
@@ -36,6 +37,7 @@ data-open-in 点击后在指定区域打开
 .form-radios
 .list-box
 .page-box
+.tool-box
 .find-box
 .tree-box
 .tree-list
@@ -101,6 +103,11 @@ function H$() {
     }
 }
 
+/**
+ * 标准化返回对象
+ * @param {Object,String} rst JSON对象/JSON文本或错误消息
+ * @return {Object}
+ */
 function hsResponObj(rst) {
     if (typeof rst.responseText != "undefined") {
         rst  = rst.responseText;
@@ -157,6 +164,11 @@ function hsResponObj(rst) {
     return rst;
 }
 
+/**
+ * 序列化为数组, 供发往服务器
+ * @param {Object,Array,String,Elements} obj
+ * @param {Array}
+ */
 function hsSerialArr(obj) {
     var arr = [];
     if (typeof obj == "string") {
@@ -185,6 +197,11 @@ function hsSerialArr(obj) {
     }
     return arr;
 }
+/**
+ * 序列化为对象, 供进一步处理
+ * @param {Object,Array,String,Elements} obj
+ * @return {Object}
+ */
 function hsSerialObj(obj) {
     var arr = hsSerialArr(obj);
     obj = {};
@@ -193,6 +210,12 @@ function hsSerialObj(obj) {
     }
     return obj;
 }
+/**
+ * 获取多个序列值
+ * @param {Array} arr 使用 hsSerialArr 获得
+ * @param {String} name
+ * @return {Array}
+ */
 function hsGetSerias(arr, name) {
     var val = [];
     for(var i = 0; i < arr.length ; i ++) {
@@ -202,6 +225,12 @@ function hsGetSerias(arr, name) {
     }
     return val;
 }
+/**
+ * 设置多个序列值 
+ * @param {Array} arr 使用 hsSerialArr 获得
+ * @param {String} name
+ * @param {Array} value
+ */
 function hsSetSerias(arr, name, value) {
     for(var j = arr.length-1; j > -1; j --) {
         if (arr[j]["name"] == name) {
@@ -212,15 +241,33 @@ function hsSetSerias(arr, name, value) {
         arr.push({name: name, value: value[i]});
     }
 }
+/**
+ * 获取单个序列值
+ * @param {Array} arr 使用 hsSerialArr 获得
+ * @param {String} name
+ * @return {String}
+ */
 function hsGetSeria (arr, name) {
     var val = hsGetSerias(arr, name);
     if (val.length) return val.pop();
     else            return "";
 }
+/**
+ * 设置单个序列值
+ * @param {Array} arr 使用 hsSerialArr 获得
+ * @param {String} name
+ * @param {Array} value
+ */
 function hsSetSeria (arr, name, value) {
     hsSetSerias(arr, name, [value]);
 }
 
+/**
+ * 获取多个参数值
+ * @param {String} url
+ * @param {String} name
+ * @return {Array}
+ */
 function hsGetParams(url, name) {
     name = encodeURIComponent(name).replace('.', '\\.');
     var reg = new RegExp("[\\?&]"+_hsEscParam(name)+"=([^&]*)", "g");
@@ -233,6 +280,12 @@ function hsGetParams(url, name) {
     }
     return val;
 }
+/**
+ * 设置多个参数值
+ * @param {String} url
+ * @param {String} name
+ * @param {Array} value
+ */
 function hsSetParams(url, name, value) {
     name = encodeURIComponent(name).replace('.', '\\.');
     var reg = new RegExp("[\\?&]"+_hsEscParam(name)+"=([^&]*)", "g");
@@ -247,15 +300,34 @@ function hsSetParams(url, name, value) {
     }
     return url;
 }
+/**
+ * 获取单个参数值
+ * @param {String} url
+ * @param {String} name
+ * @return {String}
+ */
 function hsGetParam (url, name) {
     var val = hsGetParams(url, name);
     if (val.length) return val.pop();
     else            return "";
 }
+/**
+ * 设置单个参数值
+ * @param {String} url
+ * @param {String} name
+ * @param {String} value
+ */
 function hsSetParam (url, name, value) {
     return hsSetParams(url, name, [value]);
 }
 
+/**
+ * 从树对象获取值
+ * @param {Object,Array} obj
+ * @param {Array,String} path ['a','b'] 或 a.b
+ * @param def 默认值
+ * @return 获取到的值, 如果没有则取默认值
+ */
 function hsGetValue (obj, path, def) {
     if (jQuery.isArray(path)) {
         return hsGetArray(obj, path, def);
@@ -274,6 +346,13 @@ function hsGetValue (obj, path, def) {
                .split  (/\./ );
     return hsGetArray(obj, path, def);
 }
+/**
+ * 从树对象获取值(hsGetValue的底层方法)
+ * @param {Object,Array} obj
+ * @param {Array} keys ['a','b']
+ * @param def 默认值
+ * @return 获取到的值, 如果没有则取默认值
+ */
 function hsGetArray (obj, keys, def) {
     if (!obj) {
         return null;
@@ -299,6 +378,12 @@ function hsGetArray (obj, keys, def) {
     }
         return  obj;
 }
+/**
+ * 向树对象设置值
+ * @param {Object,Array} obj
+ * @param {Array,String} path ['a','b'] 或 a.b
+ * @param val
+ */
 function hsSetValue (obj, path, val) {
     /**
      需要注意的键:
@@ -320,6 +405,12 @@ function hsSetValue (obj, path, val) {
                .split  (/\./ );
     hsSetArray(obj, path, val);
 }
+/**
+ * 向树对象设置值(hsSetValue的底层方法)
+ * @param {Object,Array} obj
+ * @param {Array} keys ['a','b']
+ * @param val
+ */
 function hsSetArray (obj, keys, val) {
     if (!obj) {
         return;
@@ -356,6 +447,12 @@ function hsSetArray (obj, keys, val) {
     else   obj.push(val);
 }
 
+/**
+ * 获取配置
+ * @param {String} key
+ * @param {String} def 默认值
+ * @return {String} 获取到的配置, 如果没有则取默认值
+ */
 function hsGetConf  (key, def) {
     if (typeof HsCONF[key] != "undefined") {
         return HsCONF[key];
@@ -364,6 +461,12 @@ function hsGetConf  (key, def) {
         return def;
     }
 }
+/**
+ * 获取语言
+ * @param {String} key
+ * @param {Object,Array} rep 替换参数, {a:1,b:2} 或 [1,2]
+ * @return {String} 获取到的语言, 其中的 $a或$0 可被 rep 替换
+ */
 function hsGetLang  (key, rep) {
     if (typeof HsLANG[key] != "undefined") {
         key  = HsLANG[key];
@@ -396,13 +499,17 @@ function hsGetLang  (key, rep) {
 
     return key;
 }
-function hsChkUri   (uri, pms) {
+/**
+ * 检查URI是否有权访问
+ * @param {String} uri
+ * @return {Boolean} 是(true)否(false)有权访问
+ */
+function hsChkUri   (uri) {
     uri = hsFixUri(uri) + ".de";
 
     if (typeof HsAUTH[uri] == "undefined") {
         jQuery.ajax({
             "url"       :  uri,
-            "data"      :  pms,
             "type"      : "POST",
             "async"     :  false,
             "cache"     :  false,
@@ -413,6 +520,11 @@ function hsChkUri   (uri, pms) {
     }
     return HsAUTH[uri];
 }
+/**
+ * 补全URI为其增加前缀
+ * @param {String} uri
+ * @return {String} 完整的URI
+ */
 function hsFixUri   (uri) {
     if (/^(https?:\/\/|\/|\.)/.test(uri) == false)
         return hsGetConf("BASE_HREF") + "/" + uri;
@@ -615,7 +727,7 @@ function hsPrsDate(text, format) {
  * 格式化日期
  *
  * @author HuangHong
- * @param { Date } date
+ * @param {Date} date
  * @param {String} format
  * @return {String}
  */
@@ -719,6 +831,12 @@ function hsFmtDate(date, format) {
   return format.replace(/M+|d+|y+|H+|k+|K+|h+|m+|s+|S+|E+|a+/g, _replace);
 }
 
+/**
+ * 通知
+ * @param {String} msg 消息
+ * @param {String} cls 样式类
+ * @return {jQuery} 消息框对象
+ */
 function hsNote(msg, cls) {
     var div = jQuery('<div class="note-msg"></div>');
     var box = jQuery("#note-box").show();
@@ -735,6 +853,13 @@ function hsNote(msg, cls) {
     }, 5000);
     return div;
 }
+/**
+ * 打开浮窗
+ * @param {String} url 浮窗内容URL
+ * @param {hsSerialArr_obj} 附加参数
+ * @param {Function} callback
+ * @return {jQuery} 浮窗对象
+ */
 function hsOpen(url, data, callback) {
     var div = jQuery('<div class="overlay"><div class="close"></div><div class="open-box"></div></div>');
     var box = div.find('.open-box');
@@ -751,6 +876,13 @@ function hsOpen(url, data, callback) {
     box.load(url, data, callback);
     return box;
 }
+/**
+ * 在tab或指定区域中打开
+ * @param {String} url 内容URL
+ * @param {hsSerialArr_obj} 附加参数
+ * @param {Function} callback
+ * @return {jQuery} 区域对象
+ */
 function HsOpen(url, data, callback) {
     var box = jQuery( this ).addClass ( "open-box" );
     if (box.closest(".tabs").length) {
@@ -770,6 +902,10 @@ function HsOpen(url, data, callback) {
     box.load(url, data, callback);
     return box;
 }
+/**
+ * 关闭浮窗或区域
+ * @return 浮窗或区域对象
+ */
 function HsClose() {
     var box = jQuery(this);
     box.trigger("hsClose");
@@ -789,6 +925,10 @@ function HsClose() {
     box.removeClass("open-box");
     return box;
 }
+/**
+ * 预置浮窗或区域
+ * @return 浮窗或区域对象
+ */
 function HsReady() {
     var box = jQuery(this);
     box.trigger("hsReady");
@@ -809,6 +949,11 @@ function HsReady() {
     return box;
 }
 
+/**
+ * 表单组件
+ * @param {Object} opts 选项
+ * @param {Element} context 容器
+ */
 function HsForm(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsForm");
     if (data)  return data;
@@ -1049,7 +1194,7 @@ HsForm.prototype = {
         if (typeof rst.__success__ != "undefined"
         &&         rst.__success__ ==  false     ) {
             if (typeof rst.errors  != "undefined") {
-                this.invalidate ( rst.errors );
+                this.formBox.data("validator").invalidate(rst.errors);
             }
             return;
         }
@@ -1060,6 +1205,11 @@ HsForm.prototype = {
     }
 };
 
+/**
+ * 列表组件
+ * @param {Object} opts 选项
+ * @param {Element} context 容器
+ */
 function HsList(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsList");
     if (data)  return data;
@@ -1482,6 +1632,11 @@ HsList.prototype = {
     }
 };
 
+/**
+ * 树型组件
+ * @param {Object} opts 选项
+ * @param {Element} context 容器
+ */
 function HsTree(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsTree");
     if (data)  return data;
@@ -1901,8 +2056,8 @@ HsTree.prototype = {
 
 /**
  * 遍历对象或数组的全部叶子节点
- * @param {object,array} data
- * @param {function} func
+ * @param {Object,Array} data
+ * @param {Function} func
  */
 function _hsEachLeaf(data, func) {
     var path = [];
@@ -1926,9 +2081,9 @@ function _hsEachLeaf(data, func) {
 
 /**
  * 标准文档对象操作类初始化方法
- * @param {object} opts
- * @param {string} name
- * @returns {object,null}
+ * @param {Object} opts
+ * @param {String} name
+ * @returns {Object,null}
  */
 function _HsInitOpts(opts, name) {
         var func = self[name];
@@ -1953,7 +2108,7 @@ function _HsInitOpts(opts, name) {
 
 /**
  * 获取配置选项
- * @returns object
+ * @returns {Object}
  */
 function _HsReadOpts() {
     var obj = {};
