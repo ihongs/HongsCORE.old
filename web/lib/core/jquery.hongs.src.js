@@ -2441,7 +2441,7 @@ jQuery.fn.extend({
         return this;
     };
 
-    /** 初始化 **/
+    // /** 初始化 **/
 
     $(function() {
         $(this).hsInit();
