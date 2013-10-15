@@ -2151,6 +2151,8 @@ function _hs2jtDF(format) {
                .replace(/M/g , "m"   );
 }
 
+/** jQuery插件整合 **/
+
 // 常用jQuery扩展
 jQuery.extend({
     hsNote  : hsNote,
@@ -2195,7 +2197,7 @@ $.fn.load = function(url, data, complate) {
     this.data( "url" , url ).data( "data" , data );
     this.addClass("load-box").addClass("load-ing");
     return _jqLoad.call(this, url,data, function() {
-        var  that  =  $(this);
+        var that = jQuery(this);
         that.removeClass ( "load-ing" );
         complate.apply(that, arguments);
         HsReady .call (that);
