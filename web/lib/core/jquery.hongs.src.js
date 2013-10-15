@@ -526,8 +526,8 @@ function hsChkUri   (uri) {
  * @return {String} 完整的URI
  */
 function hsFixUri   (uri) {
-    if (/^(https?:\/\/|\/|\.)/.test(uri) == false)
-        return hsGetConf("BASE_HREF") + "/" + uri;
+    if (/^(\w+:\/\/|\/|\.)/.test(uri) == false)
+        return hsGetConf("BASE_HREF") +"/"+uri;
     else
         return uri;
 }
