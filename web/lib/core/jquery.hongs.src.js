@@ -620,110 +620,6 @@ function hsFmtNum(num, len, dec, sep, dot) {
 }
 
 /**
- * 解析日期
- *
- * @author HuangHong
- * @param {String} text
- * @param {String} format
- * @return {Date}
- */
-function hsPrsDate(text, format) {
-  var a = text.split(/\W+/);
-  var b = format.match(/M+|d+|y+|H+|k+|K+|h+|m+|s+|S+|E+|a+/g);
-
-  var i, j;
-  var M, d, y, H = 0, m = 0, s = 0, A = 0;
-
-  for (i = 0; i < b.length; i ++) {
-    if (a[i] == null) continue;
-
-    var wrd = a[i];
-    var len = b[i].length;
-    var flg = b[i].substring(0, 1);
-    switch (flg) {
-      case 'M':
-        if (len >= 4) {
-          for (j = 0; j < hsLang("date.format.LM").length; j ++) {
-            if (wrd == hsLang("date.format.LM")[j]) {
-              M = j;
-              break;
-            }
-          }
-        }
-        else if (len == 3) {
-          for (j = 0; j < hsLang("date.format.SM").length; j ++) {
-            if (wrd == hsLang("date.format.SM")[j]) {
-              M = j;
-              break;
-            }
-          }
-        }
-        else {
-          M = parseInt(wrd, 10);
-        }
-      break;
-      case 'd':
-        d = parseInt(wrd, 10);
-      break;
-      case 'y':
-        y = parseInt(wrd, 10);
-        if (len <= 2) {
-          y += y > 29 ? 1900 : 2000;
-        }
-      break;
-      case 'H':
-      case 'K':
-        H = parseInt(wrd, 10);
-      break;
-      case 'k':
-      case 'h':
-        H = parseInt(wrd, 10) - 1;
-      break;
-      case 'm':
-        m = parseInt(wrd, 10);
-      break;
-      case 's':
-        s = parseInt(wrd, 10);
-      break;
-      case 'a':
-        if (len >= 4) {
-          for (j = 0; j < hsLang("date.format.La").length; j ++) {
-            if (wrd == hsLang("date.format.La")[j]) {
-              A = j;
-              break;
-            }
-          }
-        }
-        else {
-          for (j = 0; j < hsLang("date.format.Sa").length; j ++) {
-            if (wrd == hsLang("date.format.Sa")[j]) {
-              A = j;
-              break;
-            }
-          }
-        }
-      break;
-    }
-  }
-
-  if (A == 1) {
-    H += 12;
-  }
-
-  var text2;
-  if (typeof(M) != "undefined"
-  &&  typeof(d) != "undefined"
-  &&  typeof(y) != "undefined") {
-    text2 = M+"/"+d+"/"+y+" "+H+":"+m+":"+s;
-  }
-  else {
-    text2 = H+":"+m+":"+s;
-  }
-
-  return new Date(Date.parse(text2));
-}
-
-/**
  * 格式化日期
  *
  * @author HuangHong
@@ -829,6 +725,110 @@ function hsFmtDate(date, format) {
   }
 
   return format.replace(/M+|d+|y+|H+|k+|K+|h+|m+|s+|S+|E+|a+/g, _replace);
+}
+
+/**
+ * 解析日期
+ *
+ * @author HuangHong
+ * @param {String} text
+ * @param {String} format
+ * @return {Date}
+ */
+function hsPrsDate(text, format) {
+  var a = text.split(/\W+/);
+  var b = format.match(/M+|d+|y+|H+|k+|K+|h+|m+|s+|S+|E+|a+/g);
+
+  var i, j;
+  var M, d, y, H = 0, m = 0, s = 0, A = 0;
+
+  for (i = 0; i < b.length; i ++) {
+    if (a[i] == null) continue;
+
+    var wrd = a[i];
+    var len = b[i].length;
+    var flg = b[i].substring(0, 1);
+    switch (flg) {
+      case 'M':
+        if (len >= 4) {
+          for (j = 0; j < hsLang("date.format.LM").length; j ++) {
+            if (wrd == hsLang("date.format.LM")[j]) {
+              M = j;
+              break;
+            }
+          }
+        }
+        else if (len == 3) {
+          for (j = 0; j < hsLang("date.format.SM").length; j ++) {
+            if (wrd == hsLang("date.format.SM")[j]) {
+              M = j;
+              break;
+            }
+          }
+        }
+        else {
+          M = parseInt(wrd, 10);
+        }
+      break;
+      case 'd':
+        d = parseInt(wrd, 10);
+      break;
+      case 'y':
+        y = parseInt(wrd, 10);
+        if (len <= 2) {
+          y += y > 29 ? 1900 : 2000;
+        }
+      break;
+      case 'H':
+      case 'K':
+        H = parseInt(wrd, 10);
+      break;
+      case 'k':
+      case 'h':
+        H = parseInt(wrd, 10) - 1;
+      break;
+      case 'm':
+        m = parseInt(wrd, 10);
+      break;
+      case 's':
+        s = parseInt(wrd, 10);
+      break;
+      case 'a':
+        if (len >= 4) {
+          for (j = 0; j < hsLang("date.format.La").length; j ++) {
+            if (wrd == hsLang("date.format.La")[j]) {
+              A = j;
+              break;
+            }
+          }
+        }
+        else {
+          for (j = 0; j < hsLang("date.format.Sa").length; j ++) {
+            if (wrd == hsLang("date.format.Sa")[j]) {
+              A = j;
+              break;
+            }
+          }
+        }
+      break;
+    }
+  }
+
+  if (A == 1) {
+    H += 12;
+  }
+
+  var text2;
+  if (typeof(M) != "undefined"
+  &&  typeof(d) != "undefined"
+  &&  typeof(y) != "undefined") {
+    text2 = M+"/"+d+"/"+y+" "+H+":"+m+":"+s;
+  }
+  else {
+    text2 = H+":"+m+":"+s;
+  }
+
+  return new Date(Date.parse(text2));
 }
 
 /**
