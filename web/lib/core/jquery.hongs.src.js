@@ -2165,54 +2165,51 @@ jQuery.fn.extend({
     hsTree  : HsTree
 });
 
-// /** 应用支持部分 **/
+// 重写jQuery函数
+var _jqAjax = $.ajax;
+var _jqLoad = $.fn.load;
+$.ajax = function(url, settings) {
+    if (typeof url === "object") {
+        settings = url;
+        if (typeof url["url"] != "undefined")
+            url  = url["url"];
+    }
+    return _jqAjax(hsFixUri(url) , settings );
+};
+$.fn.load = function(url, data, complate) {
+    if ( jQuery.isFunction(  data  )) {
+        complate = data ;
+        data = undefined;
+    }
+    if (!jQuery.isFunction(complate)) {
+        complate = function() {};
+    }
 
+    // 解决重载区域后内部区域未关闭的问题
+    if (jQuery.fn.load.caller != hsOpen
+    &&  jQuery.fn.load.caller != HsOpen) {
+        this.find  (".open-box").hsClose();
+        this.filter(".open-box").hsClose();
+    }
+
+    this.data( "url" , url ).data( "data" , data );
+    this.addClass("load-box").addClass("load-ing");
+    return _jqLoad.call(this, url,data, function() {
+        var  that  =  $(this);
+        that.removeClass ( "load-ing" );
+        complate.apply(that, arguments);
+        HsReady .call (that);
+    });
+};
+
+/**
+ * 应用支持部分
+ * 编码原则:
+ * 1. 尽可能的少写程序, 用描标记述化代替
+ * 2. 使用事件驱动应用, 而不是初始化程序
+ * @param {jQuery} $
+ */
 ( function($) {
-    /*
-    编码原则:
-    1. 尽可能的少写程序, 用描标记述化代替
-    2. 使用事件驱动应用, 而不是初始化程序
-    */
-
-    // /** 重写jQuery函数 **/
-
-    var _ajax = $.ajax;
-    var _load = $.fn.load;
-
-    $.ajax = function(url, settings) {
-        if (typeof url === "object") {
-            settings = url;
-            if (typeof url["url"] != "undefined")
-                url  = url["url"];
-        }
-        return _ajax( hsFixUri( url ), settings );
-    };
-    $.fn.load = function(url, data, complate) {
-        if ($.isFunction(data)) {
-            complate = data ;
-            data = undefined;
-        }
-        if (!$.isFunction(complate)) {
-            complate = function() {};
-        }
-
-        // 解决重载区域后内部区域未关闭的问题
-        if ($.fn.load.caller != hsOpen
-        &&  $.fn.load.caller != HsOpen) {
-            this.find(".open-box").hsClose();
-            this.filter(".open-box").hsClose();
-        }
-
-        this.data( "url" , url ).data( "data" , data );
-        this.addClass("load-box").addClass("load-ing");
-        return _load.call(this, url, data, function( ) {
-            var that  = $(this);
-            that.removeClass ( "load-ing" );
-            complate.apply(that, arguments);
-            HsReady .call (that);
-        });
-    };
-
     // /** 设置jQueryTools参数 **/
 
     // 设置jquery tools国际化
