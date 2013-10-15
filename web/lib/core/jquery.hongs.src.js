@@ -72,9 +72,12 @@ function H$() {
     case '?': return hsChkUri .apply(this, arguments);
     case '/': return hsFixUri .apply(this, arguments);
     case '%':
+        if (typeof window.locaStorage == "undefined")
+            throw("H$: localStorage does not support!");
         if (arguments.length == 1)
-            throw("H$: Argument 2 required by flag '%'!");
-        return hsGetValue(  arguments[1], arguments[0]  );
+            return window.localStorage[arguments[0]];
+        else
+            window.localStorage[arguments[0]] = arguments[1];
     case '&':
     case '@':
         if (arguments.length == 1)
@@ -1578,16 +1581,17 @@ HsList.prototype = {
 
     // /** 填充函数 **/
 
-    fill_htime: function(td, v, n) {
-        var d1 = new Date();
-        var d2 = hsPrsDate(v, H$(":datetime.format"));
+    fill__htime: function(td, v, n) {
+        var d1  =  new Date ();
+        var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
         if (d1.getYear()  == d2.getYear()
         &&  d1.getMonth() == d2.getMonth()
         &&  d1.getDate()  == d2.getDate()) {
-            return H$(":time.today", {time: hsFmtDate(v, H$(":time.format"))});
+            return hsGetLang("time.today", {
+            time : hsFmtDate(v, hsGetLang( "time.format" ))});
         }
         else {
-            return hsFmtDate(v, H$(":datetime.format"));
+            return hsFmtDate(v, hsGetLang("datetime.format"));
         }
     },
     fill__check : function(td, v, n) {
