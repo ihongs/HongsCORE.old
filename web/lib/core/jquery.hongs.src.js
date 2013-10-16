@@ -938,7 +938,7 @@ function HsClose() {
     else if (box.data("tabs")) {
         var oldTab = box.data("oldTab");
         var curTab = box.data("curTab");
-        oldTab.click( ); curTab.show( );
+        oldTab.click( ); curTab.hide( );
     }
     else if (box.data("baks")) {
         var baks = box.data("baks");
