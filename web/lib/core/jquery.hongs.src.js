@@ -6,10 +6,10 @@ HongsCORE(Javascript)
 依赖:
     jquery.js,
     jquery.tools.js (tabs, tooltip, overlay, validator, dateinput, expose)
-    bootstrap.css   (.btn, .alert, .modal, .tooltip, .popover,
+    bootstrap.css   (.btn, .nav, .alert, .modal, .tooltip, .popover,
                      .pagination, .dropdown, .arrow, .caret, .close,
                      其他场合使用:
-                     .container, .row, .col, .navbar, .nav,
+                     .container, .row, .col, .navbar,
                      .table, .form, .input, .label, .badge)
 
 自定义属性:
