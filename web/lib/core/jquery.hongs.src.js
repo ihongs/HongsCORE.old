@@ -7,7 +7,10 @@ HongsCORE(Javascript)
     jquery.js,
     jquery.tools.js (tabs, tooltip, overlay, validator, dateinput, expose)
     bootstrap.css   (.btn, .alert, .modal, .tooltip, .popover,
-                     .pagination, .dropdown, .arrow, .caret)
+                     .pagination, .dropdown, .arrow, .caret, .close,
+                     其他场合使用:
+                     .container, .row, .col, .navbar, .nav,
+                     .table, .form, .input, .label, .badge)
 
 自定义属性:
 data-fn HsForm|HsList中为field name
@@ -881,7 +884,7 @@ function hsNote(msg, cls) {
  * @return {jQuery} 浮窗对象
  */
 function hsOpen(url, data, callback) {
-    var div = jQuery('<div class="overlay modal-content"><button class="close">&times;</button><div class="open-box"></div></div>');
+    var div = jQuery('<div class="overlay modal-content"><button class="close">&times;</button><div class="open-box modal-body"></div></div>');
     var box = div.find('.open-box');
     div.appendTo(document.body)
        .overlay({
