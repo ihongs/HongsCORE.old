@@ -1,8 +1,9 @@
-<object class="config" name="hsInitOpen" data="">
+<object class="config" name="hsInit" data="">
     <param name="width" value="600px"/>
 </object>
 
-<h2 class="show-in-overlay show-in-load">编辑用户</h2>
+<h2 class="show-in-overlay show-in-load">${editTitle}用户</h2>
+
 <div id="hcum_user_form">
     <object class="config" name="hsForm" data="">
         <param name="loadUrl" value="hcum/User/Info.do"/>
@@ -31,7 +32,7 @@
             <label>备注</label>
             <textarea name="note" class="form-control"></textarea>
         </div>
-        <div class="form-group">
+        <div class="form-group btn-box">
             <button type="submit" class="ensure btn btn-primary">提交</button>
             <button type="button" class="cancel btn btn-link">取消</button>
         </div>
@@ -41,7 +42,7 @@
 <script type="text/javascript">
 (function() {
     var context = $("#hcum_user_form");
-    
+
     $("[name=password]", context).data("validate", function(input, value) {
         if (!value && !$("[name=id]", context).val()) {
             return "必须填写";

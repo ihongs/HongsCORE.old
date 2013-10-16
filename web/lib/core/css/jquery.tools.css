@@ -1,29 +1,29 @@
 
 .overlay {
-    z-index: 9999;
-    display: none;
     background-color: #FFFFFF;
-    border: 1px solid #666666;
-    padding: 1em;
+    display: none;
+    padding: 15px;
+    z-index: 9999;
     min-width: 50em;
-
-    -webkit-box-shadow: 0 0 10px #000;
-    -moz-box-shadow: 0 0 10px #000;
-    box-shadow: 0 0 10px #000;
-
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
 }
 .overlay .close {
-    text-align: center;
-    font-weight: bold;
-    font-size: 22px;
-    width: 35px;
-    height: 35px;
-    top: 0px;
+    top: -2px;
     right: 0px;
-    position: absolute;
-    cursor: pointer;
+    opacity: 0.6;
+}
+.overlay .close:hover,
+.overlay .close:focus {
+    opacity: 0.9;
+}
+.overlay h1,
+.overlay h2,
+.overlay h3 {
+    margin-top: 0;
+}
+.overlay .open-box {
+    padding: 15px;
+}
 
+.panes {
+    padding-top: 15px;
 }

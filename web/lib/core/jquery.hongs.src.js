@@ -6,7 +6,7 @@ HongsCORE(Javascript)
 依赖:
     jquery.js,
     jquery.tools.js (tabs, tooltip, overlay, validator, dateinput, expose)
-    bootstrap.css   (.btn, .nav, .alert, .modal, .tooltip, .popover,
+    bootstrap.css   (.btn, .nav, .alert, .tooltip, .popover,
                      .pagination, .dropdown, .arrow, .caret, .close,
                      其他场合使用:
                      .container, .row, .col, .navbar,
@@ -884,7 +884,9 @@ function hsNote(msg, cls) {
  * @return {jQuery} 浮窗对象
  */
 function hsOpen(url, data, callback) {
-    var div = jQuery('<div class="overlay modal-content"><button class="close">&times;</button><div class="open-box modal-body"></div></div>');
+    var div = jQuery('<div class="overlay alert alert-dismissable">'
+                    +'<button type="button" class="close">&times;</button>'
+                    +'<div class="open-box"></div></div>');
     var box = div.find('.open-box');
     div.appendTo(document.body)
        .overlay({
@@ -2166,17 +2168,17 @@ function _HsReadOpts() {
     return obj;
 }
 
-function _jt2hsDF(format) {
-  return format.replace(/dddd/g, "EE")
-               .replace(/ddd/g , "E" )
-               .replace(/m/g   , "M" );
-}
 function _hs2jtDF(format) {
   return format.replace(/EE/g, "dddd")
                .replace(/E/g , "ddd" )
                .replace(/M/g , "m"   );
 }
 
+function _jt2hsDF(format) {
+  return format.replace(/dddd/g, "EE")
+               .replace(/ddd/g , "E" )
+               .replace(/m/g   , "M" );
+}
 /** jQuery插件整合 **/
 
 // 常用jQuery扩展
@@ -2281,6 +2283,10 @@ $.fn.load = function(url, data, complate) {
         loadSpeed   : 0
     };
 
+    // 改变class使其能使用bootstrap的样式
+    $.tools.tabs.conf.tabs = "li";
+    $.tools.tabs.conf.current = "active";
+
     // 设置jquery tools表单校验
     $.tools.validator.conf.formEvent = null;
     $.tools.validator.conf.inputEvent = "change";
@@ -2382,6 +2388,10 @@ $.fn.load = function(url, data, complate) {
         });
     });
 
+    // 改变class使其能使用bootstrap的样式
+    $.tools.tabs.conf.tabs = "li";
+    $.tools.tabs.conf.current = "active";
+
     // /** 自定义语义属性/标签 **/
 
     $.fn.hsInit = function(cnf) {
@@ -2390,6 +2400,21 @@ $.fn.load = function(url, data, complate) {
         if (cnf) {
             var v, o, c;
             var box = $(this).closest(".load-box");
+
+            // 自动提取标题
+            var h = box.children("h1, h2, h3");
+            if (h.length) cnf.title = h.text();
+
+            // 编辑标题替换
+            if (cnf.title) {
+                if (H$("&id", box)) {
+                    cnf.title = hsGetLang(cnf.title, { 'editTitle': hsGetLang("edit.title.update") });
+                } else {
+                    cnf.title = hsGetLang(cnf.title, { 'editTitle': hsGetLang("edit.title.create") });
+                }
+                if (h.length) h.text(cnf.title);
+            }
+
             if (box.data( "overlay" )) {
                 o = box.data( "overlay" ); c = o.getConf();
                 v = hsGetValue(cnf, "top"); if (v) c.top = v;
@@ -2398,7 +2423,8 @@ $.fn.load = function(url, data, complate) {
                 o.getOverlay( ).overlay( c );
             }
             else if (box.data("tabs")) {
-                v = hsGetValue(cnf, "title"); if (v) box.data("curTab").text(v);
+                v = hsGetValue(cnf, "title");
+                if (v) $(box.data("curTab")).find("a").text(v);
             }
             return this;
         }
@@ -2475,10 +2501,10 @@ $.fn.load = function(url, data, complate) {
     });
     $(document )
     .on("ajaxError", function( evt , xhr ) {
-        hsResponObj(xhr);
+        hsResponObj(xhr);  return  false;
     })
     .on("hsReady", ".load-box", function() {
-        $(this).hsInit();
+        $(this).hsInit();  return  false;
     })
     /*
     .on("hsClose", ".load-box", function() {

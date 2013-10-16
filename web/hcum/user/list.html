@@ -1,8 +1,15 @@
-<div id="hcum_user_list">
+<ul class="tabs nav nav-tabs">
+  <li class="user-list-tab"><a href="javascript:;">用户列表</a></li>
+  <li class="user-form-tab dn"><a href="javascript:;"></a></li>
+  <li class="dept-form-tab dn"><a href="javascript:;"></a></li>
+</ul>
+<div class="panes">
+
+<div id="hcum-user-list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcum/User/List.do?dept_id='+H$('&dept_id',this))"/>
-        <param name="openUrls[]" value="['.create', 'hcum/user/form.html?dept_id='+H$('&dept_id',this)]"/>
-        <param name="openUrls[]" value="['.modify', 'hcum/user/form.html?id={ID}','.main-context']"/>
+        <param name="openUrls[]" value="['.create', 'hcum/user/form.html?dept_id='+H$('&dept_id',this),'.user-form-tab']"/>
+        <param name="openUrls[]" value="['.modify', 'hcum/user/form.html?id={ID}','.user-form-tab']"/>
         <param name="sendUrls[]" value="['.remove', 'hcum/User/Remove.do']"/>
         <param name="idKey" value="id"/>
     </object>
@@ -38,4 +45,8 @@
         </table>
     </div>
     <div class="page-box"></div>
+</div>
+
+<div></div>
+<div></div>
 </div>
