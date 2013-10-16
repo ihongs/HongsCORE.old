@@ -5,8 +5,9 @@ HongsCORE(Javascript)
 修改: 2013/05/25
 依赖:
     jquery.js,
-    jquery.tools.js (Tab, Tooltip, Overlay, Validator, Dateinput, Expose)
-    bootstrap.js    (Tab, Tooltip, Modal)
+    jquery.tools.js (tabs, tooltip, overlay, validator, dateinput, expose)
+    bootstrap.css   (.btn, .alert, .modal, .tooltip, .popover,
+                     .pagination, .dropdown, .arrow, .caret)
 
 自定义属性:
 data-fn HsForm|HsList中为field name
@@ -45,6 +46,10 @@ data-open-in 点击后在指定区域打开
 .tree-hand
 .tree-name
 .tree-cnum
+
+全局通知:
+.note-box
+#note-box
 */
 
 if (typeof(HsCONF) === "undefined") HsCONF = {};
@@ -56,11 +61,13 @@ if (typeof(HsAUTH) === "undefined") HsAUTH = {};
  * 说明(首参数以下列字符开头的意义):
  * .    获取配置
  * :    获取语言
- * /    补全路径
  * ?    检查权限
- * %    获取树纵深值, 第二个参数指定树
+ * /    补全路径
  * &    获取单个参数值, 第二个参数指定参数容器
  * @    获取多个参数值, 第二个参数指定参数容器
+ * $    获取/设置回话存储, 第二个参数存在为设置, 第二个参数为null则删除
+ * %    获取/设置本地存储, 第二个参数存在为设置, 第二个参数为null则删除
+ * @return {Mixed} 根据开头标识返回不同类型的数据
  */
 function H$() {
     var a = arguments[0];
@@ -71,17 +78,11 @@ function H$() {
     case ':': return hsGetLang.apply(this, arguments);
     case '?': return hsChkUri .apply(this, arguments);
     case '/': return hsFixUri .apply(this, arguments);
-    case '%':
-        if (typeof window.locaStorage == "undefined")
-            throw("H$: localStorage does not support!");
-        if (arguments.length == 1)
-            return window.localStorage[arguments[0]];
-        else
-            window.localStorage[arguments[0]] = arguments[1];
     case '&':
     case '@':
-        if (arguments.length == 1)
+        if (arguments.length == 1) {
             arguments[1] = location.href;
+        }
         if (typeof arguments[1] != "string") {
             if (jQuery.isArray(arguments[1]) == false) {
                 var c = jQuery(arguments[1]).closest(".load-box");
@@ -101,6 +102,21 @@ function H$() {
                 return hsGetParams(arguments[1], arguments[0]);
             else
                 return hsGetParam (arguments[1], arguments[0]);
+        }
+    case '$':
+    case '%':
+        var c = b == '$' ? window.sessionStorage : window.localStorage;
+        if (typeof c=="undefined") {
+            throw("H$: "+( b=='$'?'session':'local' )+"Storage does not support!");
+        }
+        if (arguments.length == 1) {
+            return c.getItem(arguments[0]);
+        }
+        else if (  arguments[1]  ) {
+                c.setItem(arguments[0], arguments[1]);
+        }
+        else {
+                c.removeItem(arguments[0]);
         }
     default: throw("H$: Wrong flag '"+b+"'");
     }
@@ -841,7 +857,7 @@ function hsPrsDate(text, format) {
  * @return {jQuery} 消息框对象
  */
 function hsNote(msg, cls) {
-    var div = jQuery('<div class="note-msg alert"></div>');
+    var div = jQuery('<div class="note-box alert"></div>');
     var box = jQuery("#note-box").show();
     if (cls) div.addClass(cls);
     div.appendTo(box).append(msg).hide()
@@ -856,6 +872,7 @@ function hsNote(msg, cls) {
     }, 5000);
     return div;
 }
+
 /**
  * 打开浮窗
  * @param {String} url 浮窗内容URL
@@ -864,7 +881,7 @@ function hsNote(msg, cls) {
  * @return {jQuery} 浮窗对象
  */
 function hsOpen(url, data, callback) {
-    var div = jQuery('<div class="overlay"><div class="close">&times;</div><div class="open-box"></div></div>');
+    var div = jQuery('<div class="overlay modal-content"><button class="close">&times;</button><div class="open-box"></div></div>');
     var box = div.find('.open-box');
     div.appendTo(document.body)
        .overlay({
@@ -1596,7 +1613,7 @@ HsList.prototype = {
     },
     fill__check : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
-        jQuery('<input type="checkbox" class="check-one"/>')
+        jQuery('<input type="checkbox" class="checkbox check-one"/>')
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
@@ -1604,7 +1621,7 @@ HsList.prototype = {
     },
     fill__radio : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
-        jQuery('<input type="radio" class="check-one"/>')
+        jQuery('<input type="radio" class="radio check-one"/>')
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
@@ -1627,7 +1644,9 @@ HsList.prototype = {
                     this.getTip().data("trigger", this.getTrigger());
                 }
             });
-            jQuery('<button class="admin-btn">'+hsGetLang('list.admin.col')+'</button>')
+            jQuery('<button class="btn btn-xs btn-default dropdown-toggle">'
+                 + hsGetLang('list.admin.col')
+                 + '<span class="caret"></span></button>')
                 .attr("title", th.text())
                 .tooltip (tp)
                 .appendTo(td);
