@@ -38,8 +38,8 @@ data-open-in 点击后在指定区域打开
 .for-checks
 
 定位类说明:
-.form-checks
-.form-radios
+#note-box 全局即时通知盒子
+.note-box
 .list-box
 .page-box
 .tool-box
@@ -50,10 +50,6 @@ data-open-in 点击后在指定区域打开
 .tree-hand
 .tree-name
 .tree-cnum
-
-全局通知:
-.note-box
-#note-box
 */
 
 if (typeof(HsCONF) === "undefined") HsCONF = {};
