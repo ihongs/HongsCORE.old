@@ -8,6 +8,7 @@ HongsCORE(Javascript)
     jquery.tools.js (tabs, tooltip, overlay, validator, dateinput, expose)
     bootstrap.css   (.btn, .alert, .tooltip, .popover, .pagination,
                      .dropdown, .arrow, .caret, .close, .active,
+                     .fade, .in, .[position], .has-error,
                      // 其他场合使用:
                      .container, .row, .col, .nav, .navbar,
                      .table, .form, .input, .label, .badge)
@@ -2344,7 +2345,7 @@ $.fn.load = function(url, data, complate) {
         });
         return ret;
     });
-    // 让错误消息紧贴输入框
+    // 自定义错误消息, 让错误消息紧贴输入框
     $.tools.validator.addEffect("default", function(errs) {
         var conf = this.getConf();
         $.each(errs, function(i, err) {
@@ -2377,14 +2378,14 @@ $.fn.load = function(url, data, complate) {
 
             msg.css({visibility: 'visible', position: 'absolute', top: p1.top, left: p1.left}).show();
         });
-    }, function(inputs) {
+    }, function(ipts) {
         var conf = this.getConf();
-        inputs.removeClass(conf.errorClass).each(function() {
+        ipts.each(function( ) {
             var msg = $(this).data ( "msg.el" );
             if (msg) {
                 msg.css({visibility: "hidden"});
             }
-        });
+        }).closest(".form-group").removeClass(conf.errorClass);
     });
 
     // 改变tab和class使其能使用bootstrap的样式
