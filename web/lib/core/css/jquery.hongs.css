@@ -54,7 +54,7 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
 }
 .select-list {
 }
-.option-item {
+.select-item {
     float: left;
 }
 
@@ -86,12 +86,12 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
 }
 */
 
-/*
 .list-box ._check,
 .list-box ._radio,
 .list-box ._admin {
     width: 1.5em;
 }
+.list-box ._htime,
 .list-box .datetime {
     width: 12em;
 }
@@ -99,7 +99,6 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
 .list-box .time {
     width: 6em;
 }
-*/
 
 /** 树 **/
 
@@ -192,10 +191,13 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
 }
 
 form input.form-control {
-    max-width: 25em;
+    max-width: 300px;
+}
+form select.form-control {
+    max-width: 302px;
 }
 form textarea.form-control {
-    min-height: 5em;
+    min-height: 80px;
 }
 
 /** bootstrap 补充 **/
