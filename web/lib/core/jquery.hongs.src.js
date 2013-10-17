@@ -2,7 +2,7 @@
 HongsCORE(Javascript)
 作者: 黄弘 <kevin.hongs@gmail.com>
 创建: 2013/01/01
-修改: 2013/05/25
+修改: 2013/10/16 23:55:30
 依赖:
     jquery.js,
     jquery.tools.js (tabs, overlay, tooltip, validator, dateinput, expose)
@@ -39,7 +39,7 @@ data-open-in 点击后在指定区域打开
 
 定位类说明:
 #note-box 全局即时通知盒子
-.note-box
+.note-box 消息盒子(在#note-box下)
 .list-box
 .page-box
 .tool-box
@@ -550,8 +550,6 @@ function hsFixUri   (uri) {
 
 /**
  * 格式化数字
- *
- * @author HuangHong
  * @param {Number} num
  * @param {Number} len 总长度(不含小数点)
  * @param {Number} dec 小数位
@@ -637,8 +635,6 @@ function hsFmtNum(num, len, dec, sep, dot) {
 
 /**
  * 格式化日期
- *
- * @author HuangHong
  * @param {Date} date
  * @param {String} format
  * @return {String}
@@ -745,8 +741,6 @@ function hsFmtDate(date, format) {
 
 /**
  * 解析日期
- *
- * @author HuangHong
  * @param {String} text
  * @param {String} format
  * @return {Date}
@@ -2274,6 +2268,13 @@ $.fn.load = function(url, data, complate) {
     });
     });
 
+    // 改变tab和class使其能使用bootstrap的样式
+    $.tools.tabs.conf.tabs = "li";
+    $.tools.tabs.conf.current = "active";
+    $.tools.tooltip.conf.tipClass = "popover";
+    $.tools.validator.conf.errorClass = "has-error";
+    $.tools.validator.conf.messageClass = "tooltip fade right in";
+
     // 设置jquery tools覆盖层
     $.tools.overlay.conf.top = "center",
     $.tools.overlay.conf.left = "center",
@@ -2283,13 +2284,9 @@ $.fn.load = function(url, data, complate) {
     $.tools.overlay.conf.closeOnClick = false,
     $.tools.overlay.conf.mask = {
         color       : "#000",
-        opacity     : 0.8,
+        opacity     : 0.5,
         loadSpeed   : 0
     };
-
-    // 改变class使其能使用bootstrap的样式
-    $.tools.tabs.conf.tabs = "li";
-    $.tools.tabs.conf.current = "active";
 
     // 设置jquery tools表单校验
     $.tools.validator.conf.formEvent = null;
@@ -2390,13 +2387,6 @@ $.fn.load = function(url, data, complate) {
             }
         }).closest(".form-group").removeClass(conf.errorClass);
     });
-
-    // 改变tab和class使其能使用bootstrap的样式
-    $.tools.tabs.conf.tabs = "li";
-    $.tools.tabs.conf.current = "active";
-    $.tools.tooltip.conf.tipClass = "popover";
-    $.tools.validator.conf.errorClass = "has-error";
-    $.tools.validator.conf.messageClass = "tooltip fade right in";
 
     // /** 自定义语义属性/标签 **/
 
