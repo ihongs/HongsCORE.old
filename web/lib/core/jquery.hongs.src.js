@@ -1158,7 +1158,7 @@ HsForm.prototype = {
     saveInit : function(act) {
         var url  = this.formBox.attr("action" ) || act;
         var type = this.formBox.attr("method" );
-        var enct = this.formBox.attr("enctype");
+        var enc  = this.formBox.attr("enctype");
         var data = this.formBox;
         var that = this;
 
@@ -1167,7 +1167,7 @@ HsForm.prototype = {
             return that.formBox.data("validator").checkValidity();
         });
 
-        if (enct ===  "multipart/form-data") {
+        if ( enc === "multipart/form-data" ) {
             if (data.attr("target") == null) {
                 var name  = "_" + Math.floor(Math.random() * 1000000000);
                 var style = "width:0; height:0; border:0; margin:0; padding:0; overflow:hidden; visibility:hidden;";
