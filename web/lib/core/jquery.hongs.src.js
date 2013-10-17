@@ -8,7 +8,7 @@ HongsCORE(Javascript)
     jquery.tools.js (tabs, tooltip, overlay, validator, dateinput, expose)
     bootstrap.css   (.btn, .alert, .tooltip, .popover, .pagination,
                      .dropdown, .arrow, .caret, .close, .active,
-                     .fade, .in, .[position], .has-error,
+                     .fade, .[in|out], .[position], .has-error,
                      // 其他场合使用:
                      .container, .row, .col, .nav, .navbar,
                      .table, .form, .input, .label, .badge)
