@@ -52,9 +52,9 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
     min-width: auto;
     max-width: auto;
 }
-.select-list {
+.select-box {
 }
-.select-item {
+.option-box {
     float: left;
 }
 
