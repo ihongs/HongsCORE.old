@@ -5,7 +5,7 @@ HongsCORE(Javascript)
 修改: 2013/05/25
 依赖:
     jquery.js,
-    jquery.tools.js (tabs, tooltip, overlay, validator, dateinput, expose)
+    jquery.tools.js (tabs, overlay, tooltip, validator, dateinput, expose)
     bootstrap.css   (.btn, .alert, .tooltip, .popover, .pagination,
                      .dropdown, .arrow, .caret, .close, .active,
                      .fade, .[in|out], .[position], .has-error,
