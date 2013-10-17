@@ -1169,7 +1169,7 @@ HsForm.prototype = {
 
         if ( enc === "multipart/form-data" ) {
             if (data.attr("target") == null) {
-                var name  = "_" + Math.floor(Math.random() * 1000000000);
+                var name  = "_" + ( (new Date()).getTime() % 86400000 ) + "_" + Math.floor( Math.random( ) * 1000 );
                 var style = "width:0; height:0; border:0; margin:0; padding:0; overflow:hidden; visibility:hidden;";
                 var frame = jQuery('<iframe src="about:blank" name="' + name + '" style="' + style + '"></iframe>');
                 data.attr("target", name).before(frame);
