@@ -2408,9 +2408,9 @@ $.fn.load = function(url, data, complate) {
             // 编辑标题替换
             if (cnf.title) {
                 if (H$("&id", box)) {
-                    cnf.title = hsGetLang(cnf.title, { 'editTitle': cnf.update | hsGetLang("edit.title.update") });
+                    cnf.title = hsGetLang(cnf.title, {'editTitle': cnf.update || hsGetLang("edit.title.update")});
                 } else {
-                    cnf.title = hsGetLang(cnf.title, { 'editTitle': cnf.create | hsGetLang("edit.title.create") });
+                    cnf.title = hsGetLang(cnf.title, {'editTitle': cnf.create || hsGetLang("edit.title.create")});
                 }
                 if (h.length) h.text(cnf.title);
             }
