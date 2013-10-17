@@ -2162,17 +2162,27 @@ function _HsReadOpts() {
     return obj;
 }
 
+/**
+ * HongsCORE日期格式转jquery.tools日期格式
+ * @param {String} format
+ * @return {String)
+ */
 function _hs2jtDF(format) {
   return format.replace(/EE/g, "dddd")
                .replace(/E/g , "ddd" )
                .replace(/M/g , "m"   );
 }
-
+/**
+ * jquery.tools日期格式转HongsCORE日期格式
+ * @param {String} format
+ * @return {String)
+ */
 function _jt2hsDF(format) {
   return format.replace(/dddd/g, "EE")
                .replace(/ddd/g , "E" )
                .replace(/m/g   , "M" );
 }
+
 /** jQuery插件整合 **/
 
 // 常用jQuery扩展
