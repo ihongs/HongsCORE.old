@@ -23,7 +23,7 @@ label, input, select, button, textarea {
 }
 */
 
-/** 常用样式缩写 **/
+/** 缩写 **/
 
 .cb {clear: both;}
 .fl {float: left;}
@@ -33,8 +33,6 @@ label, input, select, button, textarea {
 .tc {text-align: center;}
 .dn {display: none;}
 .vh {visibility: hidden; overflow: hidden; width: 0; height: 0; magin: 0; padding: 0;}
-
-.nav > li.dn {display: none;}
 
 /** 消息 **/
 
@@ -54,18 +52,10 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
     min-width: auto;
     max-width: auto;
 }
-.select-box {
+.select-list {
 }
-.option-box {
+.option-item {
     float: left;
-}
-.button-box {
-    border-top: 1px solid #eee;
-    margin-top: 3px;
-    padding-top: 3px;
-}
-.overlay .button-box {
-    margin-bottom: 0px;
 }
 
 /** 列表 **/
@@ -152,7 +142,44 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
     display: none;
 }
 
-/** bootstrap 补充 **/
+/** jquery.tools 设置 **/
+
+.overlay {
+    background-color: #FFFFFF;
+    display: none;
+    padding: 15px;
+    z-index: 9999;
+    min-width: 50em;
+}
+.overlay .close {
+    top: -2px;
+    right: 0px;
+    opacity: 0.6;
+}
+.overlay .close:hover,
+.overlay .close:focus {
+    opacity: 0.9;
+}
+.overlay .open-box {
+    padding: 15px;
+}
+.overlay h1,
+.overlay h2,
+.overlay h3 {
+    margin-top: 0;
+}
+
+/** bootstrap 调整 **/
+
+.nav > li.dn {
+    display: none;
+}
+
+.nav-tabs {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: 15px;
+}
 
 .list-box .table {
     margin: 0;
@@ -169,4 +196,11 @@ form input.form-control {
 }
 form textarea.form-control {
     min-height: 5em;
+}
+
+/** bootstrap 补充 **/
+
+.form-panel {
+    border-top: 1px solid #eee;
+    padding-top: 3px;
 }
