@@ -12,17 +12,17 @@
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <input type="hidden" name="pid"/>
-        <div>
+        <div class="form-group">
             <label>名称</label>
-            <input type="text" name="name"/>
+            <input type="text" name="name" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label>备注</label>
+            <textarea name="note" class="form-control"></textarea>
         </div>
         <div>
-            <label>备注</label>
-            <textarea name="note"></textarea>
-        </div>
-        <div class="button-box">
-            <button type="submit" class="ensure">提交</button>
-            <a href="javascript:;" class="cancel">取消</a>
+            <button type="submit" class="ensure btn btn-primary">提交</button>
+            <button type="button" class="cancel btn btn-link">取消</butotn>
         </div>
     </form>
 </div>

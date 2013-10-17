@@ -8,9 +8,9 @@
 <div id="hcum-user-list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcum/User/List.do?dept_id='+H$('&dept_id',this))"/>
-        <param name="openUrls[]" value="['.create', 'hcum/user/form.html?dept_id='+H$('&dept_id',this),'.user-form-tab']"/>
-        <param name="openUrls[]" value="['.modify', 'hcum/user/form.html?id={ID}','.user-form-tab']"/>
-        <param name="sendUrls[]" value="['.remove', 'hcum/User/Remove.do']"/>
+        <param name="openUrls[]" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this)]"/>
+        <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','.user-form-tab']"/>
+        <param name="sendUrls[]" value="['.remove','hcum/User/Remove.do']"/>
         <param name="idKey" value="id"/>
     </object>
     <div>
@@ -37,8 +37,8 @@
                     <th data-fn="username">邮箱</th>
                     <th data-fn="name">昵称</th>
                     <th data-fn="note">备注</th>
-                    <th data-fn="mtime" data-ft="htime" class="datetime">修改时间</th>
-                    <th data-fn="ctime" data-ft="htime" class="datetime">创建时间</th>
+                    <th data-fn="mtime" data-ft="_htime" class="_htime">修改时间</th>
+                    <th data-fn="ctime" data-ft="_htime" class="_htime">创建时间</th>
                 </tr>
             </thead>
             <tbody></tbody>

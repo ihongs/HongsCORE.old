@@ -2,26 +2,21 @@
  * HongsCORE 公共样式
  */
 
+html, body, label, input, select, button, textarea {
+    color: #666;
+    font-size: 14px;
+}
+html, body, label, input, select, button, textarea,
+h1, h2, h3, h4, h5, h6,.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'Microsoft YaHei', SimSun, Arial, sans-serif;
+}
+pre, code {
+    font-family: SimSun, Monaco, Consolas,  'Courier New', monospace;
+}
+
 object.config {
     display: none;
 }
-
-/*
-label, input, select, textarea {
-    margin: 2px;
-    padding: 2px 2px;
-}
-button, .button,.submit, .reset,.image {
-    margin: 2px;
-    padding: 2px 6px;
-}
-label, input, select, button, textarea {
-    vertical-align: middle;
-}
-[disabled], .disabled {
-    color: #bbb;
-}
-*/
 
 /** 缩写 **/
 
@@ -127,7 +122,7 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
 
 .tree-hand {
     width: 16px;
-    height: 20px;
+    height: 22px;
     background-image: url(../img/tree-hand.gif);
 }
 .tree-fold>table .tree-hand {
@@ -148,11 +143,10 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
     display: none;
     padding: 15px;
     z-index: 9999;
-    min-width: 50em;
+    min-width: 600px;
 }
 .overlay .close {
-    top: -2px;
-    right: 0px;
+    right: -2px;
     opacity: 0.6;
 }
 .overlay .close:hover,
@@ -160,7 +154,7 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
     opacity: 0.9;
 }
 .overlay .open-box {
-    padding: 15px;
+    margin: 15px;
 }
 .overlay h1,
 .overlay h2,
@@ -173,36 +167,35 @@ form input.hidden, form input.checkbox, form input.radio, form input.file {
 .nav > li.dn {
     display: none;
 }
-
 .nav-tabs {
     padding-left: 15px;
     padding-right: 15px;
     margin-bottom: 15px;
 }
 
+.close {
+    margin-top: -4px;
+}
+
+#note-box .alert {
+    margin-bottom: 1px;
+}
 .list-box .table {
-    margin: 0;
+    margin: 1px 0px;
 }
 .page-box .pagination {
-    margin: 0;
+    margin: 1px 0px;
 }
 .find-box.input-group {
     width: 20em;
 }
 
 form input.form-control {
-    max-width: 300px;
+    max-width: 400px;
 }
 form select.form-control {
-    max-width: 302px;
+    max-width: 400px;
 }
 form textarea.form-control {
     min-height: 80px;
-}
-
-/** bootstrap 补充 **/
-
-.form-panel {
-    border-top: 1px solid #eee;
-    padding-top: 3px;
 }

@@ -122,9 +122,10 @@ function H$() {
 /**
  * 标准化返回对象
  * @param {Object,String} rst JSON对象/JSON文本或错误消息
+ * @param {Boolean} cry 为true时, 当有消息则发出通知或警告 
  * @return {Object}
  */
-function hsResponObj(rst) {
+function hsResponObj(rst, cry) {
     if (typeof rst.responseText != "undefined") {
         rst  = rst.responseText;
     }
@@ -165,13 +166,12 @@ function hsResponObj(rst) {
         if (typeof rst["__message__"] == "undefined") {
             rst["__message__"] =  "" ;
         }
-        if (rst["__message__"]) {
-        if (rst["__success__"]) {
-            hsNote(rst["__message__"], 'alert-success');
-        }
-        else {
-            alert (rst["__message__"]);
-        }
+        if (rst["__message__"] && cry) {
+            if (rst["__success__"]) {
+                hsNote(rst["__message__"], 'alert-success');
+            } else {
+                alert (rst["__message__"]);
+            }
         }
         if (typeof rst["__refresh__"] != "undefined") {
             window.location.href = rst["__refresh__"];
@@ -242,7 +242,7 @@ function hsGetSerias(arr, name) {
     return val;
 }
 /**
- * 设置多个序列值 
+ * 设置多个序列值
  * @param {Array} arr 使用 hsSerialArr 获得
  * @param {String} name
  * @param {Array} value
@@ -848,19 +848,24 @@ function hsPrsDate(text, format) {
  * @return {jQuery} 消息框对象
  */
 function hsNote(msg, cls) {
-    var div = jQuery('<div class="note-box alert"></div>');
+    var div = jQuery('<div class="note-box alert">'
+                    +'<button type="button" class="close">&times;</button>'
+                    +'</div>');
     var box = jQuery("#note-box").show();
+    div.appendTo(box).append(msg).hide();
+    div.find(".close").click( function() {
+        div.remove(  );
+    });
     if (cls) div.addClass(cls);
-    div.appendTo(box).append(msg).hide()
-       .slideDown(500);
+    div.slideDown(200);
     setTimeout( function() {
-      div.slideUp(500, function() {
+      div.slideUp(200, function() {
             div. remove ();
             if (box.children().length == 0) {
                 box.hide();
             }
       });
-    }, 5000);
+    }, 10000 );
     return div;
 }
 
@@ -1164,7 +1169,11 @@ HsForm.prototype = {
 
         this.formBox.attr(  "action", url  );
         this.formBox.on("submit", function() {
-            return that.formBox.data("validator").checkValidity();
+            if (that.formBox.data("validator").checkValidity()) {
+                that.formBox.trigger("beforeSave");
+                return true;
+            }
+            return false;
         });
 
         if ( enc === "multipart/form-data" ) {
@@ -1192,10 +1201,11 @@ HsForm.prototype = {
                 jQuery.ajax({
                     "url"       : url,
                     "data"      : hsSerialArr(data),
-                    "type"      : type?type: "POST",
+                    "type"      : type || "POST",
                     "dataType"  :"json",
                     "async"     : false,
                     "cache"     : false,
+                    "action"    : "save",
                     "context"   : that,
                     "success"   : that.saveBack
                 });
@@ -1203,7 +1213,7 @@ HsForm.prototype = {
         }
     },
     saveBack : function(rst) {
-        rst = hsResponObj(rst);
+        rst = hsResponObj(rst, !!this.formBox.attr("target"));
         if (typeof rst.__success__ != "undefined"
         &&         rst.__success__ ==  false     ) {
             if (typeof rst.errors  != "undefined") {
@@ -1407,10 +1417,13 @@ HsList.prototype = {
         jQuery.ajax({
             "url"       : this._url ,
             "data"      : this._data,
-            "type"      :"POST",
-            "dataType"  :"json",
+            "type"      : "POST",
+            "dataType"  : "json",
+            "action"    : "load",
+            "async"     : false,
+            "cache"     : false,
             "context"   : this,
-            "success"   : this.loadBack
+            "success"  : this.loadBack
         });
     },
     loadBack : function(rst) {
@@ -1526,6 +1539,9 @@ HsList.prototype = {
             "data"      : data,
             "type"      : "POST",
             "dataType"  : "json",
+            "action"    : "send",
+            "async"     : false,
+            "cache"     : false,
             "context"   : this,
             "success"   : function(rst) {
                 this.sendBack(btn, rst, dat2);
@@ -1852,9 +1868,12 @@ HsTree.prototype = {
             "url"       : this._url ,
             "data"      :{"pid":this._pid},
             "type"      : "POST",
-            "dataType"  : "json",
+            "dataType"  : "load",
+            "action"    : "send",
+            "async"     : false,
+            "cache"     : false,
             "context"   : this,
-            "success"   : function(rst) {
+            "success"  : function(rst) {
                 this.loadBack(rst, pid);
             }
         });
@@ -1974,6 +1993,9 @@ HsTree.prototype = {
             "data"      : data,
             "type"      : "POST",
             "dataType"  : "json",
+            "action"    : "send",
+            "async"     : false,
+            "cache"     : false,
             "context"   : this,
             "success"   : function(rst) {
                 this.sendBack(btn, rst, dat2);
@@ -2176,6 +2198,19 @@ function _jt2hsDF(format) {
                .replace(/ddd/g , "E" )
                .replace(/m/g   , "M" );
 }
+/**
+ * bootstrap方位转jquery.tools方位
+ * @param {String} pos
+ * @returns {String}
+ */
+function _bs2jtPos(pos) {
+    return {
+        top     : "top center",
+        left    : "center left",
+        right   : "center right",
+        bottom  : "bottom center"
+    }[pos];
+}
 
 /** jQuery插件整合 **/
 
@@ -2204,13 +2239,13 @@ $.ajax = function(url, settings) {
     }
     return _jqAjax(hsFixUri(url) , settings );
 };
-$.fn.load = function(url, data, complate) {
+$.fn.load = function(url, data, complete) {
     if ( jQuery.isFunction(  data  )) {
-        complate = data ;
+        complete = data ;
         data = undefined;
     }
-    if (!jQuery.isFunction(complate)) {
-        complate = function() {};
+    if (!jQuery.isFunction(complete)) {
+        complete = function() {};
     }
 
     // 解决重载区域后内部区域未关闭的问题
@@ -2222,10 +2257,10 @@ $.fn.load = function(url, data, complate) {
 
     this.data( "url" , url ).data( "data" , data );
     this.addClass("load-box").addClass("load-ing");
-    return _jqLoad.call(this, url,data, function() {
+    return _jqLoad.call(this, hsFixUri(url),data, function() {
         var that = jQuery(this);
         that.removeClass ( "load-ing" );
-        complate.apply(that, arguments);
+        complete.apply(that, arguments);
         HsReady .call (that);
     });
 };
@@ -2349,8 +2384,9 @@ $.fn.load = function(url, data, complate) {
     $.tools.validator.addEffect("default", function(errs) {
         var conf = this.getConf();
         $.each(errs, function(i, err) {
-            var inp = err.input.closest( ".form-group").addClass( conf.errorClass);
+            var inp = err.input;
             var msg = inp.data("msg.el");
+            inp.closest(".form-group").addClass(conf.errorClass);
             if (msg == null) {
                 msg = $(conf.message).addClass(conf.messageClass).insertAfter(inp);
                 inp.data("msg.el" , msg);
@@ -2427,7 +2463,7 @@ $.fn.load = function(url, data, complate) {
 
         /** jquery tools 语义属性解析 **/
 
-        $(this).find(".overlay-trigger").each(function() {
+        $(this).find("[data-toggle=overlay]").each(function() {
             var o = {}, n = $(this).next(".overlay");
             if ($(this).attr("rel")) {
                 o.target = $(this).attr("rel");
@@ -2442,15 +2478,37 @@ $.fn.load = function(url, data, complate) {
             };
             $(this).overlay(o);
         });
-        $(this).find(".tooltip-trigger").each(function() {
-            var o = {}, n = $(this).next(".tooltip");
+        $(this).find("[data-toggle=tooltip],[data-toggle=popover],[data-toggle=dropdown]").each(function() {
+            var o = {}, n = $(this).next(".tooltip,.popover,.dropdown-menu");
             if ($(this).attr("rel")) {
                 o.tip = $(this).attr("rel");
+                o.relative = false;
             }
             else if (n.length) {
                 o.tip = n;
+                o.relative = true;
             }
-            o.relative = true ;
+
+            // 与bootstrap配合使用
+            var p = $(this).attr("data-placement");
+            switch ($(this).attr("data-toggle")) {
+                case "tooltip":
+                    o.position = p ? _bs2jtPos(p) : "top center";
+                    o.tipClass = "tooltip";
+                    o.events = { def: "mouseover,mouseout" };
+                    break;
+                case "popover":
+                    o.position = p ? _bs2jtPos(p) : "top center";
+                    o.tipClass = "popover";
+                    o.events = { def: "click,mouseout" };
+                    break;
+                case "dropdown":
+                    o.position = p ? _bs2jtPos(p) : "bottom center";
+                    o.tipClass = "dropdown-menu";
+                    o.events = { def: "click,mouseout" };
+                    break;
+            }
+
             $(this).tooltip(o);
         });
         $(this).find(".tabs").each(function() {
@@ -2496,11 +2554,21 @@ $.fn.load = function(url, data, complate) {
         $(this).hsInit();
     });
     $(document )
-    .on("ajaxError", function( evt , xhr ) {
-        hsResponObj(xhr);  return  false;
+    .on("ajaxError", function(evt , xhr, cnf) {
+        hsResponObj(xhr, true);
+        if (cnf.context instanceof HsForm) {
+            cnf.context.formBox.trigger(cnf.action+"Error");
+        }   else
+        if (cnf.context instanceof HsList) {
+            cnf.context.listBox.trigger(cnf.action+"Error");
+        }   else
+        if (cnf.context instanceof HsTree) {
+            cnf.context.treeBox.trigger(cnf.action+"Error");
+        }
     })
     .on("hsReady", ".load-box", function() {
-        $(this).hsInit();  return  false;
+        $(this).hsInit();
+        return false;
     })
     /*
     .on("hsClose", ".load-box", function() {
@@ -2560,5 +2628,20 @@ $.fn.load = function(url, data, complate) {
         var tree = $(this).data("HsTree");
         if (tree.getSid()!=tree.getRid()) return;
         $(this).find(".for-select,.for-checks").prop("disabled", true);
+    })
+    .on("save", "form", function(evt) {
+        if (evt.isDefaultPrevented()) {
+            return;
+        }
+        var btn = $(this).find(":submit");
+        btn.prop("disabled", true );
+        btn.data("txt", btn.text());
+        btn.text(hsGetLang("form.saving"));
+    })
+    .on("saveBack saveError", "form", function() {
+        var btn = $(this).find(":submit");
+        var txt = btn.data("txt");
+        if (txt)  btn.text( txt );
+        btn.prop("disabled", false);
     });
 })(jQuery);
