@@ -46,45 +46,13 @@ label, input, select, button, textarea {
     left: 30%;
 }
 
-.btn-box {
-    margin-bottom: 0;
-}
-
 /** 表单 **/
 
-/*
-form label {
-    display: inline-block;
-    vertical-align: top;
-    text-align: right;
-    min-width: 120px;
-}
-form input {
-    min-width: 240px;
-}
-form select {
-    min-width: 246px;
-}
-@-moz-document url-prefix() {
-form select {
-    min-width: 246px;
-}}
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-form select {
-    min-width: 248px;
-}}
-form textarea {
-    min-width: 360px;
-    min-height: 5em;
-}
 form input.button, form input.submit, form input.reset, form input.image,
-form input.hidden, form input.checkbox,form input.radio, form input.file,
-.input-box label {
+form input.hidden, form input.checkbox, form input.radio, form input.file {
+    width: auto;
     min-width: auto;
-}
-.input-box {
-    display: inline-block;
-    vertical-align: top;
+    max-width: auto;
 }
 .select-box {
 }
@@ -93,26 +61,14 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 }
 .button-box {
     border-top: 1px solid #eee;
-    margin-top: 0.2em;
-    padding-top: 0.2em;
+    margin-top: 3px;
+    padding-top: 3px;
 }
-.button-box a {
-    margin: 0 6px;
-    vertical-align: middle;
+.overlay .button-box {
+    margin-bottom: 0px;
 }
-*/
 
 /** 列表 **/
-
-/*
-.tool-box input, .tool-box button, .tool-box select,
-.find-box input, .find-box button, .find-box select {
-    margin: 0;
-}
-.tool-bar {
-    margin-bottom: 0.25em;
-}
-*/
 
 /*
 .list-box table {
@@ -122,10 +78,12 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
     line-height: 2em;
     width: 100%;
 }
-.list-box td {
+.list-box td,
+.list-box th {
     padding: 0 0.25em;
 }
-.list-box thead td {
+.list-box thead td,
+.list-box thead th {
     font-weight: bold;
     background: #f8f8f8;
     border-bottom: 3px solid #eee;
@@ -137,6 +95,7 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
     background: #f8f8f8;
 }
 */
+
 /*
 .list-box ._check,
 .list-box ._radio,
@@ -149,10 +108,6 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
 .list-box .date,
 .list-box .time {
     width: 6em;
-}
-
-.page-curr {
-    color: #66f;
 }
 */
 
@@ -209,9 +164,6 @@ form input.hidden, form input.checkbox,form input.radio, form input.file,
     width: 20em;
 }
 
-form .popover-content {
-    color: #b94a48;
-}
 form input.form-control {
     max-width: 25em;
 }
