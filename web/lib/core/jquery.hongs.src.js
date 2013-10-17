@@ -100,8 +100,7 @@ function H$() {
                 return hsGetSerias(arguments[1], arguments[0]);
             else
                 return hsGetSeria (arguments[1], arguments[0]);
-        }
-        else {
+        } else {
             if (b == '@')
                 return hsGetParams(arguments[1], arguments[0]);
             else
@@ -115,11 +114,9 @@ function H$() {
         }
         if (arguments.length == 1) {
             return c.getItem(arguments[0]);
-        }
-        else if (  arguments[1]  ) {
+        } else if ( arguments[1] ) {
                 c.setItem(arguments[0], arguments[1]);
-        }
-        else {
+        } else {
                 c.removeItem(arguments[0]);
         }
     default: throw("H$: Wrong flag '"+b+"'");
