@@ -15,15 +15,17 @@
 .overlay .close:focus {
     opacity: 0.9;
 }
+.overlay .open-box {
+    padding: 15px;
+}
 .overlay h1,
 .overlay h2,
 .overlay h3 {
     margin-top: 0;
 }
-.overlay .open-box {
-    padding: 15px;
-}
 
-.panes {
-    padding-top: 15px;
+.tabs {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: 15px;
 }
