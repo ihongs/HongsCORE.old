@@ -2290,7 +2290,6 @@ $.fn.load = function(url, data, complate) {
     // 设置jquery tools表单校验
     $.tools.validator.conf.formEvent = null;
     $.tools.validator.conf.inputEvent = "change";
-    $.tools.validator.conf.messageClass = "tooltip fade right in";
     $.tools.validator.fn("[requires]", function(input, value) {
         switch (input.prop("tagName")) {
             case "BUTTON":
@@ -2349,7 +2348,7 @@ $.fn.load = function(url, data, complate) {
     $.tools.validator.addEffect("default", function(errs) {
         var conf = this.getConf();
         $.each(errs, function(i, err) {
-            var inp = err.input.addClass(conf.errorClass);
+            var inp = err.input.closest( ".form-group").addClass( conf.errorClass);
             var msg = inp.data("msg.el");
             if (msg == null) {
                 msg = $(conf.message).addClass(conf.messageClass).insertAfter(inp);
@@ -2388,9 +2387,12 @@ $.fn.load = function(url, data, complate) {
         });
     });
 
-    // 改变class使其能使用bootstrap的样式
+    // 改变tab和class使其能使用bootstrap的样式
     $.tools.tabs.conf.tabs = "li";
     $.tools.tabs.conf.current = "active";
+    $.tools.tooltip.conf.tipClass = "popover";
+    $.tools.validator.conf.errorClass = "has-error";
+    $.tools.validator.conf.messageClass = "tooltip fade right in";
 
     // /** 自定义语义属性/标签 **/
 
