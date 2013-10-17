@@ -2504,8 +2504,8 @@ $.fn.load = function(url, data, complate) {
     })
     /*
     .on("hsClose", ".load-box", function() {
-        // 解决表单"窗口"关闭后validator的错误消息仍然存在的问题
-        // 已经将错误消息位置修改改为相对input, 不需要下列代码了
+        // 解决表单浮窗关闭后validator的错误消息仍然存在的问题
+        // 已将错误消息位置改为相对于input, 就不需要以下代码了
         var obj = $(this).find(".HsForm").data("HsForm");
         if (obj) obj.formBox.data("validator").destroy();
     })
