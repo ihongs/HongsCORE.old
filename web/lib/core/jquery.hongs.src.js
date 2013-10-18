@@ -1446,25 +1446,36 @@ HsList.prototype = {
             if (     td.attr("data-ft")) {
                 fts [td.attr("data-fn")] = td.attr("data-ft");
             }
-            
+
             // 排序
             if (td.hasClass("sortable")) {
-                var ico = td.find("caret");
-                if (ico.size() == 0) {
-                    ico = $('<span class="caret"></span>').appendTo(td);
+                if (td.find(".caret").size() == 0) {
+                    td.append('<span class="caret"></span>');
+                    var that = this;
                     td.click(function( ) {
-                        var fn = $(this).attr("data-fn");
-                        if ($(this).hasClass("sort-a-z")) {
-                            $(this).removeClass("sort-a-z");
+                        var td = $(this);
+                        var fn = td.attr("data-fn");
+                        var sn = "";
+                        if (td.hasClass("sort-a-z")) {
+                            sn = "-"+fn;
                         } else
-                        if ($(this).hasClass("sort-z-a")) {
-                            $(this).removeClass("sort-z-a");
-                        } else {
-                            $(this).addClass("sort-a-z");
+                        if (td.hasClass("sort-z-a") == false) {
+                            sn = fn;
                         }
+                        hsSetSerial(that._data, that.sortKey, sn);
+                        that.load();
                     });
                 }
+
+                var sn = hsGetSerial(this._data, this.sortKey);
+                var fn = td.attr("data-fn");
                 td.removeClass("sort-a-z sort-z-a");
+                if (sn == fn) {
+                    td.addClass("sort-a-z");
+                } else
+                if (sn == '-'+fn) {
+                    td.addClass("sort-z-a");
+                }
             }
         }
         for (i = 0; i < list.length; i ++) {
