@@ -949,7 +949,7 @@ abstract public class AbstractBaseModel
 
   /**
    * 排序过滤(被getFilter调用)
-   * 根据请求的第二个参数来决定是逆序还是正序
+   * 如果字段有前缀“-”则该字段为逆序
    * @param value
    * @param columns
    * @param more
@@ -1066,6 +1066,13 @@ abstract public class AbstractBaseModel
     }
   }
 
+  /**
+   * 当前表字段过滤
+   * @param key
+   * @param val
+   * @param not
+   * @param more
+   */
   protected void mkeyFilter(String key, Object val, boolean not, FetchMore more)
   {
     if (val instanceof String)
@@ -1083,6 +1090,13 @@ abstract public class AbstractBaseModel
     }
   }
 
+  /**
+   * 关联表字段过滤
+   * @param key
+   * @param val
+   * @param not
+   * @param more
+   */
   protected void skeyFilter(String key, Object val, boolean not, FetchMore more)
   throws HongsException
   {
