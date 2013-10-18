@@ -204,7 +204,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     {
       if (onlyId)
       {
-        List path = this.getPathIds(pid);
+        List path = this.getParentIds(pid);
 
         Iterator it = list.iterator();
         while (it.hasNext())
@@ -214,12 +214,12 @@ public class AbstractTreeModel extends AbstractBaseModel
           List subPath = new ArrayList(path);
           info.put("path", subPath);
 
-          subPath.addAll(this.getPathIds(id, pid));
+          subPath.addAll(this.getParentIds(id, pid));
         }
       }
       else
       {
-        List path = this.getPath(pid);
+        List path = this.getParents(pid);
 
         Iterator it = list.iterator();
         while (it.hasNext())
@@ -229,7 +229,7 @@ public class AbstractTreeModel extends AbstractBaseModel
           List subPath = new ArrayList(path);
           info.put("path", subPath);
 
-          subPath.addAll(this.getPath(id, pid));
+          subPath.addAll(this.getParents(id, pid));
         }
       }
     }
@@ -490,6 +490,51 @@ public class AbstractTreeModel extends AbstractBaseModel
     return this.db.fetchOne(sql, id);
   }
 
+  public List<String> getParentIds(String id, String rootId)
+    throws HongsException
+  {
+    List<String> ids = new ArrayList<String>();
+    String pid = this.getParentId(id);
+    if (pid != null)
+    {
+      if (!pid.equals(rootId))
+      {
+        ids.addAll(this.getParentIds(pid, rootId));
+      }
+      ids.add(pid);
+    }
+    return ids;
+  }
+
+  public List<String> getParentIds(String id)
+    throws HongsException
+  {
+    return this.getParentIds(id, this.rootId);
+  }
+
+  public List<Map> getParents(String id, String rootId)
+    throws HongsException
+  {
+    List<Map> list = new ArrayList<Map>();
+    Map info = this.getParent(id);
+    if (info != null)
+    {
+      String pid = (String)info.get(this.pidKey);
+      if (pid.equals(rootId))
+      {
+        list.addAll(this.getParents(pid, rootId));
+      }
+      list.add(info);
+    }
+    return list;
+  }
+
+  public List<Map> getParents(String id)
+    throws HongsException
+  {
+    return this.getParents(id, this.rootId);
+  }
+
   public List<String> getChildIds(String id, boolean all)
     throws HongsException
   {
@@ -600,51 +645,6 @@ public class AbstractTreeModel extends AbstractBaseModel
     throws HongsException
   {
     return this.getChilds(id, false);
-  }
-
-  public List<String> getPathIds(String id, String rootId)
-    throws HongsException
-  {
-    List<String> ids = new ArrayList<String>();
-    String pid = this.getParentId(id);
-    if (pid != null)
-    {
-      if (!pid.equals(rootId))
-      {
-        ids.addAll(this.getPathIds(pid, rootId));
-      }
-      ids.add(pid);
-    }
-    return ids;
-  }
-
-  public List<String> getPathIds(String id)
-    throws HongsException
-  {
-    return this.getPathIds(id, this.rootId);
-  }
-
-  public List<Map> getPath(String id, String rootId)
-    throws HongsException
-  {
-    List<Map> list = new ArrayList<Map>();
-    Map info = this.getParent(id);
-    if (info != null)
-    {
-      String pid = (String)info.get(this.pidKey);
-      if (pid.equals(rootId))
-      {
-        list.addAll(this.getPath(pid, rootId));
-      }
-      list.add(info);
-    }
-    return list;
-  }
-
-  public List<Map> getPath(String id)
-    throws HongsException
-  {
-    return this.getPath(id, this.rootId);
   }
 
   /** 子数目相关 **/
