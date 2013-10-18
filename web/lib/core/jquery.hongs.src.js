@@ -1249,6 +1249,7 @@ function HsList(opts, context) {
     var sendUrls = hsGetValue(opts, "sendUrls");
     this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
     this.pageKey = hsGetValue(opts, "pageKey", "page");
+    this.sortKey = hsGetValue(opts, "sortKey", "sort");
 
     this.context = context;
     this.loadBox = loadBox;
@@ -1444,6 +1445,26 @@ HsList.prototype = {
             fns.push(td.attr("data-fn"));
             if (     td.attr("data-ft")) {
                 fts [td.attr("data-fn")] = td.attr("data-ft");
+            }
+            
+            // 排序
+            if (td.hasClass("sortable")) {
+                var ico = td.find("caret");
+                if (ico.size() == 0) {
+                    ico = $('<span class="caret"></span>').appendTo(td);
+                    td.click(function( ) {
+                        var fn = $(this).attr("data-fn");
+                        if ($(this).hasClass("sort-a-z")) {
+                            $(this).removeClass("sort-a-z");
+                        } else
+                        if ($(this).hasClass("sort-z-a")) {
+                            $(this).removeClass("sort-z-a");
+                        } else {
+                            $(this).addClass("sort-a-z");
+                        }
+                    });
+                }
+                td.removeClass("sort-a-z sort-z-a");
             }
         }
         for (i = 0; i < list.length; i ++) {
