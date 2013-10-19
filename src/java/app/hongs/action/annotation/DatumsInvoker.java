@@ -54,13 +54,13 @@ public class DatumsInvoker {
         Map data = helper.getResponseData( );
         if (data != null
         && (data.get("__success__") == null
-        ||  data.get("__success__") == true))
+        || (boolean) data.get("__success__") == true))
         {
             Tree.putAllDeep (data,map);
             helper.printJSON(  data  );
         }
         else {
-            helper.print(  rsp3.toString()  );
+            helper.print( rsp3.toString( ) );
         }
     }
 }

@@ -145,7 +145,7 @@ public class DatumsFilter
     Map data = helper.getResponseData( );
     if (data != null
     && (data.get("__success__") == null
-    ||  data.get("__success__") == true))
+    || (boolean) data.get("__success__") == true))
     {
       Tree.putAllDeep (data,dat);
       helper.printJSON(  data  );

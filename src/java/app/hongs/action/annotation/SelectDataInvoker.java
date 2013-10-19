@@ -27,7 +27,7 @@ public class SelectDataInvoker {
         helper.response = rsp2;
 
         Map data = helper.getResponseData();
-        if (data == null || data.get("__success__") == false)
+        if (data == null || (boolean)data.get("__success__") == false)
         {
             helper.print( rsp3.toString() );
             return;
