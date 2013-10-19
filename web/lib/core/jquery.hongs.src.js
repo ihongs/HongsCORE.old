@@ -122,10 +122,10 @@ function H$() {
 /**
  * 标准化返回对象
  * @param {Object,String} rst JSON对象/JSON文本或错误消息
- * @param {Boolean} cry 为true时, 当有消息则发出通知或警告 
+ * @param {Boolean} qut 静默, 不显示消息
  * @return {Object}
  */
-function hsResponObj(rst, cry) {
+function hsResponObj(rst, qut) {
     if (typeof rst.responseText != "undefined") {
         rst  = rst.responseText;
     }
@@ -166,8 +166,8 @@ function hsResponObj(rst, cry) {
         if (typeof rst["__message__"] == "undefined") {
             rst["__message__"] =  "" ;
         }
-        if (rst["__message__"] && cry) {
-            if (rst["__success__"]) {
+        if (rst["__message__"] && !qut) {
+            if (  rst["__success__"]  ) {
                 hsNote(rst["__message__"], 'alert-success');
             } else {
                 alert (rst["__message__"]);
@@ -1037,6 +1037,7 @@ HsForm.prototype = {
             "data"      : data,
             "type"      : "POST",
             "dataType"  : "json",
+            "action"    : "load",
             "async"     : false,
             "context"   : this,
             "success"   : this.loadBack
@@ -1202,10 +1203,10 @@ HsForm.prototype = {
                     "url"       : url,
                     "data"      : hsSerialArr(data),
                     "type"      : type || "POST",
-                    "dataType"  :"json",
+                    "dataType"  : "json",
+                    "action"    : "save",
                     "async"     : false,
                     "cache"     : false,
-                    "action"    : "save",
                     "context"   : that,
                     "success"   : that.saveBack
                 });
@@ -1424,7 +1425,7 @@ HsList.prototype = {
             "async"     : false,
             "cache"     : false,
             "context"   : this,
-            "success"  : this.loadBack
+            "success"   : this.loadBack
         });
     },
     loadBack : function(rst) {
@@ -1462,12 +1463,12 @@ HsList.prototype = {
                         if (td.hasClass("sort-z-a") == false) {
                             sn = fn;
                         }
-                        hsSetSerial(that._data, that.sortKey, sn);
+                        hsSetSeria(that._data, that.sortKey, sn);
                         that.load();
                     });
                 }
 
-                var sn = hsGetSerial(this._data, this.sortKey);
+                var sn = hsGetSeria(this._data, this.sortKey);
                 var fn = td.attr("data-fn");
                 td.removeClass("sort-a-z sort-z-a");
                 if (sn == fn) {
@@ -1900,12 +1901,12 @@ HsTree.prototype = {
             "url"       : this._url ,
             "data"      :{"pid":this._pid},
             "type"      : "POST",
-            "dataType"  : "load",
-            "action"    : "send",
+            "dataType"  : "json",
+            "action"    : "load",
             "async"     : false,
             "cache"     : false,
             "context"   : this,
-            "success"  : function(rst) {
+            "success"   : function(rst) {
                 this.loadBack(rst, pid);
             }
         });
@@ -1930,6 +1931,7 @@ HsTree.prototype = {
             lst.remove();
             return;
         }
+        nod.addClass("tree-open");
 
         if (lst.length == 0 ) {
             lst = jQuery('<div class="tree-list"></div>');
@@ -1959,7 +1961,7 @@ HsTree.prototype = {
     },
     fillInfo : function(info, nod) {
         var tab = jQuery('<table><tbody><tr>'
-            + '<td class="tree-hand"></td>'
+            + '<td class="tree-hand"><span class="caret"></span></td>'
             + '<td class="tree-name"></td>'
             + '<td class="tree-cnum"></td>'
             + '</tr></tbody></table>');
@@ -2091,9 +2093,14 @@ HsTree.prototype = {
     toggle   : function(id) {
         var nod = this.getNode(id);
             id  = this.getId (nod);
-        var lst = nod.find(".tree-list");
-        if (lst.length == 0) this.load(null, id );
+        var lst = nod.children(".tree-list");
         lst.toggle(); nod.trigger("toggle", [id]);
+        if (lst.length == 0) this.load(null, id );
+        else {
+            nod.removeClass("tree-open tree-fold");
+            lst.is(":visible") ? nod.addClass("tree-open")
+                               : nod.addClass("tree-fold");
+        }
     },
 
     getNode  : function(id) {
@@ -2385,7 +2392,13 @@ $.fn.load = function(url, data, complete) {
         return /^\d{4}\/\d{1,2}\/\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/.test(value);
     });
     $.tools.validator.fn("[data-validate]", function(input, value) {
-        return input.data(input.attr("data-validate"))(input, value);
+        try {
+            return input.data(input.attr("data-validate"))(input, value);
+        } catch (ex) {
+            if (window.console)
+                window.console.log("Call func error: "+ex, input, value);
+            return false;
+        }
     });
     $.tools.validator.fn("[data-repeat]", function(input, value) {
         return this.getInputs().filter("[name="+input.attr("data-repeat")+"]").val() == value;
@@ -2466,7 +2479,7 @@ $.fn.load = function(url, data, complete) {
             var box = $(this).closest(".load-box");
 
             // 自动提取标题
-            var h = box.children("h1, h2, h3");
+            var h = box.find(">.page-header h1,>h1");
             if (h.length) cnf.title = h.text();
 
             // 编辑标题替换
@@ -2587,7 +2600,7 @@ $.fn.load = function(url, data, complete) {
     });
     $(document )
     .on("ajaxError", function(evt , xhr, cnf) {
-        hsResponObj(xhr, true);
+        hsResponObj(xhr);
         if (cnf.context instanceof HsForm) {
             cnf.context.formBox.trigger(cnf.action+"Error");
         }   else

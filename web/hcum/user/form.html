@@ -2,7 +2,9 @@
     <param name="width" value="600px"/>
 </object>
 
-<h2 class="show-in-overlay show-in-load">${editTitle}用户</h2>
+<div class="page-header show-in-overlay show-in-load">
+    <h1>${editTitle}用户</h1>
+</div>
 
 <div id="hcum_user_form">
     <object class="config" name="hsForm" data="">
@@ -13,23 +15,23 @@
         <input type="hidden" name="id"/>
         <input type="hidden" name="a_hcum_user_dept.0.dept_id" data-pn="dept_id"/>
         <div class="form-group">
-            <label>邮箱</label>
-            <input type="email" name="username" class="form-control" required="required"/>
+            <label class="control-label">邮箱</label>
+            <input type="email" name="username" class="form-control" required="required" data-unique="hcum/User/Unique.do?id={id}"/>
         </div>
         <div class="form-group">
-            <label>口令</label>
+            <label class="control-label">口令</label>
             <input type="password" name="password" class="form-control" data-validate="validate"/>
         </div>
         <div class="form-group">
-            <label>重复口令</label>
+            <label class="control-label">重复口令</label>
             <input type="password" name="password2" class="form-control" data-repeat="password" data-message="请重复输入口令" placeholder="请重复输入口令"/>
         </div>
         <div class="form-group">
-            <label>昵称</label>
-            <input type="text" name="name" class="form-control" required="required"/>
+            <label class="control-label">昵称</label>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcum/User/Unique.do?id={id}"/>
         </div>
         <div class="form-group">
-            <label>备注</label>
+            <label class="control-label">备注</label>
             <textarea name="note" class="form-control"></textarea>
         </div>
         <div>
@@ -41,7 +43,7 @@
 
 <script type="text/javascript">
 (function() {
-    var context = $("#hcum_user_form");
+    var context = $("#hcum_user_form").removeAttr("id");
 
     $("[name=password]", context).data("validate", function(input, value) {
         if (!value && !$("[name=id]", context).val()) {

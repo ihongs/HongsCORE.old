@@ -68,9 +68,9 @@ public class User {
         helper.back(num, msg);
     }
 
-    public void actionExists(ActionHelper helper)
+    public void actionUnique(ActionHelper helper)
     throws HongsException {
-        boolean rst = model.exists(helper.getRequestData());
+        boolean rst = model.unique(helper.getRequestData());
         helper.back(rst);
     }
 
