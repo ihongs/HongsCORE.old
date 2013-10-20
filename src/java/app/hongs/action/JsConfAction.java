@@ -111,7 +111,7 @@ public class JsConfAction
       helper.printJSON( s );
     }
     else {
-      helper.printJS("if(!HsCONF)HsCONF={};$.extend(HsCONF,"+s+");");
+      helper.printJS("if(!window.HsCONF)window.HsCONF={};$.extend(window.HsCONF,"+s+");");
     }
   }
 

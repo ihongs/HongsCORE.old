@@ -43,10 +43,17 @@ object.config {
 
 /** 表单 **/
 
-.select-box {
+.check-box label,
+.radio-box label {
+    font-weight: normal;
+    width: 15em;
+    margin-right: 2px;
 }
+
 .option-box {
     float: left;
+    width: 15em;
+    margin-right: 2px;
 }
 
 /** 列表 **/

@@ -50,6 +50,8 @@ data-open-in 点击后在指定区域打开
 .tree-hand
 .tree-name
 .tree-cnum
+.check-box 复选区域
+.radio-box 单选区域
 */
 
 if (typeof(HsCONF) === "undefined") HsCONF = {};
@@ -2366,17 +2368,14 @@ $.fn.load = function(url, data, complete) {
     $.tools.validator.conf.formEvent = null;
     $.tools.validator.conf.inputEvent = "change";
     $.tools.validator.fn("[requires]", function(input, value) {
-        switch (input.prop("tagName")) {
-            case "BUTTON":
-                return !!input.prev().find(":hidden").length;
-                break;
-            case "SPAN":
-            case "DIV":
-                return !!input.find(":checked").length;
-                break;
-            default:
-                return !!value;
-                break;
+        if (input.prop("tagName") == "SLEECT") {
+            return !!value;
+        }
+        else if (input.hasClass("check-box") || input.hasClass("radio-box")) {
+            return !!input.find( ":checked").length;
+        }
+        else {
+            return !!input.find( ":hidden" ).length;
         }
     });
     $.tools.validator.fn("[minlength]", function(input, value) {
@@ -2587,7 +2586,7 @@ $.fn.load = function(url, data, complete) {
         }).remove();
         $(this).find( 'input' ).each( function(  ) {
             // 为所有的input加上type class, 方便设置样式, 兼容老浏览器
-            $(this).addClass($(this).attr("type"));
+            $(this).addClass("input-"+$(this).attr("type"));
         });
 
         return this;

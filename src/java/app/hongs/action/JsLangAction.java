@@ -115,7 +115,7 @@ public class JsLangAction
       helper.printJSON( s );
     }
     else {
-      helper.printJS("if(!HsLANG)HsLANG={};$.extend(HsLANG,"+s+");");
+      helper.printJS("if(!window.HsLANG)window.HsLANG={};$.extend(window.HsLANG,"+s+");");
     }
   }
 
