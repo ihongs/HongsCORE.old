@@ -2368,7 +2368,7 @@ $.fn.load = function(url, data, complete) {
     $.tools.validator.conf.formEvent = null;
     $.tools.validator.conf.inputEvent = "change";
     $.tools.validator.fn("[requires]", function(input, value) {
-        if (input.prop("tagName") == "SLEECT") {
+        if (input.prop("tagName") == "SELECT") {
             return !!value;
         }
         else if (input.hasClass("check-box") || input.hasClass("radio-box")) {
