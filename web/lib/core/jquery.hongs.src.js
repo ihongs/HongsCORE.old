@@ -844,29 +844,36 @@ function hsPrsDate(text, format) {
 /**
  * 通知
  * @param {String} msg 消息
- * @param {String} cls 样式类
+ * @param {String} cls 样式类, 默认为alert-info
+ * @param {Integer} sec 展示秒数, 默认为5秒
  * @return {jQuery} 消息框对象
  */
-function hsNote(msg, cls) {
-    var div = jQuery('<div class="note-box alert">'
+function hsNote(msg, cls, sec) {
+    if (! cls) cls = "alert-info";
+    if (! sec) sec = 5;
+
+    var div = jQuery('<div class="alert alert-dismissable">'
                     +'<button type="button" class="close">&times;</button>'
-                    +'</div>');
-    var box = jQuery("#note-box").show();
-    div.appendTo(box).append(msg).hide();
-    div.find(".close").click( function() {
-        div.remove(  );
-    });
-    if (cls) div.addClass(cls);
+                    +'<div class="note-box></div></div>')
+            .addClass(cls);
+    var btn = div.find("button");
+    var box = div.find(".note-box").append(msg);
+    var ctr =  jQuery ("#note-box").append(div).show();
+
     div.slideDown(200);
-    setTimeout( function() {
+    btn.click(function() {
       div.slideUp(200, function() {
-            div. remove ();
-            if (box.children().length == 0) {
-                box.hide();
-            }
+          div. remove ();
+          if (ctr.children().size() == 0) {
+              ctr.hide();
+          }
       });
-    }, 10000 );
-    return div;
+    });
+
+    setTimeout(function() {
+      btn.click( );
+    }, sec * 1000);
+    return box;
 }
 
 /**
