@@ -2555,6 +2555,8 @@ $.fn.load = function(url, data, complete) {
                     o.events = { def: "click,mouseout" };
                     break;
                 case "dropdown":
+                    if (! p && $(this).parent( ).hasClass("dropup"))
+                        p = "top"; // 如果父级为 dropup 则向上弹出
                     o.position = p ? _bs2jtPos(p) : "bottom center";
                     o.tipClass = "dropdown-menu";
                     o.events = { def: "click,mouseout" };
