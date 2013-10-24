@@ -2547,26 +2547,32 @@ $.fn.load = function(url, data, complete) {
                 case "tooltip":
                     o.position = p ? _bs2jtPos(p) : "top center";
                     o.tipClass = "tooltip";
-                    o.events = { def: "mouseover,mouseout" };
+                    o.events = {def: "click mouseover,mouseout"};
                     break;
                 case "popover":
                     o.position = p ? _bs2jtPos(p) : "top center";
                     o.tipClass = "popover";
-                    o.events = { def: "click,mouseout" };
+                    o.events = {def: "click,mouseout"};
                     break;
                 case "dropdown":
                     if (! p && $(this).parent( ).hasClass("dropup"))
                         p = "top"; // 如果父级为 dropup 则向上弹出
                     o.position = p ? _bs2jtPos(p) : "bottom center";
                     o.tipClass = "dropdown-menu";
-                    o.events = { def: "click,mouseout" };
+                    o.events = {def: "click,mouseout"};
                     break;
             }
 
             $(this).tooltip(o);
         });
-        $(this).find(".tabs").each(function() {
-            $(this).tabs($(this).next(".panes").children("div"));
+        $(this).find(".tabs,.nav-tabs,.nav-pills").each(function() {
+            var rel = $(this).attr( "rel" );
+            if (rel.size( ) == 0) {
+                rel = $(this).next(".panes,.nav-panes").children("div");
+            }
+            if (rel.size( ) != 0) {
+                $(this).tabs(rel);
+            }
         });
         $(this).find("[type=date]").dateinput();
 
