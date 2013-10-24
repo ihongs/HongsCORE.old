@@ -2479,7 +2479,7 @@ $.fn.load = function(url, data, complete) {
     // /** 自定义语义属性/标签 **/
 
     $.fn.hsInit = function(cnf) {
-        /** jquery tools 初始配置处理 **/
+        /** jquery tools, bootstrap 初始配置处理 **/
 
         if (cnf) {
             var v, o, c;
@@ -2510,13 +2510,24 @@ $.fn.load = function(url, data, complete) {
                 v = hsGetValue(cnf, "title");
                 if (v) $(box.data("curTab")).find("a").text(v);
             }
+            
+            // 直接返回, 有指定 cnf 的为使用 object.config 进行特定初始化
             return this;
         }
 
-        /** jquery tools 语义属性解析 **/
+        /** jquery tools, bootstrap 语义属性解析 **/
 
-        $(this).find("[data-toggle=overlay]").each(function() {
-            var o = {}, n = $(this).next(".overlay");
+        $(this).find(".tabs,.nav-tabs,.nav-pills").each(function() {
+            var rel = $(this).attr( "rel" );
+            if (rel.size( ) == 0) {
+                rel = $(this).next(".panes,.nav-panes").children("div");
+            }
+            if (rel.size( ) != 0) {
+                $(this).tabs(rel);
+            }
+        });
+        $(this).find("[data-toggle=overlay],[data-toggle=alert],[data-toggle=modal]").each(function() {
+            var o = {}, n = $(this).next(".overlay,.alert,.modal");
             if ($(this).attr("rel")) {
                 o.target = $(this).attr("rel");
             }
@@ -2541,7 +2552,7 @@ $.fn.load = function(url, data, complete) {
                 o.relative = true;
             }
 
-            // 与bootstrap配合使用
+            // 与 bootstrap 配合使用
             var p = $(this).attr("data-placement");
             switch ($(this).attr("data-toggle")) {
                 case "tooltip":
@@ -2565,16 +2576,9 @@ $.fn.load = function(url, data, complete) {
 
             $(this).tooltip(o);
         });
-        $(this).find(".tabs,.nav-tabs,.nav-pills").each(function() {
-            var rel = $(this).attr( "rel" );
-            if (rel.size( ) == 0) {
-                rel = $(this).next(".panes,.nav-panes").children("div");
-            }
-            if (rel.size( ) != 0) {
-                $(this).tabs(rel);
-            }
-        });
+
         $(this).find("[type=date]").dateinput();
+        $(this).find("[type=range]").rangeinput();
 
         /** 自定义语义属性/标签解析 **/
 
@@ -2600,9 +2604,9 @@ $.fn.load = function(url, data, complete) {
             // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
             return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
         }).remove();
-        $(this).find( 'input' ).each( function(  ) {
+        $(this).find('input').each(function() {
             // 为所有的input加上type class, 方便设置样式, 兼容老浏览器
-            $(this).addClass($(this).attr("type"));
+            $(this).addClass('input-'+$(this).attr("type"));
         });
 
         return this;
