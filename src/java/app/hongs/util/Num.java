@@ -123,7 +123,8 @@ public class Num
     if (h > 0) sb.append(h).append("H");
     if (m > 0) sb.append(m).append("M");
     if (s > 0) sb.append(s).append("S");
-    if (sb.length() < 1) sb.append("0S");
+    if (sb.length() < 1)
+        sb.append("0S" );
 
     return sb.toString().trim();
   }
@@ -147,8 +148,11 @@ public class Num
     if (g > 0) sb.append(g).append("G");
     if (m > 0) sb.append(m).append("M");
     if (k > 0) sb.append(k).append("K");
-    if (b > 0) sb.append(b).append("B");
-    if (sb.length() < 1) sb.append("0B");
+    if (b > 0) sb.append(b);
+    if (sb.length() < 1)
+        sb.append("0B" );
+    else
+        sb.append( "B" );
 
     return sb.toString().trim();
   }
