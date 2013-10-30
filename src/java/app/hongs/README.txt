@@ -32,7 +32,7 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
 
 [更新日志]
 
-[2013-11-20] 在样式上统一使用bootstrap(不采取其JS, JS仍然使用jquery.tools)
+[2013-10-20] 在样式上统一使用bootstrap(不采取其JS, JS仍然使用jquery.tools)
 [2013-03-08] 完成hongs-core-js的jquery-tools的迁移, 前端组件支撑由原来的jquery-ui
              改为jquery-tools
 [2012-04-26] 将app.hongs.util.Text里的数字操作部分拿出来放到app.hongs.util.Num里
