@@ -89,7 +89,12 @@ find    搜索关键词
 查找不匹配的行  -find=word1+word2, -find.name=word1+word2
 排序(-表示逆序) sort=-field1+field2, sort=sub_table.field
 
-注: "+" 在 URL 中为空格
+注: "+" 在 URL 中为空格; 框架未提供 >,>=,<,<= 等条件, 因这些需求并不多, 请自行
+  实现, 命名推荐使用 gt_,ge_,lt_,le_ 为字段前缀.
+  之所以不使用后缀(如field!=value更易懂), 是因为 field,find 均可以作为数组传递
+  (如field[]=value表示IN语句), 框架的解析器需要通过"."和"[]"来构建Map和List,
+  用前缀方便解析(不用特殊处理[]的逻辑), 也方便过滤时做判断, 且"-"在URL中不需要
+  转义.
 
 [数据模型命名规范]
 
@@ -108,6 +113,9 @@ find    搜索关键词
   mtime     修改时间, DATETIME或TIMESTAMP
   btime     开始时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
+
+注: 因字段名可以用于 URL 中字段过滤, 而部分参数已有特殊含义, 取名时请避免, 如:
+  page,rows,cols,sort,find
 
 <<KEEP IT SIMPLE, STUPID!>>
 
