@@ -34,7 +34,7 @@ public class Num
 
   /**
    * 十进制转其他进制
-   * 进制为arr的长度
+   * 进制为arr的长度, 左边不能是arr首位, 如36进制(数字加字母), 0是0, 36是10
    * @param num 待转数字
    * @param arr 转换序列
    * @return
@@ -58,7 +58,7 @@ public class Num
 
   /**
    * 十进制转其他进制
-   * 进制为arr的长度, 但最左边可以是arr首位, 如26个字母的进制, 0是A, 26是AA而非BA
+   * 进制为arr的长度, 左边可以是arr首位, 如26进制(字母), 0是A, 26是AA而非BA
    * @param num 待转数字
    * @param arr 转换序列
    * @return
