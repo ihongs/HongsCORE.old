@@ -43,12 +43,20 @@ node-[ID]       节点编号, 在.tree-node上
 
 [Attr]
 
-data-fn         用于Form和List中
-data-vk         用于Form中, 下同
-data-tk
-data-pn         用于List中, 下同
-data-pos
-data-off
+data-fn         HsForm和HsList中的field-name
+data-pn         HsForm中的param-name, HsList中的page-num
+data-vk         HsForm中的value-key
+data-tk         HsForm中的text-key
+data-ft         HsList中的field-type
+data-eval       执行JS, this指向当前节点
+data-load       在当前节点中加载, 属性值为url
+data-open       在当前节点中打开, 属性值为url
+data-load-in    在指定区域中加载, 属性值为selector, 由href指定url
+data-open-in    在指定区域中打开, 属性值为selector, 由href指定url
+data-repeat     重复输入, 属性值为input-name
+data-unique     限制唯一, 属性值为url, url中可用{input-name}指定其他表单项的值
+data-toggle     关联触发, 可以为: overlay,alert,modal,tooltip,overlay,dropdown
+data-placement  tooltip的相对位置, 参阅bootstrip的tooltip
 
 [Data]
 
