@@ -16,12 +16,10 @@
 close
 cancel
 ensure
-note-msg
 load-ing
 load-box
 open-box
-check-box       用于Form中, 下同
-radio-box
+note-box
 list-box        用于List中, 下同
 page-box
 check-one
