@@ -1647,22 +1647,9 @@ HsList.prototype = {
 
     // /** 填充函数 **/
 
-    fill__htime: function(td, v, n) {
-        var d1  =  new Date ();
-        var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
-        if (d1.getYear()  == d2.getYear()
-        &&  d1.getMonth() == d2.getMonth()
-        &&  d1.getDate()  == d2.getDate()) {
-            return hsGetLang("time.today", {
-            time : hsFmtDate(v, hsGetLang( "time.format" ))});
-        }
-        else {
-            return hsFmtDate(v, hsGetLang("datetime.format"));
-        }
-    },
     fill__check : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
-        jQuery('<input type="checkbox" class="checkbox check-one"/>')
+        jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
@@ -1670,37 +1657,29 @@ HsList.prototype = {
     },
     fill__radio : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
-        jQuery('<input type="radio" class="radio check-one"/>')
+        jQuery('<input type="radio" class="input-radio check-one"/>')
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
         return false;
     },
     fill__admin : function(td, v, n) {
-        var box = this.loadBox.find('.'+n+'-btn');
-        if (box.length) {
-            box.contents( ).clone( ).appendTo(td);
-        }
-            box = this.loadBox.find('.'+n+'-tip');
-        if (box.length) {
-            box.click(function() { jQuery(this).hide(); });
-            var th = this.listBox.find('thead [data-fn="'+n+'"]');
-            var tp = eval ("("+(box.attr("data-tp") || "{}")+")");
-            tp = jQuery.extend({}, {
-                "position":"center left", "offset":[0, 0]
-            }, tp, {
-                "tip":box, "onShow":function() {
-                    this.getTip().data("trigger", this.getTrigger());
-                }
-            });
-            jQuery('<button class="btn btn-xs btn-default dropdown-toggle">'
-                 + hsGetLang('list.admin.col')
-                 + '<span class="caret"></span></button>')
-                .attr("title", th.text())
-                .tooltip (tp)
-                .appendTo(td);
-        }
+        var th = this.listBox.find('thead [data-fn="'+n+'"]');
+        td.append(th.find(".vh").clone( ).removeClass("vh")).hsInit();
         return false;
+    },
+    fill__htime : function(td, v, n) {
+        var d1  =  new Date ();
+        var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
+        if (d1.getYear()  == d2.getYear()
+        &&  d1.getMonth() == d2.getMonth()
+        &&  d1.getDate()  == d2.getDate()) {
+            return hsGetLang("time.today", {
+              time : hsFmtDate(v, hsGetLang("time.format"))});
+        }
+        else {
+            return hsFmtDate(v, hsGetLang("datetime.format"));
+        }
     }
 };
 
