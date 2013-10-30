@@ -37,6 +37,7 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
              改为jquery-tools
 [2012-04-26] 将app.hongs.util.Text里的数字操作部分拿出来放到app.hongs.util.Num里
 [2011-09-25] 基本完成hongs-core-js的jquery重写实现, 大部分组件已可以使用
+             (不支持拖拽、树搜索)
 [2011-03-23] 新增UploadHelper上传助手类(使用apache的commons-fileupload)
 [2011-01-25] 树模型支持搜索逐个定位(Javascript)
 [2011-01-01] 表格列支持拖拽改变尺寸(Javascript)
