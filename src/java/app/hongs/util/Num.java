@@ -114,26 +114,24 @@ public class Num
     int n;
 
     n = (int) Math.floor(time / 86400000);
-    if (n > 0) {
-      time = time % 86400000;
+    if (n > 0) {  time = time % 86400000;
       sb.append(n).append("D");
     }
     n = (int) Math.floor(time / 3600000);
-    if (n > 0) {
-      time = time % 3600000;
+    if (n > 0) {  time = time % 3600000;
       sb.append(n).append("H");
     }
     n = (int) Math.floor(time / 60000);
-    if (n > 0) {
-      time = time % 60000;
+    if (n > 0) {  time = time % 60000;
       sb.append(n).append("M");
     }
     n = (int) Math.floor(time / 1000);
     if (n > 0) {
       sb.append(n).append("S");
     }
+
     if (sb.length() < 1) {
-      sb.append("0S");
+        sb.append( "0S");
     }
 
     return sb.toString().trim();
@@ -150,31 +148,28 @@ public class Num
     int n;
 
     n = (int) Math.floor(size / 1099511627776);
-    if (n > 0) {
-      size = size % 1099511627776;
+    if (n > 0) {  size = size % 1099511627776;
       sb.append(n).append("T");
     }
     n = (int) Math.floor(size / 1073741824);
-    if (n > 0) {
-      size = size % 1073741824;
+    if (n > 0) {  size = size % 1073741824;
       sb.append(n).append("G");
     }
     n = (int) Math.floor(size / 1048576);
-    if (n > 0) {
-      size = size % 1048576;
+    if (n > 0) {  size = size % 1048576;
       sb.append(n).append("M");
     }
     n = (int) Math.floor(size / 1024);
-    if (n > 0) {
-      size = size % 1024;
+    if (n > 0) {  size = size % 1024;
       sb.append(n).append("K");
     }
     n = (int) size;
     if (n > 0) {
       sb.append(n);
     }
+
     if (sb.length() < 1) {
-      sb.append("0");
+        sb.append( "0" );
     }
 
     return sb.toString().trim();
