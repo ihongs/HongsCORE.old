@@ -58,10 +58,11 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
     - lang          语言资源
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
-  - include         引用页面
-  - script          脚本库
-  - style           样式库
-  - util            工具库
+  - xxxx            项目模块页面
+  + lib             前端库(js,flash)
+    + core          前端核心库
+      - css         前端核心样式
+      - img         前端核心图片
   - var             变化文件(如上传)
 
 文件映射:
