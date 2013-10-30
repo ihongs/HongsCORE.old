@@ -134,7 +134,7 @@ public class Num
         sb.append( "0S");
     }
 
-    return sb.toString().trim();
+    return sb.toString();
   }
 
   /**
@@ -172,7 +172,7 @@ public class Num
         sb.append( "0" );
     }
 
-    return sb.toString().trim();
+    return sb.toString();
   }
 
 }
