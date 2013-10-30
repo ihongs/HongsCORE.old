@@ -7,6 +7,8 @@ package app.hongs.util;
 public class Num
 {
 
+  /** 进制 **/
+
   /**
    * 符号转换表
    * <pre>
@@ -29,8 +31,6 @@ public class Num
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
   };
-
-  /** 进制 **/
 
   /**
    * 十进制转其他进制
