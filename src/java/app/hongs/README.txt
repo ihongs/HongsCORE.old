@@ -64,30 +64,34 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
   - var             变化文件(如上传)
 
 文件映射:
-xxx/class.if        调用 app.xxx.shell.class.action
 xxx/Class/Method.do 调用 app.xxx.action.Class.actionMethod
+xxx/Class.api       调用 app.xxx.cmdlet.Class.action
 URL.de              判断是否能访问该页面
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
 
 [通用请求参数解释]
 
-id:   主键(单个)
-id[]: 主键(多个)
-pid:  上级id(树)
-page: 当前页码
-rows: 额定行数
-cols: 限定列名
-sort: 排序字段
-find: 查找的关键词
+id      主键(单个)
+id[]    主键(多个)
+pid     上级id(树)
+page    当前页码
+rows    额定行数
+cols[]  限定列名
+sort    排序字段
+find    搜索关键词
 
 [特定请求参数规则]
 
-表示字段等于:       field=value
-表示字段不等于:     -field=value
-查找匹配的行:       find=word1+word2
-查找不匹配的行:     -find=word1+word2
-排序(-表示逆序):    sort=-field1+field2
+字段等于        field=value
+字段不等于      field!=value
+字段大于或等于  field>=value
+字段小于或等于  field<=value
+查找匹配的行    find=word1+word2
+查找不匹配的行  find!=word1+word2
+排序(-表示逆序) sort=-field1+field2
+
+注: "+" 在 URL 中为空格
 
 [数据模型命名规范]
 
