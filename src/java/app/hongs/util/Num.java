@@ -106,53 +106,76 @@ public class Num
   /**
    * 友好的时间格式(精确到秒)
    * @param time 毫秒数
-   * @return
+   * @return 最大到天, 最小到秒
    */
   public static String humanTime(long time)
   {
-    int d = (int) Math.floor(time / 86400000);
-    time = time % 86400000;
-    int h = (int) Math.floor(time / 3600000);
-    time = time % 3600000;
-    int m = (int) Math.floor(time / 60000);
-    time = time % 60000;
-    int s = (int) Math.floor(time / 1000);
+    StringBuilder sb = new StringBuilder( );
+    int n;
 
-    StringBuilder sb = new StringBuilder();
-    if (d > 0) sb.append(d).append("D");
-    if (h > 0) sb.append(h).append("H");
-    if (m > 0) sb.append(m).append("M");
-    if (s > 0) sb.append(s).append("S");
-    if (sb.length() < 1)
-        sb.append("0S" );
+    n = (int) Math.floor(time / 86400000);
+    if (n > 0) {
+      time = time % 86400000;
+      sb.append(n).append("D");
+    }
+    n = (int) Math.floor(time / 3600000);
+    if (n > 0) {
+      time = time % 3600000;
+      sb.append(n).append("H");
+    }
+    n = (int) Math.floor(time / 60000);
+    if (n > 0) {
+      time = time % 60000;
+      sb.append(n).append("M");
+    }
+    n = (int) Math.floor(time / 1000);
+    if (n > 0) {
+      sb.append(n).append("S");
+    }
+    if (sb.length() < 1) {
+      sb.append("0S");
+    }
 
     return sb.toString().trim();
   }
 
   /**
    * 友好的容量格式
-   * @param size 字节数
-   * @return
+   * @param size 容量数
+   * @return 最大到T 注意: 不带单位, B或b等请自行补充
    */
   public static String humanSize(long size)
   {
-    int g = (int) Math.floor(size / 1073741824);
-    size = size % 1073741824;
-    int m = (int) Math.floor(size / 1048576);
-    size = size % 1048576;
-    int k = (int) Math.floor(size / 1024);
-    size = size % 1024;
-    int b = (int) size;
+    StringBuilder sb = new StringBuilder( );
+    int n;
 
-    StringBuilder sb = new StringBuilder();
-    if (g > 0) sb.append(g).append("G");
-    if (m > 0) sb.append(m).append("M");
-    if (k > 0) sb.append(k).append("K");
-    if (b > 0) sb.append(b);
-    if (sb.length() < 1)
-        sb.append("0B" );
-    else
-        sb.append( "B" );
+    n = (int) Math.floor(size / 1099511627776);
+    if (n > 0) {
+      size = size % 1099511627776;
+      sb.append(n).append("T");
+    }
+    n = (int) Math.floor(size / 1073741824);
+    if (n > 0) {
+      size = size % 1073741824;
+      sb.append(n).append("G");
+    }
+    n = (int) Math.floor(size / 1048576);
+    if (n > 0) {
+      size = size % 1048576;
+      sb.append(n).append("M");
+    }
+    n = (int) Math.floor(size / 1024);
+    if (n > 0) {
+      size = size % 1024;
+      sb.append(n).append("K");
+    }
+    n = (int) size;
+    if (n > 0) {
+      sb.append(n);
+    }
+    if (sb.length() < 1) {
+      sb.append("0");
+    }
 
     return sb.toString().trim();
   }
