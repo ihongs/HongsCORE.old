@@ -83,13 +83,11 @@ find    搜索关键词
 
 [特定请求参数规则]
 
-字段等于        field=value
-字段不等于      field!=value
-字段大于或等于  field>=value
-字段小于或等于  field<=value
-查找匹配的行    find=word1+word2
-查找不匹配的行  find!=word1+word2
-排序(-表示逆序) sort=-field1+field2
+字段等于        field=value, assoc_table.field=value
+字段不等于      -field=value, -assoc_table.field=value
+查找匹配的行    find=word1+word2, find.name=word1+word2
+查找不匹配的行  -find=word1+word2, -find.name=word1+word2
+排序(-表示逆序) sort=-field1+field2, sort=sub_table.field
 
 注: "+" 在 URL 中为空格
 
