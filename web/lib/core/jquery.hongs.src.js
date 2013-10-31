@@ -2455,7 +2455,7 @@ $.fn.load = function(url, data, complete) {
         }).closest(".form-group").removeClass(conf.errorClass);
     });
 
-    // /** 自定义语义属性/标签 **/
+    // /** 区域初始化, 语义标签 **/
 
     $.fn.hsInit = function(cnf) {
         /** jquery tools, bootstrap 初始配置处理 **/
@@ -2559,7 +2559,7 @@ $.fn.load = function(url, data, complete) {
         $(this).find("[type=date]").dateinput();
         $(this).find("[type=range]").rangeinput();
 
-        /** 自定义语义属性/标签解析 **/
+        /** 语义标签解析 **/
 
         $(this).find("div[data-eval]").each(function() {
             eval($(this).attr("data-eval"));
@@ -2590,25 +2590,13 @@ $.fn.load = function(url, data, complete) {
 
         return this;
     };
-
-    // /** 初始化 **/
-
     $(function() {
         $(this).hsInit();
     });
+
+    // /** 文档初始化, 全局事件 **/
+
     $(document )
-    .on("ajaxError", function(evt , xhr, cnf) {
-        hsResponObj(xhr);
-        if (cnf.context instanceof HsForm) {
-            cnf.context.formBox.trigger(cnf.action+"Error");
-        }   else
-        if (cnf.context instanceof HsList) {
-            cnf.context.listBox.trigger(cnf.action+"Error");
-        }   else
-        if (cnf.context instanceof HsTree) {
-            cnf.context.treeBox.trigger(cnf.action+"Error");
-        }
-    })
     .on("hsReady", ".load-box", function() {
         $(this).hsInit();
         return false;
@@ -2619,12 +2607,13 @@ $.fn.load = function(url, data, complete) {
         // 已将错误消息位置改为相对于input, 就不需要以下代码了
         var obj = $(this).find(".HsForm").data("HsForm");
         if (obj) obj.formBox.data("validator").destroy();
+        return false;
     })
     */
     .on("click", "[data-load-in]", function() {
         var s = $(this).attr("data-load-in");
         s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
-        s.load($(this).attr("href"));
+        s.load($( this ).attr("href"));
         return false;
     })
     .on("click", "[data-open-in]", function() {
@@ -2686,5 +2675,17 @@ $.fn.load = function(url, data, complete) {
         var txt = btn.data("txt");
         if (txt)  btn.text( txt );
         btn.prop("disabled", false);
+    })
+    .on("ajaxError", function(evt , xhr, cnf) {
+        hsResponObj(xhr);
+        if (cnf.context instanceof HsForm) {
+            cnf.context.formBox.trigger(cnf.action+"Error");
+        }   else
+        if (cnf.context instanceof HsList) {
+            cnf.context.listBox.trigger(cnf.action+"Error");
+        }   else
+        if (cnf.context instanceof HsTree) {
+            cnf.context.treeBox.trigger(cnf.action+"Error");
+        }
     });
 })(jQuery);
