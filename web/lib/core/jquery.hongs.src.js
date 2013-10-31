@@ -2683,11 +2683,11 @@ $.fn.load = function(url, data, complete) {
         btn.prop("disabled", false);
     })
     .on("ajaxError", function(evt, xhr, cnf) {
-        hsResponObj(xhr, cnf.quiet);
-        if (typeof cnf.action === "undefined") {
+        hsResponObj(xhr);
+        if (typeof cnf.action === "undefined" ) {
             return;
         }
-        if (typeof cnf.button !== "undefined") {
+        if (typeof cnf.button !== "undefined" ) {
             $(cnf.button).trigger(cnf.action+"Error");
         }
         else if (cnf.context instanceof HsForm) {
