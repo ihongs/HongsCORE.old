@@ -170,14 +170,14 @@ public class FetchPage
     if (more2.hasGroupBy( ))
     {
       sql    = "SELECT COUNT(*) AS __count__ FROM ("
-             + more2.getSQL( )+") AS __table__";
-      params = more2.getParams( );
+             + more2.getSQL()+") AS __table__";
+      params = more2.getParams();
     }
     else
     {
-      more2.setSelect(  "COUNT(*) AS __count__"  );
-      sql    = more2.getSQL(    );
-      params = more2.getParams( );
+      more2.setSelect("COUNT(*) AS __count__");
+      sql    = more2.getSQL();
+      params = more2.getParams();
     }
 
     // 计算总行数及总页数
