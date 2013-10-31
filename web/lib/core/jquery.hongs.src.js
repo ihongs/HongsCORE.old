@@ -1524,9 +1524,16 @@ HsList.prototype = {
     },
     fillPage : function(page) {
         switch (page.errno) {
+            case 2:
+                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
+                this.listBox.hide();
+                hsSetSerial(this._data, "page", page.total_pages);
+                this.load();
+                return;
             case 1:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
-                this.listBox.hide(); return;
+                this.listBox.hide();
+                return;
             default:
                 this.listBox.show();
         }
