@@ -2683,7 +2683,7 @@ $.fn.load = function(url, data, complete) {
         btn.prop("disabled", false);
     })
     .on("ajaxError", function(evt, xhr, cnf) {
-        hsResponObj(xhr,);
+        hsResponObj(xhr, cnf.quiet);
         if (typeof cnf.action === "undefined") {
             return;
         }
