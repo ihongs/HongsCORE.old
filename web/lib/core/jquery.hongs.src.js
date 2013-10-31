@@ -1214,8 +1214,10 @@ HsForm.prototype = {
                     "action"    : "save",
                     "async"     : false,
                     "cache"     : false,
+                    "global"    : false,
                     "context"   : that,
-                    "success"   : that.saveBack
+                    "complete"  : that.saveBack,
+                    "error"     : function() { return false; }
                 });
             });
         }
@@ -2671,7 +2673,7 @@ $.fn.load = function(url, data, complete) {
         btn.data("txt", btn.text());
         btn.text(hsGetLang("form.saving"));
     })
-    .on("saveBack saveFail", "form", function() {
+    .on("saveBack saveError", "form", function() {
         var btn = $(this).find(":submit");
         var txt = btn.data("txt");
         if (txt)  btn.text( txt );
