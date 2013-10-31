@@ -1046,6 +1046,7 @@ HsForm.prototype = {
             "dataType"  : "json",
             "action"    : "load",
             "async"     : false,
+            "cache"     : false,
             "context"   : this,
             "success"   : this.loadBack
         });
@@ -1583,6 +1584,7 @@ HsList.prototype = {
             "type"      : "POST",
             "dataType"  : "json",
             "action"    : "send",
+            "button"    : btn,
             "async"     : false,
             "cache"     : false,
             "context"   : this,
@@ -2017,6 +2019,7 @@ HsTree.prototype = {
             "type"      : "POST",
             "dataType"  : "json",
             "action"    : "send",
+            "button"    : btn,
             "async"     : false,
             "cache"     : false,
             "context"   : this,
@@ -2679,15 +2682,21 @@ $.fn.load = function(url, data, complete) {
         if (txt)  btn.text( txt );
         btn.prop("disabled", false);
     })
-    .on("ajaxError", function(evt , xhr, cnf) {
-        hsResponObj(xhr);
-        if (cnf.context instanceof HsForm) {
+    .on("ajaxError", function(evt, xhr, cnf) {
+        hsResponObj(xhr,);
+        if (typeof cnf.action === "undefined") {
+            return;
+        }
+        if (typeof cnf.button !== "undefined") {
+            $(cnf.button).trigger(cnf.action+"Error");
+        }
+        else if (cnf.context instanceof HsForm) {
             cnf.context.formBox.trigger(cnf.action+"Error");
-        }   else
-        if (cnf.context instanceof HsList) {
+        }
+        else if (cnf.context instanceof HsList) {
             cnf.context.listBox.trigger(cnf.action+"Error");
-        }   else
-        if (cnf.context instanceof HsTree) {
+        }
+        else if (cnf.context instanceof HsTree) {
             cnf.context.treeBox.trigger(cnf.action+"Error");
         }
     });
