@@ -11,20 +11,26 @@
 组件库. 以hs开头的为普通函数; 以Hs开头的为伪类函数, this指向调用的容器对象.
 依赖的jQueryTools组件: tabs, overlay, tooltip, validator
 
+[ID]
+
+note-box        全局消息
+node-[ID]       节点编号, 在.tree-node上
+
 [Class]
 
-close
-cancel
-ensure
+open            在浮窗中打开href对应的页
+close           关闭浮窗的图标按钮
+cancel          取消表单并关闭浮窗或区域的按钮
+ensure          提交表单的按钮
 load-ing
 load-box
 open-box
 note-box
-list-box        用于List中, 下同
+list-box        用于HsList中, 下同
 page-box
 check-one
 check-all
-tree-box        用于Tree中, 下同
+tree-box        用于HsTree中, 下同
 tree-list
 tree-node
 tree-root
@@ -35,11 +41,6 @@ tree-hand       节点开关图标
 tree-name       节点名称
 tree-cnum       节点子级数量
 node-[TP]       节点类型, 在.tree-node上
-
-[ID]
-
-note-box
-node-[ID]       节点编号, 在.tree-node上
 
 [Attr]
 
@@ -60,9 +61,9 @@ data-placement  tooltip的相对位置, 参阅bootstrip的tooltip
 
 [Data]
 
-url             用于Load中, 下同
+url             用于HsLoad中, 下同
 data
-baks            用于Open中, 下同
+baks            用于JsOpen中, 下同
 tabs
 oldTab
 curTab
@@ -77,15 +78,21 @@ HsReady:
     hsReady
 HsForm:
     loadBack    绑定在formBox上
+    loadError   绑定在formBox上, 加载错误触发, 参数同ajaxError
     saveBack    绑定在formBox上, 默认关闭表单
+    saveFail    绑定在formBox上, 提交失败触发
 HsList:
     loadBack    绑定在listBox上
+    loadError   绑定在listBox上, 加载错误触发, 参数同ajaxError
     sendBack    绑定在btn上, 默认刷新列表
+    sendError   绑定在btn上, 发送错误触发, 参数同ajaxError
     openBack    绑定在btn上
     saveBack    绑定在btn上, 默认刷新列表
 HsTree:
     loadBack    绑定在treeBox上
+    loadError   绑定在treeBox上, 加载错误触发, 参数同ajaxError
     sendBack    绑定在btn上, 默认刷新节点
+    sendError   绑定在btn上, 发送错误触发, 参数同ajaxError
     openBack    绑定在btn上
     saveBack    绑定在btn上, 默认刷新节点
     select      绑定在节点上(选中)
