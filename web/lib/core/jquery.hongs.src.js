@@ -2676,7 +2676,7 @@ $.fn.load = function(url, data, complete) {
         btn.data("txt", btn.text());
         btn.text(hsGetLang("form.saving"));
     })
-    .on("saveBack saveError", "form", function() {
+    .on("saveBack saveFail", "form", function() {
         var btn = $(this).find(":submit");
         var txt = btn.data("txt");
         if (txt)  btn.text( txt );
