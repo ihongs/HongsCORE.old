@@ -1227,6 +1227,7 @@ HsForm.prototype = {
             if (typeof rst.errors  != "undefined") {
                 this.formBox.data("validator").invalidate(rst.errors);
             }
+            this.formBox.trigger("saveFail",[rst]);
             return;
         }
         var evt = new jQuery.Event("saveBack");
@@ -2670,7 +2671,7 @@ $.fn.load = function(url, data, complete) {
         btn.data("txt", btn.text());
         btn.text(hsGetLang("form.saving"));
     })
-    .on("saveBack saveError", "form", function() {
+    .on("saveBack saveFail", "form", function() {
         var btn = $(this).find(":submit");
         var txt = btn.data("txt");
         if (txt)  btn.text( txt );
