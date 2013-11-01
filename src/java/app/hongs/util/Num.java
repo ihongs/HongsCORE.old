@@ -147,8 +147,8 @@ public class Num
     StringBuilder sb = new StringBuilder( );
     int n;
 
-    n = (int) Math.floor(size / 1099511627776);
-    if (n > 0) {  size = size % 1099511627776;
+    n = (int) Math.floor(size / 1099511627776L);
+    if (n > 0) {  size = size % 1099511627776L;
       sb.append(n).append("T");
     }
     n = (int) Math.floor(size / 1073741824);
