@@ -32,10 +32,12 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
 
 [更新日志]
 
+[2013-10-20] 在样式上统一使用bootstrap(不采取其JS, JS仍然使用jquery.tools)
 [2013-03-08] 完成hongs-core-js的jquery-tools的迁移, 前端组件支撑由原来的jquery-ui
              改为jquery-tools
 [2012-04-26] 将app.hongs.util.Text里的数字操作部分拿出来放到app.hongs.util.Num里
 [2011-09-25] 基本完成hongs-core-js的jquery重写实现, 大部分组件已可以使用
+             (不支持拖拽、树搜索)
 [2011-03-23] 新增UploadHelper上传助手类(使用apache的commons-fileupload)
 [2011-01-25] 树模型支持搜索逐个定位(Javascript)
 [2011-01-01] 表格列支持拖拽改变尺寸(Javascript)
@@ -56,37 +58,45 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
     - lang          语言资源
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
-  - include         引用页面
-  - script          脚本库
-  - style           样式库
-  - util            工具库
+  - xxxx            项目模块页面
+  + lib             前端库(js,flash)
+    + core          前端核心库
+      - css         前端核心样式
+      - img         前端核心图片
   - var             变化文件(如上传)
 
 文件映射:
-xxx/class.if        调用 app.xxx.shell.class.action
 xxx/Class/Method.do 调用 app.xxx.action.Class.actionMethod
+xxx/Class.api       调用 app.xxx.cmdlet.Class.action
 URL.de              判断是否能访问该页面
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
 
 [通用请求参数解释]
 
-id:   主键(单个)
-id[]: 主键(多个)
-pid:  上级id(树)
-page: 当前页码
-rows: 额定行数
-cols: 限定列名
-sort: 排序字段
-find: 查找的关键词
+id      主键(单个)
+id[]    主键(多个)
+pid     上级id(树)
+page    当前页码
+rows    额定行数
+cols[]  限定列名
+sort    排序字段
+find    搜索关键词
 
 [特定请求参数规则]
 
-表示字段等于:       field=value
-表示字段不等于:     -field=value
-查找匹配的行:       find=word1+word2
-查找不匹配的行:     -find=word1+word2
-排序(-表示逆序):    sort=-field1+field2
+字段等于        field=value, assoc_table.field=value
+字段不等于      -field=value, -assoc_table.field=value
+查找匹配的行    find=word1+word2, find.name=word1+word2
+查找不匹配的行  -find=word1+word2, -find.name=word1+word2
+排序(-表示逆序) sort=-field1+field2, sort=sub_table.field
+
+注: "+" 在 URL 中为空格; 框架未提供 >,>=,<,<= 等条件, 因这些需求并不多, 请自行
+  实现, 推荐使用 gt-,ge-,lt-,le- 作为参数前缀.
+  之所以不使用后缀(如field!=value更易懂), 是因为 field,find 均可以作为数组传递
+  (如field[]=value表示IN语句), 框架的解析器需要通过"."和"[]"来构建Map和List,
+  用前缀方便解析(不用特殊处理[]的逻辑), 也方便过滤时做判断, 且"-"在URL中不需要
+  转义.
 
 [数据模型命名规范]
 
@@ -105,6 +115,9 @@ find: 查找的关键词
   mtime     修改时间, DATETIME或TIMESTAMP
   btime     开始时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
+
+注: 因字段名可以用于 URL 中字段过滤, 而部分参数已有特殊含义, 取名时请避免, 如:
+  page,rows,cols,sort,find
 
 <<KEEP IT SIMPLE, STUPID!>>
 

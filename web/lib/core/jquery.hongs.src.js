@@ -846,29 +846,36 @@ function hsPrsDate(text, format) {
 /**
  * 通知
  * @param {String} msg 消息
- * @param {String} cls 样式类
+ * @param {String} cls 样式类, 默认为alert-info
+ * @param {Integer} sec 展示秒数, 默认为5秒
  * @return {jQuery} 消息框对象
  */
-function hsNote(msg, cls) {
-    var div = jQuery('<div class="note-box alert">'
+function hsNote(msg, cls, sec) {
+    if (! cls) cls = "alert-info";
+    if (! sec) sec = 5;
+
+    var div = jQuery('<div class="alert alert-dismissable">'
                     +'<button type="button" class="close">&times;</button>'
-                    +'</div>');
-    var box = jQuery("#note-box").show();
-    div.appendTo(box).append(msg).hide();
-    div.find(".close").click( function() {
-        div.remove(  );
-    });
-    if (cls) div.addClass(cls);
+                    +'<div class="note-box></div></div>')
+            .addClass(cls);
+    var btn = div.find("button");
+    var box = div.find(".note-box").append(msg);
+    var ctr =  jQuery ("#note-box").append(div).show();
+
     div.slideDown(200);
-    setTimeout( function() {
+    btn.click(function() {
       div.slideUp(200, function() {
-            div. remove ();
-            if (box.children().length == 0) {
-                box.hide();
-            }
+          div. remove ();
+          if (ctr.children().size() == 0) {
+              ctr.hide();
+          }
       });
-    }, 10000 );
-    return div;
+    });
+
+    setTimeout(function() {
+      btn.click( );
+    }, sec * 1000);
+    return box;
 }
 
 /**
@@ -1041,6 +1048,7 @@ HsForm.prototype = {
             "dataType"  : "json",
             "action"    : "load",
             "async"     : false,
+            "cache"     : false,
             "context"   : this,
             "success"   : this.loadBack
         });
@@ -1209,8 +1217,10 @@ HsForm.prototype = {
                     "action"    : "save",
                     "async"     : false,
                     "cache"     : false,
+                    "global"    : false,
                     "context"   : that,
-                    "success"   : that.saveBack
+                    "complete"  : that.saveBack,
+                    "error"     : function() { return false; }
                 });
             });
         }
@@ -1222,6 +1232,7 @@ HsForm.prototype = {
             if (typeof rst.errors  != "undefined") {
                 this.formBox.data("validator").invalidate(rst.errors);
             }
+            this.formBox.trigger("saveFail",[rst]);
             return;
         }
         var evt = new jQuery.Event("saveBack");
@@ -1515,9 +1526,16 @@ HsList.prototype = {
     },
     fillPage : function(page) {
         switch (page.errno) {
+            case 2:
+                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
+                this.listBox.hide();
+                hsSetSerial(this._data, "page", page.total_pages);
+                this.load();
+                return;
             case 1:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
-                this.listBox.hide(); return;
+                this.listBox.hide();
+                return;
             default:
                 this.listBox.show();
         }
@@ -1575,6 +1593,7 @@ HsList.prototype = {
             "type"      : "POST",
             "dataType"  : "json",
             "action"    : "send",
+            "button"    : btn,
             "async"     : false,
             "cache"     : false,
             "context"   : this,
@@ -1642,22 +1661,9 @@ HsList.prototype = {
 
     // /** 填充函数 **/
 
-    fill__htime: function(td, v, n) {
-        var d1  =  new Date ();
-        var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
-        if (d1.getYear()  == d2.getYear()
-        &&  d1.getMonth() == d2.getMonth()
-        &&  d1.getDate()  == d2.getDate()) {
-            return hsGetLang("time.today", {
-            time : hsFmtDate(v, hsGetLang( "time.format" ))});
-        }
-        else {
-            return hsFmtDate(v, hsGetLang("datetime.format"));
-        }
-    },
     fill__check : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
-        jQuery('<input type="checkbox" class="checkbox check-one"/>')
+        jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
@@ -1665,37 +1671,29 @@ HsList.prototype = {
     },
     fill__radio : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
-        jQuery('<input type="radio" class="radio check-one"/>')
+        jQuery('<input type="radio" class="input-radio check-one"/>')
             .attr("name", ck.attr("name"))
             .val (hsGetValue(this._info, this.idKey))
             .appendTo(td);
         return false;
     },
     fill__admin : function(td, v, n) {
-        var box = this.loadBox.find('.'+n+'-btn');
-        if (box.length) {
-            box.contents( ).clone( ).appendTo(td);
-        }
-            box = this.loadBox.find('.'+n+'-tip');
-        if (box.length) {
-            box.click(function() { jQuery(this).hide(); });
-            var th = this.listBox.find('thead [data-fn="'+n+'"]');
-            var tp = eval ("("+(box.attr("data-tp") || "{}")+")");
-            tp = jQuery.extend({}, {
-                "position":"center left", "offset":[0, 0]
-            }, tp, {
-                "tip":box, "onShow":function() {
-                    this.getTip().data("trigger", this.getTrigger());
-                }
-            });
-            jQuery('<button class="btn btn-xs btn-default dropdown-toggle">'
-                 + hsGetLang('list.admin.col')
-                 + '<span class="caret"></span></button>')
-                .attr("title", th.text())
-                .tooltip (tp)
-                .appendTo(td);
-        }
+        var th = this.listBox.find('thead [data-fn="'+n+'"]');
+        td.append(th.find(".vh").clone( ).removeClass("vh")).hsInit();
         return false;
+    },
+    fill__htime : function(td, v, n) {
+        var d1  =  new Date ();
+        var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
+        if (d1.getYear()  == d2.getYear()
+        &&  d1.getMonth() == d2.getMonth()
+        &&  d1.getDate()  == d2.getDate()) {
+            return hsGetLang("time.today", {
+              time : hsFmtDate(v, hsGetLang("time.format"))});
+        }
+        else {
+            return hsFmtDate(v, hsGetLang("datetime.format"));
+        }
     }
 };
 
@@ -2030,6 +2028,7 @@ HsTree.prototype = {
             "type"      : "POST",
             "dataType"  : "json",
             "action"    : "send",
+            "button"    : btn,
             "async"     : false,
             "cache"     : false,
             "context"   : this,
@@ -2468,10 +2467,10 @@ $.fn.load = function(url, data, complete) {
         }).closest(".form-group").removeClass(conf.errorClass);
     });
 
-    // /** 自定义语义属性/标签 **/
+    // /** 区域初始化, 语义标签 **/
 
     $.fn.hsInit = function(cnf) {
-        /** jquery tools 初始配置处理 **/
+        /** jquery tools, bootstrap 初始配置处理 **/
 
         if (cnf) {
             var v, o, c;
@@ -2502,13 +2501,24 @@ $.fn.load = function(url, data, complete) {
                 v = hsGetValue(cnf, "title");
                 if (v) $(box.data("curTab")).find("a").text(v);
             }
+            
+            // 直接返回, 有指定 cnf 的为使用 object.config 进行特定初始化
             return this;
         }
 
-        /** jquery tools 语义属性解析 **/
+        /** jquery tools, bootstrap 语义属性解析 **/
 
-        $(this).find("[data-toggle=overlay]").each(function() {
-            var o = {}, n = $(this).next(".overlay");
+        $(this).find(".tabs,.nav-tabs,.nav-pills").each(function() {
+            var rel = $(this).attr( "rel" );
+            if (rel.size( ) == 0) {
+                rel = $(this).next(".panes,.nav-panes").children("div");
+            }
+            if (rel.size( ) != 0) {
+                $(this).tabs(rel);
+            }
+        });
+        $(this).find("[data-toggle=overlay],[data-toggle=alert],[data-toggle=modal]").each(function() {
+            var o = {}, n = $(this).next(".overlay,.alert,.modal");
             if ($(this).attr("rel")) {
                 o.target = $(this).attr("rel");
             }
@@ -2533,34 +2543,35 @@ $.fn.load = function(url, data, complete) {
                 o.relative = true;
             }
 
-            // 与bootstrap配合使用
+            // 与 bootstrap 配合使用
             var p = $(this).attr("data-placement");
             switch ($(this).attr("data-toggle")) {
                 case "tooltip":
                     o.position = p ? _bs2jtPos(p) : "top center";
                     o.tipClass = "tooltip";
-                    o.events = { def: "mouseover,mouseout" };
+                    o.events = {def: "click mouseover,mouseout"};
                     break;
                 case "popover":
                     o.position = p ? _bs2jtPos(p) : "top center";
                     o.tipClass = "popover";
-                    o.events = { def: "click,mouseout" };
+                    o.events = {def: "click,mouseout"};
                     break;
                 case "dropdown":
+                    if (! p && $(this).parent( ).hasClass("dropup"))
+                        p = "top"; // 如果父级为 dropup 则向上弹出
                     o.position = p ? _bs2jtPos(p) : "bottom center";
                     o.tipClass = "dropdown-menu";
-                    o.events = { def: "click,mouseout" };
+                    o.events = {def: "click,mouseout"};
                     break;
             }
 
             $(this).tooltip(o);
         });
-        $(this).find(".tabs").each(function() {
-            $(this).tabs($(this).next(".panes").children("div"));
-        });
-        $(this).find("[type=date]").dateinput();
 
-        /** 自定义语义属性/标签解析 **/
+        $(this).find("[type=date]").dateinput();
+        $(this).find("[type=range]").rangeinput();
+
+        /** 语义标签解析 **/
 
         $(this).find("div[data-eval]").each(function() {
             eval($(this).attr("data-eval"));
@@ -2584,32 +2595,20 @@ $.fn.load = function(url, data, complete) {
             // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
             return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
         }).remove();
-        $(this).find( 'input' ).each( function(  ) {
+        $(this).find('input').each(function() {
             // 为所有的input加上type class, 方便设置样式, 兼容老浏览器
             $(this).addClass("input-"+$(this).attr("type"));
         });
 
         return this;
     };
-
-    // /** 初始化 **/
-
     $(function() {
         $(this).hsInit();
     });
+
+    // /** 文档初始化, 全局事件 **/
+
     $(document )
-    .on("ajaxError", function(evt , xhr, cnf) {
-        hsResponObj(xhr);
-        if (cnf.context instanceof HsForm) {
-            cnf.context.formBox.trigger(cnf.action+"Error");
-        }   else
-        if (cnf.context instanceof HsList) {
-            cnf.context.listBox.trigger(cnf.action+"Error");
-        }   else
-        if (cnf.context instanceof HsTree) {
-            cnf.context.treeBox.trigger(cnf.action+"Error");
-        }
-    })
     .on("hsReady", ".load-box", function() {
         $(this).hsInit();
         return false;
@@ -2620,12 +2619,13 @@ $.fn.load = function(url, data, complete) {
         // 已将错误消息位置改为相对于input, 就不需要以下代码了
         var obj = $(this).find(".HsForm").data("HsForm");
         if (obj) obj.formBox.data("validator").destroy();
+        return false;
     })
     */
     .on("click", "[data-load-in]", function() {
         var s = $(this).attr("data-load-in");
         s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
-        s.load($(this).attr("href"));
+        s.load($( this ).attr("href"));
         return false;
     })
     .on("click", "[data-open-in]", function() {
@@ -2682,10 +2682,28 @@ $.fn.load = function(url, data, complete) {
         btn.data("txt", btn.text());
         btn.text(hsGetLang("form.saving"));
     })
-    .on("saveBack saveError", "form", function() {
+    .on("saveBack saveFail", "form", function() {
         var btn = $(this).find(":submit");
         var txt = btn.data("txt");
         if (txt)  btn.text( txt );
         btn.prop("disabled", false);
+    })
+    .on("ajaxError", function(evt, xhr, cnf) {
+        hsResponObj(xhr);
+        if (typeof cnf.action === "undefined" ) {
+            return;
+        }
+        if (typeof cnf.button !== "undefined" ) {
+            $(cnf.button).trigger(cnf.action+"Error");
+        }
+        else if (cnf.context instanceof HsForm) {
+            cnf.context.formBox.trigger(cnf.action+"Error");
+        }
+        else if (cnf.context instanceof HsList) {
+            cnf.context.listBox.trigger(cnf.action+"Error");
+        }
+        else if (cnf.context instanceof HsTree) {
+            cnf.context.treeBox.trigger(cnf.action+"Error");
+        }
     });
 })(jQuery);
