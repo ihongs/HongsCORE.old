@@ -2509,39 +2509,50 @@ $.fn.load = function(url, data, complete) {
         /** jquery tools, bootstrap 语义属性解析 **/
 
         $(this).find(".tabs,.nav-tabs,.nav-pills").each(function() {
-            var rel = $(this).attr( "rel" );
-            if (rel.size( ) == 0) {
-                rel = $(this).next(".panes,.nav-panes").children("div");
-            }
-            if (rel.size( ) != 0) {
-                $(this).tabs(rel);
-            }
+            var n;
+            do {
+                n = $(this).attr("rel");
+                if (n) break;
+                n = $(this).next(".panes,.nav-panes").children("div");
+                if (n.size()) break;
+                return;
+            } while ( false );
+            $(this).tabs( n );
         });
         $(this).find("[data-toggle=overlay],[data-toggle=alert],[data-toggle=modal]").each(function() {
-            var o = {}, n = $(this).next(".overlay,.alert,.modal");
-            if ($(this).attr("rel")) {
-                o.target = $(this).attr("rel");
-            }
-            else if (n.length) {
-                o.target = n;
-            }
-            o.mask = {
+            var n;
+            do {
+                n = $(this).attr("rel");
+                if (n       ) break;
+                n = $(this).next(".overlay,.alert,.modal");
+                if (n.size()) break;
+                return;
+            } while ( false );
+            var o = {
+              target      : n,
+              mask        : {
                 color     : "#000",
                 opacity   : 0.8,
                 loadSpeed : 0
+              }
             };
             $(this).overlay(o);
         });
         $(this).find("[data-toggle=tooltip],[data-toggle=popover],[data-toggle=dropdown]").each(function() {
-            var o = {}, n = $(this).next(".tooltip,.popover,.dropdown-menu");
-            if ($(this).attr("rel")) {
-                o.tip = $(this).attr("rel");
-                o.relative = false;
-            }
-            else if (n.length) {
-                o.tip = n;
-                o.relative = true;
-            }
+            var n, r;
+            do {
+                n = $(this).attr("rel");
+                r = false;
+                if (n       ) break;
+                n = $(this).next(".tooltip,.popover,.dropdown-menu");
+                r =  true;
+                if (n.size()) break;
+                return;
+            } while ( false );
+            var o = {
+                tip       : n,
+                relative  : r
+            };
 
             // 与 bootstrap 配合使用
             var p = $(this).attr("data-placement");

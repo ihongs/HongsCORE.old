@@ -146,8 +146,8 @@ public class test {
   }
   
   private static void testRadix(long num) {
-    CmdletHelper.print("36 Radix: "+app.hongs.util.Num.to36Radix(num));
-    CmdletHelper.print("26 Radix: "+app.hongs.util.Num.to26Radix(num));
+    CmdletHelper.print("36 Radix: "+app.hongs.util.Num.to36Hex(num));
+    CmdletHelper.print("26 Radix: "+app.hongs.util.Num.to26Hex(num));
   }
 
   private static class TestSerially extends CoreSerially {

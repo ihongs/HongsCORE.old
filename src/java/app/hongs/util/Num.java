@@ -1,5 +1,8 @@
 package app.hongs.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 数字工具
  * @author Hongs
@@ -20,13 +23,13 @@ public class Num
    * 正所谓: 阳中有阴, 阴中有阳, 呵呵^________________^
    * </pre>
    */
-  private final static char[] rad36 = {
+  private final static char[] arr36 = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
   };
-  private final static char[] rad26 = {
+  private final static char[] arr26 = {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
@@ -34,23 +37,24 @@ public class Num
 
   /**
    * 十进制转其他进制
-   * 进制为arr的长度, 左边不能是arr首位, 如36进制(数字加字母), 0是0, 36是10
-   * @param num 待转数字
+   * 进制为arr的长度, 左边不能是arr首位, 如36进制(数字加字母), 35是Z, 36是10
+   * @param num 待转数字 0~MAX
    * @param arr 转换序列
    * @return
    */
-  public static String toXRadix(long num, char[] arr)
+  public static String toXHex(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
+    int i;
 
     if   (num == 0)
-          str.insert(0, arr[ 0 ]);
+          str.insert(0, arr[0]);
     while(num >= 1)
     {
-      int idx = (int) ( num % x );
-          num = (long)( num / x );
-          str.insert(0, arr[idx]);
+          i   = (int) ( num%x );
+          num = (long)( num/x );
+          str.insert(0, arr[i]);
     }
 
     return str.toString();
@@ -58,47 +62,85 @@ public class Num
 
   /**
    * 十进制转其他进制
-   * 进制为arr的长度, 左边可以是arr首位, 如26进制(字母), 0是A, 26是AA而非BA
-   * @param num 待转数字
+   * 进制为arr的长度, 左边可以是arr首位, 如26进制(字母), 1是A, 26是Z, 27是AA
+   * @param num 待转数字 1~MAX
    * @param arr 转换序列
    * @return
    */
-  public static String toYRadix(long num, char[] arr)
+  public static String toYHex(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
+    int i;
 
-          num += 1;
     while(num >= 1)
-    {
-          num -= 1;
-      int idx = (int) ( num % x );
-          num = (long)( num / x );
-          str.insert(0, arr[idx]);
+    {     num -= 1;
+          i   = (int) ( num%x );
+          num = (long)( num/x );
+          str.insert(0, arr[i]);
     }
 
     return str.toString();
   }
 
   /**
-   * 十进制转36进制(0~9A-Z)
-   * @param num
+   * 十进制转36进制(0~Z)
+   * @param num 0~MAX
    * @return 36进制串
    */
-  public static String to36Radix(long num)
+  public static String to36Hex(long num)
   {
-    return toXRadix(num, rad36);
+    return toXHex(num, arr36);
   }
 
   /**
    * 十进制转26进制(A-Z)
-   * 请注意: 进位从首位开始, 26是AA而非BA
-   * @param num
+   * @param num 1~MAX
    * @return 26进制串
    */
-  public static String to26Radix(long num)
+  public static String to26Hex(long num)
   {
-    return toYRadix(num, rad26);
+    return toYHex(num, arr26);
+  }
+
+  public static long fromXHex(String str, char[] arr) {
+      Map<Character, Integer> map = new HashMap();
+      char[] chs = str.toCharArray();
+      long   num = 0;
+      int x = arr.length;
+      int y = chs.length;
+      int i;
+      for (i = 0; i < x; i ++) {
+          map.put( arr[i], i );
+      }
+      for (i = 0; i < y; i ++) {
+          num += Math.pow(y-i+1, x) * map.get(chs[i]);
+      }
+      return num;
+  }
+
+  public static long fromYHex(String str, char[] arr) {
+      Map<Character, Integer> map = new HashMap();
+      char[] chs = str.toCharArray();
+      long   num = 0;
+      int x = arr.length;
+      int y = chs.length;
+      int i;
+      for (i = 0; i < x; i ++) {
+          map.put( arr[i], i );
+      }
+      for (i = 0; i < y; i ++) {
+          num += Math.pow(y-i+1, x) * (map.get(chs[i])+1);
+      }
+      return num;
+  }
+
+  public static long from36Hex(String str) {
+      return fromXHex(str, arr36);
+  }
+
+  public static long from26Hex(String str) {
+      return fromYHex(str, arr26);
   }
 
   /** 格式 **/
