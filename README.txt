@@ -1,4 +1,4 @@
-++ HongsCORE Framework for Java ++
+<< HongsCORE Framework for Java >>
 
 文档版本: 10.09.25
 软件版本: 0.1.1-20110925
@@ -119,7 +119,7 @@ find    搜索关键词
 注: 因字段名可以用于 URL 中字段过滤, 而部分参数已有特殊含义, 取名时请避免, 如:
   page,rows,cols,sort,find
 
-++ HongsCORE Framework for javascript ++
+<< HongsCORE Framework for javascript >>
 
 文档版本: 13.01.01
 软件版本: 13.02.15
@@ -219,7 +219,7 @@ HsTree:
     select      绑定在节点上(选中)
     taggle      绑定在节点上(开关)
 
-++ KEEP IT SIMPLE, STUPID! ++
+<< KEEP IT SIMPLE, STUPID! >>
 
 编写只做一件事情，并且要做好的程序；编写可以在一起工作的程序，编写处理文本流的程
 序，因为这是通用的接口。这就是UNIX哲学.所有的哲学真 正的浓缩为一个铁一样的定律，
