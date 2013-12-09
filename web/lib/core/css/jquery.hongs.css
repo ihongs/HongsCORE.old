@@ -199,19 +199,21 @@ object.config {
     margin-top: -4px;
 }
 
-#note-box .alert {
+#note-box .alert,
+.page-box .alert {
     margin-bottom: 1px;
 }
-.list-box .table {
-    margin: 1px 0px;
-}
+.list-box .table,
 .page-box .pagination {
-    margin: 1px 0px;
+    margin: 1px 0;
 }
+.list-box .table thead {
+    font-weight: bold;
+}
+
 .find-box.input-group {
     width: 20em;
 }
-
 form input.form-control {
     max-width: 400px;
 }
