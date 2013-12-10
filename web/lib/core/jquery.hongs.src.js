@@ -176,7 +176,12 @@ function hsResponObj(rst, qut) {
             }
         }
         if (typeof rst["__refresh__"] != "undefined") {
-            window.location.href = rst["__refresh__"];
+            if (  rst["__refresh__"]  ) {
+                location.assign( rst["__refresh__"] );
+            }
+            else {
+                location.reload( );
+            }
         }
     }
     return rst;
