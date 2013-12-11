@@ -2625,6 +2625,24 @@ $.fn.load = function(url, data, complete) {
     // /** 文档初始化, 全局事件 **/
 
     $(document )
+    .on("ajaxError", function(evt, xhr, cnf) {
+        var rst = hsResponObj(xhr);
+        if (typeof cnf.action === "undefined" ) {
+            return;
+        }
+        if (typeof cnf.button !== "undefined" ) {
+            $(cnf.button).trigger(cnf.action+"Error", evt, rst);
+        }
+        else if (cnf.context instanceof HsForm) {
+            cnf.context.formBox.trigger(cnf.action+"Error", evt, rst);
+        }
+        else if (cnf.context instanceof HsList) {
+            cnf.context.listBox.trigger(cnf.action+"Error", evt, rst);
+        }
+        else if (cnf.context instanceof HsTree) {
+            cnf.context.treeBox.trigger(cnf.action+"Error", evt, rst);
+        }
+    })
     .on("hsReady", ".load-box", function() {
         $(this).hsInit();
         return false;
@@ -2654,6 +2672,23 @@ $.fn.load = function(url, data, complete) {
         $.hsOpen($(this).attr("href"));
         return false;
     })
+    /** 表单 **/
+    .on("save", "form", function(evt) {
+        if (evt.isDefaultPrevented()) {
+            return;
+        }
+        var btn = $(this).find(":submit");
+        btn.prop("disabled", true );
+        btn.data("txt", btn.text());
+        btn.text(hsGetLang("form.saving"));
+    })
+    .on("saveBack saveFail", "form", function() {
+        var btn = $(this).find(":submit");
+        var txt = btn.data("txt");
+        if (txt)  btn.text( txt );
+        btn.prop("disabled", false);
+    })
+    /** 列表 **/
     .on("click", ".list-box tbody td", function(evt) {
         // 当点击表格列时单选
         // 工具按钮有三类, 打开|打开选中|发送选中
@@ -2674,52 +2709,20 @@ $.fn.load = function(url, data, complete) {
         box.find(".for-select").prop("disabled", len != 1);
         box.find(".for-checks").prop("disabled", len == 0);
     })
+    .on("loadBack", ".HsList", function() {
+        $(this).find(".check-all").prop("checked", false);
+        $(this).find(".for-select,.for-checks").prop("disabled", true);
+    })
+    /** 树 **/
     .on("select", ".HsTree .tree-node", function() {
         // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
         var box = $(this).closest(".HsTree");
         var obj =        box.data( "HsTree");
         box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
     })
-    .on("loadBack", ".HsList", function() {
-        $(this).find(".check-all").prop("checked", false);
-        $(this).find(".for-select,.for-checks").prop("disabled", true);
-    })
     .on("loadBack", ".HsTree", function() {
         var tree = $(this).data("HsTree");
         if (tree.getSid()!=tree.getRid()) return;
         $(this).find(".for-select,.for-checks").prop("disabled", true);
-    })
-    .on("save", "form", function(evt) {
-        if (evt.isDefaultPrevented()) {
-            return;
-        }
-        var btn = $(this).find(":submit");
-        btn.prop("disabled", true );
-        btn.data("txt", btn.text());
-        btn.text(hsGetLang("form.saving"));
-    })
-    .on("saveBack saveFail", "form", function() {
-        var btn = $(this).find(":submit");
-        var txt = btn.data("txt");
-        if (txt)  btn.text( txt );
-        btn.prop("disabled", false);
-    })
-    .on("ajaxError", function(evt, xhr, cnf) {
-        hsResponObj(xhr);
-        if (typeof cnf.action === "undefined" ) {
-            return;
-        }
-        if (typeof cnf.button !== "undefined" ) {
-            $(cnf.button).trigger(cnf.action+"Error");
-        }
-        else if (cnf.context instanceof HsForm) {
-            cnf.context.formBox.trigger(cnf.action+"Error");
-        }
-        else if (cnf.context instanceof HsList) {
-            cnf.context.listBox.trigger(cnf.action+"Error");
-        }
-        else if (cnf.context instanceof HsTree) {
-            cnf.context.treeBox.trigger(cnf.action+"Error");
-        }
     });
 })(jQuery);
