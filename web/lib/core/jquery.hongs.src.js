@@ -2710,7 +2710,7 @@ $.fn.load = function(url, data, complete) {
         box.find(".for-checks").prop("disabled", len == 0);
     })
     .on("loadBack", ".HsList", function() {
-        $(this).find(".check-all").prop("checked", false);
+        $(this).find(".check-all").prop("checked", false );
         $(this).find(".for-select,.for-checks").prop("disabled", true);
     })
     /** 树 **/
@@ -2721,8 +2721,8 @@ $.fn.load = function(url, data, complete) {
         box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
     })
     .on("loadBack", ".HsTree", function() {
-        var tree = $(this).data("HsTree");
-        if (tree.getSid()!=tree.getRid()) return;
+        var obj = $(this).data( "HsTree");
+        if (obj.getSid( )!=obj.getRid( )) return;
         $(this).find(".for-select,.for-checks").prop("disabled", true);
     });
 })(jQuery);
