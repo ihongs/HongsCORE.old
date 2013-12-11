@@ -100,7 +100,7 @@ app.hongs.action.annotation.Verify        数据验证
 app.hongs.cmdlet    命令工具库
 app.hongs.cmdlet.Cmdlet                   命令工具类
 app.hongs.cmdlet.CmdletHelper             命令助手类
-app.hongs.cmdlet.CmdletAction             命令动作类(高级HTTP协作接口)
+app.hongs.cmdlet.CmdletAction             命令动作类(高级应用接口)
 app.hongs.db        模型库
 app.hongs.db.AbstractBaseModel
 app.hongs.db.AbstractTreeModel
