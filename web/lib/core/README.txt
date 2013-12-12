@@ -8,8 +8,15 @@
   Email: kevin.hongs@gmail.com
 
 本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库, 使用jQueryTools作为UI
-组件库. 以hs开头的为普通函数; 以Hs开头的为伪类函数, this指向调用的容器对象.
-依赖的jQueryTools组件: tabs, overlay, tooltip, validator
+组件库, 使用Bootstrap作为UI主题库. 以hs开头的为普通函数, 以Hs开头的为伪类函数,
+this指向调用的容器对象.
+依赖的jQueryTools组件: tabs, overlay, tooltip, validator, dateinput, expose
+依赖的Bootstrap组件: .btn, .alert, .tooltip, .popover, .pagination,
+                     .dropdown, .arrow, .caret, .close, .active,
+                     .fade, .[in|out], .[position], .has-error,
+                     // 其他场合使用:
+                     .container, .row, .col, .nav, .navbar,
+                     .table, .form, .input, .label, .badge
 
 [ID]
 
@@ -65,17 +72,17 @@ url             用于HsLoad中, 下同
 data
 baks            用于JsOpen中, 下同
 tabs
-oldTab
-curTab
+oldTab          之前选中的Tab对象
+curTab          现在选中的Tab对象
 overlay
 trigger         用于从tip上获取trigger对象
 
 [Event]
 
-HsClose:
-    hsClose
 HsReady:
     hsReady
+HsClose:
+    hsClose
 HsForm:
     loadBack    绑定在formBox上
     loadError   绑定在formBox上, 加载错误触发, 参数同ajaxError

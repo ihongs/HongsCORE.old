@@ -11,12 +11,16 @@
 
 HongsCORE
 即: Hong's Common Object Requesting Engine, 通用对象请求引擎, 拼凑的有些生硬. 在设
-计第一个原型框架时(PHP版), 我买了一台Intel Core CPU的笔记本电脑,当时随意的给她取了个
+计第一个原型框架时(PHP版), 我买了一台Intel Core CPU的笔记本电脑, 当时随意的给她取了个
 名字叫Core, 后来觉得名字应该更有意义才扩展成了以上缩写. 另一个理由是: 从最初的PHP版一
 直到现在的Java版, 我都有设计一个核心工厂类, 主要作用就是用于请求和管理唯一对象, 实现
 Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实例化, 使对象的使用效率更高.
 具体到这个Java版本中, 利用了Tomcat等Servlet容器的单实例多线程特性来实现行之有效的单例
 模式.
+注: 原PHP版框架在上海科捷信息技术有限公司(北京)的AFP8系统(已被其他公司收购)中使用, 其
+部分模块是在科捷的工作期间开发的, 本人已于2011年离开科捷, 故不再对其更新. 原科捷公司
+和AFP8系统拥有原PHP版框架代码的全部处置权.
+感谢 林叶,杨林,袁杰,赵征 等过去对我的支持和宽容.
 
 [特性概叙]
 
@@ -42,7 +46,7 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
 [2011-01-25] 树模型支持搜索逐个定位(Javascript)
 [2011-01-01] 表格列支持拖拽改变尺寸(Javascript)
 [2010-11-21] 支持多表串联(JOIN模式)
-[2010-11-12] 支持多表串联(LINK模式)
+[2010-11-12] 支持多表串联(IN模式)
 [2010-11-11] 更改配置及消息体系(Javascript)
 [2010-09-20] 增加日期选择功能(Javascript)
 [2010-08-15] 增加浮动块功能(Javascript)
@@ -66,11 +70,27 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
   - var             变化文件(如上传)
 
 文件映射:
-xxx/Class/Method.do 调用 app.xxx.action.Class.actionMethod
-xxx/Class.api       调用 app.xxx.cmdlet.Class.action
-URL.de              判断是否能访问该页面
+xxxx/Foo/Bar.do     调用 app.xxx.action.Foo.actionBar
+xxxx/Foo.api        调用 app.xxx.cmdlet.Foo.action
+xxxx.Foo            调用 app.xxx.cmdlet.Foo.cmdlet (命令行 WEB-INF/run xxxx.Class)
+URL.de              判断是否有权访问该页面
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
+
+框架结构:
+app.hongs           核心
+app.hongs.action    动作支持
+app.hongs.action.annotation     动作注解
+app.hongs.cmdlet    命令支持
+app.hongs.db        数据模型
+app.hongs.tag       JSP标签
+app.hongs.util      工具
+app.xxxx            用户模块
+app.xxxx.action     用户动作
+app.xxxx.cmdlet     用户命令
+app.xxxx.model      用户模型
+注: 以上仅列举了主要的包, 更多框架信息请参考API文档; xxxx为用户模块名称.
+    
 
 [通用请求参数解释]
 
@@ -116,108 +136,13 @@ find    搜索关键词
   btime     开始时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
 
-注: 因字段名可以用于 URL 中字段过滤, 而部分参数已有特殊含义, 取名时请避免, 如:
-  page,rows,cols,sort,find
+注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避
+开这些名称: page,rows,cols,sort,find. 另外, 在Model中可以重新定义这些名称, 但并
+不建议将这些参数名作为配置写入配置中.
 
 << HongsCORE Framework for javascript >>
 
-文档版本: 13.01.01
-软件版本: 13.02.15
-设计作者: 黄弘(Kevin Hongs)
-技术支持:
-  Phone: +8618621523173
-  Email: kevin.hongs@gmail.com
-
-本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库, 使用jQueryTools作为UI
-组件库. 以hs开头的为普通函数; 以Hs开头的为伪类函数, this指向调用的容器对象.
-依赖的jQueryTools组件: tabs, overlay, tooltip, validator
-
-[ID]
-
-note-box        全局消息
-node-[ID]       节点编号, 在.tree-node上
-
-[Class]
-
-open            在浮窗中打开href对应的页
-close           关闭浮窗的图标按钮
-cancel          取消表单并关闭浮窗或区域的按钮
-ensure          提交表单的按钮
-load-ing
-load-box
-open-box
-note-box
-list-box        用于HsList中, 下同
-page-box
-check-one
-check-all
-tree-box        用于HsTree中, 下同
-tree-list
-tree-node
-tree-root
-tree-curr
-tree-opened
-tree-folded
-tree-hand       节点开关图标
-tree-name       节点名称
-tree-cnum       节点子级数量
-node-[TP]       节点类型, 在.tree-node上
-
-[Attr]
-
-data-fn         HsForm和HsList中的field-name
-data-pn         HsForm中的param-name, HsList中的page-num
-data-vk         HsForm中的value-key
-data-tk         HsForm中的text-key
-data-ft         HsList中的field-type
-data-eval       执行JS, this指向当前节点
-data-load       在当前节点中加载, 属性值为url
-data-open       在当前节点中打开, 属性值为url
-data-load-in    在指定区域中加载, 属性值为selector, 由href指定url
-data-open-in    在指定区域中打开, 属性值为selector, 由href指定url
-data-repeat     重复输入, 属性值为input-name
-data-unique     限制唯一, 属性值为url, url中可用{input-name}指定其他表单项的值
-data-toggle     关联触发, 可以为: overlay,alert,modal,tooltip,overlay,dropdown
-data-placement  tooltip的相对位置, 参阅bootstrip的tooltip
-
-[Data]
-
-url             用于HsLoad中, 下同
-data
-baks            用于JsOpen中, 下同
-tabs
-oldTab
-curTab
-overlay
-trigger         用于从tip上获取trigger对象
-
-[Event]
-
-HsClose:
-    hsClose
-HsReady:
-    hsReady
-HsForm:
-    loadBack    绑定在formBox上
-    loadError   绑定在formBox上, 加载错误触发, 参数同ajaxError
-    saveBack    绑定在formBox上, 默认关闭表单
-    saveFail    绑定在formBox上, 提交失败触发
-HsList:
-    loadBack    绑定在listBox上
-    loadError   绑定在listBox上, 加载错误触发, 参数同ajaxError
-    sendBack    绑定在btn上, 默认刷新列表
-    sendError   绑定在btn上, 发送错误触发, 参数同ajaxError
-    openBack    绑定在btn上
-    saveBack    绑定在btn上, 默认刷新列表
-HsTree:
-    loadBack    绑定在treeBox上
-    loadError   绑定在treeBox上, 加载错误触发, 参数同ajaxError
-    sendBack    绑定在btn上, 默认刷新节点
-    sendError   绑定在btn上, 发送错误触发, 参数同ajaxError
-    openBack    绑定在btn上
-    saveBack    绑定在btn上, 默认刷新节点
-    select      绑定在节点上(选中)
-    taggle      绑定在节点上(开关)
+请转至 https://github.com/ihongs/HongsCORE/blob/develop/web/lib/core/README.txt
 
 << KEEP IT SIMPLE, STUPID! >>
 
@@ -243,3 +168,4 @@ HsTree:
 15、优化原则：在雕琢之前先有原型；在你优化它之前，先让他可以运行。
 16、差异原则：怀疑所有声称的“唯一真理“。
 17、可扩展原则：为将来做设计，因为它可能比你认为来的要快。
+
