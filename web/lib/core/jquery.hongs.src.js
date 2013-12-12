@@ -2282,7 +2282,7 @@ $.ajax = function(url, settings) {
         if (typeof url["url"] != "undefined")
             url  = url["url"];
     }
-    return _jqAjax(hsFixUri(url) , settings );
+    return _jqAjax( hsFixUri(url), settings );
 };
 $.fn.load = function(url, data, complete) {
     if ( jQuery.isFunction(  data  )) {
