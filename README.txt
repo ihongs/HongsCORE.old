@@ -77,51 +77,19 @@ name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的�
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
 
 框架结构:
-app.hongs           框架核心库
-app.hongs.Core      核心类
-app.hongs.CoreConfig            核心配置类
-app.hongs.CoreLanguage          核心语言类
-app.hongs.CoreLogger            核心日志类
-app.hongs.CoreSerially          核心缓存类(抽象序列化类)
-app.hongs.HongsError            核心错误类
-app.hongs.HongsException        核心异常类
-app.hongs.action                控制动作库
-app.hongs.action.ActionInit               动作初始化类
-app.hongs.action.Action                   动作类
-app.hongs.action.JsConfAction             JS配置类
-app.hongs.action.jsLangAction             JS语言类
-app.hongs.action.DetectAction             权限检测类
-app.hongs.action.ActionFilter             权限过滤器
-app.hongs.actoin.ActoinHelper             总之助手类
-app.hongs.action.UploadHelper             上传助手类
-app.hongs.action.annotation     动作注解库
-app.hongs.action.annotation.CommitSuccess 提交失败则自动回滚
-app.hongs.action.annotation.Datums        数据注入
-app.hongs.action.annotation.Verify        数据验证
-app.hongs.cmdlet    命令工具库
-app.hongs.cmdlet.Cmdlet                   命令工具类
-app.hongs.cmdlet.CmdletHelper             命令助手类
-app.hongs.cmdlet.CmdletAction             命令动作类(高级应用接口)
-app.hongs.db        模型库
-app.hongs.db.AbstractBaseModel
-app.hongs.db.AbstractTreeModel
-app.hongs.db.DB
-app.hongs.db.Table
-app.hongs.tag       标签库
-app.hongs.tag.ConfTag
-app.hongs.tag.LangTag
-app.hongs.tag.ActTag
-app.hongs.tag.UidTag
-app.hongs.util      工具库
-app.hongs.util.Num
-app.hongs.util.Str
-app.hongs.util.JSON
-app.xxx             用户模块
-app.xxx.action      用户动作包
-app.xxx.action.Xxxx 用户动作类
-app.xxx.cmdlet      用户命令包
-app.xxx.action.Xxxx 用户命令类
-注: xxx 为用户模块名称, Xxxx 为用户动作/命令类名
+app.hongs           核心
+app.hongs.action    动作支持
+app.hongs.action.annotation     动作注解
+app.hongs.cmdlet    命令支持
+app.hongs.db        数据模型
+app.hongs.tag       JSP标签
+app.hongs.util      工具
+app.xxxx            用户模块
+app.xxxx.action     用户动作
+app.xxxx.cmdlet     用户命令
+app.xxxx.model      用户模型
+注: 以上仅列举了主要的包, 更多框架信息请参考API文档; xxxx为用户模块名称.
+    
 
 [通用请求参数解释]
 
