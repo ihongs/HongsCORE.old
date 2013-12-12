@@ -70,9 +70,10 @@ AFP8系统拥有原框架的PHP及JS等代码的全部处置权.
   - var             变化文件(如上传)
 
 文件映射:
-xxx/Class/Method.do 调用 app.xxx.action.Class.actionMethod
-xxx/Class.api       调用 app.xxx.cmdlet.Class.action
-URL.de              判断是否能访问该页面
+xxxx/Foo/Bar.do     调用 app.xxx.action.Foo.actionBar
+xxxx/Foo.api        调用 app.xxx.cmdlet.Foo.action
+xxxx.Foo            调用 app.xxx.cmdlet.Foo.cmdlet (命令行 WEB-INF/run xxxx.Class)
+URL.de              判断是否有权访问该页面
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
 
