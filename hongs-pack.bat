@@ -36,8 +36,10 @@ cd %DSTPATH%\%WARNAME%
 jar cvf %DSTPATH%\%WARNAME%.zip *
 cd %~DP0
 
+copy %DSTPATH%\%WARNAME%.zip %~DP0\hongs-core.zip /Y
 del %DSTPATH%\%JARNAME%.jar
 del %DSTPATH%\%WARNAME%.war
+del %DSTPATH%\%WARNAME%.zip
 rmdir %DSTPATH%\%WARNAME% /S /Q
 
 @echo on
