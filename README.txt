@@ -90,7 +90,6 @@ app.xxxx.action     用户动作
 app.xxxx.cmdlet     用户命令
 app.xxxx.model      用户模型
 注: 以上仅列举了主要的包, 更多框架信息请参考API文档; xxxx为用户模块名称.
-    
 
 [通用请求参数解释]
 
