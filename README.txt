@@ -58,8 +58,9 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
 物理分层:
 /
   + WEB-INF
-    - conf          配置资源(常规配置/动作配置/数据库配置/自定义标签配置)
+    - conf          配置资源(常规配置/动作配置/数据配置/数据库配置/自定义标签配置)
     - lang          语言资源
+    - lib           后端库
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
   - xxxx            项目模块页面
@@ -70,9 +71,9 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
   - var             变化文件(如上传)
 
 文件映射:
-xxxx/Foo/Bar.do     调用 app.xxx.action.Foo.actionBar
-xxxx/Foo.api        调用 app.xxx.cmdlet.Foo.action
-xxxx.Foo            调用 app.xxx.cmdlet.Foo.cmdlet (命令行 WEB-INF/run xxxx.Class)
+xxxx/Foo/Bar.do     调用 app.xxxx.action.Foo.actionBar
+xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
+xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(命令行 WEB-INF/run xxxx.Class)
 URL.de              判断是否有权访问该页面
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
@@ -95,7 +96,7 @@ app.xxxx.model      用户模型
 
 id      主键(单个)
 id[]    主键(多个)
-pid     上级id(树)
+pid     父id(上级)
 page    当前页码
 rows    额定行数
 cols[]  限定列名
@@ -129,7 +130,7 @@ find    搜索关键词
   id        主键, CHAR(20)
   pid       父键, CHAR(20)
   x_id      外键, CHAR(20), x为关联表缩写
-  dflag     删除标识, 0为正常, 1为删除
+  dflag     删除标识, TINYINT, 0为正常, 1为删除, 可用其他数字表示其他状态
   ctime     创建时间, DATETIME或TIMESTAMP
   mtime     修改时间, DATETIME或TIMESTAMP
   btime     开始时间, DATETIME或TIMESTAMP
