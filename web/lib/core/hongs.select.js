@@ -88,7 +88,7 @@
         /** 选择菜单 **/
 
         if(!tip.hasClass("hsSelectTip")) {
-            tip.addCalss("hsSelectTip");
+            tip.addClass("hsSelectTip");
         }
         else {
             return;
