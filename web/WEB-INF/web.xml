@@ -20,7 +20,11 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>ActionInit</filter-name>
-        <url-pattern>*.if</url-pattern>
+        <url-pattern>*.api</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ActionInit</filter-name>
+        <url-pattern>*.jsp</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>ActionInit</filter-name>
@@ -29,10 +33,6 @@
     <filter-mapping>
         <filter-name>ActionInit</filter-name>
         <url-pattern>*.js-lang</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>ActionInit</filter-name>
-        <url-pattern>*.jsp</url-pattern>
     </filter-mapping>
     <!-- Action Servlet -->
     <servlet>
@@ -59,7 +59,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Cmdlet</servlet-name>
-        <url-pattern>*.if</url-pattern>
+        <url-pattern>*.api</url-pattern>
     </servlet-mapping>
     <!-- JsConf Servlet -->
     <servlet>
