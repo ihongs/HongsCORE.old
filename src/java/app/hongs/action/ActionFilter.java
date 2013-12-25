@@ -58,9 +58,9 @@ public class ActionFilter
   private String loginPath;
 
   /**
-   * 权限会话键
+   * 是否检查登录
    */
-  private String sessionKey;
+  private boolean checkLogin;
 
   /**
    * 权限配置名
@@ -68,9 +68,9 @@ public class ActionFilter
   private String configName;
 
   /**
-   * 是否检查登录
+   * 权限会话键
    */
-  private boolean checkLogin;
+  private String sessionKey;
 
   @Override
   public void init(FilterConfig config)
@@ -138,8 +138,8 @@ public class ActionFilter
   public void doFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
     throws IOException, ServletException
   {
-    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
     /*
+    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
     if (  helper.INITID == 1  )
     {
       ActionFilter.clearCache();
@@ -157,15 +157,21 @@ public class ActionFilter
         this.sayError(0);
         return;
       }
+      
+      sessionData = new HashMap();
     }
 
     String act = Core.ACTION_PATH.get();
 
     Map<String, Boolean> configData = getConfig(this.configName);
 
+    /**
+     * 纯SESSION校验则只判断SESSION里是否有指定ACT
+     * 按CONFIG校验则判断CONFIG里有而SESSION里没有指定ACT
+     */
     if (configData == null)
     {
-      if (sessionData.containsKey(act) && !sessionData.get(act))
+      if ( sessionData.containsKey(act) && !sessionData.get(act))
       {
         this.sayError(1);
         return;
@@ -247,7 +253,7 @@ public class ActionFilter
      * 如果处于AJAX环境, 则是由JSON传递URL和消息
      * 否则使用HTTP错误代码
      */
-    if (helper.request.getRequestURI().endsWith(".do")) {
+    if (helper.request.getRequestURI().endsWith(".act")) {
         Map rsp = new HashMap();
             rsp.put("__success__", false);
             rsp.put("__message__", msg);
@@ -286,6 +292,19 @@ public class ActionFilter
     }
 
     return actionData;
+  }
+
+  private static void clearCache()
+  {
+    Core core = Core.getInstance();
+    if (core.containsKey("app.hongs.action.ActionFilter.ConfigList"))
+    {
+      core.remove("app.hongs.action.ActionFilter.ConfigList");
+    }
+    if (core.containsKey("app.hongs.action.ActionFilter.SessionList"))
+    {
+      core.remove("app.hongs.action.ActionFilter.SessionList");
+    }
   }
 
   private static Map<String, Boolean> getConfig(String configName)
@@ -380,19 +399,54 @@ public class ActionFilter
     }
   }
 
-  private static void clearCache()
+  public static Map<String, Boolean> getActions(String configName, String sessionKey, boolean checkLogin)
   {
-    Core core = Core.getInstance();
-    if (core.containsKey("app.hongs.action.ActionFilter.ConfigList"))
-    {
-      core.remove("app.hongs.action.ActionFilter.ConfigList");
+    Map<String, Boolean> sessionData = getSession(sessionKey);
+    if (sessionData == null) {
+        if (checkLogin) {
+            return null;
+        }
     }
-    if (core.containsKey("app.hongs.action.ActionFilter.SessionList"))
-    {
-      core.remove("app.hongs.action.ActionFilter.SessionList");
+
+    Map<String, Boolean> configData;
+    try {
+      configData = getConfig(configName);
     }
+    catch (IOException ex ) {
+        configData =  null;
+    }
+    if (configData == null) {
+        configData =  new HashMap();
+    }
+
+    Map<String, Boolean> data = new HashMap();
+    data.putAll( configData);
+    if (sessionData == null) {
+        data.putAll(sessionData);
+    } else {
+        for (String act : data.keySet()) {
+            data.put(act, false);
+        }
+    }
+
+    return  data;
   }
 
+  public static Map<String, Boolean> getActions(String configName, String sessionKey)
+  {
+    return getActions(configName, sessionKey, false);
+  }
+
+  public static Map<String, Boolean> getActions(String configName)
+  {
+    return getActions(configName, "actions" , false);
+  }
+  
+  public static Map<String, Boolean> getActions()
+  {
+    return getActions("default" , "actions" , false);
+  }
+  
   /**
    * 检查是否有指定动作的权限
    * @param act 动作URI
@@ -458,7 +512,7 @@ public class ActionFilter
   /**
    * 检查是否有指定动作的权限(不检查登录, sessionKey取actions)
    * @param act 动作URI
-   * @param checkLogin 检查登录
+   * @param configName 配置名称
    * @return 通过为true, 反之为false
    */
   public static boolean checkAction(String act, String configName)
