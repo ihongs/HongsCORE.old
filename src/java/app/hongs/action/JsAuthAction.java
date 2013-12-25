@@ -26,12 +26,12 @@ import app.hongs.util.Str;
  * <pre>
  * &lt;!-- Config Servlet --&gt;
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;Config&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;Auth&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.action.JSConfAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;Config&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.jsc&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;Auth&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;*.jsa&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * <pre>
  *
@@ -40,8 +40,6 @@ import app.hongs.util.Str;
 public class JsAuthAction
   extends HttpServlet
 {
-  private static Map<String, String> data = new HashMap<String, String>();
-  private static Map<String, String> lastModified = new HashMap<String, String>();
 
   /**
    * 服务方法
@@ -62,206 +60,36 @@ public class JsAuthAction
            name = name.substring(1, name.lastIndexOf('.'));
     String type = req.getParameter( "t");
     String m, s;
-    
+
     /**
-     * 如果指定配置的数据并没有改变
-     * 则直接返回 304 Not modified
+     * CONF和SESS
      */
-    m = helper.request.getHeader("If-Modified-Since");
-    if (m != null && m.equals(JsAuthAction.lastModified.get(name)) )
-    {
-      helper.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+    String[] ns = name.split("/", 2);
+    String conf, sess;
+    if (ns.length > 1) {
+      conf = ns[0];
+      sess = ns[1];
+    }
+    else {
+      conf = ns[0];
+      sess = "actions";
+      name+="/actions";
+    }
+
+    try {
+      s = JSON.soString(ActionFilter.getActions(conf, sess);
+    }
+    catch (HongsError ex) {
+      helper.print500Code(ex.getMessage());
       return;
     }
-
-    /**
-     * 如果没有配置
-     * 则调用工厂方法构造 JS 代码
-     */
-    if (!JsAuthAction.data.containsKey(name))
-    {
-      try {
-        s = ActionFilter.getActions();
-      }
-      catch (HongsError ex) {
-        helper.print500Code(ex.getMessage());
-        return;
-      }
-
-      SimpleDateFormat
-          sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z",
-                                      Locale.ENGLISH );
-          sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-      m = sdf.format(new Date());
-
-      JsAuthAction.data.put(name , s);
-      JsAuthAction.lastModified.put(name , m);
-    }
-    else
-    {
-      s = JsAuthAction.data.get(name);
-      m = JsAuthAction.lastModified.get(name);
-    }
-
-    // 标明修改时间
-    helper.response.setHeader("Last-Modified", m);
 
     // 输出配置信息
     if ("json".equals(type)) {
       helper.printJSON( s );
     }
     else {
-      helper.printJS("if(!window.HsCONF)window.HsCONF={};$.extend(window.HsCONF,"+s+");");
-    }
-  }
-
-  /**
-   * 销毁方法
-   * 清空配置信息和消息数据
-   */
-  @Override
-  public void destroy()
-  {
-    super.destroy();
-
-    // 销毁配置信息
-    JsAuthAction.data.clear();
-  }
-
-  /**
-   * 构造配置信息
-   * 配置类型按后缀划分为:
-   * .N 数字
-   * .B 布尔
-   * .C 代码
-   * 无后缀及其他为字符串
-   */
-  private String makeConfig(String confName)
-  {
-    Maker         mk = new Maker(confName);
-    StringBuilder sb = new StringBuilder();
-
-    /** 配置代码 **/
-
-    sb.append("{\r\n");
-
-    // 公共配置
-    if ("default".equals(confName))
-    {
-      sb.append("DEBUG:")
-        .append(String.valueOf(Core.IN_DEBUG_MODE))
-        .append(",\n")
-        .append("SERVER_ID:\"")
-        .append(Core.SERVER_ID)
-        .append("\",\n")
-        .append("BASE_HREF:\"")
-        .append(Core.BASE_HREF)
-        .append("\",\n");
-    }
-
-    // 查找扩展配置信息
-    Iterator it = mk.conf.keySet().iterator();
-    while (it.hasNext())
-    {
-      sb.append(mk.make((String) it.next( )));
-    }
-
-    sb.append("\"\":\"\"\r\n}");
-    return sb.toString();
-  }
-
-  /** 辅助工具类 **/
-
-  /**
-   * 配置信息辅助构造类
-   */
-  private static class Maker
-  {
-    private CoreConfig conf;
-
-    public Maker(String name)
-    {
-      this.conf = new CoreConfig(name);
-    }
-
-    public String make(String key)
-    {
-      /**
-       * 后缀 意义
-       * [无] 字符串
-       * .B   布尔
-       * .N   数字
-       * .C   代码
-       * .L   链接
-       */
-      if (!key.startsWith("core.js.")
-      &&  !key.startsWith("user.js.")) {
-          return "";
-      }
-      String name = key.substring( 8 )
-                       .replaceFirst("\\.[B|N|C|L]$", "");
-      if (key.endsWith(".L"))
-      {
-        return this.makeLink(name, key);
-      }
-      else if(key.endsWith(".C"))
-      {
-        return this.makeCode(name, key);
-      }
-      else if (key.endsWith(".B"))
-      {
-        return this.makeConf(name, key, false);
-      }
-      else if (key.endsWith(".N"))
-      {
-        return this.makeConf(name, key, 0 );
-      }
-      else
-      {
-        return this.makeConf(name, key, "");
-      }
-    }
-
-    private String makeConf(String name, String key, String def)
-    {
-      String value = this.conf.getProperty(key, def);
-      value = Str.escape(value);
-      return "\"" + name + "\":\"" + value + "\",\r\n";
-    }
-
-    private String makeConf(String name, String key, double def)
-    {
-      String value = String.valueOf(this.conf.getProperty(key, def));
-      return "\"" + name + "\":" + value + ",\r\n";
-    }
-
-    private String makeConf(String name, String key, boolean def)
-    {
-      String value = String.valueOf(this.conf.getProperty(key, def));
-      return "\"" + name + "\":" + value + ",\r\n";
-    }
-
-    private String makeCode(String name, String key)
-    {
-      String value = this.conf.getProperty(key, "null");
-      return "\"" + name + "\":" + value + ",\n";
-    }
-
-    private String makeLink(String name, String key)
-    {
-      String[] arr = this.conf.getProperty(key, "").split(":", 2);
-      if (1 == arr.length)
-      {
-        name = "default";
-        key  = arr[0];
-      }
-      else
-      {
-        name = arr[0];
-        key  = arr[1];
-      }
-        this.conf.load(name);
-      return this.make(key );
+      helper.printJS("if(!window.HsCONF)window.HsCONF={};$.extend(window.HsAUTH,"+s+");");
     }
   }
 
