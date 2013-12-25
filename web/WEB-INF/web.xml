@@ -12,11 +12,7 @@
     </filter>
     <filter-mapping>
         <filter-name>ActionInit</filter-name>
-        <url-pattern>*.do</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>ActionInit</filter-name>
-        <url-pattern>*.de</url-pattern>
+        <url-pattern>*.act</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>ActionInit</filter-name>
@@ -25,6 +21,10 @@
     <filter-mapping>
         <filter-name>ActionInit</filter-name>
         <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ActionInit</filter-name>
+        <url-pattern>*.js-auth</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>ActionInit</filter-name>
@@ -41,16 +41,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Action</servlet-name>
-        <url-pattern>*.do</url-pattern>
-    </servlet-mapping>
-    <!-- Detect Servlet -->
-    <servlet>
-        <servlet-name>Detect</servlet-name>
-        <servlet-class>app.hongs.action.DetectAction</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Detect</servlet-name>
-        <url-pattern>*.de</url-pattern>
+        <url-pattern>*.act</url-pattern>
     </servlet-mapping>
     <!-- Cmdlet Servlet -->
     <servlet>
@@ -60,6 +51,15 @@
     <servlet-mapping>
         <servlet-name>Cmdlet</servlet-name>
         <url-pattern>*.api</url-pattern>
+    </servlet-mapping>
+    <!-- JsAuth Servlet -->
+    <servlet>
+        <servlet-name>JsLang</servlet-name>
+        <servlet-class>app.hongs.action.JsAuthAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>JsAuth</servlet-name>
+        <url-pattern>*.js-auth</url-pattern>
     </servlet-mapping>
     <!-- JsConf Servlet -->
     <servlet>
