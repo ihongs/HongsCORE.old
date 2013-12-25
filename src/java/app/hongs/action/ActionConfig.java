@@ -22,9 +22,9 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import app.hongs.Core;
+import app.hongs.CoreConfig;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-import static app.hongs.action.DatumsConfig.getInstance;
 
 /**
  * <h1>动作配置工具</h1>
@@ -116,10 +116,10 @@ public class ActionConfig
    */
   public Set<String>     actions;
 
-  public String indexPath;
-  public String loginPath;
-  public String checkLogin;
-  public String sessionKey;
+  /**
+   * 权限名称
+   */
+  public     String      session;
 
   public ActionConfig(String name)
     throws HongsException
@@ -167,26 +167,17 @@ public class ActionConfig
       this.parseActionTree(root,
         new ArrayList(), this.paths, this.pages, this.groups, this.actions, new HashSet());
 
-      // 提取基础配置
+      /**
+       * 提取会话名(类)
+       * Add by Hongs, 2013/12/25
+       */
+      CoreConfig c = CoreConfig.getInstance();
+      this.session = c.getProperty("core.default.auth.session", "actions");
       NodeList nodes = root.getElementsByTagName("config");
-      if (nodes.getLength() > 0) {
-        Element conf = (Element)nodes.item(0);
-        String x;
-        x = conf.getAttribute("indexPath");
-        if (x != null && !"".equals(x)) this.indexPath = x;
-        x = conf.getAttribute("loginPath");
-        if (x != null && !"".equals(x)) this.loginPath = x;
-        x = conf.getAttribute("sessionKey");
-        if (x != null && !"".equals(x)) this.sessionKey = x;
-        x = conf.getAttribute("checkLogin");
-        if (x != null && !"".equals(x)) this.checkLogin = Boolean.parseBoolean(x);
-      }
-      else if (!"default".equals(name)) {
-        ActionConfig c = getInstance();
-        this.indexPath = c.indexPath;
-        this.loginPath = c.loginPath;
-        this.sessionKey = c.sessionKey;
-        this.checkLogin = c.checkLogin;
+      if (nodes.getLength( ) > 0) {
+          Element e = ( Element ) nodes.item(0);
+          String  s = e.getAttribute("session");
+          if (s != null && !"".equals(s)) this.session = s;
       }
 
       // 测试
@@ -365,10 +356,34 @@ public class ActionConfig
   }
 
   /**
+   * 获取全部分组
+   * @param keys
+   * @return 全部分组信息
+   */
+  public Map<String, Map> getGroups(String... keys)
+  {
+    Map<String, Map> gs = new HashMap();
+    this.runGroupActions(gs, new HashSet(), keys);
+    return gs;
+  }
+
+  /**
+   * 获取全部动作
+   * @param keys
+   * @return 全部动作名
+   */
+  public Set<String> getGroupActions(String... keys)
+  {
+    Set<String> as = new HashSet();
+    this.runGroupActions(new HashMap(), as, keys);
+    return as;
+  }
+
+  /**
    * 获取全部分组和动作
    * @param keys
    */
-  public void getAllGroupActions (Map groupz, Set actionz, String... keys)
+  private void runGroupActions(Map groupz, Set actionz, String... keys)
   {
     for (String key : keys)
     {
@@ -389,39 +404,54 @@ public class ActionConfig
       {
         Set<String> dependsSet = (Set<String>)group.get("depends");
         String[]    dependsArr = dependsSet.toArray(new String[0]);
-        this.getAllGroupActions(groupz, actionz, dependsArr);
+        this.runGroupActions(groupz, actionz, dependsArr);
       }
     }
   }
 
-  /**
-   * 获取全部分组
-   * @param keys
-   * @return 全部分组信息
-   */
-  public Map<String, Map> getAllGroups (String... keys)
-  {
-    Map<String, Map> gs = new HashMap();
-    this.getAllGroupActions(gs, new HashSet(), keys);
-    return gs;
+  public Set<String> getAuthSet() {
+      if (! session.contains(".")) {
+          ActionHelper help = (ActionHelper)
+            Core.getInstance(ActionHelper.class);
+          return (Set) help.getSession (session);
+      }
+      else {
+          return (Set) Core.getInstance(session);
+      }
   }
 
-  /**
-   * 获取全部动作
-   * @param keys
-   * @return 全部动作名
-   */
-  public Set<String> getAllActions (String... keys)
-  {
-    Set<String> as = new HashSet();
-    this.getAllGroupActions(new HashMap(), as, keys);
-    return as;
+  public Map<String, Boolean> getAuthMap() {
+      Set<String> authset = getAuthSet();
+      if (authset == null || (authset.size() == 1 && authset.contains(null))) {
+          return null;
+      }
+      Map<String, Boolean> map = new HashMap();
+      for (String act : actions) {
+          map.put(act , false);
+      }
+      for (String act : authset) {
+          map.put(act , true );
+      }
+      return map;
+  }
+
+  public Boolean chkAuth(String url) {
+      Set<String> authset = getAuthSet();
+      if (authset == null || (authset.size() == 1 && authset.contains(null))) {
+          return false;
+      }
+      if (actions.contains(url) && !authset.contains(url)) {
+          return false;
+      }
+      else {
+          return true ;
+      }
   }
 
   /** 工厂方法 **/
 
   public static ActionConfig getInstance(String name) throws HongsException {
-      String key = "__DAT__." + name;
+      String key = "__ACT__." + name;
       Core core = Core.getInstance();
       ActionConfig inst;
       if (core.containsKey(key)) {

@@ -16,6 +16,9 @@
   <!-- 包含 -->
   <xs:element name="include" type="xs:string"/>
 
+  <!-- 会话 -->
+  <xs:element name="session" type="xs:string"/>
+
   <!-- 分组 -->
   <xs:element name="group">
     <xs:complexType>
@@ -48,6 +51,7 @@
         <xs:element ref="page" maxOccurs="unbounded"/>
         <xs:element ref="group" maxOccurs="unbounded"/>
         <xs:element ref="include" maxOccurs="unbounded"/>
+        <xs:element ref="session" minOccurs="0" maxOccurs="1"/>
       </xs:all>
     </xs:complexType>
   </xs:element>

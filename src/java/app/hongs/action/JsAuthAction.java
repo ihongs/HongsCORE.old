@@ -1,12 +1,5 @@
 package app.hongs.action;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Date;
-import java.util.TimeZone;
-import java.text.SimpleDateFormat;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -15,9 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import app.hongs.Core;
-import app.hongs.CoreConfig;
 import app.hongs.HongsError;
-import app.hongs.util.Str;
+import app.hongs.HongsException;
+import app.hongs.util.JSON;
 
 /**
  * <h1>配置信息输出动作</h1>
@@ -53,31 +46,19 @@ public class JsAuthAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    Core core = Core.getInstance();
-    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
     String name = Core.ACTION_PATH.get();
            name = name.substring(1, name.lastIndexOf('.'));
     String type = req.getParameter( "t");
-    String m, s;
-
-    /**
-     * CONF和SESS
-     */
-    String[] ns = name.split("/", 2);
-    String conf, sess;
-    if (ns.length > 1) {
-      conf = ns[0];
-      sess = ns[1];
-    }
-    else {
-      conf = ns[0];
-      sess = "actions";
-      name+="/actions";
-    }
+    String data;
 
     try {
-      s = JSON.soString(ActionFilter.getActions(conf, sess);
+      data = JSON.toString(ActionConfig.getInstance(name).getAuthMap());
+    }
+    catch (HongsException ex) {
+      helper.print500Code(ex.getMessage());
+      return;
     }
     catch (HongsError ex) {
       helper.print500Code(ex.getMessage());
@@ -85,11 +66,11 @@ public class JsAuthAction
     }
 
     // 输出配置信息
-    if ("json".equals(type)) {
-      helper.printJSON( s );
+    if ( "json".equals(type)) {
+      helper.printJSON(data);
     }
     else {
-      helper.printJS("if(!window.HsCONF)window.HsCONF={};$.extend(window.HsAUTH,"+s+");");
+      helper.printJS("if(!window.HsAUTH)window.HsAUTH={};$.extend(window.HsAUTH,"+data+");");
     }
   }
 

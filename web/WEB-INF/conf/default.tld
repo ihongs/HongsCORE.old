@@ -4,6 +4,32 @@
   <short-name>hs</short-name>
   <uri>/hs.tags</uri>
   <tag>
+    <name>act</name>
+    <tag-class>app.hongs.tag.AuthTag</tag-class>
+    <body-content>JSP</body-content>
+    <attribute>
+      <name>conf</name>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <name>act</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <name>not</name>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+    </attribute>
+    <attribute>
+      <name>els</name>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+    </attribute>
+  </tag>
+  <tag>
     <name>conf</name>
     <tag-class>app.hongs.tag.ConfTag</tag-class>
     <body-content>empty</body-content>
@@ -48,42 +74,6 @@
       <type>java.lang.String</type>
     </attribute>
     <dynamic-attributes>true</dynamic-attributes>
-  </tag>
-  <tag>
-    <name>act</name>
-    <tag-class>app.hongs.tag.ActTag</tag-class>
-    <body-content>JSP</body-content>
-    <attribute>
-      <name>act</name>
-      <required>true</required>
-      <rtexprvalue>true</rtexprvalue>
-      <type>java.lang.String</type>
-    </attribute>
-    <attribute>
-      <name>not</name>
-      <rtexprvalue>true</rtexprvalue>
-      <type>java.lang.Boolean</type>
-    </attribute>
-    <attribute>
-      <name>els</name>
-      <rtexprvalue>true</rtexprvalue>
-      <type>java.lang.Boolean</type>
-    </attribute>
-    <attribute>
-      <name>sign</name>
-      <rtexprvalue>true</rtexprvalue>
-      <type>java.lang.Boolean</type>
-    </attribute>
-    <attribute>
-      <name>conf</name>
-      <rtexprvalue>true</rtexprvalue>
-      <type>java.lang.String</type>
-    </attribute>
-    <attribute>
-      <name>sess</name>
-      <rtexprvalue>true</rtexprvalue>
-      <type>java.lang.String</type>
-    </attribute>
   </tag>
   <tag>
     <name>nav</name>

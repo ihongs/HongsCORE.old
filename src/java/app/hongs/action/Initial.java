@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  * </pre>
  * @author Hong
  */
-public class ActionInit
+public class Initial
 implements Filter {
 
     @Override
@@ -71,6 +71,22 @@ implements Filter {
                 + "LOGS_PATH       : " + Core.LOGS_PATH + "\r\n"
                 + "TMPS_PATH       : " + Core.TMPS_PATH + "\r\n");
         }
+    }
+
+    @Override
+    public void destroy() {
+        if (Core.IN_DEBUG_MODE) {
+            Core core = Core.GLOBAL_CORE;
+            long time = Core.GLOBAL_TIME;
+            float secs = (float) (System.currentTimeMillis() - time) / 1000;
+            System.out.println(
+                "--------------------------------------------------\r\n"
+                + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
+                + "Used Seconds    : " + secs + "\r\n"
+                + "Used Objects    : " + core.keySet().toString() + "\r\n");
+        }
+
+        Core.GLOBAL_CORE.destroy();
     }
 
     private void doInit(ServletRequest request, ServletResponse response)
@@ -126,17 +142,6 @@ implements Filter {
         }
     }
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-    throws ServletException, IOException {
-        this.doInit(request, response);
-        try {
-            chain.doFilter(request, response);
-        } finally {
-            this.doDestroy();
-        }
-    }
-
     private void doDestroy() {
         if (Core.IN_DEBUG_MODE) {
             Core core = Core.THREAD_CORE.get();
@@ -153,19 +158,14 @@ implements Filter {
     }
 
     @Override
-    public void destroy() {
-        if (Core.IN_DEBUG_MODE) {
-            Core core = Core.GLOBAL_CORE;
-            long time = Core.GLOBAL_TIME;
-            float secs = (float) (System.currentTimeMillis() - time) / 1000;
-            System.out.println(
-                "--------------------------------------------------\r\n"
-                + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
-                + "Used Seconds    : " + secs + "\r\n"
-                + "Used Objects    : " + core.keySet().toString() + "\r\n");
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    throws ServletException, IOException {
+            this .doInit   (request, response);
+        try {
+            chain.doFilter (request, response);
+        } finally {
+            this .doDestroy();
         }
-
-        Core.GLOBAL_CORE.destroy();
     }
 
 }

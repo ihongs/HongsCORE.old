@@ -94,7 +94,7 @@ extends AbstractBaseModel {
                 groups.add( group2 );
                 group2.put("key" , group1.get("key" ));
                 group2.put("name", group1.get("name"));
-                group2.put("groups", ac.getAllGroups(k).keySet());
+                group2.put("groups", ac.getGroups(k).keySet());
             }
 
                 }

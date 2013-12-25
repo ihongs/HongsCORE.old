@@ -1,12 +1,12 @@
 package app.hongs.tag;
 
+import app.hongs.HongsException;
+import app.hongs.action.ActionConfig;
 import java.io.IOException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
-
-import app.hongs.action.ActionFilter;
 
 /**
  * <h1>动作权限判断标签</h1>
@@ -19,20 +19,21 @@ import app.hongs.action.ActionFilter;
  *
  * @author Hongs
  */
-public class ActTag extends BodyTagSupport {
+public class AuthTag extends BodyTagSupport {
 
   private String act;
   private Boolean not = false;
   private Boolean els = false;
   private Boolean ebb = false;
-  private Boolean checkLogin = false;
-  private String configName = "default";
-  private String sessionKey = "actions";
+  private String cnf = "default";
 
   @Override
   public int doStartTag() throws JspException {
-    this.ebb = ActionFilter.checkAction(this.act,
-    this.configName, this.sessionKey, this.checkLogin);
+    try {
+      this.ebb = ActionConfig.getInstance(this.cnf).chkAuth(this.act);
+    } catch ( HongsException ex) {
+      throw new JspException(ex);
+    }
 
     if (this.not) {
         this.ebb =! this.ebb;
@@ -89,16 +90,8 @@ public class ActTag extends BodyTagSupport {
     this.els = els;
   }
 
-  public void setCkin(Boolean cl) {
-    this.checkLogin = cl;
-  }
-
   public void setConf(String cn) {
-    this.configName = cn;
-  }
-
-  public void setSess(String sk) {
-    this.sessionKey = sk;
+    this.cnf = cn;
   }
 
 }
