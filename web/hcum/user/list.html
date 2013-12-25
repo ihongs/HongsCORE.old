@@ -7,10 +7,10 @@
 
 <div id="hcum-user-list">
     <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('hcum/User/List.do?dept_id='+H$('&dept_id',this))"/>
+        <param name="loadUrl" value="('hcum/User/List.act?dept_id='+H$('&dept_id',this))"/>
         <param name="openUrls[]" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this)]"/>
         <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','.user-form-tab']"/>
-        <param name="sendUrls[]" value="['.remove','hcum/User/Remove.do']"/>
+        <param name="sendUrls[]" value="['.remove','hcum/User/Remove.act']"/>
         <param name="idKey" value="id"/>
     </object>
     <div>

@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet初始化
  * <pre>
- * 映射到 *.do *.de *.if *.js-conf *.js-lang *.jsp
+ * 映射到 *.act *.api *.jsp *.js-auth *.js-conf *.js-lang
  * 必须作为第一个 filter
  * </pre>
  * @author Hong

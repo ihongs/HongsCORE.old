@@ -31,7 +31,7 @@ import app.hongs.action.annotation.ActionChain;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
  *   &lt;servlet-name&gt;Action&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;
+ *   &lt;url-pattern&gt;*.act&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * <pre>
  *
@@ -44,7 +44,7 @@ public class Action
   /**
    * 服务方法
    *
-   * Servlet Mapping: *.do
+   * Servlet Mapping: *.act
    * 注意: 不支持请求URI的路径中含有"."(句点), 且必须区分大小写;
    * 其目的是为了防止产生多种形式的请求路径, 影响动作过滤, 产生安全隐患.
    *

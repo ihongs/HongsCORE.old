@@ -71,10 +71,10 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
   - var             变化文件(如上传)
 
 文件映射:
-xxxx/Foo/Bar.do     调用 app.xxxx.action.Foo.actionBar
+xxxx/Foo/Bar.act    调用 app.xxxx.action.Foo.actionBar
 xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
 xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(命令行 WEB-INF/run xxxx.Class)
-URL.de              判断是否有权访问该页面
+name.js-auth        读取 WBE-INF/conf/act-name.xml 中 action+session 的组合
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
 

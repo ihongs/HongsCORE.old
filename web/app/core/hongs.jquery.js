@@ -54,9 +54,9 @@ data-open-in 点击后在指定区域打开
 .radio-box 单选区域
 */
 
+if (typeof(HsAUTH) === "undefined") HsAUTH = {};
 if (typeof(HsCONF) === "undefined") HsCONF = {};
 if (typeof(HsLANG) === "undefined") HsLANG = {};
-if (typeof(HsAUTH) === "undefined") HsAUTH = {};
 
 /**
  * 快捷方式
@@ -528,20 +528,7 @@ function hsGetLang  (key, rep) {
  * @return {Boolean} 是(true)否(false)有权访问
  */
 function hsChkUri   (uri) {
-    uri = hsFixUri(uri) + ".de";
-
-    if (typeof HsAUTH[uri] == "undefined") {
-        jQuery.ajax({
-            "url"       :  uri,
-            "type"      : "POST",
-            "async"     :  false,
-            "cache"     :  false,
-            "success"   :  function( rst ) {
-                HsAUTH[uri] = rst == "OK";
-            }
-        });
-    }
-    return HsAUTH[uri];
+    return HsAUTH? HsAUTH[hsFixUri(uri)]: false;
 }
 /**
  * 补全URI为其增加前缀
@@ -549,8 +536,8 @@ function hsChkUri   (uri) {
  * @return {String} 完整的URI
  */
 function hsFixUri   (uri) {
-    if (/^(\w+:\/\/|\/|\.)/.test(uri) == false)
-        return hsGetConf("BASE_HREF") +"/"+uri;
+    if (/^(\w+:\/\/|\/|\.)/.test(uri) === false)
+        return hsGetConf("BASE_HREF") +"/"+ uri;
     else
         return uri;
 }
