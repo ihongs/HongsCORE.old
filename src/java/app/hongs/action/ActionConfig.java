@@ -116,6 +116,11 @@ public class ActionConfig
    */
   public Set<String>     actions;
 
+  public String indexPath;
+  public String loginPath;
+  public String checkLogin;
+  public String sessionKey;
+
   public ActionConfig(String name)
     throws HongsException
   {
@@ -157,9 +162,32 @@ public class ActionConfig
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder dbn = dbf.newDocumentBuilder();
       Document doc = dbn.parse(df);
+      Element root = doc.getDocumentElement();
 
-      this.parseActionTree(doc.getDocumentElement(),
+      this.parseActionTree(root,
         new ArrayList(), this.paths, this.pages, this.groups, this.actions, new HashSet());
+
+      // 提取基础配置
+      NodeList nodes = root.getElementsByTagName("config");
+      if (nodes.getLength() > 0) {
+        Element conf = (Element)nodes.item(0);
+        String x;
+        x = conf.getAttribute("indexPath");
+        if (x != null && !"".equals(x)) this.indexPath = x;
+        x = conf.getAttribute("loginPath");
+        if (x != null && !"".equals(x)) this.loginPath = x;
+        x = conf.getAttribute("sessionKey");
+        if (x != null && !"".equals(x)) this.sessionKey = x;
+        x = conf.getAttribute("checkLogin");
+        if (x != null && !"".equals(x)) this.checkLogin = Boolean.parseBoolean(x);
+      }
+      else if (!"default".equals(name)) {
+        ActionConfig c = getInstance();
+        this.indexPath = c.indexPath;
+        this.loginPath = c.loginPath;
+        this.sessionKey = c.sessionKey;
+        this.checkLogin = c.checkLogin;
+      }
 
       // 测试
       /*
