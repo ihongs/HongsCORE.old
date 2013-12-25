@@ -12,6 +12,12 @@
 <root xmlns="http://hongs-core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://hongs-core ac.xsd">
+    <!--
+    <indexPath>/index.html</indexPath>
+    <loginPath>/login.html</loginPath>
+    <checkLogin>true</checkLogin>
+    <sessionKey>actions</sessionKey>
+    //-->
     <page name="首页" uri="/">
         <page name="首页" uri="/"/>
         <include>hcrm</include>
