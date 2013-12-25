@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  * </pre>
  * @author Hong
  */
-public class Initial
+public class Initialize
 implements Filter {
 
     @Override
