@@ -54,7 +54,7 @@ public class CmdletAction
     throws IOException, ServletException
   {
     ActionHelper helper = (ActionHelper)
-    Core.getInstance(app.hongs.action.ActionHelper.class);
+      Core.getInstance(ActionHelper.class);
     String action = Core.ACTION_PATH.get();
     action = action.substring(1, action.lastIndexOf('.')); // 去掉前导"/", 去掉扩展名
 

@@ -402,7 +402,7 @@ public class CmdletHelper
    */
   public static void print(String text)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.cmd.line.time.format",
                                 "yyyy/MM/dd HH:mm:ss");
     Date   d = new Date(System.currentTimeMillis());

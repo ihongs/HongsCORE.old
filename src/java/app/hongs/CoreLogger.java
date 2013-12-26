@@ -99,7 +99,7 @@ public class CoreLogger
      * 记录发生的时间
      */
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.line.time.format",
                                 "yyyy/MM/dd HH:mm:ss");
     DateFormat df = new SimpleDateFormat(f);
@@ -179,7 +179,7 @@ public class CoreLogger
    */
   private void check(long time)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.name.date.format", "");
     String p = this.path + File.separator + this.name;
     String x;

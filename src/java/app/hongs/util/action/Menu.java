@@ -37,7 +37,7 @@ public class Menu {
         }
 
         CoreLanguage lang = (CoreLanguage)
-        Core.getInstance(app.hongs.CoreLanguage.class);
+            Core.getInstance(CoreLanguage.class);
         ActionConfig conf = new ActionConfig(name);
 
         helper.printJSON(buildMenu(lang, conf.pages, l, d, 0));

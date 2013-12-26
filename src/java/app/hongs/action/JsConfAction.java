@@ -55,8 +55,7 @@ public class JsConfAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    Core core = Core.getInstance();
-    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
     String name = Core.ACTION_PATH.get();
            name = name.substring(1, name.lastIndexOf('.'));

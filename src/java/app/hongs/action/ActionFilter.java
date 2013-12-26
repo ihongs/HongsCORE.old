@@ -116,6 +116,23 @@ public class ActionFilter
       };
       this.excludeUrls = u3;
     }
+
+    /**
+     * 从配置中提取首页
+     */
+    ActionConfig conf;
+    try {
+        conf = ActionConfig.getInstance(configName);
+    }
+    catch (HongsException ex) {
+        throw new ServletException(ex);
+    }
+    catch (HongsError ex) {
+        throw new ServletException(ex);
+    }
+    if (conf.pages.size() == 1) {
+        this.indexPage = conf.pages.keySet().toArray(new String[0])[0];
+    }
   }
 
   @Override
@@ -184,8 +201,8 @@ public class ActionFilter
 
   private void sayError(int type)
   {
-    CoreLanguage lang   = (CoreLanguage)Core.getInstance(app.hongs.CoreLanguage.class);
-    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
+    CoreLanguage lang   = (CoreLanguage)Core.getInstance(CoreLanguage.class);
 
     /**
      * 根据错误类型获取错误消息及跳转URI

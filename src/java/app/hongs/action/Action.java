@@ -1,7 +1,7 @@
 package app.hongs.action;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
+import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -58,9 +58,9 @@ public class Action
     throws IOException, ServletException
   {
     ActionHelper helper = (ActionHelper)
-    Core.getInstance(app.hongs.action.ActionHelper.class);
+      Core.getInstance(ActionHelper.class);
     String action = Core.ACTION_PATH.get();
-    action = action.substring(1, action.lastIndexOf('.')); // 去掉前导"/", 去掉扩展名
+    action = action.substring(1,action.lastIndexOf('.')); // 去掉前导"/", 去掉扩展名
 
     if (action != null && action.length() == 0) {
         helper.print404Code("Can not find action name.");
@@ -204,7 +204,7 @@ public class Action
     if (!(ta instanceof HongsThrowable))
     {
       CoreLanguage lang = (CoreLanguage)
-        Core.getInstance(app.hongs.CoreLanguage.class);
+          Core.getInstance(CoreLanguage.class );
       if (error == null || error.length() == 0)
       {
         error = lang.translate("core.error.unkwn");

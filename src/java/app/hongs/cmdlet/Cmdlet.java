@@ -130,7 +130,7 @@ public class Cmdlet
       if (!(ta instanceof HongsThrowable))
       {
         CoreLanguage lang = (CoreLanguage)
-          Core.getInstance(app.hongs.CoreLanguage.class);
+            Core.getInstance(CoreLanguage.class );
         if (error == null || error.length() == 0)
         {
           error = lang.translate("core.error.unkwn");
@@ -215,7 +215,7 @@ public class Cmdlet
     Core.LOGS_PATH = Core.BASE_PATH + File.separator + "logs";
     Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
     Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
     Core.SERVER_ID  = conf.getProperty("core.server.id", "0");
@@ -303,8 +303,8 @@ public class Cmdlet
     }
 
     ActionHelper helper = (ActionHelper)
-                 Core.getInstance(app.hongs.action.ActionHelper.class);
-                 helper.init( req, ses );
+          Core.getInstance(ActionHelper.class);
+    helper.init(req, ses);
   }
 
   /**

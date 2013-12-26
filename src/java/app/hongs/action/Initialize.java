@@ -55,7 +55,7 @@ implements Filter {
         Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
 
         // 资源配置
-        CoreConfig conf = (CoreConfig) Core.getInstance(app.hongs.CoreConfig.class);
+        CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
         Core.LOGS_PATH = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
         Core.TMPS_PATH = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
         Core.SERVER_ID = conf.getProperty("core.server.id", "0");
@@ -95,9 +95,9 @@ implements Filter {
         HttpServletResponse rsp = (HttpServletResponse) response;
 
         CoreConfig conf = (CoreConfig)
-            Core.getInstance(app.hongs.CoreConfig.class);
+          Core.getInstance(CoreConfig.class);
         ActionHelper helper = (ActionHelper)
-            Core.getInstance(app.hongs.action.ActionHelper.class);
+              Core.getInstance(ActionHelper.class);
         helper.init( req, rsp );
 
         Core.ACTION_TIME.set(System.currentTimeMillis());

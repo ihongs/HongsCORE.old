@@ -55,8 +55,7 @@ public class JsLangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core core = Core.getInstance();
-    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
     String conf = Core.ACTION_PATH.get();
            conf = conf.substring(1, conf.lastIndexOf('.'));
