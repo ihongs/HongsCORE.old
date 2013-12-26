@@ -106,9 +106,10 @@ object.config {
 /** 树 **/
 
 .tree-node {
-    /*border-left: 1px dotted #000;*/
-    margin-left: 7px;
-    padding-left: 7px;
+    border-left: 1px dotted #000;
+    margin-left: 12px;
+    padding-left: 6px;
+    line-height: 22px;
     cursor: pointer;
 }
 .tree-root {
@@ -120,8 +121,8 @@ object.config {
 .tree-node table td {
     border: 0;
     border-spacing: 0;
+    margin: 0 2px;
 }
-
 .tree-curr>table,
 .tree-curr>table td{
     color: #000;
@@ -132,34 +133,40 @@ object.config {
     width: 14px;
 }
 .tree-hand .caret {
-    /*
     width: 16px;
     height: 22px;
     background-image: url(../img/tree-hand.gif);
-    */
     border: 0;
 }
 .tree-fold>table .tree-hand .caret {
-    /*background-image: url(../img/tree-hand-fold.gif);*/
-    border-left: 6px solid #ccc;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
+    background-image: url(../img/tree-hand-fold.gif);
+    /*
+    border-left: 8px solid #666;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    */
 }
 .tree-fold>table .tree-hand:hover .caret {
-    border-left: 6px solid #666;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
+    /*
+    border-left: 8px solid #f66;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    */
 }
 .tree-open>table .tree-hand .caret {
-    /*background-image: url(../img/tree-hand-open.gif);*/
-    border-top: 6px solid #ccc;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
+    background-image: url(../img/tree-hand-open.gif);
+    /*
+    border-top: 8px solid #666;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    */
 }
 .tree-open>table .tree-hand:hover .caret {
-    border-top: 6px solid #666;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
+    /*
+    border-top: 8px solid #f66;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    */
 }
 
 .tree-cnum {
