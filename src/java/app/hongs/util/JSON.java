@@ -100,7 +100,7 @@ public class JSON
     String sp = Core.IN_DEBUG_MODE ? "" : null;
     StringBuilder sb = new StringBuilder();
     JSON.print(sb, sp, null, obj, 0, 0);
-    return sb.toString();
+    return sb.toString().trim();
   }
 
   /** 操作方法 **/

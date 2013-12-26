@@ -14,8 +14,8 @@
       xsi:schemaLocation="http://hongs-core ac.xsd">
     <page name="首页" uri="/">
         <page name="首页" uri="/"/>
-        <include>hcum</include>
         <!--
+        <include>hcum</include>
         <page name="广告中心" uri="/action/Jump/To?page=ad">
             <page name="订单管理" uri="/adms/order_list.jsp">
                 <page name="{opt}广告主" uri="/adms/owner_form.jsp"/>

@@ -54,7 +54,7 @@
     </servlet-mapping>
     <!-- JsAuth Servlet -->
     <servlet>
-        <servlet-name>JsLang</servlet-name>
+        <servlet-name>JsAuth</servlet-name>
         <servlet-class>app.hongs.action.JsAuthAction</servlet-class>
     </servlet>
     <servlet-mapping>

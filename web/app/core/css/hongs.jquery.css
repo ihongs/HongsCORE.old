@@ -31,7 +31,7 @@ object.config {
 .dn {display: none;}
 .vh {visibility: hidden; overflow: hidden; width: 0; height: 0; magin: 0; padding: 0;}
 
-/** 消息 **/
+/** 全局 **/
 
 #note-box {
     position: fixed;
@@ -39,6 +39,13 @@ object.config {
     z-index: 9999;
     width: 40%;
     left: 30%;
+}
+
+.side-context {
+    padding: 0 1em 0 0;
+}
+.main-context {
+    padding: 0;
 }
 
 /** 表单 **/
