@@ -6,13 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 追加表单中的选择数据
+ * 处理列表中的选择数据
  * @author Hong
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionAnnotation(SelectDataInvoker.class)
-public @interface SelectData {
+@ActionAnnotation(ListDataInvoker.class)
+public @interface ListData {
     String   conf() default "default";
     String   lang() default "default";
     String[] keys() default {};

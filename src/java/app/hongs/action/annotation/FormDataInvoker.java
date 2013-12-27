@@ -14,7 +14,7 @@ import java.lang.annotation.Annotation;
  * 追加表单中的选择数据
  * @author Hong
  */
-public class SelectDataInvoker {
+public class FormDataInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
         chain.doAction();
@@ -32,7 +32,7 @@ public class SelectDataInvoker {
 
         /** 追加数据 **/
 
-        SelectData datums = (SelectData) anno;
+        FormData datums = (FormData) anno;
         String       conf = datums.conf();
         String       lang = datums.lang();
         String[]     keys = datums.keys();

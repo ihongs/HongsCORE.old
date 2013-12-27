@@ -13,7 +13,7 @@ import java.lang.annotation.Annotation;
  * 处理列表中的选择数据
  * @author Hong
  */
-public class SelectListInvoker {
+public class ListDataInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
         chain.doAction();
@@ -33,7 +33,7 @@ public class SelectListInvoker {
 
         /** 追加数据 **/
 
-        SelectList datums = (SelectList) anno;
+        ListData datums = (ListData) anno;
         String       conf = datums.conf();
         String       lang = datums.lang();
         String[]     keys = datums.keys();
