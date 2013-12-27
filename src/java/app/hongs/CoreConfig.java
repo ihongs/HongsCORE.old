@@ -8,17 +8,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 /**
- * <h1>配置信息读取工具</h1>
- * <pre>
- * 采用Properties加载配置选项.
- * </pre>
+ * 配置信息读取工具
  *
- * <h2>配置选项:</h2>
+ * <p>
+ * 采用Properties加载配置选项.<br/>
+ * 资源文件名为"xxx.properties".<br/>
+ * </p>
+ *
+ * <h3>配置选项:</h3>
  * <pre>
  * core.load.config.once    为true则仅加载一次, 为false由Core控制
  * </pre>
  *
- * <h2>错误代码:</h2>
+ * <h3>错误代码:</h3>
  * <pre>
  * 0x21 无法找到配置文件
  * 0x23 无法读取配置文件
@@ -205,7 +207,7 @@ public class CoreConfig
     }
   }
 
-  /** 静态属性及方法 **/
+  //** 静态属性及方法 **/
 
   public static CoreConfig instance;
 
@@ -230,7 +232,13 @@ public class CoreConfig
 
     return conf;
   }
-  
+
+  /**
+   * 按配置名获取唯一实例
+   * 如果配置为core.load.config.once为true则仅加载一次
+   * @param name 配置名
+   * @return 唯一配置实例
+   */
   public static CoreConfig getInstance(String name)
   {
     String key = "__CONF__." + name;

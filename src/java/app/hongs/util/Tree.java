@@ -9,10 +9,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * <h1>树型操作工具</h1>
- * <pre>
+ * 树形操作工具
+ *
+ * <p>
  * 用于获取和设置树型结构(&lt;Map&lt;Map...&gt;&gt;)数据的值
- * </pre>
+ * </p>
  *
  * @author Hongs
  */
@@ -215,17 +216,17 @@ public class Tree
    * 将map2追加到map1的keys层级中
    * @param map1
    * @param map2
-   * @param keys 
+   * @param keys
    */
   public static void putAllDeep(Map map1, Map map2, String[] keys) {
       putAllDeep(map1, map2, Arrays.asList(keys));
   }
-  
+
   /**
    * 将map2追加到map1的keys层级中
    * @param map1
    * @param map2
-   * @param keys 
+   * @param keys
    */
   public static void putAllDeep(Map map1, Map map2, List<String> keys) {
       Iterator it = map2.entrySet().iterator();

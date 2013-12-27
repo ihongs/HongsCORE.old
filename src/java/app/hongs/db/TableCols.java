@@ -10,11 +10,13 @@ import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 
 /**
- * <h1>表字段信息缓存类</h1>
- * <pre>
- * 缓存文件存放在 "WEB-INF/tmps/dc-库名.表名.ser" 的文件中; 当表结构发生改变, 程序不
- * 会自动重载, 务必删除对应的缓存文件
- * </pre>
+ * 表字段信息缓存类
+ *
+ * <p>
+ * 缓存文件存放在 "WEB-INF/tmps/dc-库名.表名.ser" 的文件中;
+ * 当表结构发生改变, 程序不会自动重载, 务必删除对应的缓存文件.
+ * </p>
+ *
  * @author hongs
  */
 public class TableCols

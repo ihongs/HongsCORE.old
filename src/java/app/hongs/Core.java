@@ -7,25 +7,26 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * <h1>核心类</h1>
- * <pre>
- * 承担"唯一实例"(线程内唯一)的申请与注销操作
- * 必须存在一个无参构造函数或无参"getInstance"方法
- * 获取当前 Core 的唯一实例总是使用"Core.getInstance()"
- * </pre>
+ * 核心类
  *
- * <h2>特性解释:</h2>
- * <pre>
- * Servlet 在众多实现中总是以单实例多线程的方式工作, 对于某一个请求有且仅有一个线程为
- * 其服务.
- * Core 类为框架的对象请求器, 其分配原则为线程内分配, 除个别类通过 getInstance 自定规
- * 则外, 其他类的实例均在线程内唯一. 故不需要同步即可确保程序的线程安全, 而同时兼顾单例
- * 模式的特点(节省资源, 共享状态).
- * </pre>
+ * <p>
+ * 承担"唯一实例"(线程内唯一)的申请与注销操作<br/>
+ * 必须存在一个无参构造函数或无参"getInstance"方法<br/>
+ * 获取当前 Core 的唯一实例总是使用"Core.getInstance()"<br/>
+ * </p>
  *
- * <h2>静态属性:</h2>
+ * <h3>特性解释:</h3>
+ * <p>
+ * Servlet 在众多实现中总是以单实例多线程的方式工作,
+ * 即对于单个请求有且仅有一个线程在为其服务.
+ * Core 类为框架的对象请求器, 分配原则为线程内分配.
+ * 除个别类通过 getInstance 自定规则外, 其他类的实例均在线程内唯一,
+ * 故不需要同步即可确保程序的线程安全, 而同时兼顾单例模式的特点(节省资源, 共享状态).
+ * </p>
+ *
+ * <h3>静态属性:</h3>
  * <pre>
- * IN_DEBUG_MODE    标识是否处于调试模式
+ * IN_DEBUG_MODE    标识是否处于调试模式(develop)
  * IN_SHELL_MODE    标识是否处于外壳模式(cmdlet)
  * BASE_HREF        应用访问路径(WEB应用中为ContextPath)
  * BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
@@ -35,9 +36,9 @@ import java.lang.reflect.InvocationTargetException;
  * TMPS_PATH        临时文件存放目录
  * SERVER_ID        服务器ID
  * 注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
- * </p>
+ * </pre>
  *
- * <h2>错误代码:</h2>
+ * <h3>错误代码:</h3>
  * <pre>
  * 0x25 实例名称不能为空
  * 0x27 无法获取对应的类
@@ -81,7 +82,7 @@ extends HashMap<String, Object>
 
   /**
    * 不支持get(Object), 仅支持get(String)
-   * 
+   *
    * @param name
    * @return 抛出错误
    * @deprecated
@@ -95,8 +96,7 @@ extends HashMap<String, Object>
 
   /**
    * 不支持clear
-   * 
-   * @return 抛出错误
+   *
    * @deprecated
    */
   @Override
@@ -255,10 +255,10 @@ extends HashMap<String, Object>
     }
   }
 
-  /** 静态属性及方法 **/
+  //** 静态属性及方法 **/
 
   /**
-   * 是否处于调试模式(devlop)
+   * 是否处于调试模式
    */
   public static boolean IN_DEBUG_MODE;
 
@@ -306,6 +306,7 @@ extends HashMap<String, Object>
    * 全局核心对象
    */
   public static Core GLOBAL_CORE = new Core();
+
   /**
    * 全局开始时间
    */
@@ -321,16 +322,19 @@ extends HashMap<String, Object>
             return new Core();
       }
   };
+
   /**
    * 动作开始时间
    */
   public static InheritableThreadLocal< Long > ACTION_TIME
          =  new InheritableThreadLocal();
+
   /**
    * 动作路径标识
    */
   public static InheritableThreadLocal<String> ACTION_PATH
          =  new InheritableThreadLocal();
+
   /**
    * 动作语言标识
    */
@@ -339,7 +343,7 @@ extends HashMap<String, Object>
 
   /**
    * 获取核心对象
-   * @return 
+   * @return 核心对象
    */
   public static Core getInstance() {
     return THREAD_CORE.get();
@@ -349,7 +353,7 @@ extends HashMap<String, Object>
    * 按类获取单例
    *
    * @param klass
-   * @return 
+   * @return 类的对象
    */
   public static Object getInstance(Class klass) {
     return getInstance().get(klass);
@@ -359,7 +363,7 @@ extends HashMap<String, Object>
    * 按类名获取单例
    *
    * @param name
-   * @return 
+   * @return 类的对象
    */
   public static Object getInstance(String name) {
     return getInstance().get( name);
@@ -405,7 +409,7 @@ extends HashMap<String, Object>
     return Core.getUniqueId(Core.SERVER_ID);
   }
 
-  /** 核心接口 **/
+  //** 核心接口 **/
 
   /**
    * 核心处理结束事件接口

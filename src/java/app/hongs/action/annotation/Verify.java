@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
+ * 表单验证(未开发)
  * @author Hong
  */
 @Target(ElementType.METHOD)

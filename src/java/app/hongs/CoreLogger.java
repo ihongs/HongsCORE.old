@@ -16,15 +16,15 @@ import app.hongs.action.ActionHelper;
 import app.hongs.util.Str;
 
 /**
- * <h1>日志记录工具</h1>
+ * 日志记录工具
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
  * core.log.name.date.format    日志名称中的日期格式, 为空则不按日期拆分日志
  * core.log.line.time.format    日志记录中的时间格式, 默认为"yyyy/MM/dd HH:mm:ss"
  * </pre>
  *
- * <h2>错误代码:</h2>
+ * <h3>错误代码:</h3>
  * <pre>
  * 0x16 无法打开日志文件
  * 0x18 无法写入日志文件
@@ -262,7 +262,7 @@ public class CoreLogger
     }
   }
 
-  /** 静态属性及方法 **/
+  //** 静态属性及方法 **/
 
   /**
    * 日志对象集合

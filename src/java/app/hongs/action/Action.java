@@ -15,16 +15,18 @@ import app.hongs.HongsThrowable;
 import app.hongs.action.annotation.ActionChain;
 
 /**
- * <h1>动作启动器</h2>
- * <pre>
- * 在 app.xxx.action 中建立一个类, 指定多个
- * public void actionXxx(app.hongs.action.ActionHelper helper)
- * 方法接收来自Web的请求动作.
- * </pre>
+ * 动作启动器
  *
- * <h2>web.xml配置:</h2>
+ * <p>
+ * 在 app.xxx.action 中建立一个类, 指定多个
+ * <code>
+ * public void actionXxx(app.hongs.action.ActionHelper helper)
+ * </core>
+ * 方法接收来自Web的请求动作.
+ * </p>
+ *
+ * <h3>web.xml配置:</h3>
  * <pre>
- * &lt;!-- Action Servlet --&gt;
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;Action&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.action.Action&lt;/servlet-class&gt;
@@ -44,7 +46,7 @@ public class Action
   /**
    * 服务方法
    *
-   * Servlet Mapping: *.act
+   * Servlet Mapping: *.act<br/>
    * 注意: 不支持请求URI的路径中含有"."(句点), 且必须区分大小写;
    * 其目的是为了防止产生多种形式的请求路径, 影响动作过滤, 产生安全隐患.
    *
@@ -104,6 +106,7 @@ public class Action
    * @param cls
    * @param mtd
    * @param helper
+   * @throws javax.servlet.ServletException
    */
   protected void doAction(String cls, String mtd, ActionHelper helper)
     throws ServletException

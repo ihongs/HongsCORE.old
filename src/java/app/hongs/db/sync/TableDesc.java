@@ -12,7 +12,7 @@ import app.hongs.db.DB;
 import app.hongs.db.Table;
 
 /**
- * <h1>表结构描述(Table structure descriptions)</h1>
+ * 表结构描述(Table structure descriptions)
  *
  * <b>注意: 参考MySQL编写, 可能不适用于其他数据库</b>
  *
@@ -113,7 +113,7 @@ public class TableDesc
     }
   }
 
-  /** 静态属性及方法 **/
+  //** 静态成员 **/
 
   public static final int DROP = 0;
   public static final int ADD = 1;
@@ -270,7 +270,7 @@ public class TableDesc
     return sql;
   }
 
-  /** 私有静态工具方法 **/
+  //** 私有成员 **/
 
   private static String getKeyType(TableDesc td, String key)
   {

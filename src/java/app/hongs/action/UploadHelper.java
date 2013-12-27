@@ -26,9 +26,13 @@ import org.apache.commons.fileupload.util.Streams;
 
 /**
  * 上传助手
- * 需要依赖apache的commons-fileupload(1.2)
- * 参考API: http://commons.apache.org/fileupload/apidocs/index.html
- * 默认上传目录: TMPS_PATH + "/uploads";
+ *
+ * <p>
+ * 需要依赖 apache 的 commons-fileupload(1.2)<br/>
+ * 参考接口文档: http://commons.apache.org/fileupload/apidocs/index.html<br/>
+ * 默认上传目录: TMPS_PATH + "/uploads"
+ * </p>
+ *
  * @author Hongs
  */
 public class UploadHelper
@@ -245,7 +249,7 @@ public class UploadHelper
     }
   }
 
-  /** 工具函数 **/
+  //** 工具函数 **/
 
   private void parseRequest()
   throws HongsException

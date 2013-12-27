@@ -16,18 +16,19 @@ import app.hongs.HongsError;
 import java.io.PrintWriter;
 
 /**
- * <h1>简单JSON格式工具</h1>
- * <pre>
- * 支持将 <b>数组,集合框架,基础类型</b> 的数据转换为JSON字符串, 反向解析JSON字符串到
- * Java对象; 暂采用 org.json.simple 来完成.
- * 顺便说说为什么不采用第3方的JSON库: 最开始采用的是org.json, 效果相当不错, 可惜在解
- * 析JSON时首先解析成他自身的对象而不是Java集合框架的对象; 后来采用org.json.simple,
- * 也很好, 但是对Set类型不支持, 修改其源码将List改成Collection即可解决; 再后来考虑到
- * 我已经有一个Dump类, 用于调试输出基础数据类型, 其实现与JSON大同小异, 故将其修改成该
- * JSON类. 但是JSON的解析太麻烦, 就还是调org.json.simple来做了.
- * </pre>
- * 
- * <h2>错误代码</h2>
+ * 简单JSON格式工具
+ *
+ * <p>
+ * 支持将 <b>数组,集合框架,基础类型</b> 的数据转换为 JSON 字符串,
+ * 反向解析 JSON 字符串到 Java 对象; 暂采用 org.json.simple 来完成.<br/>
+ * 顺便说说为什么不采用第3方的 JSON 库:
+ * 最开始用 org.json, 还不错, 可惜在解析 JSON 时会解析成他自身的对象而不是 Java 集合框架的对象;
+ * 后来采用 org.json.simple, 也很好, 但是不支持 Set, 需要修改其源码将 List 改成 Collection;
+ * 考虑到我有一个 Dump 类, 用于调试输出基础类型和集合对象, 其实现与 JSON 大同小异,
+ * 故将其修改成该 JSON类. 但是 JSON 的解析太麻烦, 就还是调 org.json.simple 好了.
+ * </p>
+ *
+ * <h3>错误代码</h3>
  * <pre>
  * 0x40 解析JSON数据错误
  * </pre>
@@ -103,7 +104,7 @@ public class JSON
     return sb.toString().trim();
   }
 
-  /** 操作方法 **/
+  //** 操作方法 **/
 
   private static void print(StringBuilder sb, String pre, Object[] arr)
   {
@@ -284,7 +285,7 @@ public class JSON
     }
   }
 
-  /** 编码 **/
+  //** 编码 **/
   /*
   private final static String[] hex = {
       "00","01","02","03","04","05","06","07","08","09","0A","0B","0C","0D","0E","0F",

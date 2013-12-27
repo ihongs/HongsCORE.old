@@ -9,12 +9,13 @@ import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 
 /**
- * <h1>分页查询</h1>
- * <pre>
+ * 分页查询
+ * 
+ * <p>
  * 注意: 必须先调 getList 然后调 getPage
- * </pre
+ * </p>
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
  * core.first.of.page 首页序号, 0或1
  * core.rows.per.page 每页多少条记录

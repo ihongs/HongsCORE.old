@@ -17,9 +17,9 @@ import java.util.regex.Pattern;
 import java.text.SimpleDateFormat;
 
 /**
- * <h1>外壳程序助手类</h1>
+ * 外壳程序助手类
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
  * core.cmd.line.time.format    输出记录中的时间格式, 默认为"yyyy/MM/dd HH:mm:ss"
  * </pre>
@@ -29,7 +29,7 @@ import java.text.SimpleDateFormat;
 public class CmdletHelper
 {
 
-  /** 参数相关 **/
+  //** 参数相关 **/
 
   /**
    * 错误消息集合
@@ -109,7 +109,8 @@ public class CmdletHelper
    *                    "date=/^\\d{4}-\\d{1,2}-\\d{1,2}$/");
    * </pre>
    * @param opts 选项
-   * @param regs 规则
+   * @param chks 规则
+   * @return 选项集合
    */
   public static Map<String, Object> getOpts(Map<String, String[]> opts, String... chks)
   throws HongsError
@@ -394,7 +395,7 @@ public class CmdletHelper
     return newOpts;
   }
 
-  /** 输出相关 **/
+  //** 输出相关 **/
 
   /**
    * 输出到标准输出

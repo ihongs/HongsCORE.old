@@ -30,19 +30,17 @@ import java.util.Set;
 import org.w3c.dom.NamedNodeMap;
 
 /**
- * <h1>数据库配置信息解析类</h1>
+ * 数据库配置信息解析类
  *
- * <h2>异常代码区间:</h2>
- * <b>0x1060~0x106f</b>
- *
- * <h2>异常代码说明:</h2>
- * <ul>
- * <li>0x1061  找不到数据库配置文件</li>
- * <li>0x1063  无法解析数据库配置文档</li>
- * <li>0x1065  在配置文档中找不到根节点</li>
- * <li>0x1067  无法读取XML文件</li>
- * <li>0x1069  无法读取XML流</li>
- * </ul>
+ * <h3>异常代码:</h3>
+ * <pre>
+ * 区间: 0x1060~0x106f
+ * 0x1061  找不到数据库配置文件
+ * 0x1063  无法解析数据库配置文档
+ * 0x1065  在配置文档中找不到根节点
+ * 0x1067  无法读取XML文件
+ * 0x1069  无法读取XML流
+ * </pre>
  *
  * @author Hongs
  */
@@ -51,7 +49,7 @@ public class DBConfig
   implements Serializable
 {
 
-  /** 缓存 **/
+  //** 缓存 **/
 
   protected String name;
 
@@ -87,7 +85,7 @@ public class DBConfig
     this.tableConfigs = cp.tableConfigs;
   }
 
-  /** 数据 **/
+  //** 数据 **/
 
   public String dbClass;
 

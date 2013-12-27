@@ -10,13 +10,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <h1>树模型</h1>
+ * 树形模型
  *
- * <pre>
+ * <p>
  * 用于与树JS组件进行交互
- * </pre>
+ * </p>
  *
- * <h2>URL参数说明:</h2>
+ * <h3>URL参数说明:</h3>
  * <pre>
  *   pid          获取pid指定的一组节点
  *   ids          获取ids指定的全部节点
@@ -25,7 +25,7 @@ import java.util.Set;
  *   with_path    附带节点路径
  * </pre>
  *
- * <h2>JS请求参数组合:</h2>
+ * <h3>JS请求参数组合:</h3>
  * <pre>
  *   获取一层: ?pid=xxx
  *   查找节点: ?find=xxx&only_id=1
@@ -106,7 +106,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     this(DB.getInstance(dbName).getTable(tableName));
   }
 
-  /** 标准动作方法 **/
+  //** 标准动作方法 **/
 
   /**
    * <b>获取树</p>
@@ -249,7 +249,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     return this.getTree(req, null);
   }
 
-  /** 标准模型方法 **/
+  //** 标准模型方法 **/
 
   /**
    * 添加节点
@@ -463,7 +463,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     }
   }
 
-  /** 树基础操作 **/
+  //** 树基础操作 **/
 
   public String getParentId(String id)
     throws HongsException
@@ -647,7 +647,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     return this.getChilds(id, false);
   }
 
-  /** 子数目相关 **/
+  //** 子数目相关 **/
 
   public int getChildsNum(String id, List excludeIds)
     throws HongsException
@@ -775,7 +775,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     this.db.execute(sql, params);
   }
 
-  /** 排序号相关 **/
+  //** 排序号相关 **/
 
   public int getSerialNum(String id)
     throws HongsException
@@ -953,7 +953,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     this.db.execute(sql, params);
   }
 
-  /** 检查及修复 **/
+  //** 检查及修复 **/
 
   public void checkAndRepair(String pid)
     throws HongsException

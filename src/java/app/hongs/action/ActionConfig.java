@@ -15,11 +15,11 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
@@ -27,25 +27,25 @@ import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 
 /**
- * <h1>动作配置工具</h1>
+ * 动作配置工具
  *
- * <h2>注意:</h2>
- * <pre>
- * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间; 但无法确保其对象在反
- * 复使用中会自动重载, 最好在修改配置后删除临时文件并重启应用.
- * </pre>
+ * <p>
+ * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;
+ * 但无法确保其对象在反复使用中会自动重载,
+ * 最好在修改配置后删除临时文件并重启应用.
+ * </p>
  *
- * <h2>规范:</h2>
+ * <h3>配置规范:</h3>
  * <pre>
- * page(页面)   有uri和name(名称)两个属性, 相同的uri可以对应不同的name, 可包含多个
- *              group(分组), 可包含下级page(页面);
- * group(分组)  有key和name(名称)两个属性, 相同的key只能对应相同的name, 可包含多个
- *              action(动作), 可包含下级group(分组);
+ * page(页面)   有uri和name(名称)两个属性, 相同的uri可以对应不同的name,
+ *              可包含多个group(分组), 可包含下级page(页面);
+ * group(分组)  有key和name(名称)两个属性, 相同的key只能对应相同的name,
+ *              可包含多个action(动作), 可包含下级group(分组);
  * actoin(动作) 仅能包含一个动作串(为动作uri);
  * depend(依赖) 仅能包含一个分组键(为分组key).
  * </pre>
  *
- * <h2>数据结构:</h2>
+ * <h3>数据结构:</h3>
  * <pre>
  * pages = Map{
  *   "uri" : Map{
@@ -81,7 +81,7 @@ import app.hongs.HongsException;
  * }
  * </pre>
  *
- * <h2>异常代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
  * 区间: 0x10e0~0x10ef
  * 0x10e0 动作配置文件不存在
@@ -117,7 +117,7 @@ public class ActionConfig
   public Set<String>     actions;
 
   /**
-   * 权限名称
+   * 权限名称(会话键或会话类)
    */
   public     String      session;
 
@@ -448,7 +448,7 @@ public class ActionConfig
       }
   }
 
-  /** 工厂方法 **/
+  //** 工厂方法 **/
 
   public static ActionConfig getInstance(String name) throws HongsException {
       String key = "__ACT__." + name;

@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 数字工具
+ * 数字操作工具
  * @author Hongs
  */
 public class Num
 {
 
-  /** 进制 **/
+  //** 进制 **/
 
   /**
    * 符号转换表
@@ -40,7 +40,7 @@ public class Num
    * 进制为arr的长度, 左边不能是arr首位, 如36进制(数字加字母), 35是Z, 36是10
    * @param num 待转数字 0~MAX
    * @param arr 转换序列
-   * @return
+   * @return 指定进制的数字字符串
    */
   public static String toXHex(long num, char[] arr)
   {
@@ -65,7 +65,7 @@ public class Num
    * 进制为arr的长度, 左边可以是arr首位, 如26进制(字母), 1是A, 26是Z, 27是AA
    * @param num 待转数字 1~MAX
    * @param arr 转换序列
-   * @return
+   * @return 指定进制的数字字符串
    */
   public static String toYHex(long num, char[] arr)
   {
@@ -143,7 +143,7 @@ public class Num
       return fromYHex(str, arr26);
   }
 
-  /** 格式 **/
+  //** 格式 **/
 
   /**
    * 友好的时间格式(精确到秒)

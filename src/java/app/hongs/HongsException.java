@@ -1,19 +1,19 @@
 package app.hongs;
 
 /**
- * <h1>通用异常类</h1>
+ * 通用异常类
  *
- * <h2>取值范围:</h2>
+ * <p>
+ * 因 printStackTrace 默认调 getLocalizedMessage 输出消息,
+ * 但我希望在输出对象堆栈跟踪时输出基础信息, 故:
+ * getLocalizedMessage 返回的消息是开发人员的,
+ * getMessage 返回的消息才是根据用户区域变化的.
+ * </p>
+ *
+ * <h3>取值范围:</h3>
  * <pre>
  * 核心: 0x1000~0xFFFF (4096~65535)
  * 用户: 0x10000~0xFFFFF (65536~1048575)
- * </pre>
- *
- * <h2>注意:</h2>
- * <pre>
- * 因 printStackTrace 默认调 getLocalizedMessage 输出消息, 但我希望在输出对象堆栈跟
- * 踪时使用基础的消息, 故 getMessage 返回的消息才是根据用户区域变化的,
- * getLocalizedMessage 返回的消息是开发人员的.
  * </pre>
  *
  * @author Hongs

@@ -8,7 +8,7 @@
     <!-- Action Init -->
     <filter>
         <filter-name>Init</filter-name>
-        <filter-class>app.hongs.action.Initialize</filter-class>
+        <filter-class>app.hongs.action.InitFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>Init</filter-name>

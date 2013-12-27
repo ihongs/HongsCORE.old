@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionAnnotation(DatumsInvoker.class)
-public @interface Datums {
+@ActionAnnotation(DataInvoker.class)
+public @interface Data {
     TYPES    type() default TYPES.RSP;
     String   conf() default "default";
     String[] keys() default {};

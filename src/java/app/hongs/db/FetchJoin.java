@@ -15,9 +15,9 @@ import app.hongs.HongsException;
 import java.util.Arrays;
 
 /**
- * <h1>关联查询及更新</h1>
+ * 关联查询及更新
  *
- * <h2>异常代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
  * 区间: 0x10c0~0x10cf
  * 0x10c0 获取行号失败, 可能缺少关联字段
@@ -399,13 +399,13 @@ public class FetchJoin
     this.fetchIdsMap(key.split("\\."), ids, map);
   }
 
-  /** 静态方法 **/
+  //** 静态方法 **/
 
   /**
    * 关联查询
    * @param table 主表
    * @param assocs 关联配置
-   * @param join 查询体
+   * @param more 查询体
    * @return 结果列表
    * @throws HongsException
    */

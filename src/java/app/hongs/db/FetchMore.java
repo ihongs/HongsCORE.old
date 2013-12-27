@@ -14,9 +14,17 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
- * <h1>查询结构体</h1>
+ * 查询结构体
  *
- * <h2>将SQL语句拆解成以下对应部分:</h2>
+ * <p>
+ * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表.<br/>
+ * 关联字段, 用"表.列"描述字段时, "."的两侧不得有空格.<br/>
+ * 本想自动识别字段的所属表(可部分区域), 但总是出问题;<br/>
+ * 好的规则胜过万行代码, 定此规矩, 多敲了一个符号而已.<br/>
+ * setOption用于登记特定查询选项, 以备组织查询结构的过程中读取.
+ * </p>
+ *
+ * <h3>将SQL语句拆解成以下对应部分:</h3>
  * <pre>
  * fields         SELECT field1, field2...
  * tableName name FROM tableName AS name
@@ -27,16 +35,7 @@ import java.util.regex.Pattern;
  * limits         LIMIT offset, length
  * </pre>
  *
- * <h2>注意:</h2>
- * <pre>
- * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表.
- * 关联字段, 用"表.列"描述字段时, "."的两侧不得有空格.
- * 本想自动识别字段的所属表(可部分区域), 但总是出问题;
- * 好的规则胜过万行代码, 定此规矩, 多敲了一个符号而已.
- * setOption用于登记特定查询选项, 以备组织查询结构的过程中读取.
- * </pre>
- *
- * <h2>系统已定义的"options":</h2>
+ * <h3>系统已定义的"options":</h3>
  * <pre>
  * ASSOC_TABLES : Set         仅对某些表做关联; 作用域: FetchJoin.assocSelect
  * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchJoin.assocSelect
@@ -47,13 +46,13 @@ import java.util.regex.Pattern;
  * rows         : int|String  分页行数; 作用域: FetchPage
  * </pre>
  *
- * <h2>异常代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
  * 区间: 0x10b0~0x10bf
  * 0x10b0 无法识别关联类型(JOIN)
  * 0x10b2 必须指定关联条件(FULL|LEFT|RIGHT)_JOIN
  * 0x10b4 没有指定查询表名
- * </ul>
+ * </pre>
  *
  * @author Hongs
  */
@@ -94,7 +93,7 @@ public class FetchMore
   private static final Pattern pw = Pattern
           .compile("^\\s*(AND|OR)\\s+", Pattern.CASE_INSENSITIVE);
 
-  /** 构造 **/
+  //** 构造 **/
 
   /**
    * 构造表结构对象
@@ -167,13 +166,13 @@ public class FetchMore
     this(null, null);
   }
 
-  /** 查询 **/
+  //** 查询 **/
 
   /***
    * 设置查询表和别名
    * @param tableName
    * @param name
-   * @return
+   * @return 当前查询结构对象
    */
   public FetchMore from(String tableName, String name)
   {
@@ -185,7 +184,7 @@ public class FetchMore
   /**
    * 设置查询表(如果别名已设置则不会更改)
    * @param tableName
-   * @return
+   * @return 当前查询结构对象
    */
   public FetchMore from(String tableName)
   {
@@ -210,7 +209,8 @@ public class FetchMore
   /**
    * 追加查询条件
    * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表
-   * @param wheres
+   * @param where
+   * @param params 对应 where 中的 ?
    * @return 当前查询结构对象
    */
   public FetchMore where(String where, Object... params)
@@ -235,7 +235,8 @@ public class FetchMore
   /**
    * 追加过滤条件
    * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表
-   * @param wheres
+   * @param where
+   * @param params 对应 where 中的 ?
    * @return 当前查询结构对象
    */
   public FetchMore having(String where, Object... params)
@@ -280,7 +281,7 @@ public class FetchMore
     return this;
   }
 
-  /** 关联 **/
+  //** 关联 **/
 
   private FetchMore link(FetchMore more,
     String joinExpr, short joinType)
@@ -457,7 +458,7 @@ public class FetchMore
    * 设置管理的表查询关系
    * @param joinExpr .被join的表 :执行join的表
    * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return
+   * @return 当前查询结构对象
    */
   public FetchMore setJoin(String joinExpr, short joinType)
   {
@@ -466,7 +467,7 @@ public class FetchMore
     return this;
   }
 
-  /** 选项 **/
+  //** 选项 **/
 
   /**
    * 是否存在选项
@@ -513,7 +514,7 @@ public class FetchMore
     return this;
   }
 
-  /** 获取构造结果部分 **/
+  //** 获取构造结果 **/
 
   /**
    * 获取SQL
@@ -789,7 +790,7 @@ public class FetchMore
     return new FetchMore(this);
   }
 
-  /** 不推荐的和废弃的方法 **/
+  //** 不推荐的方法 **/
 
   /**
    * 是否有设置查询字段
@@ -870,7 +871,8 @@ public class FetchMore
   /**
    * 设置查询条件
    * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表
-   * @param wheres
+   * @param where
+   * @param params 对应 where 中的 ?
    * @return 当前查询结构对象
    * @deprecated
    */

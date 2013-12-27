@@ -6,8 +6,10 @@ import app.hongs.action.ActionHelper;
 import java.lang.annotation.Annotation;
 
 /**
- * 操作成功才提交
+ * 操作成功才提交数据更改
+ *
  * 由Action.doAction自动调用
+ *
  * @author Hongs
  */
 public class CommitInvoker {
@@ -29,7 +31,7 @@ public class CommitInvoker {
             core.remove("__DB_AUTO_COMMIT__");
         }
     }
-    
+
     public static void commit()
     throws Exception {
         try {
@@ -51,7 +53,7 @@ public class CommitInvoker {
             throw ex;
         }
     }
-    
+
     public static void rollback()
     throws Exception {
         try {

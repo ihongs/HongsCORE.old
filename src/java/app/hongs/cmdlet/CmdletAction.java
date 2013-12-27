@@ -11,24 +11,26 @@ import app.hongs.action.Action;
 import app.hongs.action.ActionHelper;
 
 /**
- * <h1>外壳程序动作</h1>
- * <pre>
- * 在 app.xxx.shell 中建立一个类, 指定一个
- * public void action(app.hongs.action.ActionHelper helper)
- * 方法接收来自 Web 的请求动作.
- * </pre>
+ * 外壳程序动作
  *
- * <h2>web.xml配置:</h2>
+ * <p>
+ * 在 app.xxx.shell 中建立一个类, 指定一个
+ * <code>
+ * public void action(app.hongs.action.ActionHelper helper)
+ * </code>
+ * 方法接收来自 Web 的请求动作.
+ * </p>
+ *
+ * <h3>web.xml配置:</h3>
  * <pre>
- * &lt;!-- Shell Servlet --&gt;
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;Cmdlet&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.cmdlet.CmdletAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
  *   &lt;servlet-name&gt;Cmdlet&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.if&lt;/url-pattern&gt;
- * &lt;/servlet-mapping&gt;<br/>
+ *   &lt;url-pattern&gt;*.api&lt;/url-pattern&gt;
+ * &lt;/servlet-mapping&gt;
  * <pre>
  *
  * @author Hongs
@@ -40,7 +42,7 @@ public class CmdletAction
   /**
    * 服务方法
    *
-   * Servlet Mapping: *.sh
+   * Servlet Mapping: *.api<br/>
    * 注意: 不支持请求URI的路径中含有"."(句点), 且必须区分大小写;
    * 其目的是为了防止产生多种形式的请求路径, 影响动作过滤, 产生安全隐患.
    *

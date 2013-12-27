@@ -18,13 +18,15 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet初始化
- * <pre>
- * 映射到 *.act *.api *.jsp *.js-auth *.js-conf *.js-lang
+ * 
+ * <p>
+ * 映射到 *.act *.api *.jsp *.js-auth *.js-conf *.js-lang<br/>
  * 必须作为第一个 filter
- * </pre>
+ * </p>
+ * 
  * @author Hong
  */
-public class Initialize
+public class InitFilter
 implements Filter {
 
     @Override

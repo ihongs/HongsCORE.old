@@ -14,11 +14,11 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import app.hongs.Core;
 import app.hongs.CoreSerially;
@@ -26,11 +26,19 @@ import app.hongs.HongsException;
 import app.hongs.util.JSON;
 
 /**
- * <h1>数据配置工具</h1>
+ * 数据配置工具
+ *
+ * <p>
+ * 在 Java 7 之前写 List,Set,Map 很麻烦, 不能像写 JSON 那样方便;<br/>
+ * 有些数据需要方便修改, 而 Java 代码修改麻烦;<br/>
+ * 需要统一管理一些数据, 如状态/类型/选项等.<br/>
+ * 故编写此类用于解决以上问题, 可从 XML 中读取结构数据或 JSON 数据.
+ * XML 的结构请参考 WEB-INF/conf 中的 dat.xsd 和 dat-default.xml
+ * </p>
  *
  * @author Hongs
  */
-public class DatumsConfig
+public class DataConfig
   extends CoreSerially
 {
 
@@ -41,7 +49,7 @@ public class DatumsConfig
   public Map<String, Set<String[]>> refDatas;
   public Map<String, Set<String[]>> rspDatas;
 
-  public DatumsConfig(String name)
+  public DataConfig(String name)
     throws HongsException
   {
     this.name = name;
@@ -291,23 +299,23 @@ public class DatumsConfig
     return map;
   }
 
-  /** 工厂方法 **/
+  //** 工厂方法 **/
 
-  public static DatumsConfig getInstance(String name) throws HongsException {
+  public static DataConfig getInstance(String name) throws HongsException {
       String key = "__DAT__." + name;
       Core core = Core.getInstance();
-      DatumsConfig inst;
+      DataConfig inst;
       if (core.containsKey(key)) {
-          inst = (DatumsConfig)core.get(key);
+          inst = (DataConfig)core.get(key);
       }
       else {
-          inst = new DatumsConfig(name);
+          inst = new DataConfig(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static DatumsConfig getInstance() throws HongsException {
+  public static DataConfig getInstance() throws HongsException {
       return getInstance("default");
   }
 }

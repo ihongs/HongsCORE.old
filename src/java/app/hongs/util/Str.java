@@ -7,17 +7,18 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
- * <h1>文本操作工具</h1>
- * <pre>
+ * 文本操作工具
+ *
+ * <p>
  * 用于引用/编码或清理文本, 转换数值进制等.
- * </pre>
+ * </p>
  *
  * @author Hongs
  */
 public final class Str
 {
 
-  /** 引用 **/
+  //** 引用 **/
 
   /**
    * 转义正则符
@@ -115,7 +116,7 @@ public final class Str
     return Str.resume(str, "'\"", "\\");
   }
 
-  /** 替换 **/
+  //** 替换 **/
 
   // 偶数个转义符$单词或{文本}
   private static Pattern injectPattern = Pattern.compile("((?:[\\\\][\\\\])*)\\$(?:(\\w+)|\\{(.*?)\\})");
@@ -124,7 +125,7 @@ public final class Str
    * 注入参数
    * @param str
    * @param vars
-   * @return
+   * @return 注入后的文本
    */
   public static String inject(String str, Map<String, String> vars) {
       Matcher matcher = injectPattern.matcher(str);
@@ -154,7 +155,7 @@ public final class Str
    * 注入参数
    * @param str
    * @param vars
-   * @return
+   * @return 注入后的文本
    */
   public static String inject(String str, List<String> vars)
   {
@@ -173,7 +174,7 @@ public final class Str
    * 注入参数
    * @param str
    * @param vars
-   * @return
+   * @return  注入后的文本
    */
   public static String inject(String str, String... vars)
   {
@@ -188,13 +189,13 @@ public final class Str
       return inject(str, rep2);
   }
 
-  /** 缩进 **/
+  //** 缩进 **/
 
   /**
    * 行首缩进
    * @param str
    * @param inds
-   * @return
+   * @return 缩进后的文本
    */
   public static String indent(String str, String inds) {
       return Pattern.compile("^", Pattern.MULTILINE)
@@ -204,13 +205,13 @@ public final class Str
   /**
    * 行首缩进
    * @param str
-   * @return
+   * @return 缩进后的文本
    */
   public static String indent(String str) {
       return indent(str, "\t");
   }
 
-  /** 清理 **/
+  //** 清理 **/
 
   /**
    * 清除换行

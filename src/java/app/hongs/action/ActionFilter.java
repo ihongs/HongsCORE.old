@@ -22,9 +22,9 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 
 /**
- * <h1>标准动作过滤器</h1>
+ * 标准动作过滤器
  *
- * <h2>初始化参数(init-param):</h2>
+ * <h3>初始化参数(init-param):</h3>
  * <pre>
  * index-path   首页地址(为空则不跳转)
  * login-path   登录地址(为空则不跳转)

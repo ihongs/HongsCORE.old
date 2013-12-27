@@ -15,19 +15,22 @@ import app.hongs.HongsException;
 import java.util.Arrays;
 
 /**
- * <h1>基础模型</h1>
- * <pre>
- * 注意: 当要使用 getInfo(get),save(add,put),remove(del) 时请确保表有配置主键.
- * 该类中, getPage,getList,getInfo,save,update,remove,exists 为基础动作方法, 通常
- * 它们被动作类直接调用, get,add,put,remove 为基础模型方法, 通常要改写只需覆盖它们即
- * 可; getFilter 和 idCheck 为两个特殊方法, 分别用于对获取和更改数据等常规操作进行过
- * 滤, 其中idCheck默认是调用getFilter来实现的, 可覆盖它来做资源过滤操作.
+ * 基础模型
+ * 
+ * <p>
+ * 当要使用 getInfo(get),save(add,put),remove(del) 时请确保表有配置主键.<br/>
+ * getPage,getList,getInfo,save,update,remove,exists 为基础动作方法, 通常它们被动作类直接调用;
+ * get,add,put,remove 为基础模型方法, 一般改写只需覆盖它们即可;
+ * getFilter,idCheck 分别用于对获取和更改数据等常规操作进行过滤,
+ * 其中 idCheck 默认是调用 getFilter 来实现的, 可覆盖它来做资源过滤操作.<br/>
  * 可使用查询参数:
+ * <code>
  * ?f1=123&-f2=456&find=a+b&sort=-f1+f2&page=1&rows=10&cols[]=id&cols[]=f1&cols[]=f2
- * 详见getFilter方法说明
- * </pre>
+ * </code>
+ * 详见 getFilter 方法说明
+ * </p>
  *
- * <h2>异常代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
  * 区间: 0x10a0~0x10af
  * 0x10a0 参数id不能为空(获取/删除)
@@ -126,7 +129,7 @@ abstract public class AbstractBaseModel
     this(DB.getInstance(dbName).getTable(tableName));
   }
 
-  /** 标准动作方法 **/
+  //** 标准动作方法 **/
 
   /**
    * 获取分页
@@ -557,7 +560,7 @@ abstract public class AbstractBaseModel
     return !exists(req);
   }
 
-  /** 标准模型方法 **/
+  //** 标准模型方法 **/
 
   /**
    * 添加记录
@@ -723,7 +726,7 @@ abstract public class AbstractBaseModel
     return this.get(id, null);
   }
 
-  /** 辅助方法 **/
+  //** 辅助方法 **/
 
   /**
    * "获取"过滤

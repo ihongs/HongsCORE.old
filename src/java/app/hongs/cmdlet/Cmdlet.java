@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * <h1>外壳程序启动器(原名shell)</h1>
+ * 外壳程序启动器(原名shell)
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
  * core.server.id         服务ID
  * core.language.detect   自动识别语言

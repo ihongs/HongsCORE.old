@@ -9,9 +9,9 @@ import app.hongs.CoreConfig;
 import app.hongs.util.Str;
 
 /**
- * <h1>配置信息读取标签</h1>
+ * 配置信息读取标签
  *
- * <h2>使用方法:</h2>
+ * <h3>使用方法:</h3>
  * <pre>
  * &lt;hs:conf load"config.name"/&gt;
  * &lt;hs:conf key="config.key" [esc="yes|no|EscapeSymbol"] [def="default.value"]/&gt;

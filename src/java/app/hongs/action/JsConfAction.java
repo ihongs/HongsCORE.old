@@ -20,18 +20,17 @@ import app.hongs.HongsError;
 import app.hongs.util.Str;
 
 /**
- * <h1>配置信息输出动作</h1>
+ * 配置信息输出动作
  *
- * <h2>web.xml配置:</h2>
+ * <h3>web.xml配置:</h3>
  * <pre>
- * &lt;!-- Config Servlet --&gt;
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;Config&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;JsConf&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.action.JSConfAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;Config&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.jsc&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;JsConf&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;*.js-conf&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * <pre>
  *
@@ -169,7 +168,7 @@ public class JsConfAction
     return sb.toString();
   }
 
-  /** 辅助工具类 **/
+  //** 辅助工具类 **/
 
   /**
    * 配置信息辅助构造类

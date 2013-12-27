@@ -13,18 +13,17 @@ import app.hongs.HongsException;
 import app.hongs.util.JSON;
 
 /**
- * <h1>配置信息输出动作</h1>
+ * 权限信息输出动作
  *
- * <h2>web.xml配置:</h2>
+ * <h3>web.xml配置:</h3>
  * <pre>
- * &lt;!-- Config Servlet --&gt;
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;Auth&lt;/servlet-name&gt;
- *   &lt;servlet-class&gt;app.hongs.action.JSConfAction&lt;/servlet-class&gt;
+ *   &lt;servlet-name&gt;JsAuth&lt;/servlet-name&gt;
+ *   &lt;servlet-class&gt;app.hongs.action.JSAuthAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;Auth&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.jsa&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;JsAuth&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;*.js-auth&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * <pre>
  *

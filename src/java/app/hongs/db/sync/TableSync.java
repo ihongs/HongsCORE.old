@@ -9,7 +9,7 @@ import app.hongs.HongsException;
 import app.hongs.db.Table;
 
 /**
- * <h1>表结构同步器(Table structure synchronizer)</h1>
+ * 表结构同步器(Table structure synchronizer)
  *
  * <b>注意: 参考MySQL编写, 可能不适用于其他数据库(使用了SHOW语句)</b>
  *

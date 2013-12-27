@@ -24,12 +24,13 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 
 /**
- * <h1>数据表基础类</h1>
- * <pre>
- * 请总是用DB.getTable("Table_Name")来获取表对象
- * </pre>
+ * 数据表基础类
  *
- * <h2>错误代码:</h2>
+ * <p>
+ * 请总是用DB.getTable("Table_Name")来获取表对象
+ * </p>
+ *
+ * <h3>错误代码:</h3>
  * <pre>
  * 区间: 0x1070~0x109f
  *
@@ -48,7 +49,7 @@ import app.hongs.CoreLanguage;
  * 0x1090 无法识别的日期或时间格式
  * </pre>
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
  * core.disable.check.values  设置为true禁止在存储时对数据进行检查
  * core.default.date.format   可识别的日期类型, 默认"yyyy/MM/dd", 已移到语言
@@ -388,7 +389,7 @@ public class Table
     return this.db.delete(this.tableName, where, params);
   }
 
-  /** 工具方法 **/
+  //** 工具方法 **/
 
   /**
    * 获取字段(包含名称及类型等)
@@ -486,6 +487,7 @@ public class Table
   /**
    * 检验主数据
    *
+   * <pre>
    * 会进行校验的类型:
    * CHAR, VARCHAR, LONGVARCHAR, NCHAR, NVARCHAR, NLONGVARCHAR
    * TINYINT, SMALLINT, INTEGER, BIGINT
@@ -496,10 +498,11 @@ public class Table
    * 通过配置"core.dsiable.check.values=true"来关闭检查
    * 通过配置"core.default.date.format=日期格式串"来设置可识别的日期格式, 已移到语言
    * 通过配置"core.defualt.time.format=时间格式串"来设置可识别的时间格式, 已移到语言
+   * </pre>
    *
    * @param values
    * @param isNew
-   * @return
+   * @return 可供提交的数据
    * @throws app.hongs.HongsException
    */
   private Map checkMainValues(Map values, boolean isNew)
@@ -830,7 +833,7 @@ public class Table
     FetchJoin.assocDelete(this, assocs, id);
   }
 
-  /** 其他私有方法 **/
+  //** 私有方法 **/
 
   private static boolean getDisableCheck(Map values)
   {

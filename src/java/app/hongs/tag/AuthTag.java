@@ -9,12 +9,12 @@ import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
 /**
- * <h1>动作权限判断标签</h1>
+ * 动作权限判断标签
  *
- * <h2>使用方法:</h2>
+ * <h3>使用方法:</h3>
  * <pre>
- * &lt;hs:act act="action" [not="true|false"] [els="true|false"]/&gt;
- * &lt;hs:act act="action" [not="true|false"] [els="true|false"]&gt;Some Text&lt;/hs:act&gt;
+ * &lt;hs:auth act="action" [not="true|false"] [els="true|false"]/&gt;
+ * &lt;hs:auth act="action" [not="true|false"] [els="true|false"]&gt;Some Text&lt;/hs:auth&gt;
  * </pre>
  *
  * @author Hongs

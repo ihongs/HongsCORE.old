@@ -20,18 +20,17 @@ import app.hongs.HongsError;
 import app.hongs.util.Str;
 
 /**
- * <h1>语言信息输出动作</h1>
+ * 语言信息输出动作
  *
- * <h2>web.xml配置:</h2>
+ * <h3>web.xml配置:</h3>
  * <pre>
- * &lt;!-- Config Servlet --&gt;
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;Language&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;JsLang&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.action.JSLangAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;Language&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.jsl&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;JsLang&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;*.js-lang&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;<br/>
  * <pre>
  *
@@ -177,7 +176,7 @@ public class JsLangAction
     return sb.toString();
   }
 
-  /** 辅助工具类 **/
+  //** 辅助工具类 **/
 
   /**
    * 语言信息辅助构造类

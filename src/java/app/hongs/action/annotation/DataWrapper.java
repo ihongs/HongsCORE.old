@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package app.hongs.action.annotation;
 
 import java.io.IOException;
@@ -11,15 +7,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
- * 返回数据包裹
+ * 返回数据修饰器
  * @author Hong
  */
-public class DatumsWrapper extends HttpServletResponseWrapper {
+public class DataWrapper extends HttpServletResponseWrapper {
 
     private StringWriter output;
     private  PrintWriter writer;
 
-    public DatumsWrapper(HttpServletResponse response) {
+    public DataWrapper(HttpServletResponse response) {
         super( response );
         output = new StringWriter();
         writer = new  PrintWriter(output);

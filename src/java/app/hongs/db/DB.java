@@ -34,13 +34,19 @@ import app.hongs.HongsException;
 import app.hongs.util.Str;
 
 /**
- * <h1>数据库基础类</h1>
- * <pre>
+ * 数据库基础类
+ *
+ * <p>
  * 当需要库对象时, 一般情况可调用其工厂方法getInstance获取;
  * 当需要扩展类时, 请从DB继承并实现一个无参getInstance方法.
+ * </p>
+ *
+ * <h3>配置选项:</h3>
+ * <pre>
+ * core.load.db.[dbName].once 为true则仅加载一次, 为false由Core控制
  * </pre>
  *
- * <h2>异常代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
  * 区间: 0x1010~0x105f
  *
@@ -77,11 +83,6 @@ import app.hongs.util.Str;
  * 0x104b  执行删除语句失败
  *
  * 0x1051  查询参数的个数与语句中的插入位置数不符
- * </pre>
- *
- * <h2>配置选项:</h2>
- * <pre>
- * core.load.db.[dbName].once 为true则仅加载一次, 为false由Core控制
  * </pre>
  *
  * @author Hongs
@@ -744,7 +745,7 @@ public class DB
     }
   }
 
-  /** 查询语句 **/
+  //** 查询语句 **/
 
   /**
    * 查询方法
@@ -1067,7 +1068,7 @@ public class DB
     return this.update(sql, params);
   }
 
-  /** 静态工具 **/
+  //** 静态工具 **/
 
   /**
    * 引用字段名
@@ -1258,7 +1259,7 @@ public class DB
     }
   }
 
-  /** 构造工厂 **/
+  //** 构造工厂 **/
 
   public static Map<String, DB> instances;
 

@@ -1,7 +1,7 @@
 package app.hongs.action.annotation;
 
 import app.hongs.action.ActionHelper;
-import app.hongs.action.DatumsConfig;
+import app.hongs.action.DataConfig;
 import app.hongs.util.Tree;
 import java.util.Map;
 import java.util.HashMap;
@@ -12,17 +12,17 @@ import javax.servlet.http.HttpServletResponse;
  * 数据追加处理器
  * @author Hong
  */
-public class DatumsInvoker {
+public class DataInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
-        Datums datums = (Datums) anno;
-        Datums.TYPES type = datums.type();
+        Data datums = (Data) anno;
+        Data.TYPES type = datums.type();
         String       conf = datums.conf();
         String[]     keys = datums.keys();
 
         Map<String,Object> map = new HashMap();
 
-        DatumsConfig cnf = DatumsConfig.getInstance(conf);
+        DataConfig cnf = DataConfig.getInstance(conf);
         for(String key : keys) {
             String val;
             String[] arr = key.split( "=", 2 );
@@ -34,7 +34,7 @@ public class DatumsInvoker {
             }
         }
 
-        if (type == Datums.TYPES.REQ ) {
+        if (type == Data.TYPES.REQ ) {
             Map data = helper.getRequestData();
             Tree.putAllDeep(data, map);
             chain.doAction ();
@@ -44,9 +44,9 @@ public class DatumsInvoker {
         /** 输出过滤 **/
 
         HttpServletResponse rsp2;
-        DatumsWrapper rsp3;
+        DataWrapper rsp3;
         rsp2 = helper.response;
-        rsp3 = new DatumsWrapper(rsp2);
+        rsp3 = new DataWrapper(rsp2);
         helper.response = rsp3;
         chain.doAction();
         helper.response = rsp2;

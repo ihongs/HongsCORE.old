@@ -12,7 +12,7 @@ import app.hongs.db.DB;
 import app.hongs.db.Table;
 
 /**
- * <h1>库结构同步器(DB structure synchronizer)</h1>
+ * 库结构同步器(DB structure synchronizer)
  *
  * <b>注意: 参考MySQL编写, 可能不适用于其他数据库</b>
  *

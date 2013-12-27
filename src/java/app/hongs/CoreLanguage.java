@@ -9,15 +9,16 @@ import java.io.File;
 import app.hongs.util.Str;
 
 /**
- * <h1>语言资源读取工具</h1>
- * <pre>
- * 为与配置保持一致, 故从CoreConfig继承.
- * 放弃使用"ResourceBundle"类加载语言资源.
- * 资源文件名为"xxx.语言[-国家].properties".
- * </pre>
+ * 语言资源读取工具
  *
- * <h2>配置选项:</h2>
- * <re>
+ * <p>
+ * 为与配置保持一致, 故从CoreConfig继承.<br/>
+ * 放弃使用"ResourceBundle"类加载语言资源.<br/>
+ * 资源文件名为"xxx.语言[-国家].properties".<br/>
+ * </p>
+ *
+ * <h3>配置选项:</h3>
+ * <pre>
  * core.load.language.once  为true则仅加载一次, 为false由Core控制
  * core.language.link.xx    语言链接, xx为语言, 如: link.zh=zh-cn
  * </pre>
@@ -161,14 +162,14 @@ public class CoreLanguage
     return Str.inject(str, rep);
   }
 
-  /** 静态属性及方法 **/
+  //** 静态属性及方法 **/
 
   public static Map<String, CoreLanguage> instances;
 
   /**
    * 获取唯一语言对象
    * 如果配置core.load.language.once为true则仅加载一次
-   * @return 语言对象
+   * @return 唯一语言实例
    */
   public static CoreLanguage getInstance()
   {
@@ -195,6 +196,12 @@ public class CoreLanguage
     return lang;
   }
 
+  /**
+   * 按配置名获取唯一语言对象
+   * 如果配置core.load.language.once为true则仅加载一次
+   * @param name 配置名
+   * @return 唯一语言实例
+   */
   public static CoreLanguage getInstance(String name)
   {
     String key = "__LANG__." + name;

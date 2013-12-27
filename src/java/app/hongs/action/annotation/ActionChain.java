@@ -7,16 +7,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * <h1>动作注解链</h1>
+ * 动作注解链
+ *
+ * <h3>异常代码</h3>
  * <pre>
- * 异常代码区间: 0x1100~0x110f
- * 错误代码:
+ * 区间: 0x1100~0x110f
  * 0x1102 没有找到动作链方法，不存在或遇安全问题
  * 0x1104 无法执行动作链方法，无法访问或参数错误
  * 0x1106 无法执行动作方法，无法访问或参数错误
  * 0x1108 动作链索引溢出
  * 0x1100 动作内异常，当动作内产生异常需要直接抛出时，都可以使用此代号
  * </pre>
+ *
  * @author Hong
  */
 public class ActionChain {

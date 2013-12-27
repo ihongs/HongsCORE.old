@@ -14,9 +14,9 @@ import app.hongs.CoreLanguage;
 import app.hongs.util.Str;
 
 /**
- * <h1>语言信息读取标签</h1>
+ * 语言信息读取标签
  *
- * <h2>使用方法:</h2>
+ * <h3>使用方法:</h3>
  * <pre>
  * &lt;hs:lang load="language.name"/&gt;
  * &lt;hs:lang key="language.key" [esc="yes|no|EscapeSymbol"] [_0="replacement0" _1="replacement1"]/&gt;

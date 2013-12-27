@@ -19,11 +19,12 @@ import app.hongs.util.JSON;
 import app.hongs.util.Tree;
 
 /**
- * <h1>动作助手类</h1>
- * <pre>
- * 通过getRequestMap,getParameter,getSession,getCookie来获取请求/会话/Cookie数据;
- * 通过succeeed,fail来通知前端动作的成功或失败.
- * </pre>
+ * 动作助手类
+ *
+ * <p>
+ * 通过 getRequestMap,getParameter,getSession,getCookie
+ * 来获取请求/会话/Cookie数据; 通过 back 来通知前端动作的成功或失败.
+ * </p>
  *
  * @author Hongs
  */
@@ -84,7 +85,7 @@ public class ActionHelper
    * 初始化助手(用于shell)
    *
    * @param req
-   * @param rsp
+   * @param ses
    */
   public void init(Map<String, String[]> req, Map<String, String[]> ses)
   {
@@ -135,10 +136,12 @@ public class ActionHelper
 
   /**
    * 获取请求的Map数据
-   * <pre>
-   * 不同于request.getParameterMap, 该方法会将带"[]"的拆成子List, 将带"[xxx]"拆成子
-   * Map, 并逐级递归. 页可以解析"."分割的参数, 如a.b.c与上面的a[b][c]是同样的效果.
-   * </pre>
+   *
+   * 不同于 request.getParameterMap,
+   * 该方法会将带"[]"的拆成子List, 将带"[xxx]"的拆成子Map, 并逐级递归.
+   * 也可以解析用"."连接的参数, 如 a.b.c 与上面的 a[b][c] 是同样的效果.
+   * 故请务必注意参数中的"."和"[]"符号.
+   *
    * @return Map对象
    */
   public Map<String, Object> getRequestData()
@@ -163,10 +166,13 @@ public class ActionHelper
 
   /**
    * 获取返回数据
-   * <pre>
-   * 注意: 该函数为过滤器提供原始返回数据参考, 只有使用了pass,fail,back函数返回的数据
-   * 才会被记录, 其他方式返回的数据均不会记录在此, 使用时要判断是否为null.
-   * </pre>
+   *
+   * 注意:
+   * 该函数为过滤器提供原始的返回数据,
+   * 只有使用 back 函数返回的数据才会被记录,
+   * 其他方式返回的数据均不会记录在此,
+   * 使用时务必判断是否为 null.
+   *
    * @return 返回数据
    */
   public Map<String, Object> getResponseData()
@@ -302,7 +308,7 @@ public class ActionHelper
     this.setCookie(name, lang);
   }
 
-  /** 发送内容 **/
+  //** 发送内容 **/
 
   /**
    * 输出内容
@@ -372,7 +378,7 @@ public class ActionHelper
     this.print(text, "application/javascript");
   }
 
-  /** 发送数据 **/
+  //** 发送数据 **/
 
   /**
    * 发送JSON格式的数据
@@ -404,7 +410,7 @@ public class ActionHelper
     this.printJSON(JSON.toString(data));
   }
 
-  /** HTTP常用状态 **/
+  //** HTTP常用状态 **/
 
   /**
    * 301重定向
@@ -461,7 +467,7 @@ public class ActionHelper
     print500Code(ex.getMessage());
   }
 
-  /** 快捷动作 **/
+  //** 快捷动作 **/
 
   /**
    * 返回指定数据
@@ -552,7 +558,7 @@ public class ActionHelper
     back(rst, "");
   }
 
-  /** 静态工具方法 **/
+  //** 静态工具方法 **/
 
   /**
    * 解析参数
