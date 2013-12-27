@@ -848,7 +848,7 @@ function hsNote(msg, cls, sec) {
 
     var div = jQuery('<div class="alert alert-dismissable">'
                     +'<button type="button" class="close">&times;</button>'
-                    +'<div class="note-box></div></div>')
+                    +'<div class="note-box"></div></div>')
             .addClass(cls);
     var btn = div.find("button");
     var box = div.find(".note-box").append(msg);
@@ -1619,6 +1619,8 @@ HsList.prototype = {
     openBack : function(btn, box, data) {
         var that = this;
         btn.trigger("openBack", [box, data]);
+        if (box.data("opener") === this) return;
+        box.data("opener", this);
         box.on("saveBack", function(evt) {
             if(evt.isDefaultPrevented()) return;
             btn.trigger ( evt , [box, data]);
@@ -2060,6 +2062,8 @@ HsTree.prototype = {
     openBack : function(btn, box, data) {
         var that = this;
         btn.trigger("openBack",[box, data]);
+        if (box.data("opener") === this) return;
+        box.data("opener", this);
         box.on("saveBack", function(evt) {
             if(evt.isDefaultPrevented()) return;
             btn.trigger ( evt ,[box, data]);
@@ -2403,7 +2407,7 @@ $.fn.load = function(url, data, complete) {
         };
         url = url.replace(/\{(.*?)\}/, function(x, n) {
             return obj.find("[name='" +n+ "']").val();
-        });
+        });console.log(data);
         $.ajax({
             "url": url,
             "data": data,
