@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.lang.annotation.Annotation;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 处理列表中的选择数据
@@ -17,24 +16,18 @@ import javax.servlet.http.HttpServletResponse;
 public class SelectListInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
-        HttpServletResponse rsp2;
-        DataWrapper rsp3;
-        rsp2 = helper.response;
-        rsp3 = new DataWrapper(rsp2);
-        helper.response = rsp3;
         chain.doAction();
-        helper.response = rsp2;
 
         Map data = helper.getResponseData();
-        if (data == null || (boolean)data.get("__success__") == false)
+        if (data == null || (Boolean)data.get("__success__") == false)
         {
-            helper.print( rsp3.toString() );
             return;
         }
         if (data.containsKey("list") == false)
         {
             return;
         }
+
         List<Map> list = (List) data.get("list");
         Map<String, Object> maps = new HashMap();
 
@@ -79,7 +72,5 @@ public class SelectListInvoker {
                 }
             }
         }
-
-        helper.printJSON(helper.getResponseData());
     }
 }

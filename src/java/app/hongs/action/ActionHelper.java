@@ -481,7 +481,9 @@ public class ActionHelper
          data.put("__success__" , true );
 
     this.responseData = data;
-    this.printJSON(data);
+
+    // 不直接输出, 在InitFilter中进行输出
+    // this.printJSON(data);
   }
 
   /**
@@ -558,7 +560,7 @@ public class ActionHelper
     back(rst, "");
   }
 
-  //** 静态工具方法 **/
+  //** 工具方法 **/
 
   /**
    * 解析参数

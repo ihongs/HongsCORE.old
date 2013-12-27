@@ -6,7 +6,6 @@ import app.hongs.util.Tree;
 import java.util.Map;
 import java.util.HashMap;
 import java.lang.annotation.Annotation;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 数据追加处理器
@@ -15,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 public class DataInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
-        Data datums = (Data) anno;
-        Data.TYPES type = datums.type();
+        Data datums       = (Data) anno;
+        Data.TYPES   type = datums.type();
         String       conf = datums.conf();
         String[]     keys = datums.keys();
 
@@ -34,33 +33,18 @@ public class DataInvoker {
             }
         }
 
-        if (type == Data.TYPES.REQ ) {
+        if (type == Data.TYPES.REQ) {
             Map data = helper.getRequestData();
             Tree.putAllDeep(data, map);
-            chain.doAction ();
-            return;
-        }
-
-        /** 输出过滤 **/
-
-        HttpServletResponse rsp2;
-        DataWrapper rsp3;
-        rsp2 = helper.response;
-        rsp3 = new DataWrapper(rsp2);
-        helper.response = rsp3;
-        chain.doAction();
-        helper.response = rsp2;
-
-        Map data = helper.getResponseData( );
-        if (data != null
-        && (data.get("__success__") == null
-        || (boolean) data.get("__success__") == true))
-        {
-            Tree.putAllDeep (data,map);
-            helper.printJSON(  data  );
+            chain.doAction();
         }
         else {
-            helper.print( rsp3.toString( ) );
+            chain.doAction();
+            Map data = helper.getResponseData();
+            if (data == null || (Boolean)data.get("__success__") == false) {
+                return;
+            }
+            Tree.putAllDeep(data, map);
         }
     }
 }

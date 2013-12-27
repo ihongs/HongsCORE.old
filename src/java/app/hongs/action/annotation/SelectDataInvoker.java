@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.lang.annotation.Annotation;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 追加表单中的选择数据
@@ -18,18 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 public class SelectDataInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
-        HttpServletResponse rsp2;
-        DataWrapper rsp3;
-        rsp2 = helper.response;
-        rsp3 = new DataWrapper(rsp2);
-        helper.response = rsp3;
         chain.doAction();
-        helper.response = rsp2;
 
         Map data = helper.getResponseData();
-        if (data == null || (boolean)data.get("__success__") == false)
+        if (data == null || (Boolean)data.get("__success__") == false)
         {
-            helper.print( rsp3.toString() );
             return;
         }
         if (data.containsKey("data") == false)
@@ -66,7 +58,5 @@ public class SelectDataInvoker {
                 }
             }
         }
-
-        helper.printJSON(helper.getResponseData());
     }
 }

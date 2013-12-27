@@ -5,6 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -18,12 +19,12 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet初始化
- * 
+ *
  * <p>
  * 映射到 *.act *.api *.jsp *.js-auth *.js-conf *.js-lang<br/>
  * 必须作为第一个 filter
  * </p>
- * 
+ *
  * @author Hong
  */
 public class InitFilter
@@ -162,9 +163,17 @@ implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
     throws ServletException, IOException {
-            this .doInit   (request, response);
         try {
-            chain.doFilter (request, response);
+            this .doInit   ( request, response );
+            chain.doFilter ( request, response );
+
+            // 将返回数据转换成JSON格式
+            ActionHelper helper = (ActionHelper)
+                  Core.getInstance(ActionHelper.class);
+            Map data  = helper.getResponseData();
+            if (data != null) {
+                helper.printJSON(data);
+            }
         } finally {
             this .doDestroy();
         }
