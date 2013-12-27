@@ -65,18 +65,17 @@ Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实�
     - lib           后端库
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
-  - xxxx            项目模块页面
-  + lib             前端库(js,flash)
+  + app             前端英语组件(js,flash)
     + core          前端核心库
       - css         前端核心样式
       - img         前端核心图片
-  - var             变化文件(如上传)
+  - xxxx            项目模块页面
 
 文件映射:
 xxxx/Foo/Bar.act    调用 app.xxxx.action.Foo.actionBar
 xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
 xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(命令行 WEB-INF/run xxxx.Class)
-name.js-auth        读取 WBE-INF/conf/act-name.xml 中 action+session 的组合
+name.js-auth        读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
 
@@ -138,9 +137,9 @@ find    搜索关键词
   btime     开始时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
 
-注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避
-开这些名称: page,rows,cols,sort,find. 另外, 在Model中可以重新定义这些名称, 但并
-不建议将这些参数名作为配置写入配置中.
+注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些
+名称: page,rows,cols,sort,find. 另外, 在Model中可以重新定义这些名称, 但并不建议将这
+些参数名作为配置写入配置中.
 
 << HongsCORE Framework for javascript >>
 
