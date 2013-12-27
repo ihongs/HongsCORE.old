@@ -2407,7 +2407,7 @@ $.fn.load = function(url, data, complete) {
         };
         url = url.replace(/\{(.*?)\}/, function(x, n) {
             return obj.find("[name='" +n+ "']").val();
-        });console.log(data);
+        });
         $.ajax({
             "url": url,
             "data": data,
