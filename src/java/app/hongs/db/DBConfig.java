@@ -1,9 +1,14 @@
 package app.hongs.db;
 
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 
 import java.io.File;
 import java.io.InputStream;
@@ -18,16 +23,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
 
 import app.hongs.Core;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.w3c.dom.NamedNodeMap;
 
 /**
  * 数据库配置信息解析类
@@ -103,11 +103,11 @@ public class DBConfig
 
   private static Set<String> tableAttrs = new HashSet(
   Arrays.asList( new String[] {
-    "name","primaryKey","class","prefix","suffix"
+    "name","class","prefix","suffix","primaryKey"
   }));
   private static Set<String> assocAttrs = new HashSet(
   Arrays.asList( new String[] {
-    "type","join","name","realName","primaryKey","foreignKey",
+    "type","join","name","tableName","primaryKey","foreignKey",
     "select","where","groupBy","having","orderBy"
   }));
 

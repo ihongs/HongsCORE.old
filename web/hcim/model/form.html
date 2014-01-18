@@ -1,0 +1,241 @@
+<object class="config" name="hsInit" data="">
+    <param name="width" value="600px"/>
+</object>
+
+<div class="page-header show-in-overlay show-in-load">
+    <h1>${opt}模型</h1>
+</div>
+
+<div id="hcim-model-form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcim/Model/Info.act"/>
+        <param name="saveUrl" value="hcim/Model/Save.act"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <div class="form-group">
+            <label class="control-label">所属模块</label>
+            <div class="select-box"></div>
+            <button type="button" class="select-btn">选择模块</button>
+        </div>
+        <div class="form-group">
+            <label class="control-label">模型名称</label>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Model/Unique.act?id={id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">代号</label>
+            <input type="text" name="code" class="form-control" data-unique="hcim/Model/Unique.act?id={id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">备注</label>
+            <textarea name="note" class="form-control"></textarea>
+        </div>
+        
+        <div class="page-header">
+            <h3>字段设置</h3>
+        </div>
+        <div class="cols-box">
+            <div class="input-box list-box" style="width: 50em;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td style="width: 10em;">代号</td>
+                            <td>名称</td>
+                            <td style="width: 5em;">类型</td>
+                            <td style="width: 4em;">长度</td>
+                            <td style="width: 4em;">精度</td>
+                            <td style="width: 4em;">&nbsp;</td>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button type="button" class="add-col btn btn-default">添加字段</button>
+            </div>
+        </div>
+        
+        <div class="page-header">
+            <h3>属性设置</h3>
+        </div>
+        <div class="cols-box">
+            <div class="input-box list-box" style="width: 50em;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td style="width: 10em;">字段</td>
+                            <td>名称</td>
+                            <td style="width: 5em;">类型</td>
+                            <td style="width: 4em;">查看中隐藏</td>
+                            <td style="width: 4em;">列表中隐藏</td>
+                            <td style="width: 4em;">填充代码</td>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button type="button" class="add-col btn btn-default">添加熟悉</button>
+            </div>
+        </div>
+        
+        <div>
+            <button type="submit" class="ensure btn btn-primary">提交</button>
+            <button type="button" class="cancel btn btn-link">取消</button>
+        </div>
+    </form>
+</div>
+
+<style type="text/css">
+    #hcim-model-form .list-box tbody td
+        {padding: 0;}
+    #hcim-model-form .list-box tbody td input,
+    #hcim-model-form .list-box tbody td select
+        {min-width: 100%; width: 100%; height: 100%; border: 0; margin: 0; padding: 0;}
+    #hcim-model-form .list-box tbody td input
+        {padding: 0 6px;}
+    #hcim-model-form .bg-yellow
+        {background: #FFFFEF; padding: 15px 0;}
+    #hcim-model-form .cols-box
+        {margin-bottom: 2em;}
+</style>
+
+<script type="text/javascript">
+(function($) {
+    var context = $("#hcim-model-form");
+
+    /** 加载类 **/
+
+    context.find("[name=class]").change(function() {
+        var box = $(".conf-box",context).empty();
+        var cls = $(this).val();
+        var inf = context.data("HsForm")._info;
+        var dat = {};
+
+        cls = cls.replace(/^\w+\+/, "");
+
+        if (inf && inf.a_hcrm_dataset_conf) {
+            for(var i = 0; i < inf.a_hcrm_dataset_conf.length; i ++) {
+                var a = inf.a_hcrm_dataset_conf[i];
+                dat[a.name] = a.value;
+            }
+            $(this).data("dat" , dat);
+        }
+        else if ( $(this).data("dat") ) {
+            dat = $(this).data("dat");
+        }
+
+        if (cls) {
+            $.ajax({
+                url: "hcrm/Dataset/Conf.do?class="+cls,
+                async: false,
+                dataType: "json",
+                success : function(rst) {
+                    for(var i = 0; i < rst.list.length; i ++) {
+                        var v   = rst.list[i][0];
+                        var t   = H$(":hcrm.loader."+cls+"."+v );
+                        var div = $('<div></div>').appendTo(box);
+                        $('<label class="control-label"></label>')
+                            .appendTo(div).text(t+":");
+                        $('<input type="hidden" name="a_hcrm_dataset_conf['+i+'][name]"/>')
+                            .appendTo(div).val (v);
+                        $('<input type="text" name="a_hcrm_dataset_conf['+i+'][value]" class="form-control" required="required"/>')
+                            .appendTo(div).val (hsGetValue(dat, v));
+                    }
+
+                    // 重置验证
+                    context.data("HsForm").validate();
+                }
+            });
+        }
+    });
+
+    /** 周期设置 **/
+
+    context.find("[name=exec_type]").change(function() {
+        switch ($(this).val()) {
+            case "3":
+                context.find("[name=exec_mday],[name=exec_wday]")
+                       .prop("disabled", true  )
+                       .parent().hide();
+                context.find("[name=exec_hour]")
+                       .prop("disabled", false )
+                       .parent().show();
+                break;
+            case "4":
+                context.find("[name=exec_mday]")
+                       .prop("disabled", true  )
+                       .parent().hide();
+                context.find("[name=exec_hour],[name=exec_wday]")
+                       .prop("disabled", false )
+                       .parent().show();
+                break;
+            case "5":
+                context.find("[name=exec_wday]")
+                       .prop("disabled", true )
+                       .parent().hide();
+                context.find("[name=exec_hour],[name=exec_mday]")
+                       .prop("disabled", false)
+                       .parent().show();
+                break;
+            default:
+                context.find("[name=exec_hour],[name=exec_mday],[name=exec_wday]")
+                       .prop("disabled", true  )
+                       .parent().hide();
+                break;
+        }
+    });
+
+    /** 字段设置 **/
+
+    var tab = "a_hcrm_dataset_cols";
+    var idx = 0;
+
+    function addCol(col) {
+        idx ++;
+        var nm = $('<input type="text" name="'+tab+'['+idx+'][name]"/>' );
+        var nt = $('<input type="text" name="'+tab+'['+idx+'][note]"/>' );
+        var tp = $('<select name="'+tab+'['+idx+'][type]">'
+                 + '<option value="1">维度</option>'
+                 + '<option value="2">指标</option>'
+                 + '</select>');
+        var ft = $('<select name="'+tab+'['+idx+'][value_type]">'
+                 + '<option value="1">文字</option>'
+                 + '<option value="2">数字</option>'
+                 + '<option value="3">日期</option>'
+                 + '<option value="4">时间</option>'
+                 + '<option value="5">日期+时间</option>'
+                 + '</select>');
+        var fs = $('<input type="number" name="'+tab+'['+idx+'][value_size]" min="1" max="10"/>' );
+        var fc = $('<input type="number" name="'+tab+'['+idx+'][value_scale]" min="1" max="9"/>');
+        var bt = $('<button type="button" class="del-col btn btn-danger">删除</button>');
+        $('<tr></tr>').appendTo(context.find(".cols-box tbody"))
+            .append($('<td></td>').append(nm))
+            .append($('<td></td>').append(nt))
+            .append($('<td></td>').append(tp))
+            .append($('<td></td>').append(ft))
+            .append($('<td></td>').append(fs))
+            .append($('<td></td>').append(fc))
+            .append($('<td></td>').append(bt));
+        if (col) {
+            nm.val(col.name);
+            nt.val(col.note);
+            tp.val(col.type);
+            ft.val(col.value_type);
+            fs.val(col.value_size);
+            fc.val(col.value_scale);
+        }
+    }
+
+    context.on("loadBack", function(evt, rst) {
+        if (rst.info) {
+            var a = rst.info.a_hcrm_dataset_cols, i = 0;
+            if (a) for (; i < a.length; i ++)
+                addCol (a[i]);
+        }
+    });
+    context.on("click", ".add-col", function() {
+        addCol();
+    });
+    context.on("click", ".del-col", function() {
+        $(this).closest("tr").remove();
+    });
+
+})( jQuery );
+</script>

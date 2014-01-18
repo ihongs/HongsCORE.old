@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -12,7 +13,6 @@ import java.util.regex.Matcher;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
-import java.util.Arrays;
 
 /**
  * 关联查询及更新
@@ -438,7 +438,7 @@ public class FetchJoin
         String tp = (String)assoc.get("type");
         String jn = (String)assoc.get("join");
         String an = (String)assoc.get("name");
-        String rn = (String)assoc.get("realName");
+        String rn = (String)assoc.get("tableName"); // 原名 realName
         if (rn == null || rn.length() == 0) rn = an;
 
         // 检查是否许可关联
@@ -453,7 +453,7 @@ public class FetchJoin
             continue;
         }}  else {
             // 非JOIN表先放到一边
-            assoc.put("linkName", tn);
+            assoc.put("assocName", tn);
             lnks .add(assoc);
             continue;
         }
@@ -531,8 +531,8 @@ public class FetchJoin
     for (Map assoc : ( List<Map> ) lnks) {
         String tp = (String)assoc.get("type");
         String an = (String)assoc.get("name");
-        String rn = (String)assoc.get("realName");
-        String tn = (String)assoc.get("linkName");
+        String rn = (String)assoc.get("tableName"); // 原名 realName
+        String tn = (String)assoc.get("assocName"); // 原名 linkName
         if (rn == null || rn.length() == 0) rn = an;
 
         // 检查是否许可关联
@@ -703,7 +703,7 @@ public class FetchJoin
 
       String type = (String)config.get("type");
       String name = (String)config.get("name");
-      String realName = (String)config.get("realName");
+      String realName = (String)config.get("tableName"); // 原名 realName
       String foreignKey = (String)config.get("foreignKey");
 
       if (!values.containsKey(name))
@@ -824,7 +824,7 @@ public class FetchJoin
 
       String type = (String)config.get("type");
       String name = (String)config.get("name");
-      String realName = (String)config.get("realName");
+      String realName = (String)config.get("tableName"); // 原名 realName
       String foreignKey = (String)config.get("foreignKey");
 
       if (!type.equals("HAS_ONE") && !type.equals("HAS_MANY"))

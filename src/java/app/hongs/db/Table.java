@@ -466,9 +466,9 @@ public class Table
    */
   protected static String getAssocName(Map assoc)
   {
-    String tn = (String)assoc.get("realName");
-    if (   tn == null || tn.length() == 0   )
-           tn = (String)assoc.get(  "name"  );
+    String tn = (String) assoc.get("tableName"); // 原名 realName
+    if (   tn == null || tn.length() == 0)
+           tn = (String) assoc.get("name");
     return tn;
   }
 

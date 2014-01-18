@@ -40,7 +40,7 @@
       <xs:attribute ref="type" use="required"/>
       <xs:attribute ref="join"/>
       <xs:attribute ref="name" use="required"/>
-      <xs:attribute ref="realName"/>
+      <xs:attribute ref="tableName"/>
       <xs:attribute ref="foreignKey" use="required"/>
       <xs:attribute ref="primaryKey"/>
       <xs:attribute ref="updateKeys"/>

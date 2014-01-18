@@ -2479,9 +2479,9 @@ $.fn.load = function(url, data, complete) {
             // 编辑标题替换
             if (cnf.title) {
                 if (H$("&id", box)) {
-                    cnf.title = hsGetLang(cnf.title, {'editTitle': cnf.update || hsGetLang("form.update")});
+                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.update || hsGetLang("form.update")});
                 } else {
-                    cnf.title = hsGetLang(cnf.title, {'editTitle': cnf.create || hsGetLang("form.create")});
+                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.create || hsGetLang("form.create")});
                 }
                 if (h.length) h.text(cnf.title);
             }

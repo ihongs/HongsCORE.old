@@ -27,15 +27,14 @@ xsi:schemaLocation="http://hongs-core db.xsd">
   <tables>
     <!-- 结构说明
     <table name="[表名]"
-           alias="[别名]"
            primaryKey="[主键]"
-           tableClass="[Table类, 仅在使用"DB.getTable(tableName)"时有效]"
-           tablePrefix="[表前缀]"
-           tableSuffix="[表后缀]">
+           class="[Table类, 仅在使用DB.getTable(tableName)时有效]"
+           prefix="[表前缀]"
+           suffix="[表后缀]">
       <assoc type="[BLS_TO|HAS_ONE|HAS_MANY]"
              join="[INNER|LEFT|RIGHT|FULL]"
-             name="[关联表名]"
-             alias="[关联别名]"
+             name="[关联名]"
+             tableName="[真实名, 指向真实的table的name]"
              foreignKey="[关联外键]"
              primaryKey="[关联主键]"
              fields="[限制字段]"

@@ -1,0 +1,61 @@
+<object class="config" name="hsInit" data="">
+    <param name="width" value="600px"/>
+</object>
+
+<div class="page-header show-in-overlay show-in-load">
+    <h1>${opt}模块</h1>
+</div>
+
+<div id="hcim_module_form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcim/Module/Info.act"/>
+        <param name="saveUrl" value="hcim/Module/Save.act"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="module_id"/>
+        <div class="form-group">
+            <label class="control-label">模块名称</label>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Module/Unique.act?id={id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">备注</label>
+            <textarea name="note" class="form-control"></textarea>
+        </div>
+        
+        <fieldset class="dropup">
+            <legend class="dropdown-toggle">高级设置 <span class="caret"></span></legend>
+            <div class="fieldbox">
+                <div class="form-group">
+                    <label class="control-label">代号</label>
+                    <input type="text" name="code" class="form-control" data-unique="hcim/Module/Unique.act?id={id}"/>
+                </div>
+            </div>
+        </fieldset>
+        
+        <div>
+            <button type="submit" class="ensure btn btn-primary">提交</button>
+            <button type="button" class="cancel btn btn-link">取消</button>
+        </div>
+    </form>
+</div>
+
+<style type="text/css">
+    fieldset legend.dropdown-toggle {cursor: pointer;}
+</style>
+
+<script type="text/javascript">
+    (function() {
+        var context = $("#hcim_module_form");
+        
+        context.find("fieldset legend").click(function( ) {
+            $(this).closest( "fieldset").toggleClass("dropup")
+                      .find(".fieldbox").toggleClass("vh");
+        }).click();
+        context.on("loadBack", function(evt, rst) {
+            var vh = !rst.info || !rst.info.code;
+            context.find( "fieldset").toggleClass("dropup", vh)
+                   .find(".fieldbox").toggleClass("vh", vh);
+        });
+    })();
+</script>
