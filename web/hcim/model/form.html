@@ -1,22 +1,21 @@
 <object class="config" name="hsInit" data="">
-    <param name="width" value="600px"/>
+    <param name="width" value="800px"/>
 </object>
 
-<div class="page-header show-in-overlay show-in-load">
-    <h1>${opt}模型</h1>
-</div>
+<h2 class="show-in-overlay">${opt}模型</h2>
 
 <div id="hcim-model-form">
     <object class="config" name="hsForm" data="">
         <param name="loadUrl" value="hcim/Model/Info.act"/>
         <param name="saveUrl" value="hcim/Model/Save.act"/>
+        <param name="_fill__select" value="(hsFillFormSelect)"/>
     </object>
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <div class="form-group">
             <label class="control-label">所属模块</label>
-            <div class="select-box"></div>
-            <button type="button" class="btn btn-default select-btn" data-select-name="" data-select-url="">选择模块</button>
+            <div class="select-box" data-fn="module_id[]" data-ft="_select"></div>
+            <button type="button" class="btn btn-default select-btn" data-select-url="hcim/module/select.html">选择模块</button>
         </div>
         <div class="form-group">
             <label class="control-label">模型名称</label>

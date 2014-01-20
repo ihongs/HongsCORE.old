@@ -1,20 +1,22 @@
 <<HongsCORE Framework for javascript>>
 
 文档版本: 13.01.01
-软件版本: 13.02.15
+软件版本: 14.01.20
 设计作者: 黄弘(Kevin Hongs)
 技术支持:
   Phone: +8618621523173
   Email: kevin.hongs@gmail.com
 
-本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库, 使用jQueryTools作为UI组件库, 使用Bootstrap作为UI主题库. 以hs开头的为普通函数, 以Hs开头的为伪类函数, this指向调用的容器对象.
-依赖的jQueryTools组件: tabs, overlay, tooltip, validator, dateinput, expose
-依赖的Bootstrap组件: .btn, .alert, .tooltip, .popover, .pagination,
-                     .dropdown, .arrow, .caret, .close, .active,
-                     .fade, .[in|out], .[position], .has-error,
-                     // 其他场合使用:
-                     .container, .row, .col, .nav, .navbar,
-                     .table, .form, .input, .label, .badge
+本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库, 使用jQueryTools作为UI组件库, 使用Bootstrap作为UI主题库. 以hs开头的为普通函数; 以Hs开头的为伪类函数, this指向调用的容器对象.
+依赖的jQueryTools组件:
+    tabs, overlay, tooltip, validator, dateinput, expose
+依赖的Bootstrap组件:
+    .btn, .alert, .tooltip, .popover, .pagination,
+    .dropdown, .arrow, .caret, .close, .active,
+    .fade, .[in|out], .[position], .has-error,
+    // 其他场合使用:
+    .container, .row, .col, .nav, .navbar,
+    .table, .form, .input, .label, .badge
 
 [ID]
 
@@ -33,8 +35,10 @@ open-box
 note-box
 list-box        用于HsList中, 下同
 page-box
-check-one
 check-all
+check-one
+for-select
+for-checks
 tree-box        用于HsTree中, 下同
 tree-list
 tree-node
@@ -45,15 +49,19 @@ tree-folded
 tree-hand       节点开关图标
 tree-name       节点名称
 tree-cnum       节点子级数量
-node-[TP]       节点类型, 在.tree-node上
+node-TYPE       节点类型, TYPE为类型标识, 在.tree-node上
+select-box      选项区域, 用于选择组件中, 下同
+select-btn      选择按钮
+select-tip      选择窗口
+select-mul      多选窗口
 
 [Attr]
 
 data-fn         HsForm和HsList中的field-name
+data-ft         HsForm和HsList中的field-type
 data-pn         HsForm中的param-name, HsList中的page-num
 data-vk         HsForm中的value-key
 data-tk         HsForm中的text-key
-data-ft         HsList中的field-type
 data-eval       执行JS, this指向当前节点
 data-load       在当前节点中加载, 属性值为url
 data-open       在当前节点中打开, 属性值为url

@@ -2,56 +2,13 @@
 HongsCORE(Javascript)
 作者: 黄弘 <kevin.hongs@gmail.com>
 创建: 2013/01/01
-修改: 2013/10/16 23:55:30
+修改: 2014/01/20 23:52:30
 依赖:
     jquery.js,
     jquery.tools.js (tabs, overlay, tooltip, validator, dateinput, expose)
     bootstrap.css   (.btn, .alert, .tooltip, .popover, .pagination,
                      .dropdown, .arrow, .caret, .close, .active,
-                     .fade, .[in|out], .[position], .has-error,
-                     // 其他场合使用:
-                     .container, .row, .col, .nav, .navbar,
-                     .table, .form, .input, .label, .badge)
-
-自定义属性:
-data-fn HsForm|HsList中为field name
-data-ft HsForm|HsList中位field type(用于按类型填充)
-data-pn HsForm中为param name, HsList中为page num
-data-vk HsForm中为value key
-data-tk HsForm中为text key
-data-tp HsList中为操作菜单的tooltip params
-data-repeat 表单验证的是否相等
-data-unique 表单验证的是否唯一
-data-eval 自动执行
-data-load 自动加载
-data-open 自动打开
-data-load-in 点击后在指定区域加载
-data-open-in 点击后在指定区域打开
-
-功能类说明:
-.open 浮窗打开链接
-.close 浮窗关闭按钮
-.cancel 表单取消按钮
-.check-all
-.check-one
-.for-select
-.for-checks
-
-定位类说明:
-#note-box 全局即时通知盒子
-.note-box 消息盒子(在#note-box下)
-.list-box
-.page-box
-.tool-box
-.find-box
-.tree-box
-.tree-list
-.tree-node
-.tree-hand
-.tree-name
-.tree-cnum
-.check-box 复选区域
-.radio-box 单选区域
+                     .fade, .[in|out], .[position], .has-error)
 */
 
 if (typeof(HsAUTH) === "undefined") HsAUTH = {};
@@ -1069,11 +1026,11 @@ HsForm.prototype = {
         this._data = data;
         for(n in datas) {
             v = datas[n];
-            i = 0;
-            inp = this.formBox.find( '[data-fn="'+n+'"]');
+            i = 1;
+            inp = this.formBox.find('[name="'+n+'"]');
             if (inp.length == 0) {
-                i = 1;
-                inp = this.formBox.find('[name="'+n+'"]');
+                i = 0;
+                inp = this.formBox.find('[data-fn="'+n+'"]');
             }
 
             if (typeof this["_fill_"+n] !="undefined") {
@@ -1087,7 +1044,10 @@ HsForm.prototype = {
             }}
             if (! v) continue;
 
-            if (inp.prop("tagName") == "SELECT" && i == 1) {
+            if (i == 0) {
+                inp.data("data", v);
+            }
+            else if (inp.prop("tagName") == "SELECT") {
                 vk = inp.attr("data-vk"); if(!vk) vk = 0;
                 tk = inp.attr("data-tk"); if(!tk) tk = 1;
                 for (i = 0; i < v.length; i ++) {
@@ -1115,7 +1075,7 @@ HsForm.prototype = {
         delete this._data;
     },
     fillInfo : function(info) {
-        var nodes, infos, i, n, t, v, inp;
+        var nodes, infos, i, n, t, v, inp, vk, tk;
         nodes = this.formBox.find("input[name],textarea[name],select[name],.check-box[name],.radio-box[name]");
         infos = {};
         for(i = 0; i < nodes.length; i ++) {
@@ -1131,11 +1091,11 @@ HsForm.prototype = {
         this._info = info;
         for(n in infos) {
             v = infos[n];
-            i = 0;
-            inp = this.formBox.find( '[data-fn="'+n+'"]');
+            i = 1;
+            inp = this.formBox.find('[name="'+n+'"]');
             if (inp.length == 0) {
-                i = 1;
-                inp = this.formBox.find('[name="'+n+'"]');
+                i = 0;
+                inp = this.formBox.find('[data-fn="'+n+'"]');
             }
 
             if (typeof this["_fill_"+n] !="undefined") {
@@ -1151,6 +1111,27 @@ HsForm.prototype = {
             }}
 
             if (i == 0) {
+                var a  = inp.data("data"), b = {}, c;
+                if (a) {
+                    // 填充查看状态下的选项
+                    vk = inp.attr("data-vk"); if(!vk) vk = 0;
+                    tk = inp.attr("data-tk"); if(!tk) tk = 1;
+                    for(i == 0; i < a.length; i ++) {
+                        c = a[i]; b[c[vk]] = b[c[tk]];
+                    }
+                    inp.removeData("data");
+                    if (jQuery.isArray(v)) {
+                        // 多选
+                        inp.empty();
+                        for(i == 0; i < v.length; i ++) {
+                            inp.append($('<div class="fl"></div>').text(b[v[i]]));
+                        }   inp.append($('<div class="cb"></div>'));
+                        continue;
+                    } else {
+                        // 单选
+                        v = b[v];
+                    }
+                }
                 inp.text(v);
             }
             else {
@@ -1457,7 +1438,7 @@ HsList.prototype = {
                     td.append('<span class="caret"></span>');
                     var that = this;
                     td.click(function( ) {
-                        var td = $(this);
+                        var td = jQuery(this);
                         var fn = td.attr("data-fn");
                         var sn = "";
                         if (td.hasClass("sort-a-z")) {
@@ -2213,6 +2194,19 @@ function _HsReadOpts() {
 }
 
 /**
+ * bootstrap方位转jquery.tools方位
+ * @param {String} pos
+ * @returns {String}
+ */
+function _bs2jtPos(pos) {
+    return {
+        top     : "top center",
+        left    : "center left",
+        right   : "center right",
+        bottom  : "bottom center"
+    }[pos];
+}
+/**
  * HongsCORE日期格式转jquery.tools日期格式
  * @param {String} format
  * @return {String)
@@ -2232,19 +2226,6 @@ function _jt2hsDF(format) {
                .replace(/ddd/g , "E" )
                .replace(/m/g   , "M" );
 }
-/**
- * bootstrap方位转jquery.tools方位
- * @param {String} pos
- * @returns {String}
- */
-function _bs2jtPos(pos) {
-    return {
-        top     : "top center",
-        left    : "center left",
-        right   : "center right",
-        bottom  : "bottom center"
-    }[pos];
-}
 
 /** jQuery插件整合 **/
 
@@ -2263,9 +2244,9 @@ jQuery.fn.extend({
 });
 
 // 重写jQuery函数
-var _jqAjax = $.ajax;
-var _jqLoad = $.fn.load;
-$.ajax = function(url, settings) {
+var _jqAjax = jQuery.ajax;
+var _jqLoad = jQuery.fn.load;
+jQuery.ajax = function(url, settings) {
     if (typeof url === "object") {
         settings = url;
         if (typeof url["url"] != "undefined")
@@ -2273,7 +2254,7 @@ $.ajax = function(url, settings) {
     }
     return _jqAjax( hsFixUri(url), settings );
 };
-$.fn.load = function(url, data, complete) {
+jQuery.fn.load = function(url, data, complete) {
     if ( jQuery.isFunction(  data  )) {
         complete = data ;
         data = undefined;
@@ -2300,13 +2281,13 @@ $.fn.load = function(url, data, complete) {
 };
 
 /**
- * 应用支持部分
+ * 应用支持
  * 编码原则:
  * 1. 尽可能的少写程序, 用描述化标记代替
  * 2. 使用事件驱动应用, 而不是初始化程序
  * @param {jQuery} $
  */
-( function($) {
+(function($) {
     // /** 设置jQueryTools参数 **/
 
     // 设置jquery tools国际化
@@ -2639,7 +2620,7 @@ $.fn.load = function(url, data, complete) {
         evt.stopPropagation();
         $(this).hsInit();
     })
-    /** 加载 **/
+    // /** 加载 **/
     .on("click", "[data-load-in]", function() {
         var s = $(this).attr("data-load-in");
         s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
@@ -2656,7 +2637,7 @@ $.fn.load = function(url, data, complete) {
         $.hsOpen($(this).attr("href"));
         return false;
     })
-    /** 表单 **/
+    // /** 表单 **/
     .on("save", "form", function(evt) {
         if (evt.isDefaultPrevented()) {
             return;
@@ -2672,7 +2653,7 @@ $.fn.load = function(url, data, complete) {
         if (txt)  btn.text( txt );
         btn.prop("disabled", false);
     })
-    /** 列表 **/
+    // /** 列表 **/
     .on("click", ".list-box tbody td", function(evt) {
         // 当点击表格列时单选
         // 工具按钮有三类, 打开|打开选中|发送选中
@@ -2697,7 +2678,7 @@ $.fn.load = function(url, data, complete) {
         $(this).find(".check-all").prop("checked", false );
         $(this).find(".for-select,.for-checks").prop("disabled", true);
     })
-    /** 树 **/
+    // /** 树 **/
     .on("select", ".HsTree .tree-node", function() {
         // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
         var box = $(this).closest(".HsTree");
@@ -2709,4 +2690,141 @@ $.fn.load = function(url, data, complete) {
         if (obj.getSid( )!=obj.getRid( )) return;
         $(this).find(".for-select,.for-checks").prop("disabled", true);
     });
+})(jQuery);
+
+/**
+ * 选择控件
+ * 使用方法:
+ * 在表单配置区域添加:
+ * <param name="_fill__select" value="(hsFillFormSelect)"/>
+ * 在表单选项区域添加:
+ * <div class="select-box" data-fn="assoc_id[]" data-ft="_select"></div>
+ * <button type="button" class="select-btn">Select</button>
+ * 在选择列表配置添加:
+ * <param name="_fill__select" value="(hsFillListSelect)"/>
+ * 在选择列表头部添加:
+ * <td data-ft="_select"><input type="checkbox" class="check-all"/></td>
+ * @param {jQuery} $
+ */
+(function($) {
+    $.fn.hsSelect = function(conf) {
+        if(!$(this).hasClass("hsSelectBtn")) {
+            $(this).addClass("hsSelectBtn");
+        }
+        else {
+            return;
+        }
+
+        if (!conf) conf = {};
+
+        var url  = conf["url"]  || $(this).attr("data-select-url");
+        var box  = conf["box"]  || $(this).attr("data-select-box");
+        var btn  = $( this );
+
+        if (! box)
+            box = btn.closest( ".form-group").find( ".select-box");
+        else if (typeof box == "string")
+            box = /^\$/.test(box) ? $(box.substr(1), btn) : $(box);
+
+        var form = box.closest(".HsForm").data("HsForm");
+        var name = box.attr   ("data-fn");
+
+        btn.on("click", function( ) {
+            var dat = box.data("fill_data");
+            var tip = $.hsOpen(url).data("fill_data", dat)
+            .toggleClass("select-mul" , /(\[\]|\.)$/.test( name)) // 名称以[]或.结尾则为多选
+            .on("selectBack", function() {
+                box.data("fill_func").call(form, box, dat, name );
+            })
+            .on("selectItem", function(id , txt) {
+                if (!btn.hasClass("select-mul")) {
+                    dat = {};
+                    if (txt !== undefined)
+                        dat[id] = txt ;
+                } else {
+                    if (txt !== undefined)
+                        dat[id] = txt ;
+                    else
+                        delete dat[id];
+                }
+            })
+            .on("click", ".cancel", function() {
+                tip.hsClose();
+                return false ;
+            })
+            .on("click", ".ensure", function() {
+                tip.trigger("selectBack");
+                tip.hsClose();
+                return false ;
+            })
+            .on("change", ".check-one", function() {
+                var id  = $(this).val();
+                var txt = $(this).prop("checked")
+                        ? $(this).closest("tr").find(".name").text()
+                        : undefined;
+                tip.trigger("selectItem", [id, txt]);
+                return false ;
+            });
+        });
+    };
+
+    // 自动初始化组件
+    $(document).on("hsReady", ".load-box", function() {
+        $(this).find(".select-btn").hsSelect();
+    }); $(this).find(".select-btn").hsSelect();
+
+    // /** 扩展方法 **/
+
+    self.hsFillFormSelect = function(inp, v, n, t) {
+        if (t == "info") return; // 不理会 info 填充, load 的数据中的 data 必须为所有选中的项
+
+        // 准备数据
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        if ($.isArray(v)) {
+            var b = {}, c;
+            for(var i = 0; i < v.length; i ++) {
+                c = v[i]; b[c[vk]] = b[c[tk]];
+            }
+            v =  b ;
+        } else if (! $.isPlainObject(v)) {
+            v = { };
+        }
+
+        // 填充选项
+        inp.empty();
+        for(var id in v) {
+            var txt = v[id];
+            $('<div class="option-box"></div>')
+            .append($('<input type="hidden"/>').attr("name", n).val(id))
+            .append($('<span class="option-txt"></span>').text(txt))
+            .append($('<span class="option-del"></span>'))
+            .appendTo(inp);
+        }
+        inp.append($('<div class="cb"></div>'));
+
+        // 绑定填充方法和数据, 供组件内调用
+        inp.data("fill_func", self.hsFillFormSelect);
+        inp.data("fill_data", v);
+    };
+
+    self.hsFillListSelect = function(td, v, n) {
+        var box = td.closest(".load-box");
+        // 初次进入时判断单选还是多选
+        if (this._multiple === undefined) {
+            this._multiple = box.hasClass("select-mul");
+            if (!this._multiple) box.find(".check-all").hide();
+        }
+
+        // 填充选择控件
+        if (!this._multiple)
+            HsList.prototype._fill__radio.call(this, td, v, n);
+        else
+            HsList.prototype._fill__check.call(this, td, v, n);
+
+        // 判断是否选中
+        if (box.data("fill_data")[v] !== undefined) {
+            td.find(".check-one").prop("checked", true).change();
+        }
+    };
 })(jQuery);
