@@ -1083,7 +1083,7 @@ HsForm.prototype = {
             else if (inp.data("data-ft")) {
                 t =  inp.attr("data-ft");
             if (typeof this["_fill_"+t] !="undefined") {
-                v = this["_fill_"+t].call(this, inp, v, t, "data");
+                v = this["_fill_"+t].call(this, inp, v, n, "data");
             }}
             if (! v) continue;
 
@@ -1146,7 +1146,7 @@ HsForm.prototype = {
             else if (inp.data("data-ft")) {
                 t =  inp.attr("data-ft");
             if (typeof this["_fill_"+t] !="undefined") {
-                v = this["_fill_"+t].call(this, inp, v, t, "info");
+                v = this["_fill_"+t].call(this, inp, v, n, "info");
                 if (!v) continue;
             }}
 
@@ -1504,7 +1504,7 @@ HsList.prototype = {
                 else if (typeof fts[n] != "undefined") {
                     t =  fts[n];
                 if (typeof this["_fill_"+t] != "undefined") {
-                    v = this["_fill_"+t].call(this, td,v,t);
+                    v = this["_fill_"+t].call(this, td,v,n);
                     if(!v) continue;
                 }}
 
