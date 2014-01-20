@@ -2461,13 +2461,23 @@ $.fn.load = function(url, data, complete) {
         }).closest(".form-group").removeClass(conf.errorClass);
     });
 
-    // /** 区域初始化, 语义标签 **/
+    // /** 语义标签 **/
 
     $.fn.hsInit = function(cnf) {
         /** jquery tools, bootstrap 初始配置处理 **/
 
         if (cnf) {
-            var box = $(this).closest(".load-box");
+            var box = $(this).closest ( ".load-box" );
+
+            // 自动提取标题, 替换编辑文字
+            var h = box.children("h1,h2,h3,h4,h5,h6");
+            if (h.length ) cnf.title = h.text();
+            if (cnf.title) {
+                cnf.title = H$("&id", box)?
+                    hsGetLang(cnf.title, {'opt': cnf.update || hsGetLang("form.update")}):
+                    hsGetLang(cnf.title, {'opt': cnf.create || hsGetLang("form.create")});
+            }
+            if (h.length ) h.text ( cnf.title );
 
             var v, o, c;
             if (box.data( "overlay" )) {
@@ -2478,20 +2488,8 @@ $.fn.load = function(url, data, complete) {
                 o.getOverlay( ).overlay( c );
             }
             else if (box.data("tabs")) {
-                v = hsGetValue(cnf, "title");
+                v = hsGetValue(cnf, "title"); h.hide();
                 if (v) $(box.data("curTab")).find("a").text(v);
-            }
-
-            // 自动提取标题, 替换编辑文字
-            var h = box.children("h1,h2,h3,h4,h5,h6");
-            if (h.length ) cnf.title = h.text();
-            if (cnf.title) {
-                if (H$("&id", box)) {
-                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.update || hsGetLang("form.update")});
-                } else {
-                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.create || hsGetLang("form.create")});
-                }
-                if (h.length) h.text(cnf.title);
             }
 
             // 直接返回: 有指定 cnf 的为使用 object.config 进行特定初始化
@@ -2611,11 +2609,12 @@ $.fn.load = function(url, data, complete) {
 
         return this;
     };
+
     $(function() {
         $(this).hsInit();
     });
 
-    // /** 文档初始化, 全局事件 **/
+    // /** 全局事件 **/
 
     $(document )
     .on("ajaxError", function(evt, xhr, cnf) {
