@@ -1076,14 +1076,14 @@ HsForm.prototype = {
                 inp = this.formBox.find('[name="'+n+'"]');
             }
 
-            if (typeof this["fill_"+n] !="undefined") {
-                v = this["fill_"+n].call(this, inp, v, n, "data");
+            if (typeof this["_fill_"+n] !="undefined") {
+                v = this["_fill_"+n].call(this, inp, v, n, "data");
             }
             // 按类型填充
             else if (inp.data("data-ft")) {
                 t =  inp.attr("data-ft");
-            if (typeof this["fill_"+t] !="undefined") {
-                v = this["fill_"+t].call(this, inp, v, t, "data");
+            if (typeof this["_fill_"+t] !="undefined") {
+                v = this["_fill_"+t].call(this, inp, v, t, "data");
             }}
             if (! v) continue;
 
@@ -1138,15 +1138,15 @@ HsForm.prototype = {
                 inp = this.formBox.find('[name="'+n+'"]');
             }
 
-            if (typeof this["fill_"+n] !="undefined") {
-                v = this["fill_"+n].call(this, inp, v, n, "info");
+            if (typeof this["_fill_"+n] !="undefined") {
+                v = this["_fill_"+n].call(this, inp, v, n, "info");
                 if (!v) continue;
             }
             // 按类型填充
             else if (inp.data("data-ft")) {
                 t =  inp.attr("data-ft");
-            if (typeof this["fill_"+t] !="undefined") {
-                v = this["fill_"+t].call(this, inp, v, t, "info");
+            if (typeof this["_fill_"+t] !="undefined") {
+                v = this["_fill_"+t].call(this, inp, v, t, "info");
                 if (!v) continue;
             }}
 
@@ -1413,8 +1413,6 @@ function HsList(opts, context) {
                     .prop("checked", cks.length && cks.length == ckd.length);
     });
 
-    this["fill_"+this.idKey] = HsList.fill_check;
-
     if (loadUrl) this.load(loadUrl, []);
 }
 HsList.prototype = {
@@ -1498,15 +1496,15 @@ HsList.prototype = {
                 if (!n) continue;
                 v = hsGetValue(list[i], n);
 
-                if (typeof this["fill_"+n] != "undefined") {
-                    v = this["fill_"+n].call(this, td,v,n);
+                if (typeof this["_fill_"+n] != "undefined") {
+                    v = this["_fill_"+n].call(this, td,v,n);
                     if(!v) continue;
                 }
                 // 按类型填充
                 else if (typeof fts[n] != "undefined") {
                     t =  fts[n];
-                if (typeof this["fill_"+t] != "undefined") {
-                    v = this["fill_"+t].call(this, td,v,t);
+                if (typeof this["_fill_"+t] != "undefined") {
+                    v = this["_fill_"+t].call(this, td,v,t);
                     if(!v) continue;
                 }}
 
@@ -1655,7 +1653,7 @@ HsList.prototype = {
 
     // /** 填充函数 **/
 
-    fill__check : function(td, v, n) {
+    _fill__check : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
         jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
             .attr("name", ck.attr("name"))
@@ -1663,7 +1661,7 @@ HsList.prototype = {
             .appendTo(td);
         return false;
     },
-    fill__radio : function(td, v, n) {
+    _fill__radio : function(td, v, n) {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
         jQuery('<input type="radio" class="input-radio check-one"/>')
             .attr("name", ck.attr("name"))
@@ -1671,12 +1669,12 @@ HsList.prototype = {
             .appendTo(td);
         return false;
     },
-    fill__admin : function(td, v, n) {
+    _fill__admin : function(td, v, n) {
         var th = this.listBox.find('thead [data-fn="'+n+'"]');
         td.append(th.find(".vh").clone( ).removeClass("vh")).hsInit();
         return false;
     },
-    fill__htime : function(td, v, n) {
+    _fill__htime : function(td, v, n) {
         var d1  =  new Date ();
         var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
         if (d1.getYear()  == d2.getYear()
@@ -1982,8 +1980,8 @@ HsTree.prototype = {
         }
 
         if (! t) t = "info";
-        if (typeof this["fill_"+t] != "undefined") {
-            this["fill_"+t].call(this, tab, info );
+        if (typeof this["_fill_"+t] != "undefined") {
+            this["_fill_"+t].call(this, tab, info );
         }
 
         tab.prependTo(nod);
@@ -2172,7 +2170,7 @@ function _HsInitOpts(opts, name) {
     else {
         if (opts) for (var k in opts) {
             // 允许扩展已有方法, 添加或重写方法/属性
-            if (this[k] != undefined || /^(fill|)/.test(k)) {
+            if (this[k] != undefined || k.substring(0, 1) == '_') {
                 this[k]  = opts[k];
             }
         }
@@ -2469,23 +2467,9 @@ $.fn.load = function(url, data, complete) {
         /** jquery tools, bootstrap 初始配置处理 **/
 
         if (cnf) {
-            var v, o, c;
             var box = $(this).closest(".load-box");
 
-            // 自动提取标题
-            var h = box.find(">.page-header h1,>h1");
-            if (h.length) cnf.title = h.text();
-
-            // 编辑标题替换
-            if (cnf.title) {
-                if (H$("&id", box)) {
-                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.update || hsGetLang("form.update")});
-                } else {
-                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.create || hsGetLang("form.create")});
-                }
-                if (h.length) h.text(cnf.title);
-            }
-
+            var v, o, c;
             if (box.data( "overlay" )) {
                 o = box.data( "overlay" ); c = o.getConf();
                 v = hsGetValue(cnf, "top"); if (v) c.top = v;
@@ -2497,8 +2481,20 @@ $.fn.load = function(url, data, complete) {
                 v = hsGetValue(cnf, "title");
                 if (v) $(box.data("curTab")).find("a").text(v);
             }
-            
-            // 直接返回, 有指定 cnf 的为使用 object.config 进行特定初始化
+
+            // 自动提取标题, 替换编辑文字
+            var h = box.children("h1,h2,h3,h4,h5,h6");
+            if (h.length ) cnf.title = h.text();
+            if (cnf.title) {
+                if (H$("&id", box)) {
+                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.update || hsGetLang("form.update")});
+                } else {
+                    cnf.title = hsGetLang(cnf.title, {'opt': cnf.create || hsGetLang("form.create")});
+                }
+                if (h.length) h.text(cnf.title);
+            }
+
+            // 直接返回: 有指定 cnf 的为使用 object.config 进行特定初始化
             return this;
         }
 
