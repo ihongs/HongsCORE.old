@@ -69,7 +69,7 @@
             box = btn.closest( ".form-group").find( ".select-box");
         else if (typeof box == "string")
             box = /^\$/.test(box) ? $(box.substr(1), btn) : $(box);
-        box.data("init", init);
+        box.data("btn" , btn );
         box.data("fill", fill);
         
         var name = box.attr("data-fn");
@@ -78,7 +78,7 @@
 
         btn.on("click", function( ) {
             var tip = $.hsOpen(url)
-            .toggleClass("single-select", btn.hasClass("single-select"))
+            .toggleClass("multiple", btn.hasClass("multiple"))
             .on("loadBack", function() {
                 load.call(btn, tip, dat, name);
             })
@@ -86,17 +86,15 @@
                 fill.call(btn, box, dat, name);
             })
             .on("selectItem", function(id, txt) {
-                if (btn.hasClass("single-select")) {
+                if (! btn.hasClass("multiple")) {
                     dat = {};
-                    if (txt !== undefined) {
+                    if (txt !== undefined)
                         dat[id] = txt ;
-                    }
                 } else {
-                    if (txt !== undefined) {
+                    if (txt !== undefined)
                         dat[id] = txt ;
-                    } else {
+                    else
                         delete dat[id];
-                    }
                 }
             })
             .on("click", ".cancel", function() {
@@ -128,31 +126,37 @@
     
     /**
      * 用于表单的 HsForm 组件的 _select 项填充函数
+     * 用法:
+     * 在 HsForm 的 object.config 中增加参数:
+     * <param name="_fill__select" value="(hsFillFormSelect)" />
+     * 然后在表单的 select-box 加上属性:
+     * data-ft="_select"
+     * @param {Element} inp select-box区域
+     * @context HsForm 实例
      */
     self.hsFillFormSelect = function(inp, v, n) {
-        inp.data("fill")(inp, v, n);
+        $(inp).data("fill").call($(inp).data("btn"), inp, v, n);
     };
     
     /**
      * 用于选择窗 HsList 组件的 _select 列填充函数
      * 用法:
-     * 在 HsList 的 object.config 中增加参数：
-     * <param name="_fill__select" value="(_fill__select)" />
+     * 在 HsList 的 object.config 中增加参数:
+     * <param name="_fill__select" value="(hsFillListSelect)" />
      * 然后在列表 head 的选择列加上属性:
-     * data-tn="_select"
+     * data-ft="_select"
      * @param {Element} td 当前要填充的格子
-     * @param {String} v 在此无意义
-     * @param {String} n 在此无意义
      * @context HsList 实例
      */
     self.hsFillListSelect = function(td, v, n) {
-        if (this._single_select === undefined) {
-            this._single_select = td.closest(".load-box").hasClass("single-select");
+        if (this._multiple === undefined) {
+            this._multiple = td.closest(".load-box").hasClass("multiple");
+        if (! this._multiple)
+            td.closest(".load-box").find(".check-all").hide( );
         }
-        if (this._single_select) {
+        if (! this._multiple)
             HsList.prototype._fill__radio.call(this, td, v, n);
-        } else {
+        else
             HsList.prototype._fill__check.call(this, td, v, n);
-        }
     };
 })( jQuery );
