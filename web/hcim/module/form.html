@@ -23,9 +23,9 @@
             <textarea name="note" class="form-control"></textarea>
         </div>
         
-        <fieldset class="dropup">
+        <fieldset>
             <legend class="dropdown-toggle">高级设置 <span class="caret"></span></legend>
-            <div class="fieldbox">
+            <div class="dropdown-body">
                 <div class="form-group">
                     <label class="control-label">代号</label>
                     <input type="text" name="code" class="form-control" data-unique="hcim/Module/Unique.act?id={id}"/>
@@ -40,22 +40,14 @@
     </form>
 </div>
 
-<style type="text/css">
-    fieldset legend.dropdown-toggle {cursor: pointer;}
-</style>
-
 <script type="text/javascript">
     (function() {
         var context = $("#hcim_module_form");
         
-        context.find("fieldset legend").click(function( ) {
-            $(this).closest( "fieldset").toggleClass("dropup")
-                      .find(".fieldbox").toggleClass("vh");
-        }).click();
         context.on("loadBack", function(evt, rst) {
             var vh = !rst.info || !rst.info.code;
-            context.find( "fieldset").toggleClass("dropup", vh)
-                   .find(".fieldbox").toggleClass("vh", vh);
+            context.find("fieldset").toggleClass("dropup", vh)
+                   .next("div").toggleClass("vh", vh);
         });
     })();
 </script>

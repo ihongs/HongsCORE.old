@@ -2172,7 +2172,7 @@ function _HsInitOpts(opts, name) {
     else {
         if (opts) for (var k in opts) {
             // 允许扩展已有方法, 添加或重写方法/属性
-            if (this[k] != undefined || /^(user|fill)/.test(k)) {
+            if (this[k] != undefined || /^(fill|)/.test(k)) {
                 this[k]  = opts[k];
             }
         }
@@ -2603,9 +2603,15 @@ $.fn.load = function(url, data, complete) {
             return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
         }).remove();
         $(this).find('input').each(function() {
-            // 为所有的input加上type class, 方便设置样式, 兼容老浏览器
-            $(this).addClass("input-"+$(this).attr("type"));
+            // 为所有的input加上type-class, 方便设置样式, 兼容老浏览器
+            $(this).addClass("input-" + $(this).attr("type"));
         });
+        $(this).find("fieldset legend.dropdown-toggle").click(function() {
+            // 如果fieldset legend为dropdown toggle, 则点击显示或隐藏
+            $(this).closest("fieldset").toggleClass("dropup")
+                   .find(".dropdown-body").toggleClass( "vh");
+        }).closest("fieldset").not(".dropup")
+                   .find(".dropdown-body").toggleClass( "vh");
 
         return this;
     };
@@ -2634,19 +2640,11 @@ $.fn.load = function(url, data, complete) {
             cnf.context.treeBox.trigger(cnf.action+"Error", evt, rst);
         }
     })
-    .on("hsReady", ".load-box", function() {
+    .on("hsReady", ".load-box", function(evt) {
+        evt.stopPropagation();
         $(this).hsInit();
-        return false;
     })
-    /*
-    .on("hsClose", ".load-box", function() {
-        // 解决表单浮窗关闭后validator的错误消息仍然存在的问题
-        // 已将错误消息位置改为相对于input, 就不需要以下代码了
-        var obj = $(this).find(".HsForm").data("HsForm");
-        if (obj) obj.formBox.data("validator").destroy();
-        return false;
-    })
-    */
+    /** 加载 **/
     .on("click", "[data-load-in]", function() {
         var s = $(this).attr("data-load-in");
         s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);

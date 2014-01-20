@@ -7,6 +7,8 @@
  */
 
 (function($) {
+    self.hsInitSelect = function(tip) {
+    };
     self.hsFillSelect = function(box, v, n, t) {
         if (t != "info") return;
         box.empty();
@@ -36,22 +38,56 @@
 
         if (!conf) conf = {};
 
-        var box  = conf["box"]  || $(this).attr("data-select-box" );
-        var tip  = conf["tip"]  || $(this).attr("data-select-tip" );
-        var url  = conf["url"]  || $(this).attr("data-select-url" );
         var name = conf["name"] || $(this).attr("data-select-name");
+        var url  = conf["url"]  || $(this).attr("data-select-url" );
+        var box  = conf["box"]  || $(this).attr("data-select-box" );
+        var btn = $(this);
         var hsFillSelect = conf["fill"] || self.hsFillSelect;
 
-        if (box && typeof box == "string")
+        if (! box)
+            box = $(this).closest(".form-group" ).find(".select-box" );
+        else if (typeof box == "string")
             box = /^\$/.test(box) ? $(box.substring(1), this) : $(box);
-        else
-            box = $(this).closest(".input-box").find(".select-box");
-        if (tip && typeof tip == "string")
-            tip = /^\$/.test(tip) ? $(tip.substring(1), this) : $(tip);
-        else
-            tip = $("#select-tip");
 
         $(this).on("click", function() {
+            var tip = $.hsOpen(url);
+            var ids = {};
+            
+            tip.find(".cancel").click(function() {
+                tip.data("tooltip").hide();
+                return false;
+            });
+            tip.find(".ensure").click(function() {
+                btn.trigger("selectBack", [ids]);
+                tip.data("tooltip").hide();
+                return false;
+            });
+            tip.find(".check-one").change(function() {
+                var id = $(this).val();
+                if ($(this).prop("checked")) {
+                    btn.trigger("selectItem", [id, ids]);
+                    var txt = $(this).closest("tr").find(".name");
+                    ids["_"+id] = [id,txt];
+                }
+                else {
+                    if (ids["_"+id] != null) {
+                        delete ids["_"+id];
+                    }
+                }
+            });
+
+            var checked = function() {
+                var ids = tip.data("ids");
+                tip.find(".check-one").each(function() {
+                    if (ids["_"+$(this).val()]) {
+                        $(this).prop("checked", true );
+                    }
+                });
+            };
+            tip.on("loadBack", function() {
+                checked();
+            }); checked();
+        
             // 单选或多选
             if ($(this).hasClass( "single")) {
                     tip.addClass( "single")
@@ -74,15 +110,20 @@
                 ids[ "_"+id ] = [ id, $(this).text() ];
             });
 
-            tip.data("ids", ids)
-               .data("btn", $(this))
-               .data("HsList").load(url);
+            tip.data("btn", $(this))
+               .data("ids", ids)
+               .load( url );
 
             $(this).tooltip({tip : tip}).show();
         });
         $(this).on("selectBack", function() {
             hsFillSelect(box, tip.data("ids"), name);
             return false;
+        });
+        $(this).closest("form").on("loadBack", function(evt, rst) {
+            if (rst && rst.select && rst.select[name]) {
+                hsFillSelect(box, rst.select[name], name);
+            }
         });
 
         /** 选择菜单 **/
@@ -94,35 +135,10 @@
             return;
         }
 
-        tip.find(".ensure").click(function() {
-            tip.data("btn").trigger("selectBack");
-            tip.data("tooltip").hide();
-            return false;
-        });
-        tip.find(".cancel").click(function() {
-            tip.data("tooltip").hide();
-            return false;
-        });
-        tip.find(".check-one").change(function() {
-            var ids = tip.data("ids");
-            var id  = $(this).val(  );
-            if ($(this).prop("checked")) {
-                var txt = $(this).closest("tr").find(".name");
-                ids["_"+id] = [id,txt];
-            }
-            else {
-                if (ids["_"+id] != null) {
-                    delete ids["_"+id];
-                }
-            }
-        });
-        tip.on("loadBack", function() {
-            var ids = tip.data("ids");
-            tip.find(".check-one").each(function() {
-                if (ids["_"+$(this).val()]) {
-                    $(this).prop("checked", true );
-                }
-            });
-        });
     };
+    
+    // 自动初始化
+    $(document).on("hsReady", ".load-box", function() {
+        $(this).find(".select-btn").hsSelect();
+    }); $(this).find(".select-btn").hsSelect();
 })( jQuery );

@@ -50,6 +50,10 @@ object.config {
 
 /** 表单 **/
 
+fieldset .dropdown-toggle {
+    cursor: pointer;
+}
+
 .check-box label,
 .radio-box label {
     font-weight: normal;
@@ -192,10 +196,6 @@ object.config {
 }
 .overlay .open-box {
     margin: 15px;
-}
-.overlay .open-box > .page-header,
-.overlay .open-box > .page-header > h1 {
-    margin-top: 0;
 }
 
 /** bootstrap 调整 **/
