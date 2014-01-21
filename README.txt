@@ -71,7 +71,7 @@ HongsCORE
 文件映射:
 xxxx/Foo/Bar.act    调用 app.xxxx.action.Foo.actionBar
 xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
-xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(命令行 WEB-INF/run xxxx.Class)
+xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(执行命令 WEB-INF/run xxxx.Foo)
 name.js-auth        读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
 name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
 name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
@@ -109,7 +109,7 @@ find    搜索关键词
 查找不匹配的行  -find=word1+word2, -find.name=word1+word2
 排序(-表示逆序) sort=-field1+field2, sort=sub_table.field
 
-注: "+" 在 URL 中为空格; 框架未提供 >,>=,<,<= 等条件, 因这些需求并不多, 请自行实现, 推荐使用 gt-,ge-,lt-,le- 作为参数前缀. 之所以不使用后缀(如field!=value更易懂), 是因为 field,find 均可以作为数组传递(如field[]=value表示IN语句), 框架的解析器需要通过"."和"[]"来构建Map和List, 用前缀方便解析(不用特殊处理[]的逻辑), 也方便过滤时做判断, 且"-"在URL中不需要转义.
+注: "+" 在 URL 中为空格; 框架未提供 >,>=,<,<= 等条件, 因这些需求并不多, 请自行实现, 推荐使用 gt-,ge-,lt-,le- 作为参数前缀. 之所以不使用后缀(如 field!=value 更直观), 是因为 field,find 均可以作为数组传递(如 field[]=value 表示 IN 语句), 框架的解析器需要通过"."和"[]"来构建 Map 和 List, 用前缀方便解析(不用特殊处理[]的逻辑), 也方便过滤时做判断, 且"-"在 URL 中不需要转义.
 
 [数据模型命名规范]
 
