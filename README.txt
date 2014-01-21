@@ -135,7 +135,7 @@ find    搜索关键词
 
 << HongsCORE Framework for Javascript >>
 
-请转至 https://github.com/ihongs/HongsCORE/blob/develop/web/lib/core/README.txt
+请转至 https://github.com/ihongs/HongsCORE/blob/develop/web/app/common/
 
 << KEEP IT SIMPLE, STUPID! >>
 
