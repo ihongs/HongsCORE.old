@@ -82,6 +82,8 @@ oldTab          之前选中的Tab对象
 curTab          现在选中的Tab对象
 overlay
 trigger         用于从tip上获取trigger对象
+fill_func       在Select组件中绑定填充函数
+fill_data       在Select组件中绑定填充数据
 
 [Event]
 
