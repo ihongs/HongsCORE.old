@@ -24,7 +24,7 @@ if (typeof(HsLANG) === "undefined") HsLANG = {};
  * /    补全路径
  * &    获取单个参数值, 第二个参数指定参数容器
  * @    获取多个参数值, 第二个参数指定参数容器
- * $    获取/设置回话存储, 第二个参数存在为设置, 第二个参数为null则删除
+ * $    获取/设置会话存储, 第二个参数存在为设置, 第二个参数为null则删除
  * %    获取/设置本地存储, 第二个参数存在为设置, 第二个参数为null则删除
  * @return {Mixed} 根据开头标识返回不同类型的数据
  */
@@ -64,17 +64,17 @@ function H$() {
     case '$':
     case '%':
         var c = b == '$' ? window.sessionStorage : window.localStorage;
-        if (typeof c=="undefined") {
-            throw("H$: "+( b=='$'?'session':'local' )+"Storage does not support!");
+        if (typeof c == "undefined") {
+            throw("H$: Does not support '"+(b == '$' ? 'session' : 'local')+"Storage'");
         }
         if (arguments.length == 1) {
             return c.getItem(arguments[0]);
-        } else if ( arguments[1] ) {
-                c.setItem(arguments[0], arguments[1]);
+        } else if (arguments[1]) {
+                   c.setItem(arguments[0] , arguments[1]);
         } else {
                 c.removeItem(arguments[0]);
         }
-    default: throw("H$: Wrong flag '"+b+"'");
+    default: throw("H$: Unrecognized identified '"+b+"'");
     }
 }
 
@@ -322,7 +322,7 @@ function hsGetValue (obj, path, def) {
     path = path.replace(/\]\[/g, ".")
                .replace(/\[/   , ".")
                .replace(/\]/   , "" )
-               .replace(/\.+$/ , "" )
+               .replace(/\.+$/ , "" ) // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 name[] 提取数据
                .split  (/\./ );
     return hsGetArray(obj, path, def);
 }
@@ -2284,7 +2284,7 @@ jQuery.fn.load = function(url, data, complete) {
  * 应用支持
  * 编码原则:
  * 1. 尽可能的少写程序, 用描述化标记代替
- * 2. 使用事件驱动应用, 而不是初始化程序
+ * 2. 使用事件驱动应用, 避免使用配置函数
  * @param {jQuery} $
  */
 (function($) {
@@ -2717,14 +2717,14 @@ jQuery.fn.load = function(url, data, complete) {
 
         if (!conf) conf = {};
 
-        var url  = conf["url"]  || $(this).attr("data-select-url");
-        var box  = conf["box"]  || $(this).attr("data-select-box");
-        var btn  = $( this );
+        var url = conf["url"] || $(this).attr("data-select-url");
+        var box = conf["box"] || $(this).attr("data-select-box");
+        var btn = $(this);
 
         if (! box)
-            box = btn.closest( ".form-group").find( ".select-box");
+            box = btn.closest(".form-group").find(".select-box");
         else if (typeof box == "string")
-            box = /^\$/.test(box) ? $(box.substr(1), btn) : $(box);
+            box = /^\$/.test(box)? $(box.substr(1), btn): $(box);
 
         var form = box.closest(".HsForm").data("HsForm");
         var name = box.attr   ("data-fn");
@@ -2732,9 +2732,9 @@ jQuery.fn.load = function(url, data, complete) {
         btn.on("click", function( ) {
             var dat = box.data("fill_data");
             var tip = $.hsOpen(url).data("fill_data", dat)
-            .toggleClass("select-mul" , /(\[\]|\.)$/.test( name)) // 名称以[]或.结尾则为多选
+            .toggleClass("select-mul", /(\[\]|\.)$/.test(name) ) // 名称以[]或.结尾则为多选
             .on("selectBack", function() {
-                box.data("fill_func").call(form, box, dat, name );
+                box.data("fill_func").call(form, box, dat, name);
             })
             .on("selectItem", function(id , txt) {
                 if (!btn.hasClass("select-mul")) {
