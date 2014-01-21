@@ -131,7 +131,7 @@ find    搜索关键词
 
 注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: page,rows,cols,sort,find. 另, 在Model中可以重新定义这些名称, 但并不建议将这些参数名作为配置写入配置中(我信奉少量的约定胜于过多的配置).
 
-<< HongsCORE Framework for javascript >>
+<< HongsCORE Framework for Javascript >>
 
 请转至 https://github.com/ihongs/HongsCORE/blob/develop/web/lib/core/README.txt
 
