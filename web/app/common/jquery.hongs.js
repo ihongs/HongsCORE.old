@@ -793,6 +793,128 @@ function hsPrsDate(text, format) {
 }
 
 /**
+ * 遍历对象或数组的全部叶子节点
+ * @param {Object,Array} data
+ * @param {Function} func
+ */
+function _hsEachLeaf(data, func) {
+    var path = [];
+    if (arguments.length>2) {
+        path = arguments[2];
+    }
+    if (jQuery.isPlainObject(data)) {
+        for (var k in data) {
+            _hsEachLeaf(data[k], func, path.concat([k]));
+        }
+    }
+    else if (jQuery.isArray (data)) {
+        for (var i = 0; i < data.length; i ++) {
+            _hsEachLeaf(data[i], func, path.concat([i]));
+        }
+    }
+    else {
+        func(data, path);
+    }
+}
+
+/**
+ * 标准文档对象操作类初始化方法
+ * @param {Object} opts
+ * @param {String} name
+ * @returns {Object,null}
+ */
+function _HsInitOpts(opts, name) {
+        var func = self[name];
+    if (!(this instanceof func)) {
+        var inst = this.data(name);
+        if (!inst) {
+            inst = new func(opts, this);
+            this.data(name, inst).addClass(name);
+        }
+        return inst;
+    }
+    else {
+        if (opts) for (var k in opts) {
+            // 允许扩展已有方法, 添加或重写方法/属性
+            if (this[k] != undefined || k.substring(0, 1) == '_') {
+                this[k]  = opts[k];
+            }
+        }
+        return null;
+    }
+}
+
+/**
+ * 获取配置选项
+ * @returns {Object}
+ */
+function _HsReadOpts() {
+    var obj = {};
+    var arr = jQuery(this).find("param");
+    for(var i = 0; i < arr.length; i ++) {
+        var n = jQuery(arr[i]).attr("name" );
+        var v = jQuery(arr[i]).attr("value");
+        switch (v.substring(0, 2)) {
+        case "S:": // String
+            v = v.substring(2);
+            break;
+        case "N:": // Number
+            v = v.substring(2);
+            v =  parseFloat(v);
+            break;
+        case "B:": // Boolean
+            v = v.substring(2);
+            v = /(true|yes|ok)/i.test(v);
+            break;
+        default:
+            if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
+                v = eval('('+v+')');
+            else  if  (/^\s*(\(.*\))\s*$/.test(v))
+                v = eval( v );
+        }
+        if (n == "") continue;
+        hsSetValue(obj, n, v);
+    }
+    return obj;
+}
+
+/**
+ * bootstrap方位转jquery.tools方位
+ * @param {String} pos
+ * @returns {String}
+ */
+function _bs2jtPos(pos) {
+    return {
+        top     : "top center",
+        left    : "center left",
+        right   : "center right",
+        bottom  : "bottom center"
+    }[pos];
+}
+/**
+ * HongsCORE日期格式转jquery.tools日期格式
+ * @param {String} format
+ * @return {String)
+ */
+function _hs2jtDF(format) {
+  return format.replace(/EE/g, "dddd")
+               .replace(/E/g , "ddd" )
+               .replace(/M/g , "m"   );
+}
+/**
+ * jquery.tools日期格式转HongsCORE日期格式
+ * @param {String} format
+ * @return {String)
+ */
+function _jt2hsDF(format) {
+  return format.replace(/dddd/g, "EE")
+               .replace(/ddd/g , "E" )
+               .replace(/m/g   , "M" );
+}
+
+/** UI 组件 **/
+
+/**
  * 通知
  * @param {String} msg 消息
  * @param {String} cls 样式类, 默认为alert-info
@@ -908,21 +1030,154 @@ function HsClose() {
 function HsReady() {
     var box = jQuery(this);
     box.trigger("hsReady");
-    box.find("show-in-overlay,.show-in-tabs,.show-in-load").hide();
+
+    var $ = jQuery;
+    
+    /** 语义标签解析 **/
+
+    box.find("div[data-eval]").each(function() {
+        eval($(this).attr("data-eval"));
+    });
+    box.find("div[data-load]").each(function() {
+        $(this).load($(this).attr("data-load"));
+    });
+    box.find("div[data-open]").each(function() {
+        HsOpen.call(this, $(this).attr("data-open"));
+    });
+    box.find("object.config" ).each(function() {
+        var prt = $(this).parent();
+        var fun = $(this).attr("name");
+        var cnf = _HsReadOpts.call( this );
+        if (typeof prt[fun] == "function") prt[fun](cnf);
+    }).remove();
+
+    /** 样式相关处理 **/
+
+    box.find('*').contents().filter(function() {
+        // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
+        return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
+    }).remove();
+    box.find('input').each(function() {
+        // 为所有的input加上type-class, 方便设置样式, 兼容老浏览器
+        $(this).addClass("input-" + $(this).attr("type"));
+    });
+    box.find("fieldset legend.dropdown-toggle").click(function() {
+        // 如果fieldset legend为dropdown toggle, 则点击显示或隐藏
+        $(this).closest("fieldset").toggleClass("dropup")
+               .find(".dropdown-body" ).toggleClass("vh");
+    }).closest("fieldset").not(".dropup")
+               .find(".dropdown-body" ).toggleClass("vh");
+
+    /** jquery tools, bootstrap 语义标签解析 **/
+
+    box.find(".tabs,.nav-tabs,.nav-pills").each(function() {
+        var m = $(this), n;
+        do {
+            n = m.attr("rel");
+            if (n) break;
+            n = m.next(".panes,.nav-panes").children("div");
+            if (n.size()) break;
+            return;
+        } while (false);
+        m.tabs(n);
+    });
+    box.find("[data-toggle=overlay],[data-toggle=alert],[data-toggle=modal]").each(function() {
+        var m = $(this), n;
+        do {
+            n = m.attr("rel");
+            if (n) break;
+            n = m.next(".overlay,.alert,.modal");
+            if (n.size()) break;
+            return;
+        } while (false);
+        var o = {
+          target      : n,
+          mask        : {
+            color     : "#000",
+            opacity   : 0.8,
+            loadSpeed : 0
+          }
+        };
+        m.overlay(o);
+    });
+    $(this).find("[data-toggle=tooltip],[data-toggle=popover],[data-toggle=dropdown]").each(function() {
+        var m = $(this), n, r;
+        do {
+            n = m.attr("rel");
+            r = false;
+            if (n) break;
+            n = m.next(".tooltip,.popover,.dropdown-menu");
+            r = true ;
+            if (n.size()) break;
+            return;
+        } while ( false );
+        var o = {
+            tip       : n,
+            relative  : r
+        };
+
+        // 与 bootstrap 配合使用
+        var p = m.attr("data-placement");
+        switch (m.attr("data-toggle")) {
+            case "tooltip":
+                o.position = p ? _bs2jtPos(p) : "top center";
+                o.tipClass = "tooltip";
+                o.events = {def: "click mouseover,mouseout"};
+                break;
+            case "popover":
+                o.position = p ? _bs2jtPos(p) : "top center";
+                o.tipClass = "popover";
+                o.events = {def: "click,mouseout"};
+                break;
+            case "dropdown":
+                if (! p && m.parent().hasClass("dropup"))
+                    p = "top"; // 如果父级为 dropup 则向上弹出
+                o.position = p ? _bs2jtPos(p) : "bottom center";
+                o.tipClass = "dropdown-menu";
+                o.events = {def: "click,mouseout"};
+                break;
+        }
+
+        m.tooltip(o);
+    });
+
+    box.find("[type=date]").dateinput();
+    box.find("[type=range]").rangeinput();
+
+    return box;
+}
+
+/**
+ * 配置浮窗或区域
+ * @param {Object} opts 选项
+ */
+function HsInit(opts) {
+    var obj = jQuery(this);
+    var box = obj.closest(".load-box" );
+
+    /** jquery tools, bootstrap 初始配置处理 **/
+
+    // 自动提取标题, 替换编辑文字
+    var h = box.children("h1,h2,h3,h4,h5,h6");
+    if (h.length) opts.title = h.text();
+    if (opts.title) {
+        opts.title = H$("&id", box)?
+            hsGetLang(opts.title, {'opt': opts.update || hsGetLang("form.update")}):
+            hsGetLang(opts.title, {'opt': opts.create || hsGetLang("form.create")});
+    }
+    if (h.length) h.text ( opts.title );
+
+    var v, o, c;
     if (box.data( "overlay" )) {
-        box.data( "overlay" ).load();
-        box.find(".show-in-overlay").show();
+        o = box.data( "overlay" ); c = o.getConf();
+        v = hsGetValue(opts, "top"); if (v) c.top = v;
+        v = hsGetValue(opts, "left"); if (v) c.left = v;
+        v = hsGetValue(opts, "width"); if (v) box.css("width", v);
+        o.getOverlay().overlay(c);
     }
     else if (box.data("tabs")) {
-        box.find(".show-in-tabs").show();
+        v = hsGetValue(opts, "title"); if (v) box.data("curTab").find("a").text(v);
     }
-    else {
-        box.find(".show-in-load").show();
-    }
-    box.on("click", ".close,.cancel", function() {
-        HsClose.call(box);
-    });
-    return box;
 }
 
 /**
@@ -2105,128 +2360,6 @@ HsTree.prototype = {
     }
 };
 
-/** 功能辅助函数 **/
-
-/**
- * 遍历对象或数组的全部叶子节点
- * @param {Object,Array} data
- * @param {Function} func
- */
-function _hsEachLeaf(data, func) {
-    var path = [];
-    if (arguments.length>2) {
-        path = arguments[2];
-    }
-    if (jQuery.isPlainObject(data)) {
-        for (var k in data) {
-            _hsEachLeaf(data[k], func, path.concat([k]));
-        }
-    }
-    else if (jQuery.isArray (data)) {
-        for (var i = 0; i < data.length; i ++) {
-            _hsEachLeaf(data[i], func, path.concat([i]));
-        }
-    }
-    else {
-        func(data, path);
-    }
-}
-
-/**
- * 标准文档对象操作类初始化方法
- * @param {Object} opts
- * @param {String} name
- * @returns {Object,null}
- */
-function _HsInitOpts(opts, name) {
-        var func = self[name];
-    if (!(this instanceof func)) {
-        var inst = this.data(name);
-        if (!inst) {
-            inst = new func(opts, this);
-            this.data(name, inst).addClass(name);
-        }
-        return inst;
-    }
-    else {
-        if (opts) for (var k in opts) {
-            // 允许扩展已有方法, 添加或重写方法/属性
-            if (this[k] != undefined || k.substring(0, 1) == '_') {
-                this[k]  = opts[k];
-            }
-        }
-        return null;
-    }
-}
-
-/**
- * 获取配置选项
- * @returns {Object}
- */
-function _HsReadOpts() {
-    var obj = {};
-    var arr = jQuery(this).find("param");
-    for(var i = 0; i < arr.length; i ++) {
-        var n = jQuery(arr[i]).attr("name" );
-        var v = jQuery(arr[i]).attr("value");
-        switch (v.substring(0, 2)) {
-        case "S:": // String
-            v = v.substring(2);
-            break;
-        case "N:": // Number
-            v = v.substring(2);
-            v =  parseFloat(v);
-            break;
-        case "B:": // Boolean
-            v = v.substring(2);
-            v = /(true|yes|ok)/i.test(v);
-            break;
-        default:
-            if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
-                v = eval('('+v+')');
-            else  if  (/^\s*(\(.*\))\s*$/.test(v))
-                v = eval( v );
-        }
-        if (n == "") continue;
-        hsSetValue(obj, n, v);
-    }
-    return obj;
-}
-
-/**
- * bootstrap方位转jquery.tools方位
- * @param {String} pos
- * @returns {String}
- */
-function _bs2jtPos(pos) {
-    return {
-        top     : "top center",
-        left    : "center left",
-        right   : "center right",
-        bottom  : "bottom center"
-    }[pos];
-}
-/**
- * HongsCORE日期格式转jquery.tools日期格式
- * @param {String} format
- * @return {String)
- */
-function _hs2jtDF(format) {
-  return format.replace(/EE/g, "dddd")
-               .replace(/E/g , "ddd" )
-               .replace(/M/g , "m"   );
-}
-/**
- * jquery.tools日期格式转HongsCORE日期格式
- * @param {String} format
- * @return {String)
- */
-function _jt2hsDF(format) {
-  return format.replace(/dddd/g, "EE")
-               .replace(/ddd/g , "E" )
-               .replace(/m/g   , "M" );
-}
-
 /** jQuery插件整合 **/
 
 // 常用jQuery扩展
@@ -2238,6 +2371,7 @@ jQuery.fn.extend({
     hsOpen  : HsOpen,
     hsClose : HsClose,
     hsReady : HsReady,
+    hsInit  : HsInit,
     hsForm  : HsForm,
     hsList  : HsList,
     hsTree  : HsTree
@@ -2288,10 +2422,129 @@ jQuery.fn.load = function(url, data, complete) {
  * @param {jQuery} $
  */
 (function($) {
-    // /** 设置jQueryTools参数 **/
+    // /** 全局事件 **/
+
+    $(document )
+    .on("ajaxError", function(evt, xhr, cnf) {
+        var rst = hsResponObj(xhr);
+        if (typeof cnf.action === "undefined" ) {
+            return;
+        }
+        if (typeof cnf.button !== "undefined" ) {
+            $(cnf.button).trigger(cnf.action+"Error", evt, rst);
+        }
+        else if (cnf.context instanceof HsForm) {
+            cnf.context.formBox.trigger(cnf.action+"Error", evt, rst);
+        }
+        else if (cnf.context instanceof HsList) {
+            cnf.context.listBox.trigger(cnf.action+"Error", evt, rst);
+        }
+        else if (cnf.context instanceof HsTree) {
+            cnf.context.treeBox.trigger(cnf.action+"Error", evt, rst);
+        }
+    })
+    // /** 加载 **/
+    .on("click", ".open", function() {
+        $.hsOpen($(this).attr("href"));
+        return false;
+    })
+    .on("click", ".close", fucntion() {
+        $(this).closest(".load-box").hsClose();
+        return false;
+    })
+    .on("click", "[data-load-in]", function() {
+        var s = $(this).attr("data-load-in");
+        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
+        s.load($( this ).attr("href"));
+        return false;
+    })
+    .on("click", "[data-open-in]", function() {
+        var s = $(this).attr("data-load-in");
+        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
+        s.hsOpen($(this).attr("href"));
+        return false;
+    })
+    // /** 表单 **/
+    .on("save", "form", function(evt) {
+        if (evt.isDefaultPrevented()) {
+            return;
+        }
+        var btn = $(this).find(":submit");
+        btn.prop("disabled", true );
+        btn.data("txt", btn.text());
+        btn.text(hsGetLang("form.saving"));
+    })
+    .on("saveBack saveFail", "form", function() {
+        var btn = $(this).find(":submit");
+        var txt = btn.data("txt");
+        if (txt)  btn.text( txt );
+        btn.prop("disabled", false);
+    })
+    // /** 列表 **/
+    .on("click", ".list-box tbody td", function(evt) {
+        // 当点击表格列时单选
+        // 工具按钮有三类, 打开|打开选中|发送选中
+        // 打开选中只能选一行, 发送选中可以选多行
+        // 但是复选框太小不方便操作, 故让点击单元格即单选该行, 方便操作
+        if (this != evt.target) return;
+        var tr = $(this).closest("tr");
+        var ck = tr.find(".check-one");
+        if (this !=  ck .closest("td"))
+            tr.closest("tbody").find(".check-one").not(ck)
+                               .prop( "checked"  , false );
+        ck.prop("checked", ! ck.prop( "checked")).change();
+    })
+    .on("change", ".HsList .check-one", function() {
+        // 当选中行时, 开启工具按钮, 否则禁用相关按钮
+        var box = $(this).closest(".HsList");
+        var len = box.find(".check-one:checked").length;
+        box.find(".for-select").prop("disabled", len != 1);
+        box.find(".for-checks").prop("disabled", len == 0);
+    })
+    .on("loadBack", ".HsList", function() {
+        $(this).find(".check-all").prop("checked", false );
+        $(this).find(".for-select,.for-checks").prop("disabled", true);
+    })
+    // /** 树 **/
+    .on("select", ".HsTree .tree-node", function() {
+        // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
+        var box = $(this).closest(".HsTree");
+        var obj =        box.data( "HsTree");
+        box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
+    })
+    .on("loadBack", ".HsTree", function() {
+        var obj = $(this).data( "HsTree");
+        if (obj.getSid( )!=obj.getRid( )) return;
+        $(this).find(".for-select,.for-checks").prop("disabled", true);
+    });
+
+    $(function() {
+        $(this).hsReady();
+    }
+
+    // /** 组件配置 **/
+
+    // 改变tab和class使其能使用bootstrap的样式
+    $.tools.tabs.conf.tabs = "li";
+    $.tools.tabs.conf.current = "active";
+    $.tools.tooltip.conf.tipClass = "popover";
+    $.tools.validator.conf.errorClass = "has-error";
+    $.tools.validator.conf.messageClass = "tooltip fade right in";
+
+    // 设置jquery tools遮罩层
+    $.tools.overlay.conf.top = "center",
+    $.tools.overlay.conf.left = "center",
+    $.tools.overlay.conf.load = false,
+    $.tools.overlay.conf.fixed = false,
+    $.tools.overlay.conf.oneInstance = false,
+    $.tools.overlay.conf.closeOnClick = false,
+    $.tools.overlay.conf.mask = {
+        color       : "#000",
+        opacity     : 0.5,
+        loadSpeed   : 0
+    };
 
     // 设置jquery tools国际化
-    $(function() {
     $.tools.dateinput.conf.format = _hs2jtDF(hsGetLang("date.format"));
     $.tools.dateinput.conf.firstDay = hsGetLang("date.first.day");
     $.tools.dateinput.localize("en", {
@@ -2316,27 +2569,6 @@ jQuery.fn.load = function(url, data, complete) {
         "[data-repeat]"   : hsGetLang("form.is.not.repeat"),
         "[data-unique]"   : hsGetLang("form.is.not.unique")
     });
-    });
-
-    // 改变tab和class使其能使用bootstrap的样式
-    $.tools.tabs.conf.tabs = "li";
-    $.tools.tabs.conf.current = "active";
-    $.tools.tooltip.conf.tipClass = "popover";
-    $.tools.validator.conf.errorClass = "has-error";
-    $.tools.validator.conf.messageClass = "tooltip fade right in";
-
-    // 设置jquery tools覆盖层
-    $.tools.overlay.conf.top = "center",
-    $.tools.overlay.conf.left = "center",
-    $.tools.overlay.conf.load = false,
-    $.tools.overlay.conf.fixed = false,
-    $.tools.overlay.conf.oneInstance = false,
-    $.tools.overlay.conf.closeOnClick = false,
-    $.tools.overlay.conf.mask = {
-        color       : "#000",
-        opacity     : 0.5,
-        loadSpeed   : 0
-    };
 
     // 设置jquery tools表单校验
     $.tools.validator.conf.formEvent = null;
@@ -2440,255 +2672,6 @@ jQuery.fn.load = function(url, data, complete) {
                 msg.css({visibility: "hidden"});
             }
         }).closest(".form-group").removeClass(conf.errorClass);
-    });
-
-    // /** 语义标签 **/
-
-    $.fn.hsInit = function(cnf) {
-        /** jquery tools, bootstrap 初始配置处理 **/
-
-        if (cnf) {
-            var box = $(this).closest ( ".load-box" );
-
-            // 自动提取标题, 替换编辑文字
-            var h = box.children("h1,h2,h3,h4,h5,h6");
-            if (h.length ) cnf.title = h.text();
-            if (cnf.title) {
-                cnf.title = H$("&id", box)?
-                    hsGetLang(cnf.title, {'opt': cnf.update || hsGetLang("form.update")}):
-                    hsGetLang(cnf.title, {'opt': cnf.create || hsGetLang("form.create")});
-            }
-            if (h.length ) h.text ( cnf.title );
-
-            var v, o, c;
-            if (box.data( "overlay" )) {
-                o = box.data( "overlay" ); c = o.getConf();
-                v = hsGetValue(cnf, "top"); if (v) c.top = v;
-                v = hsGetValue(cnf, "left"); if (v) c.left = v;
-                v = hsGetValue(cnf, "width"); if (v) box.css("width", v);
-                o.getOverlay( ).overlay( c );
-            }
-            else if (box.data("tabs")) {
-                v = hsGetValue(cnf, "title"); h.hide();
-                if (v) $(box.data("curTab")).find("a").text(v);
-            }
-
-            // 直接返回: 有指定 cnf 的为使用 object.config 进行特定初始化
-            return this;
-        }
-
-        /** jquery tools, bootstrap 语义属性解析 **/
-
-        $(this).find(".tabs,.nav-tabs,.nav-pills").each(function() {
-            var n;
-            do {
-                n = $(this).attr("rel");
-                if (n) break;
-                n = $(this).next(".panes,.nav-panes").children("div");
-                if (n.size()) break;
-                return;
-            } while ( false );
-            $(this).tabs( n );
-        });
-        $(this).find("[data-toggle=overlay],[data-toggle=alert],[data-toggle=modal]").each(function() {
-            var n;
-            do {
-                n = $(this).attr("rel");
-                if (n       ) break;
-                n = $(this).next(".overlay,.alert,.modal");
-                if (n.size()) break;
-                return;
-            } while ( false );
-            var o = {
-              target      : n,
-              mask        : {
-                color     : "#000",
-                opacity   : 0.8,
-                loadSpeed : 0
-              }
-            };
-            $(this).overlay(o);
-        });
-        $(this).find("[data-toggle=tooltip],[data-toggle=popover],[data-toggle=dropdown]").each(function() {
-            var n, r;
-            do {
-                n = $(this).attr("rel");
-                r = false;
-                if (n       ) break;
-                n = $(this).next(".tooltip,.popover,.dropdown-menu");
-                r =  true;
-                if (n.size()) break;
-                return;
-            } while ( false );
-            var o = {
-                tip       : n,
-                relative  : r
-            };
-
-            // 与 bootstrap 配合使用
-            var p = $(this).attr("data-placement");
-            switch ($(this).attr("data-toggle")) {
-                case "tooltip":
-                    o.position = p ? _bs2jtPos(p) : "top center";
-                    o.tipClass = "tooltip";
-                    o.events = {def: "click mouseover,mouseout"};
-                    break;
-                case "popover":
-                    o.position = p ? _bs2jtPos(p) : "top center";
-                    o.tipClass = "popover";
-                    o.events = {def: "click,mouseout"};
-                    break;
-                case "dropdown":
-                    if (! p && $(this).parent( ).hasClass("dropup"))
-                        p = "top"; // 如果父级为 dropup 则向上弹出
-                    o.position = p ? _bs2jtPos(p) : "bottom center";
-                    o.tipClass = "dropdown-menu";
-                    o.events = {def: "click,mouseout"};
-                    break;
-            }
-
-            $(this).tooltip(o);
-        });
-
-        $(this).find("[type=date]").dateinput();
-        $(this).find("[type=range]").rangeinput();
-
-        /** 语义标签解析 **/
-
-        $(this).find("div[data-eval]").each(function() {
-            eval($(this).attr("data-eval"));
-        });
-        $(this).find("div[data-load]").each(function() {
-            $(this).load($(this).attr("data-load"));
-        });
-        $(this).find("div[data-open]").each(function() {
-            $(this).hsOpen($(this).attr("data-open"));
-        });
-        $(this).find("object.config" ).each(function() {
-            var prt = $(this).parent();
-            var fun = $(this).attr("name");
-            var cnf = _HsReadOpts.call( this );
-            if (typeof prt[fun] == "function") prt[fun](cnf);
-        }).remove();
-
-        /** 样式相关处理 **/
-
-        $(this).find('*').contents().filter(function() {
-            // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
-            return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
-        }).remove();
-        $(this).find('input').each(function() {
-            // 为所有的input加上type-class, 方便设置样式, 兼容老浏览器
-            $(this).addClass("input-" + $(this).attr("type"));
-        });
-        $(this).find("fieldset legend.dropdown-toggle").click(function() {
-            // 如果fieldset legend为dropdown toggle, 则点击显示或隐藏
-            $(this).closest("fieldset").toggleClass("dropup")
-                   .find(".dropdown-body").toggleClass( "vh");
-        }).closest("fieldset").not(".dropup")
-                   .find(".dropdown-body").toggleClass( "vh");
-
-        return this;
-    };
-
-    $(function() {
-        $(this).hsInit();
-    });
-
-    // /** 全局事件 **/
-
-    $(document )
-    .on("ajaxError", function(evt, xhr, cnf) {
-        var rst = hsResponObj(xhr);
-        if (typeof cnf.action === "undefined" ) {
-            return;
-        }
-        if (typeof cnf.button !== "undefined" ) {
-            $(cnf.button).trigger(cnf.action+"Error", evt, rst);
-        }
-        else if (cnf.context instanceof HsForm) {
-            cnf.context.formBox.trigger(cnf.action+"Error", evt, rst);
-        }
-        else if (cnf.context instanceof HsList) {
-            cnf.context.listBox.trigger(cnf.action+"Error", evt, rst);
-        }
-        else if (cnf.context instanceof HsTree) {
-            cnf.context.treeBox.trigger(cnf.action+"Error", evt, rst);
-        }
-    })
-    .on("hsReady", ".load-box", function(evt) {
-        evt.stopPropagation();
-        $(this).hsInit();
-    })
-    // /** 加载 **/
-    .on("click", "[data-load-in]", function() {
-        var s = $(this).attr("data-load-in");
-        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
-        s.load($( this ).attr("href"));
-        return false;
-    })
-    .on("click", "[data-open-in]", function() {
-        var s = $(this).attr("data-load-in");
-        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
-        s.hsOpen($(this).attr("href"));
-        return false;
-    })
-    .on("click", ".open", function() {
-        $.hsOpen($(this).attr("href"));
-        return false;
-    })
-    // /** 表单 **/
-    .on("save", "form", function(evt) {
-        if (evt.isDefaultPrevented()) {
-            return;
-        }
-        var btn = $(this).find(":submit");
-        btn.prop("disabled", true );
-        btn.data("txt", btn.text());
-        btn.text(hsGetLang("form.saving"));
-    })
-    .on("saveBack saveFail", "form", function() {
-        var btn = $(this).find(":submit");
-        var txt = btn.data("txt");
-        if (txt)  btn.text( txt );
-        btn.prop("disabled", false);
-    })
-    // /** 列表 **/
-    .on("click", ".list-box tbody td", function(evt) {
-        // 当点击表格列时单选
-        // 工具按钮有三类, 打开|打开选中|发送选中
-        // 打开选中只能选一行, 发送选中可以选多行
-        // 但是复选框太小不方便操作, 故让点击单元格即单选该行, 方便操作
-        if (this != evt.target) return;
-        var tr = $(this).closest("tr");
-        var ck = tr.find(".check-one");
-        if (this !=  ck .closest("td"))
-            tr.closest("tbody").find(".check-one").not(ck)
-                               .prop( "checked"  , false );
-        ck.prop("checked", ! ck.prop( "checked")).change();
-    })
-    .on("change", ".HsList .check-one", function() {
-        // 当选中行时, 开启工具按钮, 否则禁用相关按钮
-        var box = $(this).closest(".HsList");
-        var len = box.find(".check-one:checked").length;
-        box.find(".for-select").prop("disabled", len != 1);
-        box.find(".for-checks").prop("disabled", len == 0);
-    })
-    .on("loadBack", ".HsList", function() {
-        $(this).find(".check-all").prop("checked", false );
-        $(this).find(".for-select,.for-checks").prop("disabled", true);
-    })
-    // /** 树 **/
-    .on("select", ".HsTree .tree-node", function() {
-        // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
-        var box = $(this).closest(".HsTree");
-        var obj =        box.data( "HsTree");
-        box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
-    })
-    .on("loadBack", ".HsTree", function() {
-        var obj = $(this).data( "HsTree");
-        if (obj.getSid( )!=obj.getRid( )) return;
-        $(this).find(".for-select,.for-checks").prop("disabled", true);
     });
 })(jQuery);
 
