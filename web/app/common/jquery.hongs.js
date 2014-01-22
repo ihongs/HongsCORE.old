@@ -2445,20 +2445,20 @@ jQuery.fn.load = function(url, data, complete) {
         $.hsOpen($(this).attr("href"));
         return false;
     })
-    .on("click", ".close", fucntion() {
+    .on("click", ".close,.cancel", fucntion() {
         $(this).closest(".load-box").hsClose();
-        return false;
-    })
-    .on("click", "[data-load-in]", function() {
-        var s = $(this).attr("data-load-in");
-        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
-        s.load($( this ).attr("href"));
         return false;
     })
     .on("click", "[data-open-in]", function() {
         var s = $(this).attr("data-load-in");
         s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
         s.hsOpen($(this).attr("href"));
+        return false;
+    })
+    .on("click", "[data-load-in]", function() {
+        var s = $(this).attr("data-load-in");
+        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
+        s.load($( this ).attr("href"));
         return false;
     })
     // /** 表单 **/
