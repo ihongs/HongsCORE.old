@@ -1189,8 +1189,7 @@ function HsForm(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsForm");
     if (data)  return data;
 
-    context  =  jQuery( context );
-    context.data( "HsForm", this).addClass( "HsForm");
+    context  = jQuery(context);
 
     var loadBox  = context.closest(".load-box");
     var formBox  = context.find   ( "form"    );
@@ -1479,8 +1478,7 @@ function HsList(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsList");
     if (data)  return data;
 
-    context  =  jQuery( context );
-    context.data( "HsList", this).addClass( "HsList");
+    context  = jQuery(context);
 
     var loadBox  = context.closest(".load-box");
     var listBox  = context.find   (".list-box");
@@ -1934,8 +1932,7 @@ function HsTree(opts, context) {
     var data = _HsInitOpts.call(this, opts, "HsTree");
     if (data)  return data;
 
-    context  =  jQuery( context );
-    context.data( "HsTree", this).addClass( "HsTree");
+    context  = jQuery(context);
 
     var loadBox  = context.closest(".load-box");
     var treeBox  = context.find   (".tree-box");
@@ -2754,12 +2751,12 @@ jQuery.fn.load = function(url, data, complete) {
     // 自动初始化组件
     $(document).on("hsReady", ".load-box", function() {
         $(this).find(".select-btn").hsSelect();
-    }); $(this).find(".select-btn").hsSelect();
+    });
 
     // /** 扩展方法 **/
 
     self.hsFillFormSelect = function(inp, v, n, t) {
-        if (t == "info") return; // 不理会 info 填充, load 的数据中的 data 必须为所有选中的项
+        if (t == "info") return; // 注意: 填充是用 data, 并不理会 info
 
         // 准备数据
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
