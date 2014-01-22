@@ -954,13 +954,15 @@ function hsNote(msg, cls, sec) {
  * @param {String} url 浮窗内容URL
  * @param {hsSerialArr_obj} data 附加参数
  * @param {Function} callback
+ * @param {Function} callfore
  * @return {jQuery} 浮窗对象
  */
-function hsOpen(url, data, callback) {
+function hsOpen(url, data, callback, callfore) {
     var div = jQuery('<div class="overlay alert alert-dismissable">'
                     +'<button type="button" class="close">&times;</button>'
                     +'<div class="open-box"></div></div>');
     var box = div.find('.open-box');
+    if (callfore)callfore.call(box);
     div.appendTo(document.body)
        .overlay({
           close : div.find('.close' ),
@@ -982,7 +984,7 @@ function hsOpen(url, data, callback) {
  * @return {jQuery} 区域对象
  */
 function HsOpen(url, data, callback) {
-    var box = jQuery( this ).addClass ( "open-box" );
+    var box = jQuery( this );
     if (box.closest(".tabs").length) {
         var tabs = box.closest(".tabs").data("tabs");
         var oldTab = tabs.getCurrentTab();
@@ -997,6 +999,7 @@ function HsOpen(url, data, callback) {
         var baks= box.contents().detach();
         box.data("baks", baks);
     }
+    box.addClass( "open-box" );
     box.load(url, data, callback);
     return box;
 }
@@ -1030,7 +1033,11 @@ function HsClose() {
 function HsReady() {
     var box = jQuery(this);
     box.trigger("hsReady");
-
+    if (box.data("overlay")
+    && !box.children("object.config[name=hsInit]").size()) {
+        box.data("overlay").load(); // 有hsIint则交给HsInit去处理
+    }
+    
     var $ = jQuery;
     
     /** 语义标签解析 **/
@@ -1169,11 +1176,10 @@ function HsInit(opts) {
 
     var v, o, c;
     if (box.data( "overlay" )) {
-        o = box.data( "overlay" ); c = o.getConf();
+        o = box.data( "overlay" );  c = o.getConf();
         v = hsGetValue(opts, "top"); if (v) c.top = v;
         v = hsGetValue(opts, "left"); if (v) c.left = v;
-        v = hsGetValue(opts, "width"); if (v) box.css("width", v);
-        o.getOverlay().overlay(c);
+        v = hsGetValue(opts, "width"); if (v) box.css("width", v);  o.load();
     }
     else if (box.data("tabs")) {
         v = hsGetValue(opts, "title"); if (v) box.data("curTab").find("a").text(v);
@@ -1265,10 +1271,11 @@ HsForm.prototype = {
     },
     fillData : function(data) {
         var nodes, datas, i, n, t, v, inp, opt, lab, vk, tk, tp;
-        nodes = this.formBox.find("select[name],.check-box[name],.radio-box[name]");
+        nodes = this.formBox.find("select[name],[data-fn]");
         datas = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr( "name" );
+            if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
 //          if (typeof datas[n] != "undefined")
 //              continue;
             v = hsGetValue(data, n);
@@ -1291,7 +1298,7 @@ HsForm.prototype = {
                 v = this["_fill_"+n].call(this, inp, v, n, "data");
             }
             // 按类型填充
-            else if (inp.data("data-ft")) {
+            else if (inp.attr("data-ft")) {
                 t =  inp.attr("data-ft");
             if (typeof this["_fill_"+t] !="undefined") {
                 v = this["_fill_"+t].call(this, inp, v, n, "data");
@@ -1330,10 +1337,11 @@ HsForm.prototype = {
     },
     fillInfo : function(info) {
         var nodes, infos, i, n, t, v, inp, vk, tk;
-        nodes = this.formBox.find("input[name],textarea[name],select[name],.check-box[name],.radio-box[name]");
+        nodes = this.formBox.find("input[name],textarea[name],select[name],[data-fn]");
         infos = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr( "name" );
+            if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
 //          if (typeof infos[n] != "undefined")
 //              continue;
             v = hsGetValue(info, n);
@@ -1357,7 +1365,7 @@ HsForm.prototype = {
                 if (!v) continue;
             }
             // 按类型填充
-            else if (inp.data("data-ft")) {
+            else if (inp.attr("data-ft")) {
                 t =  inp.attr("data-ft");
             if (typeof this["_fill_"+t] !="undefined") {
                 v = this["_fill_"+t].call(this, inp, v, n, "info");
@@ -2419,9 +2427,13 @@ jQuery.fn.load = function(url, data, complete) {
  * @param {jQuery} $
  */
 (function($) {
+    $(function() {
+        $(this).hsReady();
+    });
+
     // /** 全局事件 **/
 
-    $(document )
+    $(document)
     .on("ajaxError", function(evt, xhr, cnf) {
         var rst = hsResponObj(xhr);
         if (typeof cnf.action === "undefined" ) {
@@ -2445,7 +2457,7 @@ jQuery.fn.load = function(url, data, complete) {
         $.hsOpen($(this).attr("href"));
         return false;
     })
-    .on("click", ".close,.cancel", fucntion() {
+    .on("click", ".close,.cancel", function() {
         $(this).closest(".load-box").hsClose();
         return false;
     })
@@ -2514,10 +2526,6 @@ jQuery.fn.load = function(url, data, complete) {
         if (obj.getSid( )!=obj.getRid( )) return;
         $(this).find(".for-select,.for-checks").prop("disabled", true);
     });
-
-    $(function() {
-        $(this).hsReady();
-    }
 
     // /** 组件配置 **/
 
@@ -2688,8 +2696,8 @@ jQuery.fn.load = function(url, data, complete) {
  */
 (function($) {
     $.fn.hsSelect = function(conf) {
-        if(!$(this).hasClass("hsSelectBtn")) {
-            $(this).addClass("hsSelectBtn");
+        if(!$(this).hasClass("hsSelect")) {
+            $(this).addClass("hsSelect");
         }
         else {
             return;
@@ -2711,45 +2719,50 @@ jQuery.fn.load = function(url, data, complete) {
 
         btn.on("click", function( ) {
             var dat = box.data("fill_data");
-            var tip = $.hsOpen(url).data("fill_data", dat)
-            .toggleClass("select-mul", /(\[\]|\.)$/.test(name) ) // 名称以[]或.结尾则为多选
-            .on("selectBack", function() {
-                box.data("fill_func").call(form, box, dat, name);
-            })
-            .on("selectItem", function(id , txt) {
-                if (!btn.hasClass("select-mul")) {
-                    dat = {};
-                    if (txt !== undefined)
-                        dat[id] = txt ;
-                } else {
-                    if (txt !== undefined)
-                        dat[id] = txt ;
-                    else
-                        delete dat[id];
-                }
-            })
-            .on("click", ".cancel", function() {
-                tip.hsClose();
-                return false ;
-            })
-            .on("click", ".ensure", function() {
-                tip.trigger("selectBack");
-                tip.hsClose();
-                return false ;
-            })
-            .on("change", ".check-one", function() {
-                var id  = $(this).val();
-                var txt = $(this).prop("checked")
-                        ? $(this).closest("tr").find(".name").text()
-                        : undefined;
-                tip.trigger("selectItem", [id, txt]);
-                return false ;
+            var tip = $.hsOpen(url, undefined, undefined, function() {
+            $( this ).data("fill_data" , dat).addClass("select-tip")
+                .toggleClass("select-mul" , /(\[\]|\.)$/.test(name)) // 名称以[]或.结尾则为多选
+                .on("selectBack", function() {
+                    box.data("fill_func").call(form, box, dat, name);
+                })
+                .on("selectItem", function(id , txt) {
+                    if (!btn.hasClass("select-mul")) {
+                        dat = {};
+                        if (txt !== undefined)
+                            dat[id] = txt ;
+                    } else {
+                        if (txt !== undefined)
+                            dat[id] = txt ;
+                        else
+                            delete dat[id];
+                    }
+                })
+                .on("click", ".ensure", function() {
+                    tip.trigger("selectBack");
+                    tip.hsClose();
+                    return false ;
+                })
+                .on("change", ".check-one", function() {
+                    var id  = $(this).val();
+                    var txt;
+                    if ($(this).prop("checked")) {
+                        txt = $(this).attr("data-name");
+                        if (! txt) {
+                            txt = $(this).closest("tr").find(".name").text();
+                        }
+                        if (! txt) {
+                            txt = $(this).closest("tr").find("data-fn=[name]").text();
+                        }
+                    }
+                    tip.trigger("selectItem", [id, txt]);
+                    return false ;
+                });
             });
         });
     };
 
     // 自动初始化组件
-    $(document).on("hsReady", ".load-box", function() {
+    $(document).on("hsReady", ".load-box", function(evt) {
         $(this).find(".select-btn").hsSelect();
     });
 

@@ -147,7 +147,7 @@ public class Cmdlet
        */
       if (Core.IN_DEBUG_MODE)
       {
-        ta.printStackTrace(System.out);
+        ta.printStackTrace(System.err);
       }
       else
       if (!(ta instanceof HongsThrowable))

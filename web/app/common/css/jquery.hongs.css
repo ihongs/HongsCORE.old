@@ -41,11 +41,21 @@ object.config {
     left: 30%;
 }
 
+.main-context {
+    padding: 0;
+}
 .side-context {
     padding: 0 1em 0 0;
 }
-.main-context {
-    padding: 0;
+
+.select-tip {
+    width: 1110px;
+}
+
+.panes .hide-in-tabs,
+.nav-panes .hide-in-tabs,
+.overlay .hide-in-overlay {
+    display: none;
 }
 
 /** 表单 **/
@@ -200,17 +210,17 @@ fieldset .dropdown-toggle {
 
 /** bootstrap 调整 **/
 
-.nav > li.dn {
+.close {
+    margin-top: -4px;
+}
+
+.nav>li.dn {
     display: none;
 }
 .nav-tabs {
     padding-left: 15px;
     padding-right: 15px;
     margin-bottom: 15px;
-}
-
-.close {
-    margin-top: -4px;
 }
 
 #note-box .alert,

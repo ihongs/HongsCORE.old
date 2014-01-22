@@ -192,11 +192,10 @@ public class JsConfAction
        * .C   代码
        * .L   链接
        */
-      if (!key.startsWith("core.js.")
-      &&  !key.startsWith("user.js.")) {
+      if (! key.startsWith("js.")) {
           return "";
       }
-      String name = key.substring( 8 )
+      String name = key.substring(3)
                        .replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {
