@@ -398,7 +398,8 @@ public class CmdletHelper
   //** 输出相关 **/
 
   /**
-   * 输出到标准输出
+   * 输出(到标准错误)
+   * 通常, 辅助信息输出标准错误, 结果数据输出标准输出, 方便其他程序/进程处理
    * @param text
    */
   public static void print(String text)
@@ -408,26 +409,26 @@ public class CmdletHelper
                                 "yyyy/MM/dd HH:mm:ss");
     Date   d = new Date(System.currentTimeMillis());
     String t = new SimpleDateFormat(f).format(d);
-    System.out.println(t + " " + text);
+    System.err.println(t + " " + text);
   }
 
   /**
-   * 输出到日志文件
+   * 输出到日志
    * @param text
    */
-  public static void printToLog(String text)
+  public static void print2Log(String text)
   {
     CoreLogger.log(Core.ACTION_PATH.get().replace('.', '_'), text, 0);
   }
 
   /**
-   * 输出到标准输出和日志文件
+   * 输出和日志
    * @param text
    */
-  public static void printAndLog(String text)
+  public static void print4Log(String text)
   {
-    CmdletHelper.print(text);
-    CmdletHelper.printToLog(text);
+    CmdletHelper.print    (text);
+    CmdletHelper.print2Log(text);
   }
 
   /**
@@ -439,7 +440,7 @@ public class CmdletHelper
   {
     start = System.currentTimeMillis() - start;
     String notes = Num.humanTime(start);
-    System.out.println(new StringBuilder()
+    System.err.println(new StringBuilder()
                           .append(label)
                           .append( ": ")
                           .append(notes) );
@@ -487,11 +488,11 @@ public class CmdletHelper
 
     if (scale == 100)
     {
-      System.out.println(sb.toString());
+      System.err.println(sb.toString());
     }
     else
     {
-      System.out.print(sb.toString());
+      System.err.print(sb.toString());
     }
   }
 
