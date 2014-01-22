@@ -1045,10 +1045,10 @@ function HsReady() {
         HsOpen.call(this, $(this).attr("data-open"));
     });
     box.find("object.config" ).each(function() {
-        var prt = $(this).parent();
-        var fun = $(this).attr("name");
-        var cnf = _HsReadOpts.call( this );
-        if (typeof prt[fun] == "function") prt[fun](cnf);
+        var prnt = $(this).parent();
+        var func = $(this).attr("name");
+        var opts = _HsReadOpts.call( this );
+        if (typeof prnt[func] === "function" ) prnt[func](opts);
     }).remove();
 
     /** 样式相关处理 **/
