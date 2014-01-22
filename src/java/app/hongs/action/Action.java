@@ -22,7 +22,7 @@ import app.hongs.action.annotation.ActionChain;
  * <code>
  * public void actionXxx(app.hongs.action.ActionHelper helper)
  * </core>
- * 方法接收来自Web的请求动作.
+ * 方法接收来自Web的请求动作, 并使用 helper.back() 来返回数据.
  * </p>
  *
  * <h3>web.xml配置:</h3>
