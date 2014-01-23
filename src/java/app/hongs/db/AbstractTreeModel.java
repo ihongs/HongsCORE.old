@@ -94,6 +94,10 @@ public class AbstractTreeModel extends AbstractBaseModel
     throws HongsException
   {
     super(table);
+    
+    // 配置
+    HongsConfig conf = Core.getInstance(HongsConfig.class);
+    this.pidVar = conf.getProperty("js.model.pid.var", "pid");
   }
   public AbstractTreeModel(String tableName)
     throws HongsException
