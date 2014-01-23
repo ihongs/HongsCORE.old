@@ -560,11 +560,76 @@ abstract public class AbstractBaseModel
     return !exists(req);
   }
 
+  /**
+   * 获取受影响的名称
+   * 默认取 findKeys 的第一位作为名称字段
+   * 仅对调用过 save,update,remove 的有效
+   * 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
+   * 这不是线程安全的
+   * @return 用", "连接的受影响的名称
+   */
+  public String getAffectedNames() throws HongsException {
+    StringBuilder sb = new StringBuilder();
+    FetchMore     fm = new FetchMore( );
+    String        fn = this.findKeys[0];
+    fm.setOption("FETCH_DFLAG" , true );
+    fm.select(".`"+fn+"`").where("id IN (?)", affectedIds);
+    List<Map> rows = this.table.fetchMore(fm);
+    for (Map  row  : rows) {
+      sb.append(", ").append(row.get(fn).toString());
+    }
+    return sb.length()>0 ? sb.substring(2) : sb.toString();
+  }
+  
+  /**
+   * 获取可操作的名称
+   * 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
+   * 此方法逻辑与 update,remove 完全一致, 最终获取仍是调用 getAffetctedNames
+   * 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
+   * @return 用", "连接的可操作的名称
+   */
+  public String getOperableNames(Map req, FetchMore more) throws HongsException {
+    if (req == null)
+    {
+      req = new HashMap();
+    }
+    if (more == null)
+    {
+      more = new FetchMore();
+    }
+
+    List<String> ids = new ArrayList();
+    if (req.containsKey(this.idVar)) {
+        Object obj = req.get(this.idVar);
+        if (obj instanceof List) {
+            ids.addAll((List<String>)obj);
+        }
+        else {
+            ids.add(obj.toString());
+        }
+    }
+    if (ids.isEmpty()) return "";
+
+    int i = 0;
+    String pk = this.table.primaryKey;
+    more = more.clone();
+    more.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
+    List<Map> rows = this.table.fetchMore(more);
+    this.affectedIds = new ArrayList();
+    for (Map  row  : rows)
+    {
+        this.affectedIds.add(row.get(pk).toString());
+    }
+    
+    // 上面与 update,remove 完全一致, 仅仅少了 put,del 调用
+    return this.getAffetctedNames();
+  }
+
   //** 标准模型方法 **/
 
   /**
    * 添加记录
-   *add,set,put
+   *
    * @param data
    * @return 记录ID
    * @throws app.hongs.HongsException
