@@ -1,14 +1,14 @@
-<ul class="tabs nav nav-tabs">
-  <li class="model-list-tab"><a href="javascript:;">模型列表</a></li>
-  <li class="model-form-tab dn"><a href="javascript:;"></a></li>
+<ul class="nav nav-tabs" data-toggle="tabs">
+  <li><a href="javascript:;">模型列表</a></li>
+  <li class="dn"><a href="javascript:;"></a></li>
 </ul>
-<div class="panes">
+<div class="nav-panes">
 
 <div id="hcim-model-list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcim/Model/List.act')"/>
-        <param name="openUrls[]" value="['.create','hcim/model/form.html','.model-form-tab']"/>
-        <param name="openUrls[]" value="['.modify','hcim/model/form.html?id={ID}','.model-form-tab']"/>
+        <param name="openUrls[]" value="['.create','hcim/model/form.html','#hcim-model-pane']"/>
+        <param name="openUrls[]" value="['.modify','hcim/model/form.html?id={ID}','#hcim-model-pane']"/>
         <param name="sendUrls[]" value="['.remove','hcim/Model/Remove.act']"/>
         <param name="idKey" value="id"/>
     </object>
@@ -45,6 +45,5 @@
     <div class="page-box"></div>
 </div>
 
-<div></div>
-<div></div>
+<div id="hcim-model-pane"></div>
 </div>

@@ -828,8 +828,8 @@ function _HsInitOpts(opts, name) {
     if (!(this instanceof func)) {
         var inst = this.data(name);
         if (!inst) {
+            this.data(name , inst).addClass(name);
             inst = new func(opts, this);
-            this.data(name, inst).addClass(name);
         }
         return inst;
     }
@@ -966,8 +966,7 @@ function hsOpen(url, data, callback) {
     var div = jQuery('<div class="overlay alert alert-dismissable">'
                     +'<button type="button" class="close">&times;</button>'
                     +'<div class="open-box"></div></div>');
-    var box = div.find('.open-box');
-    if (callfore)callfore.call(box);
+    var box = div.find( '.open-box' );
     div.appendTo(document.body)
        .overlay({
           close : div.find('.close' ),
@@ -978,7 +977,8 @@ function hsOpen(url, data, callback) {
         }
     });
     box.data("overlay", div.data("overlay"));
-    box.load(url, data, callback);
+    if (callfore) callfore.call(box);
+    box.load( url , data , callback);
     return box;
 }
 /**
@@ -989,23 +989,33 @@ function hsOpen(url, data, callback) {
  * @return {jQuery} 区域对象
  */
 function HsOpen(url, data, callback) {
-    var box = jQuery( this );
-    if (box.closest(".tabs").length) {
-        var tabs = box.closest(".tabs").data("tabs");
-        var oldTab = tabs.getCurrentTab();
-        box.show().click();
-        var curTab = tabs.getCurrentTab();
+    var callfore;
+    if (jQuery.isArray(callback)) {
+        callfore = callback[0];
+        callback = callback[1];
+    }
+    
+    var box  = jQuery(this);
+    var tabs = box.parent().data("tabs");
+    if (tabs) {
+        tabs.click(box.index());
+        var tab = tabs.getCurrentTab(  );
+        tab.show().find( "a" ).text( hsGetLang("tab.loading"));
         box = tabs.getCurrentPane();
-        box.data("oldTab", oldTab );
-        box.data("curTab", curTab );
-        box.data("tabs", tabs);
+        if (! box.data("tabs")) {
+            box.data("tab" , tab  );
+            box.data("tabs", tabs );
+        }
+    } else {
+        if (! box.data("baks")) {
+            var baks = box.contents( ).detach( );
+            box.data("baks", baks );
+        }
     }
-    else {
-        var baks= box.contents().detach();
-        box.data("baks", baks);
-    }
-    box.addClass( "open-box" );
-    box.load(url, data, callback);
+    box.contents().remove();
+    box = jQuery('<div class="open-box"></div>').appendTo(box);
+    if (callfore) callfore.call(box);
+    box.load( url , data , callback);
     return box;
 }
 /**
@@ -1014,21 +1024,21 @@ function HsOpen(url, data, callback) {
  */
 function HsClose() {
     var box = jQuery(this);
+    var prt = box.parent();
     box.trigger("hsClose");
     if (box.data("overlay")) {
         box.data("overlay").close();
     }
-    else if (box.data("tabs")) {
-        var oldTab = box.data("oldTab");
-        var curTab = box.data("curTab");
-        oldTab.click( ); curTab.hide( );
+    else if (prt.data("tabs")) {
+        prt.data("tabs").click( 0 );
+        prt.data("tab").hide();
+        prt.removeData("tabs");
     }
-    else if (box.data("baks")) {
-        var baks = box.data("baks");
-        box.contents(  ).remove(  );
-        box.append(baks).removeData("baks");
+    else if (prt.data("baks")) {
+        prt.data("baks").appendTo(prt);
+        prt.removeData("baks");
     }
-    box.removeClass("open-box");
+    box.remove();
     return box;
 }
 /**
@@ -1076,22 +1086,22 @@ function HsReady() {
     box.find("fieldset legend.dropdown-toggle").click(function() {
         // 如果fieldset legend为dropdown toggle, 则点击显示或隐藏
         $(this).closest("fieldset").toggleClass("dropup")
-               .find(".dropdown-body" ).toggleClass("vh");
+            .find(".dropdown-body").toggleClass("vh");
     }).closest("fieldset").not(".dropup")
-               .find(".dropdown-body" ).toggleClass("vh");
+            .find(".dropdown-body").toggleClass("vh");
 
     /** jquery tools, bootstrap 语义标签解析 **/
 
-    box.find(".tabs,.nav-tabs,.nav-pills").each(function() {
+    box.find("[data-toggle=tabs],[data-toggle=pills]").each(function() {
         var m = $(this), n;
         do {
             n = m.attr("rel");
             if (n) break;
-            n = m.siblings(".panes,.nav-panes").children("div");
+            n = m.siblings(".panes,.nav-panes");
             if (n.size()) break;
             return;
         } while (false);
-        m.tabs(n);
+        n.data("tabs", m.tabs(n.children()).data("tabs"));
     });
     box.find("[data-toggle=overlay],[data-toggle=alert],[data-toggle=modal]").each(function() {
         var m = $(this), n;
@@ -1110,7 +1120,7 @@ function HsReady() {
             loadSpeed : 0
           }
         };
-        m.overlay(o);
+        n.data("overlay", m.overlay(o).data("overlay"));
     });
     $(this).find("[data-toggle=tooltip],[data-toggle=popover],[data-toggle=dropdown]").each(function() {
         var m = $(this), n, r;
@@ -1150,7 +1160,7 @@ function HsReady() {
                 break;
         }
 
-        m.tooltip(o);
+        n.data("tooltip", m.tooltip(o).data("tooltip"));
     });
 
     box.find("[type=date]" ).dateinput( );
@@ -1183,10 +1193,10 @@ function HsInit(opts) {
         o = box.data( "overlay" );  c = o.getConf();
         v = hsGetValue(opts, "top"); if (v) c.top = v;
         v = hsGetValue(opts, "left"); if (v) c.left = v;
-        v = hsGetValue(opts, "width"); if (v) box.css("width", v);  o.load();
+        v = hsGetValue(opts, "width"); if (v) box.css("width" , v);  o.load();
     }
-    else if (box.data("tabs")) {
-        v = hsGetValue(opts, "title"); if (v) box.data("curTab").find("a").text(v);
+    else if (box.parent().data("tabs")) {
+        v = hsGetValue(opts, "title"); if (v) box.parent().data("tab").find("a").text(v);
     }
 }
 
@@ -1205,7 +1215,7 @@ function HsForm(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl" );
     var loadNoId = hsGetValue(opts, "loadNoId");
     var loadNoLd = hsGetValue(opts, "loadNoLd");
-    var idKey    = hsGetValue(opts, "idKey", hsGetConf("model.id.var", "id"));
+    var idVar    = hsGetValue(opts, "idVar", hsGetConf("model.id.var", "id"));
 
     if (formBox.length === 0) formBox = context;
 
@@ -1226,7 +1236,7 @@ function HsForm(opts, context) {
             ld.push(a[i]);
         }
     }
-    id = hsGetSerias(ld, idKey);
+    id = hsGetSerias(ld, idVar);
     if ( loadNoId || id.length) {
         this.load(loadUrl , ld);
     }
@@ -1511,10 +1521,10 @@ function HsList(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl" );
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
-    this.idKey   = hsGetValue(opts, "idKey"  , hsGetConf("model.id.var", "id"));
-    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("model.sort.var", "sort"));
-    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("model.page.var", "page"));
-    this.rowsKey = hsGetValur(opts, "rowsKey", hsGetConf("model.rows.var", "rows"));
+    this.idVar   = hsGetValue(opts, "idVar"  , hsGetConf("model.id.var", "id"));
+    this.sortVar = hsGetValue(opts, "sortVar", hsGetConf("model.sort.var", "sort"));
+    this.pageVar = hsGetValue(opts, "pageVar", hsGetConf("model.page.var", "page"));
+    this.rowsVar = hsGetValue(opts, "rowsVar", hsGetConf("model.rows.var", "rows"));
 
     this.context = context;
     this.loadBox = loadBox;
@@ -1725,12 +1735,12 @@ HsList.prototype = {
                         if (td.hasClass("sort-z-a") == false) {
                             sn = fn;
                         }
-                        hsSetSeria(that._data, that.sortKey, sn);
+                        hsSetSeria(that._data, that.sortVar, sn);
                         that.load();
                     });
                 }
 
-                var sn = hsGetSeria(this._data, this.sortKey);
+                var sn = hsGetSeria(this._data, this.sortVar);
                 var fn = td.attr("data-fn");
                 td.removeClass("sort-a-z sort-z-a");
                 if (sn == fn) {
@@ -1775,15 +1785,15 @@ HsList.prototype = {
     },
     fillPage : function(page) {
         switch (page.errno) {
+            case 1:
+                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
+                this.listBox.hide();
+                return;
             case 2:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
                 this.listBox.hide();
                 hsSetSerial(this._data, "page", page.total_pages);
                 this.load();
-                return;
-            case 1:
-                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
-                this.listBox.hide();
                 return;
             default:
                 this.listBox.show();
@@ -1827,7 +1837,7 @@ HsList.prototype = {
 
         this.pageBox.find("[data-pn="+p+"]").addClass("page-curr");
         this.pageBox.find("[data-pn]").on("click", function( evt ) {
-            hsSetSeria(that._data, that.pageKey, jQuery(this).attr("data-pn"));
+            hsSetSeria(that._data, that.pageVar, jQuery(this).attr("data-pn"));
             evt.preventDefault();
             that.load();
         });
@@ -1876,8 +1886,6 @@ HsList.prototype = {
     openBack : function(btn, box, data) {
         var that = this;
         btn.trigger("openBack", [box, data]);
-        if (box.data("opener") === this) return;
-        box.data("opener", this);
         box.on("saveBack", function(evt) {
             if(evt.isDefaultPrevented()) return;
             btn.trigger ( evt , [box, data]);
@@ -1916,7 +1924,7 @@ HsList.prototype = {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
         jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
             .attr("name", ck.attr("name"))
-            .val (hsGetValue(this._info, this.idKey))
+            .val (hsGetValue(this._info, this.idVar))
             .appendTo(td);
         return false;
     },
@@ -1924,7 +1932,7 @@ HsList.prototype = {
         var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
         jQuery('<input type="radio" class="input-radio check-one"/>')
             .attr("name", ck.attr("name"))
-            .val (hsGetValue(this._info, this.idKey))
+            .val (hsGetValue(this._info, this.idVar))
             .appendTo(td);
         return false;
     },
@@ -1976,13 +1984,21 @@ function HsTree(opts, context) {
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
     var linkUrls = hsGetValue(opts, "linkUrls");
-    var rootInfo = hsGetValue(opts, "rootInfo",
-        {id: "0" , name: hsGetLang("tree.root.name")});
-    this.idKey   = hsGetValue(opts, "idKey"  , hsGetConf("model.id.var", "id"));
-    this.nameKey = hsGetValue(opts, "nameKey", hsGetConf("model.name.key", "name"));
+    // 删除等操作时发送数据的ID键
+    this.idVar   = hsGetValue(opts, "idVar" , hsGetConf("model.id.var" , "id" ));
+    this.pidVar  = hsGetValue(opts, "pidVar", hsGetConf("model.pid.var", "pid"));
+    // 接收列表数据的节点属性的键
+    this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
+    this.nameKey = hsGetValue(opts, "nameKey", "name");
     this.noteKey = hsGetValue(opts, "noteKey");
     this.typeKey = hsGetValue(opts, "typeKey");
     this.cnumKey = hsGetValue(opts, "cnumKey");
+    // 根节点信息
+    var rootInfo = {
+            id   : hsGetValue(opts, "rootId"  , hsGetConf("tree.root.id", "0")),
+            name : hsGetValue(opts, "rootName", hsGetLang("tree.root.name")),
+            note : hsGetValue(opts, "rootNote", hsGetLang("tree.root.note"))
+        };
 
     this.context = context;
     this.loadBox = loadBox;
@@ -2094,7 +2110,7 @@ function HsTree(opts, context) {
         if (sid == null) return ;
 
         var dat = {};
-        dat[that.idKey] =  sid  ;
+        dat[that.idVar] =  sid  ;
 
         that.send(n, m, u, dat );
     }
@@ -2157,9 +2173,10 @@ HsTree.prototype = {
     load     : function(url, pid) {
         if (url ) this._url = url;
         if (pid ) this._pid = pid;
+        var data = {}; data[this.pidVar] = this._pid;
         jQuery.ajax({
             "url"       : this._url ,
-            "data"      :{"pid":this._pid},
+            "data"      : data,
             "type"      : "POST",
             "dataType"  : "json",
             "action"    : "load",
@@ -2304,12 +2321,10 @@ HsTree.prototype = {
         btn.trigger(evt, [rst, data]);
         if (evt.isDefaultPrevented()) return;
 
-        if (data["fid"] !== undefined)
-            this.load(null, data["fid"]);
-        if (data["pid"] !== undefined)
-            this.load(null, data["pid"]);
-        else if (data["id"] !== undefined)
-            this.load(null, this.getPid(data["id"]));
+        if (data[this.idVar] !== undefined)
+            this.load(null, this.getPid(data[this.idVar])); // 移动/删除
+        if (data[this.pidVar] !== undefined)
+            this.load(null, data[this.pidVar]); // 移动
     },
 
     open     : function(btn, box, url, data) {
@@ -2328,21 +2343,15 @@ HsTree.prototype = {
     openBack : function(btn, box, data) {
         var that = this;
         btn.trigger("openBack",[box, data]);
-        if (box.data("opener") === this) return;
-        box.data("opener", this);
         box.on("saveBack", function(evt) {
-            if(evt.isDefaultPrevented()) return;
-            btn.trigger ( evt ,[box, data]);
-            if(evt.isDefaultPrevented()) return;
+            if (evt.isDefaultPrevented()) return;
+            btn.trigger(evt, [box, data]);
+            if (evt.isDefaultPrevented()) return;
 
-            if (data["fid"] !== undefined)
-                that.load(null, data["fid"]);
-            if (data["pid"] !== undefined)
-                that.load(null, data["pid"]);
-            else if (data["id"] !== undefined)
-                that.load(null, that.getPid(data["id"]));
+            if (data[this.idVar] !== undefined)
+                that.load(null, that.getPid(data[this.idVar])); // 编辑
             else
-                that.load(null, that.getSid());
+                that.load(null, that.getSid()); // 修改
         });
     },
 
@@ -2537,9 +2546,10 @@ jQuery.fn.load = function(url, data, complete) {
         box.find(".for-select").prop("disabled", len != 1);
         box.find(".for-checks").prop("disabled", len == 0);
     })
-    .on("loadBack", ".HsList", function() {
-        $(this).find(".check-all").prop("checked", false );
-        $(this).find(".for-select,.for-checks").prop("disabled", true);
+    .on("loadBack", ".HsList .list-box", function() {
+        var box = $(this).closest(".HsList");
+        box.find(".check-all").prop("checked", false);
+        box.find(".for-select,.for-checks").prop("disabled", true);
     })
     // /** 树 **/
     .on("select", ".HsTree .tree-node", function() {
@@ -2548,10 +2558,11 @@ jQuery.fn.load = function(url, data, complete) {
         var obj =        box.data( "HsTree");
         box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
     })
-    .on("loadBack", ".HsTree", function() {
-        var obj = $(this).data( "HsTree");
-        if (obj.getSid( )!=obj.getRid( )) return;
-        $(this).find(".for-select,.for-checks").prop("disabled", true);
+    .on("loadBack", ".HsTree .tree-box", function() {
+        var box = $(this).closest(".HsTree");
+        var obj =        box.data( "HsTree");
+        if (obj.getSid( ) != obj.getRid( )) return;
+        box.find(".for-select,.for-checks").prop("disabled", true);
     });
 
     // /** 组件配置 **/
@@ -2746,7 +2757,7 @@ jQuery.fn.load = function(url, data, complete) {
 
         btn.on("click", function( ) {
             var dat = box.data("fill_data");
-            var tip = $.hsOpen(url, undefined, undefined, function() {
+            $.hsOpen(url, undefined, [function() {
                 var tip = $(this);
                 tip.data("fill_data", dat)
                    .addClass("choose-tip")
@@ -2776,6 +2787,8 @@ jQuery.fn.load = function(url, data, complete) {
                         tip.trigger("chooseBack");
                 })
                 .on("click", ".ensure", function() {
+                    if (! $(this).closest(".open-box").is(tip))
+                        return;
                     tip.trigger("chooseBack");
                     tip.hsClose();
                     return false ;
@@ -2795,7 +2808,7 @@ jQuery.fn.load = function(url, data, complete) {
                     tip.trigger("chooseItem", [id, txt]);
                     return false ;
                 });
-            });
+            }]);
         });
     };
 

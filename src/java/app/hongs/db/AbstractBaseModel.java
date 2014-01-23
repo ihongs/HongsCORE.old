@@ -119,8 +119,8 @@ abstract public class AbstractBaseModel
     this.table = table;
     
     // 配置
-    HongsConfig conf = Core.getInstance(HongsConfig.class);
-    this.idVar = conf.getProperty("js.model.id.var", "id");
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    this.idVar   = conf.getProperty("js.model.id.var", "id");
     this.pageVar = conf.getProperty("js.model.page.var", "page");
     this.rowsVar = conf.getProperty("js.model.rows.var", "rows");
     this.colsVar = conf.getProperty("js.model.cols.var", "cols");

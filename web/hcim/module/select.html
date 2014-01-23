@@ -1,17 +1,14 @@
-<object class="config" name="hsInit" data="">
-</object>
-
-<ul class="tabs nav nav-tabs">
-  <li class="module-list-tab"><a href="javascript:;">选择模块</a></li>
-  <li class="module-form-tab dn"><a href="javascript:;"></a></li>
+<ul class="nav nav-tabs" data-toggle="tabs">
+  <li><a href="javascript:;">选择模块</a></li>
+  <li class="dn"><a href="javascript:;"></a></li>
 </ul>
-<div class="panes">
+<div class="nav-panes">
 
-<div id="hcim-module-select">
+<div id="hcim-module-choose">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcim/Module/List.act')"/>
-        <param name="openUrls[]" value="['.create','hcim/module/form.html','.module-form-tab']"/>
-        <param name="_fill__select" value="(hsFillListSelect)"/>
+        <param name="openUrls[]" value="['.create','hcim/module/form.html','#hcim-module-choose-pane']"/>
+        <param name="_fill__choose" value="(hsFillListChoose)"/>
         <param name="idKey" value="id"/>
     </object>
     <div>
@@ -31,7 +28,7 @@
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
-                    <th data-fn="_select" class="_check">
+                    <th data-fn="_choose" class="_check">
                         <input type="checkbox" class="check-all" name="id[]"/>
                     </th>
                     <th data-fn="name" class="sortable">模块名称</th>
@@ -50,6 +47,5 @@
     </div>
 </div>
 
-<div></div>
-<div></div>
+<div id="hcim-module-choose-pane"></div>
 </div>

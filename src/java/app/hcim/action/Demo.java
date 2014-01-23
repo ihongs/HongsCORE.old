@@ -39,18 +39,18 @@ public class Demo {
         String nms = model.getAffectedNames();
         String msg = "保存模型 "+nms+" 成功";
 
-        helper.back(id, msg);
+        helper.back(msg, id, nms);
     }
 
     @CommitSuccess
     public void actionRemove(ActionHelper helper)
     throws HongsException {
-        int num = model.remove(helper.getRequestData());
+        model.remove(helper.getRequestData());
 
         String nms = model.getAffectedNames();
         String msg = "删除模型 "+nms+" 成功";
 
-        helper.back(num, msg);
+        helper.back(msg);
     }
 
     public void actionUnique(ActionHelper helper)

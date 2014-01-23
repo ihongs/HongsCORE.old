@@ -1,5 +1,7 @@
 package app.hongs.db;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,8 +97,8 @@ public class AbstractTreeModel extends AbstractBaseModel
   {
     super(table);
     
-    // 配置
-    HongsConfig conf = Core.getInstance(HongsConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    this.rootId = conf.getProperty("js.tree.root.id" ,  "0" );
     this.pidVar = conf.getProperty("js.model.pid.var", "pid");
   }
   public AbstractTreeModel(String tableName)
@@ -138,6 +140,7 @@ public class AbstractTreeModel extends AbstractBaseModel
       more.setOption("ASSOC_TABLES", new HashSet());
     }
 
+    // 这些参数为约定参数
     boolean onlyId = req.containsKey("only_id")
                   && req.get("only_id").equals("1");
     boolean withSub = req.containsKey("with_sub")

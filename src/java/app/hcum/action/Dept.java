@@ -43,7 +43,7 @@ public class Dept {
         String nms = model.getAffectedNames();
         String msg = "保存部门 "+nms+" 成功";
 
-        helper.back(id, msg);
+        helper.back(msg, id, nms);
     }
 
     @CommitSuccess
@@ -54,7 +54,7 @@ public class Dept {
         String nms = model.getAffectedNames();
         String msg = "删除部门 "+nms+" 成功";
 
-        helper.back(num);
+        helper.back(msg);
     }
 
     public void actionExists(ActionHelper helper)
