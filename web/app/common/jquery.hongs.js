@@ -1205,7 +1205,7 @@ function HsForm(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl" );
     var loadNoId = hsGetValue(opts, "loadNoId");
     var loadNoLd = hsGetValue(opts, "loadNoLd");
-    var idKey    = hsGetValue(opts, "idKey", "id");
+    var idKey    = hsGetValue(opts, "idKey", hsGetConf("model.id.var", "id"));
 
     if (formBox.length === 0) formBox = context;
 
@@ -1511,9 +1511,10 @@ function HsList(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl" );
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
-    this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
-    this.pageKey = hsGetValue(opts, "pageKey", "page");
-    this.sortKey = hsGetValue(opts, "sortKey", "sort");
+    this.idKey   = hsGetValue(opts, "idKey"  , hsGetConf("model.id.var", "id"));
+    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("model.sort.var", "sort"));
+    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("model.page.var", "page"));
+    this.rowsKey = hsGetValur(opts, "rowsKey", hsGetConf("model.rows.var", "rows"));
 
     this.context = context;
     this.loadBox = loadBox;
@@ -1977,8 +1978,8 @@ function HsTree(opts, context) {
     var linkUrls = hsGetValue(opts, "linkUrls");
     var rootInfo = hsGetValue(opts, "rootInfo",
         {id: "0" , name: hsGetLang("tree.root.name")});
-    this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
-    this.nameKey = hsGetValue(opts, "nameKey", "name");
+    this.idKey   = hsGetValue(opts, "idKey"  , hsGetConf("model.id.var", "id"));
+    this.nameKey = hsGetValue(opts, "nameKey", hsGetConf("model.name.key", "name"));
     this.noteKey = hsGetValue(opts, "noteKey");
     this.typeKey = hsGetValue(opts, "typeKey");
     this.cnumKey = hsGetValue(opts, "cnumKey");
