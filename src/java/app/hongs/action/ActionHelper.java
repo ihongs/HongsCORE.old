@@ -477,8 +477,8 @@ public class ActionHelper
   public void back(Map<String, Object> data)
   {
     // 默认为成功
-    if (!data.containsKey("__success__"))
-         data.put("__success__" , true );
+    if(!data.containsKey("__success__"))
+        data.put("__success__" , true );
 
     this.responseData = data;
 
@@ -487,67 +487,41 @@ public class ActionHelper
   }
 
   /**
-   * 返回操作的ID
+   * 返回保存结果
    * 针对model的save方法
-   * @param id
    * @param msg
+   * @param rst
    */
-  public void back(String id, String msg)
+  public void back(String msg, Object... rst)
   {
     Map data = new HashMap();
-    data.put("__success__", true);
-    data.put("__message__", msg );
-    data.put("ID", id);
+    data.put("__success__",true);
+    data.put("__message__", msg);
+    data.put("back", rst);
     back(data);
   }
 
   /**
-   * 返回操作的ID
-   * 针对model的save方法
-   * @param id
-   */
-  public void back(String id)
-  {
-    back(id, "");
-  }
-
-  /**
-   * 返回操作数量
-   * 针对model的remove|update方法
-   * @param ar
-   * @param msg
-   */
-  public void back(Number ar, String msg)
-  {
-    Map data = new HashMap();
-    data.put("__success__", true);
-    data.put("__message__", msg );
-    data.put("AR", ar);
-    back(data);
-  }
-
-  /**
-   * 返回操作数量
-   * 针对model的remove|update方法
-   * @param ar
-   */
-  public void back(Number ar)
-  {
-    back(ar, "");
-  }
-
-  /**
-   * 返回检验结果
-   * 针对model的exists方法
+   * 返回操作结果
    * @param rst
    * @param msg
    */
-  public void back(Boolean rst, String msg)
+  public void back(String msg, Boolean rst)
   {
     Map data = new HashMap();
     data.put("__success__", rst);
     data.put("__message__", msg);
     back(data);
+  }
+
+  /**
+   * 返回操作消息
+   * 针对model的delete方法
+   * @param rst
+   */
+  public void back(String msg)
+  {
+    back(msg, true);
   }
 
   /**
@@ -557,7 +531,7 @@ public class ActionHelper
    */
   public void back(Boolean rst)
   {
-    back(rst, "");
+    back(null, rst);
   }
 
   //** 工具方法 **/
