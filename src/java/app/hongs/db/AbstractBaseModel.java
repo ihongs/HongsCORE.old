@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Arrays;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.util.Str;
 import app.hongs.HongsException;
-import java.util.Arrays;
 
 /**
  * 基础模型
@@ -117,6 +117,15 @@ abstract public class AbstractBaseModel
   {
     this.db = table.db;
     this.table = table;
+    
+    // 配置
+    HongsConfig conf = Core.getInstance(HongsConfig.class);
+    this.idVar = conf.getProperty("js.model.id.var", "id");
+    this.pageVar = conf.getProperty("js.model.page.var", "page");
+    this.rowsVar = conf.getProperty("js.model.rows.var", "rows");
+    this.colsVar = conf.getProperty("js.model.cols.var", "cols");
+    this.sortVar = conf.getProperty("js.model.sort.var", "sort");
+    this.findVar = conf.getProperty("js.model.find.var", "find");
   }
   public AbstractBaseModel(String tableName)
     throws HongsException
@@ -349,40 +358,16 @@ abstract public class AbstractBaseModel
   public int update(Map req, FetchMore more)
     throws HongsException
   {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (more == null)
-    {
-      more = new FetchMore();
-    }
-
-    List<String> ids = new ArrayList();
-    if (req.containsKey(this.idVar)) {
-        Object obj = req.get(this.idVar);
-        if (obj instanceof List) {
-            ids.addAll((List<String>)obj);
-        }
-        else {
-            ids.add(obj.toString());
-        }
-    }
+    List<String> ids = this.getOperableIds(req, more);
     if (ids.isEmpty()) this.put("", null);
 
-    int i = 0;
-    String pk = this.table.primaryKey;
-    more = more.clone();
-    more.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
-    List<Map> rows = this.table.fetchMore(more);
-    this.affectedIds = new ArrayList();
-    for (Map  row  : rows)
+    for (String id : ids )
     {
-      this.put( row.get(pk).toString(), req );
-      this.affectedIds.add(row.get(pk).toString());
-      i += 1;
+      this.put( id , req );
     }
-    return i;
+
+    this.affectedIds = ids;
+    return ids.size();
   }
 
   /**
@@ -409,39 +394,16 @@ abstract public class AbstractBaseModel
   public int remove(Map req, FetchMore more)
     throws HongsException
   {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (more == null)
-    {
-      more = new FetchMore();
-    }
-
-    List<String> ids = new ArrayList();
-    if (req.containsKey(this.idVar)) {
-        Object obj = req.get(this.idVar);
-        if (obj instanceof List) {
-            ids.addAll((List<String>)obj);
-        }
-        else {
-            ids.add(obj.toString());
-        }
-    }
+    List<String> ids = this.getOperableIds(req, more);
     if (ids.isEmpty()) this.del("", null);
 
-    int i = 0;
-    String pk = this.table.primaryKey;
-    more = more.clone();
-    more.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
-    List<Map> rows = this.table.fetchMore(more);
-    this.affectedIds = new ArrayList();
-    for (Map  row  : rows)
+    for (String id : ids )
     {
-        i += this.del(row.get(pk).toString());
-        this.affectedIds.add(row.get(pk).toString());
+      this.del( id  );
     }
-    return i;
+
+    this.affectedIds = ids;
+    return ids.size();
   }
 
   /**
@@ -525,14 +487,7 @@ abstract public class AbstractBaseModel
     }
 
     Map row = this.table.fetchLess(more);
-    if (row.isEmpty())
-    {
-      return false;
-    }
-    else
-    {
-      return true;
-    }
+    return !row.isEmpty();
   }
 
   /**
@@ -545,7 +500,7 @@ abstract public class AbstractBaseModel
   public boolean exists(Map req)
     throws HongsException
   {
-    return this.exists(req, null);
+    return  exists(req, null);
   }
 
   public boolean unique(Map req, FetchMore more)
@@ -586,9 +541,31 @@ abstract public class AbstractBaseModel
    * 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
    * 此方法逻辑与 update,remove 完全一致, 最终获取仍是调用 getAffetctedNames
    * 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
+   * @param req
+   * @param more
    * @return 用", "连接的可操作的名称
    */
   public String getOperableNames(Map req, FetchMore more) throws HongsException {
+    affectedIds = getOperableIds(req, more);
+    return getAffectedNames();
+  }
+  /**
+   * 获取可操作的名称
+   * @param req
+   * @return 用", "连接的可操作的名称
+   */
+  public String getOperableNames(Map req) throws HongsException {
+    return getOperableNames(req, null);
+  }
+  
+  /**
+   * 获取可操作的 ID
+   * getOperableNames,update,remove 均是调用此方法获取 ID
+   * @param req
+   * @param more
+   * @return IDs
+   */
+  protected List<String> getOperableIds(Map req, FetchMore more) throws HongsException {
     if (req == null)
     {
       req = new HashMap();
@@ -600,29 +577,25 @@ abstract public class AbstractBaseModel
 
     List<String> ids = new ArrayList();
     if (req.containsKey(this.idVar)) {
-        Object obj = req.get(this.idVar);
-        if (obj instanceof List) {
-            ids.addAll((List<String>)obj);
-        }
-        else {
-            ids.add(obj.toString());
-        }
+      Object obj = req.get(this.idVar);
+      if (obj instanceof List) {
+        ids.addAll((List<String>) obj);
+      }
+      else {
+        ids.add( obj.toString() );
+      }
     }
-    if (ids.isEmpty()) return "";
+    if (ids.isEmpty()) return ids;
 
-    int i = 0;
     String pk = this.table.primaryKey;
     more = more.clone();
     more.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
     List<Map> rows = this.table.fetchMore(more);
-    this.affectedIds = new ArrayList();
-    for (Map  row  : rows)
-    {
-        this.affectedIds.add(row.get(pk).toString());
+    ids = new ArrayList();
+    for (Map  row  : rows) {
+      ids.add(row.get(pk).toString());
     }
-    
-    // 上面与 update,remove 完全一致, 仅仅少了 put,del 调用
-    return this.getAffetctedNames();
+    return ids;
   }
 
   //** 标准模型方法 **/
