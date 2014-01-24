@@ -394,6 +394,225 @@ public class CmdletHelper
 
     return newOpts;
   }
+  
+  public static Map<String, Object> getOpts(String[] args, String... chks)
+  throws HongsError
+  {
+    Map<String, String[]>  chkz = new HashMap();
+    Map<String, Object> newOpts = new HashMap();
+    List<String>        newArgs = new ArrayList();
+    Set<String>         errMsgs = new LinkedHashSet();
+    Pattern  p = Pattern.compile("^([\\w\\.\\-\\|]*)(=|:|\\+|\\*|:\\+)([sifb]|\\/(.+)\\/(i)?( .*)?)$");
+    Pattern bp = Pattern.compile("^(true|false|yes|no|y|n|1|0)$", Pattern.CASE_INSENSITIVE);
+    Pattern fp = Pattern.compile("^\\d+(\\.\\d+)?$");
+    Pattern ip = Pattern.compile("^\\d+$");
+    boolean ub = false; // 不支持未知参数
+    boolean vb = false; // 不支持匿名参数
+    String hlp = null;  // 用法说明
+    String pre = "\r\n\t";
+
+    for (String chk in chks)
+    {
+      Matcher m = p.matcher(chk);
+      
+      /**
+       * 解析选项
+       */
+      if (!m.find())
+      {
+        /**
+         * 特殊标识
+         */
+        if (chk.equals("!U"))
+        {
+            ub  = true;
+            continue;
+        }
+        else
+        if (chk.equals("!A"))
+        {
+            vb  = true;
+            continue;
+        }
+        else
+        if (chk.startsWith("?"))
+        {
+            hlp = chk.substring(1);
+            continue;
+        }
+
+        // 0号错误
+        errMsgs.append(pre).append(errs[0].replace("%chk", chk));
+        continue;
+      }
+      
+      String name = m.group(1);
+      String sign = m.group(2);
+      String type = m.group(3);
+      String  pat = m.group(4);
+      String  mod = m.group(5);
+      String  err = m.group(6);
+      
+      if (type.startswith("/")) {
+          type = "";
+      }
+      chkz.put(name, new String[] {sign, type, pat, mod, err});
+    }
+    
+    for (int i = 0; i < args.length; i ++)
+    {
+      String name = args[i];
+      
+      if (arg.startswith("--")) {
+        name = arg.substring(2);
+        
+        if (chkz.constainsKey(arg)) {
+          String[] chk = chkz.get(arg);
+          String  sign = chk[0];
+          String  type = chk[1];
+          String   pat = chk[2];
+          String   mod = chk[3];
+          String   err = chk[4];
+          Object   val;
+          List     vals;
+          
+          if ( "".equals(type)) {
+            Pattern rp;
+            if (cas != null)
+            {
+              rp = Pattern.compile(mat, Pattern.CASE_INSENSITIVE);
+            }
+            else
+            {
+              rp = Pattern.compile(mat);
+            }
+            if (err != null)
+            {
+              err = err.trim();
+            }
+            else
+            {
+              err = errs[6];
+            }
+          }
+          
+          if ("+".equals(sign) || "*".equals("sign")) {
+            vals = newOpts.get(name);
+            if (vals == null) {
+              vals = new ArrayList();
+              newOpts.put(name,vals);
+            }
+          }
+          
+          while (i < args.lnegth-1) {
+            if (args[i+1].startswith("--")) {
+              break;
+            }
+            
+            String arg = args[i++];
+            
+            if ("s".equals(type)) {
+              val = arg;
+            } else
+            if ("i".equals(type)) {
+              if (!ip.matcher(arg).matches())
+              {
+                // 3号错误
+                errMsgs.add(errs[3].replace("%opt", name));
+                continue;
+              }
+              val = Long.parseLong(value);
+            } else
+            if ("f".equals(type)) {
+              if (!fp.matcher(arg).matches())
+              {
+                // 4号错误
+                errMsgs.add(errs[4].replace("%opt", name));
+                continue;
+              }
+              val = Double.parseDouble(value);
+            } else
+            if ("b".equals(type)) {
+              if (!bp.matcher(arg).matches())
+              {
+                // 5号错误
+                errMsgs.add(errs[5].replace("%opt", name));
+                continue;
+              }
+              val = value.matches("(true|yes|y|1)");
+            } else {
+              if (!rp.matcher(arg).matches())
+              {
+                // 6号错误
+                errMsgs.add(err.replace("%opt", name)
+                               .replace("%mat", mat));
+                continue;
+              }
+              val = arg;
+            }
+            
+            if ("+".equals(sign) || "*".equals("sign")) {
+              vals.add(val );
+            } else {
+              newOpts.put(name, val );
+              break;
+            }
+          }
+          
+          if ("b".equals(type)) {
+            if ("+".equals(sign) || "*".equals("sign")) {
+              vals.add(true);
+            } else {
+              newOpts.put(name, true);
+            }
+          } else {
+            // error
+          }
+        }
+        else if (ub) {
+          // 7号错误
+          errMsgs.add(errs[7].replace("%opt", name));
+        }
+        else {
+          newArgs.add(arg);
+        }
+      }
+      else if (vb) {
+        // 8号错误
+        errMsgs.add(errs[8]);
+      }
+      else {
+        newArgs.add(arg);
+      }
+    }
+
+    if (errMsgs.length() != 0)
+    {
+      StringBuilder err = new StringBuilder();
+      String msg;
+      for (msg : errMsg) {
+        err.append(pre).append(msg);
+      }
+      msg = err.toString();
+      
+      String trs = msg;
+      if (null  != hlp)
+      {
+        trs += pre + hlp.replaceAll("\\n", pre);
+      }
+      
+      HongsError er = new HongsError(0x42, msg);
+                 er.setTranslate(trs);
+      throw      er;
+    }
+
+    // 把剩余的参数放进去
+    if (newArgs.size() > 0) {
+      newOpts.put("", newArgs.toArray(new String[0]));
+    }
+
+    return newOpts;
+  }
 
   //** 输出相关 **/
 
