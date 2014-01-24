@@ -62,7 +62,7 @@ public class Action
     ActionHelper helper = (ActionHelper)
       Core.getInstance(ActionHelper.class);
     String action = Core.ACTION_PATH.get();
-    action = action.substring(1,action.lastIndexOf('.')); // 去掉前导"/", 去掉扩展名
+    action = action.substring(0,action.lastIndexOf('.')); // 去掉扩展名
 
     if (action != null && action.length() == 0) {
         helper.print404Code("Can not find action name.");
