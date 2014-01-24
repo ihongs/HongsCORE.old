@@ -1524,7 +1524,8 @@ function HsList(opts, context) {
     this.idVar   = hsGetValue(opts, "idVar"  , hsGetConf("model.id.var", "id"));
     this.sortVar = hsGetValue(opts, "sortVar", hsGetConf("model.sort.var", "sort"));
     this.pageVar = hsGetValue(opts, "pageVar", hsGetConf("model.page.var", "page"));
-    this.rowsVar = hsGetValue(opts, "rowsVar", hsGetConf("model.rows.var", "rows"));
+    this.firstOfPage = hsGetConf("first.of.page", 1 );
+    this.rowsPerPage = hsGetConf("rows.per.page", 25);
 
     this.context = context;
     this.loadBox = loadBox;
@@ -1800,39 +1801,41 @@ HsList.prototype = {
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
-        p  = page.page || 1;
-        t  = page.total_pages || 1;
-        pn = this.pageBox.attr("data-pn");
+        p  = page.page || this.firstOfPage;
+        t  = page.total_pages || 1 ;
+        pn = this.pageBox.attr("data-pn" );
         pn = pn ? parseInt(pn) : 10;
         pmin = Math.floor((p - 1) / pn) * pn + 1;
         pmax = pmin+pn - 1; if (t<pmax) pmax = t;
 
         this.pageBox.empty();
-        var ul = jQuery('<ul class="pagination"></ul>').appendTo(this.pageBox);
+        var btns = jQuery('<ul class="fl pagination"></ul>').appendTo(this.pageBox);
+        var nums = jQuery('<ul class="fr pagination"></ul>').appendTo(this.pageBox);
+        var rows = jQuery('<select class="fr"></select>');
+        jQuery('<div class="cb"></div>').appendTo(this.pageBox);
 
         if (1 != p) {
-            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(p-1)+'">'+hsGetLang("list.prev.page")+'</a></li>'));
+            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+(p-1)+'">'+hsGetLang("list.prev.page")+'</a></li>'));
         } else {
-            // ul.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.prev.page")+'</a></li>'));
-        }
-        if (1 < pmin-1) {
-            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+1+'">'+1+'</a></li>'));
-            ul.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
-            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmin-1)+'">'+(pmin-1)+'</a></li>'));
-        }
-        for(i = pmin; i < pmax+1; i++) {
-            var cl = i == p ? ' class="active"' : '';
-            ul.append(jQuery('<li'+cl+'><a href="javascript:;" data-pn="'+i+'">'+i+'</a></li>'));
-        }
-        if (t > pmax+1) {
-            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmax+1)+'">'+(pmax+1)+'</a></li>'));
-            ul.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
-            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
+            btns.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.prev.page")+'</a></li>'));
         }
         if (t != p) {
-            ul.append(jQuery('<li><a href="javascript:;" data-pn="'+(p+1)+'">'+hsGetLang("list.next.page")+'</a></li>'));
+            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+(p+1)+'">'+hsGetLang("list.next.page")+'</a></li>'));
         } else {
-            // ul.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.next.page")+'</a></li>'));
+            btns.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.next.page")+'</a></li>'));
+        }
+        if (1 < pmin-1) {
+            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+1+'">'+1+'</a></li>'));
+            nums.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
+            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmin-1)+'">'+(pmin-1)+'</a></li>'));
+        }
+        for(i = pmin; i < pmax + 1; i ++) { var cl = i == p ? ' class="active"' : '';
+            nums.append(jQuery('<li'+cl+'><a href="javascript:;" data-pn="'+i+'">'+i+'</a></li>'));
+        }
+        if (t > pmax+1) {
+            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmax+1)+'">'+(pmax+1)+'</a></li>'));
+            nums.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
+            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
         }
 
         this.pageBox.find("[data-pn="+p+"]").addClass("page-curr");
@@ -1947,7 +1950,7 @@ HsList.prototype = {
         if (d1.getYear()  == d2.getYear()
         &&  d1.getMonth() == d2.getMonth()
         &&  d1.getDate()  == d2.getDate()) {
-            return hsGetLang("time.today", { time : "" });
+            return hsGetLang("date.today");
         }
         else {
             return hsFmtDate(v, hsGetLang("date.format"));
@@ -1960,7 +1963,7 @@ HsList.prototype = {
         &&  d1.getMonth() == d2.getMonth()
         &&  d1.getDate()  == d2.getDate()) {
             return hsGetLang("time.today", {
-              time : hsFmtDate(v, hsGetLang("time.format"))});
+            time : hsFmtDate(v, hsGetLang("time.format")) } );
         }
         else {
             return hsFmtDate(v, hsGetLang("datetime.format"));
