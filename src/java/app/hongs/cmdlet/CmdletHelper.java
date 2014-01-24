@@ -51,11 +51,11 @@ public class CmdletHelper
    * 解析选项集合
    * <pre>
    * 选项格式:
-   * arg0 arg1 arg2 --opt0 --opt1 value --opt2 value1 value2
+   * arg0 arg1 arg2 -opt0 -opt1 value -opt2 value1 value2
    * 格式特点:
-   * 以"--"或"-"开头的为选项名(后面跟数字的除外);
-   * 当需要选项值需要以"-"开头时,前面加上"\"符号;
-   * 首个以"--"或"-"开头前的选项记作匿名选项("").
+   * 以"-"开头的为选项名(后面跟数字的除外);
+   * 需要选项值以"-"开头时,前面加上"\"符号;
+   * 首个以"-"开头前的选项记作匿名选项("").
    * <pre>
    * @param args
    * @return 选项值
@@ -66,7 +66,7 @@ public class CmdletHelper
     List<String> opt = new ArrayList();
     String n = "";
 
-    Pattern p1 = Pattern.compile("^-{1,2}([^\\d\\-][\\w\\-\\.]*)$");
+    Pattern p1 = Pattern.compile("^-([^\\d\\-][\\w\\-\\.]*)$");
     Pattern p2 = Pattern.compile("^\\\\");
     Matcher m3;
 
@@ -98,7 +98,7 @@ public class CmdletHelper
    * 最后的选项别名如果以"-"开头则表示其为纯别名, 仅用于在错误消息中显示<br/>
    * "="表示1个, ":"表示0个或1个, "+"表示1个或多个, "*"表示0个或多个<br/>
    * 本规则参考自Perl的Getopt::Long模块, 为兼容, ":+"也表示0个或多个<br/>
-   * "s"表示字串, "i"表示整数, "f"表示浮点数, "b"表示布尔值<br/>
+   * "s"表示字符串, "i"表示整数, "f"表示浮点数, "b"表示布尔值<br/>
    * 规则"!A"(不含引号)表示不支持匿名选项<br/>
    * 规则"!U"(不含引号)表示不支持未知选项<br/>
    * </p>
