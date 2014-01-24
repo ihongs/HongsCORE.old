@@ -57,7 +57,7 @@ public class JsLangAction
     ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
     String conf = Core.ACTION_PATH.get();
-           conf = conf.substring(1, conf.lastIndexOf('.'));
+           conf = conf.substring(0, conf.lastIndexOf('.'));
     String type = helper.getParameter("t");
     String lang = helper.getParameter("l");
     if (lang == null || lang.length()==0 )
