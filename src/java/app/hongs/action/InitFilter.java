@@ -48,7 +48,7 @@ implements Filter {
         }
 
         // 当前应用根目录
-        Core.BASE_HREF = context.getContextPath() + "/";
+        Core.BASE_HREF = context.getContextPath();
         Core.BASE_PATH = context.getRealPath("" ) + File.separator + "WEB-INF";
 
         // 资源目录

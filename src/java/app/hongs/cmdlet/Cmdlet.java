@@ -12,10 +12,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
@@ -34,12 +36,10 @@ import java.lang.reflect.InvocationTargetException;
 public class Cmdlet
 {
 
-  private static Map<String, String[]> opts;
-
   public static void main(String[] args)
     throws IOException
   {
-    init(args);
+    args = init(args);
 
     Core core = Core.getInstance();
     String act = Core.ACTION_PATH.get();
@@ -85,7 +85,7 @@ public class Cmdlet
     Method method;
     try
     {
-      method = klass.getMethod(mtd, new Class[] {Map.class});
+      method = klass.getMethod(mtd, new Class[] {String[].class});
     }
     catch (NoSuchMethodException ex)
     {
@@ -105,7 +105,7 @@ public class Cmdlet
     // 执行方法
     try
     {
-      method.invoke(null, new Object[] {opts});
+      method.invoke(null, new Object[] {args});
 
       //ShellHelper.print(core.ACTION_PATH + " complete.");
     }
@@ -169,19 +169,17 @@ public class Cmdlet
           CmdletHelper.printETime("Total exec time", core.GLOBAL_TIME);
 
       core.destroy();
-      opts = null;
     }
   }
 
-  public static void init(String[] args)
+  public static String[] init(String[] args)
     throws IOException
   {
-    Map<String, Object> optz;
-    opts = CmdletHelper.getOpts(args);
-    optz = CmdletHelper.getOpts(opts ,":+s",
-      "debug:b","base-path:s","base-href:s",
-      "language:s","session:s","request:s"
+    Map<String, Object> opts;
+    opts = CmdletHelper.getOpts(args,
+      "basepath:s","basehref:s","language:s","session:s","request:s","debug:b"
     );
+    args = (String[]) opts.get("");
 
     Core.THREAD_CORE.set(Core.GLOBAL_CORE);
     Core.ACTION_TIME.set(Core.GLOBAL_TIME);
@@ -191,19 +189,16 @@ public class Cmdlet
     Core.IN_SHELL_MODE = true ;
     Core.IN_DEBUG_MODE = false;
 
-    if (optz.containsKey("debug"))
+    if (opts.containsKey("debug"))
     {
-      Core.IN_DEBUG_MODE = (Boolean)optz.get("debug");
+      Core.IN_DEBUG_MODE = (Boolean)opts.get("debug");
     }
 
-    if (optz.containsKey("base-href"))
+    if (opts.containsKey("basepath"))
     {
-      Core.BASE_PATH = (String) optz.get("base-href");
-    }
-
-    if (optz.containsKey("base-path"))
-    {
-      Core.BASE_PATH = (String) optz.get("base-path");
+      Core.BASE_PATH = (String)opts.get( "basepath" );
+      Core.BASE_PATH =  Pattern.compile( "[/\\\\]$" )
+          .matcher(Core.BASE_PATH).replaceFirst( "" );
     }
     else
     {
@@ -218,27 +213,25 @@ public class Cmdlet
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
     Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
+    Core.BASE_HREF  = conf.getProperty("core.base.href", "" );
     Core.SERVER_ID  = conf.getProperty("core.server.id", "0");
 
     /** 实例属性配置 **/
 
     String act = null;
-    if (optz.containsKey(""))
+    if (args.length > 0 )
     {
-      /**
-       * 获取并移除第一个匿名参数
-       * 并修改opts中的匿名参数表
-       */
-      List optx = (List)optz.get("");
-      act  =  (String)optx.remove(0);
-      opts.put("", (String[])optx.toArray(new String[0]));
+      List<String> argz = new ArrayList();
+      argz.addAll(Arrays.asList( args ) );
+      act  = argz.remove( 0 );
+      args = argz.toArray(new String[0] );
     }
     Core.ACTION_PATH.set(act);
 
     String lang = null;
-    if (optz.containsKey("language"))
+    if (opts.containsKey("language"))
     {
-      lang = (String)optz.get("language");
+      lang = (String)opts.get("language");
     }
     if (lang == null || lang.length() == 0)
     {
@@ -290,21 +283,26 @@ public class Cmdlet
     /** 初始化核心 **/
 
     String str;
-    str = (String)optz.get("request");
+    
+    str = (String)opts.get("request");
     Map<String, String[]>  req = null;
     if (str != null && str.length( ) > 0)
     {
         req  = parseQueryString(str);
     }
+    
+    str = (String)opts.get("session");
     Map<String, String[]>  ses = null;
     if (str != null && str.length( ) > 0)
     {
-        req  = parseQueryString(str);
+        ses  = parseQueryString(str);
     }
 
     ActionHelper helper = (ActionHelper)
           Core.getInstance(ActionHelper.class);
     helper.init(req, ses);
+
+    return args;
   }
 
   /**

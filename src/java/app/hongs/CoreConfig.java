@@ -81,7 +81,7 @@ public class CoreConfig
       this.load(new FileInputStream(file));
     }
     catch (FileNotFoundException ex)
-    {
+    {System.out.println(file);
       throw new app.hongs.HongsError(0x21, "Can not find the properties file '" + file + "'.");
     }
     catch (IOException ex)

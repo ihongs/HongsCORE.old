@@ -215,6 +215,10 @@ extends HashMap<String, Object>
       }
       catch (InvocationTargetException ex)
       {
+        Throwable e = ex.getCause();
+        if (e instanceof StackOverflowError)
+            throw (Error) e;
+        
         throw new HongsError(0x2b, ex.getCause());
       }
     }
@@ -246,6 +250,10 @@ extends HashMap<String, Object>
       }
       catch (InstantiationException ex)
       {
+        Throwable e = ex.getCause();
+        if (e instanceof StackOverflowError)
+            throw (Error) e;
+        
         throw new HongsError(0x2d, ex);
       }
     }

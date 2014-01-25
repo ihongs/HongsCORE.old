@@ -19,7 +19,7 @@ public class test {
     helper.print("HELLO!!!");
   }
 
-  public static void cmdlet(Map<String, String[]> opts)
+  public static void cmdlet(String[] args)
           throws app.hongs.HongsException {
 
     Map vars = new java.util.HashMap();
@@ -29,8 +29,8 @@ public class test {
 
     System.out.println(app.hongs.util.Str.inject("This is $0 and that is ${1}2.", "name", "var"));
       
-    //app.hongs.util.JSON.print(opts);
-    Map<String, Object> optz = CmdletHelper.getOpts(opts,
+    app.hongs.util.JSON.print(args);
+    Map<String, Object> opts = CmdletHelper.getOpts(args,
       "show-env:b",
       "show-properties:b",
       "test-text:b",
@@ -39,50 +39,51 @@ public class test {
       "test-opts:b",
       "test-radix:i",
       "test-inject:b",
-      "test-serially:b");
-    //app.hongs.util.JSON.print(optz);
+      "test-serially:b",
+      "?Usage: --test-rate --tset-left");
+    app.hongs.util.JSON.print(opts);
 
-    if (optz.containsKey("show-env")
-    && (Boolean)optz.get("show-env")) {
+    if (opts.containsKey("show-env")
+    && (Boolean)opts.get("show-env")) {
       JSON.print(System.getenv());
     }
 
-    if (optz.containsKey("show-properties")
-    && (Boolean)optz.get("show-properties")) {
+    if (opts.containsKey("show-properties")
+    && (Boolean)opts.get("show-properties")) {
       JSON.print(System.getProperties());
     }
 
-    if (optz.containsKey("test-text")
-    && (Boolean)optz.get("test-text")) {
+    if (opts.containsKey("test-text")
+    && (Boolean)opts.get("test-text")) {
       testText();
     }
 
-    if (optz.containsKey("test-rate")
-    && (Boolean)optz.get("test-rate")) {
+    if (opts.containsKey("test-rate")
+    && (Boolean)opts.get("test-rate")) {
       testRate();
     }
 
-    if (optz.containsKey("test-left")
-    && (Boolean)optz.get("test-left")) {
+    if (opts.containsKey("test-left")
+    && (Boolean)opts.get("test-left")) {
       testLeft();
     }
 
-    if (optz.containsKey("test-opts")
-    && (Boolean)optz.get("test-opts")) {
-      testOpts(opts);
+    if (opts.containsKey("test-opts")
+    && (Boolean)opts.get("test-opts")) {
+      testOpts(args);
     }
 
-    if (optz.containsKey("test-radix")) {
-      testRadix((long)optz.get("test-radix"));
+    if (opts.containsKey("test-radix")) {
+      testRadix((long)opts.get("test-radix"));
     }
     
-    if (optz.containsKey("test-serially")
-    && (Boolean)optz.get("test-serially")) {
+    if (opts.containsKey("test-serially")
+    && (Boolean)opts.get("test-serially")) {
       new TestSerially();
     }
 
-    if (optz.containsKey("make-demo-data")
-    && (Boolean)optz.get("make-demo-data")) {
+    if (opts.containsKey("make-demo-data")
+    && (Boolean)opts.get("make-demo-data")) {
       makeDemoData();
     }
   }
@@ -135,14 +136,14 @@ public class test {
     }
   }
 
-  private static void testOpts(Map<String, String[]> opts) throws HongsException {
-    app.hongs.util.JSON.print(opts);
-    Map optz = CmdletHelper.getOpts(opts,
+  private static void testOpts(String[] args) throws HongsException {
+    app.hongs.util.JSON.print(args);
+    Map opts = CmdletHelper.getOpts(args,
       "opt_s|opt-s:s", "opt_i|opt-i:i", "opt_f|opt-f:f", "opt_b|opt-b:b",
       "opt_o|opt-o=s", "opt_m|opt-m+s", "opt_n|opt-n*s", "opt_r|opt-r=/(a|b)/i",
       "!U", "!V", "?Useage:\ncmd opt-o xxx opt-m xxx... [opt-n xxx...]"
     );
-    app.hongs.util.JSON.print(optz);
+    app.hongs.util.JSON.print(opts);
   }
   
   private static void testRadix(long num) {

@@ -1095,7 +1095,7 @@ function HsReady() {
     box.find("[data-toggle=tabs],[data-toggle=pills]").each(function() {
         var m = $(this), n;
         do {
-            n = m.attr("rel");
+            n = m.attr("data-target");
             if (n) break;
             n = m.siblings(".panes,.nav-panes");
             if (n.size()) break;
@@ -1106,7 +1106,7 @@ function HsReady() {
     box.find("[data-toggle=overlay],[data-toggle=alert],[data-toggle=modal]").each(function() {
         var m = $(this), n;
         do {
-            n = m.attr("rel");
+            n = m.attr("data-target");
             if (n) break;
             n = m.siblings(".overlay,.alert,.modal");
             if (n.size()) break;
@@ -1125,7 +1125,7 @@ function HsReady() {
     $(this).find("[data-toggle=tooltip],[data-toggle=popover],[data-toggle=dropdown]").each(function() {
         var m = $(this), n, r;
         do {
-            n = m.attr("rel");
+            n = m.attr("data-target");
             r = false;
             if (n) break;
             n = m.siblings(".tooltip,.popover,.dropdown-menu");
@@ -1709,7 +1709,7 @@ HsList.prototype = {
         this.listBox.trigger("loadBack", [rst]);
     },
     fillList : function(list) {
-        var tb, tr, td, tds, cls, fns, i, j, n, t, v;
+        var tb, tr, td, tds, cls, fns, fts, i, j, n, t, v;
         tb  = this.listBox.find("tbody"); tb.empty( );
         tds = this.listBox.find("thead th, thead td");
         cls = []; fns = []; fts = {};
@@ -2575,10 +2575,10 @@ jQuery.fn.load = function(url, data, complete) {
     $.tools.tabs.conf.current = "active";
     $.tools.tooltip.conf.tipClass = "popover";
     $.tools.validator.conf.errorClass = "has-error";
-    $.tools.validator.conf.messageClass = "tooltip fade right in";
+    $.tools.validator.conf.messageClass = "tooltip right fade in";
 
     // 设置jquery tools遮罩层
-    $.tools.overlay.conf.top = "center",
+    $.tools.overlay.conf.top = "10%",
     $.tools.overlay.conf.left = "center",
     $.tools.overlay.conf.load = false,
     $.tools.overlay.conf.fixed = false,
@@ -2682,9 +2682,12 @@ jQuery.fn.load = function(url, data, complete) {
         $.each(errs, function(i, err) {
             var inp = err.input;
             var msg = inp.data("msg.el");
+            // 如果错误的项在隐藏的区域里, 则先将隐藏区域打开
+            inp.closest(".vh").removeClass( "vh").prev("legend")
+                         .parent("fieldset" ).addClass("dropup");
             inp.closest(".form-group").addClass(conf.errorClass);
             if (msg == null) {
-                msg = $(conf.message).addClass(conf.messageClass).insertAfter(inp);
+                msg =  $(conf.message).addClass(conf.messageClass).insertAfter(inp);
                 inp.data("msg.el" , msg);
             }
 

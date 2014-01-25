@@ -48,7 +48,7 @@ public class JsAuthAction
     ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
     String name = Core.ACTION_PATH.get();
-           name = name.substring(0, name.lastIndexOf('.'));
+           name = name.substring(1, name.lastIndexOf('.'));
     String type = req.getParameter( "t");
     String data;
 
