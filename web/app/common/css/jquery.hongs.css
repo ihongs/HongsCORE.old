@@ -223,10 +223,15 @@ fieldset .dropdown-toggle {
     margin-bottom: 15px;
 }
 
-#note-box .alert,
-.page-box .alert {
-    margin-bottom: 1px;
+.page-footer {
+    margin-top: 15px;
 }
+.page-footer p {
+    font-size: 12px;
+}
+
+#note-box .alert,
+.page-box .alert,
 .list-box .table,
 .page-box .pagination {
     margin: 1px 0;

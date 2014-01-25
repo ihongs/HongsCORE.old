@@ -2655,6 +2655,7 @@ jQuery.fn.load = function(url, data, complete) {
         return this.getInputs().filter("[name="+input.attr("data-repeat")+"]").val() == value;
     });
     $.tools.validator.fn("[data-unique]", function(input, value) {
+        if (!value) return true;
         var ret = true;
         var obj = input.closest(  "form"  );
         var url = input.attr("data-unique");
