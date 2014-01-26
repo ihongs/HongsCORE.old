@@ -1579,7 +1579,7 @@ function HsList(opts, context) {
             var sid = cks.val();
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
-            u = u.replace ("{ED}", this.idVar+"="encodeURIComponent( sid ));
+            u = u.replace ("{ED}", that.idVar+"="encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
@@ -2052,7 +2052,7 @@ function HsTree(opts, context) {
             if (sid == null) return ;
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
-            u = u.replace ("{ED}", this.idVar+"="+encodeURIComponent( sid ));
+            u = u.replace ("{ED}", that.idVar+"="+encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
