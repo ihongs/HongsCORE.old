@@ -1182,7 +1182,7 @@ function HsInit(opts) {
     var h = box.children("h1,h2,h3,h4,h5,h6");
     if (h.length) opts.title = h.text();
     if (opts.title) {
-        opts.title = H$("&id", box)?
+        opts.title = hsGetParam( "&id", box )?
             hsGetLang(opts.title, {'opt': opts.update || hsGetLang("form.update")}):
             hsGetLang(opts.title, {'opt': opts.create || hsGetLang("form.create")});
     }
