@@ -66,7 +66,7 @@ HongsCORE
     - lib           后端库
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
-  + app             前端英语组件(js,flash)
+  + app             前端库(js,flash)
     + core          前端核心库
       - css         前端核心样式
       - img         前端核心图片
