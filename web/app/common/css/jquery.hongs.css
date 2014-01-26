@@ -9,7 +9,7 @@ html, body, label, input, select, button, textarea {
     font-size: 14px;
 }
 html, body, label, input, select, button, textarea,
-h1, h2, h3, h4, h5,h6, .h1, .h2, .h3, .h4, .h5,.h6 {
+h1, h2, h3, h4, h5, h6 {
     font-family: 'Microsoft YaHei', Arial;
 }
 pre, code {
@@ -29,7 +29,7 @@ object.config {
 .tr {text-align: right;}
 .tc {text-align: center;}
 .dn {display: none;}
-.vh {visibility: hidden; overflow: hidden; width: 0; height: 0; magin: 0; padding: 0;}
+.vh {visibility: hidden; overflow: hidden; width: 0; height: 0; margin: 0; padding: 0;}
 
 /** 全局 **/
 
@@ -41,21 +41,21 @@ object.config {
     left: 30%;
 }
 
-.main-context {
-    padding: 0;
-}
-.side-context {
-    padding: 0 1em 0 0;
+.panes .hide-in-tabs,
+.nav-panes .hide-in-tabs,
+.overlay .hide-in-overlay {
+    display: none;
 }
 
 .choose-tip {
     width: 1110px;
 }
 
-.panes .hide-in-tabs,
-.nav-panes .hide-in-tabs,
-.overlay .hide-in-overlay {
-    display: none;
+.main-context {
+    padding: 0;
+}
+.side-context {
+    padding: 0 1em 0 0;
 }
 
 /** 表单 **/
@@ -65,16 +65,12 @@ fieldset .dropdown-toggle {
 }
 
 .check-box label,
-.radio-box label {
-    font-weight: normal;
-    width: 15em;
-    margin-right: 2px;
-}
-
+.radio-box label,
 .option-box {
-    float: left;
-    width: 15em;
+    display: inline-block;
+    font-weight: normal;
     margin-right: 2px;
+    width: 15em;
 }
 
 /** 列表 **/
@@ -121,10 +117,10 @@ fieldset .dropdown-toggle {
 
 .tree-node {
     border-left: 1px dotted #000;
+    cursor: pointer;
+    line-height: 22px;
     margin-left: 12px;
     padding-left: 6px;
-    line-height: 22px;
-    cursor: pointer;
 }
 .tree-root {
     border-left: 0;
@@ -147,10 +143,10 @@ fieldset .dropdown-toggle {
     width: 14px;
 }
 .tree-hand .caret {
-    width: 16px;
-    height: 22px;
     background-image: url(../img/tree-hand.gif);
     border: 0;
+    height: 22px;
+    width: 16px;
 }
 .tree-fold>table .tree-hand .caret {
     background-image: url(../img/tree-hand-fold.gif);
@@ -192,13 +188,13 @@ fieldset .dropdown-toggle {
 .overlay {
     background-color: #FFFFFF;
     display: none;
+    min-width: 600px;
     padding: 15px;
     z-index: 9999;
-    min-width: 600px;
 }
 .overlay .close {
-    right: -2px;
     opacity: 0.6;
+    right: -2px;
 }
 .overlay .close:hover,
 .overlay .close:focus {
@@ -218,9 +214,9 @@ fieldset .dropdown-toggle {
     display: none;
 }
 .nav-tabs {
+    margin-bottom: 15px;
     padding-left: 15px;
     padding-right: 15px;
-    margin-bottom: 15px;
 }
 
 .page-footer {
