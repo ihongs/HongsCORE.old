@@ -132,7 +132,7 @@ find    搜索关键词
   btime     开始时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
 
-注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: page,rows,cols,sort,find. 另, 在Model中可以重新定义这些名称, 但并不建议将这些参数名作为配置写入配置中(我信奉少量的约定胜于过多的配置).
+注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: page,rows,cols,sort,find. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 << HongsCORE Framework for Javascript >>
 
