@@ -273,6 +273,11 @@ public class AbstractTreeModel extends AbstractBaseModel
     {
       data = new HashMap();
     }
+    // pidVar <=> pidKey
+    if (data.containsKey(this.pidVar))
+    {
+      data.put(this.pidKey, data.get(this.pidVar));
+    }
 
     String pid = (String)data.get(this.pidKey);
 
@@ -319,6 +324,11 @@ public class AbstractTreeModel extends AbstractBaseModel
     if (data == null)
     {
       data = new HashMap();
+    }
+    // pidVar <=> pidKey
+    if (data.containsKey(this.pidVar))
+    {
+      data.put(this.pidKey, data.get(this.pidVar));
     }
 
     /**
