@@ -57,48 +57,49 @@ abstract public class AbstractBaseModel
 
   /**
    * id参数名
-   * 用于getFilter/getInfo/save/update/remove/exists
+   * 影响getInfo/getList/save/update/remove/exists/getFilter
    */
   protected String idVar = "id";
 
   /**
    * 页码参数名
-   * 用于getFilter/getPage
+   * 影响getPage/getList/getFilter
    */
   protected String pageVar = "page";
 
   /**
    * 行数参数名
-   * 用于getFilter/getPage
+   * 影响getPage/getList/getFilter
    */
   protected String rowsVar = "rows";
 
   /**
    * 字段参数名
-   * 用于getFilter
+   * 影响getPage/getList/getFilter
    */
   protected String colsVar = "cols";
 
   /**
    * 排序参数名
-   * 用于getFilter
+   * 影响getPage/getList/getFilter
    */
   protected String sortVar = "sort";
 
   /**
    * 搜索参数名
-   * 用于getFilter
+   * 影响getPage/getList/getFilter
    */
   protected String findVar = "find";
 
   /**
    * 被搜索的字段
-   * 用于getFilter
+   * 影响getPage/getList/getFilter
    */
   protected String[] findKeys = new String[] {"name"};
 
   /**
    * 受影响的ID
+   * 在save/update/remove后被设置为影响的行id
    */
   protected List<String> affectedIds;
 
@@ -452,8 +453,8 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a2, "Param n or v can not be empty");
     }
 
-    String n = (String)req.get("n");
-    String v = (String)req.get("v");
+    String n = (String) req.get("n");
+    String v = (String) req.get("v");
 
     Map columns = this.table.getColumns();
 
@@ -465,17 +466,17 @@ abstract public class AbstractBaseModel
 
     more.where(".`"+n+"` = ?", v);
 
-    Iterator it = req.entrySet().iterator();
+    Iterator it = req.entrySet( ).iterator();
     while (it.hasNext())
     {
       Map.Entry entry = (Map.Entry)it.next();
-      String field = (String)entry.getKey();
-      String value = (String)entry.getValue();
+      String field = (String) entry.getKey();
+      String value = (String) entry.getValue( );
 
       if (columns.containsKey(field))
       {
-        if (field.equals(this.table.primaryKey)
-        ||  field.equals(this.idVar))
+        if (field.equals(this.idVar )
+        ||  field.equals(this.table.primaryKey))
         {
           more.where(".`"+ this.table.primaryKey+"` != ?", value);
         }
@@ -516,49 +517,6 @@ abstract public class AbstractBaseModel
   }
 
   /**
-   * 获取受影响的名称
-   * 默认取 findKeys 的第一位作为名称字段
-   * 仅对调用过 save,update,remove 的有效
-   * 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
-   * 这不是线程安全的
-   * @return 用", "连接的受影响的名称
-   */
-  public String getAffectedNames() throws HongsException {
-    StringBuilder sb = new StringBuilder();
-    FetchMore     fm = new FetchMore( );
-    String        fn = this.findKeys[0];
-    fm.setOption("FETCH_DFLAG" , true );
-    fm.select(".`"+fn+"`").where("id IN (?)", affectedIds);
-    List<Map> rows = this.table.fetchMore(fm);
-    for (Map  row  : rows) {
-      sb.append(", ").append(row.get(fn).toString());
-    }
-    return sb.length()>0 ? sb.substring(2) : sb.toString();
-  }
-  
-  /**
-   * 获取可操作的名称
-   * 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
-   * 此方法逻辑与 update,remove 完全一致, 最终获取仍是调用 getAffetctedNames
-   * 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
-   * @param req
-   * @param more
-   * @return 用", "连接的可操作的名称
-   */
-  public String getOperableNames(Map req, FetchMore more) throws HongsException {
-    affectedIds = getOperableIds(req, more);
-    return getAffectedNames();
-  }
-  /**
-   * 获取可操作的名称
-   * @param req
-   * @return 用", "连接的可操作的名称
-   */
-  public String getOperableNames(Map req) throws HongsException {
-    return getOperableNames(req, null);
-  }
-  
-  /**
    * 获取可操作的 ID
    * getOperableNames,update,remove 均是调用此方法获取 ID
    * @param req
@@ -596,6 +554,55 @@ abstract public class AbstractBaseModel
       ids.add(row.get(pk).toString());
     }
     return ids;
+  }
+  /**
+   * 获取可操作的名称
+   * 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
+   * 此方法逻辑与 update,remove 完全一致, 最终获取仍是调用 getAffetctedNames
+   * 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
+   * @param req
+   * @param more
+   * @return 用", "连接的可操作的名称
+   */
+  public String getOperableNames(Map req, FetchMore more) throws HongsException {
+    affectedIds = getOperableIds(req, more);
+    return getAffectedNames();
+  }
+  /**
+   * 获取可操作的名称
+   * @param req
+   * @return 用", "连接的可操作的名称
+   */
+  public String getOperableNames(Map req) throws HongsException {
+    return getOperableNames(req, null);
+  }
+
+  /**
+   * 获取受影响的 ID
+   * @return IDs
+   */
+  public List<String> getAffectedIds() {
+    return this.affectedIds;
+  }
+  /**
+   * 获取受影响的名称
+   * 默认取 findKeys 的第一位作为名称字段
+   * 仅对调用过 save,update,remove 的有效
+   * 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
+   * 此方法不是线程安全的
+   * @return 用", "连接的受影响的名称
+   */
+  public String getAffectedNames() throws HongsException {
+    StringBuilder sb = new StringBuilder();
+    FetchMore     fm = new FetchMore( );
+    String        fn = this.findKeys[0];
+    fm.setOption("FETCH_DFLAG" , true );
+    fm.select(".`"+fn+"`").where("id IN (?)", affectedIds);
+    List<Map> rows = this.table.fetchMore(fm);
+    for (Map  row  : rows) {
+      sb.append(", ").append(row.get(fn).toString());
+    }
+    return sb.length()>0 ? sb.substring(2) : sb.toString();
   }
 
   //** 标准模型方法 **/
