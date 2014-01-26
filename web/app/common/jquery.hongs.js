@@ -1567,7 +1567,7 @@ function HsList(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{ED}")) {
+        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{IX}")) {
             var cks;
             if (0 <= jQuery.inArray(listBox[0], n.parents())) {
                 cks = that.getRow(n);
@@ -1579,7 +1579,7 @@ function HsList(opts, context) {
             var sid = cks.val();
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
-            u = u.replace ("{ED}", that.idVar+"="encodeURIComponent( sid ));
+            u = u.replace ("{IX}", that.idVar+"="encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
@@ -2041,7 +2041,7 @@ function HsTree(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{ED}")) {
+        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{IX}")) {
             var sid;
             if (0 <= jQuery.inArray(treeBox[0], n.parents())) {
                 sid = that.getId (n);
@@ -2052,7 +2052,7 @@ function HsTree(opts, context) {
             if (sid == null) return ;
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
-            u = u.replace ("{ED}", that.idVar+"="+encodeURIComponent( sid ));
+            u = u.replace ("{IX}", that.idVar+"="+encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
