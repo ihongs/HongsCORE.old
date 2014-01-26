@@ -780,24 +780,26 @@ abstract public class AbstractBaseModel
    * 作用于getPage,getList上
    *
    * 如需添加过滤条件, 请重写此方法.
-   * 注意: 此处需要类似引用参数, 故调用前请务必实例化req和fs.
+   * 注意: 此处需要类似引用参数, 故调用前请务必实例化req和more.
    * 默认仅关联join类型为LEFT,INNER和link类型为BLS_TO,HAS_ONE的表,
    * 如需指定关联方式请设置FetchMore的option: ASSOC_JOINS, ASSOC_TYEPS,
    * 如需指定关联的表请设置FetchMore的option: ASSOC_TABLES
    *
    * 设计目标:
-   * 2. 按照cols参数设置查询字段;
-   * 3. 按照sort参数设置排序方式,
+   * 1. 按照cols参数设置查询字段;
+   * 2. 按照sort参数设置排序方式,
    *    多个字段排序: sort=a+b+c或sort=-a+b+c, -表示该字段逆序;
-   * 1. 按照find参数设置模糊查询,
+   * 3. 按照find参数设置模糊查询,
    *    多关键词搜索: find=x+y+z或-find=x+y+z, -表示排除式搜索;
    *    指定字段搜索: find.a=x或find.a.b=y, 同样适用上面的规则,
    *    a.b为搜索关联表, 但需注意: a,a.b必须在findKeys中有指定;
-   * 4. 如果有id或ids参数则仅获取id或ids对应的记录,
+   * 4. 如果有id(idVar)参数则仅获取id对应的记录,
    *    可使用-id=x或-id[]=x表示排除;
    * 5. 如果有字段名相同的参数则获取与之对应的记录,
    *    可使用-field=xxx表示排除条件.
-   * 注: "+"在URL中表示空格.
+   * 6. 如果有子表.字段名相同的参数则获取与之对应的记录,
+   *    可是有-table.field=xxx表示排除条件.
+   * 注: "+"在URL中表示空格. 以上设计目录均已实现.
    * </pre>
    *
    * @param req
