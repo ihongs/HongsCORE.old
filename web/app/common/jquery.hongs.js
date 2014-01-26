@@ -2041,7 +2041,7 @@ function HsTree(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{IX}")) {
+        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{IX}") || 0 <= u.indexOf("{IY}")) {
             var sid;
             if (0 <= jQuery.inArray(treeBox[0], n.parents())) {
                 sid = that.getId (n);
@@ -2053,6 +2053,7 @@ function HsTree(opts, context) {
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
             u = u.replace ("{IX}", that.idVar+"="+encodeURIComponent( sid ));
+            u = u.replace ("{IY}",that.pidVar+"="+encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
