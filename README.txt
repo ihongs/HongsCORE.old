@@ -38,7 +38,7 @@ HongsCORE
 
 [更新日志]
 
-[2014-01-25] 重写CmdletHelper的args解析程序, 保留原来类似Perl的Getopt::Longs的解析规则, 去掉了对短参的支持, 不再转换args的数组类型. 同时修改了cmdlet函数的参数类型(与main函数完全一致)
+[2014-01-25] 重写CmdletHelper的args解析程序, 保留原来类似Perl的Getopt::Longs的解析规则, 去掉对短参的支持, 不再转换args的数组类型. cmdlet函数也与main函数参数一致
 [2013-12-26] 使用InitFilter处理框架的初始化, 返回数据在InitFilter结束前不写入response对象, 方便动作注解和其他过滤器对返回数据进行处理
 [2013-10-20] 在样式上统一使用bootstrap(不采取其JS, JS仍然使用jquery.tools)
 [2013-03-08] 完成hongs-core-js的jquery-tools的迁移, 前端组件支撑由原来的jquery-ui改为jquery-tools
