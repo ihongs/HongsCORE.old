@@ -1567,7 +1567,7 @@ function HsList(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("{ID}")) {
+        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{ED}")) {
             var cks;
             if (0 <= jQuery.inArray(listBox[0], n.parents())) {
                 cks = that.getRow(n);
@@ -1579,6 +1579,7 @@ function HsList(opts, context) {
             var sid = cks.val();
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
+            u = u.replace ("{ED}", this.idVar+"="encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
@@ -1924,18 +1925,16 @@ HsList.prototype = {
     // /** 填充函数 **/
 
     _fill__check : function(td, v, n) {
-        var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
         jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
-            .attr("name", ck.attr("name"))
-            .val (hsGetValue(this._info, this.idVar))
+            .attr("name", this.idVar)
+            .val (hsGetValue(this._info, n))
             .appendTo(td);
         return false;
     },
     _fill__radio : function(td, v, n) {
-        var ck = this.listBox.find('thead [data-fn="'+n+'"] .check-all');
         jQuery('<input type="radio" class="input-radio check-one"/>')
-            .attr("name", ck.attr("name"))
-            .val (hsGetValue(this._info, this.idVar))
+            .attr("name", this.idVar)
+            .val (hsGetValue(this._info, n))
             .appendTo(td);
         return false;
     },
@@ -2042,7 +2041,7 @@ function HsTree(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("{ID}")) {
+        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{ED}")) {
             var sid;
             if (0 <= jQuery.inArray(treeBox[0], n.parents())) {
                 sid = that.getId (n);
@@ -2053,6 +2052,7 @@ function HsTree(opts, context) {
             if (sid == null) return ;
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
+            u = u.replace ("{ED}", this.idVar+"="+encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
