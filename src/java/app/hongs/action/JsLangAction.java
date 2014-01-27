@@ -67,8 +67,8 @@ public class JsLangAction
       return;
     }
 
-    p = name.lastIndexOf('.');
     String conf, lang;
+    p = name.lastIndexOf('.');
     if (p != -1) {
       lang = name.substring( p+ 1 );
       conf = name.substring( 0, p );
@@ -77,12 +77,12 @@ public class JsLangAction
       lang = Core.ACTION_LANG.get();
       conf = name;
     }
-    String m, s;
 
     /**
      * 如果指定语言的数据并没有改变
      * 则直接返回 304 Not modified
      */
+    String m;
     m = helper.request.getHeader("If-Modified-Since");
     if (m != null  &&  m.equals(JsLangAction.lastModified.get(name)))
     {
@@ -94,6 +94,7 @@ public class JsLangAction
      * 如果没有语言
      * 则调用工厂方法构造 JS 代码
      */
+    String s;
     if (!JsLangAction.language.containsKey(name))
     {
       try {
