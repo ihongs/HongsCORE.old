@@ -41,16 +41,23 @@ public class AbstractTreeModel extends AbstractBaseModel
 {
 
   /**
+   * 父级id参数名
+   * 影响getTree
+   * 影响put, 用于移动节点时定位父级
+   */
+  protected String pidVar = "pid";
+
+  /**
+   * 参考id参数名
+   * 影响put, 用于移动节点时指定顺序
+   */
+  protected String bidVar = "bid";
+
+  /**
    * 根节点id
    * 用于确认是路径深度
    */
   protected String rootId = "0";
-
-  /**
-   * 父级id参数名
-   * 用于getAll/getList/getTree
-   */
-  protected String pidVar = "pid";
 
   /**
    * 父级id字段名
@@ -86,7 +93,9 @@ public class AbstractTreeModel extends AbstractBaseModel
    * 构造方法
    *
    * 需指定该模型对应的表对象.
-   * 如传递的id/ids等参数名不同,
+   * 如传递的pid,bid参数名不同,
+   * 或pid,name等字段名不同,
+   * 或rootId不同,
    * 可在构造时分别指定;
    * 请指定被搜索的字段.
    *
@@ -99,6 +108,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     this.pidVar = conf.getProperty("js.model.pid.var", "pid");
+    this.pidVar = conf.getProperty("js.model.bid.var", "bid");
     this.rootId = conf.getProperty("js.tree.root.id" ,  "0" );
   }
   public AbstractTreeModel(String tableName)
@@ -140,18 +150,26 @@ public class AbstractTreeModel extends AbstractBaseModel
       more.setOption("ASSOC_TABLES", new HashSet());
     }
 
-    // 这些参数为约定参数
-    boolean onlyId = req.containsKey("only_id")
-                  && req.get("only_id").equals("1");
-    boolean withSub = req.containsKey("with_sub")
-                   && req.get("with_sub").equals("1");
-    boolean withPath = req.containsKey("with_path")
-                    && req.get("with_path").equals("1");
-    req.remove("only_id");
-    req.remove("with_sub");
-    req.remove("with_path");
+    String pid;
+    pid = (String)req.get(this.pidKey);
+    if (pid == null || pid.length() == 0)
+    {
+      pid = (String)req.get(this.pidVar);
+      if (pid == null || pid.length() == 0)
+      {
+        pid =  this.rootId;
+      }
+    }
 
-    if (onlyId)
+    // 这些参数为约定参数
+    boolean getId   = req.containsKey("get_id"  )
+                    && req.get("get_id"  ).equals("1");
+    boolean getPath = req.containsKey("get_path")
+                    && req.get("get_path").equals("1");
+    req.remove("get_id"  );
+    req.remove("get_path");
+
+    if (getId)
     {
       more.select(".`" + this.table.primaryKey + "` AS `id`");
     }
@@ -187,29 +205,12 @@ public class AbstractTreeModel extends AbstractBaseModel
       }
     }
 
-    String pid = (String)req.get(this.pidVar);
-    if (pid == null || pid.length() == 0)
-        pid =  this.rootId;
-
-    if (withSub)
-    {
-      if (!pid.equals(this.rootId))
-      {
-        List pids = this.getChildIds(pid, true);
-        pids.add(0, pid);
-
-        more.where("."+this.pidKey+" IN (?)", pids);
-
-        req.remove(this.pidVar);
-      }
-    }
-
     Map  data = this.getList(req , more);
     List list = (List)data.get("list");
 
-    if (withPath)
+    if (getPath)
     {
-      if (onlyId)
+      if (getId)
       {
         List path = this.getParentIds(pid);
 
@@ -273,11 +274,6 @@ public class AbstractTreeModel extends AbstractBaseModel
     {
       data = new HashMap();
     }
-    // pidVar <=> pidKey
-    if (data.containsKey(this.pidVar))
-    {
-      data.put(this.pidKey, data.get(this.pidVar));
-    }
 
     String pid = (String)data.get(this.pidKey);
 
@@ -325,42 +321,39 @@ public class AbstractTreeModel extends AbstractBaseModel
     {
       data = new HashMap();
     }
-    // pidVar <=> pidKey
-    if (data.containsKey(this.pidVar))
-    {
-      data.put(this.pidKey, data.get(this.pidVar));
-    }
 
     /**
-     * 如果有指定aid(AfterID)或bid(BeforeID)
+     * 如有指定bid(BeforeID)
      * 则将新的pid(ParentID)重设为其pid
      */
-    String aid = (String)data.get("aid");
-    String bid = (String)data.get("bid");
-    if (null != aid && !"".equals(aid))
-    {
-      data.put(this.pidKey, this.getParentId(aid));
-    }
-    else
+    String bid = (String)data.get(this.bidVar);
     if (null != bid && !"".equals(bid))
     {
       data.put(this.pidKey, this.getParentId(bid));
     }
 
-    String newPid = (String)data.get(this.pidKey);
-    String oldPid = this.getParentId(id);
-    int ordNum = this.getSerialNum(id);
+    /**
+     * 前端组件在移动节点时会使用pidVar
+     */
+    String pid = (String)data.get(this.pidKey);
+    if (null == pid &&  "".equals(pid))
+    {
+      pid = (String)data.get(this.pidVar);
+    }
+    
+    String oldPid = this.getParentId (id);
+    int    ordNum = this.getSerialNum(id);
 
     id = super.put(id, data);
 
     /**
-     * 如果有指定新的pid且不同于旧的pid
-     * 则将其新的父级子节点数目加1
+     * 如果有指定新的pid且不同于旧的pid, 则
+     * 将其新的父级子节点数目加1
      * 将其旧的父级子节点数目减1
-     * 同时将排序设为末尾
-     * 并将旧的弟弟节点均往前移动1位
+     * 将其置于新父级列表的末尾
+     * 并将旧的弟节点序号往前加1
      */
-    if(null != newPid && !"".equals(newPid) && !oldPid.equals(newPid))
+    if(null != pid && !"".equals(pid) && !oldPid.equals(pid))
     {
       if (this.cnumKey != null)
       {
@@ -376,24 +369,15 @@ public class AbstractTreeModel extends AbstractBaseModel
     }
 
     /**
-     * 如果有指定aid或bid
+     * 如果有指定bid
      * 且其位置有所改变
-     * 则将改节点排序置为aid后或bid前
+     * 则将节点排序置为bid前
      */
     if (this.snumKey != null)
     {
       ordNum = this.getSerialNum(id);
       int ordNum2 = -1;
 
-      if (null != aid && !"".equals(aid))
-      {
-        ordNum2 = this.getSerialNum(aid);
-        if (ordNum2 < ordNum)
-        {
-          ordNum2 += 1;
-        }
-      }
-      else
       if (null != bid && !"".equals(bid))
       {
         ordNum2 = this.getSerialNum(bid);
@@ -450,6 +434,8 @@ public class AbstractTreeModel extends AbstractBaseModel
   {
     super.getFilter(req, more);
 
+    /**
+     * pidVar 仅影响 getTree
     if (!this.pidKey.equals(this.pidVar))
     {
       if (req.containsKey(this.pidVar))
@@ -464,6 +450,7 @@ public class AbstractTreeModel extends AbstractBaseModel
                   req.get(this.pidVar).toString());
       }
     }
+    */
 
     if (!req.containsKey(this.sortVar))
     {
