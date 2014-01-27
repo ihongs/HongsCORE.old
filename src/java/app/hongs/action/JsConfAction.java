@@ -56,12 +56,11 @@ public class JsConfAction
   {
     ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
+    String name = Core.ACTION_PATH.get();
     int b = name.lastIndexOf('/');
     int p = name.lastIndexOf('.');
-    String name = Core.ACTION_PATH.get();
-           name = name.substring( b, p );
     String type = name.substring( p+ 1 );
-    String m, s;
+           name = name.substring( b, p );
 
     if ( !"js".equals(type) && !"json".equals(type)) {
       helper.print500Code("Wrong file type: "+type);
@@ -72,6 +71,7 @@ public class JsConfAction
      * 如果指定配置的数据并没有改变
      * 则直接返回 304 Not modified
      */
+    String m;
     m = helper.request.getHeader("If-Modified-Since");
     if (m != null && m.equals(JsConfAction.lastModified.get(name)) )
     {
@@ -83,6 +83,7 @@ public class JsConfAction
      * 如果没有配置
      * 则调用工厂方法构造 JS 代码
      */
+    String s;
     if (!JsConfAction.config.containsKey(name))
     {
       try {
