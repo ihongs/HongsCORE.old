@@ -186,6 +186,7 @@ function hsSerialObj(obj) {
     var arr = hsSerialArr(obj);
     obj = {};
     for (var i = 0; i < arr.length; i ++) {
+        hsSetValue(arr[i].name, arr[i].value);
         obj[arr[i].name] = arr[i].value;
     }
     return obj;
@@ -405,11 +406,11 @@ function hsSetArray (obj, keys, val) {
         throw("hsSetArray: 'keys' can not be empty");
     }
 
-    var i; var k; var t = keys[0];
-    for(i = 0; i < keys.length -1; i ++ ) {
+    var i, k, t = keys[0];
+    for(i = 0; i < keys.length -1; i ++) {
         k = keys[ i ];
         t = keys[i+1];
-        if (!t) t = 0;
+        if (!t)t = -1;
         if (typeof t == "number")
             if (!jQuery.isArray(obj[k])) {
                 obj[k] = [];
@@ -423,8 +424,10 @@ function hsSetArray (obj, keys, val) {
             throw("hsSetArray: key must be a string or number");
         obj = obj[k];
     }
-    if (t) obj[t] = val ;
-    else   obj.push(val);
+    if (t !== -1)
+        obj[t] = val;
+    else
+        obj.push(val);
 }
 
 /**
