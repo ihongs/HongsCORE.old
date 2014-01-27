@@ -101,7 +101,7 @@ abstract public class AbstractBaseModel
    * 构造方法
    *
    * 需指定该模型对应的表对象.
-   * 如传递的id/ids等参数名不同,
+   * 如传递的page,rows,cols,sort,find等参数名不同,
    * 可在构造时分别指定;
    * 请指定被搜索的字段.
    *
