@@ -54,10 +54,10 @@ public class JsLangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
+    ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
 
     String conf = Core.ACTION_PATH.get();
-           conf = conf.substring(1, conf.lastIndexOf('.'));
+           conf = conf.substring(conf.lastIndexOf('/'),conf.lastIndexOf('.'));
     String type = helper.getParameter("t");
     String lang = helper.getParameter("l");
     if (lang == null || lang.length()==0 )
