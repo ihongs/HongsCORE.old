@@ -1213,9 +1213,9 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"    );
     var saveUrl  = hsGetValue(opts, "saveUrl" );
     var loadUrl  = hsGetValue(opts, "loadUrl" );
-    var loadNoId = hsGetValue(opts, "loadNoId");
-    var loadNoLd = hsGetValue(opts, "loadNoLd");
-    var idVar    = hsGetValue(opts, "idVar", hsGetConf("model.id.var", "id"));
+    var loadNoId = hsGetValue(opts, "loadNoId"); // 加载即使没有id
+    var dontRdLd = hsGetValue(opts, "dontRdLd"); // 不读取加载数据
+    var idVar    = hsGetValue(opts, "idVar" , hsGetConf("model.id.var" , "id" ));
 
     if (formBox.length === 0) formBox = context;
 
@@ -1226,7 +1226,7 @@ function HsForm(opts, context) {
     var ld, id, a, i;
 
     ld = hsSerialArr( loadUrl );
-    if (!loadNoLd) {
+    if (!dontRdLd) {
         a = hsSerialArr(loadBox.data("url" ));
         for(i = 0; i < a.length; i ++) {
             ld.push(a[i]);
@@ -1236,7 +1236,7 @@ function HsForm(opts, context) {
             ld.push(a[i]);
         }
     }
-    id = hsGetSerias(ld, idVar);
+    id = hsGetSeria (ld, idVar);
     if ( loadNoId || id.length) {
         this.load(loadUrl , ld);
     }
@@ -1251,9 +1251,9 @@ function HsForm(opts, context) {
      */
     var n, v;
     for(i = 0; i < ld.length; i ++) {
-        n = ld[i].name;
+        n = ld[i].name ;
         v = ld[i].value;
-        formBox.find("[name='"+n+"']").val(v);
+        formBox.find("[name='"   +n+"']").val(v);
         formBox.find("[data-pn='"+n+"']").val(v);
     }
 
@@ -1521,7 +1521,6 @@ function HsList(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl" );
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
-    this.idVar   = hsGetValue(opts, "idVar"  , hsGetConf("model.id.var", "id"));
     this.sortVar = hsGetValue(opts, "sortVar", hsGetConf("model.sort.var", "sort"));
     this.pageVar = hsGetValue(opts, "pageVar", hsGetConf("model.page.var", "page"));
     this.firstOfPage = hsGetConf("first.of.page", 1 );
@@ -1567,7 +1566,7 @@ function HsList(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{IX}")) {
+        if (0 <= u.indexOf("{ID}")) {
             var cks;
             if (0 <= jQuery.inArray(listBox[0], n.parents())) {
                 cks = that.getRow(n);
@@ -1579,7 +1578,6 @@ function HsList(opts, context) {
             var sid = cks.val();
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
-            u = u.replace ("{IX}", that.idVar+"="encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
@@ -1926,14 +1924,14 @@ HsList.prototype = {
 
     _fill__check : function(td, v, n) {
         jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
-            .attr("name", this.idVar)
+            .attr("name", n)
             .val (hsGetValue(this._info, n))
             .appendTo(td);
         return false;
     },
     _fill__radio : function(td, v, n) {
         jQuery('<input type="radio" class="input-radio check-one"/>')
-            .attr("name", this.idVar)
+            .attr("name", n)
             .val (hsGetValue(this._info, n))
             .appendTo(td);
         return false;
@@ -1987,8 +1985,9 @@ function HsTree(opts, context) {
     var sendUrls = hsGetValue(opts, "sendUrls");
     var linkUrls = hsGetValue(opts, "linkUrls");
     // 删除等操作时发送数据的ID键
-    this.idVar   = hsGetValue(opts, "idVar" , hsGetConf("model.id.var" , "id" ));
+    this.idVar   = hsGetValue(opts, "idVar" , hsGetConf("model.pid.var", "id" ));
     this.pidVar  = hsGetValue(opts, "pidVar", hsGetConf("model.pid.var", "pid"));
+    this.bidVar  = hsGetValue(opts, "bidVar", hsGetConf("model.bid.var", "bid"));
     // 接收列表数据的节点属性的键
     this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
     this.nameKey = hsGetValue(opts, "nameKey", "name");
@@ -2041,7 +2040,7 @@ function HsTree(opts, context) {
             return;
         }
 
-        if (0 <= u.indexOf("{ID}") || 0 <= u.indexOf("{IX}") || 0 <= u.indexOf("{IY}")) {
+        if (0 <= u.indexOf("{ID}")) {
             var sid;
             if (0 <= jQuery.inArray(treeBox[0], n.parents())) {
                 sid = that.getId (n);
@@ -2052,8 +2051,6 @@ function HsTree(opts, context) {
             if (sid == null) return ;
 
             u = u.replace ("{ID}", encodeURIComponent( sid ));
-            u = u.replace ("{IX}", that.idVar+"="+encodeURIComponent( sid ));
-            u = u.replace ("{IY}",that.pidVar+"="+encodeURIComponent( sid ));
         }
 
         that.open( n, m, u );
@@ -2177,7 +2174,8 @@ HsTree.prototype = {
     load     : function(url, pid) {
         if (url ) this._url = url;
         if (pid ) this._pid = pid;
-        var data = {}; data[this.pidVar] = this._pid;
+        var data = {};
+        data[this.pidVar] = this._pid;
         jQuery.ajax({
             "url"       : this._url ,
             "data"      : data,
@@ -2353,9 +2351,9 @@ HsTree.prototype = {
             if (evt.isDefaultPrevented()) return;
 
             if (data[this.idVar] !== undefined)
-                that.load(null, that.getPid(data[this.idVar])); // 编辑
+                that.load(null, that.getPid(data[this.idVar])); // 修改
             else
-                that.load(null, that.getSid()); // 修改
+                that.load(null, that.getSid()); // 添加
         });
     },
 
