@@ -54,15 +54,29 @@ public class JsLangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
-    String conf = Core.ACTION_PATH.get();
-           conf = conf.substring(conf.lastIndexOf('/'),conf.lastIndexOf('.'));
-    String type = helper.getParameter("t");
-    String lang = helper.getParameter("l");
-    if (lang == null || lang.length()==0 )
-           lang = Core.ACTION_LANG.get(  );
-    String name = conf+"."+lang;
+    String name = Core.ACTION_PATH.get();
+    int b = name.lastIndexOf('/');
+    int p = name.lastIndexOf('.');
+    String type = name.substring( p+ 1 );
+           name = name.substring( b, p );
+
+    if ( !"js".equals(type) && !"json".equals(type)) {
+      helper.print500Code("Wrong file type: "+type);
+      return;
+    }
+
+    p = name.lastIndexOf('.');
+    String conf, lang;
+    if (p != -1) {
+      lang = name.substring( p+ 1 );
+      conf = name.substring( 0, p );
+    }
+    else {
+      lang = Core.ACTION_LANG.get();
+      conf = name;
+    }
     String m, s;
 
     /**
