@@ -45,10 +45,10 @@ public class JsAuthAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
+    ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
 
     String name = Core.ACTION_PATH.get();
-           name = name.substring(1, name.lastIndexOf('.'));
+           name = name.substring(name.lastIndexOf('/'),name.lastIndexOf('.'));
     String type = req.getParameter( "t");
     String data;
 
