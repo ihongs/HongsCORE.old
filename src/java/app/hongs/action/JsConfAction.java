@@ -56,10 +56,17 @@ public class JsConfAction
   {
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
 
+    int b = name.lastIndexOf('/');
+    int p = name.lastIndexOf('.');
     String name = Core.ACTION_PATH.get();
-           name = name.substring(name.lastIndexOf('/'),name.lastIndexOf('.'));
-    String type = req.getParameter( "t");
+           name = name.substring( b, p );
+    String type = name.substring( p+ 1 );
     String m, s;
+
+    if ( !"js".equals(type) && !"json".equals(type)) {
+      helper.print500Code("Wrong file type: "+type);
+      return;
+    }
 
     /**
      * 如果指定配置的数据并没有改变
