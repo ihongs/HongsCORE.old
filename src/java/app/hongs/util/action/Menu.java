@@ -22,7 +22,7 @@ public class Menu {
         helper.printJSON(getMenu(name,level,depth));
     }
 
-    public List getMenu(String name, String level, String depth)
+    public List getMenu(String name, String level, String depth) throws HongsException
     {
         int l, d;
         if (name  == null || name .length() == 0) {
@@ -43,7 +43,7 @@ public class Menu {
         return getMenu(name, l, d);
     }
 
-    public List getMenu(String name, int level, int depth)
+    public List getMenu(String name, int level, int depth) throws HongsException
     {
         CoreLanguage lang = (CoreLanguage)
             Core.getInstance(CoreLanguage.class);

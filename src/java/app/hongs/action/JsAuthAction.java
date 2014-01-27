@@ -50,8 +50,8 @@ public class JsAuthAction
     String name = Core.ACTION_PATH.get();
     int b = name.lastIndexOf('/');
     int p = name.lastIndexOf('.');
-    String type = name.substring( p+ 1 );
-           name = name.substring( b, p );
+    String type = name.substring(1+   p);
+           name = name.substring(1+b, p);
 
     if ( !"js".equals(type) && !"json".equals(type)) {
       helper.print500Code("Wrong file type: "+type);

@@ -43,9 +43,8 @@
         var context = $("#hcim_module_form");
         
         context.on("loadBack", function(evt, rst) {
-            var vh = !rst.info || !rst.info.code;
-            context.find("fieldset").toggleClass("dropup", vh)
-                   .next("div").toggleClass("vh", vh);
+            var show = rst.info && rst.info.code;
+            context.find("fieldset").toggleClass("dropup", !!show);
         });
     })();
 </script>

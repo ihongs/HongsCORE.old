@@ -35,6 +35,7 @@ object.config {
 
 /** 通知固定 **/
 #note-box {
+    background: transparent;
     position: fixed;
     display: none;
     z-index: 9999;
@@ -43,12 +44,13 @@ object.config {
     top: 0;
 }
 #note-box .alert {
-    margin: 0 auto;
+    margin: 0 auto 1px auto;
     width: 500px;
 }
 
 /** 顶部固定 **/
 #head-box {
+    background: #222222;
     position: fixed;
     display: block;
     z-index: 8888;
@@ -56,28 +58,35 @@ object.config {
     left: 0;
     top: 0;
 }
-#head-box .nav-bar {
-    margin: 0 auto;
-    background: #000;
+#head-box .navbar {
+    border: 0;
+    margin: 0;
 }
 
 /** 底部固定 **/
 html, body {
-	height: 100%;
+    height: 100%;
 }
 #body-box {
-	min-height: 100%;
-	height: auto !important;
-	height: 100%;
-	margin: 0 auto -110px;
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    padding-top: 71px; /* 顶部菜单 */
+    margin-bottom: -71px; /* 底部通栏 */
 }
 #push-box,
 #foot-box {
-	height: 96px;
+    height: 71px;
 }
-#foot-box {
-    background: #000;
-	font-size: 12px;
+#foot-box blockquote {
+    margin: 21px 0 0 0;
+}
+#foot-box blockquote p {
+    font-size: 10px;
+}
+#foot-box small {
+    display: inline-block;
+    padding-left: 1em;
 }
 
 .panes .hide-in-tabs,
@@ -101,6 +110,22 @@ html, body {
 
 fieldset .dropdown-toggle {
     cursor: pointer;
+}
+fieldset .dropdown-body {
+    visibility: hidden;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+fieldset.dropup .dropdown-body {
+    visibility: visible;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    margin: auto;
+    padding: auto;
 }
 
 .check-box label,
@@ -258,7 +283,6 @@ fieldset .dropdown-toggle {
     padding-right: 15px;
 }
 
-#note-box .alert,
 .page-box .alert,
 .list-box .table,
 .page-box .pagination {
