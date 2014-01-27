@@ -54,7 +54,7 @@ public class JsConfAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
     int b = name.lastIndexOf('/');
     int p = name.lastIndexOf('.');
