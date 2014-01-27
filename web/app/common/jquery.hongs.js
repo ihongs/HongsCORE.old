@@ -178,7 +178,7 @@ function hsSerialArr(obj) {
     return arr;
 }
 /**
- * 序列化为对象, 供进一步处理
+ * 序列化为对象, 供进一步操作(可以使用hsGetValue获取数据)
  * @param {Object,Array,String,Elements} obj
  * @return {Object}
  */
