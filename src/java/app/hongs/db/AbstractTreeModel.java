@@ -435,7 +435,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     super.getFilter(req, more);
 
     /**
-     * pidVar 仅影响 getTree
+     * pidVar 仅影响 getTree,put
     if (!this.pidKey.equals(this.pidVar))
     {
       if (req.containsKey(this.pidVar))
