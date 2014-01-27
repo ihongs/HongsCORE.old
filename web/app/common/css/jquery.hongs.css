@@ -29,16 +29,55 @@ object.config {
 .tr {text-align: right;}
 .tc {text-align: center;}
 .dn {display: none;}
-.vh {visibility: hidden; overflow: hidden; width: 0; height: 0; margin: 0; padding: 0;}
+.vh {visibility: hidden; overflow: hidden; width: 0; height: 0; border: 0; margin: 0; padding: 0;}
 
-/** 全局 **/
+/** 布局 **/
 
+/** 通知固定 **/
 #note-box {
     position: fixed;
     display: none;
     z-index: 9999;
-    width: 40%;
-    left: 30%;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
+#note-box .alert {
+    margin: 0 auto;
+    width: 500px;
+}
+
+/** 顶部固定 **/
+#head-box {
+    position: fixed;
+    display: block;
+    z-index: 8888;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
+#head-box .nav-bar {
+    margin: 0 auto;
+    background: #000;
+}
+
+/** 底部固定 **/
+html, body {
+	height: 100%;
+}
+#body-box {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -110px;
+}
+#push-box,
+#foot-box {
+	height: 96px;
+}
+#foot-box {
+    background: #000;
+	font-size: 12px;
 }
 
 .panes .hide-in-tabs,
@@ -217,13 +256,6 @@ fieldset .dropdown-toggle {
     margin-bottom: 15px;
     padding-left: 15px;
     padding-right: 15px;
-}
-
-.page-footer {
-    margin-top: 15px;
-}
-.page-footer p {
-    font-size: 12px;
 }
 
 #note-box .alert,
