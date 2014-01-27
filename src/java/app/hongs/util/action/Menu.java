@@ -19,6 +19,11 @@ public class Menu {
         String name  = helper.getParameter("name" );
         String level = helper.getParameter("level");
         String depth = helper.getParameter("depth");
+        helper.printJSON(getMenu(name,level,depth));
+    }
+
+    public List getMenu(String name, String level, String depth)
+    {
         int l, d;
         if (name  == null || name .length() == 0) {
             name  = "default";
@@ -35,15 +40,18 @@ public class Menu {
         else {
             d = Integer.parseInt(depth);
         }
+        return getMenu(name, l, d);
+    }
 
+    public List getMenu(String name, int level, int depth)
+    {
         CoreLanguage lang = (CoreLanguage)
             Core.getInstance(CoreLanguage.class);
         ActionConfig conf = new ActionConfig(name);
-
-        helper.printJSON(buildMenu(lang, conf.pages, l, d, 0));
+        return getMenu(lang, conf.pages, level, depth, 0);
     }
 
-    private List buildMenu(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
+    public List getMenu(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
         List list = new ArrayList();
 
         if (i >= level + depth || pages == null) {
@@ -54,8 +62,8 @@ public class Menu {
             Map v = (Map)item.getValue();
             Map p = (Map)v.get("pages" );
 
+            List lst = getMenu(lang, p, level, depth, i + 1);
             if (i >= level) {
-                List lst = buildMenu(lang, p, level, depth, i + 1);
                 String u = (String)item.getKey();
                 String n = (String)v.get("name");
                 Map page = new HashMap();
@@ -66,7 +74,6 @@ public class Menu {
                 list.add( page );
             }
             else {
-                List lst = buildMenu(lang, p, level, depth, i + 1);
                 list.addAll(lst);
             }
         }
