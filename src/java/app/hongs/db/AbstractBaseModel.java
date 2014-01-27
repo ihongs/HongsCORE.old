@@ -56,12 +56,6 @@ abstract public class AbstractBaseModel
   public Table table;
 
   /**
-   * id参数名
-   * 影响getInfo/getList/save/update/remove/exists/getFilter
-   */
-  protected String idVar = "id";
-
-  /**
    * 页码参数名
    * 影响getPage/getList/getFilter
    */
@@ -121,7 +115,6 @@ abstract public class AbstractBaseModel
     
     // 配置
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    this.idVar   = conf.getProperty("js.model.id.var", "id");
     this.pageVar = conf.getProperty("js.model.page.var", "page");
     this.rowsVar = conf.getProperty("js.model.rows.var", "rows");
     this.colsVar = conf.getProperty("js.model.cols.var", "cols");
@@ -288,7 +281,7 @@ abstract public class AbstractBaseModel
       more = new FetchMore();
     }
 
-    String id = (String)req.get(this.idVar);
+    String id = (String)req.get(this.table.primaryKey);
 
     Map info;
     if (id != null && id.length() != 0)
@@ -334,15 +327,13 @@ abstract public class AbstractBaseModel
     throws HongsException
   {
     String id = (String)req.get(this.table.primaryKey);
-    if (id == null || id.length() == 0 )
-        id = (String)req.get(this.idVar);
-    if (id == null || id.length() == 0 )
+    if (id == null || id.length() == 0)
         id =  this.add(    req);
     else
         id =  this.put(id, req);
 
     // 记录为受影响的ID
-    this.affectedIds = new ArrayList(  );
+    this.affectedIds = new ArrayList( );
     this.affectedIds.add(id);
 
     return id;
@@ -475,8 +466,7 @@ abstract public class AbstractBaseModel
 
       if (columns.containsKey(field))
       {
-        if (field.equals(this.idVar )
-        ||  field.equals(this.table.primaryKey))
+        if (field.equals(this.table.primaryKey))
         {
           more.where(".`"+ this.table.primaryKey+"` != ?", value);
         }
@@ -534,22 +524,10 @@ abstract public class AbstractBaseModel
     }
 
     List<String> ids = new ArrayList();
-    if (req.containsKey(this.idVar)) {
-      Object obj = req.get(this.idVar);
-      if (obj instanceof List) {
-        ids.addAll((List<String>) obj);
-      }
-      else {
-        ids.add( obj.toString() );
-      }
-    }
-    if (ids.isEmpty()) return ids;
-
     String pk = this.table.primaryKey;
-    more = more.clone();
-    more.setSelect(".`"+pk+"`").where(".`"+pk+"` IN (?)", ids);
+    this.getFilter(req, more);
+    more.setSelect(".`"+pk+"` AS id");
     List<Map> rows = this.table.fetchMore(more);
-    ids = new ArrayList();
     for (Map  row  : rows) {
       ids.add(row.get(pk).toString());
     }
@@ -646,14 +624,14 @@ abstract public class AbstractBaseModel
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x10a6, "Primary Key can not be empty");
+      throw new HongsException(0x10a6, "ID can not be empty for put");
     }
 
     FetchMore more = new FetchMore();
     more.setOption("MODEL_METHOD", "put");
-    if (this.idCheck(id, more)  !=  true)
+    if (! this.idCheck(id, more))
     {
-      throw new HongsException(0x10a8, "Can not update the resource for id '"+id+"'");
+      throw new HongsException(0x10a8, "Can not put the resource for id '"+id+"'");
     }
 
     String xd = (String)data.get(this.table.primaryKey);
@@ -689,14 +667,14 @@ abstract public class AbstractBaseModel
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x10a0, "ID can not be empty for remove");
+      throw new HongsException(0x10a0, "ID can not be empty for del");
     }
 
     if (more == null) more = new FetchMore();
     more.setOption("MODEL_METHOD", "del");
-    if (this.idCheck(id, more)  !=  true)
+    if (! this.idCheck(id, more))
     {
-      throw new HongsException(0x10a8, "Can not remove the resource for id '"+id+"'");
+      throw new HongsException(0x10a8, "Can not del the resource for id '"+id+"'");
     }
 
     // 删除子数据(当有dflag时不删除子数据)
@@ -748,7 +726,7 @@ abstract public class AbstractBaseModel
 
     if (more == null) more = new FetchMore();
     more.setOption("MODEL_METHOD", "get");
-    if (this.idCheck(id, more)  !=  true)
+    if (! this.idCheck(id, more))
     {
       throw new HongsException(0x10a8, "Can not get the resource for id '"+id+"'");
     }
@@ -793,11 +771,9 @@ abstract public class AbstractBaseModel
    *    多关键词搜索: find=x+y+z或-find=x+y+z, -表示排除式搜索;
    *    指定字段搜索: find.a=x或find.a.b=y, 同样适用上面的规则,
    *    a.b为搜索关联表, 但需注意: a,a.b必须在findKeys中有指定;
-   * 4. 如果有id(idVar)参数则仅获取id对应的记录,
-   *    可使用-id=x或-id[]=x表示排除;
-   * 5. 如果有字段名相同的参数则获取与之对应的记录,
+   * 4. 如果有字段名相同的参数则获取与之对应的记录,
    *    可使用-field=xxx表示排除条件.
-   * 6. 如果有子表.字段名相同的参数则获取与之对应的记录,
+   * 5. 如果有子表.字段名相同的参数则获取与之对应的记录,
    *    可是有-table.field=xxx表示排除条件.
    * 注: "+"在URL中表示空格. 以上设计目录均已实现.
    * </pre>
@@ -907,13 +883,6 @@ abstract public class AbstractBaseModel
         } else {
                 this.findFilter(this.findKeys, value, not, more);
         }
-        continue;
-      }
-
-      // 主键
-      if (key.equals(this.idVar))
-      {
-        this.mkeyFilter(this.table.primaryKey, value, not, more);
         continue;
       }
 
@@ -1227,7 +1196,7 @@ abstract public class AbstractBaseModel
     more.setOption("CHECK_METHOD", "idCheck");
     more.setOption("ASSOC_TABLES", new HashSet( ));
     more.setSelect(".`"+this.table.primaryKey+"`")
-          .where(".`"+this.table.primaryKey+"`=?", id);
+      .where(".`"+this.table.primaryKey+"`=?", id);
 
     // 默认调用getFilter进行校验
     this.getFilter(new HashMap(), more );
