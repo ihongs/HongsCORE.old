@@ -24,15 +24,15 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>Init</filter-name>
-        <url-pattern>*.js-auth</url-pattern>
+        <url-pattern>/app/common/auth/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>Init</filter-name>
-        <url-pattern>*.js-conf</url-pattern>
+        <url-pattern>/app/common/conf/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>Init</filter-name>
-        <url-pattern>*.js-lang</url-pattern>
+        <url-pattern>/app/common/lang/*</url-pattern>
     </filter-mapping>
     <!-- Action Servlet -->
     <servlet>
@@ -59,7 +59,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>JsAuth</servlet-name>
-        <url-pattern>*.js-auth</url-pattern>
+        <url-pattern>/app/common/auth/*</url-pattern>
     </servlet-mapping>
     <!-- JsConf Servlet -->
     <servlet>
@@ -68,7 +68,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>JsConf</servlet-name>
-        <url-pattern>*.js-conf</url-pattern>
+        <url-pattern>/app/common/conf/*</url-pattern>
     </servlet-mapping>
     <!-- JsLang Servlet -->
     <servlet>
@@ -77,7 +77,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>JsLang</servlet-name>
-        <url-pattern>*.js-lang</url-pattern>
+        <url-pattern>/app/common/lang/*</url-pattern>
     </servlet-mapping>
     <!-- Default Tags -->
     <jsp-config>
