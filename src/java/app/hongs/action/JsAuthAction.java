@@ -45,12 +45,19 @@ public class JsAuthAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
+    int b = name.lastIndexOf('/');
+    int p = name.lastIndexOf('.');
     String name = Core.ACTION_PATH.get();
-           name = name.substring(name.lastIndexOf('/'),name.lastIndexOf('.'));
-    String type = req.getParameter( "t");
+           name = name.substring( b, p );
+    String type = name.substring( p+ 1 );
     String data;
+
+    if ( !"js".equals(type) && !"json".equals(type)) {
+      helper.print500Code("Wrong file type: "+type);
+      return;
+    }
 
     try {
       data = JSON.toString(ActionConfig.getInstance(name).getAuthMap());
