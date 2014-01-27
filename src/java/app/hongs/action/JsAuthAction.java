@@ -47,18 +47,18 @@ public class JsAuthAction
   {
     ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
+    String name = Core.ACTION_PATH.get();
     int b = name.lastIndexOf('/');
     int p = name.lastIndexOf('.');
-    String name = Core.ACTION_PATH.get();
-           name = name.substring( b, p );
     String type = name.substring( p+ 1 );
-    String data;
+           name = name.substring( b, p );
 
     if ( !"js".equals(type) && !"json".equals(type)) {
       helper.print500Code("Wrong file type: "+type);
       return;
     }
 
+    String data;
     try {
       data = JSON.toString(ActionConfig.getInstance(name).getAuthMap());
     }
