@@ -22,7 +22,7 @@ public class Menu {
         helper.printJSON(getMenu(name,level,depth));
     }
 
-    public List getMenu(String name, String level, String depth) throws HongsException
+    public static List getMenu(String name, String level, String depth) throws HongsException
     {
         int l, d;
         if (name  == null || name .length() == 0) {
@@ -40,18 +40,15 @@ public class Menu {
         else {
             d = Integer.parseInt(depth);
         }
-        return getMenu(name, l, d);
-    }
-
-    public List getMenu(String name, int level, int depth) throws HongsException
-    {
+        
         CoreLanguage lang = (CoreLanguage)
             Core.getInstance(CoreLanguage.class);
         ActionConfig conf = new ActionConfig(name);
-        return getMenu(lang, conf.pages, level, depth, 0);
+        
+        return getMenu(lang, name, l, d, 0);
     }
 
-    public List getMenu(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
+    public static List getMenu(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
         List list = new ArrayList();
 
         if (i >= level + depth || pages == null) {
