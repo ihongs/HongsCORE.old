@@ -68,18 +68,20 @@ HongsCORE
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
   + app             前端库(js,flash)
-    + core          前端核心库
+    + common        前端核心库
       - css         前端核心样式
       - img         前端核心图片
+      - inc         通用包含页面(页头\页尾\组件等jsp,html)
   - xxxx            项目模块页面
 
 文件映射:
 xxxx/Foo/Bar.act    调用 app.xxxx.action.Foo.actionBar
 xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
 xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(执行命令 WEB-INF/run xxxx.Foo)
-name.js-auth        读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
-name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
-name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
+app/common/auth/name.js 读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
+app/common/conf/name.js 读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
+app/common/lang/name.js 读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
+注: 以上3个配置请求, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置
 
 框架结构:
 app.hongs           核心
