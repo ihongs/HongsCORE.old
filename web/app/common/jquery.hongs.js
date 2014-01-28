@@ -2,7 +2,7 @@
 HongsCORE(Javascript)
 作者: 黄弘 <kevin.hongs@gmail.com>
 创建: 2013/01/01
-修改: 2014/01/20 23:52:30
+修改: 2014/01/27 23:51:30
 依赖:
     jquery.js,
     jquery.tools.js (tabs, overlay, tooltip, validator, dateinput, expose)
