@@ -1,43 +1,66 @@
+<%@page contentType="text/html"%>
+<%@page pageEncoding="utf-8"%>
+<%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.util.action.Menu"%>
+<%@page import="app.hongs.action.ActionHelper"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.Map"%>
 <%!
-StringBuilder makeMenus(List<Map> menus, int i) {
-  StringBuilder sb = new StringBuilder();
-  if (menus.isEmpty()) return sb;
+StringBuilder makeMenu(List<Map> menus, int i) {
+  StringBuilder menuz = new StringBuilder();
+  if (menus.isEmpty()) return menuz;
   
-  sb.append("<ul class=\"")
-    .append(i > 0 ? "dropdown-menu" : "nav navbar-nav menu")
-    .append("\">");
   for (Map menu : menus) {
-    List<Map> subMenus = (List)menu.get("menus");
+    List<Map> subMenus = (List)menu.get("menus");app.hongs.util.JSON.print(menu);
     String claz = !subMenus.isEmpty() ? "dropdown-toggle" : "";
     String cart = !subMenus.isEmpty() ? "<b class=\"caret\"></b>" : "";
     String name = (String)menu.get("name");
-    String href = (String)menu.get("url" );
-    hash = href.substring(href.indexOf("/")+1 , href.lastIndexOf("."));
-    sb.append("<li>")
-      .append("<a class=\"")
-      .append(claz)
-      .append("\" href=\"#")
-      .append(hash)
-      .append("\" data-href=\"")
-      .append(href)
-      .append("\">")
-      .append(name)
-      .append(cart)
-      .append("</a>")
-      .append(makeMenu(subMenus), i+1)
-      .append("</li>");
+    String href = (String)menu.get("uri" );
+    String hash = href.substring(href.indexOf("/")+1);
+    if (name.indexOf("${opt}") != -1) {
+        continue; // 操作类的内页不要
+    }
+    if (href.startsWith("/")) {
+        href = href.substring(1);
+    }
+    if (hash.startsWith("hongs/util/Jump/To")) {
+        hash = hash.substring(19).replaceAll("=",".");
+    }
+    else if (hash.endsWith(".html")) {
+        hash = hash.substring(0, hash.length()-5);
+    }
+    else if (hash.endsWith(".jsp" )) {
+        hash = hash.substring(0, hash.length()-4);
+    }
+    menuz.append("<li>")
+         .append("<a class=\"")
+         .append(claz)
+         .append("\" href=\"#")
+         .append(hash)
+         .append("\" data-href=\"")
+         .append(href)
+         .append("\">")
+         .append(name)
+         .append(cart)
+         .append("</a>");
+    StringBuilder subMenuz = makeMenu(subMenus, i+1);
+    if (subMenuz.length() > 0) {
+        menuz.append("<ul class=\"dropdown-menu\">")
+             .append(subMenuz)
+             .append("</ul>");
+    }
+    menuz.append("</li>");
   }
-  sb.append("</ul>");
   
-  return sb;
+  return menuz;
 }
 %>
 <%
+  ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
   String name  = helper.getParameter("n");
   String level = helper.getParameter("l");
   String depth = helper.getParameter("d");
-  List<Map> menus = Menu.getMenus(name, level, depth);
+  List<Map> menus = Menu.getMenu(name, level, depth);
 %>
 
 <nav id="main-menubar" class="navbar navbar-default" role="navigation">
@@ -47,10 +70,8 @@ StringBuilder makeMenus(List<Map> menus, int i) {
   </div>
   <!-- Collect the nav links, forms, and other content for toggling -->
   <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-    <%=makeMenus(menus).toString()%>
     <ul class="nav navbar-nav menu">
-      <li><a href="#module/list" data-href="hcim/module/list.html">模块</a></li>
-      <li><a href="#model/list" data-href="hcim/model/list.html">模型</a></li>
+      <%=makeMenu(menus, 0).toString()%>
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li class="dropdown">

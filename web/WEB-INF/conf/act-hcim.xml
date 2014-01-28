@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="http://hongs-core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://hongs-core ac.xsd">
+    <page name="通用信息管理" uri="/hcim/index.html">
+        <page name="模块" uri="/hcim/module/list.html">
+            <page name="${opt}模块" uri="/hcim/module/form.html"/>
+        </page>
+        <page name="模型" uri="/hcim/model/list.html">
+            <page name="${opt}模型" uri="/hcim/model/form.html"/>
+        </page>
+    </page>
+</root>

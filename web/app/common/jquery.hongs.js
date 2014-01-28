@@ -1213,6 +1213,7 @@ function HsForm(opts, context) {
     that = this;
     context = jQuery ( context );
     context.data("HsForm", this);
+    context.addClass ( "HsForm");
 
     var loadBox  = context.closest(".load-box");
     var formBox  = context.find   ( "form"    );
@@ -1522,6 +1523,7 @@ function HsList(opts, context) {
     that = this;
     context = jQuery ( context );
     context.data("HsList", this);
+    context.addClass ( "HsList");
 
     var loadBox  = context.closest(".load-box");
     var listBox  = context.find   (".list-box");
@@ -1988,6 +1990,7 @@ function HsTree(opts, context) {
     that = this;
     context = jQuery ( context );
     context.data("HsTree", this);
+    context.addClass ( "HsTree");
 
     var loadBox  = context.closest(".load-box");
     var treeBox  = context.find   (".tree-box");

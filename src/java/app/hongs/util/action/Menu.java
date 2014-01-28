@@ -45,7 +45,7 @@ public class Menu {
             Core.getInstance(CoreLanguage.class);
         ActionConfig conf = new ActionConfig(name);
         
-        return getMenu(lang, name, l, d, 0);
+        return getMenu(lang, conf.pages, l, d, 0);
     }
 
     public static List getMenu(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
