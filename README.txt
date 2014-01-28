@@ -38,6 +38,7 @@ HongsCORE
 
 [更新日志]
 
+[2014-01-27] 去掉全部模型属性的外部名称(id,pid等), 统一使用实际的属性名, 避免因名称转换(同一属性不同场合不同名称)导致理解困难
 [2014-01-25] 重写CmdletHelper的args解析程序, 保留原来类似Perl的Getopt::Longs的解析规则, 去掉对短参的支持, 不再转换args的数组类型. cmdlet函数也与main函数参数一致
 [2013-12-26] 使用InitFilter处理框架的初始化, 返回数据在InitFilter结束前不写入response对象, 方便动作注解和其他过滤器对返回数据进行处理
 [2013-10-20] 在样式上统一使用bootstrap(不采取其JS, JS仍然使用jquery.tools)
@@ -67,18 +68,20 @@ HongsCORE
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
   + app             前端库(js,flash)
-    + core          前端核心库
+    + common        前端核心库
       - css         前端核心样式
       - img         前端核心图片
+      - inc         通用包含页面(页头\页尾\组件等jsp,html)
   - xxxx            项目模块页面
 
 文件映射:
 xxxx/Foo/Bar.act    调用 app.xxxx.action.Foo.actionBar
 xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
 xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(执行命令 WEB-INF/run xxxx.Foo)
-name.js-auth        读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
-name.js-conf        读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
-name.js-lang        读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
+app/common/auth/name.js 读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
+app/common/conf/name.js 读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
+app/common/lang/name.js 读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
+注: 以上3个配置请求, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置
 
 框架结构:
 app.hongs           核心
