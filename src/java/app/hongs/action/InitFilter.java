@@ -92,7 +92,26 @@ implements Filter {
         Core.GLOBAL_CORE.destroy();
     }
 
-    private void doInit(ServletRequest request, ServletResponse response)
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    throws ServletException, IOException {
+        try {
+             this.doFilter ( request, response );
+            chain.doFilter ( request, response );
+
+            // 将返回数据转换成JSON格式
+            ActionHelper helper = (ActionHelper)
+                  Core.getInstance(ActionHelper.class);
+            Map data  = helper.getResponseData();
+            if (data != null) {
+                helper.printJSON(data);
+            }
+        } finally {
+            this .doDestroy();
+        }
+    }
+
+    private void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException {
         HttpServletRequest  req = (HttpServletRequest ) request ;
         HttpServletResponse rsp = (HttpServletResponse) response;
@@ -103,9 +122,9 @@ implements Filter {
               Core.getInstance(ActionHelper.class);
         helper.init( req, rsp );
 
+        Core.ACTION_PATH.set(req.getServletPath());
         Core.ACTION_TIME.set(System.currentTimeMillis());
-        Core.ACTION_PATH.set(req.getRequestURI().substring(Core.BASE_HREF.length()));
-        Core.ACTION_LANG.set( conf.getProperty( "core.language.default", "en-us" ) );
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default", "en-us"));
 
         if (conf.getProperty("core.language.detect", false)) {
             /**
@@ -158,25 +177,6 @@ implements Filter {
         }
 
         Core.THREAD_CORE.get().destroy();
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-    throws ServletException, IOException {
-        try {
-            this .doInit   ( request, response );
-            chain.doFilter ( request, response );
-
-            // 将返回数据转换成JSON格式
-            ActionHelper helper = (ActionHelper)
-                  Core.getInstance(ActionHelper.class);
-            Map data  = helper.getResponseData();
-            if (data != null) {
-                helper.printJSON(data);
-            }
-        } finally {
-            this .doDestroy();
-        }
     }
 
 }
