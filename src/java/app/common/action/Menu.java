@@ -1,4 +1,4 @@
-package app.hongs.util.action;
+package app.common.action;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
@@ -16,14 +16,13 @@ import java.util.HashMap;
  */
 public class Menu {
     public void actionList(ActionHelper helper) throws HongsException {
-        String args  = helper.getRequestArgs();
-        String name  = args.length > 0 ? args[0] : "";
-        String level = args.length > 1 ? args[1] : "";
-        String depth = args.length > 2 ? args[2] : "";
-        helper.printJSON(getMenu(name, level, depth));
+        String name  = helper.getParameter("c");
+        String level = helper.getParameter("l");
+        String depth = helper.getParameter("d");
+        helper.printJSON(getList(name, level, depth));
     }
 
-    public static List getMenu(String name, String level, String depth) throws HongsException
+    public static List getList(String name, String level, String depth) throws HongsException
     {
         int l, d;
         if (name  == null || name .length() == 0) {
@@ -44,10 +43,10 @@ public class Menu {
             Core.getInstance(CoreLanguage.class  );
         ActionConfig conf = new ActionConfig(name);
 
-        return getMenu(lang, conf.pages, l, d, 0 );
+        return getList(lang, conf.pages, l, d, 0 );
     }
 
-    public static List getMenu(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
+    public static List getList(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
         List list = new ArrayList();
 
         if (i >= level + depth || pages == null) {
@@ -58,7 +57,7 @@ public class Menu {
             Map v = (Map)item.getValue();
             Map p = (Map)v.get("pages" );
 
-            List lst = getMenu(lang, p, level, depth, i + 1);
+            List lst = getList(lang, p, level, depth, i + 1);
             if (i >= level) {
                 String u = (String)item.getKey();
                 String n = (String)v.get("name");

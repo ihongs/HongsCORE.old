@@ -1,4 +1,4 @@
-package app.hongs.util.cmdlet;
+package app.common.cmdlet;
 
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;

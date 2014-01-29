@@ -1,4 +1,4 @@
-package app.hongs.util.action;
+package app.common.action;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
@@ -13,13 +13,14 @@ import java.util.Map;
 public class Jump {
     public void actionTo(ActionHelper helper)
     throws HongsException {
-        String[] args = helper.getRequestArgs();
-        String p = args.length > 0 ? args[0] : "";
-        String c = args.length > 1 ? args[1] : "";
-        String u = Core.ACTION_PATH.get()+"/"+p;
-        if ("".equals(c)) c = "default";
+        String c = helper.getParameter("c");
+        if (null == c || "".equals(c)) c="default";
+        String q = helper.request.getQueryString();
+        if (null == q || "".equals(q)) q="";
+        else   q = "?"+q;
+        String u = Core.ACTION_PATH.get()+q;
+      
         ActionConfig conf = ActionConfig.getInstance(c);
-
         Map<String, Map> page = conf.getPage(u);
         if (page != null  && page.containsKey("pages")) {
             Map<String, Map> pages = (Map) page.get("pages");

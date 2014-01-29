@@ -122,8 +122,8 @@ implements Filter {
               Core.getInstance(ActionHelper.class);
         helper.init( req, rsp );
 
-        Core.ACTION_PATH.set(req.getServletPath());
         Core.ACTION_TIME.set(System.currentTimeMillis());
+        Core.ACTION_PATH.set(req.getServletPath()+req.getPathInfo());
         Core.ACTION_LANG.set(conf.getProperty("core.language.default", "en-us"));
 
         if (conf.getProperty("core.language.detect", false)) {

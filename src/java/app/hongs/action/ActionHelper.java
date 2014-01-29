@@ -111,7 +111,7 @@ public class ActionHelper
    * 获取请求的文本
    * @return 请求文本
    */
-  public String getRequestText()
+  public String getRequestBody()
   {
     try
     {
@@ -135,26 +135,6 @@ public class ActionHelper
   }
 
   /**
-   * 根据 pathInfo 获取请求参数
-   * 对于想简化参数传递的动作比较有用
-   * 如参数表 ?a=1&b=2[&c=3] 可简化为 x.do/1/2/3
-   * 另也可用 CmdletHelper.getArgs 方法解析 x.do/--opt_o/1/--opt_t/2
-   * @return 按 / 分割 pathInfo
-   */
-  public String[] getRequestArgs()
-  {
-    String path = this.request.getPathInfo();
-    if (null == path || "".equals(path)
-    {
-      return new String[ 0 ];
-    }
-    else
-    {
-      return path.split("/");
-    }
-  }
-
-  /**
    * 获取请求的Map数据
    *
    * 不同于 request.getParameterMap,
@@ -173,7 +153,7 @@ public class ActionHelper
         if (ct != null) {
             if ("application/json".equals(ct) || "text/json".equals(ct)) {
                 this.requestData = (Map<String, Object>)
-                    JSON.parse(this.getRequestText());
+                    JSON.parse(this.getRequestBody());
                 return this.requestData;
             }
         }

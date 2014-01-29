@@ -1,7 +1,7 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="utf-8"%>
+<%@page import="app.common.action.Menu"%>
 <%@page import="app.hongs.Core"%>
-<%@page import="app.hongs.util.action.Menu"%>
 <%@page import="app.hongs.action.ActionHelper"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
@@ -23,7 +23,7 @@ StringBuilder makeMenu(List<Map> menus, int i) {
     if (href.startsWith("/")) {
         href = href.substring(1);
     }
-    if (hash.startsWith("hongs/util/Jump/To")) {
+    if (hash.startsWith("hongs/util/Jump/To.act")) {
         hash = hash.substring(19).replaceAll("=",".");
     }
     else if (hash.endsWith(".html")) {
@@ -57,11 +57,10 @@ StringBuilder makeMenu(List<Map> menus, int i) {
 %>
 <%
   ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
-  String[] args = helper.getRequestArgs();
-  String name  = args.length > 0 ? args[0] : "";
-  String level = args.length > 1 ? args[1] : "";
-  String depth = args.length > 2 ? args[2] : "";
-  List<Map> menus = Menu.getMenu(name, level, depth);
+  String name  = helper.getParameter("c");
+  String level = helper.getParameter("l");
+  String depth = helper.getParameter("d");
+  List<Map> menus = Menu.getList(name, level, depth);
 %>
 
 <nav id="main-menubar" class="navbar navbar-default" role="navigation">
@@ -94,7 +93,7 @@ StringBuilder makeMenu(List<Map> menus, int i) {
         .filter(function() {
             return  $(this).attr("hash") !== "#";
         })
-        .click(function() {console.log($("#main-context"))
+        .click(function() {
             $("#main-context").load($(this).attr("data-href"));
             $(this).closest("li")
                    .addClass("active")

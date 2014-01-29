@@ -1,4 +1,4 @@
-package app.hongs.util.cmdlet;
+package app.common.cmdlet;
 
 /**
  * 定时任务管理器(未开发)

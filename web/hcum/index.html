@@ -1,6 +1,6 @@
 <!--
 Hong's Common User Module
-通用用户模块
+用户模块
 //-->
 <!doctype html>
 <html>
@@ -8,24 +8,34 @@ Hong's Common User Module
     <title>用户管理</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../app/common/css/bootstrap.css"/>
-    <link rel="stylesheet" type="text/css" href="../app/common/css/jquery.hongs.css"/>
-    <script type="text/javascript" src="../app/common/jquery.min.js"></script>
-    <script type="text/javascript" src="../app/common/jquery.tools.min.js"></script>
-    <script type="text/javascript" src="../app/common/auth/default.js"></script>
-    <script type="text/javascript" src="../app/common/conf/default.js"></script>
-    <script type="text/javascript" src="../app/common/lang/default.js"></script>
-    <script type="text/javascript" src="../app/common/jquery.hongs.js"></script>
+    <link rel="stylesheet" type="text/css" href="../common/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="../common/css/jquery.hongs.css"/>
+    <script type="text/javascript" src="../common/jquery.min.js"></script>
+    <script type="text/javascript" src="../common/jquery.tools.min.js"></script>
+    <script type="text/javascript" src="../common/auth/default.js"></script>
+    <script type="text/javascript" src="../common/conf/default.js"></script>
+    <script type="text/javascript" src="../common/lang/default.js"></script>
+    <script type="text/javascript" src="../common/jquery.hongs.js"></script>
 </head>
 <body>
     <div id="note-box"></div>
-    <div class="container">
-        <div class="row" data-load="./menu.html">Menu Loading...</div>
-        <div class="row">
-            <div class="col-md-3 side-context" data-load="hcum/dept/tree.html"></div>
-            <div class="col-md-9 main-context"></div>
+    <div id="head-box">
+        <div class="container">
+            <div class="row" data-load="../common/page/head.jsp?c=hcum">Head Loading...</div>
         </div>
-        <div class="row" data-load="./foot.html">Foot Loading...</div>
+    </div>
+    <div id="body-box">
+        <div class="container">
+            <div class="row">
+                <div id="main-context"></div>
+            </div>
+        </div>
+        <div id="push-box"></div>
+    </div>
+    <div id="foot-box">
+        <div class="container">
+            <div class="row" data-load="../common/page/foot.jsp">Foot Loading...</div>
+        </div>
     </div>
 </body>
 </html>
