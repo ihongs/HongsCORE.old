@@ -143,7 +143,15 @@ public class ActionHelper
    */
   public String[] getRequestArgs()
   {
-    return this.reqeust.getPathInfo().split("/");
+    String path = this.request.getPathInfo();
+    if (null == path || "".equals(path)
+    {
+      return new String[ 0 ];
+    }
+    else
+    {
+      return path.split("/");
+    }
   }
 
   /**
