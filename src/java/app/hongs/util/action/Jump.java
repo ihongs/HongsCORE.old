@@ -13,13 +13,14 @@ import java.util.Map;
 public class Jump {
     public void actionTo(ActionHelper helper)
     throws HongsException {
-        String p = helper.getParameter("page");
-        String c = helper.getParameter("conf");
-        if ( c == null || "".equals(c) ) c = "default" ;
-        String uri = Core.ACTION_PATH.get()+"?page="+p ; 
+        String[] args = helper.getRequestArgs();
+        String p = args.length > 0 ? args[0] : "";
+        String c = args.length > 1 ? args[1] : "";
+        String u = Core.ACTION_PATH.get()+"/"+p;
+        if ("".equals(c)) c = "default";
         ActionConfig conf = ActionConfig.getInstance(c);
 
-        Map<String, Map> page = conf.getPage(uri);
+        Map<String, Map> page = conf.getPage(u);
         if (page != null  && page.containsKey("pages")) {
             Map<String, Map> pages = (Map) page.get("pages");
             for (Map.Entry et : pages.entrySet()) {
