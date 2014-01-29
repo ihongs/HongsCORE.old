@@ -16,10 +16,11 @@ import java.util.HashMap;
  */
 public class Menu {
     public void actionList(ActionHelper helper) throws HongsException {
-        String name  = helper.getParameter("name" );
-        String level = helper.getParameter("level");
-        String depth = helper.getParameter("depth");
-        helper.printJSON(getMenu(name,level,depth));
+        String args  = helper.getRequestArgs();
+        String name  = args.length > 0 ? args[0] : "";
+        String level = args.length > 1 ? args[1] : "";
+        String depth = args.length > 2 ? args[2] : "";
+        helper.printJSON(getMenu(name, level, depth));
     }
 
     public static List getMenu(String name, String level, String depth) throws HongsException
@@ -30,22 +31,20 @@ public class Menu {
         }
         if (level == null || level.length() == 0) {
             l = 1;
-        }
-        else {
+        } else {
             l = Integer.parseInt(level);
         }
         if (depth == null || depth.length() == 0) {
             d = 1;
-        }
-        else {
+        } else {
             d = Integer.parseInt(depth);
         }
-        
+
         CoreLanguage lang = (CoreLanguage)
-            Core.getInstance(CoreLanguage.class);
+            Core.getInstance(CoreLanguage.class  );
         ActionConfig conf = new ActionConfig(name);
-        
-        return getMenu(lang, conf.pages, l, d, 0);
+
+        return getMenu(lang, conf.pages, l, d, 0 );
     }
 
     public static List getMenu(CoreLanguage lang, Map<String,Map> pages, int level, int depth, int i) {
@@ -69,8 +68,7 @@ public class Menu {
                 page.put("name"  , n);
                 page.put("menus" , lst );
                 list.add( page );
-            }
-            else {
+            } else {
                 list.addAll(lst);
             }
         }
