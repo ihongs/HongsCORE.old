@@ -61,7 +61,7 @@ implements Filter {
         CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
         Core.LOGS_PATH = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
         Core.TMPS_PATH = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
-        Core.SERVER_ID = conf.getProperty("core.server.id", "0");
+        Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
         if (Core.IN_DEBUG_MODE) {
             System.out.println(
