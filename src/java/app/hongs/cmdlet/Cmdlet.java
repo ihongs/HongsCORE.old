@@ -214,7 +214,7 @@ public class Cmdlet
     Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
     Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
     Core.BASE_HREF  = conf.getProperty("core.base.href", "" );
-    Core.SERVER_ID  = conf.getProperty("core.server.id", "0");
+    Core.SERVER_ID  = conf.getProperty("core.server.id", "" );
 
     /** 实例属性配置 **/
 
