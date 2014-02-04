@@ -14,28 +14,28 @@ StringBuilder makeMenu(List<Map> menus, int i) {
     List<Map> subMenus = (List)menu.get("menus");app.hongs.util.JSON.print(menu);
     String claz = !subMenus.isEmpty() ? "dropdown-toggle" : "";
     String cart = !subMenus.isEmpty() ? "<b class=\"caret\"></b>" : "";
-    String name = (String)menu.get("name");
-    String href = (String)menu.get("uri" );
-    String hash = href.substring(href.indexOf("/")+1);
+    String name =  (String)menu.get("name");
+    String href = ((String)menu.get("uri" )).substring(1);
+    String hash = "#"+href.substring(href.indexOf("/")+1);
     if (name.indexOf("${opt}") != -1) {
         continue; // 操作类的内页不要
     }
-    if (href.startsWith("/")) {
-        href = href.substring(1);
-    }
-    if (hash.startsWith("hongs/util/Jump/To.act")) {
-        hash = hash.substring(19).replaceAll("=",".");
-    }
-    else if (hash.endsWith(".html")) {
-        hash = hash.substring(0, hash.length()-5);
+    if (i == -1) {
+        hash = Core.BASE_HREF + "/" + href; // Logo Menu
     }
     else if (hash.endsWith(".jsp" )) {
         hash = hash.substring(0, hash.length()-4);
     }
+    else if (hash.endsWith(".html")) {
+        hash = hash.substring(0, hash.length()-5);
+    }
+    else if (hash.startsWith("hongs/util/Jump/To.act")) {
+        hash = hash.substring(19).replaceAll("=",".");
+    }
     menuz.append("<li>")
          .append("<a class=\"")
          .append(claz)
-         .append("\" href=\"#")
+         .append("\" href=\"")
          .append(hash)
          .append("\" data-href=\"")
          .append(href)
@@ -60,13 +60,18 @@ StringBuilder makeMenu(List<Map> menus, int i) {
   String name  = helper.getParameter("c");
   String level = helper.getParameter("l");
   String depth = helper.getParameter("d");
+  
   List<Map> menus = Menu.getList(name, level, depth);
+  List<Map> logom = Menu.getList("default", "1","1");
 %>
 
 <nav id="main-menubar" class="navbar navbar-default" role="navigation">
   <!-- Brand and toggle get grouped for better mobile display -->
   <div class="navbar-header">
-    <a class="navbar-brand" href="#">HongsCORE</a>
+    <a class="navbar-brand dropdown-toggle" href="#" data-toggle="dropdown">HongsCORE <b class="caret"></b></a>
+    <ul class="dropdown-menu">
+      <%=makeMenu(logom, -1).toString()%>
+    </ul>
   </div>
   <!-- Collect the nav links, forms, and other content for toggling -->
   <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -91,7 +96,7 @@ StringBuilder makeMenu(List<Map> menus, int i) {
     (function($) {
         $("#main-menubar .menu>li>a")
         .filter(function() {
-            return  $(this).attr("hash") !== "#";
+            return $(this).attr("href").substring(0, 1) == "#";
         })
         .click(function() {
             $("#main-context").load($(this).attr("data-href"));

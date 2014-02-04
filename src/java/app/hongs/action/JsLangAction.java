@@ -56,11 +56,18 @@ public class JsLangAction
   {
     ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
-    String name = Core.ACTION_PATH.get();
-    int b = name.lastIndexOf('/');
+    String name = helper.request.getPathInfo( );
+    if (   name == null || name.length( ) == 0) {
+      helper.print500Code("Path info required");
+      return;
+    }
     int p = name.lastIndexOf('.');
-    String type = name.substring(1+   p);
-           name = name.substring(1+b, p);
+    if (p < 0) {
+      helper.print500Code("File type required");
+      return;
+    }
+    String type = name.substring(1 + p);
+           name = name.substring(1 , p);
 
     if ( !"js".equals(type) && !"json".equals(type)) {
       helper.print500Code("Wrong file type: "+type);
