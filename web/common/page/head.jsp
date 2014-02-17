@@ -11,7 +11,7 @@ StringBuilder makeMenu(List<Map> menus, int i) {
   if (menus.isEmpty()) return menuz;
   
   for (Map menu : menus) {
-    List<Map> subMenus = (List)menu.get("menus");app.hongs.util.JSON.print(menu);
+    List<Map> subMenus = (List)menu.get("menus");
     String claz = !subMenus.isEmpty() ? "dropdown-toggle" : "";
     String cart = !subMenus.isEmpty() ? "<b class=\"caret\"></b>" : "";
     String name =  (String)menu.get("name");
