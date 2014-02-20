@@ -2767,18 +2767,26 @@ jQuery.fn.load = function(url, data, complete) {
         var form = box.closest(".HsForm").data("HsForm");
         var name = box.attr   ("data-fn");
 
-        btn.on("click", function( ) {
+        box.on("click",".option-del", function() {
+            var dat = box.data("fill_data");
+            var id = $(this).closest(".option-box")
+                             .find(":hidden").val();
+            $(this).closest(".option-box").remove();
+            delete dat[id];
+        });
+
+        btn.on("click", function() {
             var dat = box.data("fill_data");
             $.hsOpen(url, undefined, [function() {
                 var tip = $(this);
                 tip.data("fill_data", dat)
                    .addClass("choose-tip")
-                .toggleClass("choose-mul" , /(\[\]|\.)$/.test(name)) // 名称以[]或.结尾则为多选
+                .toggleClass("multiple", /(\[\]|\.)$/.test(name)) // 名称以[]或.结尾则为多选
                 .on("chooseBack", function() {
                     box.data("fill_func").call(form, box, dat, name);
                 })
                 .on("chooseItem", function(evt, id, txt) {
-                    if (!btn.hasClass("choose-mul")) {
+                    if (!tip.hasClass("multiple")) {
                         dat = {};
                         if (txt !== undefined)
                             dat[id] = txt ;
@@ -2806,16 +2814,26 @@ jQuery.fn.load = function(url, data, complete) {
                     return false ;
                 })
                 .on("change", ".check-one", function() {
-                    var id  = $(this).val();
+                    var ls = $(this).closest(".HsList").data("HsList");
+                    if (ls._info) return false;
+                    var id = $(this).val();
                     var txt;
                     if ($(this).prop("checked")) {
-                        txt = $(this).attr("data-name");
-                        if (! txt) {
+                        do {
+                            txt = $(this).attr("data-name");
+                            if (txt) break;
                             txt = $(this).closest("tr").find(".name").text();
+                            if (txt) break;
+                            var thd = $(this).closest("table").find("thead");
+                            var tds = $(this).closest("tr").find("td");
+                            var idx;
+                            idx = thd.find("[data-ft=name]").index();
+                            if (idx != -1) txt = tds.eq(idx).text( );
+                            if (txt) break;
+                            idx = thd.find("[data-fn=name]").index();
+                            if (idx != -1) txt = tds.eq(idx).text( );
                         }
-                        if (! txt) {
-                            txt = $(this).closest("tr").find("data-fn=[name]").text();
-                        }
+                        while (false);
                     }
                     tip.trigger("chooseItem", [id, txt]);
                     return false ;
@@ -2851,10 +2869,10 @@ jQuery.fn.load = function(url, data, complete) {
         inp.empty();
         for(var id in v) {
             var txt = v[id];
-            $('<div class="option-box"></div>')
-            .append($('<input type="hidden"/>').attr("name", n).val(id))
-            .append($('<span class="option-txt"></span>').text(txt))
-            .append($('<span class="option-del"></span>'))
+            $('<div class="option-box btn-group"></div>')
+            .append($('<input type="hidden"/>').attr("name", n).val(id)).attr("title", txt)
+            .append($('<button type="button" class="option-txt btn btn-info"></button>').text(txt))
+            .append($('<button type="button" class="option-del btn btn-info"></button>').html("&times;"))
             .appendTo(inp);
         }
         inp.append($('<div class="cb"></div>'));
@@ -2868,7 +2886,7 @@ jQuery.fn.load = function(url, data, complete) {
         var box = td.closest(".load-box");
         // 初次进入时判断单选还是多选
         if (this._multiple === undefined) {
-            this._multiple = box.hasClass("choose-mul");
+            this._multiple = box.hasClass( "multiple" );
             if (!this._multiple) box.find(".check-all").hide();
         }
 

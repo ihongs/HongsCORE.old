@@ -95,10 +95,6 @@ html, body {
     display: none;
 }
 
-.choose-tip {
-    width: 1110px;
-}
-
 .main-context {
     padding: 0;
 }
@@ -129,8 +125,7 @@ fieldset.dropup .dropdown-body {
 }
 
 .check-box label,
-.radio-box label,
-.option-box {
+.radio-box label {
     display: inline-block;
     font-weight: normal;
     margin-right: 2px;
@@ -245,6 +240,26 @@ fieldset.dropup .dropdown-body {
 
 .tree-cnum {
     display: none;
+}
+
+/** 选择 **/
+
+.choose-tip {
+    width: 1110px;
+}
+
+.option-box {
+    margin-bottom: 3px;
+    margin-right: 3px;
+}
+.option-box .option-del {
+    padding-right: 9px;
+    padding-left: 9px;
+}
+.option-box .option-txt {
+    width: 12em;
+    text-align: left;
+    overflow: hidden;
 }
 
 /** jquery.tools 设置 **/
