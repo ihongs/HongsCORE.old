@@ -7,17 +7,13 @@
 html, body, label, input, select, button, textarea {
     color: #666;
     font-size: 14px;
+    font-family: 'Microsoft YaHei', Arial;
 }
-html, body, label, input, select, button, textarea,
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Microsoft YaHei', Arial;
 }
 pre, code {
     font-family: SimSun, Monaco, Consolas, 'Courier New';
-}
-
-object.config {
-    display: none;
 }
 
 /** 缩写 **/
@@ -89,17 +85,18 @@ html, body {
     padding-left: 1em;
 }
 
-.panes .hide-in-tabs,
-.nav-panes .hide-in-tabs,
-.overlay .hide-in-overlay {
-    display: none;
-}
-
 .main-context {
     padding: 0;
 }
 .side-context {
     padding: 0 1em 0 0;
+}
+
+object.config,
+.panes .hide-in-tabs,
+.nav-panes .hide-in-tabs,
+.overlay .hide-in-overlay {
+    display: none;
 }
 
 /** 表单 **/

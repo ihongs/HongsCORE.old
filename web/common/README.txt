@@ -8,107 +8,113 @@
   Email: kevin.hongs@gmail.com
 
 本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库, 使用jQueryTools作为UI组件库, 使用Bootstrap作为UI主题库. 以hs开头的为普通函数; 以Hs开头的为伪类函数, this指向调用的容器对象.
-依赖的jQueryTools组件:
-    tabs, overlay, tooltip, validator, dateinput, expose
-依赖的Bootstrap组件:
-    .btn, .alert, .tooltip, .popover, .pagination,
-    .dropdown, .arrow, .caret, .close, .active,
-    .fade, .[in|out], .[position], .has-error,
-    // 其他场合使用:
-    .container, .row, .col, .nav, .navbar,
-    .table, .form, .input, .label, .badge
 
-[ID]
+#### 环境设置 ####
 
-note-box        全局消息
-node-[ID]       节点编号, 在.tree-node上
+<link rel="stylesheet" type="text/css" href="../common/css/bootstrap.css"/>
+<link rel="stylesheet" type="text/css" href="../common/css/jquery.hongs.css"/>
+<script type="text/javascript" src="../common/jquery.min.js"></script>
+<script type="text/javascript" src="../common/jquery.tools.min.js"></script>
+<script type="text/javascript" src="../common/auth/default.js"></script>
+<script type="text/javascript" src="../common/conf/default.js"></script>
+<script type="text/javascript" src="../common/lang/default.js"></script>
+<script type="text/javascript" src="../common/jquery.hongs.js"></script>
 
-[Class]
+注: 将以上代码加入 head 中，注意 link 的 href 和 script 的 src 路. common/auth 为框架提供的权限列表.
 
-open            在浮窗中打开href对应的页
-close           关闭浮窗的图标按钮
-cancel          取消表单并关闭浮窗或区域的按钮
-ensure          提交表单的按钮
-load-ing
-load-box
-open-box
-note-box
-list-box        用于HsList中, 下同
-page-box
-check-all
-check-one
-for-select
-for-checks
-tree-box        用于HsTree中, 下同
-tree-list
-tree-node
-tree-root
-tree-curr
-tree-opened
-tree-folded
-tree-hand       节点开关图标
-tree-name       节点名称
-tree-cnum       节点子级数量
-node-TYPE       节点类型, TYPE为类型标识, 在.tree-node上
-select-box      选项区域, 用于选择组件中, 下同
-select-btn      选择按钮
-select-tip      选择窗口
-select-mul      多选窗口
+#### HsForm 使用 ####
 
-[Attr]
+<div id="hcum_user_form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcum/User/Info.act"/><!-- 表单数据加载动作地址 -->
+        <param name="saveUrl" value="hcum/User/Save.act"/><!-- 表单数据保存动作地址 -->
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="a_hcum_user_dept.0.dept_id" data-pn="dept_id"/><!-- 通过 data-pn 在打开此表单的参数中提取值 -->
+        <div class="form-group">
+            <label class="control-label">邮箱</label>
+            <input type="email" name="username" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">口令</label>
+            <input type="password" name="password" class="form-control" data-validate="validate"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">重复口令</label>
+            <input type="password" name="password2" class="form-control" data-repeat="password" data-message="请重复输入口令" placeholder="请重复输入口令"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">昵称</label>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">备注</label>
+            <textarea name="note" class="form-control"></textarea>
+        </div>
+        <div>
+            <button type="submit" class="ensure btn btn-primary">提交</button>
+            <button type="button" class="cancel btn btn-link">取消</button>
+        </div>
+    </form>
+</div>
 
-data-fn         HsForm和HsList中的field-name
-data-ft         HsForm和HsList中的field-type
-data-pn         HsForm中的param-name, HsList中的page-num
-data-vk         HsForm中的value-key
-data-tk         HsForm中的text-key
-data-eval       执行JS, this指向当前节点
-data-load       在当前节点中加载, 属性值为url
-data-open       在当前节点中打开, 属性值为url
-data-load-in    在指定区域中加载, 属性值为selector, 由href指定url
-data-open-in    在指定区域中打开, 属性值为selector, 由href指定url
-data-repeat     重复输入, 属性值为input-name
-data-unique     限制唯一, 属性值为url, url中可用{input-name}指定其他表单项的值
-data-toggle     关联触发, 可以为: overlay,alert,modal,tooltip,overlay,dropdown
-data-placement  tooltip的相对位置, 参阅bootstrip的tooltip
+#### HsList 使用 ####
 
-[Data]
+<div id="hcum-user-list">
+    <object class="config" name="hsList" data="">
+        <param name="loadUrl" value="('hcum/User/List.act?dept_id='+H$('&dept_id',this))"/><!-- 列表数据加载动作地址 -->
+        <param name="openUrls[]" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'#hcum-user-pane']"/><!-- 点击第1个参数的按钮, 打开第2参数的URL, 在第3个参数的区域中, 如果没有第3个参数则在浮窗中打开  -->
+        <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','#hcum-user-pane']"/><!-- 同上, 此为修改, 故传递了 ID 参数, ID 参数会从列表选中的行中提取 -->
+        <param name="sendUrls[]" value="['.remove','hcum/User/Remove.act']"/><!-- 点击第1个参数的按钮, 将选中的行 ID 发送到第2个参数的URL -->
+    </object>
+    <div>
+        <div class="fl tool-box btn-group">
+            <button type="button" class="create btn btn-default">创建用户</button>
+            <button type="button" class="modify for-select btn btn-default">修改</button>
+            <button type="button" class="remove for-checks btn btn-danger" >删除</button>
+        </div>
+        <form class="fr find-box input-group" action="" method="POST">
+            <input type="search" name="find" class="form-control"/>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-default">查找</button>
+            </span>
+        </form>
+        <div class="cb"></div>
+    </div>
+    <div class="list-box">
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th data-fn="id[]" data-ft="_check" class="_check"><!-- 使用 data-fn 提取行数据的指定值, 使用 data-ft 指定填充的类型 -->
+                        <input type="checkbox" class="check-all" name="id[]"/>
+                    </th>
+                    <th data-fn="username" class="sortable">邮箱</th><!-- class 为 sortable 的列可以在点击表头该列是排序 -->
+                    <th data-fn="name" class="sortable">昵称</th>
+                    <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
+                    <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="page-box"></div>
+</div>
 
-url             用于HsLoad中, 下同
-data
-baks            用于JsOpen中, 下同
-tabs
-oldTab          之前选中的Tab对象
-curTab          现在选中的Tab对象
-overlay
-trigger         用于从tip上获取trigger对象
-fill_func       在Select组件中绑定填充函数
-fill_data       在Select组件中绑定填充数据
+#### HsTree 使用 ####
 
-[Event]
-
-HsReady:
-    hsReady
-HsClose:
-    hsClose
-HsForm:
-    loadBack    绑定在formBox上
-    loadError   绑定在formBox上, 加载错误触发, 参数同ajaxError
-    saveBack    绑定在formBox上, 默认关闭表单
-    saveFail    绑定在formBox上, 提交失败触发
-HsList:
-    loadBack    绑定在listBox上
-    loadError   绑定在listBox上, 加载错误触发, 参数同ajaxError
-    sendBack    绑定在btn上, 默认刷新列表
-    sendError   绑定在btn上, 发送错误触发, 参数同ajaxError
-    openBack    绑定在btn上
-    saveBack    绑定在btn上, 默认刷新列表
-HsTree:
-    loadBack    绑定在treeBox上
-    loadError   绑定在treeBox上, 加载错误触发, 参数同ajaxError
-    sendBack    绑定在btn上, 默认刷新节点
-    sendError   绑定在btn上, 发送错误触发, 参数同ajaxError
-    openBack    绑定在btn上
-    saveBack    绑定在btn上, 默认刷新节点
-    select      绑定在节点上(选中)
-    taggle      绑定在节点上(开关)
+<div id="hcum_dept_tree">
+    <object class="config" name="hsTree" data="">
+        <param name="loadUrl" value="hcum/Dept/Tree.act"/>
+        <param name="linkUrls[]" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
+        <param name="openUrls[]" value="['.create','hcum/dept/form.html?pid={ID}','#hcum-user-pane']"/>
+        <param name="openUrls[]" value="['.modify','hcum/dept/form.html?id={ID}','.#hcum-user-pane']"/>
+        <param name="sendUrls[]" value="['.remove','hcum/Dept/Remove.act']"/>
+    </object>
+    <div class="tool-box btn-group">
+        <button  type="button" class="create btn btn-default">添加部门</button>
+        <button  type="button" class="modify for-select btn btn-default">修改</button>
+        <button  type="button" class="remove for-select btn btn-danger" >删除</button>
+    </div>
+    <div class="tree-box"></div>
+</div>
