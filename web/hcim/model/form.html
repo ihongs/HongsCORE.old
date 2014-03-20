@@ -36,8 +36,8 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <td style="width: 10em;">代号</td>
                             <td>名称</td>
+                            <td style="width: 8em;">代号</td>
                             <td style="width: 5em;">类型</td>
                             <td style="width: 4em;">长度</td>
                             <td style="width: 4em;">精度</td>
@@ -185,11 +185,7 @@
     function addCol(col) {
         idx ++;
         var nm = $('<input type="text" name="'+tab+'['+idx+'][name]"/>' );
-        var nt = $('<input type="text" name="'+tab+'['+idx+'][note]"/>' );
-        var tp = $('<select name="'+tab+'['+idx+'][type]">'
-                 + '<option value="1">维度</option>'
-                 + '<option value="2">指标</option>'
-                 + '</select>');
+        var cd = $('<input type="text" name="'+tab+'['+idx+'][code]"/>' );
         var ft = $('<select name="'+tab+'['+idx+'][value_type]">'
                  + '<option value="1">文字</option>'
                  + '<option value="2">数字</option>'
@@ -202,16 +198,14 @@
         var bt = $('<button type="button" class="del-col btn btn-danger">删除</button>');
         $('<tr></tr>').appendTo(context.find(".cols-box tbody"))
             .append($('<td></td>').append(nm))
-            .append($('<td></td>').append(nt))
-            .append($('<td></td>').append(tp))
+            .append($('<td></td>').append(cd))
             .append($('<td></td>').append(ft))
             .append($('<td></td>').append(fs))
             .append($('<td></td>').append(fc))
             .append($('<td></td>').append(bt));
         if (col) {
             nm.val(col.name);
-            nt.val(col.note);
-            tp.val(col.type);
+            cd.val(col.code);
             ft.val(col.value_type);
             fs.val(col.value_size);
             fc.val(col.value_scale);

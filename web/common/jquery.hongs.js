@@ -2884,7 +2884,7 @@ jQuery.fn.load = function(url, data, complete) {
                 tip.data("fill_data", dat)
                    .addClass("choose-tip")
                 .toggleClass("multiple", /(\[\]|\.)$/.test(name)) // 名称以[]或.结尾则为多选
-                .on("chooseBack", function() {
+                .on("chooseBack", function() {console.log(dat)
                     box.data("fill_func").call(form, box, dat, name);
                 })
                 .on("chooseItem", function(evt, id, txt) {
@@ -2903,10 +2903,12 @@ jQuery.fn.load = function(url, data, complete) {
                     if (!rst || !rst.__success__ || !rst.back)
                         return;
                     // 添加则直接选中并退出
-                    evt  =  $.Event("chooseItem");
-                    tip.trigger(evt, rst.back[0], rst.back[1]);
-                    if (!evt.isDefaultPrevented())
-                        tip.trigger("chooseBack");
+                    evt = $.Event("chooseItem");
+                    tip.trigger(evt , rst.back);
+                    if (evt.isDefaultPrevented())
+                        return;
+                    tip.trigger("chooseBack");
+                    tip.hsClose();
                 })
                 .on("click", ".ensure", function() {
                     if (! $(this).closest(".open-box").is(tip))
