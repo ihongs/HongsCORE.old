@@ -1,11 +1,11 @@
 package app.hongs.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 
 /**
@@ -118,7 +118,7 @@ public class Tree
         {
           if (subKey.length() != 0)
           {
-            subNode = new HashMap();
+            subNode = new LinkedHashMap();
           }
           else
           {
@@ -145,7 +145,7 @@ public class Tree
 
         if (subKey.length() != 0)
         {
-          subNode = new HashMap();
+          subNode = new LinkedHashMap();
         }
         else
         {
