@@ -125,16 +125,16 @@ public class ActionConfig
     throws HongsException
   {
     this.name = name;
-    this.init("act-" + name);
+    this.init("action." + name);
   }
 
   @Override
   protected boolean isExpired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + "act-" + name + ".xml");
+                + File.separator + "action." + name + ".xml");
     File serFile = new File(Core.TMPS_PATH
-                + File.separator + "act-" + name + ".ser");
+                + File.separator + "action." + name + ".ser");
     return xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -143,12 +143,12 @@ public class ActionConfig
     throws HongsException
   {
     File df = new File(Core.CONF_PATH
-                + File.separator + "act-" + name + ".xml");
+                + File.separator + "action." + name + ".xml");
     if (!df.exists())
     {
       throw new HongsException(0x10e0, "Action config file '"
                 + Core.CONF_PATH
-                + File.separator + "act-" + name + ".xml"
+                + File.separator + "action." + name + ".xml"
                 + "' is not exists");
     }
 
