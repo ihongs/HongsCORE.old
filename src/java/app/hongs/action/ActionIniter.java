@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class InitFilter
+public class ActionIniter
 implements Filter {
 
     @Override
