@@ -4,6 +4,9 @@ import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.CommitSuccess;
+import app.hongs.action.annotation.FormData;
+import app.hongs.action.annotation.ListData;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,12 +22,14 @@ public class Model {
                 Core.getInstance(app.hcim.model.Model.class);
     }
 
+    @ListData(conf="hcim", keys={"MODEL_VALUE_TYPES"})
     public void actionList(ActionHelper helper)
     throws HongsException {
         Map data = model.getPage(helper.getRequestData());
         helper.back(data);
     }
 
+    @FormData(conf="hcim", keys={"MODEL_VALUE_TYPES"})
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());

@@ -1,7 +1,7 @@
 package app.hongs.action.annotation;
 
 import app.hongs.action.ActionHelper;
-import app.hongs.action.DataConfig;
+import app.hongs.action.DatumsConfig;
 import app.hongs.util.Tree;
 import java.util.Map;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public class DataInvoker {
 
         Map<String,Object> map = new HashMap();
 
-        DataConfig cnf = DataConfig.getInstance(conf);
+        DatumsConfig cnf = DatumsConfig.getInstance(conf);
         for(String key : keys) {
             String val;
             String[] arr = key.split( "=", 2 );

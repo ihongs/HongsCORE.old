@@ -49,7 +49,7 @@ public class DatumsConfig
   public Map<String, Set<String[]>> refDatas;
   public Map<String, Set<String[]>> rspDatas;
 
-  public DataConfig(String name)
+  public DatumsConfig(String name)
     throws HongsException
   {
     this.name = name;
@@ -301,21 +301,21 @@ public class DatumsConfig
 
   //** 工厂方法 **/
 
-  public static DataConfig getInstance(String name) throws HongsException {
+  public static DatumsConfig getInstance(String name) throws HongsException {
       String key = "__DAT__." + name;
       Core core = Core.getInstance();
-      DataConfig inst;
+      DatumsConfig inst;
       if (core.containsKey(key)) {
-          inst = (DataConfig)core.get(key);
+          inst = (DatumsConfig)core.get(key);
       }
       else {
-          inst = new DataConfig(name);
+          inst = new DatumsConfig(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static DataConfig getInstance() throws HongsException {
+  public static DatumsConfig getInstance() throws HongsException {
       return getInstance("default");
   }
 }

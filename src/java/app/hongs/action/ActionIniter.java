@@ -96,15 +96,17 @@ implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
     throws ServletException, IOException {
         try {
-             this.doFilter ( request, response );
-            chain.doFilter ( request, response );
+             this.doFilter(request, response);
+            chain.doFilter(request, response);
 
             // 将返回数据转换成JSON格式
-            ActionHelper helper = (ActionHelper)
-                  Core.getInstance(ActionHelper.class);
-            Map data  = helper.getResponseData();
-            if (data != null) {
-                helper.printJSON(data);
+            if (((HttpServletResponse)response).getStatus() == HttpServletResponse.SC_OK) {
+                ActionHelper helper = (ActionHelper)
+                      Core.getInstance(ActionHelper.class);
+                Map data  = helper.getResponseData();
+                if (data != null) {
+                    helper.printJSON(data);
+                }
             }
         } finally {
             this .doDestroy();
