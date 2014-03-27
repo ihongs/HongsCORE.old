@@ -38,7 +38,7 @@ import app.hongs.util.JSON;
  *
  * @author Hongs
  */
-public class DataConfig
+public class DatumsConfig
   extends CoreSerially
 {
 
@@ -60,9 +60,9 @@ public class DataConfig
   protected boolean isExpired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + "dat-" + name + ".xml");
+                + File.separator + "datums." + name + ".xml");
     File serFile = new File(Core.TMPS_PATH
-                + File.separator + "dat-" + name + ".ser");
+                + File.separator + "datums." + name + ".ser");
     return xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -71,12 +71,12 @@ public class DataConfig
     throws HongsException
   {
     File df = new File(Core.CONF_PATH
-                + File.separator + "dat-" + name + ".xml");
+                + File.separator + "datums." + name + ".xml");
     if (!df.exists())
     {
-      throw new HongsException(0x10e0, "Action config file '"
+      throw new HongsException(0x10e0, "Datums config file '"
                 + Core.CONF_PATH
-                + File.separator + "dat-" + name + ".xml"
+                + File.separator + "datums." + name + ".xml"
                 + "' is not exists");
     }
 
