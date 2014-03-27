@@ -34,7 +34,15 @@ public class Model {
     @CommitSuccess
     public void actionSave(ActionHelper helper)
     throws HongsException {app.hongs.util.JSON.print(helper.getRequestData());
-        String id = model.save(helper.getRequestData());
+        Map data = helper.getRequestData();
+        List<Map<String, String>> cols = (List<Map<String, String>>)
+            ((Map)data.get("hcrm_model_cols")).values();
+        int i = 0;
+        for (Map col : cols) {
+            col.put("serialno", i++);
+        }
+        
+        String id = model.save(data);
 
         String nms = model.getAffectedNames();
         String msg = "保存模型 "+nms+" 成功";
