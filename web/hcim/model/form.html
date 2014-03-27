@@ -36,17 +36,18 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <td class="drap_handle"></td>
-                            <td>名称</td>
-                            <td style="width: 8em;">代号</td>
-                            <td style="width: 5em;">类型</td>
-                            <td style="width: 4em;">长度</td>
-                            <td style="width: 4em;">精度</td>
-                            <td style="width: 4em;">&nbsp;</td>
+                            <td class="cols-set-hand">&nbsp;</td>
+                            <td class="cols-set-name">名称</td>
+                            <td class="cols-set-code">代号</td>
+                            <td class="cols-set-type">类型</td>
+                            <td clsss="cols-set-size">长度</td>
+                            <td class="cols-set-scale">精度</td>
+                            <td class="cols-set-remove">&nbsp;</td>
                         </tr>
                     </thead>
-                    <tbody></tbody>
                 </table>
+                <div class="cols-set-box">
+                </div>
                 <button type="button" class="add-col btn btn-default">添加字段</button>
             </div>
         </fieldset>
@@ -61,20 +62,36 @@
 <style type="text/css">
     #hcim-model-form .list-box tbody td
         {padding: 0;}
-    #hcim-model-form .list-box tbody td input,
-    #hcim-model-form .list-box tbody td select
+    #hcim-model-form .list-box tbody td select,
+    #hcim-model-form .list-box tbody td input
         {min-width: 100%; width: 100%; height: 100%; border: 0; margin: 0; padding: 0;}
     #hcim-model-form .list-box tbody td input
         {padding: 0 6px;}
-    #hcim-model-form .bg-yellow
-        {background: #FFFFEF; padding: 15px 0;}
     #hcim-model-form .cols-box
         {margin-bottom: 2em;}
+    #hcim-model-form .cols-box .list-box
+        {background: #FFFFEF;}
+    #hcim-model-form .cols-set-hand
+        {width: 1em;}
+    #hcim-model-form .cols-set-code
+        {width: 8em;}
+    #hcim-model-form .cols-set-type
+        {width: 5em;}
+    #hcim-model-form .cols-set-size,
+    #hcim-model-form .cols-set-scale,
+    #hcim-model-form .cols-set-remove
+        {width: 4em;}
 </style>
 
 <script type="text/javascript">
 (function($) {
     var context = $("#hcim-model-form");
+    var valueTypes;
+
+    context.find("cols-set-box").sortable({
+        items : "> table",
+        handle: ".cols-set-hand"
+    });
 
     /** 字段设置 **/
 
@@ -83,25 +100,25 @@
 
     function addCol(col) {
         idx ++;
+        var tb = $('<table class="table"><tbody><tr></tr></tbody></table>');
         var nm = $('<input type="text" name="'+tab+'['+idx+'][name]"/>' );
         var cd = $('<input type="text" name="'+tab+'['+idx+'][code]"/>' );
-        var ft = $('<select name="'+tab+'['+idx+'][value_type]">'
-                 + '<option value="1">文字</option>'
-                 + '<option value="2">数字</option>'
-                 + '<option value="3">日期</option>'
-                 + '<option value="4">时间</option>'
-                 + '<option value="5">日期+时间</option>'
-                 + '</select>');
+        var ft = $('<select name="'+tab+'['+idx+'][value_type]"></select>');
         var fs = $('<input type="number" name="'+tab+'['+idx+'][value_size]" min="1" max="10"/>' );
         var fc = $('<input type="number" name="'+tab+'['+idx+'][value_scale]" min="1" max="9"/>');
         var bt = $('<button type="button" class="del-col btn btn-danger">删除</button>');
-        $('<tr></tr>').appendTo(context.find(".cols-box tbody"))
-            .append($('<td></td>').append(nm))
-            .append($('<td></td>').append(cd))
-            .append($('<td></td>').append(ft))
-            .append($('<td></td>').append(fs))
-            .append($('<td></td>').append(fc))
-            .append($('<td></td>').append(bt));
+        tb.appendTo(context.find(".cols-set-box")).find("tr"))
+            .append($('<td class="cols-set-hand"></td>'))
+            .append($('<td class="cols-set-name"></td>').append(nm))
+            .append($('<td class="cols-set-code"></td>').append(cd))
+            .append($('<td class="cols-set-type"></td>').append(ft))
+            .append($('<td class="cols-set-size"></td>').append(fs))
+            .append($('<td class="cols-set-scale"></td>').append(fc))
+            .append($('<td class="cols-set-remove"></td>').append(bt));
+        for(var i = 0; i < valueTypes.length; i ++) {
+            var a = valueTypes[i];
+            ft.append($('<option></option>').val(a[0]).text(a[1]));
+        }
         if (col) {
             nm.val(col.name);
             cd.val(col.code);
@@ -112,17 +129,23 @@
     }
 
     context.on("loadBack", function(evt, rst) {
+        if (rst.data) {
+            valueTypes = rst.data.value_types;
+        }
         if (rst.info) {
-            var a = rst.info.a_hcrm_dataset_cols, i = 0;
-            if (a) for (; i < a.length; i ++)
-                addCol (a[i]);
+            var a = rst.info.a_hcrm_dataset_cols;
+            if (a) {
+                for (var i = 0; i < a.length; i ++) {
+                    addCol(a[i]);
+                }
+            }
         }
     });
     context.on("click", ".add-col", function() {
         addCol();
     });
     context.on("click", ".del-col", function() {
-        $(this).closest("tr").remove();
+        $(this).closest("table").remove();
     });
 
 })( jQuery );
