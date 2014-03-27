@@ -7,31 +7,31 @@
     </context-param>
     <!-- Action Init -->
     <filter>
-        <filter-name>Init</filter-name>
-        <filter-class>app.hongs.action.InitFilter</filter-class>
+        <filter-name>ActionIniter</filter-name>
+        <filter-class>app.hongs.action.ActionIniter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>Init</filter-name>
+        <filter-name>ActionIniter</filter-name>
         <url-pattern>*.act</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Init</filter-name>
+        <filter-name>ActionIniter</filter-name>
         <url-pattern>*.api</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Init</filter-name>
+        <filter-name>ActionIniter</filter-name>
         <url-pattern>*.jsp</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Init</filter-name>
+        <filter-name>ActionIniter</filter-name>
         <url-pattern>/common/auth/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Init</filter-name>
+        <filter-name>ActionIniter</filter-name>
         <url-pattern>/common/conf/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Init</filter-name>
+        <filter-name>ActionIniter</filter-name>
         <url-pattern>/common/lang/*</url-pattern>
     </filter-mapping>
     <!-- Action Servlet -->
