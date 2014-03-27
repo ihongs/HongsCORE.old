@@ -2,7 +2,7 @@ package app.hongs.action.annotation;
 
 import app.hongs.CoreLanguage;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.DataConfig;
+import app.hongs.action.DatumsConfig;
 import app.hongs.util.Tree;
 import java.util.List;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class FormDataInvoker {
         String       lang = datums.lang();
         String[]     keys = datums.keys();
 
-        DataConfig cnf = DataConfig.getInstance(conf);
+        DatumsConfig cnf = DatumsConfig.getInstance(conf);
         CoreLanguage lng = CoreLanguage.getInstance(lang);
 
         for(String key : keys) {
