@@ -57,16 +57,16 @@ public class DBConfig
     throws HongsException
   {
     this.name = name;
-    this.init("db-" + name);
+    this.init("db." + name);
   }
 
   @Override
   protected boolean isExpired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                 + File.separator + "db-" + name + ".xml");
+                 + File.separator + "db." + name + ".xml");
     File serFile = new File(Core.TMPS_PATH
-                 + File.separator + "db-" + name + ".ser");
+                 + File.separator + "db." + name + ".ser");
     return xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -121,7 +121,7 @@ public class DBConfig
   public static DBConfig parseByName(String dn)
     throws HongsException
   {
-    File dbConfFile = new File(Core.CONF_PATH + File.separator + "db-" + dn + ".xml");
+    File dbConfFile = new File(Core.CONF_PATH + File.separator + "db." + dn + ".xml");
     if (!dbConfFile.exists())
     {
       throw new app.hongs.HongsException(0x1061, "Can not find DB config file 'db-"+dn+".xml'");
