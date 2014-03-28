@@ -1327,9 +1327,9 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"    );
     var saveUrl  = hsGetValue(opts, "saveUrl" );
     var loadUrl  = hsGetValue(opts, "loadUrl" );
-    var loadNoId = hsGetValue(opts, "loadNoId");    // 没有id也要加载
-    var dontRdLd = hsGetValue(opts, "dontRdLd");    // 不读取加载数据
     var idKey    = hsGetValue(opts, "idKey", "id"); // 指定id参数名称, 用于判断编辑或创建
+    var withoutIdAlsoLoad = hsGetValue(opts, "withoutIdAlsoLoad"); // 没有id也要加载
+    var excludeLoadParams = hsGetValue(opts, "excludeLoadParams"); // 不读取加载数据
 
     if (formBox.length === 0) formBox = context;
 
@@ -1340,7 +1340,7 @@ function HsForm(opts, context) {
     var ld, id, a, i;
 
     ld = hsSerialArr( loadUrl );
-    if (!dontRdLd) {
+    if (!excludeLoadParams) {
         a = hsSerialArr(loadBox.data("url" ));
         for(i = 0; i < a.length; i ++) {
             ld.push(a[i]);
@@ -1351,7 +1351,7 @@ function HsForm(opts, context) {
         }
     }
     id = hsGetSeria (ld, idKey);
-    if ( loadNoId || id.length) {
+    if ( withoutIdAlsoLoad || id) {
         this.load(loadUrl , ld);
     }
     else {
