@@ -1327,9 +1327,9 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"    );
     var saveUrl  = hsGetValue(opts, "saveUrl" );
     var loadUrl  = hsGetValue(opts, "loadUrl" );
+    var loadData = hsGetValue(opts, "loadData");
+    var loadNoId = hsGetValue(opts, "loadNoId");
     var idKey    = hsGetValue(opts, "idKey", "id"); // 指定id参数名称, 用于判断编辑或创建
-    var withoutIdAlsoLoad = hsGetValue(opts, "withoutIdAlsoLoad"); // 没有id也要加载
-    var excludeLoadParams = hsGetValue(opts, "excludeLoadParams"); // 不读取加载数据
 
     if (formBox.length === 0) formBox = context;
 
@@ -1337,25 +1337,33 @@ function HsForm(opts, context) {
     this.loadBox = loadBox;
     this.formBox = formBox;
 
-    var ld, id, a, i;
+    var a, i, n, v;
 
-    ld = hsSerialArr( loadUrl );
-    if (!excludeLoadParams) {
+    /**
+     * 获取並使用上层数据
+     */
+    if (loadData) {
+        loadData = hsSerialArr(loadData);
+    } else {
+        loadData = hsSerialArr(loadData);
         a = hsSerialArr(loadBox.data("url" ));
-        for(i = 0; i < a.length; i ++) {
-            ld.push(a[i]);
+        for (i = 0; i < a.length; i ++ ) {
+            loadData.push(a[i] );
         }
         a = hsSerialArr(loadBox.data("data"));
-        for(i = 0; i < a.length; i ++) {
-            ld.push(a[i]);
+        for (i = 0; i < a.length; i ++ ) {
+            loadData.push(a[i] );
         }
     }
-    id = hsGetSeria (ld, idKey);
-    if ( withoutIdAlsoLoad || id) {
-        this.load(loadUrl , ld);
+    a = hsSerialArr(loadUrl);
+    for (i = 0; i < a.length; i ++ ) {
+        loadData.push(a[i] );
     }
-    else {
-        this.fillData({});
+    a = hsGetSeria (loadData, idKey);
+    if (loadNoId || a) {
+        this.load(loadUrl, loadData);
+    } else {
+        this.fillData( { } );
     }
 
     /**
@@ -1364,9 +1372,9 @@ function HsForm(opts, context) {
      * 这时有必要将这些参数值填写入对应的表达项, 方便初始化过程
      */
     var n, v;
-    for(i = 0; i < ld.length; i ++) {
-        n = ld[i].name ;
-        v = ld[i].value;
+    for(i = 0; i < loadData.length; i ++) {
+        n = loadData[i].name ;
+        v = loadData[i].value;
         formBox.find("[name='"   +n+"']").val(v);
         formBox.find("[data-pn='"+n+"']").val(v);
     }
