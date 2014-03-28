@@ -52,20 +52,22 @@ option-del
 
 [Attr]
 
+data-eval       执行JS, this指向当前节点
+data-load       在当前节点中加载, 属性值为url
+data-open       在当前节点中打开, 属性值为url
+data-toggle     关联触发, 属性可选: overlay,alert,modal,tooltip,dropdown,hsOpen,hsChoose
+data-target     关联区域, 属性值为selector
+data-placement  tooltip的相对位置, 请参阅bootstrip的tooltip
 data-fn         HsForm和HsList中的field-name
 data-ft         HsForm和HsList中的field-type
 data-pn         HsForm中的param-name, HsList中的page-num
 data-vk         HsForm中的value-key
 data-tk         HsForm中的text-key
-data-eval       执行JS, this指向当前节点
-data-load       在当前节点中加载, 属性值为url
-data-open       在当前节点中打开, 属性值为url
-data-load-in    在指定区域中加载, 属性值为selector, 由href指定url
-data-open-in    在指定区域中打开, 属性值为selector, 由href指定url
-data-repeat     重复输入, 属性值为input-name
-data-unique     限制唯一, 属性值为url, url中可用{input-name}指定其他表单项的值
-data-toggle     关联触发, 可以为: overlay,alert,modal,tooltip,dropdown,hsChoose
-data-placement  tooltip的相对位置, 参阅bootstrip的tooltip
+data-repeat     HsForm中校验重复, 属性值为input-name
+data-unique     HsForm中限制唯一, 属性值为url, url中可用{input-name}指定其他表单项的值
+data-validate   HsForm中校验函数, 属性值为函数名
+data-url        hsChoose中为选择按钮关联的的面板的url
+data-name       HsChoose中为面板里的checkbox或radio的value(id)对应的名称
 
 [Data]
 
@@ -1085,6 +1087,7 @@ function hsOpen(url, data, callback) {
     box.load( url , data , callback);
     return box;
 }
+
 /**
  * 在tab或指定区域中打开
  * @param {String} url 内容URL
@@ -1107,8 +1110,8 @@ function HsOpen(url, data, callback) {
         tab.show().find( "a" ).text( hsGetLang("tab.loading"));
         box = tabs.getCurrentPane();
         if (! box.data("tabs")) {
-            box.data("tab" , tab  );
             box.data("tabs", tabs );
+            box.data("tab" , tab  );
         }
     } else {
         if (! box.data("baks")) {
@@ -1122,6 +1125,7 @@ function HsOpen(url, data, callback) {
     box.load( url , data , callback);
     return box;
 }
+
 /**
  * 关闭浮窗或区域
  * @return 浮窗或区域对象
@@ -1134,7 +1138,8 @@ function HsClose() {
         box.data("overlay").close();
     }
     else if (prt.data("tabs")) {
-        prt.data("tabs").click( 0 );
+        var idx = prt.data("idx") || 0;
+        prt.data("tabs").click(idx);
         prt.data("tab").hide();
         prt.removeData("tabs");
     }
@@ -1145,6 +1150,7 @@ function HsClose() {
     box.remove();
     return box;
 }
+
 /**
  * 预置浮窗或区域
  * @return 浮窗或区域对象
@@ -1158,6 +1164,21 @@ function HsReady() {
     }
 
     var $ = jQuery;
+
+    /** 样式相关处理 **/
+
+    box.find('*').contents().filter(function() {
+        // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
+        return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
+    }).remove();
+    box.find('input').each(function() {
+        // 为所有的input加上type-class, 方便设置样式, 兼容老浏览器
+        $(this).addClass("input-" + $(this).attr("type"));
+    });
+    box.find("fieldset legend.dropdown-toggle").click(function() {
+        // 如果fieldset legend为dropdown toggle, 则点击显示或隐藏
+        $(this).closest("fieldset").toggleClass("dropup");
+    });
 
     /** 语义标签解析 **/
 
@@ -1176,21 +1197,6 @@ function HsReady() {
         var opts = _HsReadOpts.call( this );
         if (typeof prnt[func] === "function" ) prnt[func](opts);
     }).remove();
-
-    /** 样式相关处理 **/
-
-    box.find('*').contents().filter(function() {
-        // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
-        return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
-    }).remove();
-    box.find('input').each(function() {
-        // 为所有的input加上type-class, 方便设置样式, 兼容老浏览器
-        $(this).addClass("input-" + $(this).attr("type"));
-    });
-    box.find("fieldset legend.dropdown-toggle").click(function() {
-        // 如果fieldset legend为dropdown toggle, 则点击显示或隐藏
-        $(this).closest("fieldset").toggleClass("dropup");
-    });
 
     /** jquery tools, bootstrap 语义标签解析 **/
 
@@ -2605,24 +2611,39 @@ jQuery.fn.load = function(url, data, complete) {
         }
     })
     // /** 加载 **/
-    .on("click", ".open", function() {
-        $.hsOpen($(this).attr("href"));
+    .on("click", "a.open,a[data-toggle=hsOpen]", function() {
+        var url = $(this).attr("href");
+        var box = $(this).attr("data-target");
+        if (box) {
+            box = box.charAt(0) == "$" ? $(box.substr(1), this) : $(box);
+        }
+        else {
+            var nav = $(this).closest(".nav");
+            if (nav.size()) {
+                var idx = $(this).closest( "li" ).index();
+                box = nav.data("tabs").getPanes().eq(idx);
+            }
+        }
+        box ? box.hsOpen(url) : $.hsOpen(url);
         return false;
     })
     .on("click", ".close,.cancel", function() {
-        $(this).closest(".load-box").hsClose();
-        return false;
-    })
-    .on("click", "[data-open-in]", function() {
-        var s = $(this).attr("data-load-in");
-        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
-        s.hsOpen($(this).attr("href"));
-        return false;
-    })
-    .on("click", "[data-load-in]", function() {
-        var s = $(this).attr("data-load-in");
-        s = /^\$/.test(s) ? $(s.substring(1), this) : $(s);
-        s.load($( this ).attr("href"));
+        var nav = $(this).closest(".nav");
+        if (nav.size()) {
+            var tabs = nav.data("tabs");
+            var cidx = tabs.getIndex( );
+            var idx  = $(this).closest("li").index();
+            var pane = tabs.getPanes( ).eq(idx);
+            if (idx != cidx) {
+                tab.data("idx", cidx);
+                tab.children(".load-box").hsClose( );
+                tab.removeData("idx");
+            } else {
+                tab.children(".load-box").hsClose( );
+            }
+        } else {
+            $(this).closest (".load-box").hsClose( );
+        }
         return false;
     })
     // /** 表单 **/
@@ -2750,11 +2771,12 @@ jQuery.fn.load = function(url, data, complete) {
         return /^\d{4}\/\d{1,2}\/\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/.test(value);
     });
     $.tools.validator.fn("[data-validate]", function(input, value) {
+        var fn = input.attr("data-validate");
         try {
-            return input.data(input.attr("data-validate"))(input, value);
+            return hsGetValue(window, fn).call(this, input, value);
         } catch (ex) {
             if (window.console)
-                window.console.log("Call func error: "+ex, input, value);
+                window.console.log("Call "+ fn +" error: " + ex, input, value);
             return false;
         }
     });
@@ -2855,16 +2877,16 @@ jQuery.fn.load = function(url, data, complete) {
             return;
         }
 
-        if (!conf) conf = {};
+        if (! conf) conf = {};
 
         var btn = $(this);
-        var box = conf["box"] || $(this).attr("rel");
-        var url = conf["url"] || $(this).attr("data-url");
+        var url = conf["url"] || btn.attr("data-url");
+        var box = conf["box"] || btn.attr("data-target");
 
-        if (! box)
+        if (typeof box == "string")
+            box = box.charAt(0) == '$' ? $(box.substr(1), btn): $(box);
+        else if (! box)
             box = btn.siblings(".choose-box");
-        else if (typeof box == "string")
-            box = /^\$/.test(box)? $(box.substr(1), btn): $(box);
 
         var form = box.closest(".HsForm").data("HsForm");
         var name = box.attr   ("data-fn");
@@ -2884,7 +2906,7 @@ jQuery.fn.load = function(url, data, complete) {
                 tip.data("fill_data", dat)
                    .addClass("choose-tip")
                 .toggleClass("multiple", /(\[\]|\.)$/.test(name)) // 名称以[]或.结尾则为多选
-                .on("chooseBack", function() {console.log(dat)
+                .on("chooseBack", function() {
                     box.data("fill_func").call(form, box, dat, name);
                 })
                 .on("chooseItem", function(evt, id, txt) {
