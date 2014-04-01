@@ -74,7 +74,7 @@ public class test {
     }
 
     if (opts.containsKey("test-radix")) {
-      testRadix((long)opts.get("test-radix"));
+      testRadix((Long)opts.get("test-radix"));
     }
     
     if (opts.containsKey("test-serially")
@@ -86,10 +86,6 @@ public class test {
     && (Boolean)opts.get("make-demo-data")) {
       makeDemoData();
     }
-  }
-
-  private static void makeDemoData() {
-    
   }
 
   private static void testText() {
@@ -149,6 +145,10 @@ public class test {
   private static void testRadix(long num) {
     CmdletHelper.print("36 Radix: "+app.hongs.util.Num.to36Hex(num));
     CmdletHelper.print("26 Radix: "+app.hongs.util.Num.to26Hex(num));
+  }
+
+  private static void makeDemoData() {
+    
   }
 
   private static class TestSerially extends CoreSerially {

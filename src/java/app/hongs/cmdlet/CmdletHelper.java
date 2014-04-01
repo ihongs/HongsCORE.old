@@ -127,8 +127,8 @@ public class CmdletHelper
         
         if (chkz.containsKey(name)) {
           Object[] chk = chkz.get(name);
-          char    sign = (char)chk[0];
-          char    type = (char)chk[1];
+          char    sign = (Character)chk[0];
+          char    type = (Character)chk[1];
           Pattern   rp = null;
           String   reg = null;
           String   err = null;
