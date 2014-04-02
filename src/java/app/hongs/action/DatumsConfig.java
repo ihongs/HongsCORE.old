@@ -5,6 +5,8 @@ import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 import app.hongs.util.JSON;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -12,9 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -90,8 +89,8 @@ public class DatumsConfig
       DocumentBuilder dbn = dbf.newDocumentBuilder();
       Document doc = dbn.parse(df);
 
-      this.parseDatTree(doc.getDocumentElement(),
-        this.datas, null, this.reqDatas, this.rspDatas);
+      this.parseData(doc.getDocumentElement(),
+        this.datas, this.reqDatas, this.rspDatas, null);
 
       // 测试
       /*
@@ -114,8 +113,8 @@ public class DatumsConfig
     }
   }
 
-  private void parseDatTree(Element element, Object datas, Set links,
-                            Map reqDatas, Map rspDatas)
+  private void parseData(Element element, Object datas,
+    Map reqDatas, Map rspDatas, Set links)
     throws HongsException
   {
     if (!element.hasChildNodes())
@@ -158,7 +157,7 @@ public class DatumsConfig
         }
         else
         {
-          data2 = this.parseDatText(
+          data2 = this.parseData(
             element2.getTextContent()
                     .toString(),type);
         }
@@ -178,7 +177,7 @@ public class DatumsConfig
           ((Map)datas).put(key, data2);
         }
 
-        this.parseDatTree(element2, data2, null, null, null);
+        this.parseData(element2, data2, null, null, null);
       }
       else
       if ("link".equals(tagName2))
@@ -195,7 +194,7 @@ public class DatumsConfig
         Map data2 = new HashMap();
         Set link2 = new HashSet();
 
-        this.parseDatTree(element2, data2, link2, null, null);
+        this.parseData(element2, data2, null, null, link2);
 
         String uri = element2.getAttribute("uri");
 
@@ -223,7 +222,7 @@ public class DatumsConfig
     }
   }
 
-  private Object parseDatText(String text, String type)
+  private Object parseData(String text, String type)
     throws HongsException
   {
     Object data = text;
@@ -255,18 +254,18 @@ public class DatumsConfig
     return data;
   }
 
-  private void checkInstances(Object data) {
+  private void checkData(Object data) {
       if (data instanceof List) {
-          checkInstances((List)data);
+          checkData((List)data);
       }
       else if (data instanceof Set) {
-          checkInstances((Set)data);
+          checkData((Set)data);
       }
       else if (data instanceof Map) {
-          checkInstances((Map)data);
+          checkData((Map)data);
       }
   }
-  private void checkInstances(List data) {
+  private void checkData(List data) {
       int      i = 0;
       Iterator e = data.iterator();
       while (e.hasNext()) {
@@ -275,10 +274,13 @@ public class DatumsConfig
               o = Core.getInstance((Class)o);
               data.set(i, o);
           }
+          else {
+              checkData(o);
+          }
           i ++;
       }
   }
-  private void checkInstances(Set data) {
+  private void checkData(Set data) {
       Iterator e = data.iterator();
       while (e.hasNext()) {
           Object o = e.next();
@@ -287,14 +289,20 @@ public class DatumsConfig
               e.remove( );
               data.add(o);
           }
+          else {
+              checkData(o);
+          }
       }
   }
-  private void checkInstances(Map<Object, Object> data) {
+  private void checkData(Map<Object, Object> data) {
       for (Map.Entry<Object, Object> e : data.entrySet()) {
           Object o = e.getValue();
           if (o instanceof Class) {
               o = Core.getInstance((Class)o);
               e.setValue(o);
+          }
+          else {
+              checkData(o);
           }
       }
   }
@@ -302,7 +310,7 @@ public class DatumsConfig
   public Object getDataByKey(String key)
   {
     Object data = this.datas.get(key);
-    checkInstances(data);
+    checkData(data);
     return data;
   }
 
