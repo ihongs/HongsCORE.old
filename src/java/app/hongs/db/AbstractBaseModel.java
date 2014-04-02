@@ -59,37 +59,37 @@ abstract public class AbstractBaseModel
    * 页码参数名
    * 影响getPage/getList/getFilter
    */
-  protected String pageVar = "page";
+  protected String pageKey = "page";
 
   /**
    * 行数参数名
    * 影响getPage/getList/getFilter
    */
-  protected String rowsVar = "rows";
+  protected String rowsKey = "rows";
 
   /**
    * 字段参数名
    * 影响getPage/getList/getFilter
    */
-  protected String colsVar = "cols";
+  protected String colsKey = "cols";
 
   /**
    * 排序参数名
    * 影响getPage/getList/getFilter
    */
-  protected String sortVar = "sort";
+  protected String sortKey = "sort";
 
   /**
    * 搜索参数名
    * 影响getPage/getList/getFilter
    */
-  protected String findVar = "find";
+  protected String findKey = "find";
 
   /**
    * 被搜索的字段
    * 影响getPage/getList/getFilter
    */
-  protected String[] findKeys = new String[] {"name"};
+  protected String[] findCols = new String[] {"name"};
 
   /**
    * 受影响的ID
@@ -115,11 +115,11 @@ abstract public class AbstractBaseModel
     
     // 配置
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    this.pageVar = conf.getProperty("js.model.page.var", "page");
-    this.rowsVar = conf.getProperty("js.model.rows.var", "rows");
-    this.colsVar = conf.getProperty("js.model.cols.var", "cols");
-    this.sortVar = conf.getProperty("js.model.sort.var", "sort");
-    this.findVar = conf.getProperty("js.model.find.var", "find");
+    this.pageKey = conf.getProperty("js.model.page.key", "page");
+    this.rowsKey = conf.getProperty("js.model.rows.key", "rows");
+    this.colsKey = conf.getProperty("js.model.cols.key", "cols");
+    this.sortKey = conf.getProperty("js.model.sort.key", "sort");
+    this.findKey = conf.getProperty("js.model.find.key", "find");
   }
   public AbstractBaseModel(String tableName)
     throws HongsException
@@ -161,16 +161,16 @@ abstract public class AbstractBaseModel
 
     // 获取页码, 默认为第一页
     int page = 0;
-    if (req.containsKey(this.pageVar))
+    if (req.containsKey(this.pageKey))
     {
-      page = Integer.parseInt((String)req.get(this.pageVar));
+      page = Integer.parseInt((String)req.get(this.pageKey));
     }
 
     // 获取行数, 默认从配置读取
     int rows = 0;
-    if (req.containsKey(this.rowsVar))
+    if (req.containsKey(this.rowsKey))
     {
-      rows = Integer.parseInt((String)req.get(this.rowsVar));
+      rows = Integer.parseInt((String)req.get(this.rowsKey));
     }
 
     // 构建分页对象
@@ -573,7 +573,7 @@ abstract public class AbstractBaseModel
   public String getAffectedNames() throws HongsException {
     StringBuilder sb = new StringBuilder();
     FetchMore     fm = new FetchMore( );
-    String        fn = this.findKeys[0];
+    String        fn = this.findCols[0];
     fm.setOption("FETCH_DFLAG" , true );
     fm.select(".`"+fn+"`").where("id IN (?)", affectedIds);
     List<Map> rows = this.table.fetchMore(fm);
@@ -821,21 +821,21 @@ abstract public class AbstractBaseModel
       Object value = et.getValue();
 
       if (key == null || value == null
-      ||  key.equals(this.rowsVar)
-      ||  key.equals(this.pageVar))
+      ||  key.equals(this.rowsKey)
+      ||  key.equals(this.pageKey))
       {
         continue;
       }
 
       // 字段
-      if (key.equals(this.colsVar))
+      if (key.equals(this.colsKey))
       {
         this.colsFilter(value, columns, more);
         continue;
       }
 
       // 排序
-      if (key.equals(this.sortVar))
+      if (key.equals(this.sortKey))
       {
         this.sortFilter(value, columns, more);
         continue;
@@ -848,7 +848,7 @@ abstract public class AbstractBaseModel
       if (not) key = key.substring ( 1 );
 
       // 搜索
-      if (key.equals(this.findVar))
+      if (key.equals(this.findKey))
       {
         /**
          * 为实现对指定的字段进行模糊搜索
@@ -856,7 +856,7 @@ abstract public class AbstractBaseModel
          * Add by Hongs, 2013.8.9
          */
         if (value instanceof Map) {
-            List ks = Arrays.asList(this.findKeys);
+            List ks = Arrays.asList(this.findCols);
             Map  m1 = (Map) value;
             for (Object o1 : m1.entrySet()) {
                 Map.Entry e1 = (Map.Entry) o1;
@@ -881,7 +881,7 @@ abstract public class AbstractBaseModel
                 }
             }
         } else {
-                this.findFilter(this.findKeys, value, not, more);
+                this.findFilter(this.findCols, value, not, more);
         }
         continue;
       }

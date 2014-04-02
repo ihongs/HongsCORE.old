@@ -1648,8 +1648,8 @@ function HsList(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl" );
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
-    this.sortVar = hsGetValue(opts, "sortVar", hsGetConf("model.sort.var", "sort"));
-    this.pageVar = hsGetValue(opts, "pageVar", hsGetConf("model.page.var", "page"));
+    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("model.sort.key", "sort"));
+    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("model.page.key", "page"));
     this.firstOfPage = hsGetConf("first.of.page", 1 );
     this.rowsPerPage = hsGetConf("rows.per.page", 25);
 
@@ -1861,12 +1861,12 @@ HsList.prototype = {
                         if (td.hasClass("sort-z-a") == false) {
                             sn = fn;
                         }
-                        hsSetSeria(that._data, that.sortVar, sn);
+                        hsSetSeria(that._data, that.sortKey, sn);
                         that.load();
                     });
                 }
 
-                var sn = hsGetSeria(this._data, this.sortVar);
+                var sn = hsGetSeria(this._data, this.sortKey);
                 var fn = td.attr("data-fn");
                 td.removeClass("sort-a-z sort-z-a");
                 if (sn == fn) {
@@ -1965,7 +1965,7 @@ HsList.prototype = {
 
         this.pageBox.find("[data-pn="+p+"]").addClass("page-curr");
         this.pageBox.find("[data-pn]").on("click", function( evt ) {
-            hsSetSeria(that._data, that.pageVar, jQuery(this).attr("data-pn"));
+            hsSetSeria(that._data, that.pageKey, jQuery(this).attr("data-pn"));
             evt.preventDefault();
             that.load();
         });
@@ -2050,15 +2050,13 @@ HsList.prototype = {
 
     _fill__check : function(td, v, n) {
         jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
-            .attr("name", n)
-            .val (hsGetValue(this._info, n))
+            .attr("name", n).val(v)
             .appendTo(td);
         return false;
     },
     _fill__radio : function(td, v, n) {
         jQuery('<input type="radio" class="input-radio check-one"/>')
-            .attr("name", n)
-            .val (hsGetValue(this._info, n))
+            .attr("name", n).val(v)
             .appendTo(td);
         return false;
     },
@@ -2118,14 +2116,14 @@ function HsTree(opts, context) {
     // 数据的节点属性的键
     this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
     this.pidKey  = hsGetValue(opts, "pidKey" , "pid" );
-    this.bidVar  = hsGetValue(opts, "bidVar" , hsGetConf("model.bid.var", "bid")); // 移动定位字段
     this.nameKey = hsGetValue(opts, "nameKey", "name");
     this.noteKey = hsGetValue(opts, "noteKey");
     this.typeKey = hsGetValue(opts, "typeKey");
     this.cnumKey = hsGetValue(opts, "cnumKey");
+    this.bidKey  = hsGetValue(opts, "bidKey", hsGetConf("tree.bid.key", "bid")); // 移动定位字段(虚拟字段)
     // 根节点信息
     var rootInfo = {
-            id   : hsGetValue(opts, "rootId"  , hsGetConf("tree.root.id", "0")),
+            id   : hsGetValue(opts, "rootId", hsGetConf("tree.root.id", "0")),
             name : hsGetValue(opts, "rootName", hsGetLang("tree.root.name")),
             note : hsGetValue(opts, "rootNote", hsGetLang("tree.root.note"))
         };

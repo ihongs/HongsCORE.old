@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import app.hongs.Core;
+import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.HongsThrowable;
@@ -60,16 +61,16 @@ public class Action
     throws IOException, ServletException
   {
     ActionHelper helper = (ActionHelper)
-      Core.getInstance(ActionHelper.class);
-    String action = Core.ACTION_PATH.get();
-    action = action.substring(1,action.lastIndexOf('.')); // 去掉前导"/"和扩展名
+          Core.getInstance(ActionHelper.class);
+    String act = Core.ACTION_PATH.get();
+    act = act.substring(1,act.lastIndexOf('.')); // 去掉前导"/"和扩展名
 
-    if (action != null && action.length() == 0) {
+    if (act != null && act.length() == 0) {
         helper.print404Code("Can not find action name.");
         return;
     }
 
-    if (action.indexOf('.') != -1 || action.startsWith("hongs/action")) {
+    if (act.indexOf('.') != -1 || act.startsWith("hongs/action")) {
         helper.print404Code("Illegal action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
@@ -78,26 +79,36 @@ public class Action
 
     int pos;
     String cls, mtd;
-    action = action.replace('/', '.');
+    act = act.replace('/','.');
 
-    pos = action.lastIndexOf('.');
+    pos = act.lastIndexOf('.');
     if (pos == -1) {
         helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
-    mtd    = action.substring(pos+1);
-    action = action.substring(0,pos);
+    mtd = act.substring(pos+1);
+    act = act.substring(0,pos);
 
-    pos = action.lastIndexOf('.');
+    pos = act.lastIndexOf('.');
     if (pos == -1) {
         helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
-    cls    = action.substring(pos+1);
-    action = action.substring(0,pos);
+    cls = act.substring(pos+1);
+    act = act.substring(0,pos);
+
+    CoreConfig conf = (CoreConfig)
+      Core.getInstance(CoreConfig.class);
+    String cnf = "core.app."+act+".action";
+    if (conf.containsKey(cnf)) {
+        act = conf.getProperty( cnf ) +".";
+    }
+    else {
+        act = conf.getProperty("core.app", "app")+"."+act+".action.";
+    }
 
     // app.包.action.类, action方法
-    doAction("app."+action+".action."+cls, "action"+mtd, helper);
+    doAction(act+cls, "action"+mtd, helper);
   }
 
   /**

@@ -63,9 +63,22 @@ public class Cmdlet
       return;
     }
 
-    String cls =    "app."+act.substring(0,pos)
-               +".cmdlet."+act.substring(pos+1);
-    String mtd = "cmdlet";
+    String cls, mtd;
+    mtd =  "cmdlet";
+    cls = act.substring(pos+1);
+    act = act.substring(0,pos);
+
+    CoreConfig conf = (CoreConfig)
+      Core.getInstance(CoreConfig.class);
+    String cnf = "core.app."+act+".cmdlet";
+    if (conf.containsKey( cnf )) {
+        act = conf.getProperty( cnf ) +".";
+    }
+    else {
+        act = conf.getProperty("core.app", "app")+"."+act+".cmdlet.";
+    }
+
+    cls = act+cls;
 
     /** 执行指定程序 **/
 

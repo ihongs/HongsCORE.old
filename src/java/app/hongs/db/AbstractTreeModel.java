@@ -20,19 +20,18 @@ import java.util.Set;
  *
  * <h3>URL参数说明:</h3>
  * <pre>
-   newPid          获取newPid指定的一组节点
-   ids          获取ids指定的全部节点
-   only_id      仅获取节点的id
-   with_sub     获取子级节点
-   with_path    附带节点路径
+   pid          获取pid 指定的一组节点
+   id[]         获取id[]指定的全部节点
+   get_id       仅获取节点的id
+   get_path     附带节点的路径
  </pre>
  *
  * <h3>JS请求参数组合:</h3>
  * <pre>
-   获取一层: ?newPid=xxx
-   查找节点: ?find=xxx&only_id=1
- *   获取节点: ?id=xxx&only_id=1&with_path=1
- *   获取节点: ?ids[]=xxx&only_id=1&with_path=1
+ * 获取一层: ?pid=xxx
+ * 查找节点: ?find=xxx&get_id=1
+ * 获取节点: ?id=xxx&get_id=1&get_path=1
+ * 获取节点: ?id[]=xxx&get_id=1&get_path=1
  * </pre>
  *
  * @author Hong
@@ -50,7 +49,7 @@ public class AbstractTreeModel extends AbstractBaseModel
    * 参考id参数名
    * 影响put, 用于移动节点时指定顺序
    */
-  protected String bidVar = "bid";
+  protected String bidKey = "bid";
 
   /**
    * 父级id字段名
@@ -100,8 +99,8 @@ public class AbstractTreeModel extends AbstractBaseModel
     super(table);
     
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    this.bidVar = conf.getProperty("js.model.bid.var", "bid");
-    this.rootId = conf.getProperty("js.tree.root.id" ,  "0" );
+    this.bidKey = conf.getProperty("js.tree.bid.key", "bid");
+    this.rootId = conf.getProperty("js.tree.root.id", "0");
   }
   public AbstractTreeModel(String tableName)
     throws HongsException
@@ -313,7 +312,7 @@ public class AbstractTreeModel extends AbstractBaseModel
      * 如有指定bid(BeforeID)
      * 则将新的pid(ParentID)重设为其pid
      */
-    String bid = (String)data.get(this.bidVar);
+    String bid = (String)data.get(this.bidKey);
     if (null != bid && !"".equals(bid))
     {
       data.put(this.pidKey,this.getParentId(bid));
@@ -413,7 +412,7 @@ public class AbstractTreeModel extends AbstractBaseModel
   {
     super.getFilter(req, more);
 
-    if (!req.containsKey(this.sortVar))
+    if (!req.containsKey(this.sortKey))
     {
       if (this.snumKey != null)
       {
