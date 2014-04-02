@@ -3,19 +3,11 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <!-- 基础属性 -->
-  <!-- type:map,set,list,json,string,number,boolean -->
-  <xs:attribute name="type" type="xs:string"/>
-  <xs:attribute name="link" type="xs:string"/>
+  <!-- type:map,set,list,json,string,number,boolean,instance -->
   <xs:attribute name="key" type="xs:string"/>
+  <xs:attribute name="type" type="xs:string"/>
   <xs:attribute name="uri" type="xs:string"/>
-
-  <!-- 链接 -->
-  <xs:element name="link">
-    <xs:complexType>
-      <xs:attribute ref="key"/>
-      <xs:attribute ref="link"/>
-    </xs:complexType>
-  </xs:element>
+  <xs:attribute name="link" type="xs:string"/>
 
   <!-- 数据 -->
   <xs:element name="data">
@@ -28,14 +20,11 @@
     </xs:complexType>
   </xs:element>
 
-  <!-- 引用 -->
-  <xs:element name="ref">
+  <!-- 链接 -->
+  <xs:element name="link">
     <xs:complexType>
-      <xs:attribute ref="uri"/>
-      <xs:all>
-        <xs:element ref="link" maxOccurs="unbounded"/>
-        <xs:element ref="data" maxOccurs="unbounded"/>
-      </xs:all>
+      <xs:attribute ref="key"/>
+      <xs:attribute ref="link"/>
     </xs:complexType>
   </xs:element>
 
@@ -50,13 +39,24 @@
     </xs:complexType>
   </xs:element>
 
+  <!-- 响应 -->
+  <xs:element name="rsp">
+    <xs:complexType>
+      <xs:attribute ref="uri"/>
+      <xs:all>
+        <xs:element ref="link" maxOccurs="unbounded"/>
+        <xs:element ref="data" maxOccurs="unbounded"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+
   <!-- 总配置 -->
   <xs:element name="root">
     <xs:complexType>
       <xs:all>
         <xs:element ref="data" maxOccurs="unbounded"/>
-        <xs:element ref="ref" maxOccurs="unbounded"/>
         <xs:element ref="req" maxOccurs="unbounded"/>
+        <xs:element ref="rsp" maxOccurs="unbounded"/>
       </xs:all>
     </xs:complexType>
   </xs:element>

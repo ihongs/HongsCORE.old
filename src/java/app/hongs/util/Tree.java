@@ -218,7 +218,7 @@ public class Tree
    * @param map2
    * @param keys
    */
-  public static void putAllDeep(Map map1, Map map2, String[] keys) {
+  public static void putAllDeep(Map map1, Map map2, String... keys) {
       putAllDeep(map1, map2, Arrays.asList(keys));
   }
 

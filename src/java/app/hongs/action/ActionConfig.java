@@ -27,7 +27,7 @@ import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 
 /**
- * 动作配置工具
+ * 动作配置
  *
  * <p>
  * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;

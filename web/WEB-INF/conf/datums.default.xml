@@ -1,7 +1,4 @@
 <root>
-  <req uri="/action/Demo/Test">
-    <link key="abc" data="abc"/>
-  </req>
   <data key="abc" type="list">
     <data>123</data>
     <data type="set">

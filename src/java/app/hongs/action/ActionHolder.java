@@ -18,10 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet初始化
+ * 动作承载器
  *
  * <p>
- * 映射到 *.act *.api *.jsp *.js-auth *.js-conf *.js-lang<br/>
+ * 映射到 *.act *.api *.jsp /common/auth/* /common/conf/* /common/lang/*<br/>
  * 必须作为第一个 filter
  * </p>
  *

@@ -22,14 +22,14 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 
 /**
- * 标准动作过滤器
+ * 动作过滤器
  *
  * <h3>初始化参数(init-param):</h3>
  * <pre>
  * index-path   首页地址(为空则不跳转)
  * login-path   登录地址(为空则不跳转)
  * config-name  动作配置(默认为default)
- * exclude-urls 不包含的URL
+ * exclude-urls 不包含的URL, 用","分割多个
  * </pre>
  *
  * @author Hongs

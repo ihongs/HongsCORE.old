@@ -19,7 +19,7 @@ import app.hongs.util.JSON;
 import app.hongs.util.Tree;
 
 /**
- * 动作助手类
+ * 动作助手
  *
  * <p>
  * 通过 getRequestMap,getParameter,getSession,getCookie
