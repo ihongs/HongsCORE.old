@@ -550,7 +550,7 @@ public class ActionHelper
       String[] value = (String[])et.getValue();
       for (int i = 0; i < value.length; i ++ )
       {
-        Tree.setArrayValue(paramz, key, value[i]);
+        Tree.setValue(paramz, key, value[i]);
       }
     }
     return paramz;

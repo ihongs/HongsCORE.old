@@ -66,9 +66,9 @@ public class ListDataInvoker {
             for (Map.Entry et : maps.entrySet()) {
                 String key = (String) et.getKey();
                 Map    map = (Map)    et.getValue();
-                String val = Tree.getArrayValue(info, key).toString(  ); // 都转成字符串, 避免匹配失败
+                String val = Tree.getValue(info, key).toString(  ); // 都转成字符串, 避免匹配失败
                 if (val != null) {
-                    Tree.setArrayValue(info, key+"_disp", map.get(val));
+                    Tree.setValue(info, key+"_disp", map.get(val));
                 }
             }
         }

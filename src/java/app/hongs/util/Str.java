@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 public final class Str
 {
 
-  //** 引用 **/
+  //** 转义 **/
 
   /**
    * 转义正则符
@@ -116,7 +116,7 @@ public final class Str
     return Str.resume(str, "'\"", "\\");
   }
 
-  //** 替换 **/
+  //** 注入 **/
 
   // 偶数个转义符$单词或{文本}
   private static Pattern injectPattern = Pattern.compile("((?:[\\\\][\\\\])*)\\$(?:(\\w+)|\\{(.*?)\\})");

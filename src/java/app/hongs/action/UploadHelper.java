@@ -293,7 +293,7 @@ public class UploadHelper
            * 是普通字段则直接放入请求数据中
            */
           String value = Streams.asString(stream);
-          Tree.setArrayValue(requestData, fame, value);
+          Tree.setValue(requestData, fame, value);
         }
         else {
           /**
@@ -345,7 +345,7 @@ public class UploadHelper
           if (this.uploadUri != null) {
                  value = this.uploadUri + "/" + fname;
           }
-          Tree.setArrayValue(requestData, fame, value);
+          Tree.setValue(requestData, fame, value);
 
           /**
            * 将名称放入列表中

@@ -29,13 +29,13 @@ public class DataInvoker {
             val = arr.length>1 ? arr[1] : key ;
             Object dat = cnf.getDataByKey(val);
             if ( dat != null ) {
-                Tree.setArrayValue(map, key, dat);
+                Tree.setValue(map, key, dat);
             }
         }
 
         if (type == Data.TYPES.REQ) {
             Map data = helper.getRequestData();
-            Tree.putAllDeep(data, map);
+            Tree.setDepth(data, map);
             chain.doAction();
         }
         else {
@@ -44,7 +44,7 @@ public class DataInvoker {
             if (data == null || (Boolean)data.get("__success__") == false) {
                 return;
             }
-            Tree.putAllDeep(data, map);
+            Tree.setDepth(data, map);
         }
     }
 }

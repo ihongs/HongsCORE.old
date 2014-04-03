@@ -48,7 +48,7 @@ public class FormDataInvoker {
             Object dat = cnf.getDataByKey(val);
             if ( dat != null ) {
                 List lst = new ArrayList((List) dat);
-                Tree.setArrayValue(data , key , lst);
+                Tree.setValue(data , key , lst);
 
                 // 翻译选择文本
                 for (Object obj2 : lst) {
