@@ -2704,7 +2704,7 @@ jQuery.fn.load = function(url, data, complete) {
 
     // /** 组件配置 **/
 
-    // 改变tab和class使其能使用bootstrap的样式
+    // 改变tabs和class使其能使用bootstrap的样式
     $.tools.tabs.conf.tabs = "li";
     $.tools.tabs.conf.current = "active";
     $.tools.tooltip.conf.tipClass = "popover";
