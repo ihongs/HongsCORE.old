@@ -426,7 +426,7 @@ function hsGetValue (obj, path, def) {
     path = path.replace(/\]\[/g, ".")
                .replace(/\[/   , ".")
                .replace(/\]/   , "" )
-               .replace(/\.+$/ , "" ) // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 name[] 提取数据
+               .replace(/\.+$/ , "" ) // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
                .split  (/\./ );
     return hsGetArray(obj, path, def);
 }

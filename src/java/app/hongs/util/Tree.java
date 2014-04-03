@@ -1,5 +1,7 @@
 package app.hongs.util;
 
+import app.hongs.HongsError;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -13,7 +15,8 @@ import java.util.Map;
  * <p>
  * 用于获取和设置树型结构
  * (&lt;Object,Map&lt;Object,Map&lt;...&gt;&gt;&gt;)
- * 数据的值
+ * 数据的值;
+ * 切记：keys
  * </p>
  *
  * @author Hongs
@@ -55,7 +58,7 @@ public class Tree
     path = path.replaceAll("\\]\\[", ".")
                .replace("[", ".")
                .replace("]", "" )
-               .replaceFirst("\\.$", "" );
+               .replaceFirst("\\.+$", ""); // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
     String[] keys = path.split("\\.", -1);
     return getArray(map, keys, def);
   }
@@ -87,8 +90,8 @@ public class Tree
       {
         List lst = (List)val;
         Object key = keys[i];
-        int idx = key instanceof Number ? (int)key
-                : Integer.parseInt(key.toString());
+        int idx = key instanceof Integer ? (Integer)key
+                : Integer.parseInt ( key.toString( ) );
         if (idx < lst.size())
         {
           val = lst.get(idx);
@@ -123,8 +126,20 @@ public class Tree
    */
   public static void setArray(Map map, Object[] keys, Object val)
   {
-    assert keys.length > 0 : "keys can not be empty";
-    setArray(map, keys, val, 0);
+    if ( keys.length != 0 )
+    {
+      setArray(map, keys, val, 0);
+    }
+    else
+    if (val instanceof Map)
+    {
+      map.clear ();
+      map.putAll((Map) val);
+    }
+    else
+    {
+      throw new HongsError(0x10, "Can not set obj to map with empty keys");
+    }
   }
 
   /**
@@ -139,6 +154,32 @@ public class Tree
     Object key = keys[idx];
 
     if (key == null || key.equals(""))
+    {
+      Collection col = (Collection)obj;
+
+      if (keys.length == idx + 1)
+      {
+        col.add(val);
+      }
+      else
+      {
+        Object subKey = keys[idx + 1];
+        Object subNode;
+
+        if (key == null || key.equals(""))
+        {
+          subNode = new ArrayList();
+        }
+        else
+        {
+          subNode = new LinkedHashMap();
+        }
+        col.add(subNode);
+
+        setArray(subNode, keys, val, idx + 1);
+      }
+    }
+    else
     {
       Map map = (Map)obj;
 
@@ -159,40 +200,14 @@ public class Tree
         {
           if (key == null || key.equals(""))
           {
-            subNode = new LinkedHashMap();
+            subNode = new ArrayList();
           }
           else
           {
-            subNode = new ArrayList();
+            subNode = new LinkedHashMap();
           }
           map.put(key, subNode);
         }
-
-        setArray(subNode, keys, val, idx + 1);
-      }
-    }
-    else
-    {
-      Collection col = (Collection)obj;
-
-      if (keys.length == idx + 1)
-      {
-        col.add(val);
-      }
-      else
-      {
-        Object subKey = keys[idx + 1];
-        Object subNode;
-
-        if (key == null || key.equals(""))
-        {
-          subNode = new LinkedHashMap();
-        }
-        else
-        {
-          subNode = new ArrayList();
-        }
-        col.add(subNode);
 
         setArray(subNode, keys, val, idx + 1);
       }
@@ -205,7 +220,6 @@ public class Tree
    * @param oth
    */
   public static void setDepth(Map map, Map oth) {
-    assert map != null && oth != null : "map1 or map2 can not be null";
     Iterator i = oth.entrySet().iterator();
     while (i.hasNext()) {
         Map.Entry e = (Map.Entry) i.next();
