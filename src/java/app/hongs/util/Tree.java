@@ -11,7 +11,9 @@ import java.util.Map;
  * 树形操作工具
  *
  * <p>
- * 用于获取和设置树型结构(&lt;Map&lt;Map...&gt;&gt;)数据的值
+ * 用于获取和设置树型结构
+ * (&lt;Object,Map&lt;Object,Map&lt;...&gt;&gt;&gt;)
+ * 数据的值
  * </p>
  *
  * @author Hongs
