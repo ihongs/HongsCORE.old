@@ -36,7 +36,7 @@ public class Tree
    * @param keys
    * @return 键对应的值
    */
-  public static Object getArray(Map map, String[] keys)
+  public static Object getArray(Map map, Object[] keys)
   {
     return getArray(map, keys, null);
   }
@@ -65,7 +65,7 @@ public class Tree
    * @param def
    * @return 键对应的值
    */
-  public static Object getArray(Map map, String[] keys, Object def)
+  public static Object getArray(Map map, Object[] keys, Object def)
   {
     Object val = map;
     for (int i = 0; i < keys.length; i ++)
@@ -73,7 +73,7 @@ public class Tree
       if (val instanceof Map)
       {
         Map obj  =  (Map)val;
-        String key = keys[i];
+        Object key = keys[i];
         if (obj.containsKey(key))
         {
           val = obj.get(key);
@@ -84,8 +84,9 @@ public class Tree
       if (val instanceof List)
       {
         List lst = (List)val;
-        String key = keys[i];
-        int idx = Integer.parseInt(key);
+        Object key = keys[i];
+        int idx = key instanceof Number ? (int)key
+                : Integer.parseInt(key.toString());
         if (idx < lst.size())
         {
           val = lst.get(idx);
@@ -118,7 +119,7 @@ public class Tree
    * @param keys
    * @param val
    */
-  public static void setArray(Map map, String[] keys, Object val)
+  public static void setArray(Map map, Object[] keys, Object val)
   {
     assert keys.length > 0 : "keys can not be empty";
     setArray(map, keys, val, 0);
@@ -131,11 +132,11 @@ public class Tree
    * @param val
    * @param idx
    */
-  private static void setArray(Object obj, String[] keys, Object val, int idx)
+  private static void setArray(Object obj, Object[] keys, Object val, int idx)
   {
-    String key = keys[idx];
+    Object key = keys[idx];
 
-    if (key.length() != 0)
+    if (key == null || key.equals(""))
     {
       Map map = (Map)obj;
 
@@ -145,7 +146,7 @@ public class Tree
       }
       else
       {
-        String subKey = keys[idx + 1];
+        Object subKey = keys[idx + 1];
         Object subNode;
 
         if (map.containsKey(key))
@@ -154,7 +155,7 @@ public class Tree
         }
         else
         {
-          if (subKey.length() != 0)
+          if (key == null || key.equals(""))
           {
             subNode = new LinkedHashMap();
           }
@@ -178,10 +179,10 @@ public class Tree
       }
       else
       {
-        String subKey = keys[idx + 1];
+        Object subKey = keys[idx + 1];
         Object subNode;
 
-        if (subKey.length() != 0)
+        if (key == null || key.equals(""))
         {
           subNode = new LinkedHashMap();
         }
