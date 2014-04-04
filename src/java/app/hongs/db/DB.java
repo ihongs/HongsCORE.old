@@ -1,37 +1,38 @@
 package app.hongs.db;
 
-import java.util.Iterator;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.regex.Pattern;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
-
-import javax.sql.DataSource;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Str;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import java.beans.PropertyVetoException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 /**
  * 数据库基础类
@@ -91,12 +92,10 @@ public class DB
   implements Core.Destroy
 {
 
-  public boolean IN_OBJECT_MODE;
-
   /**
-   * 数据库连接
+   * 是否为对象模式(即获取的数据以对象的形式存在, 默认为字符模式)
    */
-  public Connection connection;
+  public boolean IN_OBJECT_MODE;
 
   /**
    * 库名
@@ -128,15 +127,33 @@ public class DB
    */
   protected Map<String, Table> tableObjects;
 
-  private Map       driver;
-  private Map       source;
+  private Map           source;
+  private Map           origin;
+  private Connection    connection;
+
+  private DB(Map cf)
+    throws HongsException
+  {
+    if (cf == null) cf = new HashMap();
+
+    this.name         = "";
+    this.source       = (Map) cf.get("source");
+    this.origin       = (Map) cf.get("origin");
+    this.tableClass   = "";
+    this.tablePrefix  = "";
+    this.tableSuffix  = "";
+    this.tableConfigs = new  HashMap( );
+    this.tableObjects = new  HashMap( );
+
+    this.connection   = null;
+  }
 
   public DB(DBConfig cf)
     throws HongsException
   {
     this.name         = cf.name;
-    this.driver       = cf.driver;
     this.source       = cf.source;
+    this.origin       = cf.origin;
     this.tableClass   = cf.tableClass;
     this.tablePrefix  = cf.tablePrefix;
     this.tableSuffix  = cf.tableSuffix;
@@ -144,6 +161,11 @@ public class DB
     this.tableObjects = new  HashMap( );
 
     this.connection   = null;
+
+    // 对象模式设置
+    CoreConfig conf = (CoreConfig)
+      Core.getInstance(CoreConfig.class);
+    this.IN_OBJECT_MODE = conf.getProperty("core.in.object.mode", false);
   }
 
   public DB (String db)
@@ -170,10 +192,18 @@ public class DB
     this(DBConfig.parseByDocument(db));
   }
 
-  public final void open()
+  public Connection getConnection()
     throws HongsException
   {
-    TOP: do {
+    this.checkConnection();
+    return this.connection;
+  }
+
+  public void checkConnection()
+    throws HongsException
+  {
+    TOP: do
+    {
 
     try
     {
@@ -190,21 +220,23 @@ public class DB
 
     Exception e = null;
 
+    /** 使用外部数据源 **/
+
     do
     {
-      if (source == null || source.isEmpty())
+      if (origin == null || origin.isEmpty())
       {
         break;
       }
 
-      if (!source.containsKey("name"))
+      if (!origin.containsKey("name"))
       {
-        throw new HongsException(0x1011, "Can not find name in source");
+        throw new HongsException(0x1011, "Can not find name in origin");
       }
 
       String comp = "java:comp/env";
-      String namc = (String)source.get("name");
-      Properties info = (Properties)source.get("info");
+      String namc = (String)origin.get("name");
+      Properties info = (Properties)origin.get("info");
 
       Context ct;
       DataSource ds;
@@ -230,14 +262,13 @@ public class DB
         else
         {
           this.connection = ds.getConnection(
-                 info.getProperty("user"),
+                 info.getProperty(  "user"  ),
                  info.getProperty("password"));
         }
 
         if (Core.IN_DEBUG_MODE)
         {
-          CoreLogger.debug("Connect to database(source mode), URL: "
-                           +this.connection.getMetaData().getURL());
+          CoreLogger.debug("Connect to database(origin mode): "+name);
         }
       }
       catch (SQLException ex)
@@ -249,29 +280,32 @@ public class DB
     }
     while (false);
 
+    /** 使用内部数据源 **/
+
     do
     {
-      if (driver == null || driver.isEmpty())
+      if (source == null || source.isEmpty())
       {
         break;
       }
 
-      if (!driver.containsKey("drv"))
+      if (!source.containsKey("drv"))
       {
-        throw new app.hongs.HongsException(0x1015, "Can not find drv in driver");
+        throw new app.hongs.HongsException(0x1015, "Can not find drv in source");
       }
 
-      if (!driver.containsKey("url"))
+      if (!source.containsKey("url"))
       {
-        throw new app.hongs.HongsException(0x1015, "Can not find url in driver");
+        throw new app.hongs.HongsException(0x1015, "Can not find url in source");
       }
 
-      String drv = (String)driver.get("drv");
-      String url = (String)driver.get("url");
-      Properties info = (Properties)driver.get("info");
+      String drv = (String)source.get("drv");
+      String url = (String)source.get("url");
+      Properties info = (Properties)source.get("info");
 
       try
       {
+        /*
         Class.forName(drv);
 
         if (info.isEmpty())
@@ -282,14 +316,47 @@ public class DB
         {
           this.connection = DriverManager.getConnection(url, info);
         }
+        */
+
+        ComboPooledDataSource pool = datapools.get(drv+" "+url);
+
+        if (pool == null)
+        {
+          pool = new ComboPooledDataSource();
+          pool.setDriverClass(drv);
+          pool.setJdbcUrl(url);
+
+          if (info.containsKey("user")) {
+            pool.setUser(info.getProperty("user"));
+          }
+          if (info.containsKey("password")) {
+            pool.setPassword(info.getProperty("password"));
+          }
+          if (info.containsKey("minPoolSize")) {
+            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
+          }
+          if (info.containsKey("maxPoolSize")) {
+            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
+          }
+          if (info.containsKey("maxIdleTime")) {
+            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("maxIdleTime")));
+          }
+          if (info.containsKey("maxStatements")) {
+            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("maxStatements")));
+          }
+          if (info.containsKey("initialPoolSize")) {
+            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
+          }
+        }
+
+        this.connection = pool.getConnection();
 
         if (Core.IN_DEBUG_MODE)
         {
-          CoreLogger.debug("Connect to database(driver mode), URL: "
-                           +this.connection.getMetaData().getURL());
+          CoreLogger.debug("Connect to database(source mode): "+drv+" "+url);
         }
       }
-      catch (ClassNotFoundException ex)
+      catch (PropertyVetoException ex)
       {
         throw new app.hongs.HongsException(0x1017, ex);
       }
@@ -308,7 +375,7 @@ public class DB
     }
     else
     {
-      throw new HongsException(0x1019, "Can not find source and driver");
+      throw new HongsException(0x1019, "Can not find source and origin");
     }
 
     } while (false);
@@ -326,14 +393,9 @@ public class DB
     catch (SQLException ex) {
         throw new app.hongs.HongsError(0x10,ex);
     }
-
-    // 对象模式设置
-    CoreConfig conf = (CoreConfig)
-      Core.getInstance(CoreConfig.class);
-    IN_OBJECT_MODE  =  conf.getProperty("core.in.object.mode", false);
   }
 
-  public void close()
+  public void closeConnection()
   {
     try
     {
@@ -361,7 +423,7 @@ public class DB
   @Override
   public void destroy()
   {
-    this.close();
+    this.closeConnection();
   }
 
   /**
@@ -757,7 +819,7 @@ public class DB
   public FetchNext query(String sql, Object... params)
     throws HongsException
   {
-    this.open();
+    this.checkConnection();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -883,7 +945,7 @@ public class DB
   public boolean execute(String sql, Object... params)
     throws HongsException
   {
-    this.open();
+    this.checkConnection();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -923,7 +985,7 @@ public class DB
   public int update(String sql, Object... params)
     throws HongsException
   {
-    this.open();
+    this.checkConnection();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -1261,7 +1323,9 @@ public class DB
 
   //** 构造工厂 **/
 
-  public static Map<String, DB> instances;
+  private static Map<String, ComboPooledDataSource> datapools = new HashMap();
+
+  private static Map<String, DB> instances = new HashMap();
 
   /**
    * 获取默认数据库对象
@@ -1305,8 +1369,7 @@ public class DB
   public static DB getInstance(String dbName)
     throws HongsException
   {
-    if (DB.instances != null
-    &&  DB.instances.containsKey(dbName))
+    if (DB.instances.containsKey(dbName))
     {
       return    DB.instances.get(dbName);
     }
@@ -1335,66 +1398,45 @@ public class DB
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     if (conf.getProperty("core.load.db."+dbName+".once", false))
     {
-      if (DB.instances == null)
-      {
-          DB.instances = new HashMap();
-      }
-          DB.instances.put(dbName, db);
+      DB.instances.put(dbName, db);
     }
 
     return db;
   }
 
-  public static DB getInstanceByDriver(String drv, String url, Properties info)
-  throws HongsException {
-      Map config = new HashMap();
-      Map driver = new HashMap();
-
-      config.put("driver", driver);
-      driver.put("drv" , drv );
-      driver.put("url" , url );
-      driver.put("info", info);
-
-      return new DB(config);
-  }
-
-  public static DB getInstanceByDriver(String drv, String url)
-  throws HongsException {
-      return getInstanceByDriver(drv, url, new Properties());
-  }
-
-  public static DB getInstanceBySource(String name, Properties info)
+  public static DB getInstanceBySource(String drv, String url, Properties info)
   throws HongsException {
       Map config = new HashMap();
       Map source = new HashMap();
 
       config.put("source", source);
-      source.put("name", name);
+      source.put("drv" , drv );
+      source.put("url" , url );
       source.put("info", info);
 
       return new DB(config);
   }
 
-  public static DB getInstanceBySource(String name)
+  public static DB getInstanceBySource(String drv, String url)
   throws HongsException {
-      return getInstanceBySource(name, new Properties());
+      return getInstanceBySource(drv, url, new Properties());
   }
 
-  private DB(Map cf)
-    throws HongsException
-  {
-    if (cf == null) cf = new HashMap();
+  public static DB getInstanceByOrigin(String name, Properties info)
+  throws HongsException {
+      Map config = new HashMap();
+      Map origin = new HashMap();
 
-    this.name         = "";
-    this.driver       = (Map) cf.get("driver");
-    this.source       = (Map) cf.get("source");
-    this.tableClass   = "";
-    this.tablePrefix  = "";
-    this.tableSuffix  = "";
-    this.tableConfigs = new  HashMap( );
-    this.tableObjects = new  HashMap( );
+      config.put("origin", origin);
+      origin.put("name", name);
+      origin.put("info", info);
 
-    this.connection   = null;
+      return new DB(config);
+  }
+
+  public static DB getInstanceByOrigin(String name)
+  throws HongsException {
+      return DB.getInstanceByOrigin(name, new Properties());
   }
 
 }

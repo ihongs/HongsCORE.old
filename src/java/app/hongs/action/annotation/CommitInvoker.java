@@ -1,9 +1,10 @@
 package app.hongs.action.annotation;
 
 import app.hongs.Core;
-import app.hongs.db.DB;
 import app.hongs.action.ActionHelper;
+import app.hongs.db.DB;
 import java.lang.annotation.Annotation;
+import java.sql.Connection;
 
 /**
  * 操作成功才提交数据更改
@@ -39,8 +40,10 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    if(!db.connection.getAutoCommit())
-                        db.connection.commit();
+                    Connection con = db.getConnection();
+                    if (con.getAutoCommit( ) == false ) {
+                        con.commit();
+                    }
                 }
             }
         }
@@ -61,8 +64,10 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    if(!db.connection.getAutoCommit())
-                        db.connection.rollback();
+                    Connection con = db.getConnection();
+                    if (con.getAutoCommit( ) == false ) {
+                        con.rollback();
+                    }
                 }
             }
         }

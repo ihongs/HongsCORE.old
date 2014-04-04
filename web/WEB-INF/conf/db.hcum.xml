@@ -4,7 +4,7 @@
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://hongs-core db.xsd">
     <source link="default"/>
-    <driver link="default"/>
+    <origin link="default"/>
     <tables>
         <table name="a_hcum_user"
                primaryKey="id">

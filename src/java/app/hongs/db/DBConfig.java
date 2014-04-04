@@ -76,8 +76,8 @@ public class DBConfig
   {
     DBConfig cp = DBConfig.parseByName(name);
 
-    this.driver       = cp.driver;
     this.source       = cp.source;
+    this.origin       = cp.origin;
     this.dbClass      = cp.dbClass;
     this.tableClass   = cp.tableClass;
     this.tablePrefix  = cp.tablePrefix;
@@ -97,9 +97,9 @@ public class DBConfig
 
   public Map<String, Map> tableConfigs;
 
-  public Map<String, String> driver;
-
   public Map<String, String> source;
+
+  public Map<String, String> origin;
 
   private static Set<String> tableAttrs = new HashSet(
   Arrays.asList( new String[] {
@@ -230,8 +230,8 @@ public class DBConfig
     this.tableClass = "";
     this.tablePrefix = "";
     this.tableSuffix = "";
-    this.driver = new HashMap<String, String>();
     this.source = new HashMap<String, String>();
+    this.origin = new HashMap<String, String>();
     this.tableConfigs = new HashMap<String, Map>();
 
     NodeList childs = root.getChildNodes();
@@ -266,20 +266,6 @@ public class DBConfig
         }
       }
       else
-      if (tagName.equals("driver"))
-      {
-        link = getAttribute(element, "link", null);
-        if (link != null)
-        {
-          DBConfig conf = new DBConfig(link);
-          this.driver = conf.driver;
-        }
-        else
-        {
-          this.driver = DBConfig.getDriver(element);
-        }
-      }
-      else
       if (tagName.equals("source"))
       {
         link = getAttribute(element, "link", null);
@@ -294,6 +280,20 @@ public class DBConfig
         }
       }
       else
+      if (tagName.equals("origin"))
+      {
+        link = getAttribute(element, "link", null);
+        if (link != null)
+        {
+          DBConfig conf = new DBConfig(link);
+          this.origin = conf.origin;
+        }
+        else
+        {
+          this.origin = DBConfig.getOrigin(element);
+        }
+      }
+      else
       if (tagName.equals("tables"))
       {
         this.tableConfigs = DBConfig.getTables(element);
@@ -303,7 +303,7 @@ public class DBConfig
     //app.hongs.util.JSON.dump(this.tableConfigs);
   }
 
-  private static Map getDriver(Element element)
+  private static Map getSource(Element element)
   {
     String drv = "";
     String url = "";
@@ -330,15 +330,15 @@ public class DBConfig
       }
     }
 
-    Map driver = new HashMap();
-    driver.put("drv", drv);
-    driver.put("url", url);
-    driver.put("info", info);
+    Map source = new HashMap();
+    source.put("drv", drv);
+    source.put("url", url);
+    source.put("info", info);
 
-    return driver;
+    return source;
   }
 
-  private static Map getSource(Element element)
+  private static Map getOrigin(Element element)
   {
     String name = "";
     Properties info = new Properties();
@@ -360,11 +360,11 @@ public class DBConfig
       }
     }
 
-    Map driver = new HashMap();
-    driver.put("name", name);
-    driver.put("info", info);
+    Map origin = new HashMap();
+    origin.put("name", name);
+    origin.put("info", info);
 
-    return driver;
+    return origin;
   }
 
   private static Map getTables(Element element)
