@@ -13,16 +13,6 @@
     </xs:complexType>
   </xs:element>
 
-  <!-- 外部数据源配置 -->
-  <xs:element name="origin">
-    <xs:complexType>
-      <xs:attribute name="link" type="xs:string"/>
-      <xs:attribute name="name" type="xs:string" use="required"/>
-      <xs:attribute name="user" type="xs:string"/>
-      <xs:attribute name="password" type="xs:string"/>
-    </xs:complexType>
-  </xs:element>
-
   <!-- 内部数据源驱动 -->
   <xs:element name="source">
     <xs:complexType>
@@ -36,6 +26,16 @@
       <xs:attribute name="maxIdleSize" type="xs:int"/>
       <xs:attribute name="maxStatements" type="xs:int"/>
       <xs:attribute name="initialPoolSize" type="xs:int"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- 外部数据源配置 -->
+  <xs:element name="origin">
+    <xs:complexType>
+      <xs:attribute name="link" type="xs:string"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="user" type="xs:string"/>
+      <xs:attribute name="password" type="xs:string"/>
     </xs:complexType>
   </xs:element>
 
