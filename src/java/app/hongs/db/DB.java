@@ -218,7 +218,7 @@ public class DB
       throw new HongsError(0x35, ex);
     }
 
-    Exception e = null;
+    Exception ez = null;
 
     /** 使用外部数据源 **/
 
@@ -249,7 +249,7 @@ public class DB
       }
       catch (NamingException ex)
       {
-        e =ex;
+        ez=ex;
         break;
       }
 
@@ -369,9 +369,9 @@ public class DB
     }
     while (false);
 
-    if (e !=null)
+    if (ez !=null)
     {
-      throw new HongsException(0x1019, e);
+      throw new HongsException(0x1019, ez);
     }
     else
     {
