@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.action.Action;
+import app.hongs.action.NormalAction;
 import app.hongs.action.ActionHelper;
 
 /**
@@ -37,7 +37,7 @@ import app.hongs.action.ActionHelper;
  * @author Hongs
  */
 public class CmdletAction
-  extends Action
+  extends NormalAction
 {
 
   /**
@@ -62,12 +62,12 @@ public class CmdletAction
     act = act.substring(1,act.lastIndexOf('.')); // 去掉前导"/"和扩展名
 
     if (act != null && act.length() == 0) {
-        helper.print404Code("Can not find action name.");
+        helper.print404("Can not find action name.");
         return;
     }
 
-    if (act.indexOf('.') != -1 || act.startsWith("hongs/cmdlet")) {
-        helper.print404Code("Illegal action '"+Core.ACTION_PATH.get()+"'.");
+    if (act.indexOf('.') != -1 || act.startsWith("hongs")) {
+        helper.print404("Illegal action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
 
@@ -79,7 +79,7 @@ public class CmdletAction
 
     pos = act.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
+        helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
     cls = act.substring(pos+1);

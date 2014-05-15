@@ -11,7 +11,6 @@ import java.beans.PropertyVetoException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -26,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -51,11 +48,12 @@ import javax.sql.DataSource;
  * <pre>
  * 区间: 0x1010~0x105f
  *
- * 0x1011  找不到数据源名称配置
- * 0x1013  连接数据源失败
- * 0x1015  找不到数据库驱动配置
- * 0x1017  连接数据库失败
- * 0x1019  无数据源或无驱动配置
+ * 0x1011  找不到外部数据源配置
+ * 0x1013  连接外部数据源失败
+ * 0x1015  找不到内部数据源配置
+ * 0x1017  连接内部数据源失败
+ * 0x1019  无外部或内部数据源配置
+ * 0x101b  设置自动提交失败
  *
  * 0x1021  找不到表配置
  * 0x1023  找不到表对应的类
@@ -192,14 +190,7 @@ public class DB
     this(DBConfig.parseByDocument(db));
   }
 
-  public Connection getConnection()
-    throws HongsException
-  {
-    this.checkConnection();
-    return this.connection;
-  }
-
-  public void checkConnection()
+  public Connection connect()
     throws HongsException
   {
     TOP: do
@@ -332,6 +323,9 @@ public class DB
           if (info.containsKey("password")) {
             pool.setPassword(info.getProperty("password"));
           }
+          if (info.containsKey("initialPoolSize")) {
+            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
+          }
           if (info.containsKey("minPoolSize")) {
             pool.setInitialPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
           }
@@ -343,9 +337,6 @@ public class DB
           }
           if (info.containsKey("maxStatements")) {
             pool.setInitialPoolSize(Integer.parseInt(info.getProperty("maxStatements")));
-          }
-          if (info.containsKey("initialPoolSize")) {
-            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
           }
         }
 
@@ -375,7 +366,7 @@ public class DB
     }
     else
     {
-      throw new HongsException(0x1019, "Can not find source and origin");
+      throw new HongsException(0x1019, "Can not find source or origin");
     }
 
     } while (false);
@@ -391,11 +382,14 @@ public class DB
                 core.get("__DB_AUTO_COMMIT__"));
     }
     catch (SQLException ex) {
-        throw new app.hongs.HongsError(0x10,ex);
+        throw new app.hongs.HongsException(0x101b, ex);
     }
+    
+    return this.connection;
   }
 
-  public void closeConnection()
+  @Override
+  public void destroy()
   {
     try
     {
@@ -418,12 +412,6 @@ public class DB
     {
       throw new HongsError(0x37, ex);
     }
-  }
-
-  @Override
-  public void destroy()
-  {
-    this.closeConnection();
   }
 
   /**
@@ -819,7 +807,7 @@ public class DB
   public FetchNext query(String sql, Object... params)
     throws HongsException
   {
-    this.checkConnection();
+    this.connect();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -945,7 +933,7 @@ public class DB
   public boolean execute(String sql, Object... params)
     throws HongsException
   {
-    this.checkConnection();
+    this.connect();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -985,7 +973,7 @@ public class DB
   public int update(String sql, Object... params)
     throws HongsException
   {
-    this.checkConnection();
+    this.connect();
 
     if (Core.IN_DEBUG_MODE)
     {
@@ -1150,19 +1138,6 @@ public class DB
   public static String quoteValue(String value)
   {
     return "'" + Str.escape(value, "'") + "'";
-  }
-
-  /**
-   * 格式化SQL字段名
-   * @param sql
-   * @return 格式好的SQL
-   */
-  public static String formatSQLFields(String sql)
-  {
-    return sql.replaceAll("(^|[ ,\\(])([^ ,`\\(\\)]+)\\.([^ ,`\\(\\)]+)([ ,\\)]|$)", "$1`$2`.`$3`$4")
-              .replaceAll("([^ ,`'\\(\\)]+) +AS +", "`$1` AS ")
-              .replaceAll(" +AS +([^ ,`'\\(\\)]+)", " AS `$1`")
-              .replaceAll("`\\*`", "*");
   }
 
   /**

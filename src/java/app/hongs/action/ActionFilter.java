@@ -267,10 +267,10 @@ public class ActionFilter
     }
     else {
         if (uri != null || uri.length() != 0) {
-            helper.print302Code(uri);
+            helper.print302(uri);
         }
         else {
-            helper.print403Code(msg);
+            helper.print403(msg);
         }
     }
   }

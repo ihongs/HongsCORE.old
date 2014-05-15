@@ -40,7 +40,7 @@ import app.hongs.action.annotation.ActionChain;
  *
  * @author Hongs
  */
-public class Action
+public class NormalAction
   extends HttpServlet
 {
 
@@ -66,12 +66,12 @@ public class Action
     act = act.substring(1,act.lastIndexOf('.')); // 去掉前导"/"和扩展名
 
     if (act != null && act.length() == 0) {
-        helper.print404Code("Can not find action name.");
+        helper.print404("Can not find action name.");
         return;
     }
 
-    if (act.indexOf('.') != -1 || act.startsWith("hongs/action")) {
-        helper.print404Code("Illegal action '"+Core.ACTION_PATH.get()+"'.");
+    if (act.indexOf('.') != -1 || act.startsWith("hongs")) {
+        helper.print404("Illegal action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
 
@@ -83,7 +83,7 @@ public class Action
 
     pos = act.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
+        helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
     mtd = act.substring(pos+1);
@@ -91,7 +91,7 @@ public class Action
 
     pos = act.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
+        helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
     cls = act.substring(pos+1);
@@ -136,7 +136,7 @@ public class Action
     }
     catch (ClassNotFoundException ex)
     {
-      helper.print404Code("Can not find class '" + cls + "'.");
+      helper.print404("Can not find class '" + cls + "'.");
       return;
     }
 
@@ -148,12 +148,12 @@ public class Action
     }
     catch (NoSuchMethodException ex)
     {
-      helper.print404Code("Can not find method '" + cls + "." + mtd + "'.");
+      helper.print404("Can not find method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (SecurityException ex)
     {
-      helper.print500Code("Can not exec method '" + cls + "." + mtd + "'.");
+      helper.print500("Can not exec method '" + cls + "." + mtd + "'.");
       return;
     }
 
@@ -179,12 +179,12 @@ public class Action
     }
     catch (InstantiationException ex)
     {
-      helper.print500Code("Cannot instantiate class '" + cls + "'.");
+      helper.print500("Cannot instantiate class '" + cls + "'.");
       return;
     }
     catch (IllegalAccessException ex)
     {
-      helper.print500Code("Illegal access for class '" + cls + "'.");
+      helper.print500("Illegal access for class '" + cls + "'.");
       return;
     }
 
@@ -242,7 +242,7 @@ public class Action
     }
 
 //  throw new ServletException(error,ta);
-    helper.print500Code ( error );
+    helper.print500 ( error );
   }
 
 }

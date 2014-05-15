@@ -40,7 +40,7 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    Connection con = db.getConnection();
+                    Connection con = db.connect();
                     if (con.getAutoCommit( ) == false ) {
                         con.commit();
                     }
@@ -64,7 +64,7 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    Connection con = db.getConnection();
+                    Connection con = db.connect();
                     if (con.getAutoCommit( ) == false ) {
                         con.rollback();
                     }

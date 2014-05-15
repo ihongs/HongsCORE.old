@@ -58,19 +58,19 @@ public class JsConfAction
 
     String name = helper.request.getPathInfo( );
     if (   name == null || name.length( ) == 0) {
-      helper.print500Code("Path info required");
+      helper.print500("Path info required");
       return;
     }
     int p = name.lastIndexOf('.');
     if (p < 0) {
-      helper.print500Code("File type required");
+      helper.print500("File type required");
       return;
     }
     String type = name.substring(1 + p);
            name = name.substring(1 , p);
 
     if ( !"js".equals(type) && !"json".equals(type)) {
-      helper.print500Code("Wrong file type: "+type);
+      helper.print500("Wrong file type: "+type);
       return;
     }
 
@@ -97,7 +97,7 @@ public class JsConfAction
         s = this.makeConfig(name);
       }
       catch (HongsError ex) {
-        helper.print500Code(ex.getMessage());
+        helper.print500(ex.getMessage());
         return;
       }
 
@@ -124,7 +124,7 @@ public class JsConfAction
       helper.printJSON( s );
     }
     else {
-      helper.printJS("if(!window.HsCONF)window.HsCONF={};$.extend(window.HsCONF,"+s+");");
+      helper.print("if(!window.HsCONF)window.HsCONF={};$.extend(window.HsCONF,"+s+");", "application/javascript");
     }
   }
 

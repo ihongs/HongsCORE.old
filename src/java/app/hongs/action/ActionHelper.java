@@ -308,7 +308,7 @@ public class ActionHelper
     this.setCookie(name, lang);
   }
 
-  //** 发送内容 **/
+  //** 输出内容 **/
 
   /**
    * 输出内容
@@ -342,40 +342,65 @@ public class ActionHelper
     this.print(text, "text/plain");
   }
 
+  //** 常用状态 **/
+
   /**
-   * 输出HTML内容
-   * @param text
+   * 301重定向
+   * @param url
    */
-  public void printHTML(String text)
+  public void print301(String url)
   {
-    this.print(text, "text/html");
+    this.response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+    this.response.setHeader("Location", url);
   }
 
   /**
-   * 输出XML内容
-   * @param text
+   * 302重定向
+   * @param url
    */
-  public void printXML(String text)
+  public void print302(String url)
   {
-    this.print(text, "text/xml");
+    this.response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+    this.response.setHeader("Location", url);
   }
 
   /**
-   * 输出CSS内容
-   * @param text
+   * 403禁止访问
+   * @param msg
    */
-  public void printCSS(String text)
+  public void print403(String msg)
   {
-    this.print(text, "text/css");
+    this.response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    this.print(msg);
   }
 
   /**
-   * 输出JS内容
-   * @param text
+   * 404缺少页面
+   * @param msg
    */
-  public void printJS(String text)
+  public void print404(String msg)
   {
-    this.print(text, "application/javascript");
+    this.response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    this.print(msg);
+  }
+
+  /**
+   * 500内部错误
+   * @param msg
+   */
+  public void print500(String msg)
+  {
+    this.response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    this.print(msg);
+  }
+
+  /**
+   * 500 系统异常
+   * @param ex 
+   */
+  public void print500(Exception ex)
+  {
+        ActionHelper.this.print500(ex.getMessage());
   }
 
   //** 发送数据 **/
@@ -410,80 +435,32 @@ public class ActionHelper
     this.printJSON(JSON.toString(data));
   }
 
-  //** HTTP常用状态 **/
-
-  /**
-   * 301重定向
-   * @param url
-   */
-  public void print301Code(String url)
-  {
-    this.response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-    this.response.setHeader("Location", url);
-  }
-
-  /**
-   * 302重定向
-   * @param url
-   */
-  public void print302Code(String url)
-  {
-    this.response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-    this.response.setHeader("Location", url);
-  }
-
-  /**
-   * 403禁止访问
-   * @param msg
-   */
-  public void print403Code(String msg)
-  {
-    this.response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-    this.print(msg);
-  }
-
-  /**
-   * 404缺少页面
-   * @param msg
-   */
-  public void print404Code(String msg)
-  {
-    this.response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    this.print(msg);
-  }
-
-  /**
-   * 500内部错误
-   * @param msg
-   */
-  public void print500Code(String msg)
-  {
-    this.response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    this.print(msg);
-  }
-
-  public void print500Code(Exception ex)
-  {
-    print500Code(ex.getMessage());
-  }
-
   //** 快捷动作 **/
 
   /**
    * 返回指定数据
    * 针对model的getList,getInfo方法
-   * @param data
+   * @param rst
    */
-  public void back(Map<String, Object> data)
+  public void back(Map<String, Object> rst)
   {
     // 默认为成功
-    if(!data.containsKey("__success__"))
-        data.put("__success__" , true );
+    if(!rst.containsKey("__success__"))
+        rst.put("__success__" , true );
+    this.responseData = rst;
+  }
 
-    this.responseData = data;
-
-    // 不直接输出, 在InitFilter中进行输出
-    // this.printJSON(data);
+  /**
+   * 返回操作结果
+   * @param rst
+   * @param msg
+   */
+  public void back(String msg, Boolean rst)
+  {
+    Map data = new HashMap();
+    data.put("__success__", rst);
+    data.put("__message__", msg);
+    back(data);
   }
 
   /**
@@ -498,19 +475,6 @@ public class ActionHelper
     data.put("__success__",true);
     data.put("__message__", msg);
     data.put("back", rst);
-    back(data);
-  }
-
-  /**
-   * 返回操作结果
-   * @param rst
-   * @param msg
-   */
-  public void back(String msg, Boolean rst)
-  {
-    Map data = new HashMap();
-    data.put("__success__", rst);
-    data.put("__message__", msg);
     back(data);
   }
 

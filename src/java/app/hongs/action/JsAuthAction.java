@@ -49,19 +49,19 @@ public class JsAuthAction
 
     String name = helper.request.getPathInfo( );
     if (   name == null || name.length( ) == 0) {
-      helper.print500Code("Path info required");
+      helper.print500("Path info required");
       return;
     }
     int p = name.lastIndexOf('.');
     if (p < 0) {
-      helper.print500Code("File type required");
+      helper.print500("File type required");
       return;
     }
     String type = name.substring(1 + p);
            name = name.substring(1 , p);
 
     if ( !"js".equals(type) && !"json".equals(type)) {
-      helper.print500Code("Wrong file type: "+type);
+      helper.print500("Wrong file type: "+type);
       return;
     }
 
@@ -70,11 +70,11 @@ public class JsAuthAction
       data = JSON.toString(ActionConfig.getInstance(name).getAuthMap());
     }
     catch (HongsException ex) {
-      helper.print500Code(ex.getMessage());
+      helper.print500(ex.getMessage());
       return;
     }
     catch (HongsError ex) {
-      helper.print500Code(ex.getMessage());
+      helper.print500(ex.getMessage());
       return;
     }
 
@@ -83,7 +83,7 @@ public class JsAuthAction
       helper.printJSON(data);
     }
     else {
-      helper.printJS("if(!window.HsAUTH)window.HsAUTH={};$.extend(window.HsAUTH,"+data+");");
+      helper.print("if(!window.HsAUTH)window.HsAUTH={};$.extend(window.HsAUTH,"+data+");", "application/javascript");
     }
   }
 

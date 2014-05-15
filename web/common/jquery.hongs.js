@@ -229,7 +229,7 @@ function hsResponObj(rst, qut) {
         if (typeof rst["__message__"] == "undefined") {
             rst["__message__"] =  "" ;
         }
-        if (rst["__message__"] && !qut) {
+        else if (  rst["__message__"] && ! qut  ) {
             if (  rst["__success__"]  ) {
                 hsNote(rst["__message__"], 'alert-success');
             } else {
@@ -2928,7 +2928,7 @@ jQuery.fn.load = function(url, data, complete) {
                     }
                 })
                 .on("saveBack", function(evt, rst) {
-                    if (!rst || !rst.__success__ || !rst.back)
+                    if (!rst || !rst.back)
                         return;
                     // 添加则直接选中并退出
                     evt = $.Event("chooseItem");
