@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.action.NormalAction;
+import app.hongs.action.Action;
 import app.hongs.action.ActionHelper;
 
 /**
@@ -37,7 +37,7 @@ import app.hongs.action.ActionHelper;
  * @author Hongs
  */
 public class CmdletAction
-  extends NormalAction
+  extends Action
 {
 
   /**

@@ -40,7 +40,7 @@ import app.hongs.action.annotation.ActionChain;
  *
  * @author Hongs
  */
-public class NormalAction
+public class Action
   extends HttpServlet
 {
 

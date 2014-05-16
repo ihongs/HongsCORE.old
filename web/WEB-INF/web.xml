@@ -37,7 +37,7 @@
     <!-- Action Servlet -->
     <servlet>
         <servlet-name>Action</servlet-name>
-        <servlet-class>app.hongs.action.NormalAction</servlet-class>
+        <servlet-class>app.hongs.action.Action</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Action</servlet-name>
