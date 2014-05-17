@@ -146,9 +146,9 @@ function H$() {
         if (arguments.length == 1) {
             arguments[1] = location.href;
         }
-        if (typeof arguments[1] != "string") {
-            if (jQuery.isArray(arguments[1]) == false) {
-                var c = jQuery(arguments[1]).closest(".load-box");
+        if (typeof(arguments[1]) !== "string") {
+            if (!jQuery.isArray(arguments[1])) {
+                var c =  jQuery(arguments[1]).closest(".load-box");
                 var d = hsSerialArr(c.data("url" ));
                 var e = hsSerialArr(c.data("data"));
                 for (var i = 0; i < e.length; i ++)
@@ -168,7 +168,7 @@ function H$() {
     case '$':
     case '%':
         var c = b == '$' ? window.sessionStorage : window.localStorage;
-        if (typeof c == "undefined") {
+        if (typeof(c) === "undefined") {
             throw("H$: Does not support '"+(b == '$' ? 'session' : 'local')+"Storage'");
         }
         if (arguments.length == 1) {
@@ -189,59 +189,64 @@ function H$() {
  * @return {Object}
  */
 function hsResponObj(rst, qut) {
-    if (typeof rst.responseText != "undefined") {
+    if (typeof(rst.responseText) !== "undefined") {
         rst  = rst.responseText;
     }
-    if (typeof rst == "string") {
-    if (rst.charAt( 0 ) == '{') {
-        if (typeof JSON != "undefined") {
-            rst  = JSON.parse( rst );
-        }
-        else {
-            rst  = eval('('+rst+')');
-        }
-    }
-    else
-    if (rst.charAt( 0 ) == '<') {
-        // 某些时候服务器可能出错, 返回错误消息的页面
-        // 需要清理其中的html代码, 以供输出简洁的消息
-        rst = {
-            "__success__" : false,
-            "__message__" :  rst
-                .replace(/<script.*?>.*?<\/script>/img, "")
-                .replace(/<style.*?>.*?<\/style>/img, "")
-                .replace(/<[^>]*?>/g, "")
-                .replace(/&[^&;]*;/g, "")
-                .replace(/^\s*(\r\n|\r|\n)/mg, "")
-        };
-    }
-    else {
-        rst = {
-            "__success__" : false,
-            "__message__" :  rst
-        };
-    }
-    }
-    if (typeof rst == "object") {
-        if (typeof rst["__success__"] == "undefined") {
-            rst["__success__"] = true;
-        }
-        if (typeof rst["__message__"] == "undefined") {
-            rst["__message__"] =  "" ;
-        }
-        else if (  rst["__message__"] && ! qut  ) {
-            if (  rst["__success__"]  ) {
-                hsNote(rst["__message__"], 'alert-success');
-            } else {
-                alert (rst["__message__"]);
-            }
-        }
-        if (typeof rst["__refresh__"] != "undefined") {
-            if (  rst["__refresh__"]  ) {
-                location.assign( rst["__refresh__"] );
+    if (typeof(rst) === "string") {
+        if (rst.charAt(0) == '{') {
+            if (typeof(JSON) !== "undefined") {
+                rst  = JSON.parse( rst );
             }
             else {
-                location.reload( );
+                rst  = eval('('+rst+')');
+            }
+        }
+        else
+        if (rst.charAt(0) == '<') {
+            // 某些时候服务器可能出错, 返回错误消息的页面
+            // 需要清理其中的html代码, 以供输出简洁的消息
+            rst = {
+                "__success__" : false,
+                "__message__" :  rst
+                    .replace(/<script.*?>.*?<\/script>/img, "")
+                    .replace(/<style.*?>.*?<\/style>/img, "")
+                    .replace(/<[^>]*?>/g, "")
+                    .replace(/&[^&;]*;/g, "")
+                    .replace(/^\s*(\r\n|\r|\n)/mg, "")
+            };
+        }
+        else {
+            rst = {
+                "__success__" : false,
+                "__message__" :  rst
+            };
+        }
+    }
+    if (typeof(rst) === "object" && ! qut) {
+        if (typeof(rst.__success__) === "undefined") {
+            rst.__success__ = true;
+        }
+        if (typeof(rst.__message__) !== "undefined") {
+            if (rst.__success__) {
+                if (rst.__message__) {
+                    hsNote(rst.__message__, 'alert-success');
+                }
+            }
+            else {
+                if (rst.__message__) {
+                    alert (rst.__message__);
+                }
+                else {
+                    alert (hsGetLang("error.unkwn"));
+                }
+            }
+        }
+        if (typeof(rst.__refresh__) !== "undefined") {
+            if (rst.__refresh__) {
+                location.assign(  rst.__refresh__  );
+            }
+            else {
+                location.reload(  );
             }
         }
     }
@@ -255,7 +260,7 @@ function hsResponObj(rst, qut) {
  */
 function hsSerialArr(obj) {
     var arr = [];
-    if (typeof obj == "string") {
+    if (typeof(obj) === "string") {
         var a1, a2;
         a1 = obj.split('#' , 2);
         if (a1.length > 1) obj = a1[0];
@@ -276,7 +281,7 @@ function hsSerialArr(obj) {
                       value: val});
         });
     }
-    else if (!jQuery.isArray(obj) && typeof obj == "object") {
+    else if (!jQuery.isArray(obj) && typeof(obj) === "object") {
         arr = jQuery(obj).serializeArray();
     }
     return arr;
@@ -416,10 +421,10 @@ function hsGetValue (obj, path, def) {
     if (jQuery.isArray(path)) {
         return hsGetArray(obj, path, def);
     }
-    if (typeof path == "number") {
+    if (typeof(path) === "number") {
         return hsGetArray(obj,[path],def);
     }
-    if (typeof path != "string") {
+    if (typeof(path) !== "string") {
         throw("hsGetValue: 'path' must be a string");
     }
 
@@ -451,10 +456,10 @@ function hsGetArray (obj, keys, def) {
         throw("hsGetArray: 'keys' can not be empty");
     }
 
-    var i; var k;
+    var i , k;
     for(i = 0; i < keys.length; i ++) {
         k = keys[i];
-        if(typeof obj[k] != "undefined") {
+        if(typeof(obj[k]) !== "undefined") {
            obj  = obj[k];
            continue;
         }
@@ -477,10 +482,10 @@ function hsSetValue (obj, path, val) {
     if (jQuery.isArray(path)) {
         hsSetArray(obj, path, val); return;
     }
-    if (typeof path == "number") {
+    if (typeof(path) === "number") {
         obj[path] = val; return;
     }
-    if (typeof path != "string") {
+    if (typeof(path) !== "string") {
         throw("hsSetValue: 'path' must be a string");
     }
     path = path.replace(/\]\[/g, ".")
@@ -514,12 +519,12 @@ function hsSetArray (obj, keys, val) {
         k = keys[ i ];
         t = keys[i+1];
         if (!t)t = -1;
-        if (typeof t == "number")
+        if (typeof(t) === "number")
             if (!jQuery.isArray(obj[k])) {
                 obj[k] = [];
             }
         else
-        if (typeof t == "string")
+        if (typeof(t) === "string")
             if (!jQuery.isPlainObject(obj[k])) {
                 obj[k] = {};
             }
@@ -540,7 +545,7 @@ function hsSetArray (obj, keys, val) {
  * @return {String} 获取到的配置, 如果没有则取默认值
  */
 function hsGetConf  (key, def) {
-    if (typeof HsCONF[key] != "undefined") {
+    if (typeof(HsCONF[key]) !== "undefined") {
         return HsCONF[key];
     }
     else {
@@ -554,7 +559,7 @@ function hsGetConf  (key, def) {
  * @return {String} 获取到的语言, 其中的 $a或$0 可被 rep 替换
  */
 function hsGetLang  (key, rep) {
-    if (typeof HsLANG[key] != "undefined") {
+    if (typeof(HsLANG[key]) !== "undefined") {
         key  = HsLANG[key];
     }
 
@@ -574,7 +579,7 @@ function hsGetLang  (key, rep) {
             else {
                 w = w.substring(1);
             }
-            if (typeof(rep[w]) != "undefined") {
+            if (typeof(rep[w]) !== "undefined") {
                 return rep[w];
             }
             else {
@@ -615,16 +620,16 @@ function hsFixUri   (uri) {
  * @return {String}
  */
 function hsFmtNum(num, len, dec, sep, dot) {
-  if (typeof len == "undefined") {
+  if (typeof(len) === "undefined") {
     len = 0;
   }
-  if (typeof dec == "undefined") {
+  if (typeof(dec) === "undefined") {
     dec = 2;
   }
-  if (typeof sep == "undefined") {
+  if (typeof(sep) === "undefined") {
     sep = ",";
   }
-  if (typeof dot == "undefined") {
+  if (typeof(dot) === "undefined") {
     dot = ".";
   }
 
@@ -697,17 +702,17 @@ function hsFmtNum(num, len, dec, sep, dot) {
  * @return {String}
  */
 function hsFmtDate(date, format) {
-  if (typeof(date) == "string") {
-    if (/^\d*$/.test(date)) {
-      date = parseInt(date);
-    }
-    else {
+  if (typeof(date) === "string") {
+    if ( ! /^\d*$/.test(date)) {
       date = Date.parse(date);
     }
+    else {
+      date = parseInt(date);
+    }
   }
-  if (typeof(date) == "number") {
+  if (typeof(date) === "number") {
     if (date <= 2147483647) {
-      date = date * 1000;
+      date = date * 1000 ;
     }
     date = new Date(date);
   }
@@ -886,9 +891,9 @@ function hsPrsDate(text, format) {
   }
 
   var text2;
-  if (typeof(M) != "undefined"
-  &&  typeof(d) != "undefined"
-  &&  typeof(y) != "undefined") {
+  if (typeof(M) !== "undefined"
+  &&  typeof(d) !== "undefined"
+  &&  typeof(y) !== "undefined") {
     text2 = M+"/"+d+"/"+y+" "+H+":"+m+":"+s;
   }
   else {
@@ -1195,7 +1200,7 @@ function HsReady() {
         var prnt = $(this).parent();
         var func = $(this).attr("name");
         var opts = _HsReadOpts.call( this );
-        if (typeof prnt[func] === "function" ) prnt[func](opts);
+        if (typeof(prnt[func]) === "function") prnt[func](opts);
     }).remove();
 
     /** jquery tools, bootstrap 语义标签解析 **/
@@ -1398,7 +1403,7 @@ HsForm.prototype = {
     },
     loadBack : function(rst) {
         rst = hsResponObj(rst);
-        if (rst.__success__ == false) return;
+        if (rst.__success__ === false) return;
         if (rst.data) this.fillData( rst.data );
         if (rst.info) this.fillInfo( rst.info );
         this.formBox.trigger("loadBack", [rst]);
@@ -1424,13 +1429,13 @@ HsForm.prototype = {
                 inp = this.formBox.find('[data-fn="'+n+'"]');
             }
 
-            if (typeof this["_fill_"+n] != "undefined") {
+            if (typeof(this["_fill_"+n]) !== "undefined") {
                 v = this["_fill_"+n].call(this, inp, v, n, "data");
             }
             // 按类型填充
             else if (inp.attr("data-ft")) {
                 t =  inp.attr("data-ft");
-            if (typeof this["_fill_"+t] != "undefined") {
+            if (typeof(this["_fill_"+t]) !== "undefined") {
                 v = this["_fill_"+t].call(this, inp, v, n, "data");
             }}
             if (! v) continue;
@@ -1465,13 +1470,13 @@ HsForm.prototype = {
                 inp = this.formBox.find('[data-fn="'+n+'"]');
             }
 
-            if (typeof this["_fill_"+n] != "undefined") {
+            if (typeof(this["_fill_"+n]) !== "undefined") {
                 v = this["_fill_"+n].call(this, inp, v, n, "info");
             }
             // 按类型填充
             else if (inp.attr("data-ft")) {
                 t =  inp.attr("data-ft");
-            if (typeof this["_fill_"+t] != "undefined") {
+            if (typeof(this["_fill_"+t]) !== "undefined") {
                 v = this["_fill_"+t].call(this, inp, v, n, "info");
             }}
             if (! v && (v !== 0 || v !== "")) continue;
@@ -1546,12 +1551,11 @@ HsForm.prototype = {
     },
     saveBack : function(rst) {
         rst = hsResponObj(rst, !!this.formBox.attr("target"));
-        if (typeof rst.__success__ != "undefined"
-        &&         rst.__success__ ==  false     ) {
-            if (typeof rst.errors  != "undefined") {
+        if (rst.__success__  !== false) {
+            if (typeof(rst.errors) !== "undefined") {
                 this.formBox.data("validator").invalidate(rst.errors);
             }
-            this.formBox.trigger("saveFail",[rst]);
+            this.formBox.trigger("saveFail", [rst]);
             return;
         }
         var evt = new jQuery.Event("saveBack");
@@ -1672,13 +1676,13 @@ function HsList(opts, context) {
         }
 
         /*
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             n = loadBox.find(n);
         else if (n)
             n = jQuery(n);
         */
         /*
-        if (typeof m == "string")
+        if (typeof(m) === "string")
             m = loadBox.find(m);
         else*/ if (m)
             m = jQuery(m);
@@ -1687,7 +1691,7 @@ function HsList(opts, context) {
         if (t.length)
             n = t.data   ( "trigger");
 
-        if (typeof u == "function") {
+        if (typeof(u) === "function") {
             u.call(n, m, that);
             return;
         }
@@ -1726,7 +1730,7 @@ function HsList(opts, context) {
             continue;
         }
 
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             context.on("click", n, [n, m, u], openHand);
         else if (n)
             n.on("click", [n, m, u], openHand);
@@ -1739,7 +1743,7 @@ function HsList(opts, context) {
         var u = evt.data[2];
 
         /*
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             n = loadBox.find(n);
         else if (n)
             n = jQuery(n);
@@ -1749,7 +1753,7 @@ function HsList(opts, context) {
         if (t.length)
             n = t.data   ( "trigger");
 
-        if (typeof u == "function") {
+        if (typeof(u) === "function") {
             u.call(n, m, that);
             return;
         }
@@ -1783,7 +1787,7 @@ function HsList(opts, context) {
             continue;
         }
 
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             context.on("click", n, [n, m, u], sendHand);
         else if (n)
             n.on("click", [n, m, u], sendHand);
@@ -1828,7 +1832,7 @@ HsList.prototype = {
     },
     loadBack : function(rst) {
         rst = hsResponObj(rst);
-        if (rst.__success__ == false) return;
+        if (rst.__success__ === false) return;
         if (rst.list) this.fillList( rst.list );
         if (rst.page) this.fillPage( rst.page );
         this.listBox.trigger("loadBack", [rst]);
@@ -1891,22 +1895,22 @@ HsList.prototype = {
                 if (!n) continue;
                 v = hsGetValue(list[i], n);
 
-                if (typeof this["_fill_"+n] != "undefined") {
-                    v = this["_fill_"+n].call(this, td,v,n);
+                if (typeof(this["_fill_"+n]) !== "undefined") {
+                    v = this["_fill_"+n].call(this, td, v, n);
                     if(!v) continue;
                 }
                 // 按类型填充
-                else if (typeof fts[n] != "undefined") {
+                else if (typeof(fts[n]) !== "undefined") {
                     t =  fts[n];
-                if (typeof this["_fill_"+t] != "undefined") {
-                    v = this["_fill_"+t].call(this, td,v,n);
+                if (typeof(this["_fill_"+t]) !== "undefined") {
+                    v = this["_fill_"+t].call(this, td, v, n);
                     if(!v) continue;
                 }}
 
                 td.text(v);
             }
         }
-        if (typeof this._info != "undefined")
+        if (typeof(this._info) !== "undefined")
             delete this._info;
     },
     fillPage : function(page) {
@@ -1991,7 +1995,7 @@ HsList.prototype = {
     },
     sendBack : function(btn, rst, data) {
         rst = hsResponObj(rst);
-        if (rst.__success__ == false) return;
+        if (rst.__success__ === false) return;
         var evt = new jQuery.Event("sendBack");
         btn.trigger(evt, [rst, data]);
         if (evt.isDefaultPrevented()) return;
@@ -2146,13 +2150,13 @@ function HsTree(opts, context) {
         }
 
         /*
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             n = loadBox.find(n);
         else if (n)
             n = jQuery(n);
         */
         /*
-        if (typeof m == "string")
+        if (typeof(m) === "string")
             m = loadBox.find(m);
         else*/ if (m)
             m = jQuery(m);
@@ -2161,7 +2165,7 @@ function HsTree(opts, context) {
         if (tip.length)
             n   = tip.data ( "trigger");
 
-        if (typeof u == "function") {
+        if (typeof(u) === "function") {
             u.call( that, n, m );
             return;
         }
@@ -2199,7 +2203,7 @@ function HsTree(opts, context) {
             continue;
         }
 
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             context.on("click", n, [n, m, u], openHand);
         else if (n)
             n.on("click", [n, m, u], openHand);
@@ -2212,7 +2216,7 @@ function HsTree(opts, context) {
         var u = evt.data[2];
 
         /*
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             n = loadBox.find(n);
         else if (n)
             n = jQuery(n);
@@ -2222,7 +2226,7 @@ function HsTree(opts, context) {
         if (tip.length)
             n   = tip.data ( "trigger");
 
-        if (typeof u == "function" ) {
+        if (typeof(u) === "function") {
             u.call( that, n, m );
             return;
         }
@@ -2259,7 +2263,7 @@ function HsTree(opts, context) {
             continue;
         }
 
-        if (typeof n == "string")
+        if (typeof(n) === "string")
             context.on("click", n, [n, m, u], sendHand);
         else if (n)
             n.on("click", [n, m, u], sendHand);
@@ -2319,7 +2323,7 @@ HsTree.prototype = {
     loadBack : function(rst, pid) {
         rst = hsResponObj(rst );
         var sid = this.getSid();
-        if (rst.__success__ == false) return;
+        if (rst.__success__ === false) return;
         if (rst.list) this.fillList( rst.list, pid );
         this.treeBox.trigger("loadBack", [rst, pid]);
         if (this.treeBox.find("#tree-node-"+sid).length == 0) {
@@ -2374,15 +2378,15 @@ HsTree.prototype = {
 
         n = hsGetValue(info, this.nameKey);
         tab.find(".tree-name").text(n);
-        if (typeof this.noteKey != "undefined") {
+        if (typeof(this.noteKey) !== "undefined") {
             n = hsGetValue(info , this.noteKey);
             nod.find(".tree-name").attr("title", n);
         }
-        if (typeof this.typeKey != "undefined") {
+        if (typeof(this.typeKey) !== "undefined") {
             t = hsGetValue(info , this.typeKey);
             nod.addClass("tree-type-" + t);
         }
-        if (typeof this.cnumKey != "undefined") {
+        if (typeof(this.cnumKey) !== "undefined") {
             n = hsGetValue(info , this.cnumKey);
             tab.find(".tree-cnum").text(n);
             if (n)
@@ -2393,8 +2397,8 @@ HsTree.prototype = {
         }
 
         if (! t) t = "info";
-        if (typeof this["_fill_"+t] != "undefined") {
-            this["_fill_"+t].call(this, tab, info );
+        if (typeof(this["_fill_"+t]) !== "undefined") {
+            this["_fill_"+t].call(this, tab, info);
         }
 
         tab.prependTo(nod);
@@ -2403,7 +2407,7 @@ HsTree.prototype = {
         var nod = lst.closest (".tree-node");
         var arr = lst.children(".tree-node");
 
-        if (typeof cnum == "undefined")
+        if (typeof(cnum) === "undefined")
             cnum  = arr.length;
         if (cnum != arr.length)
             for (var i = arr.length-1; i > cnum-1; i --) {
@@ -2444,7 +2448,7 @@ HsTree.prototype = {
     },
     sendBack : function(btn, rst, data) {
         rst = hsResponObj(rst);
-        if (rst.__success__ == false) return;
+        if (rst.__success__ === false) return;
         var evt = new jQuery.Event("sendBack");
         btn.trigger(evt, [rst, data]);
         if (evt.isDefaultPrevented()) return;
@@ -2504,7 +2508,7 @@ HsTree.prototype = {
     },
 
     getNode  : function(id) {
-        if (typeof id === "object")
+        if (typeof(id) === "object")
             return id.closest(".tree-node" );
         else
             return this.treeBox.find( "#tree-node-" + id );
@@ -2513,7 +2517,7 @@ HsTree.prototype = {
         return this.getNode(id).parent().closest(".tree-node");
     },
     getId    : function(id) {
-        if (typeof id === "object")
+        if (typeof(id) === "object")
             return this.getId(id.attr("id"));
         else
             return id.toString( ).substr(10);
@@ -2550,14 +2554,14 @@ jQuery.fn.extend({
 var _jqAjax = jQuery.ajax;
 var _jqLoad = jQuery.fn.load;
 jQuery.ajax = function(url, settings) {
-    if (typeof url === "object") {
+    if (typeof(url) === "object") {
         settings = url;
-        if (typeof url["url"] != "undefined")
+        if (typeof(url["url"]) !== "undefined")
             url  = url["url"];
     }
-    return _jqAjax( hsFixUri(url), settings );
+    return _jqAjax( hsFixUri( url ), settings );
 };
-jQuery.fn.load = function(url, data, complete) {
+jQuery.fn.load = function(url, data, complete ) {
     if ( jQuery.isFunction(  data  )) {
         complete = data ;
         data = undefined;
@@ -2600,10 +2604,10 @@ jQuery.fn.load = function(url, data, complete) {
     $(document)
     .on("ajaxError", function(evt, xhr, cnf) {
         var rst = hsResponObj(xhr);
-        if (typeof cnf.action === "undefined" ) {
+        if (typeof(cnf.action) === "undefined" ) {
             return;
         }
-        if (typeof cnf.button !== "undefined" ) {
+        if (typeof(cnf.button) !== "undefined" ) {
             $(cnf.button).trigger(cnf.action+"Error", evt, rst);
         }
         else if (cnf.context instanceof HsForm) {
@@ -2889,7 +2893,7 @@ jQuery.fn.load = function(url, data, complete) {
         var url = conf["url"] || btn.attr("data-url");
         var box = conf["box"] || btn.attr("data-target");
 
-        if (typeof box == "string")
+        if (typeof(box) === "string")
             box = box.charAt(0) == '$' ? $(box.substr(1), btn): $(box);
         else if (! box)
             box = btn.siblings(".choose-box");
