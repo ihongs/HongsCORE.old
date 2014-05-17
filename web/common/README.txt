@@ -22,44 +22,25 @@
 
 注: 将以上代码加入 head 中，注意 link 的 href 和 script 的 src 路. common/auth 为框架提供的权限列表.
 
-#### HsForm 使用 ####
+#### HsTree 树型组件的用法 ####
 
-<div id="hcum_user_form">
-    <object class="config" name="hsForm" data="">
-        <param name="loadUrl" value="hcum/User/Info.act"/><!-- 表单数据加载动作地址 -->
-        <param name="saveUrl" value="hcum/User/Save.act"/><!-- 表单数据保存动作地址 -->
+<div id="hcum_dept_tree">
+    <object class="config" name="hsTree" data="">
+        <param name="loadUrl" value="hcum/Dept/Tree.act"/>
+        <param name="linkUrls[]" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
+        <param name="openUrls[]" value="['.create','hcum/dept/form.html?pid={ID}','#hcum-user-pane']"/>
+        <param name="openUrls[]" value="['.modify','hcum/dept/form.html?id={ID}','.#hcum-user-pane']"/>
+        <param name="sendUrls[]" value="['.remove','hcum/Dept/Remove.act']"/>
     </object>
-    <form action="" method="POST">
-        <input type="hidden" name="id"/>
-        <input type="hidden" name="a_hcum_user_dept.0.dept_id" data-pn="dept_id"/><!-- 通过 data-pn 在打开此表单的参数中提取值 -->
-        <div class="form-group">
-            <label class="control-label">邮箱</label>
-            <input type="email" name="username" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">口令</label>
-            <input type="password" name="password" class="form-control" data-validate="validate"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">重复口令</label>
-            <input type="password" name="password2" class="form-control" data-repeat="password" data-message="请重复输入口令" placeholder="请重复输入口令"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">昵称</label>
-            <input type="text" name="name" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">备注</label>
-            <textarea name="note" class="form-control"></textarea>
-        </div>
-        <div>
-            <button type="submit" class="ensure btn btn-primary">提交</button>
-            <button type="button" class="cancel btn btn-link">取消</button>
-        </div>
-    </form>
+    <div class="tool-box btn-group">
+        <button  type="button" class="create btn btn-default">添加部门</button>
+        <button  type="button" class="modify for-select btn btn-default">修改</button>
+        <button  type="button" class="remove for-select btn btn-danger" >删除</button>
+    </div>
+    <div class="tree-box"></div>
 </div>
 
-#### HsList 使用 ####
+#### HsList 列表组件的用法 ####
 
 <div id="hcum-user-list">
     <object class="config" name="hsList" data="">
@@ -101,20 +82,45 @@
     <div class="page-box"></div>
 </div>
 
-#### HsTree 使用 ####
+#### HsForm 表单组件的用法 ####
 
-<div id="hcum_dept_tree">
-    <object class="config" name="hsTree" data="">
-        <param name="loadUrl" value="hcum/Dept/Tree.act"/>
-        <param name="linkUrls[]" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
-        <param name="openUrls[]" value="['.create','hcum/dept/form.html?pid={ID}','#hcum-user-pane']"/>
-        <param name="openUrls[]" value="['.modify','hcum/dept/form.html?id={ID}','.#hcum-user-pane']"/>
-        <param name="sendUrls[]" value="['.remove','hcum/Dept/Remove.act']"/>
+<div id="hcum_user_form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcum/User/Info.act"/><!-- 表单数据加载动作地址 -->
+        <param name="saveUrl" value="hcum/User/Save.act"/><!-- 表单数据保存动作地址 -->
     </object>
-    <div class="tool-box btn-group">
-        <button  type="button" class="create btn btn-default">添加部门</button>
-        <button  type="button" class="modify for-select btn btn-default">修改</button>
-        <button  type="button" class="remove for-select btn btn-danger" >删除</button>
-    </div>
-    <div class="tree-box"></div>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="a_hcum_user_dept.0.dept_id" data-pn="dept_id"/><!-- 通过 data-pn 在打开此表单的参数中提取值 -->
+        <div class="form-group">
+            <label class="control-label">邮箱</label>
+            <input type="email" name="username" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">口令</label>
+            <input type="password" name="password" class="form-control" data-validate="validate"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">重复口令</label>
+            <input type="password" name="password2" class="form-control" data-repeat="password" data-message="请重复输入口令" placeholder="请重复输入口令"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">昵称</label>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">备注</label>
+            <textarea name="note" class="form-control"></textarea>
+        </div>
+        <div>
+            <button type="submit" class="ensure btn btn-primary">提交</button>
+            <button type="button" class="cancel btn btn-link">取消</button>
+        </div>
+    </form>
 </div>
+
+#### HsOpen 打开的浮层设置 ####
+
+<object class="config" name="hsInit" data="">
+    <param name="width" value="600px"/><!-- 定义浮层宽度为 600px -->
+</object>
