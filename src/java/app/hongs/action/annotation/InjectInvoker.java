@@ -11,17 +11,16 @@ import java.lang.annotation.Annotation;
  * 数据追加处理器
  * @author Hong
  */
-public class DataInvoker {
+public class InjectInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
-        Data datums       = (Data) anno;
-        Data.TYPES   type = datums.type();
-        String       conf = datums.conf();
-        String[]     keys = datums.keys();
-
-        Map<String,Object> map = new HashMap();
+        Inject       ann  = (Inject) anno;
+        Inject.TYPES type = ann.type();
+        String       conf = ann.conf();
+        String[]     keys = ann.keys();
 
         DatumsConfig cnf = DatumsConfig.getInstance(conf);
+        Map<String,Object> map = new HashMap();
         for(String key : keys) {
             String val;
             String[] arr = key.split( "=", 2 );
@@ -33,7 +32,7 @@ public class DataInvoker {
             }
         }
 
-        if (type == Data.TYPES.REQ) {
+        if (type == Inject.TYPES.REQ) {
             Map data = helper.getRequestData();
             Tree.setDepth(data, map);
             chain.doAction();

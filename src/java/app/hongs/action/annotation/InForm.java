@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionAnnotation(FormDataInvoker.class)
-public @interface FormData {
+@ActionAnnotation(InFormInvoker.class)
+public @interface InForm {
+    String[] keys();
     String   conf() default "default";
     String   lang() default "default";
-    String[] keys() default {};
 }

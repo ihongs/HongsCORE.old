@@ -6,13 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 表单验证(未开发)
+ * 数据校验
  * @author Hong
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionAnnotation(VerifyInvoker.class)
+@ActionAnnotation(InjectInvoker.class)
 public @interface Verify {
-    String   conf() default "default";
-    String[] keys() default {};
+    String[] rules();
+    String   data() default "";
+    String   lang() default "default";
 }

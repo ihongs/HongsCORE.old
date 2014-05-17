@@ -6,16 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 数据追加
+ * 处理列表中的选择数据
  * @author Hong
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionAnnotation(DataInvoker.class)
-public @interface Data {
-    TYPES    type() default TYPES.RSP;
-    String   conf() default "default";
+@ActionAnnotation(InListInvoker.class)
+public @interface InList {
     String[] keys() default {};
-    
-    public static enum TYPES { REQ, RSP }
+    String   conf() default "default";
+    String   lang() default "default";
 }
