@@ -103,14 +103,11 @@ app.xxxx.model      用户模型
 
 [通用请求参数解释]
 
-id      主键(单个)
-id[]    主键(多个)
-pid     父id(上级)
+find    搜索字词
+sort    排序字段
 page    当前页码
 rows    额定行数
 cols[]  限定列名
-sort    排序字段
-find    搜索关键词
 
 [特定请求参数规则]
 
