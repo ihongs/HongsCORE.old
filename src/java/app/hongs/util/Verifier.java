@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * </pre>
  */
 public class Verifier {
-    public static class Rule {
+    private static class Rule {
         String name;
         String rule;
         List   args;
@@ -39,16 +39,21 @@ public class Verifier {
         }
     }
     
-    private CoreLanguage        lang;
-    private Map<String, Object> data;
-    private List<Rule>          rules;
+    private static class Item {
+        String name;
+        List<String> values;
+        public Item(String name, List<String> values) {
+            this.name = name;
+            this.values = values;
+        }
+    }
+    
+    private CoreLanguage lang;
+    private List<Rule> rules1;
+    private List<Rule> rules2;
     
     public void setLang(CoreLanguage lang) {
         this.lang = lang;
-    }
-    
-    public void setData(Map<String,Object> data) {
-        this.data = data;
     }
     
     public void setRules(String... rules) throws HongsException {
@@ -57,7 +62,8 @@ public class Verifier {
         String name;
         String argz;
         List   args;
-        this.rules = new ArrayList();
+        this.rules1 = new ArrayList();
+        this.rules2 = new ArrayList();
         for (String rule : rules) {
             mat = pat.matcher(rule);
             if (! mat.matches()) {
@@ -69,52 +75,104 @@ public class Verifier {
             argz = mat.group(4);
             args = argz == null ? new ArrayList() : (List)JSON.parse("["+argz+"]");
             
-            this.rules.add(new Rule(name, rule, args));
+            if (name.indexOf('*') == -1) {
+                this.rules1.add(new Rule(name, rule, args));
+            }
+            else {
+                this.rules2.add(new Rule(name, rule, args));
+            }
         }
     }
     
-    public Map<String, List<String>> verify() throws HongsException {
+    private void addError(String name, String error, Map<String, List<String>> errors) {
+        List<String> errorz = errors.get(name);
+        if (errorz == null ) {
+            errorz = new ArrayList();
+            errors.put(name, errorz);
+        }
+        errorz.add(error);
+    }
+    
+    private Map<String, List<String>> getValues(Map<String, Object> data) {
+        Map<String, List<String>> values = new LinkedHashMap();
+        Tree.walk4req(new Each4Req() {
+            public void eachItem(String name, String value) {
+                addError(name, value, values);
+            }
+        }, data);
+        return values;
+    }
+    
+    private List<Item> getValues(String name, Map<String, List<String>> values) {
+        name = "^"+Str.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
+        Pattern pa = Pattern.compile(name);
+        List<Item> items = new ArrayList();
+        List<String> valuez;
+        for (Map.Entry et : values.emptySet()) {
+            name   = (String) et.getKey();
+            valuez = (List<String>) et.getValue();
+            if (pa.matcher(mn).matches()) {
+                items.add(new Item(name, valuez));
+            }
+        }
+        return items;
+    }
+    
+    public Map<String, List<String>> verify(Map<String, Object> data) throws HongsException {
         Map<String, List<String>> errors = new LinkedHashMap();
-        List   errorz;
-        String error ;
-        for (Rule rule : rules) {
-                error = verify(rule);
-                if (error  == null ) {
-                    continue;
+        Mpa<Stirng, List<String>> values = getValues(data);
+        List<String> valuez;
+        List<Item> items;
+        String error;
+        
+        for (Rule rule : rules1) {
+            valuez = values.get(rule.name);
+            
+            if (valuez == null) {
+                if (rule.rule.equals("required")) {
+                    error = required(null);
+                    addError(rule.name, error, errors);
                 }
-                errorz = errors.get(rule.name);
-                if (errorz == null ) {
-                    errorz  = new ArrayList( );
-                    errors.put(rule.name, errorz);
+                else
+                if (rule.rule.equals("requires")) {
+                    error = requires(null);
+                    addError(rule.name, error, errors);
                 }
-                errorz.add(error);
-        }
-        return errors;
-    }
-    
-    public String verify(Rule rule) throws HongsException {
-        Object value = data.get(rule.name);
-        if (!(value instanceof Collection)) {
-            verify(rule, value.toString( ));
-            return null;
-        }
-        
-        Collection  valua = (Collection) value;
-        
-        if (value == null|| valua.isEmpty()
-        &&  rule.rule.equals( "required" )) {
-            requires(null);
-            return null;
-        }
-        
-        for(Object valub : valua) {
-            String error = verify(rule, valub.toString());
-            if ( error  !=  null) {
-                return error;
+            }
+            else
+            for (String value : valuez) {
+                error = verify(rule, value);
+                if (error != null) {
+                    addError(rule.name, error, errors);
+                }
             }
         }
         
-        return null;
+        // 带通配符的规则
+        for (Rule rule : rules2) {
+            items = getValues(rule.name, values);
+            
+            if (items.isEmtpy()) {
+                if (rule.rule.equals("required")) {
+                    error = required(null);
+                    addError(rule.name, error, errors);
+                }
+                else
+                if (rule.rule.equals("requires")) {
+                    error = requires(null);
+                    addError(rule.name, error, errors);
+                }
+            }
+            else
+            for (Item item : items) {
+                error = verify(rule, item.value);
+                if (error != null) {
+                    addError(item.name, error, errors);
+                }
+            }
+        }
+        
+        return errors;
     }
     
     public String verify(Rule rule, String value) throws HongsException {
@@ -142,7 +200,7 @@ public class Verifier {
             case "maxLength":
                 return maxLength(value, (Integer)rule.args.get(0));
             case "isMatch":
-                return isMatch(value, (String)rule.args.get(0), (String)rule.args.get(1));
+                return isMatch (value, (String)rule.args.get(0), (String)rule.args.get(1));
             case "isRepeat":
                 return isRepeat(value, (String)rule.args.get(0));
             case "isUnique":
