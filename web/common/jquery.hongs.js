@@ -45,7 +45,7 @@ node-TYPE       节点类型, TYPE为类型标识, 在.tree-node上
 choose-btn      选择按钮, 用于选择组件中, 下同
 choose-box      选项区域
 choose-tip      选择窗口
-multiple        多选窗口
+choose-mul      多选窗口
 option-box
 option-txt
 option-del
@@ -2911,12 +2911,12 @@ jQuery.fn.load = function(url, data, complete) {
                 var tip = $(this);
                 tip.data("fill_data", dat)
                    .addClass("choose-tip")
-                .toggleClass("multiple", /(\[\]|\.)$/.test(name)) // 名称以[]或.结尾则为多选
+                .toggleClass("choose-mul", /(\[\]|\.)$/.test(name)) // 名称以[]或.结尾则为多选
                 .on("chooseBack", function() {
                     box.data("fill_func").call(form, box, dat, name);
                 })
                 .on("chooseItem", function(evt, id, txt) {
-                    if (!tip.hasClass("multiple")) {
+                    if (!tip.hasClass("choose-mul")) {
                         dat = {};
                         if (txt !== undefined)
                             dat[id] = txt ;
@@ -3016,21 +3016,21 @@ jQuery.fn.load = function(url, data, complete) {
 
     self.hsFillListChoose = function(td, v, n) {
         var box = td.closest(".load-box");
+
         // 初次进入时判断单选还是多选
-        if (this._multiple === undefined) {
-            this._multiple = box.hasClass( "multiple" );
-            if (!this._multiple) box.find(".check-all").hide();
+        if (this._choose_mul === undefined) {
+            this._choose_mul = box.hasClass("choose-mul");
+            if (!this._choose_mul) box.find(".check-all").hide();
         }
 
         // 填充选择控件
-        if (!this._multiple)
-            HsList.prototype._fill__radio.call(this, td, v, n);
+        if (!this._choose_mul)
+            HsList.prototype._fill__radio.call( this, td, v, n );
         else
-            HsList.prototype._fill__check.call(this, td, v, n);
+            HsList.prototype._fill__check.call( this, td, v, n );
 
         // 判断是否选中
-        if (box.data("fill_data")[v] !== undefined) {
+        if (box.data("fill_data")[v] !== undefined)
             td.find(".check-one").prop("checked", true).change();
-        }
     };
 })(jQuery);
