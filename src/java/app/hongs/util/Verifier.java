@@ -93,17 +93,7 @@ public class Verifier {
         errorz.add(error);
     }
     
-    protected Map<String, List<String>> getValues(Map<String, Object> data) {
-        Map<String, List<String>> values = new LinkedHashMap();
-        Tree.walk4req(new Each4Req() {
-            public void eachItem(String name, String value) {
-                addError(name, value, values);
-            }
-        }, data);
-        return values;
-    }
-    
-    protected List<Item> getValues(String name, Map<String, List<String>> values) {
+    protected List<Item> getItems(String name, Map<String, List<String>> values) {
         name = "^"+Str.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
         Pattern pa = Pattern.compile(name);
         List<Item> items = new ArrayList();
@@ -119,8 +109,18 @@ public class Verifier {
     }
     
     public Map<String, List<String>> verify(Map<String, Object> data) throws HongsException {
-        Map<String, List<String>> errors = new LinkedHashMap();
-        Mpa<Stirng, List<String>> values = getValues(data);
+        Map<String, List<String>> values = new LinkedHashMap();
+        Tree.walk4req(new Each4Req() {
+            public void eachItem(String name, String value) {
+                addError(name, value, values);
+            }
+        }, data);
+        
+        return verify(values);
+    }
+    
+    public Map<String, List<String>> verify(Map<String, List<String>> values) throws HongsException {
+        Map <String, List<String>> errors = new LinkedHashMap();
         List<String> valuez;
         List<Item> items;
         String error;
@@ -150,7 +150,7 @@ public class Verifier {
         
         // 带通配符的规则
         for (Rule rule : rules2) {
-            items = getValues(rule.name, values);
+            items = getItems (rule.name, values);
             
             if (items.isEmtpy()) {
                 if (rule.rule.equals("required")) {
