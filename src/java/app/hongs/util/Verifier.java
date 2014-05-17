@@ -52,7 +52,7 @@ public class Verifier {
     }
     
     public void setRules(String... rules) throws HongsException {
-        Pattern pat = Pattern.compile("^([^=]+)=([^\\(\\)]+)(\\((.*)\\))?$");
+        Pattern pat = Pattern.compile("^([^:]+):([^\\(\\)]+)(\\((.*)\\))?$");
         Matcher mat;
         String name;
         String argz;
