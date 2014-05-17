@@ -29,10 +29,9 @@ public class VerifyInvoker {
             dat = (Map<String, Object>)Tree.getValue(dat, data);
         }
         Verifier ver = new Verifier();
-        ver.setLang(lng);
-        ver.setData(dat);
+        ver.setLang (lng  );
         ver.setRules(rules);
-        Map<String, List<String>> errors = ver.verify();
+        Map<String,List<String>> errors = ver.verify(dat);
         
         if (errors.isEmpty()) {
             chain.doAction();
