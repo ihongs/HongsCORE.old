@@ -27,13 +27,13 @@ public final class Str
    * @param str 原字符串
    * @return 转换了的字符串
    */
-  private static String escapeRegular(String str)
+  public static String escapeRegular(String str)
   {
     StringBuilder sb = new StringBuilder();
          char[]   cs = str.toCharArray();
     for (char c : cs)
     {
-      sb.append(String.format("\\u%04x", (int)c));
+      sb.append(String.format("\\u%04x",(int)c));
     }
     return sb.toString();
   }
@@ -45,9 +45,9 @@ public final class Str
    * @param str 原字符串
    * @return 转换了的字符串
    */
-  private static String escapeReplace(String str)
+  public static String escapeReplace(String str)
   {
-    return str.replaceAll("(\\\\|\\$)", "\\\\$1");
+    return str.replaceAll("(\\\\|\\$)","\\\\$1");
   }
 
   /**
