@@ -222,11 +222,14 @@ function hsResponObj(rst, qut) {
             };
         }
     }
-    if (typeof(rst) === "object" && ! qut) {
+    if (typeof(rst) === "object") {
         if (typeof(rst.__success__) === "undefined") {
             rst.__success__ = true;
         }
-        if (typeof(rst.__message__) !== "undefined") {
+        if (typeof(rst.__message__) === "undefined") {
+            rst.__message__ =  "" ;
+        }
+        if (! qut) {
             if (rst.__success__) {
                 if (rst.__message__) {
                     hsNote(rst.__message__, 'alert-success');
@@ -248,6 +251,7 @@ function hsResponObj(rst, qut) {
             else {
                 location.reload(  );
             }
+            delete rst.__refersh__ ;
         }
     }
     return rst;
