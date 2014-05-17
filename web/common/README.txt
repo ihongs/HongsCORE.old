@@ -24,7 +24,7 @@
 
 #### HsTree 树型组件的用法 ####
 
-<div id="hcum_dept_tree">
+<div id="hcum-dept-tree">
     <object class="config" name="hsTree" data="">
         <param name="loadUrl" value="hcum/Dept/Tree.act"/>
         <param name="linkUrls[]" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
@@ -84,7 +84,7 @@
 
 #### HsForm 表单组件的用法 ####
 
-<div id="hcum_user_form">
+<div id="hcum-user-form">
     <object class="config" name="hsForm" data="">
         <param name="loadUrl" value="hcum/User/Info.act"/><!-- 表单数据加载动作地址 -->
         <param name="saveUrl" value="hcum/User/Save.act"/><!-- 表单数据保存动作地址 -->
