@@ -236,4 +236,101 @@ public class Tree
     }
   }
 
+  /**
+   * 遍历每个节点
+   * 重写 eachLeaf 以处理每个叶子节点
+   * 重新 eachLimb 以处理每个枝干节点
+   */
+  public static class Each() {
+    public Each(Map map) {
+      each(new ArrayList(), map);
+    }
+    
+    public void each(List path, Object value) {
+      if (value instanceof Map ) {
+        Iterator it = ((Map) value).entrySet().iterator();
+        while (it.hasNext()) {
+          Map.Entry et = (Map.Entry) it.next();
+          Object k = et.getKey(  );
+          Object v = et.getValue();
+          
+          List p = path.clone();
+          p.add(k);
+          
+          each(p, v);
+        }
+      }
+      else
+      if (value instanceof List) {
+        Iterator it = ((List)value).iterator();
+        int k = 0 ;
+        while (it.hasNext()) {
+          Object v = it.next ();
+          
+          List p = path.clone();
+          p.add(k);
+          k = 1+k ;
+          
+          each(p, v);
+        }
+      }
+      else
+      if (path.size() > 0) {
+        eachLeaf(path, value);
+        return;
+      }
+      if (path.size() > 0) {
+        eachLimb(path, value);
+      }
+    }
+    
+    public void eachLeaf(List path, Object value) {}
+    
+    public void eachLimb(List path, Object value) {}
+  }
+
+  /**
+   * 遍历请求数据的所有条目
+   * 重写 eachItem 以处理每个请求条目
+   */
+  public static class Each4Req {
+    public Each4Req(Map map) {
+      each(new StringBuilder(), map);
+    }
+    
+    public void each(StringBuilder path, Object value) {
+      if (value instanceof Map ) {
+        Iterator it = ((Map) value).entrySet().iterator();
+        while (it.hasNext()) {
+          Map.Entry et = (Map.Entry) it.next();
+          Object k = et.getKey(  );
+          Object v = et.getValue();
+          
+          StringBuilder p = path.clone();
+          p.append(".")
+           .append( k );
+          
+          each(p, v);
+        }
+      }
+      else
+      if (value instanceof List) {
+        Iterator it = ((List)value).iterator();
+        while (it.hasNext()) {
+          Object v = it.next ();
+          
+          StringBuilder p = path.clone();
+          p.append(".");
+          
+          each(p, v);
+        }
+      }
+      else {
+        eachItem(path.substring(1), value.toString());
+      }
+    }
+    
+    public void eachItem(String name, String value) {}
+  }
+
 }
