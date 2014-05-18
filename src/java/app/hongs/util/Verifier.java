@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 验证器
+ * 校验器
  * @author Hongs
  * 
  * <h3>异常代码</h3>
