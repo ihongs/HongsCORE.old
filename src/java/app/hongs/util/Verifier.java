@@ -131,7 +131,7 @@ public class Verifier {
             +"["+idx+"] is not '"+T.class.getName()+"'");
     }
     
-    public Map<String, List<String>> verify(Map<String, Object> data) throws HongsException {
+    public Map<String, List<String>> verify(Map data) throws HongsException {
         Map<String, List<String>> values = new LinkedHashMap();
         Tree.walk4req(new Each4Req() {
             public void eachItem(String name, String value) {
