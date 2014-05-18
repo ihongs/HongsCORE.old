@@ -87,16 +87,16 @@ public class Verifier {
         }
     }
     
-    protected void addError(String name, String error, Map<String, List<String>> errors) {
-        List<String> errorz = errors.get(name);
-        if (errorz == null ) {
-            errorz = new ArrayList();
-            errors.put(name, errorz);
+    protected void addValue(String name, Object value, Map<String, List> values) {
+        List valuez = values.get(name);
+        if (valuez == null) {
+            valuez = new ArrayList();
+            values.put(name, valuez);
         }
-        errorz.add(error);
+        valuez.add(value);
     }
     
-    protected List<String> getNames(String name, Map<String, List<String>> values) {
+    protected List<String> getNames(String name, Map<String, List> values) {
         name = "^"+Str.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
         Pattern pa = Pattern.compile(name);
         List<String> names = new ArrayList();
@@ -135,7 +135,7 @@ public class Verifier {
         Map<String, List<String>> values = new LinkedHashMap();
         Tree.walk4req(new Each4Req() {
             public void eachItem(String name, String value) {
-                addError(name, value, values);
+                addValue(name, value, values);
             }
         }, data);
         
@@ -148,13 +148,13 @@ public class Verifier {
         String error;
         
         for (Rule rule : rules1) {
-            addError(rule.name, rule, rules3);
+            addValue(rule.name, rule, rules3);
         }
         
         for (Rule rule : rules2) {
             List<String> names = getNames(rule.name, values);
             for (String  name  : names) {
-                addError(name , rule, rules3);
+                addValue(name , rule, rules3);
             }
         }
         
@@ -166,12 +166,12 @@ public class Verifier {
                 if (valuez==null || valuez.isEmtpy()) {
                     if (rule.rule.equals("required")) {
                         error = required(null);
-                        addError(rule.name, error, errors);
+                        addValue(rule.name, error, errors);
                     }
                     else
                     if (rule.rule.equals("requires")) {
                         error = requires(null);
-                        addError(rule.name, error, errors);
+                        addValue(rule.name, error, errors);
                     }
                 }
                 else
@@ -179,7 +179,7 @@ public class Verifier {
                     item  = new Item(name, value, values);
                     error = verify  (item, rule);
                     if (error != null) {
-                        addError(rule.name, error, errors);
+                        addValue(rule.name, error, errors);
                     }
                 }
             }
