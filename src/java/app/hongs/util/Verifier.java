@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
  * 0x1111 规则格式错误
  * 0x1113 找不到规则的类
  * 0x1115 找不到规则的方法
+ * 0x1117 参数与要求的格式不匹配
  * </pre>
  */
 public class Verifier {
@@ -69,7 +70,7 @@ public class Verifier {
         for (String rule : rules) {
             mat = pat.matcher(rule);
             if (! mat.matches()) {
-                throw new HongsException(0x1201, "Rule format error, rule: "+rule);
+                throw new HongsException(0x1111, "Rule format error, rule: "+rule);
             }
             
             name = mat.group(1);
@@ -125,7 +126,7 @@ public class Verifier {
         if (val instanceof T) {
             return (T) val;
         }
-        throw new HongsException(0x1207,
+        throw new HongsException(0x1117,
             "Arg type for "+rule.name+":"+rule.rule
             +"["+idx+"] is not '"+T.class.getName()+"'");
     }
