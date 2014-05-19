@@ -34,7 +34,7 @@ public class TableCols
     this.table = table;
     if (table.db.name != null && table.db.name.length()!=0)
     {
-      this.init("dc-" +table.db.name+ "." +table.tableName);
+      this.init("dc." +table.db.name+ "." +table.tableName);
     }
     else
     {
@@ -58,27 +58,26 @@ public class TableCols
       {
         Map column = new HashMap();
         column.put("type",            md.getColumnType(i));
-        column.put("typeName",        md.getColumnTypeName(i));
-        column.put("className",       md.getColumnClassName(i));
-        column.put("displaySize",     md.getColumnDisplaySize(i));
-        column.put("precision",       md.getPrecision(i));
+        column.put("size",            md.getPrecision (i));
         column.put("scale",           md.getScale(i));
-        column.put("isSigned",        md.isSigned(i));
-        column.put("isCurrency",      md.isCurrency(i));
-        column.put("isNullable",      md.isNullable(i));
-        column.put("isWritable",      md.isWritable(i));
-        column.put("isReadOnly",      md.isReadOnly(i));
-        column.put("isCaseSensitive", md.isCaseSensitive(i));
-        column.put("isAutoIncrement", md.isAutoIncrement(i));
+        column.put("signed",          md.isSigned(i));
+        column.put("nullable",        md.isNullable(i));
+        column.put("autoIncrement",   md.isAutoIncrement(i));
+        column.put("caseSensitive",   md.isCaseSensitive(i));
 
         // 在这里没什么意义的属性:
         /*
         column.put("catalogName",     md.getCatalogName(i));
         column.put("schemaName",      md.getSchemaName(i));
         column.put("tableName",       md.getTableName(i));
-        column.put("columnName",      md.getColumnName(i));
-        column.put("columnLabel",     md.getColumnLable(i));
-        column.put("isSearchable",    md.isSearchable(i));
+        column.put("label",           md.getColumnLable(i));
+        column.put("typeName",        md.getColumnTypeName(i));
+        column.put("className",       md.getColumnClassName(i));
+        column.put("displaySize",     md.getColumnDisplaySize(i));
+        column.put("readOnly",        md.isReadOnly(i));
+        column.put("writable",        md.isWritable(i));
+        column.put("currency",        md.isCurrency(i));
+        column.put("searchable",      md.isSearchable(i));
         */
 
         this.columns.put(md.getColumnName(i), column);

@@ -490,18 +490,18 @@ public class Table
    * <pre>
    * 会进行校验的类型:
    * CHAR, VARCHAR, LONGVARCHAR, NCHAR, NVARCHAR, NLONGVARCHAR
-   * TINYINT, SMALLINT, INTEGER, BIGINT
+   * INTEGER, TINYINT, SMALLINT, BIGINT
    * FLOAT, DOUBLE, NUMERIC, DECIMAL
    * DATE, TIME, TIMESTAMP
    * 推荐构建数据库时采用以上类型
    * 日期时间格式采用默认配置定义
    * 通过配置"core.dsiable.check.values=true"来关闭检查
-   * 通过配置"core.default.date.format=日期格式串"来设置可识别的日期格式, 已移到语言
-   * 通过配置"core.defualt.time.format=时间格式串"来设置可识别的时间格式, 已移到语言
+   * 通过语言"core.default.date.format=日期格式串"来设置可识别的日期格式
+   * 通过语言"core.defualt.time.format=时间格式串"来设置可识别的时间格式
    * </pre>
    *
    * @param values
-   * @param isNew
+   * @param isNew 新增还是修改
    * @return 可供提交的数据
    * @throws app.hongs.HongsException
    */
@@ -509,14 +509,16 @@ public class Table
     throws HongsException
   {
     /**
-     * 日期时间格式
-     */
-    String dateFormat = null, timeFormat = null, dateTimeFormat = null;
-
-    /**
      * 是否关闭检查
      */
-    boolean disable = this.getDisableCheck(values);
+    boolean disabled = isDisabledCheck(values);
+
+    /**
+     * 日期时间格式
+     */
+    String dateFormat = null,
+           timeFormat = null,
+       dateTimeFormat = null;
 
     /**
      * 获取字段信息
@@ -547,7 +549,7 @@ public class Table
             value =  null;
 
         if (value == null
-        && (Integer)column.get("isNullable")
+        && (Integer)column.get("nullable")
         ==  java.sql.ResultSetMetaData.columnNoNulls)
         {
           throw nullException(namc);
@@ -556,8 +558,8 @@ public class Table
       else
       {
         if (isNew == true
-        &&!(Boolean)column.get("isAutoIncrement")
-        && (Integer)column.get("isNullable")
+        &&!(Boolean)column.get("autoIncrement")
+        && (Integer)column.get("nullable")
         ==  java.sql.ResultSetMetaData.columnNoNulls)
         {
           throw nullException(namc);
@@ -569,7 +571,7 @@ public class Table
        * 如果关闭了检查或值不是基础类型, 则跳过数据检查
        * 通常POST或GET过来的总是String, 而JSON过来的是String/Number/Boolean/Null
        */
-      if (disable || !(value instanceof String || value instanceof Number))
+      if (disabled || !(value instanceof String || value instanceof Number))
       {
         mainValues.put(namc, value);
         continue;
@@ -577,32 +579,32 @@ public class Table
 
       String valueStr = value.toString().trim();
 
-      int precision = (Integer)column.get("precision");
+      int type  = (Integer)column.get("type");
+      int size  = (Integer)column.get("size");
       int scale = (Integer)column.get("scale");
-      int type = (Integer)column.get("type");
 
       // 判断字符串类型
       if (type == Types.CHAR  || type == Types.VARCHAR  || type == Types.LONGVARCHAR
        || type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR)
       {
         // 判断精度
-        if (valueStr.length() > precision)
+        if (valueStr.length() > size)
         {
-          throw precisionException(namc, valueStr, precision);
+          throw sizeException(namc, valueStr, size);
         }
 
         mainValues.put(namc, valueStr);
       }
 
       // 判断整型数值
-      else if (type == Types.TINYINT || type == Types.SMALLINT || type == Types.INTEGER || type == Types.BIGINT)
+      else if (type == Types.INTEGER || type == Types.TINYINT || type == Types.SMALLINT || type == Types.BIGINT)
       {
         if (!valueStr.matches("^[\\-+]?[0-9]+$"))
         {
           throw intException(namc, valueStr);
         }
 
-        if (!(Boolean)column.get("isSigned") && valueStr.startsWith("-"))
+        if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
         {
           throw unsignedException(namc, valueStr);
         }
@@ -615,9 +617,9 @@ public class Table
         String valueStr2 = df.format(Math.abs(valueNum));
 
         // 判断精度
-        if (valueStr2.length() > precision)
+        if (valueStr2.length() > size)
         {
-          throw precisionException(namc, valueStr, precision);
+          throw sizeException(namc, valueStr, size);
         }
 
         mainValues.put(namc, valueNum);
@@ -631,7 +633,7 @@ public class Table
           throw floatException(namc, valueStr);
         }
 
-        if (!(Boolean)column.get("isSigned") && valueStr.startsWith("-"))
+        if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
         {
           throw unsignedException(namc, valueStr);
         }
@@ -656,9 +658,9 @@ public class Table
           /**
            * 判断精度
            */
-          if (valueStr2.length() > precision)
+          if (valueStr2.length() > size)
           {
-            throw precisionException(namc, valueStr, precision);
+            throw sizeException(namc, valueStr, size);
           }
         }
         else
@@ -679,9 +681,9 @@ public class Table
           /**
            * 判断精度
            */
-          if (allLen > precision)
+          if (allLen > size)
           {
-            throw precisionException(namc, valueStr, precision);
+            throw sizeException(namc, valueStr, size);
           }
 
           /**
@@ -689,7 +691,7 @@ public class Table
            */
           if (subLen > scale)
           {
-            throw scaleException(namc, valueStr, precision);
+            throw scaleException(namc, valueStr, size);
           }
         }
 
@@ -712,7 +714,7 @@ public class Table
         {
           if (dateFormat == null)
           {
-            dateFormat = this.getDatimeFormat(values, "date");
+            dateFormat = getDatimeFormat(values, "date");
           }
           SimpleDateFormat sdf = new java.text.SimpleDateFormat(dateFormat);
 
@@ -722,7 +724,7 @@ public class Table
           }
           catch (ParseException ex)
           {
-            throw dateTimeException(namc, valueStr, dateFormat);
+            throw datetimeException(namc, valueStr, dateFormat);
           }
 
           mainValues.put(namc, value);
@@ -745,7 +747,7 @@ public class Table
         {
           if (timeFormat == null)
           {
-            timeFormat = this.getDatimeFormat(values, "time");
+            timeFormat = getDatimeFormat(values, "time");
           }
           SimpleDateFormat sdf = new java.text.SimpleDateFormat(timeFormat);
 
@@ -755,7 +757,7 @@ public class Table
           }
           catch (ParseException ex)
           {
-            throw dateTimeException(namc, valueStr, timeFormat);
+            throw datetimeException(namc, valueStr, timeFormat);
           }
 
           mainValues.put(namc, value);
@@ -778,7 +780,7 @@ public class Table
         {
           if (dateTimeFormat == null)
           {
-            dateTimeFormat = this.getDatimeFormat(values, "datetime");
+            dateTimeFormat = getDatimeFormat(values, "datetime");
           }
           SimpleDateFormat sdf = new java.text.SimpleDateFormat(dateTimeFormat);
 
@@ -788,7 +790,7 @@ public class Table
           }
           catch (ParseException ex)
           {
-            throw dateTimeException(namc, valueStr, dateTimeFormat);
+            throw datetimeException(namc, valueStr, dateTimeFormat);
           }
 
           mainValues.put(namc, value);
@@ -835,14 +837,14 @@ public class Table
 
   //** 私有方法 **/
 
-  private static boolean getDisableCheck(Map values)
+  private static boolean isDisabledCheck(Map values)
   {
-    String key = "__disable_check__";
+    String key = "__DISABLE_CHECK__";
     if (values.containsKey(key))
     {
       if (values.get(key) instanceof Boolean)
       {
-        return !(Boolean)values.remove(key);
+        return ! (Boolean) values.remove(key);
       }
     }
 
@@ -852,7 +854,7 @@ public class Table
 
   private static String getDatimeFormat(Map values, String type)
   {
-    String key = "__"+type+"_format__";
+    String key = "__"+type.toUpperCase()+"_FORMAT__";
     if (values.containsKey(key))
     {
       if (values.get(key) instanceof String)
@@ -861,17 +863,20 @@ public class Table
       }
     }
 
-    String dftFmt;
-    if ("time".equals(type))
-      dftFmt = "HH:mm:ss";
+    String dfmt;
+    if ("time".equals(type)) {
+      dfmt = "HH:mm:ss";
+    }
     else
-    if ("date".equals(type))
-      dftFmt = "yyyy/MM/dd";
-    else
-      dftFmt = "yyyy/MM/dd HH:mm:ss";
+    if ("date".equals(type)) {
+      dfmt = "yyyy/MM/dd";
+    }
+    else {
+      dfmt = "yyyy/MM/dd HH:mm:ss";
+    }
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreLanguage.class);
-    return conf.getProperty("core.default."+type+".format", dftFmt);
+    CoreLanguage conf = (CoreLanguage)Core.getInstance(CoreLanguage.class);
+    return conf.getProperty("core.default."+type+".format", dfmt);
   }
 
   private HongsException nullException(String name) {
@@ -879,14 +884,14 @@ public class Table
     return validateException(0x1084, error, name);
   }
 
+  private HongsException sizeException(String name, String value, int size) {
+    String error = "Size for column '"+name+"'("+value+") must be a less than "+size;
+    return validateException(0x1086, error, name, value, String.valueOf(size));
+  }
+
   private HongsException scaleException(String name, String value, int scale) {
     String error = "Scale for column '"+name+"'("+value+") must be a less than "+scale;
     return validateException(0x1088, error, name, value, String.valueOf(scale));
-  }
-
-  private HongsException precisionException(String name, String value, int precision) {
-    String error = "Precision for column '"+name+"'("+value+") must be a less than "+precision;
-    return validateException(0x1086, error, name, value, String.valueOf(precision));
   }
 
   private HongsException intException(String name, String value) {
@@ -904,7 +909,7 @@ public class Table
     return validateException(0x108e, error, name, value);
   }
 
-  private HongsException dateTimeException(String name, String value, String format) {
+  private HongsException datetimeException(String name, String value, String format) {
     String error = "Format for column '"+name+"'("+value+") must like this '"+format+"'";
     return validateException(0x1090, error, name, value, format);
   }

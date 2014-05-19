@@ -52,7 +52,7 @@ public class DatumsConfig
     throws HongsException
   {
     this.name = name;
-    this.init("dat-" + name);
+    this.init("datums." + name);
   }
 
   @Override
