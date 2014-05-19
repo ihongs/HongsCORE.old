@@ -34,7 +34,7 @@ public class InjectInvoker {
 
         if (type == Inject.TYPES.REQ) {
             Map data = helper.getRequestData();
-            Tree.setDepth(data, map);
+            Tree.putDepth(data, map);
             chain.doAction();
         }
         else {
@@ -43,7 +43,7 @@ public class InjectInvoker {
             if (data == null || (Boolean)data.get("__success__") == false) {
                 return;
             }
-            Tree.setDepth(data, map);
+            Tree.putDepth(data, map);
         }
     }
 }

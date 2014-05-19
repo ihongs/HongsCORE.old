@@ -163,7 +163,6 @@ public class Tree
       }
       else
       {
-        Object subKey = keys[idx + 1];
         Object subNode;
 
         if (key == null || key.equals(""))
@@ -189,7 +188,6 @@ public class Tree
       }
       else
       {
-        Object subKey = keys[idx + 1];
         Object subNode;
 
         if (map.containsKey(key))
@@ -215,11 +213,12 @@ public class Tree
   }
 
   /**
-   * 将其他oth追加到map中
+   * 将 oth 追加到 map 中
+   * 与 Map.putAll 的不同在于: 本函数会将其子级的 Map 也进行合并
    * @param map
    * @param oth
    */
-  public static void setDepth(Map map, Map oth) {
+  public static void putDepth(Map map, Map oth) {
     Iterator i = oth.entrySet().iterator();
     while (i.hasNext()) {
         Map.Entry e = (Map.Entry) i.next();
@@ -228,7 +227,7 @@ public class Tree
         Object v1 =  map.get(k2);
 
         if (v1 instanceof Map && v2 instanceof Map) {
-            setDepth((Map)v1, (Map)v2);
+            putDepth((Map)v1, (Map)v2);
         }
         else {
             map.put(k2, v2);
@@ -236,6 +235,8 @@ public class Tree
     }
   }
 
+  /** 遍历工具 **/
+  
   public static interface EachValue {
     public void each(Object value, String   path);
   }
