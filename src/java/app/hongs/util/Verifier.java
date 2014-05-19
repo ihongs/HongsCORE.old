@@ -87,7 +87,7 @@ public class Verifier {
         }
     }
     
-    protected void addValue(String name, Object value, Map<String, List> values) {
+    protected static void addValue(String name, Object value, Map<String, List> values) {
         List valuez = values.get(name);
         if (valuez == null) {
             valuez = new ArrayList();
@@ -96,7 +96,7 @@ public class Verifier {
         valuez.add(value);
     }
     
-    protected List<String> getNames(String name, Map<String, List> values) {
+    protected static List<String> getNames(String name, Map<String, List> values) {
         name = "^"+Str.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
         Pattern pa = Pattern.compile(name);
         List<String> names = new ArrayList();
@@ -133,17 +133,19 @@ public class Verifier {
     
     public Map<String, List<String>> verify(Map data) throws HongsException {
         Map<String, List<String>> values = new LinkedHashMap();
-        Tree.walk4req(new Tree.Each4Req() {
-            Map<String, List<String>> values ;
-            public Each4Req getValues(Map<String, List<String>> values) {
+        Tree.EachValue each = new Tree.EachValue() {
+            Map<String, List<String>> values;
+            public void setValues(Map<String, List<String>> values) {
                 this.values = values;
             }
-            public void eachItem(String name, String value) {
-                addValue(name, value, values);
+            public void each(String name, String value) {
+                Verifier.addValue (name, value, values);
             }
-          }.setValues(values), data);
+        };
+        each.setValues(values);
+        Tree.each(data , each);
         
-        return verify(values);
+        return  verify(values);
     }
     
     public Map<String, List<String>> verify(Map<String, List<String>> values) throws HongsException {
