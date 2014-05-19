@@ -133,11 +133,15 @@ public class Verifier {
     
     public Map<String, List<String>> verify(Map data) throws HongsException {
         Map<String, List<String>> values = new LinkedHashMap();
-        Tree.walk4req(new Each4Req() {
+        Tree.walk4req(new Tree.Each4Req() {
+            Map<String, List<String>> values ;
+            public Each4Req getValues(Map<String, List<String>> values) {
+                this.values = values;
+            }
             public void eachItem(String name, String value) {
                 addValue(name, value, values);
             }
-        }, data);
+          }.setValues(values), data);
         
         return verify(values);
     }
