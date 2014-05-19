@@ -236,61 +236,35 @@ public class Tree
     }
   }
 
-  public interface Each {
-    public void eachLeaf(List path, Object value);
-    public void eachLimb(List path, Object value);
+  public static interface EachValue {
+    public void each(Object value, String   path);
   }
 
-  public static void walk(Each each, Map map) {
-    each(each, new ArrayList(), map);
-  }
-  
-  private static void walk(Each each, List path, Object value) {
-    if (value instanceof Map) {
-      Iterator it = ((Map) value).entrySet().iterator();
-      while (it.hasNext()) {
-        Map.Entry et = (Map.Entry) it.next();
-        Object k = et.getKey(  );
-        Object v = et.getValue();
-        
-        List p = item.path.clone();
-        p.add(k);
-        
-        walk(each, p, v);
-      }
-    }
-    else
-    if (value instanceof List) {
-      Iterator it = ((List)value).iterator();
-      int k = 0 ;
-      while (it.hasNext()) {
-        Object v = it.next ();
-        
-        List p = path.clone();
-        p.add(k);
-        k = 1+k ;
-        
-        walk(each, p, v);
-      }
-    }
-    else
-    if (path.size() > 0) {
-      each.eachLeaf(path, value);
-    }
-    if (path.size() > 0) {
-      each.eachLimb(path, value);
-    }
+  public static interface EachArray {
+    public void each(Object value, Object[] path);
   }
 
-  public interface Each4Req {
-    public void eachItem(String name, String value);
+  /**
+   * 遍历所有的叶子节点
+   * 路径以字串形式给出(.分割层级, 如 a.b.c.)
+   * @param data 要遍历的数据
+   * @param loop 遍历回调接口
+   */
+  public static void each(Object data, EachValue loop) {
+    each(data, loop, new StringBuilder());
   }
-  
-  public static walk4req(Each4Req each, Map map) {
-    walk4req(each, new StringBuilder(), map);
+
+  /**
+   * 遍历所有的叶子节点
+   * 路径以列表形式给出
+   * @param data 要遍历的数据
+   * @param loop 遍历回调接口
+   */
+  public static void each(Object data, EachArray loop) {
+    each(data, loop, new ArrayList());
   }
-  
-  private static walk4req(Each4Req each, StringBuilder name, Object value) {
+
+  private static each(Object value, EachValue loop, StringBuilder path) {
     if (value instanceof Map ) {
       Iterator it = ((Map) value).entrySet().iterator();
       while (it.hasNext()) {
@@ -302,23 +276,60 @@ public class Tree
         p.append(".")
          .append( k );
         
-        walk4req(each, p, v);
+        each(v, loop, p);
       }
     }
     else
     if (value instanceof List) {
       Iterator it = ((List)value).iterator();
       while (it.hasNext()) {
-        Object v = it.next ();
+        Object v = it.next();
         
         StringBuilder p = path.clone();
         p.append(".");
         
-        walk4req(each, p, v);
+        each(v, loop, p);
       }
     }
-    else {
-      each.eachItem(path.substring(1), value.toString());
+    else
+    if (path.length() > 0) {
+        loop.each(value , path.substring(1));
+    }
+  }
+
+  private static void each(Object value, EachArray loop, List path) {
+    if (value instanceof Map) {
+      Iterator it = ((Map) value).entrySet().iterator();
+      while (it.hasNext()) {
+        Map.Entry et = (Map.Entry) it.next();
+        Object k = et.getKey(  );
+        Object v = et.getValue();
+        
+        List p = new ArrayList();
+        p.addAll(path);
+        p.add(k);
+        
+        each(v, loop, p);
+      }
+    }
+    else
+    if (value instanceof List) {
+      Iterator it = ((List)value).iterator();
+      int k = -1;
+      while (it.hasNext()) {
+        k = k +1;
+        Object v = it.next();
+        
+        List p = new ArrayList();
+        p.addAll(path)
+        p.add(k);
+        
+        each(v, loop, p);
+      }
+    }
+    else
+    if (!path.isEmpty()) {
+        loop.each(value , path.toArray ( ) );
     }
   }
 
