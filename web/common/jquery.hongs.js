@@ -423,10 +423,10 @@ function hsSetParam (url, name, value) {
  */
 function hsGetValue (obj, path, def) {
     if (jQuery.isArray(path)) {
-        return hsGetArray(obj, path, def);
+        return hsGetByArr(obj, path, def);
     }
     if (typeof(path) === "number") {
-        return hsGetArray(obj,[path],def);
+        return hsGetByArr(obj,[path],def);
     }
     if (typeof(path) !== "string") {
         throw("hsGetValue: 'path' must be a string");
@@ -437,7 +437,7 @@ function hsGetValue (obj, path, def) {
                .replace(/\]/   , "" )
                .replace(/\.+$/ , "" ) // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
                .split  (/\./ );
-    return hsGetArray(obj, path, def);
+    return hsGetByArr(obj, path, def);
 }
 /**
  * 从树对象获取值(hsGetValue的底层方法)
@@ -446,18 +446,18 @@ function hsGetValue (obj, path, def) {
  * @param def 默认值
  * @return 获取到的值, 如果没有则取默认值
  */
-function hsGetArray (obj, keys, def) {
+function hsGetByArr (obj, keys, def) {
     if (!obj) {
         return null;
     }
     if (!jQuery.isArray(obj ) && !jQuery.isPlainObject(obj )) {
-        throw("hsGetArray: 'obj' must be an array or object");
+        throw("hsGetByArr: 'obj' must be an array or object");
     }
     if (!jQuery.isArray(keys)) {
-        throw("hsGetArray: 'keys' must be an array");
+        throw("hsGetByArr: 'keys' must be an array");
     }
     if (!keys.length) {
-        throw("hsGetArray: 'keys' can not be empty");
+        throw("hsGetByArr: 'keys' can not be empty");
     }
 
     var i , k;
@@ -484,7 +484,7 @@ function hsSetValue (obj, path, val) {
      a[][k] 空键将作为字符串对待, 但放在末尾可表示push
      */
     if (jQuery.isArray(path)) {
-        hsSetArray(obj, path, val); return;
+        hsSetByArr(obj, path, val); return;
     }
     if (typeof(path) === "number") {
         obj[path] = val; return;
@@ -496,7 +496,7 @@ function hsSetValue (obj, path, val) {
                .replace(/\[/   , ".")
                .replace(/\]/   , "" )
                .split  (/\./ );
-    hsSetArray(obj, path, val);
+    hsSetByArr(obj, path, val);
 }
 /**
  * 向树对象设置值(hsSetValue的底层方法)
@@ -504,18 +504,18 @@ function hsSetValue (obj, path, val) {
  * @param {Array} keys ['a','b']
  * @param val
  */
-function hsSetArray (obj, keys, val) {
+function hsSetByArr (obj, keys, val) {
     if (!obj) {
         return;
     }
     if (!jQuery.isPlainObject(obj)) {
-        throw("hsSetArray: 'obj' must be an object");
+        throw("hsSetByArr: 'obj' must be an object");
     }
     if (!jQuery.isArray(keys)) {
-        throw("hsSetArray: 'keys' must be an array");
+        throw("hsSetByArr: 'keys' must be an array");
     }
     if (!keys.length) {
-        throw("hsSetArray: 'keys' can not be empty");
+        throw("hsSetByArr: 'keys' can not be empty");
     }
 
     var i, k, t = keys[0];
@@ -533,7 +533,7 @@ function hsSetArray (obj, keys, val) {
                 obj[k] = {};
             }
         else
-            throw("hsSetArray: key must be a string or number");
+            throw("hsSetByArr: key must be a string or number");
         obj = obj[k];
     }
     if (t !== -1)

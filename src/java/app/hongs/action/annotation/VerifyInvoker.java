@@ -31,7 +31,7 @@ public class VerifyInvoker {
         Verifier ver = new Verifier();
         ver.setLang (lng  );
         ver.setRules(rules);
-        Map<String,List<String>> errors = ver.verify(dat);
+        Map<String, List<String>> errors = ver.verify4RD( dat );
         
         if (errors.isEmpty()) {
             chain.doAction();

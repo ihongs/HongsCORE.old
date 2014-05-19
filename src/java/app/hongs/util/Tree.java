@@ -32,7 +32,7 @@ public class Tree
    */
   public static Object getValue(Map map, String path)
   {
-    return getValue(map, path, null);
+    return Tree.getValue(map, path, null);
   }
 
   /**
@@ -41,9 +41,9 @@ public class Tree
    * @param keys
    * @return 键对应的值
    */
-  public static Object getArray(Map map, Object[] keys)
+  public static Object getByArr(Map map, Object[] keys)
   {
-    return getArray(map, keys, null);
+    return Tree.getByArr(map, keys, null);
   }
 
   /**
@@ -60,7 +60,7 @@ public class Tree
                .replace("]", "" )
                .replaceFirst("\\.+$", ""); // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
     String[] keys = path.split("\\.", -1);
-    return getArray(map, keys, def);
+    return Tree.getByArr(map, keys, def);
   }
 
   /**
@@ -70,7 +70,7 @@ public class Tree
    * @param def
    * @return 键对应的值
    */
-  public static Object getArray(Map map, Object[] keys, Object def)
+  public static Object getByArr(Map map, Object[] keys, Object def)
   {
     Object val = map;
     for (int i = 0; i < keys.length; i ++)
@@ -115,7 +115,7 @@ public class Tree
              .replace("[", ".")
              .replace("]", "" );
     String[] keys = path.split("\\.", -1);
-    setArray(map, keys, val);
+    Tree.setByArr(map, keys, val);
   }
 
   /**
@@ -124,11 +124,11 @@ public class Tree
    * @param keys
    * @param val
    */
-  public static void setArray(Map map, Object[] keys, Object val)
+  public static void setByArr(Map map, Object[] keys, Object val)
   {
     if ( keys.length != 0 )
     {
-      setArray(map, keys, val, 0);
+      setValue(map, keys, val, 0);
     }
     else
     if (val instanceof Map)
@@ -149,7 +149,7 @@ public class Tree
    * @param val
    * @param idx
    */
-  private static void setArray(Object obj, Object[] keys, Object val, int idx)
+  private static void setValue(Object obj, Object[] keys, Object val, int idx)
   {
     Object key = keys[idx];
 
@@ -176,7 +176,7 @@ public class Tree
         }
         col.add(subNode);
 
-        setArray(subNode, keys, val, idx + 1);
+        setValue(subNode, keys, val, idx + 1);
       }
     }
     else
@@ -209,7 +209,7 @@ public class Tree
           map.put(key, subNode);
         }
 
-        setArray(subNode, keys, val, idx + 1);
+        setValue(subNode, keys, val, idx + 1);
       }
     }
   }
@@ -240,7 +240,7 @@ public class Tree
     public void each(Object value, String   path);
   }
 
-  public static interface EachArray {
+  public static interface EachByArr {
     public void each(Object value, Object[] path);
   }
 
@@ -260,11 +260,11 @@ public class Tree
    * @param data 要遍历的数据
    * @param loop 遍历回调接口
    */
-  public static void each(Object data, EachArray loop) {
+  public static void each(Object data, EachByArr loop) {
     each(data, loop, new ArrayList());
   }
 
-  private static each(Object value, EachValue loop, StringBuilder path) {
+  private static void each(Object value, EachValue loop, StringBuilder path) {
     if (value instanceof Map ) {
       Iterator it = ((Map) value).entrySet().iterator();
       while (it.hasNext()) {
@@ -272,7 +272,7 @@ public class Tree
         Object k = et.getKey(  );
         Object v = et.getValue();
         
-        StringBuilder p = path.clone();
+        StringBuilder p = new StringBuilder(path);
         p.append(".")
          .append( k );
         
@@ -281,11 +281,19 @@ public class Tree
     }
     else
     if (value instanceof List) {
-      Iterator it = ((List)value).iterator();
-      while (it.hasNext()) {
-        Object v = it.next();
+      List a = (List) value;
+      for (Object v : a) {
+        StringBuilder p = new StringBuilder(path);
+        p.append(".");
         
-        StringBuilder p = path.clone();
+        each(v, loop, p);
+      }
+    }
+    else
+    if (value instanceof Object[]) {
+      Object[] a = (Object[]) value;
+      for (Object v : a) {
+        StringBuilder p = new StringBuilder(path);
         p.append(".");
         
         each(v, loop, p);
@@ -297,7 +305,7 @@ public class Tree
     }
   }
 
-  private static void each(Object value, EachArray loop, List path) {
+  private static void each(Object value, EachByArr loop, List path) {
     if (value instanceof Map) {
       Iterator it = ((Map) value).entrySet().iterator();
       while (it.hasNext()) {
@@ -305,8 +313,7 @@ public class Tree
         Object k = et.getKey(  );
         Object v = et.getValue();
         
-        List p = new ArrayList();
-        p.addAll(path);
+        List p = new ArrayList(path);
         p.add(k);
         
         each(v, loop, p);
@@ -314,14 +321,25 @@ public class Tree
     }
     else
     if (value instanceof List) {
-      Iterator it = ((List)value).iterator();
+      List a = (List) value;
       int k = -1;
-      while (it.hasNext()) {
+      for (Object v : a) {
         k = k +1;
-        Object v = it.next();
         
-        List p = new ArrayList();
-        p.addAll(path)
+        List p = new ArrayList(path);
+        p.add(k);
+        
+        each(v, loop, p);
+      }
+    }
+    else
+    if (value instanceof Object[]) {
+      Object[] a = (Object[]) value;
+      int k = -1;
+      for (Object v : a) {
+        k = k +1;
+        
+        List p = new ArrayList(path);
         p.add(k);
         
         each(v, loop, p);
