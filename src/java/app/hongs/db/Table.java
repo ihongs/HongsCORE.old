@@ -157,10 +157,10 @@ public class Table
   public Table (DB db, String tableName)
     throws HongsException
   {
-    this(db, buildTableConfig(tableName));
+    this(db, _buildTableConfig(tableName));
   }
 
-  private static Map buildTableConfig(String name)
+  private static Map _buildTableConfig(String name)
   {
     Map tableConfig = new HashMap();
     tableConfig.put( "name", name );
