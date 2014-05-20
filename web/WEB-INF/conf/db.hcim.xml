@@ -13,33 +13,50 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                    foreignKey="moduel_id"/>
             <assoc type="HAS_MANY"
                    name="a_hcim_model_cols"
-                   foreignKey="model_id"/>
+                   foreignKey="model_id">
+                <assoc type="BLS_TO"
+                       name="a_hcim_ctype"
+                       foreignKey="ctype_id"/>
+            </assoc>
             <assoc type="HAS_MANY"
                    name="a_hcim_model_rels"
                    foreignKey="model_id">
                 <assoc type="BLS_TO"
-                       name="rel_col"
-                       tableName="a_hcim_model_cols"
-                       foreignKey="col_id"/>
-                <assoc type="BLS_TO"
-                       name="rel_model"
-                       tableName="a_hcim_model"
+                       name="a_hcim_model"
                        foreignKey="assoc_id"/>
             </assoc>
             <assoc type="HAS_MANY"
-                   name="a_hcim_model_view_cols"
+                   name="a_hcim_model_uniq"
                    foreignKey="model_id">
-                <assoc type="BLS_TO"
-                       name="view_col"
-                       tableName="a_hcim_model_cols"
-                       foreignKey="col_id"/>
+                <assoc type="HAS_MANY"
+                       name="a_hcim_model_uniq_cols"
+                       foreignKey="uniq_id">
+                    <assoc type="BLS_TO"
+                           name="uniq_cols"
+                           tableName="a_hcim_model_cols"
+                           foreignKey="cols_id"/>
+                </assoc>
+                <assoc type="HAS_MANY"
+                       name="a_hcim_model_uniq_rels"
+                       foreignKey="uniq_id">
+                    <assoc type="BLS_TO"
+                           name="uniq_rels"
+                           tableName="a_hcim_model_rels"
+                           foreignKey="rels_id"/>
+                </assoc>
             </assoc>
         </table>
         <table name="a_hcim_module"
                primaryKey="id"/>
+        <table name="a_hcum_ctype"
+               primaryKey="id"/>
         <table name="a_hcim_model_cols"
                primaryKey="id"/>
-        <table name="a_hcim_model_rels"/>
-        <table name="a_hcum_model_view_cols"/>
+        <table name="a_hcim_model_rels"
+               primaryKey="id"/>
+        <table name="a_hcim_model_uniq"
+               primaryKey="id"/>
+        <table name="a_hcim_model_uniq_cols"/>
+        <table name="a_hcim_model_uniq_rels"/>
     </tables>
 </db>

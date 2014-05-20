@@ -39,9 +39,9 @@ extends AbstractTreeModel {
     }
 
     @Override
-    protected void getFilter(Map req, FetchMore more)
+    protected void reqFilter(Map req, FetchMore more)
     throws HongsException {
-        super.getFilter(req, more);
+        super.reqFilter(req, more);
 
         /**
          * 如果有指定user_id
@@ -51,18 +51,6 @@ extends AbstractTreeModel {
             more.join ("a_hcum_user_dept", ".dept_id = :id")
                 .where("user_id = ?" , req.get( "user_id" ));
         }
-    }
-
-    public String getAffectedNames() throws HongsException {
-        StringBuilder sb = new StringBuilder();
-        FetchMore     fm = new FetchMore();
-        fm.setOption("FETCH_DFLAG", true );
-        fm.select("name").where("id IN (?)", this.affectedIds);
-        List<Map> rows = this.table.fetchMore(fm);
-        for (Map  row  : rows) {
-            sb.append(",").append(row.get("name").toString( ));
-        }
-        return sb.length()>0 ? sb.substring(1) : sb.toString();
     }
 
 }

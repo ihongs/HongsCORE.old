@@ -10,11 +10,11 @@ import java.util.Map;
  * 模型动作接口
  * @author Hongs
  */
-public class Demo {
+public class Ctype {
 
     private app.hcim.model.Model model;
 
-    public Demo() {
+    public Ctype() {
         model = (app.hcim.model.Model)
                 Core.getInstance(app.hcim.model.Model.class);
     }

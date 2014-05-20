@@ -51,12 +51,14 @@ import app.hongs.CoreLanguage;
  *
  * <h3>配置选项:</h3>
  * <pre>
- * core.disable.check.values  设置为true禁止在存储时对数据进行检查
- * core.default.date.format   可识别的日期类型, 默认"yyyy/MM/dd", 已移到语言
- * core.default.time.format   可识别的时间类型, 默认"HH:mm:ss", 已移到语言
- * core.table.field.ctime     创建时间字段名
- * core.table.field.mtime     修改时间字段名
- * </pre>
+ core.disable.check.values  设置为true禁止在存储时对数据进行检查
+ core.default.date.format   可识别的日期类型, 默认"yyyy/MM/dd", 已移到语言
+ core.default.time.format   可识别的时间类型, 默认"HH:mm:ss", 已移到语言
+ core.table.ctime.field     创建时间字段名
+ core.table.mtime.field     修改时间字段名
+ core.table.etime.field     结束时间字段名
+ core.table.state.field     删除状态字段名
+ </pre>
  *
  * @author Hongs
  */
@@ -176,15 +178,14 @@ public class Table
   {
     more.from(tableName, name);
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
-
-    this.getColumns();
+    String rstat = getField( "state" );
+    String rflag = getState("removed");
 
     // 默认不查询已经删除的记录
-    if (this.columns.containsKey(dflag) && !more.hasOption("FETCH_DFLAG"))
+    if (rstat != null && rflag != null
+    && !more.hasOption("INCLUDE_REMOVED"))
     {
-        more.where("`"+dflag+"` != 1" );
+      more.where(".`"+rstat+"` != ?", rflag);
     }
 
     return FetchJoin.assocSelect(this, assocs, more);
@@ -221,18 +222,14 @@ public class Table
   public int insert(Map<String, Object> values)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    String ctime = conf.getProperty("core.table.field.ctime", "__ctime__");
-    String etime = conf.getProperty("core.table.field.etime", "__etime__");
-    String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
+    String mtime = getField("mtime");
+    String ctime = getField("ctime");
+    String etime = getField("etime");
 
     long time = System.currentTimeMillis();
 
-    this.getColumns();
-
-    // 存在__mtime__字段则自动放入当前时间
-    if (this.columns.containsKey(mtime)
-          && !values.containsKey(mtime))
+    // 存在 mtime 字段则自动放入当前时间
+    if (mtime != null && !values.containsKey(mtime))
     {
       int type = (Integer)((Map)this.columns.get(mtime)).get("type");
       switch (type)
@@ -251,9 +248,8 @@ public class Table
       }
     }
 
-    // 存在__ctime__字段则自动放入当前时间
-    if (this.columns.containsKey(ctime)
-          && !values.containsKey(ctime))
+    // 存在 ctime 字段则自动放入当前时间
+    if (ctime != null && !values.containsKey(ctime))
     {
       int type = (Integer)((Map)this.columns.get(ctime)).get("type");
       switch (type)
@@ -272,10 +268,8 @@ public class Table
       }
     }
 
-    // 存在__etime__字段则自动放入结束时间
-    if (this.columns.containsKey(etime)
-          && !values.containsKey(etime)
-          && this.primaryKey  !=  null)
+    // 存在 etime 字段则自动放入结束时间
+    if (etime != null && !values.containsKey(etime) && this.primaryKey != null)
     {
       Map<String, Object> valuez = new HashMap();
       List<Object> paramz = new ArrayList(  );
@@ -326,16 +320,12 @@ public class Table
   public int update(Map<String, Object> values, String where, Object... params)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
+    String mtime = getField("mtime");
 
     long time = System.currentTimeMillis();
 
-    this.getColumns();
-
-    // 存在__mtime__字段则自动放入当前时间
-    if (this.columns.containsKey(mtime)
-          && !values.containsKey(mtime))
+    // 存在 mtime 字段则自动放入当前时间
+    if (mtime != null && !values.containsKey(mtime))
     {
       int type = (Integer)((Map)this.columns.get(mtime)).get("type");
       switch (type)
@@ -374,15 +364,14 @@ public class Table
   public int delete(String where, Object... params)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
+    String rstat = getField( "state" );
+    String rflag = getState("removed");
 
-    this.getColumns();
-
-    // 存在__dflag__字段则将删除标识设置为1
-    if (this.columns.containsKey(dflag))
+    // 存在 rstat 字段则将删除标识设置为1
+    if (rstat != null && rflag != null)
     {
-      Map data=new HashMap();data.put(dflag,1);
+      Map data = new HashMap();
+      data.put( rstat, rflag );
       return  this.update(data, where, params);
     }
 
@@ -396,7 +385,7 @@ public class Table
    * @return 全部字段信息
    * @throws app.hongs.HongsException
    */
-  public Map getColumns()
+  protected Map getColumns()
     throws HongsException
   {
     if (this.columns == null)
@@ -406,16 +395,66 @@ public class Table
     return this.columns;
   }
 
-  /**
-   * 获取字段名
-   * @return 全部字段名
-   * @throws app.hongs.HongsException
-   */
-  public String[] getColumnNames()
+  protected String getField(String field)
     throws HongsException
   {
-    Map<String, Map> cols = (Map)this.getColumns();
-    return cols.keySet( ).toArray( new String[0] );
+    Map        cols = getColumns();
+    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    field = conf.getProperty("core.table." + field + ".field", field);
+    return  cols.containsKey(field) ? field : null;
+  }
+
+  protected String getState(String state)
+  {
+    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    return  conf.getProperty("core.table." + state + ".state", null );
+  }
+
+  /**
+   * 获取日期(时间)格式
+   * <p>
+   * 也可在 values 中通过 __type_format__,__name__format__ 来告知格式;
+   * 其中 type 为 date,time,datetime; name 为 values 中的键.
+   * </p>
+   * @param type
+   * @param name
+   * @param values
+   * @return 
+   */
+  protected String getFormat(String type, String name, Map values)
+  {
+    String key;
+    key = "__"+name+"_format__";
+    if (values.containsKey(key))
+    {
+      if (values.get(key) instanceof String)
+      {
+        return (String) values.remove( key );
+      }
+    }
+    key = "__"+type+"_format__";
+    if (values.containsKey(key))
+    {
+      if (values.get(key) instanceof String)
+      {
+        return (String) values.remove( key );
+      }
+    }
+    
+    String fmt;
+    if ("time".equals(type)) {
+      fmt = "HH:mm:ss";
+    }
+    else
+    if ("date".equals(type)) {
+      fmt = "yyyy/MM/dd";
+    }
+    else {
+      fmt = "yyyy/MM/dd HH:mm:ss";
+    }
+
+    CoreLanguage conf = (CoreLanguage) Core.getInstance(CoreLanguage.class);
+    return conf.getProperty("core.default."+type+".format", fmt);
   }
 
   /**
@@ -423,7 +462,7 @@ public class Table
    * @param name 关联名
    * @return 关联信息
    */
-  public Map getAssoc(String name)
+  protected Map getAssoc(String name)
   {
     if (this.scossa.containsKey(name))
     return (Map)this.scossa.get(name);
@@ -446,12 +485,12 @@ public class Table
 
   /**
    * 获取关联查询体
-   * @param more 查询体
    * @param name 关联名
+   * @param more 查询体
    * @return 关联查询体
    * @throws HongsException
    */
-  public FetchMore getAssocInst(FetchMore more, String name)
+  public FetchMore getAssocFetch(String name, FetchMore more)
     throws HongsException
   {
     Map tc =  this.getAssoc(name);
@@ -495,7 +534,7 @@ public class Table
    * DATE, TIME, TIMESTAMP
    * 推荐构建数据库时采用以上类型
    * 日期时间格式采用默认配置定义
-   * 通过配置"core.dsiable.check.values=true"来关闭检查
+   * 通过配置"core.table.donot.check=true"来关闭检查
    * 通过语言"core.default.date.format=日期格式串"来设置可识别的日期格式
    * 通过语言"core.defualt.time.format=时间格式串"来设置可识别的时间格式
    * </pre>
@@ -508,24 +547,25 @@ public class Table
   private Map checkMainValues(Map values, boolean isNew)
     throws HongsException
   {
+    Map mainValues = new HashMap();
+
     /**
      * 是否关闭检查
      */
-    boolean disabled = isDisabledCheck(values);
+    CoreConfig conf = ( CoreConfig ) Core.getInstance(CoreConfig.class);
+    boolean disable = conf.getProperty("core.table.donot.check", false);
 
     /**
      * 日期时间格式
      */
     String dateFormat = null,
            timeFormat = null,
-       dateTimeFormat = null;
+       datetimeFormat = null;
 
     /**
      * 获取字段信息
      */
     this.getColumns();
-
-    Map mainValues = new HashMap();
 
     Iterator it = this.columns.entrySet().iterator();
     while (it.hasNext())
@@ -569,9 +609,9 @@ public class Table
 
       /**
        * 如果关闭了检查或值不是基础类型, 则跳过数据检查
-       * 通常POST或GET过来的总是String, 而JSON过来的是String/Number/Boolean/Null
+       * 通常POST或GET过来的总是String, JSON过来的是String/Number/Boolean/Null
        */
-      if (disabled || !(value instanceof String || value instanceof Number))
+      if (disable || !(value instanceof String || value instanceof Number))
       {
         mainValues.put(namc, value);
         continue;
@@ -714,7 +754,7 @@ public class Table
         {
           if (dateFormat == null)
           {
-            dateFormat = getDatimeFormat(values, "date");
+            dateFormat = getFormat("date", namc, values);
           }
           SimpleDateFormat sdf = new java.text.SimpleDateFormat(dateFormat);
 
@@ -747,7 +787,7 @@ public class Table
         {
           if (timeFormat == null)
           {
-            timeFormat = getDatimeFormat(values, "time");
+            timeFormat = getFormat("time", namc, values);
           }
           SimpleDateFormat sdf = new java.text.SimpleDateFormat(timeFormat);
 
@@ -778,11 +818,11 @@ public class Table
         }
         else
         {
-          if (dateTimeFormat == null)
+          if (datetimeFormat == null)
           {
-            dateTimeFormat = getDatimeFormat(values, "datetime");
+            datetimeFormat = getFormat("datetime", namc, values);
           }
-          SimpleDateFormat sdf = new java.text.SimpleDateFormat(dateTimeFormat);
+          SimpleDateFormat sdf = new java.text.SimpleDateFormat(datetimeFormat);
 
           try
           {
@@ -790,7 +830,7 @@ public class Table
           }
           catch (ParseException ex)
           {
-            throw datetimeException(namc, valueStr, dateTimeFormat);
+            throw datetimeException(namc, valueStr, datetimeFormat);
           }
 
           mainValues.put(namc, value);
@@ -836,48 +876,6 @@ public class Table
   }
 
   //** 私有方法 **/
-
-  private static boolean isDisabledCheck(Map values)
-  {
-    String key = "__DISABLE_CHECK__";
-    if (values.containsKey(key))
-    {
-      if (values.get(key) instanceof Boolean)
-      {
-        return ! (Boolean) values.remove(key);
-      }
-    }
-
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    return conf.getProperty("core.disable.check.values", false);
-  }
-
-  private static String getDatimeFormat(Map values, String type)
-  {
-    String key = "__"+type.toUpperCase()+"_FORMAT__";
-    if (values.containsKey(key))
-    {
-      if (values.get(key) instanceof String)
-      {
-        return (String)values.remove(key);
-      }
-    }
-
-    String dfmt;
-    if ("time".equals(type)) {
-      dfmt = "HH:mm:ss";
-    }
-    else
-    if ("date".equals(type)) {
-      dfmt = "yyyy/MM/dd";
-    }
-    else {
-      dfmt = "yyyy/MM/dd HH:mm:ss";
-    }
-
-    CoreLanguage conf = (CoreLanguage)Core.getInstance(CoreLanguage.class);
-    return conf.getProperty("core.default."+type+".format", dfmt);
-  }
 
   private HongsException nullException(String name) {
     String error = "Value for column '"+name+"' can not be NULL";

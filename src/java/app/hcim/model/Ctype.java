@@ -10,10 +10,10 @@ import java.util.Map;
  * 通用信息模型处理类
  * @author Hongs
  */
-public class Model extends AbstractBaseModel {
+public class Ctype extends AbstractBaseModel {
 
-    public Model() throws HongsException {
-        super("hcim", "a_hcim_model");
+    public Ctype() throws HongsException {
+        super("hcim", "a_hcim_ctype");
     }
 
 }

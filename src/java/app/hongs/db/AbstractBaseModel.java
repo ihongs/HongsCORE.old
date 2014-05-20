@@ -21,13 +21,13 @@ import app.hongs.HongsException;
  * 当要使用 getInfo(get),save(add,put),remove(del) 时请确保表有配置主键.<br/>
  * getPage,getList,getInfo,save,update,remove,exists 为基础动作方法, 通常它们被动作类直接调用;
  * get,add,put,remove 为基础模型方法, 一般改写只需覆盖它们即可;
- * getFilter,idCheck 分别用于对获取和更改数据等常规操作进行过滤,
- * 其中 idCheck 默认是调用 getFilter 来实现的, 可覆盖它来做资源过滤操作.<br/>
+ * reqFilter,idFilter 分别用于对获取和更改数据等常规操作进行过滤,
+ * 其中 idFilter 默认是调用 reqFilter 来实现的, 可覆盖它来做资源过滤操作.<br/>
  * 可使用查询参数:
  * <code>
  * ?f1=123&-f2=456&find=a+b&sort=-f1+f2&page=1&rows=10&cols[]=id&cols[]=f1&cols[]=f2
  * </code>
- * 详见 getFilter 方法说明
+ * 详见 reqFilter 方法说明
  * </p>
  *
  * <h3>异常代码:</h3>
@@ -57,37 +57,37 @@ abstract public class AbstractBaseModel
 
   /**
    * 页码参数名
-   * 影响getPage/getList/getFilter
+   * 影响getPage/getList/reqFilter
    */
   protected String pageKey = "page";
 
   /**
    * 行数参数名
-   * 影响getPage/getList/getFilter
+   * 影响getPage/getList/reqFilter
    */
   protected String rowsKey = "rows";
 
   /**
    * 字段参数名
-   * 影响getPage/getList/getFilter
+   * 影响getPage/getList/reqFilter
    */
   protected String colsKey = "cols";
 
   /**
    * 排序参数名
-   * 影响getPage/getList/getFilter
+   * 影响getPage/getList/reqFilter
    */
   protected String sortKey = "sort";
 
   /**
    * 搜索参数名
-   * 影响getPage/getList/getFilter
+   * 影响getPage/getList/reqFilter
    */
   protected String findKey = "find";
 
   /**
    * 被搜索的字段
-   * 影响getPage/getList/getFilter
+   * 影响getPage/getList/reqFilter
    */
   protected String[] findCols = new String[] {"name"};
 
@@ -157,7 +157,7 @@ abstract public class AbstractBaseModel
     }
 
     more.setOption("MODEL_METHOD", "getPage");
-    this.getFilter(req, more);
+    this.reqFilter(req, more);
 
     // 获取页码, 默认为第一页
     int page = 0;
@@ -230,7 +230,7 @@ abstract public class AbstractBaseModel
     }
 
     more.setOption("MODEL_METHOD", "getList");
-    this.getFilter(req, more);
+    this.reqFilter(req, more);
 
     // 获取列表
     List list = this.table.fetchMore(more);
@@ -506,83 +506,6 @@ abstract public class AbstractBaseModel
     return !exists(req);
   }
 
-  /**
-   * 获取可操作的 ID
-   * getOperableNames,update,remove 均是调用此方法获取 ID
-   * @param req
-   * @param more
-   * @return IDs
-   */
-  protected List<String> getOperableIds(Map req, FetchMore more) throws HongsException {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (more == null)
-    {
-      more = new FetchMore();
-    }
-
-    List<String> ids = new ArrayList();
-    String pk = this.table.primaryKey;
-    this.getFilter(req, more);
-    more.setSelect(".`"+pk+"` AS id");
-    List<Map> rows = this.table.fetchMore(more);
-    for (Map  row  : rows) {
-      ids.add(row.get(pk).toString());
-    }
-    return ids;
-  }
-  /**
-   * 获取可操作的名称
-   * 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
-   * 此方法逻辑与 update,remove 完全一致, 最终获取仍是调用 getAffetctedNames
-   * 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
-   * @param req
-   * @param more
-   * @return 用", "连接的可操作的名称
-   */
-  public String getOperableNames(Map req, FetchMore more) throws HongsException {
-    affectedIds = getOperableIds(req, more);
-    return getAffectedNames();
-  }
-  /**
-   * 获取可操作的名称
-   * @param req
-   * @return 用", "连接的可操作的名称
-   */
-  public String getOperableNames(Map req) throws HongsException {
-    return getOperableNames(req, null);
-  }
-
-  /**
-   * 获取受影响的 ID
-   * @return IDs
-   */
-  public List<String> getAffectedIds() {
-    return this.affectedIds;
-  }
-  /**
-   * 获取受影响的名称
-   * 默认取 findKeys 的第一位作为名称字段
-   * 仅对调用过 save,update,remove 的有效
-   * 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
-   * 此方法不是线程安全的
-   * @return 用", "连接的受影响的名称
-   */
-  public String getAffectedNames() throws HongsException {
-    StringBuilder sb = new StringBuilder();
-    FetchMore     fm = new FetchMore( );
-    String        fn = this.findCols[0];
-    fm.setOption("FETCH_DFLAG" , true );
-    fm.select(".`"+fn+"`").where("id IN (?)", affectedIds);
-    List<Map> rows = this.table.fetchMore(fm);
-    for (Map  row  : rows) {
-      sb.append(", ").append(row.get(fn).toString());
-    }
-    return sb.length()>0 ? sb.substring(2) : sb.toString();
-  }
-
   //** 标准模型方法 **/
 
   /**
@@ -629,7 +552,7 @@ abstract public class AbstractBaseModel
 
     FetchMore more = new FetchMore();
     more.setOption("MODEL_METHOD", "put");
-    if (! this.idCheck(id, more))
+    if (! this.idFilter(id, more))
     {
       throw new HongsException(0x10a8, "Can not put the resource for id '"+id+"'");
     }
@@ -672,15 +595,14 @@ abstract public class AbstractBaseModel
 
     if (more == null) more = new FetchMore();
     more.setOption("MODEL_METHOD", "del");
-    if (! this.idCheck(id, more))
+    if (! this.idFilter(id, more))
     {
       throw new HongsException(0x10a8, "Can not del the resource for id '"+id+"'");
     }
 
-    // 删除子数据(当有dflag时不删除子数据)
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
-    if (!this.table.getColumns().containsKey(dflag))
+    // 删除子数据 (主表非伪删除)
+    if (this.table.getField( "state" ) == null
+    ||  this.table.getState("removed") == null)
     {
       this.table.deleteSubValues(id);
     }
@@ -724,9 +646,10 @@ abstract public class AbstractBaseModel
       throw new HongsException(0x10a0, "ID can not be empty for get");
     }
 
-    if (more == null) more = new FetchMore();
+    if (more == null)
+      more = new FetchMore();
     more.setOption("MODEL_METHOD", "get");
-    if (! this.idCheck(id, more))
+    if (! this.idFilter(id, more))
     {
       throw new HongsException(0x10a8, "Can not get the resource for id '"+id+"'");
     }
@@ -750,6 +673,46 @@ abstract public class AbstractBaseModel
   }
 
   //** 辅助方法 **/
+
+  /**
+   * 检查id对应的数据是否可获取/修改/删除
+   *
+   * <pre>
+   * 作用于get,put,del上
+   *
+   * 默认调用"reqFilter"来判断id是否允许操作;
+   * 如需对以上方法进行其他过滤,可覆盖该方法.
+   * 在"reqFilter"方法中可以通过
+   * "idFilter".equals(FetchMore.getOption("FILTER_METHOD"))
+   * 来区分是不是"idFilter"发起的
+   * </pre>
+   * 
+   * @param id
+   * @param more
+   * @return 可操作则返回true, 反之返回false
+   */
+  protected boolean idFilter(String id, FetchMore more)
+    throws HongsException
+  {
+    if (more != null)
+    {
+      more = more.clone();
+    }
+    else
+    {
+      more = new FetchMore();
+    }
+
+    more.setOption("FILTER_METHOD", "idFilter");
+    more.setOption( "ASSOC_TABLES", new HashSet());
+    more.setSelect(".`"+this.table.primaryKey+"`")
+      .where(".`"+this.table.primaryKey+"`=?", id);
+
+    // 默认调用reqFilter进行校验
+    this.reqFilter(new HashMap(), more );
+
+    return !this.table.fetchLess( more ).isEmpty();
+  }
 
   /**
    * "获取"过滤
@@ -782,7 +745,7 @@ abstract public class AbstractBaseModel
    * @param more
    * @throws app.hongs.HongsException
    */
-  protected void getFilter(Map req, FetchMore more)
+  protected void reqFilter(Map req, FetchMore more)
     throws HongsException
   {
     // 默认仅连接类型为LEFT,INNER的表(必须满足左表)
@@ -903,7 +866,7 @@ abstract public class AbstractBaseModel
   }
 
   /**
-   * 字段过滤(被getFilter调用)
+   * 字段过滤(被reqFilter调用)
    * 根据请求的字段设置查询及判断需要关联的表
    * @param value
    * @param columns
@@ -967,7 +930,7 @@ abstract public class AbstractBaseModel
   }
 
   /**
-   * 排序过滤(被getFilter调用)
+   * 排序过滤(被reqFilter调用)
    * 如果字段有前缀“-”则该字段为逆序
    * @param value
    * @param columns
@@ -1036,7 +999,7 @@ abstract public class AbstractBaseModel
   }
 
   /**
-   * 搜索过滤(被getFilter调用)
+   * 搜索过滤(被reqFilter调用)
    * @param keys
    * @param val
    * @param not
@@ -1166,42 +1129,79 @@ abstract public class AbstractBaseModel
     }
   }
 
+  /** 操作记录 **/
+
   /**
-   * 检查id对应的数据是否可获取/修改/删除
-   *
-   * 作用于get,put,del上
-   *
-   * 默认调用"getFilter"来判断id是否允许操作;
-   * 如需对以上方法进行其他过滤,可覆盖该方法.
-   * 在"getFilter"方法中可以通过
-   * "idCheck".equals(FetchMore.getOption("CHECK_METHOD"))
-   * 来区分是不是"idCheck"发起的
-   *
-   * @param id
+   * 获取可操作的 ID
+   * getOperableNames,update,remove 均是调用此方法获取 ID
+   * @param req
    * @param more
-   * @return 可操作则返回true, 反之返回false
+   * @return IDs
+   * @throws app.hongs.HongsException
    */
-  protected boolean idCheck(String id, FetchMore more)
-    throws HongsException
-  {
-    if (more != null)
+  protected List<String> getOperableIds(Map req, FetchMore more) throws HongsException {
+    if (req == null)
     {
-      more = more.clone();
+      req = new HashMap();
     }
-    else
+    if (more == null)
     {
       more = new FetchMore();
     }
 
-    more.setOption("CHECK_METHOD", "idCheck");
-    more.setOption("ASSOC_TABLES", new HashSet( ));
-    more.setSelect(".`"+this.table.primaryKey+"`")
-      .where(".`"+this.table.primaryKey+"`=?", id);
-
-    // 默认调用getFilter进行校验
-    this.getFilter(new HashMap(), more );
-
-    return !this.table.fetchLess( more ).isEmpty();
+    List<String> ids = new ArrayList();
+    String pk = this.table.primaryKey;
+    this.reqFilter(req, more);
+    more.setSelect(".`"+pk+"` AS id");
+    List<Map> rows = this.table.fetchMore(more);
+    for (Map  row  : rows) {
+      ids.add(row.get(pk).toString());
+    }
+    return ids;
+  }
+  /**
+   * 获取可操作的名称
+   * 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
+   * 此方法逻辑与 update,remove 完全一致, 最终获取仍是调用 getAffetctedNames
+   * 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
+   * @param req
+   * @param more
+   * @return 用", "连接的可操作的名称
+   * @throws app.hongs.HongsException
+   */
+  public String getOperableNames(Map req, FetchMore more) throws HongsException {
+    affectedIds = getOperableIds(req, more);
+    return getAffectedNames();
+  }
+  /**
+   * 获取可操作的名称
+   * @param req
+   * @return 用", "连接的可操作的名称
+   * @throws app.hongs.HongsException
+   */
+  public String getOperableNames(Map req) throws HongsException {
+    return getOperableNames(req, null);
+  }
+  /**
+   * 获取受影响的名称
+   * 默认取 findKeys 的第一位作为名称字段
+   * 仅对调用过 save,update,remove 的有效
+   * 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
+   * 此方法不是线程安全的
+   * @return 用", "连接的受影响的名称
+   * @throws app.hongs.HongsException
+   */
+  public String getAffectedNames() throws HongsException {
+    StringBuilder sb = new StringBuilder();
+    FetchMore     fm = new FetchMore( );
+    String        fn = this.findCols[0];
+    fm.setOption("INCLUDE_REMOVED", true);
+    fm.select(".`"+fn+"`").where("id IN (?)", affectedIds);
+    List<Map> rows = this.table.fetchMore(fm);
+    for (Map  row  : rows) {
+      sb.append(", ").append(row.get(fn).toString());
+    }
+    return sb.length()>0 ? sb.substring(2) : sb.toString();
   }
 
 }

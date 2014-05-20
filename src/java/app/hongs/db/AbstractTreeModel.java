@@ -407,10 +407,10 @@ public class AbstractTreeModel extends AbstractBaseModel
   }
 
   @Override
-  protected void getFilter(Map req, FetchMore more)
+  protected void reqFilter(Map req, FetchMore more)
     throws HongsException
   {
-    super.getFilter(req, more);
+    super.reqFilter(req, more);
 
     if (!req.containsKey(this.sortKey))
     {
