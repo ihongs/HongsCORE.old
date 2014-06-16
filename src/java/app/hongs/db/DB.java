@@ -327,16 +327,16 @@ public class DB
             pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
           }
           if (info.containsKey("minPoolSize")) {
-            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
+            pool.setMinPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
           }
           if (info.containsKey("maxPoolSize")) {
-            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
+            pool.setMaxPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
           }
           if (info.containsKey("maxIdleTime")) {
-            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("maxIdleTime")));
+            pool.setMaxIdleTime(Integer.parseInt(info.getProperty("maxIdleTime")));
           }
           if (info.containsKey("maxStatements")) {
-            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("maxStatements")));
+            pool.setMaxStatements(Integer.parseInt(info.getProperty("maxStatements")));
           }
         }
 

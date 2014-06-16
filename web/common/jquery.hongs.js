@@ -1555,7 +1555,7 @@ HsForm.prototype = {
     },
     saveBack : function(rst) {
         rst = hsResponObj(rst, !!this.formBox.attr("target"));
-        if (rst.__success__  !== false) {
+        if (rst.__success__ === false) {
             if (typeof(rst.errors) !== "undefined") {
                 this.formBox.data("validator").invalidate(rst.errors);
             }

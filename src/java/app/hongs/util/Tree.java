@@ -165,7 +165,8 @@ public class Tree
       {
         Object subNode;
 
-        if (key == null || key.equals(""))
+        Object key2 = keys[idx + 1];
+        if (key2 == null || key2.equals(""))
         {
           subNode = new ArrayList();
         }
@@ -196,7 +197,8 @@ public class Tree
         }
         else
         {
-          if (key == null || key.equals(""))
+          Object key2 = keys[idx + 1];
+          if (key2 == null || key2.equals(""))
           {
             subNode = new ArrayList();
           }
