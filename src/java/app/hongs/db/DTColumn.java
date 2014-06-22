@@ -24,9 +24,9 @@ public class DTColumn
   implements Serializable
 {
 
-  public  Map columns;
-
   private Table table;
+
+  public Map<String, Object> columns;
 
   public DTColumn(Table table)
     throws HongsException
@@ -58,7 +58,7 @@ public class DTColumn
       {
         Map column = new HashMap();
         column.put("type",            md.getColumnType(i));
-        column.put("size",            md.getPrecision (i));
+        column.put("size",            md.getPrecision(i));
         column.put("scale",           md.getScale(i));
         column.put("signed",          md.isSigned(i));
         column.put("nullable",        md.isNullable(i));

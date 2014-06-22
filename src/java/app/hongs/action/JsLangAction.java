@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
-import app.hongs.util.Str;
+import app.hongs.util.Text;
 
 /**
  * 语言信息输出动作
@@ -252,7 +252,7 @@ public class JsLangAction
     private String makeLang(String name, String key, String def)
     {
       String value = this.lang.getProperty(key, def);
-      value = Str.escape(value);
+      value = Text.escape(value);
       return "\"" + name + "\":\"" + value + "\",\r\n";
     }
 

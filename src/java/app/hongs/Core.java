@@ -1,10 +1,12 @@
 package app.hongs;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.lang.reflect.Method;
+import app.hongs.util.Text;
+
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 核心类
@@ -311,14 +313,14 @@ extends HashMap<String, Object>
   public static String SERVER_ID;
 
   /**
-   * 全局核心对象
-   */
-  public static Core GLOBAL_CORE = new Core();
-
-  /**
    * 全局开始时间
    */
   public static Long GLOBAL_TIME = System.currentTimeMillis();
+
+  /**
+   * 全局核心对象
+   */
+  public static Core GLOBAL_CORE = new Core();
 
   /**
    * 线程核心对象
@@ -390,13 +392,13 @@ extends HashMap<String, Object>
   public static String getUniqueId(String svid)
   {
     long n1 = System.currentTimeMillis();
-    String s1 = String.format("%8s", app.hongs.util.Num.to36Hex(n1));
+    String s1 = String.format("%8s", Text.to36Hex(n1));
 
     long n2 = Thread.currentThread().getId();
-    String s2 = String.format("%4s", app.hongs.util.Num.to36Hex(n2));
+    String s2 = String.format("%4s", Text.to36Hex(n2));
 
     long n3 = (long)(Math.random() * 1000000);
-    String s3 = String.format("%4s", app.hongs.util.Num.to36Hex(n3));
+    String s3 = String.format("%4s", Text.to36Hex(n3));
 
     if (s1.length() > 8) s1 = s1.substring(s1.length() - 8);
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);

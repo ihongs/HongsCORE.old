@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
-import app.hongs.util.Str;
+import app.hongs.util.Text;
 
 /**
  * 配置信息输出动作
@@ -237,7 +237,7 @@ public class JsConfAction
     private String makeConf(String name, String key, String def)
     {
       String value = this.conf.getProperty(key, def);
-      value = Str.escape(value);
+      value = Text.escape(value);
       return "\"" + name + "\":\"" + value + "\",\r\n";
     }
 

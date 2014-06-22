@@ -133,7 +133,7 @@ public class Verifier {
     }
     
     private static List<String> getNames(String name, Map<String, List<String>> values) {
-        name = "^"+Str.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
+        name = "^"+Text.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
         Pattern pa = Pattern.compile(name);
         List<String> names = new ArrayList();
         for (String  namc  : values.keySet()) {

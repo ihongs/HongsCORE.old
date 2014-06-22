@@ -13,7 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import app.hongs.action.ActionHelper;
-import app.hongs.util.Str;
+import app.hongs.util.Text;
 
 /**
  * 日志记录工具
@@ -147,7 +147,7 @@ public class CoreLogger
      * 去掉空行, 行首缩进
      */
     sb.append("\r\n");
-    sb.append(Str.indent(Str.clearEL(text.trim())));
+    sb.append(Text.indent(Text.clearEL(text.trim())));
 
     /*
     try

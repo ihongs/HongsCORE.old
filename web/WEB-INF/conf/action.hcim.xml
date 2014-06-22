@@ -9,8 +9,8 @@
         <page name="模型" uri="/hcim/model/list.html">
             <page name="${opt}模型" uri="/hcim/model/form.html"/>
         </page>
-        <page name="属性" uri="/hcim/ctype/list.html">
-            <page name="${opt}属性" uri="/hcim/ctype/form.html"/>
+        <page name="属性" uri="/hcim/attr/list.html">
+            <page name="${opt}属性" uri="/hcim/attr/form.html"/>
         </page>
     </page>
 </root>

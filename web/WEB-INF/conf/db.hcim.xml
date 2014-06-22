@@ -15,15 +15,15 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                    name="a_hcim_model_cols"
                    foreignKey="model_id">
                 <assoc type="BLS_TO"
-                       name="a_hcim_ctype"
-                       foreignKey="ctype_id"/>
+                       name="a_hcim_attr"
+                       foreignKey="attr_id"/>
             </assoc>
             <assoc type="HAS_MANY"
                    name="a_hcim_model_rels"
                    foreignKey="model_id">
                 <assoc type="BLS_TO"
                        name="a_hcim_model"
-                       foreignKey="assoc_id"/>
+                       foreignKey="link_id"/>
             </assoc>
             <assoc type="HAS_MANY"
                    name="a_hcim_model_uniq"
@@ -46,9 +46,9 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                 </assoc>
             </assoc>
         </table>
-        <table name="a_hcim_module"
+        <table name="a_hcim_attr"
                primaryKey="id"/>
-        <table name="a_hcum_ctype"
+        <table name="a_hcim_module"
                primaryKey="id"/>
         <table name="a_hcim_model_cols"
                primaryKey="id"/>

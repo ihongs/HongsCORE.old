@@ -5,7 +5,7 @@ import app.hongs.HongsException;
 import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.JSON;
-import app.hongs.util.Str;
+import app.hongs.util.Text;
 import java.util.Map;
 
 /**
@@ -25,9 +25,9 @@ public class test {
     Map vars = new java.util.HashMap();
     vars.put("var",  "var1");
     vars.put("var.2", "var2");
-    System.out.println(app.hongs.util.Str.inject("This is $var and that is ${var.2}.", vars));
+    System.out.println(app.hongs.util.Text.inject("This is $var and that is ${var.2}.", vars));
 
-    System.out.println(app.hongs.util.Str.inject("This is $0 and that is ${1}2.", "name", "var"));
+    System.out.println(app.hongs.util.Text.inject("This is $0 and that is ${1}2.", "name", "var"));
       
     app.hongs.util.JSON.print(args);
     Map<String, Object> opts = CmdletHelper.getOpts(args,
@@ -93,9 +93,9 @@ public class test {
              + "这是弘的框架, 问: \\\"你是谁?\"\r\n"
              + "%abc,$def.";
     CmdletHelper.print("actual: " + s);
-    String s1 = Str.escape(s);
+    String s1 = Text.escape(s);
     CmdletHelper.print("escape: " + s1);
-    String s2 = Str.resume(s1);
+    String s2 = Text.resume(s1);
     CmdletHelper.print("resume: " + s2);
   }
 
@@ -143,8 +143,8 @@ public class test {
   }
   
   private static void testRadix(long num) {
-    CmdletHelper.print("36 Radix: "+app.hongs.util.Num.to36Hex(num));
-    CmdletHelper.print("26 Radix: "+app.hongs.util.Num.to26Hex(num));
+    CmdletHelper.print("36 Radix: "+app.hongs.util.Text.to36Hex(num));
+    CmdletHelper.print("26 Radix: "+app.hongs.util.Text.to26Hex(num));
   }
 
   private static void makeDemoData() {

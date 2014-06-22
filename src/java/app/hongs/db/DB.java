@@ -5,7 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.Str;
+import app.hongs.util.Text;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.beans.PropertyVetoException;
 import java.lang.reflect.Constructor;
@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -309,34 +311,53 @@ public class DB
         }
         */
 
-        ComboPooledDataSource pool = datapools.get(drv+" "+url);
+        String name = drv+" "+url;
+        ComboPooledDataSource pool;
+        poolslock.readLock( ).lock();
+        try
+        {
+          pool = datapools.get(name);
+        }
+        finally
+        {
+          poolslock.readLock().unlock();
+        }
 
         if (pool == null)
         {
-          pool = new ComboPooledDataSource();
-          pool.setDriverClass(drv);
-          pool.setJdbcUrl(url);
+          poolslock.writeLock( ).lock();
+          try
+          {
+            pool = new ComboPooledDataSource();
+            datapools.put( name, pool );
+            pool.setDriverClass(drv);
+            pool.setJdbcUrl(url);
 
-          if (info.containsKey("user")) {
-            pool.setUser(info.getProperty("user"));
+            if (info.containsKey("user")) {
+              pool.setUser(info.getProperty("user"));
+            }
+            if (info.containsKey("password")) {
+              pool.setPassword(info.getProperty("password"));
+            }
+            if (info.containsKey("initialPoolSize")) {
+              pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
+            }
+            if (info.containsKey("minPoolSize")) {
+              pool.setMinPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
+            }
+            if (info.containsKey("maxPoolSize")) {
+              pool.setMaxPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
+            }
+            if (info.containsKey("maxIdleTime")) {
+              pool.setMaxIdleTime(Integer.parseInt(info.getProperty("maxIdleTime")));
+            }
+            if (info.containsKey("maxStatements")) {
+              pool.setMaxStatements(Integer.parseInt(info.getProperty("maxStatements")));
+            }
           }
-          if (info.containsKey("password")) {
-            pool.setPassword(info.getProperty("password"));
-          }
-          if (info.containsKey("initialPoolSize")) {
-            pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
-          }
-          if (info.containsKey("minPoolSize")) {
-            pool.setMinPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
-          }
-          if (info.containsKey("maxPoolSize")) {
-            pool.setMaxPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
-          }
-          if (info.containsKey("maxIdleTime")) {
-            pool.setMaxIdleTime(Integer.parseInt(info.getProperty("maxIdleTime")));
-          }
-          if (info.containsKey("maxStatements")) {
-            pool.setMaxStatements(Integer.parseInt(info.getProperty("maxStatements")));
+          finally
+          {
+            poolslock.writeLock().unlock();
           }
         }
 
@@ -1020,7 +1041,7 @@ public class DB
 
     /** 组织语言 **/
 
-    String sql = "UPDATE `" + Str.escape(table, "`") + "` SET ";
+    String sql = "UPDATE `" + Text.escape(table, "`") + "` SET ";
     List params2 = new ArrayList();
 
     Iterator it = values.entrySet().iterator();
@@ -1030,7 +1051,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      sql += "`" + Str.escape(field, "`") + "` = ?, ";
+      sql += "`" + Text.escape(field, "`") + "` = ?, ";
     }
 
     sql = sql.substring(0, sql.length()  - 2);
@@ -1068,7 +1089,7 @@ public class DB
 
     /** 组织语句 **/
 
-    String sql = "INSERT INTO `" + Str.escape(table, "`") + "`";
+    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
     List params2 = new ArrayList();
     String fs = "", vs = "";
 
@@ -1079,7 +1100,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      fs += "`" + Str.escape(field, "`") + "`, ";
+      fs += "`" + Text.escape(field, "`") + "`, ";
       vs += "?, ";
     }
 
@@ -1106,7 +1127,7 @@ public class DB
   {
     /** 组织语句 **/
 
-    String sql = "DELETE FROM `" + Str.escape(table, "`") + "`";
+    String sql = "DELETE FROM `" + Text.escape(table, "`") + "`";
 
     if (where != null && where.length() != 0)
     {
@@ -1127,7 +1148,7 @@ public class DB
    */
   public static String quoteField(String field)
   {
-    return "`" + Str.escape(field, "`") + "`";
+    return "`" + Text.escape(field, "`") + "`";
   }
 
   /**
@@ -1137,7 +1158,7 @@ public class DB
    */
   public static String quoteValue(String value)
   {
-    return "'" + Str.escape(value, "'") + "'";
+    return "'" + Text.escape(value, "'") + "'";
   }
 
   /**
@@ -1298,9 +1319,11 @@ public class DB
 
   //** 构造工厂 **/
 
+  private static Map<String, DB> instances = new HashMap();
+
   private static Map<String, ComboPooledDataSource> datapools = new HashMap();
 
-  private static Map<String, DB> instances = new HashMap();
+  private static  ReadWriteLock  poolslock = new ReentrantReadWriteLock();
 
   /**
    * 获取默认数据库对象

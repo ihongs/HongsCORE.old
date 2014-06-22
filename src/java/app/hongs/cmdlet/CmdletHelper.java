@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
-import app.hongs.util.Num;
+import app.hongs.util.Text;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -313,7 +313,7 @@ public class CmdletHelper
   public static void printETime(String label, long start)
   {
     start = System.currentTimeMillis() - start;
-    String notes = Num.humanTime(start);
+    String notes = Text.humanTime(start);
     System.err.println(new StringBuilder()
                           .append(label)
                           .append( ": ")
@@ -415,7 +415,7 @@ public class CmdletHelper
     float  scale = (float)ok / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Num.humanTime((long) left1);
+    String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) Time left: %s",
                                     ok, left2);
     printERate(scale, left3);
@@ -433,7 +433,7 @@ public class CmdletHelper
     float  scale = (float)(err + ok) / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Num.humanTime((long) left1);
+    String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) error(%d) Time left: %s",
                                ok, err, left2);
     printERate(scale, left3);

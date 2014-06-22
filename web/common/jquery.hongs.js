@@ -288,6 +288,9 @@ function hsSerialArr(obj) {
     else if (!jQuery.isArray(obj) && typeof(obj) === "object") {
         arr = jQuery(obj).serializeArray();
     }
+    else if (null != obj) {
+        arr = obj;
+    }
     return arr;
 }
 /**
@@ -1336,9 +1339,9 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"    );
     var saveUrl  = hsGetValue(opts, "saveUrl" );
     var loadUrl  = hsGetValue(opts, "loadUrl" );
-    var loadData = hsGetValue(opts, "loadData");
-    var loadNoId = hsGetValue(opts, "loadNoId");
-    var idKey    = hsGetValue(opts, "idKey", "id"); // 指定id参数名称, 用于判断编辑或创建
+    var idKey    = hsGetValue(opts, "idKey","id"); // id参数名, 用于判断编辑还是创建
+    var probeMode = hsGetValue(opts, "probeMode"); // 刺探模式, 无论有无id都请求信息
+    var aloneMode = hsGetValue(opts, "aloneMode"); // 独立模式, 请求时不携带上层数据
 
     if (formBox.length === 0) formBox = context;
 
@@ -1351,10 +1354,8 @@ function HsForm(opts, context) {
     /**
      * 获取並使用上层数据
      */
-    if (loadData) {
-        loadData = hsSerialArr(loadData);
-    } else {
-        loadData = hsSerialArr(loadData);
+    var loadData = [];
+    if ( ! aloneMode) {
         a = hsSerialArr(loadBox.data("url" ));
         for (i = 0; i < a.length; i ++ ) {
             loadData.push(a[i] );
@@ -1369,7 +1370,7 @@ function HsForm(opts, context) {
         loadData.push(a[i] );
     }
     a = hsGetSeria (loadData, idKey);
-    if (loadNoId || a) {
+    if (a||probeMode) {
         this.load(loadUrl, loadData);
     } else {
         this.fillData( { } );
@@ -1445,10 +1446,10 @@ HsForm.prototype = {
             if (! v) continue;
 
             if (i == 0) {
-                this._fill__review(inp, v, n, t);
+                this._fill__review(inp, v, n, "data");
             }
             else if (inp.prop("tagName") == "SELECT") {
-                this._fill__select(inp, v, n, t);
+                this._fill__select(inp, v, n, "data");
             }
         }
         delete this._data;
@@ -1486,11 +1487,18 @@ HsForm.prototype = {
             if (! v && (v !== 0 || v !== "")) continue;
 
             if (i == 0) {
-                v = this._fill__review( inp, v, n, t );
-                inp.text(v);
+                v = this._fill__review( inp, v, n, "info" );
+                inp.text(v );
+            }
+            else if (inp.attr("type") == "checkbox"
+                 ||  inp.attr("type") == "radio") {
+                inp.filter("[value='"+v+"']")
+                   .prop("checked", true)
+                   .change();
             }
             else {
-                inp.val (v).change();
+                inp.val (v )
+                   .change();
             }
         }
         delete this._info;
@@ -1604,6 +1612,7 @@ HsForm.prototype = {
                .data("data", v[i]);
             inp.append(opt);
         }
+        inp.change();
     },
     _fill__check : function(inp, v, n, t) {
         if (t !== "data") return v;
@@ -1618,6 +1627,7 @@ HsForm.prototype = {
             inp.append(lab);
         }
         inp.append($('<div class="cb"></div>'));
+        inp.find(":checkbox").change();
     },
     _fill__radio : function(inp, v, n, t) {
         if (t !== "data") return v;
@@ -1632,6 +1642,7 @@ HsForm.prototype = {
             inp.append(lab);
         }
         inp.append($('<div class="cb"></div>'));
+        inp.find(":radio").change();
     }
 };
 
@@ -1816,7 +1827,7 @@ function HsList(opts, context) {
                     .prop("checked", cks.length && cks.length == ckd.length);
     });
 
-    if (loadUrl) this.load(loadUrl, []);
+    if (loadUrl) this.load(loadUrl, hsSerialArr(loadUrl));
 }
 HsList.prototype = {
     load     : function(url, data) {

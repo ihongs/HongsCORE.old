@@ -68,7 +68,7 @@ StringBuilder makeMenu(List<Map> menus, int i) {
 <nav id="main-menubar" class="navbar navbar-default" role="navigation">
   <!-- Brand and toggle get grouped for better mobile display -->
   <div class="navbar-header">
-    <a class="navbar-brand dropdown-toggle" href="#" data-toggle="dropdown">HongsCORE <b class="caret"></b></a>
+    <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown">HongsCORE <b class="caret"></b></a>
     <ul class="dropdown-menu">
       <%=makeMenu(logom, -1).toString()%>
     </ul>
