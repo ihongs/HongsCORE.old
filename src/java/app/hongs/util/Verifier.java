@@ -222,70 +222,83 @@ public class Verifier {
     }
     
     private String verify(Item item, Rule rule) throws HongsException {
-        switch (rule.rule) {
-            case "required":
-                return required(item.value);
-            case "isNumber":
-                return isNumber(item.value);
-            case "isEmail":
-                return isEmail(item.value);
-            case "isURL":
-                return isURL(item.value);
-            case "isDate":
-                return isDate(item.value);
-            case "isTime":
-                return isTime(item.value);
-            case "isDatetime":
-                return isDatetime(item.value);
-            case "min":
-                return min(item.value, getParam(rule, 0, 1.0));
-            case "max":
-                return max(item.value, getParam(rule, 0, 1.0));
-            case "minLength":
-                return minLength(item.value, getParam(rule, 0, 1));
-            case "maxLength":
-                return maxLength(item.value, getParam(rule, 0, 1));
-            case "isMatch":
-                return isMatch(item.value, getParam(rule, 0, ""), getParam(rule, 1, ""));
-            case "isRepeat":
-                return isRepeat(item.value, item.values, getParam(rule, 0, ""));
-            case "isUnique":
-                List<String> fields = new ArrayList();
-                fields.addAll(rule.params);
-                fields.remove(0);
-                return isUnique(item.value, item.values, getParam(rule, 0, ""),
-                    item.name, fields.toArray(new String[]{}));
-            default:
-                // 调用 rule 指定的静态方法进行校验
-                int pos = rule.rule.lastIndexOf(".");
-                if (pos < 0) {
-                    throw new HongsException(0x1113, "Unknown rule '"+rule.rule+"'");
-                }
-                String cls = rule.rule.substring(0,pos);
-                String mtd = rule.rule.substring(1+pos);
-                try {
-                    Class  klass  = Class.forName  (cls);
-                    Method method = klass.getMethod(mtd, new Class[]{ Item.class, Rule.class });
-                    return (String) method.invoke(mtd, item, rule);
-                }
-                catch (ClassNotFoundException ex) {
-                    throw new HongsException(0x1115, "Class '"+cls+"' for '"+rule.name+"' is not exists");
-                }
-                catch (NoSuchMethodException ex) {
-                    throw new HongsException(0x1117, "Method '"+rule.rule+"' for '"+rule.name+"' is not exists");
-                }
-                catch (SecurityException ex) {
-                    throw new HongsException(0x1117, ex);
-                }
-                catch (IllegalAccessException ex) {
-                    throw new HongsException(0x1117, ex);
-                }
-                catch (IllegalArgumentException ex) {
-                    throw new HongsException(0x1117, ex);
-                }
-                catch (InvocationTargetException ex) {
-                    throw new HongsException(0x1117, ex);
-                }
+        if ("required".equals(rule.rule)) {
+            return required(item.value);
+        }
+        else if ("isNumber".equals(rule.rule)) {
+            return isNumber(item.value);
+        }
+        else if ("isEmail".equals(rule.rule)) {
+            return isEmail(item.value);
+        }
+        else if ("isURL".equals(rule.rule)) {
+            return isURL(item.value);
+        }
+        else if ("isDate".equals(rule.rule)) {
+            return isDate(item.value);
+        }
+        else if ("isTime".equals(rule.rule)) {
+            return isTime(item.value);
+        }
+        else if ("isDatetime".equals(rule.rule)) {
+            return isDatetime(item.value);
+        }
+        else if ("min".equals(rule.rule)) {
+            return min(item.value, getParam(rule, 0, 1.0));
+        }
+        else if ("max".equals(rule.rule)) {
+            return max(item.value, getParam(rule, 0, 1.0));
+        }
+        else if ("minLength".equals(rule.rule)) {
+            return minLength(item.value, getParam(rule, 0, 1));
+        }
+        else if ("maxLength".equals(rule.rule)) {
+            return maxLength(item.value, getParam(rule, 0, 1));
+        }
+        else if ("isMatch".equals(rule.rule)) {
+            return isMatch(item.value, getParam(rule, 0, ""), getParam(rule, 1, ""));
+        }
+        else if ("isRepeat".equals(rule.rule)) {
+            return isRepeat(item.value, item.values, getParam(rule, 0, ""));
+        }
+        else if ("isUnique".equals(rule.rule)) {
+            List<String> fields = new ArrayList();
+            fields.addAll(rule.params);
+            fields.remove(0);
+            return isUnique(item.value, item.values, getParam(rule, 0, ""),
+                item.name, fields.toArray(new String[]{}));
+        }
+        else {
+            // 调用 rule 指定的静态方法进行校验
+            int pos = rule.rule.lastIndexOf(".");
+            if (pos < 0) {
+                throw new HongsException(0x1113, "Unknown rule '"+rule.rule+"'");
+            }
+            String cls = rule.rule.substring(0,pos);
+            String mtd = rule.rule.substring(1+pos);
+            try {
+                Class  klass  = Class.forName  (cls);
+                Method method = klass.getMethod(mtd, new Class[]{ Item.class, Rule.class });
+                return (String) method.invoke(mtd, item, rule);
+            }
+            catch (ClassNotFoundException ex) {
+                throw new HongsException(0x1115, "Class '"+cls+"' for '"+rule.name+"' is not exists");
+            }
+            catch (NoSuchMethodException ex) {
+                throw new HongsException(0x1117, "Method '"+rule.rule+"' for '"+rule.name+"' is not exists");
+            }
+            catch (SecurityException ex) {
+                throw new HongsException(0x1117, ex);
+            }
+            catch (IllegalAccessException ex) {
+                throw new HongsException(0x1117, ex);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new HongsException(0x1117, ex);
+            }
+            catch (InvocationTargetException ex) {
+                throw new HongsException(0x1117, ex);
+            }
         }
     }
     
