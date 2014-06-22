@@ -2,7 +2,7 @@ package app.hcim.model;
 
 import app.hongs.HongsException;
 import app.hongs.db.AbstractBaseModel;
-import app.hongs.db.FetchMore;
+import app.hongs.db.FetchCase;
 import java.util.List;
 import java.util.Map;
 

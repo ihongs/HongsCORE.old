@@ -3,7 +3,7 @@ package app.hcum.model;
 import app.hongs.HongsException;
 import app.hongs.action.ActionConfig;
 import app.hongs.db.AbstractBaseModel;
-import app.hongs.db.FetchMore;
+import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,12 +29,12 @@ extends AbstractBaseModel {
         if (userId == null) throw new HongsException(0x10000, "User Id required!");
 
         Table asoc = this.db.getTable("a_hcum_user_group");
-        FetchMore more = new FetchMore();
-        more.select(".group_key")
+        FetchCase caze = new FetchCase();
+        caze.select(".group_key")
             .where(".user_id = ?", userId);
 
         Set<String> groups = new HashSet();
-        List<Map>   rows   = asoc.fetchMore(more);
+        List<Map>   rows   = asoc.fetchMore(caze);
         for (Map row : rows) {
             groups.add((String)row.get("group_key"));
         }
@@ -105,16 +105,16 @@ extends AbstractBaseModel {
     }
 
     @Override
-    protected void reqFilter(Map req, FetchMore more)
+    protected void reqFilter(Map req, FetchCase caze)
     throws HongsException {
-        super.reqFilter(req, more);
+        super.reqFilter(req, caze);
 
         /**
          * 如果有指定dept_id
          * 则关联a_hcum_user_detp来约束范围
          */
         if (req.containsKey("dept_id")) {
-            more.join ("a_hcum_user_dept", ".user_id = :id")
+            caze.join ("a_hcum_user_dept", ".user_id = :id")
                 .where("dept_id = ?" , req.get( "dept_id" ));
         }
     }

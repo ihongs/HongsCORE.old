@@ -119,26 +119,26 @@ public class AbstractTreeModel extends AbstractBaseModel
    * <b>获取树</p>
    *
    * @param req
-   * @param more
+   * @param caze
    * @return 树列表
    */
-  public Map getTree(Map req, FetchMore more)
+  public Map getTree(Map req, FetchCase caze)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (more == null)
+    if (caze == null)
     {
-      more = new FetchMore();
+      caze = new FetchCase();
     }
 
-    if (!more.hasOption("ASSOC_TABLES")
-    &&  !more.hasOption("ASSOC_TYPES")
-    &&  !more.hasOption("ASSOC_JOINS"))
+    if (!caze.hasOption("ASSOC_TABLES")
+    &&  !caze.hasOption("ASSOC_TYPES")
+    &&  !caze.hasOption("ASSOC_JOINS"))
     {
-      more.setOption("ASSOC_TABLES", new HashSet());
+      caze.setOption("ASSOC_TABLES", new HashSet());
     }
 
     String pid = (String)req.get(this.pidKey);
@@ -157,41 +157,41 @@ public class AbstractTreeModel extends AbstractBaseModel
 
     if (getId)
     {
-      more.select(".`" + this.table.primaryKey + "`");
+      caze.select(".`" + this.table.primaryKey + "`");
     }
     else
     {
-      more.select(".`" + this.table.primaryKey + "`")
+      caze.select(".`" + this.table.primaryKey + "`")
           .select(".`" + this.pidKey  + "`")
           .select(".`" + this.nameKey + "`");
 
       if (this.noteKey != null)
       {
-        more.select(".`" + this.noteKey + "`");
+        caze.select(".`" + this.noteKey + "`");
       }
       if (this.typeKey != null)
       {
-        more.select(".`" + this.typeKey + "`");
+        caze.select(".`" + this.typeKey + "`");
       }
       if (this.cnumKey != null)
       {
-        more.select(".`" + this.cnumKey + "`");
+        caze.select(".`" + this.cnumKey + "`");
       }
       else
       {
-        more.select("'1' AS `"+ cnumKey + "`");
+        caze.select("'1' AS `"+ cnumKey + "`");
       }
       if (this.snumKey != null)
       {
-        more.select(".`" + this.snumKey + "`");
+        caze.select(".`" + this.snumKey + "`");
       }
       else
       {
-        more.select("'0' AS `"+ snumKey + "`");
+        caze.select("'0' AS `"+ snumKey + "`");
       }
     }
 
-    Map  data = this.getList(req , more);
+    Map  data = this.getList(req , caze);
     List list = (List)data.get("list");
 
     if (getPath)
@@ -378,17 +378,17 @@ public class AbstractTreeModel extends AbstractBaseModel
    * 删除节点
    *
    * @param id
-   * @param more
+   * @param caze
    * @return 删除条数
    */
   @Override
-  public int del(String id, FetchMore more)
+  public int del(String id, FetchCase caze)
     throws HongsException
   {
     String pid = this.getParentId(id);
     int on = this.getSerialNum(id);
 
-    int i = super.del(id, more);
+    int i = super.del(id, caze);
 
     // 父级节点子节点数目减1
     this.setChildsOffset(pid, -1);
@@ -407,20 +407,20 @@ public class AbstractTreeModel extends AbstractBaseModel
   }
 
   @Override
-  protected void reqFilter(Map req, FetchMore more)
+  protected void reqFilter(Map req, FetchCase caze)
     throws HongsException
   {
-    super.reqFilter(req, more);
+    super.reqFilter(req, caze);
 
     if (!req.containsKey(this.sortKey))
     {
       if (this.snumKey != null)
       {
-        more.orderBy(this.snumKey);
+        caze.orderBy(this.snumKey);
       }
       else if (this.cnumKey != null)
       {
-        more.orderBy("(CASE WHEN `"
+        caze.orderBy("(CASE WHEN `"
              + this.cnumKey +
            "` > 0 THEN 1 END) DESC");
       }
@@ -528,7 +528,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     List list = this.db.fetchAll(sql,id);
 
     Set        ids = new  HashSet ();
-    FetchJoin join = new FetchJoin(list);
+    FetchMore join = new FetchMore(list);
     join.fetchIds(this.table.primaryKey,ids);
     List      cids = new ArrayList( ids);
 

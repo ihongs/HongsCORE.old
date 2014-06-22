@@ -19,7 +19,7 @@ import app.hongs.HongsException;
  *
  * @author hongs
  */
-public class TableCols
+public class DTColumn
      extends CoreSerially
   implements Serializable
 {
@@ -28,13 +28,13 @@ public class TableCols
 
   private Table table;
 
-  public TableCols(Table table)
+  public DTColumn(Table table)
     throws HongsException
   {
     this.table = table;
     if (table.db.name != null && table.db.name.length()!=0)
     {
-      this.init("dc." +table.db.name+ "." +table.tableName);
+      this.init("dt." +table.db.name+ "." +table.tableName);
     }
     else
     {

@@ -30,7 +30,7 @@ public class FetchPage
 
   private Table table;
 
-  private FetchMore more;
+  private FetchCase caze;
 
   private int page;
 
@@ -38,31 +38,31 @@ public class FetchPage
 
   private Map info;
 
-  public FetchPage(DB db, FetchMore more)
+  public FetchPage(DB db, FetchCase caze)
   {
     this.db    = db;
-    this.more  = more;
+    this.caze  = caze;
     this.table = null;
 
-    Object page2 = more.getOption("page");
+    Object page2 = caze.getOption("page");
     if (page2 != null && page2.equals(""))
     {
       this.page = Integer.parseInt(page2.toString());
     }
 
-    Object rows2 = more.getOption("rows");
+    Object rows2 = caze.getOption("rows");
     if (rows2 != null && page2.equals(""))
     {
       this.rows = Integer.parseInt(rows2.toString());
     }
   }
 
-  public FetchPage(Table table, FetchMore more)
+  public FetchPage(Table table, FetchCase caze)
   {
-    this(table.db, more);
+    this(table.db, caze);
     this.table  =  table;
 
-    this.more.from(table.tableName, table.name);
+    this.caze.from(table.tableName, table.name);
   }
 
   public void setPage(int page)
@@ -115,15 +115,15 @@ public class FetchPage
     this.info.put("rows", this.rows);
 
     // 查询列表
-    more.limit(rows * (page - 1), rows);
+    caze.limit(rows * (page - 1), rows);
     List list;
     if (null != this.table)
     {
-      list = this.table.fetchMore(more);
+      list = this.table.fetchMore(caze);
     }
     else
     {
-      list = this.db.fetchMore(more);
+      list = this.db.fetchMore(caze);
     }
 
     // 获取真实行数
@@ -161,24 +161,24 @@ public class FetchPage
     // 查询总行数
     String   sql;
     Object[] params;
-    FetchMore      more2 = this.more.clone();
-    for (FetchMore more3 : more2.joinList)
+    FetchCase      caze2 = this.caze.clone();
+    for (FetchCase caze3 : caze2.joinList)
     {
-      more3.setSelect("");
+      caze3.setSelect("");
     }
-    more2.limit(0);
-    more2.setOrderBy( "");
-    if (more2.hasGroupBy( ))
+    caze2.limit(0);
+    caze2.setOrderBy( "");
+    if (caze2.hasGroupBy( ))
     {
       sql    = "SELECT COUNT(*) AS __count__ FROM ("
-             + more2.getSQL()+") AS __table__";
-      params = more2.getParams();
+             + caze2.getSQL()+") AS __table__";
+      params = caze2.getParams();
     }
     else
     {
-      more2.setSelect("COUNT(*) AS __count__");
-      sql    = more2.getSQL();
-      params = more2.getParams();
+      caze2.setSelect("COUNT(*) AS __count__");
+      sql    = caze2.getSQL();
+      params = caze2.getParams();
     }
 
     // 计算总行数及总页数

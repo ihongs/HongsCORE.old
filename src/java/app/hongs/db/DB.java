@@ -889,27 +889,27 @@ public class DB
   /**
    * 采用查询体获取全部数据
    * <p>注: 调fetchAll实现</p>
-   * @param more
+   * @param caze
    * @return 全部数据
    * @throws app.hongs.HongsException
    */
-  public List fetchMore(FetchMore more)
+  public List fetchMore(FetchCase caze)
     throws HongsException
   {
-    return this.fetchAll(more.getSQL(), more.getParams());
+    return this.fetchAll(caze.getSQL(), caze.getParams());
   }
 
   /**
    * 采用查询体获取单条数据
    * <p>注: 调fetchMore实现</p>
-   * @param less
+   * @param caze
    * @return 单条数据
    * @throws app.hongs.HongsException
    */
-  public Map fetchLess(FetchMore less)
+  public Map fetchLess(FetchCase caze)
     throws HongsException
   {
-    List<Map<String, Object>> rows = this.fetchMore(less.limit(1));
+    List<Map<String, Object>> rows = this.fetchMore(caze.limit(1));
 
     if (!rows.isEmpty())
     {

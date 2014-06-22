@@ -1,933 +1,832 @@
 package app.hongs.db;
 
-import app.hongs.HongsException;
-
-import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+import app.hongs.Core;
+import app.hongs.HongsException;
 
 /**
- * 查询结构体
- *
- * <p>
- * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表.<br/>
- * 关联字段, 用"表.列"描述字段时, "."的两侧不得有空格.<br/>
- * 本想自动识别字段的所属表(可部分区域), 但总是出问题;<br/>
- * 好的规则胜过万行代码, 定此规矩, 多敲了一个符号而已.<br/>
- * setOption用于登记特定查询选项, 以备组织查询结构的过程中读取.
- * </p>
- *
- * <h3>将SQL语句拆解成以下对应部分:</h3>
- * <pre>
- * fields         SELECT field1, field2...
- * tableName name FROM tableName AS name
- * wheres         WHERE expr1 AND expr2...
- * groups         GROUP BY field1, field2...
- * havins         HAVING expr1 AND expr2...
- * orders         ORDER BY field1, field2...
- * limits         LIMIT offset, length
- * </pre>
- *
- * <h3>系统已定义的"options":</h3>
- * <pre>
- * ASSOC_TABLES : Set         仅对某些表做关联; 作用域: FetchJoin.assocSelect
- * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchJoin.assocSelect
- * ASSOC_JOINS  : Set         仅对某些类型连接; 作用域: FetchJoin.assocSelect
- * MULTI_ASSOC  : boolean     多行关联(使用IN方式关联); 作用域: FetchJoin
- * UNITY_ASSOC  : boolean     单体关联(仅限非多行关联); 作用域: FetchJoin
- * page         : int|String  分页页码; 作用域: FetchPage
- * rows         : int|String  分页行数; 作用域: FetchPage
- * </pre>
+ * 关联查询及更新
  *
  * <h3>异常代码:</h3>
  * <pre>
- * 区间: 0x10b0~0x10bf
- * 0x10b0 无法识别关联类型(JOIN)
- * 0x10b2 必须指定关联条件(FULL|LEFT|RIGHT)_JOIN
- * 0x10b4 没有指定查询表名
+ * 区间: 0x10c0~0x10cf
+ * 0x10c0 获取行号失败, 可能缺少关联字段
+ * 0x10c2 无法识别的关联方式(LINK)
+ * 0x10c4 无法识别的关联类型(JOIN)
+ * 0x10c6 找不到指定的关联表(LINK)
+ * 0x10c8 找不到指定的关联表(JOIN)
+ * 0x10ca 关联数据类型必须为Map
+ * 0x10cc 关联数据类型必须为Map或List
  * </pre>
  *
  * @author Hongs
  */
 public class FetchMore
-  implements Cloneable, Serializable
 {
 
-  protected String              tableName;
-  protected String              name;
+  private List rows;
 
-  protected StringBuilder       fields;
-  protected StringBuilder       wheres;
-  protected StringBuilder       groups;
-  protected StringBuilder       havins;
-  protected StringBuilder       orders;
-  protected int[]               limits;
-
-  private   List<Object>        wparams;
-  private   List<Object>        hparams;
-  protected Map<String,Object>  options;
-
-  private   short               joinType;
-  private   String              joinExpr;
-  protected Set<FetchMore>      joinList;
-
-  public static final short     INNER = 1;
-  public static final short      LEFT = 2;
-  public static final short     RIGHT = 3;
-  public static final short      FULL = 4;
-  public static final short     CROSS = 5;
-
-  private static final Pattern p1 = Pattern
-          .compile("(^|[^`\\w])\\.([`\\w\\*])");
-  private static final Pattern p2 = Pattern
-          .compile("(^|[^`\\w])\\:([`\\w\\*])");
-  private static final Pattern pf = Pattern
-          .compile("^\\s*,\\s*", Pattern.CASE_INSENSITIVE);
-  private static final Pattern pw = Pattern
-          .compile("^\\s*(AND|OR)\\s+", Pattern.CASE_INSENSITIVE);
-
-  //** 构造 **/
-
-  /**
-   * 构造表结构对象
-   * @param more 复制其全部属性
-   */
-  public FetchMore(FetchMore more)
+  public FetchMore(List<Map> rows)
   {
-    this.tableName  = more.tableName;
-    this.name       = more.name;
-    this.fields     = new StringBuilder(more.fields);
-    this.wheres     = new StringBuilder(more.wheres);
-    this.groups     = new StringBuilder(more.groups);
-    this.havins     = new StringBuilder(more.havins);
-    this.orders     = new StringBuilder(more.orders);
-    this.limits     = more.limits;
-    this.wparams    = new ArrayList(more.wparams);
-    this.hparams    = new ArrayList(more.hparams);
-    this.options    = new HashMap(more.options);
-    this.joinType   = more.joinType;
-    this.joinExpr   = more.joinExpr;
-    this.joinList   = new LinkedHashSet(more.joinList);
+    this.rows = rows;
   }
 
   /**
-   * 构建表结构对象
-   * @param name
-   * @param tableName
+   * 追加关联数据
+   * @param rows 要追加的数据
+   * @param col  追加数据的关联键
+   * @param key  目标数据的关联键
+   * @param name 追加到目标的键
    */
-  public FetchMore(String tableName, String name)
+  public void join(List<Map> rows, String col, String key, String name)
   {
-    this.tableName  = tableName;
-    this.name       = name;
-    this.fields     = new StringBuilder();
-    this.wheres     = new StringBuilder();
-    this.groups     = new StringBuilder();
-    this.havins     = new StringBuilder();
-    this.orders     = new StringBuilder();
-    this.limits     = new int[0];
-    this.wparams    = new ArrayList();
-    this.hparams    = new ArrayList();
-    this.options    = new HashMap();
-    this.joinType   = 0 ;
-    this.joinExpr   = "";
-    this.joinList   = new LinkedHashSet();
+    FetchMore.this.join(rows, name, col, key, false, false);
   }
 
   /**
-   * 构建表结构对象
-   * @param tableName
+   * 追加关联数据
+   * @param rows 要追加的数据
+   * @param col  追加数据的关联键
+   * @param key  目标数据的关联键
+   * @param name 追加到目标的键
+   * @param multiAssoc 目标数据与追加数据是一对多的关系
+   * @param unityAssoc 将追加数据放入目标数据的同一层下(name将无效)
    */
-  public FetchMore(String tableName)
+  public void join(List<Map> rows, String col, String key, String name,
+                        Boolean multiAssoc, Boolean unityAssoc)
   {
-    this(tableName, tableName);
-  }
+    // 获取id及行号
+    Map<String, List> map = new HashMap();
+    this.fetchMap(key,map);
 
-  /**
-   * 构造表结构对象
-   * @param table 取tableName和name
-   */
-  public FetchMore(Table  table)
-  {
-    this(table.tableName, table.name);
-  }
+    Iterator rs = rows.iterator(  );
 
-  /**
-   * 构建空结构
-   */
-  public FetchMore()
-  {
-    this(null, null);
-  }
+    Map     row, sub;
+    List    lst;
+    String  id;
 
-  //** 查询 **/
-
-  /***
-   * 设置查询表和别名
-   * @param tableName
-   * @param name
-   * @return 当前查询结构对象
-   */
-  public FetchMore from(String tableName, String name)
-  {
-    this.tableName = tableName;
-    this.name = name;
-    return this;
-  }
-
-  /**
-   * 设置查询表(如果别名已设置则不会更改)
-   * @param tableName
-   * @return 当前查询结构对象
-   */
-  public FetchMore from(String tableName)
-  {
-    this.tableName = tableName;
-    if (this.name == null)
-    this.name = tableName;
-    return this;
-  }
-
-  /**
-   * 追加查询字段
-   * 必须包含当前表字段, 必须在当前表字段前加".";
-   * @param fields
-   * @return 当前查询结构对象
-   */
-  public FetchMore select(String fields)
-  {
-    this.fields.append(", ").append(fields);
-    return this;
-  }
-
-  /**
-   * 追加查询条件
-   * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表
-   * @param where
-   * @param params 对应 where 中的 ?
-   * @return 当前查询结构对象
-   */
-  public FetchMore where(String where, Object... params)
-  {
-    this.wheres.append(" AND ").append(where);
-    this.wparams.addAll(Arrays.asList(params));
-    return this;
-  }
-
-  /**
-   * 追加分组字段
-   * 必须包含当前表字段, 必须在当前表字段前加".";
-   * @param fields
-   * @return 当前查询结构对象
-   */
-  public FetchMore groupBy(String fields)
-  {
-    this.groups.append(", ").append(fields);
-    return this;
-  }
-
-  /**
-   * 追加过滤条件
-   * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表
-   * @param where
-   * @param params 对应 where 中的 ?
-   * @return 当前查询结构对象
-   */
-  public FetchMore having(String where, Object... params)
-  {
-    this.havins.append(" AND ").append(where);
-    this.hparams.addAll(Arrays.asList(params));
-    return this;
-  }
-
-  /**
-   * 追加排序字段
-   * 必须包含当前表字段, 必须在当前表字段前加".";
-   * @param fields
-   * @return 当前查询结构对象
-   */
-  public FetchMore orderBy(String fields)
-  {
-    this.orders.append(", ").append(fields);
-    return this;
-  }
-
-  /**
-   * 设置限额
-   * @param start
-   * @param limit
-   * @return 当前查询结构对象
-   */
-  public FetchMore limit(int start, int limit)
-  {
-    this.limits = limit == 0 ? new int[0] : new int[] {start, limit};
-    return this;
-  }
-
-  /**
-   * 设置限额
-   * @param limit
-   * @return 当前查询结构对象
-   */
-  public FetchMore limit(int limit)
-  {
-    this.limits = limit == 0 ? new int[0] : new int[] {0, limit};
-    return this;
-  }
-
-  //** 关联 **/
-
-  private FetchMore link(FetchMore more,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    if (joinType < 0 || joinType > 5)
+    if (! multiAssoc)
     {
-      throw new HongsException(0x10b0,
-        "Unrecognized join type '"+joinType+"'");
-    }
-    if ((joinType == FetchMore.INNER
-    ||   joinType == FetchMore.LEFT
-    ||   joinType == FetchMore.RIGHT
-    ||   joinType == FetchMore.FULL)
-    &&  (joinExpr == null || joinExpr.length() == 0))
-    {
-      throw new HongsException(0x10b2,
-        "JoinExpr be required in (FULL|LEFT|RIGHT)");
-    }
-
-    this.joinList.add(more);
-    more.joinExpr  = joinExpr;
-    more.joinType  = joinType;
-    more.options   = this.options;
-    return more;
-  }
-
-  /**
-   * 关联一个表(采用指定结构的方式)
-   * 注意: 此方法将自动克隆原查询结构,
-   * 需追加查询参数请接收其返回的对象,
-   * 并在该对象上进行相应的操作.
-   * @param more
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchMore join(FetchMore more,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchMore(more),
-           joinExpr, joinType);
-  }
-  public FetchMore join(FetchMore more,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchMore(more),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 关联一个表(采用指定表名和别名的方式)
-   * @param tableName
-   * @param name
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchMore join(String tableName, String name,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchMore(tableName, name),
-           joinExpr, joinType);
-  }
-  public FetchMore join(String tableName, String name,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchMore(tableName, name),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 关联一个表(采用指定表名或别名的方式)
-   * @param tableName
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchMore join(String tableName,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchMore(tableName),
-           joinExpr, joinType);
-  }
-  public FetchMore join(String tableName,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchMore(tableName),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 关联一个表(采用指定表对象的方式)
-   * @param table
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchMore join(Table  table,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchMore(table),
-           joinExpr, joinType);
-  }
-  public FetchMore join(Table  table,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchMore(table),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 设置/获取一个关联表
-   * 注意: 如果之前没设置该别名的关联,
-   * 则会自动创建一个该别名的关联结构,
-   * 最后查询时务必补全表名和关联属性.
-   * @param name
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchMore join(String name)
-    throws HongsException
-  {
-    FetchMore more = this.getJoin(name);
-    if (more == null)
-        more =  this.link(new FetchMore(name), null, (short)0);
-    return more;
-  }
-  public FetchMore join(String... path)
-    throws HongsException
-  {
-    FetchMore more = this;
-    for (String n : path) more = more.join(n);
-    return more;
-  }
-  public FetchMore join(List<String> path)
-    throws HongsException
-  {
-    FetchMore more = this;
-    for (String n : path) more = more.join(n);
-    return more;
-  }
-
-  /**
-   * 获取关联的表查询结构
-   * @param name
-   * @return 指定关联的表查询结构对象
-   */
-  public FetchMore getJoin(String name)
-  {
-    for (FetchMore more : this.joinList)
-    {
-      if (this.name.equals(name))
+      while (rs.hasNext())
       {
-        return more;
+        sub = ( Map  ) rs.next(   );
+        id  = (String) sub.get(col);
+        lst = ( List ) map.get(id );
+
+        if (lst == null)
+        {
+          //throw new HongsException(0x10c0, "Line nums is null");
+          continue;
+        }
+
+        Iterator it = lst.iterator();
+        while (it.hasNext())
+        {
+          row = (Map) it.next();
+
+          if (! unityAssoc)
+          {
+            row.put(name, sub);
+          }
+          else
+          {
+            sub.putAll(row);
+            row.putAll(sub);
+          }
+        }
       }
-    }
-    return null;
-  }
-
-  /**
-   * 设置管理的表查询关系
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 当前查询结构对象
-   */
-  public FetchMore setJoin(String joinExpr, short joinType)
-  {
-    this.joinExpr = joinExpr;
-    this.joinType = joinType;
-    return this;
-  }
-
-  //** 选项 **/
-
-  /**
-   * 是否存在选项
-   * @param key
-   * @return 存在为true, 反之为false
-   */
-  public boolean hasOption(String key)
-  {
-    return this.options.containsKey(key);
-  }
-
-  /**
-   * 获取选项
-   * @param key
-   * @return 指定选项
-   */
-  public Object getOption(String key)
-  {
-    return this.options.get(key);
-  }
-
-  /**
-   * 获取选项(可指定类型)
-   * @param <T>
-   * @param key
-   * @param def
-   * @return 指定选项
-   */
-  public <T> T getOption(String key, T def)
-  {
-    Object obj = this.options.get(key);
-    return obj != null ? (T)obj : def;
-  }
-
-  /**
-   * 设置参数(单个)
-   * @param key
-   * @param obj
-   * @return 当前查询结构对象
-   */
-  public FetchMore setOption(String key, Object obj)
-  {
-    this.options.put(key, obj);
-    return this;
-  }
-
-  //** 获取构造结果 **/
-
-  /**
-   * 获取SQL
-   * @return SQL
-   */
-  public String getSQL()
-  {
-    return this.getSQLStrb().toString();
-  }
-
-  /**
-   * 获取SQL字串
-   * @return SQL字串
-   */
-  private StringBuilder getSQLStrb()
-  {
-    StringBuilder t = new StringBuilder();
-    StringBuilder f = new StringBuilder();
-    StringBuilder g = new StringBuilder();
-    StringBuilder o = new StringBuilder();
-    StringBuilder w = new StringBuilder();
-    StringBuilder h = new StringBuilder();
-    this.getSQLDeep(  t, f, g, o, w, h, null);
-
-    StringBuilder sql = new StringBuilder("SELECT");
-
-    // 字段
-    if (f.length() != 0)
-    {
-      sql.append(" ")
-         .append(pf.matcher(f).replaceFirst(""));
-    }
-
-    // 表名
-    sql.append(" FROM ").append(t);
-
-    // 条件
-    if (w.length() != 0)
-    {
-      sql.append(" WHERE ")
-         .append(pw.matcher(w).replaceFirst(""));
-    }
-
-    // 分组
-    if (g.length() != 0)
-    {
-      sql.append(" GROUP BY ")
-         .append(pf.matcher(g).replaceFirst(""));
-    }
-
-    // 过滤
-    if (h.length() != 0)
-    {
-      sql.append(" WHERE ")
-         .append(pw.matcher(h).replaceFirst(""));
-    }
-
-    // 排序
-    if (o.length() != 0)
-    {
-      sql.append(" ORDER BY ")
-         .append(pf.matcher(o).replaceFirst(""));
-    }
-
-    // 查询限额
-    if (this.limits.length > 0)
-    {
-      sql.append(" LIMIT ?, ?");
-    }
-
-    //sql = DB.formatSQLFields(sql);
-
-    return sql;
-  }
-
-  /**
-   * 获取SQL组合
-   * @return SQL组合
-   */
-  private void getSQLDeep(StringBuilder t, StringBuilder f,
-                          StringBuilder g, StringBuilder o,
-                          StringBuilder w, StringBuilder h,
-                          String rp2)
-  {
-    if (this.tableName == null
-    ||  this.tableName.length() == 0)
-    {
-        throw new Error( new HongsException(0x10b4) );
-    }
-
-    // 表名/替换
-    String rp;
-    StringBuilder b = new StringBuilder();
-    b.append("`").append(this.tableName ).append("`");
-    if (this.name != null
-    &&  this.name.length() != 0
-    && !this.name.equals(this.tableName))
-    {
-      b.append(" AS `").append(this.name).append("`");
-      rp = "$1`"+this.name+"`.$2";
     }
     else
     {
-      rp = "$1`"+this.tableName+"`.$2";
-    }
-
-    // 关联
-    if (rp2 != null)
-    {
-      switch (this.joinType)
+      while (rs.hasNext())
       {
-        case FetchMore.INNER: b.insert(0," INNER JOIN "); break;
-        case FetchMore.LEFT : b.insert(0, " LEFT JOIN "); break;
-        case FetchMore.RIGHT: b.insert(0," RIGHT JOIN "); break;
-        case FetchMore.FULL : b.insert(0, " FULL JOIN "); break;
-        case FetchMore.CROSS: b.insert(0," CROSS JOIN "); break;
-        default: return;
+        sub = ( Map  ) rs.next(   );
+        id  = (String) sub.get(col);
+        lst = ( List ) map.get(id );
+
+        if (lst == null)
+        {
+          //throw new HongsException(0x10c0, "Line nums is null");
+          continue;
+        }
+
+        Iterator it = lst.iterator();
+        while (it.hasNext())
+        {
+          row = (Map) it.next();
+
+          if (row.containsKey(name))
+          {
+            (( List ) row.get(name)).add(sub);
+          }
+          else
+          {
+            List lzt = new ArrayList();
+            row.put(name, lzt);
+            lzt.add(sub);
+          }
+        }
       }
-      if (this.joinExpr != null && this.joinExpr.length() != 0)
+    }
+  }
+
+  /**
+   * 获取关联数据
+   *
+   * @param table 关联表
+   * @param col   关联字段
+   * @param key   源表关联键
+   * @throws app.hongs.HongsException
+   */
+  public void join(Table table, String col, String key)
+    throws HongsException
+  {
+    this.join(table, col, key, new FetchCase());
+  }
+
+  /**
+   * 获取关联数据
+   *
+   * @param table 关联表
+   * @param col   关联字段
+   * @param key   源表关联键
+   * @param caze  限制查询结构
+   * @throws app.hongs.HongsException
+   */
+  public void join(Table table, String col, String key, FetchCase caze)
+    throws HongsException
+  {
+    if (this.rows.isEmpty())
+    {
+      return;
+    }
+
+    DB db = table.db;
+    String       name   = caze.name;
+    String  tableName   = table.tableName;
+    boolean multiAssoc  = caze.getOption("MULTI_ASSOC", false);
+    boolean unityAssoc  = caze.getOption("UNITY_ASSOC", false);
+
+    if (name == null || name.length() == 0)
+    {
+        name = table.name;
+    }
+
+    // 获取id及行号
+    Map<String, List> map = new HashMap();
+    this.fetchMap(key,map);
+    Set<String> ids = map.keySet();
+
+    if (ids.isEmpty() || map.isEmpty())
+    {
+      //throw new HongsException(0x10c0, "Ids map is null");
+      return;
+    }
+
+    // 识别字段别名
+    String col2 = col;
+    if (!table.getColumns().containsKey(col))
+    {
+      Pattern pattern = Pattern.compile(
+             "^(.+?)\\s+(?:AS\\s+)?`?(.+?)`?$",
+                     Pattern.CASE_INSENSITIVE);
+      Matcher matcher = pattern.matcher(col);
+      if (matcher.find())
       {
-        String s  =  this.joinExpr;
-        s = p1.matcher(s).replaceAll(rp );
-        s = p2.matcher(s).replaceAll(rp2);
-        b.append(" ON ").append(s);
+        col  = matcher.group(1);
+        col2 = matcher.group(2);
       }
     }
-
-    t.append(b);
-
-    // 字段
-    if (this.fields.length() != 0)
+    else
     {
-      String s = this.fields.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      f.append(" ").append(s);
-    }
-    else if (rp2 == null)
-    {
-      f.append(" ,`").append(this.name).append("`.*");
+      col = ".`" + col + "`";
     }
 
-    // 分组
-    if (this.groups.length() != 0)
+    // 构建查询结构
+    caze.from (tableName, name)
+      .where(col+" IN (?)", ids);
+
+    /**
+     * 根据 id 获取关联数据,
+     * 并根据之前的 id=>行 关系以表名为键放入列表中
+     */
+
+    FetchNext rs = db.query(caze.getSQL(), caze.getParams());
+
+    Map     row, sub;
+    List    lst;
+    String  id;
+
+    if (! multiAssoc)
     {
-      String s = this.groups.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      g.append(" ").append(s);
+      while ((sub = rs.fetch()) != null)
+      {
+        id  = (String) sub.get(col2);
+        lst = ( List ) map.get( id );
+
+        if (lst == null)
+        {
+          //throw new HongsException(0x10c0, "Line nums is null");
+          continue;
+        }
+
+        Iterator it = lst.iterator();
+        while (it.hasNext())
+        {
+          row = (Map) it.next();
+
+          if (! unityAssoc)
+          {
+            row.put(name, sub);
+          }
+          else
+          {
+            sub.putAll(row);
+            row.putAll(sub);
+          }
+        }
+      }
+    }
+    else
+    {
+      while ((sub = rs.fetch()) != null)
+      {
+        id  = (String) sub.get(col2);
+        lst = ( List ) map.get( id );
+
+        if (lst == null)
+        {
+          //throw new HongsException(0x10c0, "Line nums is null");
+          continue;
+        }
+
+        Iterator it = lst.iterator();
+        while (it.hasNext())
+        {
+          row = (Map) it.next();
+
+          if (row.containsKey(name))
+          {
+            (( List ) row.get(name)).add(sub);
+          }
+          else
+          {
+            List lzt = new ArrayList();
+            row.put(name, lzt);
+            lzt.add(sub);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 获取关联ID
+   *
+   * @param key 使用"."分割的键
+   * @param ids
+   */
+  public void fetchIds(String key, Set<String> ids)
+  {
+    Map map = new HashMap( );
+    this.fetchMap(key.split("\\."), map);
+    ids.addAll(map.keySet());
+  }
+
+  /**
+   * 获取关联ID和行
+   *
+   * @param key 使用"."分割的键
+   * @param map
+   */
+  public void fetchMap(String key, Map<String, List> map)
+  {
+    if (key.startsWith( ":" ))
+    {
+        key = key.substring(1);
+    }
+    this.fetchMap(key.split("\\."), map);
+  }
+
+  /**
+   * 获取关联ID和行
+   *
+   * @param key
+   * @param map
+   */
+  private void fetchMap(String[] key, Map<String, List> map)
+  {
+    Iterator it = this.rows.iterator();
+    W:while (it.hasNext())
+    {
+      Object row = it.next();
+      Object obj = row;
+
+      // 获取id值
+      for (int i = 0; i < key.length; i ++)
+      {
+        if (obj instanceof Map)
+        {
+          obj = ((Map)obj).get(key[i]);
+        }
+        else
+        if (obj instanceof List)
+        {
+          List rowz = this.rows;
+          this.rows = (List)obj;
+
+          // 切割子键数组
+          int j = key.length - i ;
+          String[] keyz = new String[j];
+          System.arraycopy(key, i, keyz, 0, j);
+
+          // 往下递归一层
+          this.fetchMap(keyz, map);
+
+          this.rows = rowz;
+
+          continue W;
+        }
+        else
+        {
+          continue W;
+        }
+      }
+      if (obj == null)
+      {
+          continue W;
+      }
+
+      String id = obj.toString();
+
+      // 登记行
+      if (map.containsKey(id))
+      {
+        map.get(id).add(row);
+      }
+      else
+      {
+        List lst = new ArrayList();
+        map.put(id, lst);
+        lst.add(row);
+      }
+    }
+  }
+
+  //** 静态方法 **/
+
+  /**
+   * 关联查询
+   * @param table 主表
+   * @param caze 查询体
+   * @param assocs 关联配置
+   * @return 结果列表
+   * @throws HongsException
+   */
+  public static List fetchMore
+    (Table table, FetchCase caze, Map assocs)
+  throws HongsException {
+    if ( assocs == null ) assocs = new HashMap();
+
+    List<Map> lnks = new ArrayList();
+
+    fetchMore(table, caze, assocs, lnks);
+    List rows = table.db.fetchMore(caze);
+    fetchMore(table, caze,  rows , lnks);
+
+    return rows;
+  }
+
+  private static void fetchMore
+    (Table table, FetchCase caze, Map assocs, List lnks)
+  throws HongsException {
+    Set tps = (Set)caze.getOption("ASSOC_TYPES" );
+    Set jns = (Set)caze.getOption("ASSOC_JOINS" );
+    Set tns = (Set)caze.getOption("ASSOC_TABLES");
+    String tn = caze.name;
+    if (tn == null || tn.length() == 0)
+           tn = caze.tableName;
+
+    for(Map.Entry et : (Set<Map.Entry>)assocs.entrySet()) {
+        Map assoc = (Map) et.getValue();
+        String tp = (String)assoc.get("type");
+        String jn = (String)assoc.get("join");
+        String an = (String)assoc.get("name");
+        String rn = (String)assoc.get("tableName"); // 原名 realName
+        if (rn == null || rn.length() == 0) rn = an;
+
+        // 检查是否许可关联
+        if (tns != null && !tns.contains(rn) && !tns.contains(an)) {
+            continue;
+        }
+        if (tps != null && !tps.contains(tp)) {
+            continue;
+        }
+        if (jn  != null &&  jn.length() != 0) {
+        if (jns != null && !jns.contains(jn)) {
+            continue;
+        }}  else {
+            // 非JOIN表先放到一边
+            assoc.put("assocName", tn);
+            lnks .add(assoc);
+            continue;
+        }
+
+        Map  assocs2 = (Map) assoc.get("assocs");
+        Table table2 = table.db.getTable(  rn  );
+        FetchCase caze2 = caze.join(an)
+                              .from(table2.tableName);
+        String fk = (String)assoc.get("foreignKey");
+        String pk = (String)assoc.get("primaryKey");
+
+        // 建立关联关系
+        if ("BLS_TO".equals(tp)) {
+            // 上级外键连接下级主键, 交换主外键
+            String xk = fk; fk = pk; pk = xk;
+            if (fk == null) fk = table2.primaryKey;
+        }
+        else if ("HAS_ONE".equals(tp)) {
+            // 上级主键连接下级外键
+            if (pk == null) pk = table .primaryKey;
+        }
+        else if ("HAS_MANY".equals(tp)) {
+            throw new HongsException(0x10c2, "Unsupported assoc type '"+tp+"'");
+        }
+        else {
+            throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
+        }
+        if (tn == null || tn.length() == 0) {
+            fk =         ":`"+fk+"`";
+        } else {
+            fk = "`"+tn+"`.`"+fk+"`";
+        }   pk = "`"+an+"`.`"+pk+"`";
+
+        // 转化关联类型
+        short ji;
+        if ("INNER".equals(jn)) {
+            ji = FetchCase.INNER;
+        }
+        else if ("LEFT".equals(jn)) {
+            ji = FetchCase.LEFT;
+        }
+        else if ("RIGHT".equals(jn)) {
+            ji = FetchCase.RIGHT;
+        }
+        else if ("FULL".equals(jn)) {
+            ji = FetchCase.FULL;
+        }
+        else if ("CROSS".equals(jn)) {
+            throw new HongsException(0x10c4, "Unsupported assoc join '"+jn+"'");
+        }
+        else {
+            throw new HongsException(0x10c4, "Unrecognized assoc join '"+jn+"'");
+        }
+
+        // 设置关联关系
+        caze2.setJoin(pk+"="+fk, ji);
+
+        buildCase(caze2, assoc);
+
+        if (assocs2 != null) {
+            FetchMore.fetchMore(table2, caze2, assocs2, lnks);
+        }
+    }
+  }
+
+  private static void fetchMore
+    (Table table, FetchCase caze, List rows, List lnks)
+  throws HongsException {
+    Set tps = (Set)caze.getOption("ASSOC_TYPES" );
+    Set tns = (Set)caze.getOption("ASSOC_TABLES");
+    FetchMore join = new FetchMore(rows);
+
+    while (!lnks.isEmpty()) {
+        List lnks2 = new ArrayList();
+    for (Map assoc : ( List<Map> ) lnks) {
+        String tp = (String)assoc.get("type");
+        String an = (String)assoc.get("name");
+        String rn = (String)assoc.get("tableName"); // 原名 realName
+        String tn = (String)assoc.get("assocName"); // 原名 linkName
+        if (rn == null || rn.length() == 0) rn = an;
+
+        // 检查是否许可关联
+        if (tns != null && !tns.contains(rn) && !tns.contains(an)) {
+            continue;
+        }
+        if (tps != null && !tps.contains(tp)) {
+            continue;
+        }
+
+        Map  assocs2 = (Map) assoc.get("assocs");
+        Table table2 = table.db.getTable(  rn  );
+        FetchCase caze2 = caze.join(an)
+                              .from(table2.tableName);
+        String fk = (String)assoc.get("foreignKey");
+        String pk = (String)assoc.get("primaryKey");
+
+        // 准备关联关系
+        if ("BLS_TO".equals(tp)) {
+            // 上级外键连接下级主键, 交换主外键
+            String xk = fk; fk = pk; pk = xk;
+            if (fk == null) fk = table2.primaryKey;
+        }
+        else if ("HAS_ONE".equals(tp)) {
+            // 上级主键连接下级外键
+            if (pk == null) pk = table .primaryKey;
+            caze2.setOption("MULTI_ASSOC", false);
+        }
+        else if ("HAS_MANY".equals(tp)) {
+            // 上级主键连接下级外键
+            if (pk == null) pk = table .primaryKey;
+            caze2.setOption("MULTI_ASSOC", true );
+        }
+        else {
+            throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
+        }
+        if (tn != null && tn.length() != 0 && !tn.equals(caze.name)) {
+            pk = tn+"."+pk;
+        }
+
+        buildCase(caze2, assoc);
+
+        if (assocs2 != null) {
+                    FetchMore.fetchMore(table2, caze2, assocs2, lnks2);
+        }
+
+        join.join (table2, fk , pk, caze2);
+    }
+        lnks = lnks2;
+    }
+  }
+
+  private static void buildCase(FetchCase caze, Map assoc) {
+    String str;
+    str = (String)assoc.get("select");
+    if (str != null && str.length() != 0) {
+        caze.select(str);
+    }
+    str = (String)assoc.get("where");
+    if (str != null && str.length() != 0) {
+        caze.where(str);
+    }
+    str = (String)assoc.get("groupBy");
+    if (str != null && str.length() != 0) {
+        caze.groupBy(str);
+    }
+    str = (String)assoc.get("having");
+    if (str != null && str.length() != 0) {
+        caze.having(str);
+    }
+    str = (String)assoc.get("orderBy");
+    if (str != null && str.length() != 0) {
+        caze.orderBy(str);
+    }
+  }
+
+    /**
+     * 关联更新
+     *
+     * @param table 主表
+     * @param rows 要插入的数据
+     * @param keys 判断改变的键
+     * @param where 更新/删除范围
+     * @param params where 的参数
+     * @throws HongsException
+     */
+    public static void updateMore(
+        Table           table,
+        List<Map>       rows,
+        List<String>    keys,
+        String          where,
+        Object...       params
+    )   throws HongsException
+    {
+        List<Object> params1 = Arrays.asList(params);
+        List<Object> params2;
+        Object[]     params3;
+
+        StringBuilder where2 = new StringBuilder(where);
+        String        where3;
+        for (String k : keys)
+        {
+            where2.append(" AND `"+k+"`=?" );
+        }
+        where3 = where2.toString();
+
+        List ids = new ArrayList();
+
+        for (Map row : rows)
+        {
+            params2 = new ArrayList(params1);
+            for (String k : keys)
+            {
+                params2.add(row.get(k));
+            }
+            params3 = params2.toArray();
+
+            String sql = "SELECT `"+table.primaryKey+"` FROM `"+table.tableName+"` WHERE "+where2;
+            Map<String, Object> one = table.db.fetchOne( sql , params3 );
+            if (!one.isEmpty())
+            {
+                //  有则更新
+                if (!row.containsKey(table.primaryKey) || "".equals(row.get(table.primaryKey)))
+                    row.put(table.primaryKey, one.get(table.primaryKey));
+                table.update(row, where3, params3);
+            }
+            else
+            {
+                // 没则插入
+                if (!row.containsKey(table.primaryKey) || "".equals(row.get(table.primaryKey)))
+                    row.put(table.primaryKey, Core.getUniqueId());
+                table.insert(row);
+            }
+
+            ids.add(row.get(table.primaryKey));
+        }
+
+        // 删除多余
+        where2 = new StringBuilder(where);
+        where2.append(" AND `"+table.primaryKey+"` NOT IN (?)");
+        params2 = new ArrayList(params1 );
+        params2.add(ids);
+        table .delete( where2.toString( ), params2.toArray( ) );
     }
 
-    // 排序
-    if (this.orders.length() != 0)
-    {
-      String s = this.orders.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      o.append(" ").append(s);
-    }
+  /**
+   * 关联插入
 
-    // 条件
-    if (this.wheres.length() != 0)
-    {
-      String s = this.wheres.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      w.append(" ").append(s);
-    }
+ 关联配置中有指定 updateKeys 的话, 会调用 updateMore 进行更新
+   *
+   * @param table 主表
+   * @param assocs 关联配置
+   * @param values 要插入的数据
+   * @throws app.hongs.HongsException
+   */
+  protected static void insertMore(Table table, Map assocs, Map values)
+    throws HongsException
+  {
+    if ( assocs == null || assocs.isEmpty() ) return;
 
-    // 过滤
-    if (this.havins.length() != 0)
-    {
-      String s = this.havins.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      h.append(" ").append(s);
-    }
+    String id = (String)values.get(table.primaryKey);
 
-    // 追加子级查询片段
-    Iterator it = this.joinList.iterator( );
+    Iterator it = assocs.entrySet().iterator();
     while (it.hasNext())
     {
-      FetchMore more = (FetchMore)it.next();
-      if (0  != more.joinType)
-      {
-        more.getSQLDeep(t, f, g,o, w,h, rp);
-      }
-    }
-  }
+      Map.Entry entry = (Map.Entry)it.next();
+      Map config = (Map)entry.getValue();
 
-  /**
-   * 获取参数
-   * @return 参数
-   */
-  public Object[] getParams()
-  {
-    return this.getParamsList().toArray();
-  }
+      String type = (String)config.get("type");
+      String name = (String)config.get("name");
+      String realName = (String)config.get("tableName"); // 原名 realName
+      String foreignKey = (String)config.get("foreignKey");
 
-  /**
-   * 获取参数列表
-   * @return 参数列表
-   */
-  private List getParamsList()
-  {
-    List paramz = new ArrayList();
-    List wparamz = new ArrayList();
-    List hparamz = new ArrayList();
-
-    // 查询参数
-    this.getParamsDeep(wparamz, hparamz);
-    paramz.addAll(wparamz);
-    paramz.addAll(hparamz);
-
-    // 查询限额
-    if (this.limits.length > 0)
-    {
-      paramz.add(this.limits[0]);
-      paramz.add(this.limits[1]);
-    }
-
-    return paramz;
-  }
-
-  /**
-   * 获取参数组合
-   * @return 参数组合
-   */
-  private void getParamsDeep(List wparamz, List hparamz)
-  {
-    wparamz.addAll(this.wparams);
-    hparamz.addAll(this.hparams);
-
-    for (FetchMore more  :  this.joinList)
-    {
-      if (0 == more.joinType)
+      if (!values.containsKey(name))
       {
         continue;
       }
+      if (!type.equals("HAS_ONE") && !type.equals("HAS_MANY"))
+      {
+        continue;
+      }
+      if (realName == null || realName.length() == 0)
+      {
+          realName =  name;
+      }
 
-      more.getParamsDeep(wparamz, hparamz);
+      Table tb = table.db.getTable(realName);
+      List  pa = new ArrayList();
+            pa.add(id);
+
+      // 都整理成List方便处理
+      Object subValues = values.get(name);
+      List subValues2 = new ArrayList();
+      if ("HAS_ONE".equals(type))
+      {
+        if (subValues instanceof Map)
+        {
+          subValues2.add( subValues );
+        }
+        else
+        {
+          throw new HongsException(0x10ca,
+          "Sub data type for table '"+tb.name+"' must be Map");
+        }
+      }
+      else
+      {
+        if (subValues instanceof List)
+        {
+          subValues2.addAll((List)subValues);
+        }
+        else
+        if (subValues instanceof Map)
+        {
+          subValues2.addAll(((Map)subValues).values());
+        }
+        else
+        {
+          throw new HongsException(0x10cc,
+          "Sub data type for table '"+tb.name+"' must be Map or List");
+        }
+      }
+
+      /**
+       * Add by Hong on 2013/6/6
+       * 有时候子数据会被其他数据引用, 如果更新子数据, 子数据的ID就会改变.
+       * 通常这种情况存在以下规则: 如果某些字段值没发生改变则不要重新插入.
+       * 所以当有指定updateKeys时, 使用assocUpdate方法更新数据, 其原理为:
+       * 找出没改变的数据并更新, 然后插入新增数据, 最后删除更新和新增之外的数据.
+       */
+      List<String> updateKeys = (List<String>) config.get( "updateKeys" );
+      if (updateKeys != null && !updateKeys.isEmpty())
+      {
+        // 填充外键
+        Iterator it2 = subValues2.iterator();
+        while (it2.hasNext())
+        {
+          Map subValues3=(Map)it2.next();
+          subValues3.put(foreignKey, id);
+        }
+
+        updateMore(tb, subValues2, updateKeys, "`"+foreignKey+"`=?", pa);
+      }
+      else
+      {
+        // 先删除旧数据
+        tb.delete("`"+foreignKey+"`=?" , pa);
+
+        // 再插入新数据
+        Iterator it2 = subValues2.iterator();
+        while (it2.hasNext())
+        {
+          Map subValues3=(Map)it2.next();
+          subValues3.put(foreignKey, id);
+
+          // 如果存在主键而没给定主键值,则帮其添加上唯一ID
+          if (tb.primaryKey != null && tb.primaryKey.length() != 0
+          &&  ! subValues3.containsKey(tb.primaryKey)) {
+            subValues3.put(tb.primaryKey, Core.getUniqueId());
+          }
+
+          tb.insert(subValues3);
+        }
+      }
     }
   }
 
   /**
-   * 转换为字符串
-   * @return 合并了SQL和参数
+   * 关联删除
+   *
+   * @param table 主表
+   * @param assocs 关联配置
+   * @param id 要删除的外键
+   * @throws app.hongs.HongsException
    */
-  @Override
-  public String toString()
+  protected static void deleteMore(Table table, Map assocs, String id)
+    throws HongsException
   {
-    StringBuilder sb = this.getSQLStrb();
-    List   paramz = this.getParamsList();
-    try
+    if (assocs.isEmpty())
     {
-      DB.checkSQLParams(sb, paramz);
-      DB.mergeSQLParams(sb, paramz);
+      return;
     }
-    catch (HongsException ex)
+
+    Iterator it = assocs.entrySet().iterator();
+    while (it.hasNext())
     {
-           return   null;
-    }
-    return sb.toString();
-  }
+      Map.Entry entry = (Map.Entry)it.next();
+      Map config = (Map)entry.getValue();
 
-  /**
-   * 克隆
-   * @return 新查询结构对象
-   */
-  @Override
-  public FetchMore clone()
-  {
-    return new FetchMore(this);
-  }
+      String type = (String)config.get("type");
+      String name = (String)config.get("name");
+      String realName = (String)config.get("tableName"); // 原名 realName
+      String foreignKey = (String)config.get("foreignKey");
 
-  //** 不推荐的方法 **/
+      if (!type.equals("HAS_ONE") && !type.equals("HAS_MANY"))
+      {
+        continue;
+      }
+      if (realName == null || realName.length() == 0)
+      {
+          realName =  name;
+      }
 
-  /**
-   * 是否有设置查询字段
-   * @return 存在为true, 反之为false
-   * @deprecated
-   */
-  public boolean hasSelect()
-  {
-    return this.fields.length() != 0;
-  }
+      Table tb = table.db.getTable(realName);
+      List  pa = new ArrayList();
+            pa.add(id);
 
-  /**
-   * 设置查询字段
-   * @param fields
-   * @return 当前查询结构对象
-   * @deprecated
-   */
-  public FetchMore setSelect(String fields)
-  {
-    this.fields = new StringBuilder(checkField(fields));
-    return this;
-  }
-
-  /**
-   * 是否有设置分组
-   * @return 存在为true, 反之为false
-   * @deprecated
-   */
-  public boolean hasGroupBy()
-  {
-    return this.groups.length() != 0;
-  }
-
-  /**
-   * 设置分组字段
-   * @param fields
-   * @return 当前查询结构对象
-   * @deprecated
-   */
-  public FetchMore setGroupBy(String fields)
-  {
-    this.groups = new StringBuilder(checkField(fields));
-    return this;
-  }
-
-  /**
-   * 是否有设置排序
-   * @return 存在为true, 反之为false
-   * @deprecated
-   */
-  public boolean hasOrderBy()
-  {
-    return this.orders.length() != 0;
-  }
-
-  /**
-   * 设置排序字段
-   * @param fields
-   * @return 当前查询结构对象
-   * @deprecated
-   */
-  public FetchMore setOrderBy(String fields)
-  {
-    this.orders = new StringBuilder(checkField(fields));
-    return this;
-  }
-
-  /**
-   * 是否有设置查询条件
-   * @return 存在为true, 反之为false
-   * @deprecated
-   */
-  public boolean hasWhere()
-  {
-    return this.wheres.length() != 0;
-  }
-
-  /**
-   * 设置查询条件
-   * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表
-   * @param where
-   * @param params 对应 where 中的 ?
-   * @return 当前查询结构对象
-   * @deprecated
-   */
-  public FetchMore setWhere(String where, Object... params)
-  {
-    this.wheres = new StringBuilder(checkWhere(where));
-    this.wparams = Arrays.asList(params);
-    return this;
-  }
-
-  /**
-   * @deprecated
-   */
-  public boolean hasHaving()
-  {
-    return this.havins.length() != 0;
-  }
-
-  /**
-   * @deprecated
-   */
-  public FetchMore setHaving(String where, Object... params)
-  {
-    this.havins = new StringBuilder(checkWhere(where));
-    this.hparams = Arrays.asList(params);
-    return this;
-  }
-
-  private String checkField(String field)
-  {
-    if (field == null) return "";
-        field = field.trim();
-    if (field.length() != 0
-    && !field.startsWith(","))
-    {
-      return ", " + field;
-    }
-    else
-    {
-      return field;
+      // 直接删除数据
+      tb.delete("`"+foreignKey+"`=?", pa);
     }
   }
 
-  private String checkWhere(String where)
-  {
-    if (where == null) return "";
-        where = where.trim();
-    if (where.length() != 0
-    && !where.matches("^(AND|OR) (?i)"))
-    {
-      return "AND " + where;
-    }
-    else
-    {
-      return where;
-    }
-  }
 }

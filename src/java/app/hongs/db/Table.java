@@ -169,39 +169,39 @@ public class Table
 
   /**
    * 查询多条记录(采用查询结构)
-   * @param more
+   * @param caze
    * @return 全部记录
    * @throws app.hongs.HongsException
    */
-  public List fetchMore(FetchMore more)
+  public List fetchMore(FetchCase caze)
     throws HongsException
   {
-    more.from(tableName, name);
+    caze.from(tableName, name);
 
     String rstat = getField( "state" );
     String rflag = getState("removed");
 
     // 默认不查询已经删除的记录
     if (rstat != null && rflag != null
-    && !more.hasOption("INCLUDE_REMOVED"))
+    && !caze.hasOption("INCLUDE_REMOVED"))
     {
-      more.where(".`"+rstat+"` != ?", rflag);
+      caze.where(".`"+rstat+"` != ?", rflag);
     }
 
-    return FetchJoin.assocSelect(this, assocs, more);
+    return FetchMore.fetchMore(this, caze, assocs);
   }
 
   /**
    * 获取单条记录(采用查询结构)
-   * @param less
+   * @param caze
    * @return 单条记录
    * @throws app.hongs.HongsException
    */
-  public Map fetchLess(FetchMore less)
+  public Map fetchLess(FetchCase caze)
     throws HongsException
   {
-    less.limit(1);
-    List<Map> rows = this.fetchMore(less);
+    caze.limit(1);
+    List<Map> rows = this.fetchMore(caze);
 
     if (! rows.isEmpty( ))
     {
@@ -390,7 +390,7 @@ public class Table
   {
     if (this.columns == null)
     {
-        this.columns = (new TableCols(this)).columns;
+        this.columns = (new DTColumn(this)).columns;
     }
     return this.columns;
   }
@@ -486,16 +486,16 @@ public class Table
   /**
    * 获取关联查询体
    * @param name 关联名
-   * @param more 查询体
+   * @param caze 查询体
    * @return 关联查询体
    * @throws HongsException
    */
-  public FetchMore getAssocFetch(String name, FetchMore more)
+  public FetchCase getAssocFetch(String name, FetchCase caze)
     throws HongsException
   {
     Map tc =  this.getAssoc(name);
     if (tc == null) return  null ;
-    return more.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
+    return caze.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
   }
 
   /**
@@ -858,7 +858,7 @@ public class Table
   protected void insertSubValues(Map values)
     throws HongsException
   {
-    FetchJoin.assocInsert(this, assocs, values);
+    FetchMore.insertMore(this, assocs, values);
   }
 
   /**
@@ -872,7 +872,7 @@ public class Table
   protected void deleteSubValues(String id)
     throws HongsException
   {
-    FetchJoin.assocDelete(this, assocs, id);
+    FetchMore.deleteMore(this, assocs, id);
   }
 
   //** 私有方法 **/

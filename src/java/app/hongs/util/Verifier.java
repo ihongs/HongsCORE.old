@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.db.AbstractBaseModel;
-import app.hongs.db.FetchMore;
+import app.hongs.db.FetchCase;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -368,16 +368,16 @@ public class Verifier {
     private String isUnique(String value, Map<String, List<String>> values, String model,
             String field, String... fields) throws HongsException {
         AbstractBaseModel mode = (AbstractBaseModel) Core.getInstance(model);
-        FetchMore more = new FetchMore();
-        more.where(".`"+field+"` = ?", value);
+        FetchCase caze = new FetchCase();
+        caze.where(".`"+field+"` = ?", value);
 
         List v = values.get(mode.table.primaryKey);
         if (v != null) {
             if ( v.size() > 1 ) {
-                more.where(".`"+mode.table.primaryKey+"` NOT IN (?)", v);
+                caze.where(".`"+mode.table.primaryKey+"` NOT IN (?)", v);
             }
             else {
-                more.where(".`"+mode.table.primaryKey+"` != ?", v);
+                caze.where(".`"+mode.table.primaryKey+"` != ?", v);
             }
         }
         
@@ -387,14 +387,14 @@ public class Verifier {
                 continue;
             }
             if ( v.size() > 1 ) {
-                more.where(".`"+f+"` IN (?)", v);
+                caze.where(".`"+f+"` IN (?)", v);
             }
             else {
-                more.where(".`"+f+"` = ?", v);
+                caze.where(".`"+f+"` = ?", v);
             }
         }
 
-        Map row = mode.table.fetchLess(more);
+        Map row = mode.table.fetchLess(caze);
         if (! row.isEmpty()) {
             return lang.translate("js.form.is.not.unique");
         }
