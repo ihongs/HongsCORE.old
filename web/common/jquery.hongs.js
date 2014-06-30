@@ -2887,6 +2887,9 @@ jQuery.fn.load = function(url, data, complete ) {
  * 在表单选项区域添加:
  * <div class="choose-box" data-fn="assoc_id[]" data-ft="_choose"></div>
  * <button type="button" class="choose-btn">Choose</button>
+ * 如果是单选还可以为:
+ * <input type="hidden" data-fn="assoc_id" data-ft="_choose"/>
+ * <button type="button" class="choose-btn">Choose</button>
  * 在选择列表配置添加:
  * <param name="_fill__choose" value="(hsFillListChoose)"/>
  * 在选择列表头部添加:
@@ -2912,14 +2915,16 @@ jQuery.fn.load = function(url, data, complete ) {
             box = box.charAt(0) == '$' ? $(box.substr(1), btn): $(box);
         else if (! box)
             box = btn.siblings(".choose-box");
+        if (! box.size())
+            box = btn.siblings(":hidden");
 
         var form = box.closest(".HsForm").data("HsForm");
-        var name = box.attr   ("data-fn");
+        var name = box.attr("data-fn")||box.attr("name");
 
-        box.on("click",".option-del", function() {
+        box.on("click", ".option-del", function() {
             var dat = box.data("fill_data");
             var id = $(this).closest(".option-box")
-                             .find(":hidden").val();
+                            .find(":hidden").val( );
             $(this).closest(".option-box").remove();
             delete dat[id];
         });
@@ -3017,16 +3022,27 @@ jQuery.fn.load = function(url, data, complete ) {
         }
 
         // 填充选项
-        inp.empty();
-        for(var id in v) {
-            var txt = v[id];
-            $('<div class="option-box btn-group"></div>')
-            .append($('<input type="hidden"/>').attr("name", n).val(id)).attr("title", txt)
-            .append($('<button type="button" class="option-txt btn btn-info"></button>').text(txt))
-            .append($('<button type="button" class="option-del btn btn-info"></button>').html("&times;"))
-            .appendTo(inp);
+        if (inp.is(":hidden")) {
+            var btn = inp.siblings(":button");
+            inp.attr("name", n);
+            for(var id in v) {
+                var txt = v[id];
+                inp.val (id );
+                btn.text(txt);
+                btn.attr("title", txt);
+            }
+        } else {
+            inp.empty();
+            for(var id in v) {
+                var txt = v[id];
+                $('<div class="option-box btn-group"></div>')
+                .append($('<input type="hidden"/>').attr("name", n).val(id)).attr("title", txt)
+                .append($('<button type="button" class="option-txt btn btn-info"></button>').text(txt))
+                .append($('<button type="button" class="option-del btn btn-info"></button>').html("&times;"))
+                .appendTo(inp);
+            }
+            inp.append($('<div class="cb"></div>'));
         }
-        inp.append($('<div class="cb"></div>'));
 
         // 绑定填充方法和数据, 供组件内调用
         inp.data("fill_func", self.hsFillFormChoose);

@@ -15,16 +15,12 @@
         <input type="hidden" name="id"/>
         <div class="form-group">
             <label class="control-label">所属模块</label>
-            <div class="choose-box" data-fn="module_id" data-ft="_choose"></div>
-            <button type="button" class="btn btn-default" data-toggle="hsChoose" data-url="hcim/module/select.html">选择模块</button>
+            <input type="hidden" data-fn="module_id" data-ft="_choose"/>
+            <button type="button" class="btn btn-default" data-toggle="hsChoose" data-url="hcim/module/choose.html" style="display: block;">选择模块</button>
         </div>
         <div class="form-group">
             <label class="control-label">模型名称</label>
             <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Model/Unique.act?id={id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">代号</label>
-            <input type="text" name="code" class="form-control" data-unique="hcim/Model/Unique.act?id={id}"/>
         </div>
         <div class="form-group">
             <label class="control-label">备注</label>
@@ -34,26 +30,22 @@
         <fieldset class="cols-box">
             <legend class="dropdown-toggle">字段设置 <span class="caret"></span></legend>
             <div class="dropdown-body list-box">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <td class="cols-set-hand">&nbsp;</td>
-                            <td class="cols-set-name">名称</td>
-                            <td class="cols-set-code">代号</td>
-                            <td class="cols-set-type">类型</td>
-                            <td class="cols-set-size">长度</td>
-                            <td class="cols-set-scale">精度</td>
-                            <td class="cols-set-remove">&nbsp;</td>
-                        </tr>
-                    </thead>
-                </table>
                 <div class="cols-set-box">
                 </div>
                 <button type="button" class="add-col btn btn-default">添加字段</button>
             </div>
         </fieldset>
         
-        <div>
+        <fieldset class="rels-box">
+            <legend class="dropdown-toggle">关联设置 <span class="caret"></span></legend>
+            <div class="dropdown-body list-box">
+                <div class="rels-set-box">
+                </div>
+                <button type="button" class="add-rel btn btn-default">添加关联</button>
+            </div>
+        </fieldset>
+        
+        <div style="margin-top: 0.3em;">
             <button type="submit" class="ensure btn btn-primary">提交</button>
             <button type="button" class="cancel btn btn-link">取消</button>
         </div>
@@ -61,29 +53,27 @@
 </div>
 
 <style type="text/css">
-    #hcim-model-form .list-box tbody td
-        {padding: 0;}
-    #hcim-model-form .list-box tbody td select,
-    #hcim-model-form .list-box tbody td input
-        {min-width: 98%; width: 98%; height: 98%; border: 0; margin: 0; padding: 0;}
-    #hcim-model-form .list-box tbody td input
-        {padding: 0 6px;}
+    #hcim-model-form .cols-box,
     #hcim-model-form .cols-box
         {margin-bottom: 2em;}
     #hcim-model-form .cols-box .list-box,
-    #hcim-model-form .cols-box .list-box table
+    #hcim-model-form .rels-box .list-box
         {background: #FFFFEF;}
-    #hcim-model-form .cols-set-hand
-        {width: 2em;}
-    #hcim-model-form .cols-set-code
-        {width: 15em;}
-    #hcim-model-form .cols-set-type,
-    #hcim-model-form .cols-set-size,
-    #hcim-model-form .cols-set-scale,
-    #hcim-model-form .cols-set-remove
-        {width: 10em;}
-    #hcim-model-form .cols-set-remove
-        {text-align: center;}
+    #hcim-model-form .cols-box .sort-hand,
+    #hcim-model-form .rels-box .sort-hand
+        {background: #CCCCCC; width: 1.5em; padding-left: 0; padding-right: 0;}
+    #hcim-model-form .cols-box .list-box .btn-group,
+    #hcim-model-form .rels-box .list-box .btn-group
+        {background: #FFFFEF; display: block; margin-bottom: 0.2em;}
+    #hcim-model-form .cols-box .list-box .btn-danger,
+    #hcim-model-form .rels-box .list-box .btn-danger
+        {margin-left: 0.2em;}
+    #hcim-model-form .cols-box .list-box .btn-info,
+    #hcim-model-form .rels-box .list-box .btn-info
+        {margin-left: 0.2em; width: 12.3em; text-align: left; overflow: hidden;}
+    #hcim-model-form .cols-box .list-box .form-control,
+    #hcim-model-form .rels-box .list-box .form-control
+        {margin-left: 0.2em; width: 12.3em; display: inline-block; float: left;}
 </style>
 
 <script type="text/javascript">
@@ -92,43 +82,66 @@
     var valueTypes;
 
     context.find(".cols-set-box").sortable({
-        items : "> table",
-        handle: ".cols-set-hand"
+        handle : ".sort-hand",
+        items : ">.btn-group"
+    });
+    context.find(".rels-set-box").sortable({
+        handle : ".sort-hand",
+        items : ">.btn-group"
     });
 
-    /** 字段设置 **/
+    /** 字段和关系设置 **/
 
-    var tab = "a_hcim_model_cols";
-    var idx = 0;
+    var colTab = "a_hcim_model_cols";
+    var relTab = "a_hcim_model_rels";
+    var colIdx = 0;
+    var relIdx = 0;
 
     function addCol(col) {
-        idx ++;
-        var tb = $('<table class="table"><tbody><tr></tr></tbody></table>');
-        var nm = $('<input type="text" name="'+tab+'['+idx+'][name]"/>' );
-        var cd = $('<input type="text" name="'+tab+'['+idx+'][code]"/>' );
-        var ft = $('<select name="'+tab+'['+idx+'][value_type]"></select>');
-        var fs = $('<input type="number" name="'+tab+'['+idx+'][value_size]" min="1"/>' );
-        var fc = $('<input type="number" name="'+tab+'['+idx+'][value_scale]" min="0" max="9"/>');
-        var bt = $('<button type="button" class="del-col btn btn-danger">删除</button>');
-        tb.appendTo(context.find(".cols-set-box")).find("tr")
-            .append($('<td class="cols-set-hand"></td>'))
-            .append($('<td class="cols-set-name"></td>').append(nm))
-            .append($('<td class="cols-set-code"></td>').append(cd))
-            .append($('<td class="cols-set-type"></td>').append(ft))
-            .append($('<td class="cols-set-size"></td>').append(fs))
-            .append($('<td class="cols-set-scale"></td>').append(fc))
-            .append($('<td class="cols-set-remove"></td>').append(bt));
-        for(var i = 0; i < valueTypes.length; i ++) {
-            var a = valueTypes[i];
-            ft.append($('<option></option>').val(a[0]).text(a[1]));
-        }
+        colIdx ++;
+        var hand = $('<div class="btn sort-hand">&nbsp;</div>');
+        var name = $('<input type="text" name="'+colTab+'['+colIdx+'][name]" placeholder="字段名称" class="form-control fl"/>' );
+        var attr = $('<input type="hidden" name="'+colTab+'['+colIdx+'][attr_id]"/>');
+        var attrBtn = $('<button type="button" class="sel-attr btn btn-info">选择属性</button>');
+        var delBtn = $('<button type="button" class="del-col btn btn-danger">&times;</button>');
+        $('<div class="btn-group from-inline"></div>')
+                .append(hand)
+                .append($('<div class="fl"></div>').append(name))
+                .append($('<div class="fl"></div>').append(attr).append(attrBtn))
+                .append(delBtn)
+                .append('<div class="cb"></div>')
+                .appendTo(context.find('.cols-set-box'));
         if (col) {
-            nm.val(col.name);
-            cd.val(col.code);
-            ft.val(col.value_type);
-            fs.val(col.value_size);
-            fc.val(col.value_scale);
+            name.val(col.name);
+            attr.val(col.attr_id);
+            attrBtn.text(col.attr.name);
         }
+        attrBtn.hsChoose({url: "hcim/attr/choose.html"});
+    }
+    
+    function addRel(rel) {
+        relIdx ++;
+        var hand = $('<div class="btn sort-hand">&nbsp;</div>');
+        var type = $('<input type="hidden" name="'+relTab+'['+relIdx+'][type]"/>');
+        var typeBtn = $('<button type="button" class="sel-type btn btn-info">选择类型</button>');
+        var link = $('<input type="hidden" name="'+relTab+'['+relIdx+'][link_id]"/>');
+        var linkBtn = $('<button type="button" class="sel-link btn btn-info">选择关联</button>');
+        var delBtn = $('<button type="button" class="del-col btn btn-danger">&times;</button>');
+        $('<div class="btn-group"></div>')
+                .append(hand)
+                .append($('<div class="fl"></div>').append(type).append(typeBtn))
+                .append($('<div class="fl"></div>').append(link).append(linkBtn))
+                .append(delBtn)
+                .append('<div class="cb"></div>')
+                .appendTo(context.find('.rels-set-box'));
+        if (rel) {
+            type.val(rel.type);
+            typeBtn.text(rel.type_name);
+            link.val(rel.link_id);
+            linkBtn.text(rel.link.name);
+        }
+        linkBtn.hsChoose({url: "hcim/model/choose.html"});
+        typeBtn.hsChoose({url: "hcim/choose-link-type.html"});
     }
 
     context.on("loadBack", function(evt, rst) {
@@ -136,10 +149,17 @@
             valueTypes = rst.data.MODEL_VALUE_TYPES;
         }
         if (rst.info) {
-            var a = rst.info.a_hcrm_dataset_cols;
+            var a, i;
+            a = rst.info.a_hcim_model_cols;
             if (a) {
-                for (var i = 0; i < a.length; i ++) {
+                for (i = 0; i < a.length; i ++) {
                     addCol(a[i]);
+                }
+            }
+            a = rst.info.a_hcim_model_rels;
+            if (a) {
+                for (i = 0; i < a.length; i ++) {
+                    addRel(a[i]);
                 }
             }
         }
@@ -148,8 +168,13 @@
         addCol();
     });
     context.on("click", ".del-col", function() {
-        $(this).closest("table").remove();
+        $(this).closest(".btn-group").remove();
     });
-
+    context.on("click", ".add-rel", function() {
+        addRel();
+    });
+    context.on("click", ".del-rel", function() {
+        $(this).closest(".btn-group").remove();
+    });
 })( jQuery );
 </script>

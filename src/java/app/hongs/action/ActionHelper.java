@@ -446,21 +446,8 @@ public class ActionHelper
   {
     // 默认为成功
     if(!rst.containsKey("__success__"))
-        rst.put("__success__" , true );
+        rst.put( "__success__", true );
     this.responseData = rst;
-  }
-
-  /**
-   * 返回操作结果
-   * @param rst
-   * @param msg
-   */
-  public void back(String msg, Boolean rst)
-  {
-    Map data = new HashMap();
-    data.put("__success__", rst);
-    data.put("__message__", msg);
-    back(data);
   }
 
   /**
@@ -475,6 +462,19 @@ public class ActionHelper
     data.put("__success__",true);
     data.put("__message__", msg);
     data.put("back", rst);
+    back(data);
+  }
+
+  /**
+   * 返回操作结果
+   * @param rst
+   * @param msg
+   */
+  public void back(String msg, boolean rst)
+  {
+    Map data = new HashMap();
+    data.put("__success__", rst);
+    data.put("__message__", msg);
     back(data);
   }
 
