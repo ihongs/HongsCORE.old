@@ -143,7 +143,7 @@ function H$() {
     case '/': return hsFixUri .apply(this, arguments);
     case '&':
     case '@':
-        if (arguments.length == 1) {
+        if (arguments.length === 1) {
             arguments[1] = location.href;
         }
         if (typeof(arguments[1]) !== "string") {
@@ -155,23 +155,23 @@ function H$() {
                     d.push(e[i]);
                 arguments[1] = d;
             }
-            if (b == '@')
+            if (b === '@')
                 return hsGetSerias(arguments[1], arguments[0]);
             else
                 return hsGetSeria (arguments[1], arguments[0]);
         } else {
-            if (b == '@')
+            if (b === '@')
                 return hsGetParams(arguments[1], arguments[0]);
             else
                 return hsGetParam (arguments[1], arguments[0]);
         }
     case '$':
     case '%':
-        var c = b == '$' ? window.sessionStorage : window.localStorage;
+        var c = b === '$' ? window.sessionStorage : window.localStorage;
         if (typeof(c) === "undefined") {
             throw("H$: Does not support '"+(b == '$' ? 'session' : 'local')+"Storage'");
         }
-        if (arguments.length == 1) {
+        if (arguments.length === 1) {
             return c.getItem(arguments[0]);
         } else if (arguments[1]) {
                    c.setItem(arguments[0] , arguments[1]);
@@ -192,8 +192,8 @@ function hsResponObj(rst, qut) {
     if (typeof(rst.responseText) !== "undefined") {
         rst  = rst.responseText;
     }
-    if (typeof(rst) === "string") {
-        if (rst.charAt(0) == '{') {
+    if (typeof (rst) === "string") {
+        if (rst.charAt(0) === '{') {
             if (typeof(JSON) !== "undefined") {
                 rst  = JSON.parse( rst );
             }
@@ -202,7 +202,7 @@ function hsResponObj(rst, qut) {
             }
         }
         else
-        if (rst.charAt(0) == '<') {
+        if (rst.charAt(0) === '<') {
             // 某些时候服务器可能出错, 返回错误消息的页面
             // 需要清理其中的html代码, 以供输出简洁的消息
             rst = {
@@ -288,7 +288,7 @@ function hsSerialArr(obj) {
     else if (!jQuery.isArray(obj) && typeof(obj) === "object") {
         arr = jQuery(obj).serializeArray();
     }
-    else if (null != obj) {
+    else if ( obj != null ) {
         arr = obj;
     }
     return arr;
@@ -315,7 +315,7 @@ function hsSerialObj(obj) {
 function hsGetSerias(arr, name) {
     var val = [];
     for(var i = 0; i < arr.length ; i ++) {
-        if (arr[i]["name"] == name) {
+        if (arr[i]["name"] === name ) {
             val.push(arr[i]["value"]);
         }
     }
@@ -329,7 +329,7 @@ function hsGetSerias(arr, name) {
  */
 function hsSetSerias(arr, name, value) {
     for(var j = arr.length-1; j > -1; j --) {
-        if (arr[j]["name"] == name) {
+        if (arr[j]["name"] === name) {
             arr.splice(j, 1);
         }
     }
@@ -371,7 +371,7 @@ function hsGetParams(url, name) {
     var val = [];
     while (true) {
         arr = reg.exec(url);
-        if (arr == null) break;
+        if ( arr === null ) break;
         val.push(decodeURIComponent(arr[1]));
     }
     return val;
