@@ -62,25 +62,25 @@ data-fn         HsForm和HsList中的field-name
 data-ft         HsForm和HsList中的field-type
 data-pn         HsForm中的param-name, HsList中的page-num
 data-vk         HsForm中的value-key
-data-tk         HsForm中的text-key
+data-tk         HsForm中的 text-key
 data-repeat     HsForm中校验重复, 属性值为input-name
 data-unique     HsForm中限制唯一, 属性值为url, url中可用{input-name}指定其他表单项的值
 data-validate   HsForm中校验函数, 属性值为函数名
-data-url        hsChoose中为选择按钮关联的的面板的url
+data-url        HsChoose中为选择按钮关联的的面板的url
 data-name       HsChoose中为面板里的checkbox或radio的value(id)对应的名称
 
 [Data]
 
 url             用于HsLoad中, 下同
 data
-baks            用于JsOpen中, 下同
+baks            用于HsOpen中, 下同
 tabs
 oldTab          之前选中的Tab对象
 curTab          现在选中的Tab对象
 overlay
 trigger         用于从tip上获取trigger对象
-fill_func       在Select组件中绑定填充函数
-fill_data       在Select组件中绑定填充数据
+fill_func       在Choose组件中绑定填充函数
+fill_data       在Choose组件中绑定填充数据
 
 [Event]
 
@@ -942,20 +942,21 @@ function _hsEachLeaf(data, func) {
  * @returns {Object,null}
  */
 function _HsInitOpts(opts, name) {
-        var func = self[name];
-    if (!(this instanceof func)) {
+    var func = self[name];
+    if (! ( this instanceof func)) {
         var inst = this.data(name);
-        if (!inst) {
-            inst = new func( opts, this );
-            this.data( name, inst ).addClass(name);
+        if (! inst) {
+            inst = new  func(opts , this);
+            this.data(name , inst);
         }
         return inst;
     }
     else {
-        if (opts) for (var k in opts) {
-            // 允许扩展已有方法, 添加或重写方法/属性
-            if (this[k] != undefined || k.substring(0, 1) == '_') {
-                this[k]  = opts[k];
+        if (opts) for ( var k in opts) {
+            // 允许扩展及重写方法和属性
+            if ('_'===k.substring(0,1)
+            ||  this[k] !== undefined) {
+                this[k]  =  opts[k];
             }
         }
         return null;
@@ -982,16 +983,15 @@ function _HsReadOpts() {
             break;
         case "B:": // Boolean
             v = v.substring(2);
-            v = /(true|yes|ok)/i.test(v);
+            v = /(true|yes|ok|t|y|1)/i.test(v);
             break;
         default:
             if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
                 v = eval('('+v+')');
             else  if  (/^\s*(\(.*\))\s*$/.test(v))
-                v = eval( v );
+                v = eval(v);
         }
-        if (n == "") continue;
-        hsSetValue(obj, n, v);
+        if (n) hsSetValue(obj, n,v);
     }
     return obj;
 }
