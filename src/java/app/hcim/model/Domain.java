@@ -10,10 +10,10 @@ import java.util.Map;
  * 通用信息模型处理类
  * @author Hongs
  */
-public class Attr extends AbstractBaseModel {
+public class Domain extends AbstractBaseModel {
 
-    public Attr() throws HongsException {
-        super("hcim", "a_hcim_attr");
+    public Domain() throws HongsException {
+        super("hcim", "a_hcim_domain");
     }
 
 }

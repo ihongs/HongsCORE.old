@@ -4,9 +4,9 @@
 </ul>
 <div class="nav-panes">
 
-<div id="hcim-module-choose">
+<div id="hcim-module-choose-list">
     <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('hcim/Module/List.act')"/>
+        <param name="loadUrl" value="('hcim/Module/List.act?sort=-ctime')"/>
         <param name="openUrls[]" value="['.create','hcim/module/form.html','#hcim-module-choose-pane']"/>
         <param name="_fill__choose" value="(hsFillListChoose)"/>
         <param name="idKey" value="id"/>
@@ -32,7 +32,6 @@
                         <input type="checkbox" class="check-all" name="id[]"/>
                     </th>
                     <th data-fn="name" class="sortable">模块名称</th>
-                    <th data-fn="code" class="sortable">代号</th>
                     <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
                     <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
                 </tr>

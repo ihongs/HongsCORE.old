@@ -2,13 +2,13 @@
     <param name="width" value="800px"/>
 </object>
 
-<h2 class="hide-in-tabs">${opt}模型</h2>
+<h2 class="hide-in-tabs">${opt}实体</h2>
 
-<div id="hcim-model-form">
+<div id="hcim-entity-form">
     <object class="config" name="hsForm" data="">
         <param name="loadNoId" value="1"/>
-        <param name="loadUrl" value="hcim/Model/Info.act"/>
-        <param name="saveUrl" value="hcim/Model/Save.act"/>
+        <param name="loadUrl" value="hcim/Entity/Info.act"/>
+        <param name="saveUrl" value="hcim/Entity/Save.act"/>
         <param name="_fill__choose" value="(hsFillFormChoose)"/>
     </object>
     <form action="" method="POST">
@@ -19,8 +19,8 @@
             <button type="button" class="btn btn-default" data-toggle="hsChoose" data-url="hcim/module/choose.html" style="display: block;">选择模块</button>
         </div>
         <div class="form-group">
-            <label class="control-label">模型名称</label>
-            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Model/Unique.act?id={id}"/>
+            <label class="control-label">实体名称</label>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Entity/Unique.act?id={id}"/>
         </div>
         <div class="form-group">
             <label class="control-label">备注</label>
@@ -28,11 +28,11 @@
         </div>
         
         <fieldset class="cols-box">
-            <legend class="dropdown-toggle">字段设置 <span class="caret"></span></legend>
+            <legend class="dropdown-toggle">属性设置 <span class="caret"></span></legend>
             <div class="dropdown-body list-box">
                 <div class="cols-set-box">
                 </div>
-                <button type="button" class="add-col btn btn-default">添加字段</button>
+                <button type="button" class="add-col btn btn-default">添加属性</button>
             </div>
         </fieldset>
         
@@ -45,7 +45,7 @@
             </div>
         </fieldset>
         
-        <div style="margin-top: 0.3em;">
+        <div>
             <button type="submit" class="ensure btn btn-primary">提交</button>
             <button type="button" class="cancel btn btn-link">取消</button>
         </div>
@@ -53,59 +53,46 @@
 </div>
 
 <style type="text/css">
-    #hcim-model-form .cols-box,
-    #hcim-model-form .cols-box
-        {margin-bottom: 2em;}
-    #hcim-model-form .cols-box .list-box,
-    #hcim-model-form .rels-box .list-box
-        {background: #FFFFEF;}
-    #hcim-model-form .cols-box .sort-hand,
-    #hcim-model-form .rels-box .sort-hand
-        {background: #CCCCCC; width: 1.5em; padding-left: 0; padding-right: 0;}
-    #hcim-model-form .cols-box .list-box .btn-group,
-    #hcim-model-form .rels-box .list-box .btn-group
-        {background: #FFFFEF; display: block; margin-bottom: 0.2em;}
-    #hcim-model-form .cols-box .list-box .btn-danger,
-    #hcim-model-form .rels-box .list-box .btn-danger
-        {margin-left: 0.2em;}
-    #hcim-model-form .cols-box .list-box .btn-info,
-    #hcim-model-form .rels-box .list-box .btn-info
-        {margin-left: 0.2em; width: 12.3em; text-align: left; overflow: hidden;}
-    #hcim-model-form .cols-box .list-box .form-control,
-    #hcim-model-form .rels-box .list-box .form-control
-        {margin-left: 0.2em; width: 12.3em; display: inline-block; float: left;}
+    #hcim-entity-form .cols-box .list-box,
+    #hcim-entity-form .rels-box .list-box
+        {background: #FFFFAA;}
+    #hcim-entity-form .cols-box .btn-group,
+    #hcim-entity-form .rels-box .btn-group
+        {background: #FFFFCC; margin-bottom: 2px; display: block;}
+    #hcim-entity-form .cols-box .btn-group .btn-default,
+    #hcim-entity-form .rels-box .btn-group .btn-default
+        {margin-right: 2px; width: 174.5px; overflow: hidden; text-align: left;}
+    #hcim-entity-form .cols-box .btn-group .form-control,
+    #hcim-entity-form .rels-box .btn-group .form-control
+        {margin-right: 2px; width: 174.5px; display: inline-block; float: left;}
 </style>
 
 <script type="text/javascript">
 (function($) {
-    var context = $("#hcim-model-form");
+    var context = $("#hcim-entity-form");
     var valueTypes;
 
     context.find(".cols-set-box").sortable({
-        handle : ".sort-hand",
         items : ">.btn-group"
     });
     context.find(".rels-set-box").sortable({
-        handle : ".sort-hand",
         items : ">.btn-group"
     });
 
     /** 字段和关系设置 **/
 
-    var colTab = "a_hcim_model_cols";
-    var relTab = "a_hcim_model_rels";
+    var colTab = "a_hcim_entity_cols";
+    var relTab = "a_hcim_entity_rels";
     var colIdx = 0;
     var relIdx = 0;
 
     function addCol(col) {
         colIdx ++;
-        var hand = $('<div class="btn sort-hand">&nbsp;</div>');
         var name = $('<input type="text" name="'+colTab+'['+colIdx+'][name]" placeholder="字段名称" class="form-control fl"/>' );
         var attr = $('<input type="hidden" name="'+colTab+'['+colIdx+'][attr_id]"/>');
-        var attrBtn = $('<button type="button" class="sel-attr btn btn-info">选择属性</button>');
-        var delBtn = $('<button type="button" class="del-col btn btn-danger">&times;</button>');
+        var attrBtn = $('<button type="button" class="sel-attr btn btn-default">选择属性</button>');
+        var delBtn = $('<button type="button" class="del-col btn btn-warning">&times;</button>');
         $('<div class="btn-group from-inline"></div>')
-                .append(hand)
                 .append($('<div class="fl"></div>').append(name))
                 .append($('<div class="fl"></div>').append(attr).append(attrBtn))
                 .append(delBtn)
@@ -116,19 +103,17 @@
             attr.val(col.attr_id);
             attrBtn.text(col.attr.name);
         }
-        attrBtn.hsChoose({url: "hcim/attr/choose.html"});
+        attrBtn.hsChoose({url: "hcim/domain/choose.html"});
     }
     
     function addRel(rel) {
         relIdx ++;
-        var hand = $('<div class="btn sort-hand">&nbsp;</div>');
         var type = $('<input type="hidden" name="'+relTab+'['+relIdx+'][type]"/>');
-        var typeBtn = $('<button type="button" class="sel-type btn btn-info">选择类型</button>');
+        var typeBtn = $('<button type="button" class="sel-type btn btn-default">选择类型</button>');
         var link = $('<input type="hidden" name="'+relTab+'['+relIdx+'][link_id]"/>');
-        var linkBtn = $('<button type="button" class="sel-link btn btn-info">选择关联</button>');
-        var delBtn = $('<button type="button" class="del-col btn btn-danger">&times;</button>');
+        var linkBtn = $('<button type="button" class="sel-link btn btn-default">选择关联</button>');
+        var delBtn = $('<button type="button" class="del-col btn btn-warning">&times;</button>');
         $('<div class="btn-group"></div>')
-                .append(hand)
                 .append($('<div class="fl"></div>').append(type).append(typeBtn))
                 .append($('<div class="fl"></div>').append(link).append(linkBtn))
                 .append(delBtn)
@@ -140,23 +125,23 @@
             link.val(rel.link_id);
             linkBtn.text(rel.link.name);
         }
-        linkBtn.hsChoose({url: "hcim/model/choose.html"});
-        typeBtn.hsChoose({url: "hcim/choose-link-type.html"});
+        linkBtn.hsChoose({url: "hcim/entity/choose.html"});
+        typeBtn.hsChoose({url: "hcim/entity/choose-rels-type.html"});
     }
 
     context.on("loadBack", function(evt, rst) {
         if (rst.data) {
-            valueTypes = rst.data.MODEL_VALUE_TYPES;
+            valueTypes = rst.data.ENTITY_VALUE_TYPES;
         }
         if (rst.info) {
             var a, i;
-            a = rst.info.a_hcim_model_cols;
+            a = rst.info.a_hcim_entity_cols;
             if (a) {
                 for (i = 0; i < a.length; i ++) {
                     addCol(a[i]);
                 }
             }
-            a = rst.info.a_hcim_model_rels;
+            a = rst.info.a_hcim_entity_rels;
             if (a) {
                 for (i = 0; i < a.length; i ++) {
                     addRel(a[i]);

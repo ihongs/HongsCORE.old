@@ -2883,17 +2883,15 @@ jQuery.fn.load = function(url, data, complete ) {
  * 选择控件
  * 使用方法:
  * 在表单配置区域添加:
- * <param name="_fill__choose" value="(hsFillFormChoose)"/>
+ * <param name="_fill__choose" value="(hsFillFormChoose)" />
  * 在表单选项区域添加:
- * <div class="choose-box" data-fn="assoc_id[]" data-ft="_choose"></div>
- * <button type="button" class="choose-btn">Choose</button>
- * 如果是单选还可以为:
- * <input type="hidden" data-fn="assoc_id" data-ft="_choose"/>
- * <button type="button" class="choose-btn">Choose</button>
+ * 多选: <div class="choose-box" data-ft="_choose" data-fn="xxx_id[]"></div>
+ * 单选: <input type="hidden" data-ft="_choose" data-fn="xxx_id" />
+ * <button type="button" data-toggle="hsChoose" data-url="x.html"></button>
  * 在选择列表配置添加:
- * <param name="_fill__choose" value="(hsFillListChoose)"/>
+ * <param name="_fill__choose" value="(hsFillListChoose)" />
  * 在选择列表头部添加:
- * <td data-ft="_choose"><input type="checkbox" class="check-all"/></td>
+ * <td data-ft="_choose"> <input type="checkbox" class="check-all" /> </td>
  * @param {jQuery} $
  */
 (function($) {
@@ -2915,8 +2913,12 @@ jQuery.fn.load = function(url, data, complete ) {
             box = box.charAt(0) == '$' ? $(box.substr(1), btn): $(box);
         else if (! box)
             box = btn.siblings(".choose-box");
-        if (! box.size())
+        if (! box.size() )
             box = btn.siblings(":hidden");
+        if (! box.data("fill_data") )
+            box.data("fill_data", {});
+        if (! box.data("fill_func") )
+            box.data("fill_func", self.hsFillFormChoose);
 
         var form = box.closest(".HsForm").data("HsForm");
         var name = box.attr("data-fn")||box.attr("name");
@@ -3012,13 +3014,14 @@ jQuery.fn.load = function(url, data, complete ) {
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
         if ($.isArray(v)) {
-            var b = {}, c;
-            for(var i = 0; i < v.length; i ++) {
-                c = v[i]; b[c[vk]] = b[c[tk]];
+            var b = {}, c, i;
+            for(i = 0; i < v.length; i ++) {
+                c = v[i];
+                b[c[vk]] = b[c[tk]];
             }
-            v =  b ;
-        } else if (! $.isPlainObject(v)) {
-            v = { };
+            v = b ;
+        } else if (! $.isPlainObject( v )) {
+            v = {};
         }
 
         // 填充选项
@@ -3045,27 +3048,30 @@ jQuery.fn.load = function(url, data, complete ) {
         }
 
         // 绑定填充方法和数据, 供组件内调用
-        inp.data("fill_func", self.hsFillFormChoose);
+        inp.data("fill_func",self.hsFillFormChoose);
         inp.data("fill_data", v);
     };
 
-    self.hsFillListChoose = function(td, v, n) {
-        var box = td.closest(".load-box");
+    self.hsFillListChoose = function(cel, v, n) {
+        var box = cel.closest(".load-box");
 
         // 初次进入时判断单选还是多选
         if (this._choose_mul === undefined) {
             this._choose_mul = box.hasClass("choose-mul");
-            if (!this._choose_mul) box.find(".check-all").hide();
-        }
+        if (! this._choose_mul) {
+            box.find( ".check-all" ).hide();
+        }}
 
         // 填充选择控件
-        if (!this._choose_mul)
-            HsList.prototype._fill__radio.call( this, td, v, n );
-        else
-            HsList.prototype._fill__check.call( this, td, v, n );
+        if (! this._choose_mul) {
+            HsList.prototype._fill__radio.call( this, cel, v, n );
+        } else {
+            HsList.prototype._fill__check.call( this, cel, v, n );
+        }
 
         // 判断是否选中
-        if (box.data("fill_data")[v] !== undefined)
-            td.find(".check-one").prop("checked", true).change();
+        if (box.data("fill_data")[v] !== undefined) {
+            cel.find(".check-one").prop("checked", true).change();
+        }
     };
 })(jQuery);

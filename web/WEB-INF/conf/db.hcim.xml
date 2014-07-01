@@ -6,57 +6,57 @@ xsi:schemaLocation="http://hongs-core db.xsd">
     <source link="default"/>
     <origin link="default"/>
     <tables>
-        <table name="a_hcim_model"
+        <table name="a_hcim_entity"
                primaryKey="id">
             <assoc type="BLS_TO"
                    name="a_hcim_module"
                    foreignKey="moduel_id"/>
             <assoc type="HAS_MANY"
-                   name="a_hcim_model_cols"
-                   foreignKey="model_id">
+                   name="a_hcim_entity_cols"
+                   foreignKey="entity_id">
                 <assoc type="BLS_TO"
-                       name="a_hcim_attr"
-                       foreignKey="attr_id"/>
+                       name="a_hcim_domain"
+                       foreignKey="domain_id"/>
             </assoc>
             <assoc type="HAS_MANY"
-                   name="a_hcim_model_rels"
-                   foreignKey="model_id">
+                   name="a_hcim_entity_rels"
+                   foreignKey="entity_id">
                 <assoc type="BLS_TO"
-                       name="a_hcim_model"
-                       foreignKey="link_id"/>
+                       name="a_hcim_entity"
+                       foreignKey="relate_id"/>
             </assoc>
             <assoc type="HAS_MANY"
-                   name="a_hcim_model_uniq"
-                   foreignKey="model_id">
+                   name="a_hcim_entity_uniq"
+                   foreignKey="entity_id">
                 <assoc type="HAS_MANY"
-                       name="a_hcim_model_uniq_cols"
+                       name="a_hcim_entity_uniq_cols"
                        foreignKey="uniq_id">
                     <assoc type="BLS_TO"
                            name="uniq_cols"
-                           tableName="a_hcim_model_cols"
+                           tableName="a_hcim_entity_cols"
                            foreignKey="cols_id"/>
                 </assoc>
                 <assoc type="HAS_MANY"
-                       name="a_hcim_model_uniq_rels"
+                       name="a_hcim_entity_uniq_rels"
                        foreignKey="uniq_id">
                     <assoc type="BLS_TO"
                            name="uniq_rels"
-                           tableName="a_hcim_model_rels"
+                           tableName="a_hcim_entity_rels"
                            foreignKey="rels_id"/>
                 </assoc>
             </assoc>
         </table>
-        <table name="a_hcim_attr"
-               primaryKey="id"/>
         <table name="a_hcim_module"
                primaryKey="id"/>
-        <table name="a_hcim_model_cols"
+        <table name="a_hcim_domain"
                primaryKey="id"/>
-        <table name="a_hcim_model_rels"
+        <table name="a_hcim_entity_cols"
                primaryKey="id"/>
-        <table name="a_hcim_model_uniq"
+        <table name="a_hcim_entity_rels"
                primaryKey="id"/>
-        <table name="a_hcim_model_uniq_cols"/>
-        <table name="a_hcim_model_uniq_rels"/>
+        <table name="a_hcim_entity_uniq"
+               primaryKey="id"/>
+        <table name="a_hcim_entity_uniq_cols"/>
+        <table name="a_hcim_entity_uniq_rels"/>
     </tables>
 </db>

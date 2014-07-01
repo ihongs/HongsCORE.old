@@ -1,21 +1,20 @@
 <ul class="nav nav-tabs" data-toggle="tabs">
-  <li><a href="javascript:;">模型列表</a></li>
+  <li><a href="javascript:;">选择属性</a></li>
   <li class="dn"><a href="javascript:;"></a></li>
 </ul>
 <div class="nav-panes">
 
-<div id="hcim-model-list">
+<div id="hcim-domain-choose-list">
     <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('hcim/Model/List.act')"/>
-        <param name="openUrls[]" value="['.create','hcim/model/form.html','#hcim-model-pane']"/>
-        <param name="openUrls[]" value="['.modify','hcim/model/form.html?id={ID}','#hcim-model-pane']"/>
-        <param name="sendUrls[]" value="['.remove','hcim/Model/Remove.act']"/>
+        <param name="loadUrl" value="('hcim/Domain/List.act?sort=-ctime')"/>
+        <param name="openUrls[]" value="['.create','hcim/domain/form.html','#hcim-domain-choose-pane']"/>
+        <param name="_fill__choose" value="(hsFillListChoose)"/>
+        <param name="idKey" value="id"/>
     </object>
     <div>
         <div class="fl tool-box btn-group">
-            <button type="button" class="create btn btn-default">创建模型</button>
-            <button type="button" class="modify for-select btn btn-default">修改</button>
-            <button type="button" class="remove for-checks btn btn-danger" >删除</button>
+            <button type="button" class="ensure btn btn-primary">确认选择</button>
+            <button type="button" class="create btn btn-default">创建模块</button>
         </div>
         <form class="fr find-box input-group" action="" method="POST">
             <input type="search" name="find" class="form-control"/>
@@ -29,11 +28,12 @@
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
-                    <th data-fn="_check" class="_check">
+                    <th data-fn="id" data-ft="_choose" class="_check">
                         <input type="checkbox" class="check-all" name="id[]"/>
                     </th>
-                    <th data-fn="name" class="sortable">模型名称</th>
-                    <td data-fn="code" class="sortable">代号</td>
+                    <th data-fn="name" class="sortable">属性名称</th>
+                    <th data-fn="type" class="sortable">类型</th>
+                    <th data-fn="note">备注</th>
                     <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
                     <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
                 </tr>
@@ -42,7 +42,11 @@
         </table>
     </div>
     <div class="page-box"></div>
+    <div class="btn-group">
+        <button type="button" class="ensure btn btn-primary">确认选择</button>
+        <button type="button" class="cancel btn btn-link">取消</button>
+    </div>
 </div>
 
-<div id="hcim-model-pane"></div>
+<div id="hcim-domain-choose-pane"></div>
 </div>

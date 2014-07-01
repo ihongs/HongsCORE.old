@@ -1,19 +1,19 @@
 <ul class="nav nav-tabs" data-toggle="tabs">
-  <li><a href="javascript:;">模型列表</a></li>
+  <li><a href="javascript:;">实体列表</a></li>
   <li class="dn"><a href="javascript:;"></a></li>
 </ul>
 <div class="nav-panes">
 
-<div id="hcim-model-list">
+<div id="hcim-entity-list">
     <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('hcim/Model/List.act')"/>
-        <param name="openUrls[]" value="['.create','hcim/model/form.html','#hcim-model-pane']"/>
-        <param name="openUrls[]" value="['.modify','hcim/model/form.html?id={ID}','#hcim-model-pane']"/>
-        <param name="sendUrls[]" value="['.remove','hcim/Model/Remove.act']"/>
+        <param name="loadUrl" value="('hcim/Entity/List.act')"/>
+        <param name="openUrls[]" value="['.create','hcim/entity/form.html','#hcim-entity-pane']"/>
+        <param name="openUrls[]" value="['.modify','hcim/entity/form.html?id={ID}','#hcim-entity-pane']"/>
+        <param name="sendUrls[]" value="['.remove','hcim/Entity/Remove.act']"/>
     </object>
     <div>
         <div class="fl tool-box btn-group">
-            <button type="button" class="create btn btn-default">创建模型</button>
+            <button type="button" class="create btn btn-default">创建实体</button>
             <button type="button" class="modify for-select btn btn-default">修改</button>
             <button type="button" class="remove for-checks btn btn-danger" >删除</button>
         </div>
@@ -32,8 +32,7 @@
                     <th data-fn="_check" class="_check">
                         <input type="checkbox" class="check-all" name="id[]"/>
                     </th>
-                    <th data-fn="name" class="sortable">模型名称</th>
-                    <td data-fn="code" class="sortable">代号</td>
+                    <th data-fn="name" class="sortable">实体名称</th>
                     <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
                     <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
                 </tr>
@@ -44,5 +43,5 @@
     <div class="page-box"></div>
 </div>
 
-<div id="hcim-model-pane"></div>
+<div id="hcim-entity-pane"></div>
 </div>

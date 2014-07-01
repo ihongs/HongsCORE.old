@@ -6,28 +6,29 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.CommitSuccess;
 import app.hongs.action.annotation.InForm;
 import app.hongs.action.annotation.InList;
-import java.util.List;
 import java.util.Map;
 
 /**
  * 模型动作接口
  * @author Hongs
  */
-public class Model {
+public class Domain {
 
-    private app.hcim.model.Model model;
+    private app.hcim.model.Domain model;
 
-    public Model() {
-        model = (app.hcim.model.Model)
-                Core.getInstance(app.hcim.model.Model.class);
+    public Domain() {
+        model = (app.hcim.model.Domain)
+                Core.getInstance(app.hcim.model.Domain.class);
     }
 
+    @InList(conf="hcim", keys={"type=ATTR_TYPES"})
     public void actionList(ActionHelper helper)
     throws HongsException {
         Map data = model.getPage(helper.getRequestData());
         helper.back(data);
     }
 
+    @InForm(conf="hcim", keys={"type=ATTR_TYPES"})
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
@@ -36,19 +37,40 @@ public class Model {
 
     @CommitSuccess
     public void actionSave(ActionHelper helper)
-    throws HongsException {app.hongs.util.JSON.print(helper.getRequestData());
+    throws HongsException {
         Map data = helper.getRequestData();
-        List<Map<String, String>> cols = (List<Map<String, String>>)
-            ((Map)data.get("hcrm_model_cols")).values();
-        int i = 0;
-        for (Map col : cols) {
-            col.put("serialno", i++);
+        
+        String type = data.get("type").toString();
+        if ("2".equals(type)) {
+            // 数字取值范围
+            String min = data.get("min").toString();
+            String max = data.get("max").toString();
+            String rule = min + "," + max;
+            data.put("rule", rule);
+        }
+        else if ("1".equals(type)) {
+            // 字符
+            data.put("scale", "0");
+            data.put("signed","0");
+        }
+        else if ("6".equals(type)) {
+            // 文本
+            data.put("rule" , "" );
+            data.put("scale", "0");
+            data.put("signed","0");
+        }
+        else {
+            // 其他
+            data.put("rule" , "" );
+            data.put("size" , "0");
+            data.put("scale", "0");
+            data.put("signed","0");
         }
         
         String id = model.save(data);
 
         String nms = model.getAffectedNames();
-        String msg = "保存模型 "+nms+" 成功";
+        String msg = "保存属性 "+nms+" 成功";
 
         helper.back(msg, id, nms);
     }
@@ -59,7 +81,7 @@ public class Model {
         model.remove(helper.getRequestData());
 
         String nms = model.getAffectedNames();
-        String msg = "删除模型 "+nms+" 成功";
+        String msg = "删除属性 "+nms+" 成功";
 
         helper.back(msg);
     }

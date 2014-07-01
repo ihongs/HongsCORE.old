@@ -282,6 +282,17 @@ fieldset.dropup .dropdown-body {
 
 /** bootstrap 调整 **/
 
+fieldset {
+    margin-bottom: 15px;
+}
+legend {
+    margin-bottom: 2px;
+}
+
+.btn {
+    height: 43px;
+}
+
 .close {
     margin-top: -4px;
 }

@@ -6,11 +6,11 @@
         <page name="模块" uri="/hcim/module/list.html">
             <page name="${opt}模块" uri="/hcim/module/form.html"/>
         </page>
-        <page name="模型" uri="/hcim/model/list.html">
-            <page name="${opt}模型" uri="/hcim/model/form.html"/>
+        <page name="实体" uri="/hcim/entity/list.html">
+            <page name="${opt}模型" uri="/hcim/entity/form.html"/>
         </page>
-        <page name="属性" uri="/hcim/attr/list.html">
-            <page name="${opt}属性" uri="/hcim/attr/form.html"/>
+        <page name="属性" uri="/hcim/domain/list.html">
+            <page name="${opt}属性" uri="/hcim/domain/form.html"/>
         </page>
     </page>
 </root>
