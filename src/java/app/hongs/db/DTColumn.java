@@ -1,13 +1,13 @@
 package app.hongs.db;
 
+import app.hongs.CoreSerially;
+import app.hongs.HongsException;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-
-import app.hongs.CoreSerially;
-import app.hongs.HongsException;
 
 /**
  * 表字段信息缓存类

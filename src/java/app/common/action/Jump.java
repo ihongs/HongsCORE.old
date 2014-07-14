@@ -4,22 +4,24 @@ import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionConfig;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.annotation.Action;
 import java.util.Map;
 
 /**
  * 跳转
  * @author Hongs
  */
+@Action
 public class Jump {
     public void actionTo(ActionHelper helper)
     throws HongsException {
-        String c = helper.getParameter("c");
+        String c = helper.getParam("c");
         if (null == c || "".equals(c)) c="default";
         String q = helper.request.getQueryString();
         if (null == q || "".equals(q)) q="";
         else   q = "?"+q;
         String u = Core.ACTION_PATH.get()+q;
-      
+
         ActionConfig conf = ActionConfig.getInstance(c);
         Map<String, Map> page = conf.getPage(u);
         if (page != null  && page.containsKey("pages")) {

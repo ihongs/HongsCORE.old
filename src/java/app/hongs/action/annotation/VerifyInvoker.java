@@ -1,9 +1,7 @@
 package app.hongs.action.annotation;
 
-import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.DatumsConfig;
 import app.hongs.util.Tree;
 import app.hongs.util.Verifier;
 import java.lang.annotation.Annotation;
@@ -18,29 +16,33 @@ import java.util.Map;
 public class VerifyInvoker {
     public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
     throws Throwable {
-        Verify       ann  = (Verify) anno;
-        String       lang = ann.lang();
-        String       data = ann.data();
-        String[]    rules = ann.rules();
+        Verify ann  = (Verify) anno;
+        String lang = ann.lang();
+        String conf = ann.conf();
+        String form = ann.form();
+        String data = ann.data();
 
-        CoreLanguage lng = CoreLanguage.getInstance(lang);
+        // 准备数据
         Map<String, Object> dat = helper.getRequestData();
         if (data.length() > 0) {
-            dat = (Map<String, Object>)Tree.getValue(dat, data);
+            dat = (Map<String, Object>) Tree.getValue(dat, data);
         }
-        Verifier ver = new Verifier();
-        ver.setLang (lng  );
-        ver.setRules(rules);
-        Map<String, List<String>> errors = ver.verify4RD( dat );
-        
-        if (errors.isEmpty()) {
-            chain.doAction();
+
+        // 开始校验
+        CoreLanguage lng = CoreLanguage.getInstance(lang);
+        Verifier ver = new Verifier( lng ).setRule( conf, form );
+        Map<String, List<String>> errors = ver.verify4RD( dat  );
+
+        // 返回错误
+        if (! errors.isEmpty()) {
+            dat = new HashMap();
+            dat.put("__message__", lng.translate("js.form.invalid"));
+            dat.put("__success__", false);
+            dat.put("errors", errors);
+            helper.back(dat);
+            return;
         }
-        
-        dat = new HashMap();
-        dat.put("__message__", lng.translate("js.form.invalid"));
-        dat.put("__success__", false);
-        dat.put("errors", errors);
-        helper.back(dat);
+
+        chain.doAction();
     }
 }

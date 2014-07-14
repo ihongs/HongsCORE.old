@@ -144,7 +144,7 @@ public class NavTag extends SimpleTagSupport {
 
     private String translate(String name) {
         if (name.indexOf("{opt}") != -1) {
-            if (ah.getParameter("id") != null) {
+            if (ah.getParam("id") != null) {
                 name = name.replace("{opt}", "set");
             }
             else {

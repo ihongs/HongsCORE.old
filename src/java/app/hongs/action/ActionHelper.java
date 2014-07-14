@@ -1,9 +1,12 @@
 package app.hongs.action;
 
+import app.hongs.HongsError;
+import app.hongs.util.JSON;
+import app.hongs.util.Tree;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.UnsupportedEncodingException;
@@ -12,19 +15,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import app.hongs.Core;
-import app.hongs.CoreConfig;
-import app.hongs.HongsError;
-import app.hongs.util.JSON;
-import app.hongs.util.Tree;
-
 /**
  * 动作助手
  *
  * <p>
- * 通过 getRequestMap,getParameter,getSession,getCookie
- * 来获取请求/会话/Cookie数据; 通过 back 来通知前端动作的成功或失败.
- * </p>
+ 通过 getRequestData,getParam,getSession,getCookie
+ 来获取请求/会话/Cookie数据; 通过 back 来通知前端动作的成功或失败.
+ </p>
  *
  * @author Hongs
  */
@@ -42,11 +39,6 @@ public class ActionHelper
   public HttpServletResponse response;
 
   /**
-   * 会话数据
-   */
-  protected Map<String, Object> sessionData;
-
-  /**
    * 请求数据
    */
   protected Map<String, Object> requestData;
@@ -55,6 +47,16 @@ public class ActionHelper
    * 返回数据
    */
   protected Map<String, Object> responseData;
+
+  /**
+   * 会话数据
+   */
+  protected Map<String, Object> session;
+
+  /**
+   * 客户数据
+   */
+  protected Map<String, Object> cookies;
 
   /**
    * 初始化助手
@@ -86,8 +88,9 @@ public class ActionHelper
    *
    * @param req
    * @param ses
+   * @param cok
    */
-  public void init(Map<String, String[]> req, Map<String, String[]> ses)
+  public void init(Map<String, String[]> req, Map<String, String[]> ses, Map<String, String[]> cok)
   {
     if (req != null)
     {
@@ -95,15 +98,23 @@ public class ActionHelper
     }
     else
     {
-      this.requestData = new HashMap(   );
+      this.requestData = new HashMap();
     }
     if (ses != null)
     {
-      this.sessionData = parseParams(ses);
+      this.session = parseParams(ses);
     }
     else
     {
-      this.sessionData = new HashMap(  );
+      this.session = new HashMap();
+    }
+    if (ses != null)
+    {
+      this.cookies = parseParams(cok);
+    }
+    else
+    {
+      this.cookies = new HashMap();
     }
   }
 
@@ -148,18 +159,15 @@ public class ActionHelper
   {
     if (this.requestData == null)
     {
-        // 增加按Content-Type解析请求数据, 2013/02/22
-        String ct = this.request.getContentType();
-        if (ct != null) {
-            if ("application/json".equals(ct) || "text/json".equals(ct)) {
-                this.requestData = (Map<String, Object>)
-                    JSON.parse(this.getRequestBody());
-                return this.requestData;
-            }
-        }
-
-        this.requestData = ActionHelper.parseParams(
-                           this.request.getParameterMap());
+      String ct = this.request.getContentType();
+      if (null != ct && ("text/json".equals(ct) || "application/json".equals(ct) ))
+      {
+        this.requestData = (Map<String, Object>) JSON.parse(this.getRequestBody( ));
+      }
+      else
+      {
+        this.requestData = ActionHelper.parseParams(this.request.getParameterMap());
+      }
     }
     return this.requestData;
   }
@@ -181,81 +189,116 @@ public class ActionHelper
   }
 
   /**
-   * 同request.getParameter
+   * 获取数据
+   * @param name
+   * @return 当前请求数据
+   */
+  public Object getValue(String name)
+  {
+    return Tree.getValue(this.getRequestData(), name);
+  }
+
+  /**
+   * 获取参数
    * @param name
    * @return 当前请求参数
    */
-  public String getParameter(String name)
+  public String getParam(String name)
   {
-    return this.request.getParameter(name);
-  }
-
-  /**
-   * 同request.getAtribute
-   * @param name
-   * @return 请求环境属性
-   */
-  public Object getAttribute(String name)
-  {
-    return this.request.getAttribute(name);
-  }
-
-  /**
-   * 同request.setAttribute
-   * @param name
-   * @param value
-   */
-  public void setAttribute(String name, Object value)
-  {
-    this.request.setAttribute(name, value);
+    Object o = this.getValue(name);
+    if (o instanceof List)
+    {
+      List l = (List) o;
+      int  i = l.size();
+      o =  l.get(i + 1);
+    }
+    return o.toString();
   }
 
   /**
    * 获取session
    * 没有则返回null
+   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
    * @param name
    * @return Session值
    */
   public Object getSession(String name)
   {
-      if (this.sessionData != null)
-          return this.sessionData.get(name);
-      else
-          return this.request.getSession( )
-                        .getAttribute(name);
+    if (this.session != null)
+    {
+      return this.session.get(name);
+    }
+    else
+    {
+      return this.request.getSession(/**/).getAttribute(name);
+    }
   }
 
   /**
    * 设置session
+   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
    * @param name
    * @param value
    */
   public void setSession(String name, Object value)
   {
-      if (this.sessionData != null)
-          this.sessionData.put(name, value);
-      else
-          this.request.getSession(  true  )
-                 .setAttribute(name, value);
+    if (this.session != null)
+    {
+      this.session.put(name, value);
+    }
+    else
+    {
+      this.request.getSession(true).setAttribute(name, value);
+    }
   }
 
   /**
    * 获取cookie
    * 没有则返回null
+   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
    * @param name
+   * @return Cookie值
+   */
+  public String getCookie(String name)
+  {
+    if (this.cookies != null)
+    {
+        return this.cookies.get(name).toString();
+    }
+
+    Cookie ck  = this.getCookia(name);
+    return ck == null  ?  null  :  ck.getValue();
+  }
+
+  /**
+   * 设置cookie
+   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
+   * @param name
+   * @param value
    * @return Cookie
    */
-  public Cookie getCookie(String name)
+  public Cookie setCookie(String name, String value)
   {
-    Cookie[] cookies = this.request.getCookies();
-
-    if (cookies != null)
+    if (this.cookies != null)
     {
-      for (int i = 0; i < cookies.length; i ++ )
+        this.cookies.put (name, value);
+        return new Cookie(name, value);
+    }
+
+    return this.setCookia(name, value);
+  }
+
+  private Cookie getCookia(String name)
+  {
+    Cookie[] cookiez = this.request.getCookies();
+
+    if (cookiez != null)
+    {
+      for (int i = 0; i < cookiez.length; i ++ )
       {
-        if ( cookies[i].getName().equals(name) )
+        if ( cookiez[i].getName().equals(name) )
         {
-          return cookies[i];
+          return cookiez[i];
         }
       }
     }
@@ -263,49 +306,84 @@ public class ActionHelper
     return null;
   }
 
-  /**
-   * 设置cookie
-   * @param name
-   * @param value
-   * @return Cookie
-   */
-  public Cookie setCookie(String name, String value)
+  private Cookie setCookia(String name, String value)
   {
-    Cookie cookie = this.getCookie(name);
+    Cookie cookie = this.getCookia(name);
 
-    if (cookie == null)
-    {
-      cookie = new Cookie(name,value);
-      this.response.addCookie(cookie);
-    }
-    else
+    if (cookie != null)
     {
       cookie.setValue(value);
     }
+    else
+    {
+      cookie = new Cookie(name,value);
+    }
+    this.response.addCookie( cookie );
 
     return cookie;
   }
 
+  //** 快捷动作 **/
+
   /**
-   * 设置语言标识到SESSION
-   * @param lang
+   * 返回指定数据
+   * 针对model的getList,getInfo方法
+   * @param rst
    */
-  public void setLangToSession(String lang)
+  public void back(Map<String, Object> rst)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    String name = conf.getProperty("core.language.session" , "lang");
-    this.setSession(name, lang);
+    // 默认为成功
+    if(!rst.containsKey("__success__"))
+        rst.put( "__success__", true );
+    this.responseData = rst;
   }
 
   /**
-   * 设置语言标识到COOKIE
-   * @param lang
+   * 返回保存结果
+   * 针对model的save方法
+   * @param msg
+   * @param rst
    */
-  public void setLangToCookie(String lang)
+  public void back(String msg, Object... rst)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    String name = conf.getProperty("core.language.session" , "lang");
-    this.setCookie(name, lang);
+    Map data = new HashMap();
+    data.put("__success__",true);
+    data.put("__message__", msg);
+    data.put("back", rst);
+    back(data);
+  }
+
+  /**
+   * 返回操作结果
+   * @param rst
+   * @param msg
+   */
+  public void back(String msg, boolean rst)
+  {
+    Map data = new HashMap();
+    data.put("__success__", rst);
+    data.put("__message__", msg);
+    back(data);
+  }
+
+  /**
+   * 返回操作消息
+   * 针对model的delete方法
+   * @param rst
+   */
+  public void back(String msg)
+  {
+    back(msg, true);
+  }
+
+  /**
+   * 返回检验结果
+   * 针对model的exists方法
+   * @param rst
+   */
+  public void back(Boolean rst)
+  {
+    back(null, rst);
   }
 
   //** 输出内容 **/
@@ -396,7 +474,7 @@ public class ActionHelper
 
   /**
    * 500 系统异常
-   * @param ex 
+   * @param ex
    */
   public void print500(Exception ex)
   {
@@ -433,69 +511,6 @@ public class ActionHelper
   public void printJSON(Map data)
   {
     this.printJSON(JSON.toString(data));
-  }
-
-  //** 快捷动作 **/
-
-  /**
-   * 返回指定数据
-   * 针对model的getList,getInfo方法
-   * @param rst
-   */
-  public void back(Map<String, Object> rst)
-  {
-    // 默认为成功
-    if(!rst.containsKey("__success__"))
-        rst.put( "__success__", true );
-    this.responseData = rst;
-  }
-
-  /**
-   * 返回保存结果
-   * 针对model的save方法
-   * @param msg
-   * @param rst
-   */
-  public void back(String msg, Object... rst)
-  {
-    Map data = new HashMap();
-    data.put("__success__",true);
-    data.put("__message__", msg);
-    data.put("back", rst);
-    back(data);
-  }
-
-  /**
-   * 返回操作结果
-   * @param rst
-   * @param msg
-   */
-  public void back(String msg, boolean rst)
-  {
-    Map data = new HashMap();
-    data.put("__success__", rst);
-    data.put("__message__", msg);
-    back(data);
-  }
-
-  /**
-   * 返回操作消息
-   * 针对model的delete方法
-   * @param rst
-   */
-  public void back(String msg)
-  {
-    back(msg, true);
-  }
-
-  /**
-   * 返回检验结果
-   * 针对model的exists方法
-   * @param rst
-   */
-  public void back(Boolean rst)
-  {
-    back(null, rst);
   }
 
   //** 工具方法 **/

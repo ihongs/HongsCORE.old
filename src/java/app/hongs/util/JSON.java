@@ -1,19 +1,19 @@
 package app.hongs.util;
 
+import app.hongs.Core;
+import app.hongs.HongsError;
+
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Enumeration;
-
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import app.hongs.Core;
-import app.hongs.HongsError;
-import java.io.PrintWriter;
 
 /**
  * 简单JSON格式工具

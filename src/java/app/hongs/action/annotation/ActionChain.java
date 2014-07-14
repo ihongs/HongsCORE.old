@@ -37,36 +37,36 @@ public class ActionChain {
     }
 
     public void doAction() throws HongsException {
-        // 如果超出链长度, 终止执行
+        // 如果超出链长度, 则终止执行
         if ( idx  >  annotations.length) {
             throw new HongsException(0x1108, "Action annotation out of index: "
             +idx+">"+annotations.length);
         }
 
-        // 如果已到达链尾, 则执行动作函数
+        // 如果已到达链尾, 则执行动作
         if ( idx ==  annotations.length) {
-            invokeAction();
+            doInvoke();
             return;
         }
 
-        // 如果不是动作链, 则跳过注解检查
-        ActionAnnotation ann1;
-        Annotation ann2 = annotations[idx++];
-        if (ann2 instanceof ActionAnnotation) {
-            ann1 = ( ActionAnnotation ) ann2;
+        ActionDecor ann1;
+        Annotation  ann2 = annotations[idx ++];
+        if (ann2 instanceof ActionDecor) {
+            ann1 = ( ActionDecor ) ann2;
+        } else {
+            ann1 = ann2.annotationType().getAnnotation(ActionDecor.class);
         }
-        else {
-            ann1 = ann2.annotationType().getAnnotation(ActionAnnotation.class);
-        }
+
+        // 如果不是动作链, 则跳过注解
         if (ann1 == null) {
             doAction();
             return;
         }
 
-        invokeFilter(ann1, ann2);
+        doFilter(ann1 , ann2);
     }
 
-    private void invokeAction() throws HongsException {
+    private void doInvoke() throws HongsException {
         try {
             method.invoke(object, helper);
         } catch (IllegalAccessException ex) {
@@ -78,7 +78,7 @@ public class ActionChain {
         }
     }
 
-    private void invokeFilter(ActionAnnotation ann1, Annotation ann2) throws HongsException {
+    private void doFilter(ActionDecor ann1, Annotation ann2) throws HongsException {
         Class  cls = ann1.value();
         Method mtd;
 
@@ -94,8 +94,7 @@ public class ActionChain {
 
         try {
             mtd.invoke(null, helper, this, ann2);
-        }
-        catch (IllegalAccessException ex) {
+        } catch (IllegalAccessException ex) {
             throw new HongsException(0x1104, "Illegal access for "+cls.getName()+"."+mtd.getName());
         } catch (IllegalArgumentException ex) {
             throw new HongsException(0x1104, "Illegal argument for "+cls.getName()+"."+mtd.getName());

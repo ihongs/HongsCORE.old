@@ -1,5 +1,10 @@
 package app.hongs.action;
 
+import app.hongs.Core;
+import app.hongs.CoreLanguage;
+import app.hongs.HongsError;
+import app.hongs.util.Text;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,11 +18,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import app.hongs.Core;
-import app.hongs.CoreLanguage;
-import app.hongs.HongsError;
-import app.hongs.util.Text;
 
 /**
  * 语言信息输出动作

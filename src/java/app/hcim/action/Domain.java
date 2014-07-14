@@ -21,14 +21,14 @@ public class Domain {
                 Core.getInstance(app.hcim.model.Domain.class);
     }
 
-    @InList(conf="hcim", keys={"type=ATTR_TYPES"})
+    @InList(conf="hcim", keys={"type=DOMAIN_TYPES"})
     public void actionList(ActionHelper helper)
     throws HongsException {
         Map data = model.getPage(helper.getRequestData());
         helper.back(data);
     }
 
-    @InForm(conf="hcim", keys={"type=ATTR_TYPES"})
+    @InForm(conf="hcim", keys={"type=DOMAIN_TYPES"})
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());

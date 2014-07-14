@@ -1,12 +1,11 @@
 package app.hongs;
 
+import app.hongs.util.Text;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-
 import java.io.File;
-
-import app.hongs.util.Text;
 
 /**
  * 语言资源读取工具

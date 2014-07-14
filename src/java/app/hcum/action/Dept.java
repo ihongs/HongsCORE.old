@@ -72,7 +72,7 @@ public class Dept {
         data.put("pageGroups", pageGroups);
 
         // 用户动作分组
-        String id = helper.getParameter("id");
+        String id = helper.getParam("id");
         if (id != null) {
             app.hcum.model.Dept model2 = (app.hcum.model.Dept)
                 Core.getInstance(app.hcum.model.Dept.class);

@@ -9,18 +9,22 @@
         <param name="loadNoId" value="1"/>
         <param name="loadUrl" value="hcim/Entity/Info.act"/>
         <param name="saveUrl" value="hcim/Entity/Save.act"/>
-        <param name="_fill__choose" value="(hsFillFormChoose)"/>
+        <param name="_fill__pick" value="(hsFormFillPick)"/>
     </object>
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <div class="form-group">
             <label class="control-label">所属模块</label>
-            <input type="hidden" data-fn="module_id" data-ft="_choose"/>
-            <button type="button" class="btn btn-default" data-toggle="hsChoose" data-url="hcim/module/choose.html" style="display: block;">选择模块</button>
+            <div data-fn="module_id" data-ft="_pick"></div>
+            <button type="button" class="btn btn-default" data-toggle="hsPick" href="hcim/module/pick.html" style="display: block;">选择模块</button>
         </div>
         <div class="form-group">
             <label class="control-label">实体名称</label>
-            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Entity/Unique.act?id={id}"/>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Entity/Unique.act?id={id}&module_id={module_id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">代码</label>
+            <input type="text" name="code" class="form-control" required="required" data-unique="hcim/Entity/Unique.act?id={id}&module_id={module_id}"/>
         </div>
         <div class="form-group">
             <label class="control-label">备注</label>
@@ -45,6 +49,12 @@
             </div>
         </fieldset>
         
+        <fieldset class="rels-box">
+            <legend class="dropdown-toggle">唯一约束 <span class="caret"></span></legend>
+            <div class="dropdown-body list-box">
+            </div>
+        </fieldset>
+        
         <div>
             <button type="submit" class="ensure btn btn-primary">提交</button>
             <button type="button" class="cancel btn btn-link">取消</button>
@@ -55,7 +65,7 @@
 <style type="text/css">
     #hcim-entity-form .cols-box .list-box,
     #hcim-entity-form .rels-box .list-box
-        {background: #FFFFAA;}
+        {background: #FFFFAA; padding: 2px 0 2px 0;}
     #hcim-entity-form .cols-box .btn-group,
     #hcim-entity-form .rels-box .btn-group
         {background: #FFFFCC; margin-bottom: 2px; display: block;}
@@ -88,45 +98,59 @@
 
     function addCol(col) {
         colIdx ++;
-        var name = $('<input type="text" name="'+colTab+'['+colIdx+'][name]" placeholder="字段名称" class="form-control fl"/>' );
-        var attr = $('<input type="hidden" name="'+colTab+'['+colIdx+'][attr_id]"/>');
+        
+        var attr = colTab+'['+colIdx+'][domain_id]';
+        var name = colTab+'['+colIdx+'][name]';
+        
+        var nameInp = $('<input type="text" name="'+name+'" placeholder="字段名称" class="form-control fl"/>' );
+        var attrInp = $('<input type="hidden" name="'+attr+'"/>');
         var attrBtn = $('<button type="button" class="sel-attr btn btn-default">选择属性</button>');
-        var delBtn = $('<button type="button" class="del-col btn btn-warning">&times;</button>');
+        var  delBtn = $('<button type="button" class="del-col btn btn-warning">&times;</button>');
         $('<div class="btn-group from-inline"></div>')
-                .append($('<div class="fl"></div>').append(name))
-                .append($('<div class="fl"></div>').append(attr).append(attrBtn))
+                .append($('<div class="fl"></div>').append(nameInp))
+                .append($('<div class="fl"></div>').append(attrInp).append(attrBtn))
                 .append(delBtn)
                 .append('<div class="cb"></div>')
                 .appendTo(context.find('.cols-set-box'));
         if (col) {
-            name.val(col.name);
-            attr.val(col.attr_id);
-            attrBtn.text(col.attr.name);
+            nameInp.val (col.name);
+            attrInp.val (col.domain_id);
+            attrBtn.text(col.domain.name);
         }
-        attrBtn.hsChoose({url: "hcim/domain/choose.html"});
+        
+        attrBtn.attr("data-toggle", "hsPick")
+               .attr("href", "hcim/domain/pick.html");
     }
     
     function addRel(rel) {
         relIdx ++;
-        var type = $('<input type="hidden" name="'+relTab+'['+relIdx+'][type]"/>');
-        var typeBtn = $('<button type="button" class="sel-type btn btn-default">选择类型</button>');
-        var link = $('<input type="hidden" name="'+relTab+'['+relIdx+'][link_id]"/>');
+        
+        var link = relTab+'['+relIdx+'][relate_id]';
+        var type = relTab+'['+relIdx+'][type]';
+        
+        var typeSel = $('<select name="'+type+'" class="form-control">'
+            +'<option value="1">隶属于</option>'
+            +'<option value="2">一对一</option>'
+            +'<option value="1">一对多</option>'
+            +'<option value="1">多对多</option>'
+            +'</select>');
+        var linkInp = $('<input type="hidden" name="'+link+'"/>');
         var linkBtn = $('<button type="button" class="sel-link btn btn-default">选择关联</button>');
-        var delBtn = $('<button type="button" class="del-col btn btn-warning">&times;</button>');
+        var  delBtn = $('<button type="button" class="del-col btn btn-warning">&times;</button>');
         $('<div class="btn-group"></div>')
-                .append($('<div class="fl"></div>').append(type).append(typeBtn))
-                .append($('<div class="fl"></div>').append(link).append(linkBtn))
+                .append($('<div class="fl"></div>').append(typeSel))
+                .append($('<div class="fl"></div>').append(linkInp).append(linkBtn))
                 .append(delBtn)
                 .append('<div class="cb"></div>')
                 .appendTo(context.find('.rels-set-box'));
         if (rel) {
-            type.val(rel.type);
-            typeBtn.text(rel.type_name);
-            link.val(rel.link_id);
-            linkBtn.text(rel.link.name);
+            typeSel.val (rel.type);
+            linkInp.val (rel.relate_id);
+            linkBtn.text(rel.relate.name);
         }
-        linkBtn.hsChoose({url: "hcim/entity/choose.html"});
-        typeBtn.hsChoose({url: "hcim/entity/choose-rels-type.html"});
+        
+        linkBtn.attr("data-toggle", "hsPick")
+               .attr("href", "hcim/entity/pick.html?deny=create");
     }
 
     context.on("loadBack", function(evt, rst) {

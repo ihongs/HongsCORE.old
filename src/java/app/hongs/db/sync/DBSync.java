@@ -1,15 +1,15 @@
 package app.hongs.db.sync;
 
+import app.hongs.HongsException;
+import app.hongs.db.DB;
+import app.hongs.db.Table;
+
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import app.hongs.HongsException;
-import app.hongs.db.DB;
-import app.hongs.db.Table;
 
 /**
  * 库结构同步器(DB structure synchronizer)

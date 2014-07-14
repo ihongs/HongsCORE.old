@@ -1,12 +1,12 @@
 package app.hongs.db.sync;
 
+import app.hongs.HongsException;
+import app.hongs.db.Table;
+
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
 import java.util.Iterator;
-
-import app.hongs.HongsException;
-import app.hongs.db.Table;
 
 /**
  * 表结构同步器(Table structure synchronizer)

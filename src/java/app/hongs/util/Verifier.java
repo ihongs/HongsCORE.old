@@ -3,22 +3,23 @@ package app.hongs.util;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
+import app.hongs.action.DatumsConfig;
 import app.hongs.db.AbstractBaseModel;
 import app.hongs.db.FetchCase;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 /**
  * 校验器
  * @author Hongs
- * 
+ *
  * <h3>异常代码</h3>
  * <pre>
  * 代码区间 0x1110~0x111f
@@ -30,125 +31,60 @@ import java.util.regex.Pattern;
  * </pre>
  */
 public class Verifier {
-    private static class Rule {
-        String name;
-        String rule;
-        List params;
-        public Rule(String name, String rule, List params) {
-            this.name = name;
-            this.rule = rule;
-            this.params = params;
-        }
-    }
-    
-    private static class Item {
-        String name;
-        String value;
-        Map<String, List<String>> values;
-        public Item(String name, String value, Map<String, List<String>> values) {
-            this.name = name;
-            this.value = value;
-            this.values = values;
-        }
-    }
-    
-    private static class Each implements Tree.EachValue {
-        Map<String, List<String>> values;
-        public Each(Map<String, List<String>> values) {
-            this.values = values;
-        }
-        @Override
-        public void each(Object value, String path) {
-            Verifier.addValue(path, value.toString(), values);
-        }
-    }
-    
-    private CoreLanguage lang;
-    private List<Rule> rules1;
-    private List<Rule> rules2;
-    
-    public void setLang(CoreLanguage lang) {
+
+    private CoreLanguage lang; // 错误语言
+    private List<Rule> rules1; // 无适配符的规则
+    private List<Rule> rules2; // 带适配符的规则
+
+    public Verifier(CoreLanguage lang) {
         this.lang = lang;
-    }
-    
-    public void setRules(String... rules) throws HongsException {
-        Pattern pat = Pattern.compile("^([^:]+):([^\\(\\)]+)(\\((.*)\\))?$");
-        Matcher mat;
-        String name;
-        String args;
-        List params;
         this.rules1 = new ArrayList();
         this.rules2 = new ArrayList();
-        for (String rule : rules) {
-            mat = pat.matcher(rule);
-            if (! mat.matches()) {
-                throw new HongsException(0x1111, "Rule format error, rule: "+rule);
-            }
-            
-            name = mat.group(1);
-            rule = mat.group(2);
-            args = mat.group(4);
-            params = args==null ? new ArrayList() : (List)JSON.parse("["+args+"]");
-            
-            if (name.indexOf('*') == -1) {
-                this.rules1.add(new Rule(name, rule, params));
-            }
-            else {
-                this.rules2.add(new Rule(name, rule, params));
-            }
-        }
     }
-    
-    private static void addValue(String name, Object value, Map values) {
-        List valuez = (List)values.get(name);
-        if (valuez == null) {
-            valuez = new ArrayList();
-            values.put(name, valuez);
-        }
-        valuez.add(value);
+
+    public Verifier(String lang) {
+        this(CoreLanguage.getInstance(lang));
     }
-    
-    public static String getValue(Item item, String name) {
-        List<String> values = item.values.get(name);
-        if (values != null && !values.isEmpty()) {
-            return values.get(0);
+
+    public Verifier addRule(String name, String rule, Object... args) {
+        if (name.indexOf('*') == -1) {
+            this.rules1.add(new Rule(name, rule, Arrays.asList(args)));
+        } else {
+            this.rules2.add(new Rule(name, rule, Arrays.asList(args)));
         }
-        else {
-            return null;
-        }
+        return this;
     }
-    
-    public static <T>T getParam(Rule rule, int idx, T def) throws HongsException {
-        Object val = rule.params.get(idx);
-        if (val == null) {
-            return def;
-        }
+
+    public Verifier setRule(String conf, String form) throws HongsException {
+        DatumsConfig cnf = DatumsConfig.getInstance(conf);
+
+        int i = 0;
         try {
-            return (T) val;
+            List<List> lst = (List<List>) cnf.getDataByKey(form);
+            for (List  sub :  lst ) {
+                i ++;
+                String name = sub.get(0).toString();
+                String rule = sub.get(0).toString();
+                sub.remove(1);  sub.remove(0);
+                Object[] args = sub.toArray();
+                this.addRule(name,rule, args);
+            }
         }
         catch (ClassCastException ex) {
-            throw new HongsException(0x1119,
-                "Wrong type for "+rule.name+":"+rule.rule+"["+idx+"]", ex);
+            throw new HongsException(0x1000, "Failed to get rule: "+conf+":"+form);
         }
-    }
-    
-    private static List<String> getNames(String name, Map<String, List<String>> values) {
-        name = "^"+Text.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
-        Pattern pa = Pattern.compile(name);
-        List<String> names = new ArrayList();
-        for (String  namc  : values.keySet()) {
-            if (pa.matcher( namc ).matches()) {
-                names.add ( namc );
-            }
+        catch (IndexOutOfBoundsException ex) {
+            throw new HongsException(0x1000, "Failed to get rule: "+conf+":"+form+"#"+i);
         }
-        return names;
+
+        return this;
     }
-    
+
     /**
      * 针对 requestData 的校验
      * @param map
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     public Map<String, List<String>> verify4RD(Map<String, Object> map) throws HongsException {
         Map<String, List<String>> values = new LinkedHashMap();
@@ -156,12 +92,12 @@ public class Verifier {
         Tree.each(map, each);
         return verify(values);
     }
-    
+
     /**
      * 针对 parameterMap 的校验
      * @param map
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     public Map<String, List<String>> verify4PM(Map<String, String[]> map) throws HongsException {
         Map <String, List<String>> values = new LinkedHashMap();
@@ -173,24 +109,30 @@ public class Verifier {
         }
         return verify(values);
     }
-    
-    private Map<String, List<String>> verify(Map<String, List<String>> values) throws HongsException {
+
+    /**
+     * 验证
+     * @param values
+     * @return
+     * @throws HongsException
+     */
+    public Map<String, List<String>> verify(Map<String, List<String>> values) throws HongsException {
         Map <String, List<String>> errors = new LinkedHashMap();
         Map <String, List< Rule >> rules3 = new LinkedHashMap();
         String error;
         Item item;
-        
+
         for (Rule rule : rules1) {
             addValue(rule.name, rule, rules3);
         }
-        
+
         for (Rule rule : rules2) {
             List<String> names = getNames(rule.name, values);
             for (String  name  : names) {
                 addValue(name , rule, rules3);
             }
         }
-        
+
         for (Map.Entry et : rules3.entrySet()) {
             String name = (String)et.getKey();
             List<Rule> rules = (List)et.getValue();
@@ -217,10 +159,10 @@ public class Verifier {
                 }
             }
         }
-        
+
         return errors;
     }
-    
+
     private String verify(Item item, Rule rule) throws HongsException {
         if ("required".equals(rule.rule)) {
             return required(item.value);
@@ -276,10 +218,12 @@ public class Verifier {
             }
             String cls = rule.rule.substring(0,pos);
             String mtd = rule.rule.substring(1+pos);
+
             try {
-                Class  klass  = Class.forName  (cls);
-                Method method = klass.getMethod(mtd, new Class[]{ Item.class, Rule.class });
-                return (String) method.invoke(mtd, item, rule);
+                Class  kls = Class.forName(cls);
+                Method wtd = kls.getMethod(mtd ,
+                       new Class[] { Item.class, Rule.class, CoreLanguage.class });
+                return (String) wtd.invoke(item, rule);
             }
             catch (ClassNotFoundException ex) {
                 throw new HongsException(0x1115, "Class '"+cls+"' for '"+rule.name+"' is not exists");
@@ -301,74 +245,119 @@ public class Verifier {
             }
         }
     }
-    
+
+    public static String getValue(Item item, String key, String def) {
+        List<String> values = item.values.get(key);
+        if (values == null || values.isEmpty()) {
+            return def;
+        }
+        else {
+            return values.get(0);
+        }
+    }
+
+    public static <T>T getParam(Rule rule, int idx, T def) throws HongsException {
+        Object val = rule.params.get(idx);
+        if (val == null) {
+            return def;
+        }
+        try {
+            return (T) val;
+        }
+        catch (ClassCastException ex) {
+            throw new HongsException(0x1119,
+                "Wrong type for "+rule.name+":"+rule.rule+"["+idx+"]", ex);
+        }
+    }
+
+    private static List<String> getNames(String name, Map<String, List<String>> values) {
+        name = "^"+Text.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
+        Pattern pa = Pattern.compile(name);
+        List<String> names = new ArrayList();
+        for (String  namc  : values.keySet()) {
+            if (pa.matcher( namc ).matches()) {
+                names.add ( namc );
+            }
+        }
+        return names;
+    }
+
+    private static void addValue(String name, Object value, Map values) {
+        List valuez = (List)values.get(name);
+        if (valuez == null) {
+            valuez = new ArrayList();
+            values.put(name, valuez);
+        }
+        valuez.add(value);
+    }
+
     private String requires(Object value) {
         if (value == null) {
             return lang.translate("js.form.requires");
         }
         return null;
     }
-    
+
     private String required(String value) {
-        if (value == null||"".equals(value)) {
+        if (value == null || "".equals(value)) {
             return lang.translate("js.form.required");
         }
         return null;
     }
-    
+
     private String isNumber(String value) {
         return null;
     }
-    
+
     private String isEmail(String value) {
         return null;
     }
-    
+
     private String isURL(String value) {
         return null;
     }
-    
+
     private String isDate(String value)  {
         return null;
     }
-    
+
     private String isTime(String value) {
         return null;
     }
-    
+
     private String isDatetime(String value) {
         return null;
     }
-    
+
     private String minLength(String value, int num) {
         return null;
     }
-    
+
     private String maxLength(String value, int num) {
         return null;
     }
-    
+
     private String min(String value, double num) {
         if (num > Double.parseDouble(value)) {
             return lang.translate("js.form.lt.min");
         }
         return null;
     }
-    
+
     private String max(String value, double num) {
         if (num < Double.parseDouble(value)) {
             return lang.translate("js.form.gt.max");
         }
         return null;
     }
-    
+
     private String isMatch(String value, String regex, String error) {
         if (value != null && ! value.matches(regex)) {
             return lang.translate(error);
         }
         return null;
     }
-    
+
     private String isRepeat(String value, Map<String, List<String>> values, String name2) {
         List<String> valuez = values.get(name2);
         String value2 = valuez != null && !valuez.isEmpty() ? valuez.get(0) : "";
@@ -377,7 +366,7 @@ public class Verifier {
         }
         return null;
     }
-    
+
     private String isUnique(String value, Map<String, List<String>> values, String model,
             String field, String... fields) throws HongsException {
         AbstractBaseModel mode = (AbstractBaseModel) Core.getInstance(model);
@@ -393,7 +382,7 @@ public class Verifier {
                 caze.where(".`"+mode.table.primaryKey+"` != ?", v);
             }
         }
-        
+
         for (String f : fields) {
             v = values.get(f);
             if (v == null) {
@@ -411,7 +400,43 @@ public class Verifier {
         if (! row.isEmpty()) {
             return lang.translate("js.form.is.not.unique");
         }
-        
+
         return null;
     }
+
+    /** 内部类 **/
+
+    private static class Rule {
+        String name;
+        String rule;
+        List params;
+        public Rule(String name, String rule, List params) {
+            this.name = name;
+            this.rule = rule;
+            this.params = params;
+        }
+    }
+
+    private static class Item {
+        String name;
+        String value;
+        Map<String, List<String>> values;
+        public Item(String name, String value, Map<String, List<String>> values) {
+            this.name = name;
+            this.value = value;
+            this.values = values;
+        }
+    }
+
+    private static class Each implements Tree.EachValue {
+        Map<String, List<String>> values;
+        public Each(Map<String, List<String>> values) {
+            this.values = values;
+        }
+        @Override
+        public void each(Object value, String path) {
+            Verifier.addValue(path, value.toString(), values);
+        }
+    }
+
 }

@@ -1,5 +1,9 @@
 package app.hongs.db;
 
+import app.hongs.Core;
+import app.hongs.CoreSerially;
+import app.hongs.HongsException;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -9,7 +13,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
@@ -18,16 +21,13 @@ import java.io.Serializable;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+
 import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
-
-import app.hongs.Core;
-import app.hongs.CoreSerially;
-import app.hongs.HongsException;
 
 /**
  * 数据库配置信息解析类

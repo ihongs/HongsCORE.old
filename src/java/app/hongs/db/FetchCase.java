@@ -2,7 +2,6 @@ package app.hongs.db;
 
 import app.hongs.HongsException;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.regex.Pattern;
+import java.io.Serializable;
 
 /**
  * 查询结构体

@@ -8,13 +8,22 @@
     <object class="config" name="hsForm" data="">
         <param name="loadUrl" value="hcim/Domain/Info.act"/>
         <param name="saveUrl" value="hcim/Domain/Save.act"/>
-        <param name="loadNoId" value="true"/>
+        <param name="probeMode" value="true"/>
     </object>
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <div class="form-group">
+            <label class="control-label">所属模块</label>
+            <div data-fn="module_id" data-ft="_pick"></div>
+            <button type="button" class="btn btn-default" data-toggle="hsPick" href="hcim/module/pick.html" style="display: block;">选择模块</button>
+        </div>
+        <div class="form-group">
             <label class="control-label">属性名称</label>
-            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}"/>
+            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">代码</label>
+            <input type="text" name="code" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
         </div>
         <div class="form-group">
             <label class="control-label">类型</label>
@@ -42,7 +51,7 @@
             <input type="number" name="max" value="0" class="form-control" style="width: 12em;"/>
         </div>
         <div class="form-group">
-            <label class="control-label">正则验证</label>
+            <label class="control-label">校验规则</label>
             <input type="text" name="rule" class="form-control"/>
         </div>
         
@@ -71,6 +80,10 @@
                     break;
                 case "6":
                     context.find("[name=size]")
+                           .closest(".form-group").show();
+                    break;
+                case "11":
+                    context.find("[name=rule")
                            .closest(".form-group").show();
                     break;
             }

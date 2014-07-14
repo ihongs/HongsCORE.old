@@ -7,11 +7,6 @@ import app.hongs.HongsError;
 import app.hongs.HongsThrowable;
 import app.hongs.action.ActionHelper;
 
-import java.net.URLDecoder;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -20,6 +15,10 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLDecoder;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * 外壳程序启动器(原名shell)
@@ -91,6 +90,13 @@ public class Cmdlet
     catch (ClassNotFoundException ex)
     {
       CmdletHelper.print("ERROR: Can not find class '" + cls + "'.");
+      return;
+    }
+
+    // 动作类必须加上 Cmdlet 注解. Add by Hongs, 2014/7/14
+    if (! klass.isAnnotationPresent(app.hongs.cmdlet.annotation.Cmdlet.class))
+    {
+      CmdletHelper.print("ERROR: Can not exec class '" + cls + "'.");
       return;
     }
 
@@ -310,10 +316,17 @@ public class Cmdlet
     {
         ses  = parseQueryString(str);
     }
+    
+    str = (String)opts.get("cookies");
+    Map<String, String[]>  cok = null;
+    if (str != null && str.length( ) > 0)
+    {
+        cok  = parseQueryString(str);
+    }
 
     ActionHelper helper = (ActionHelper)
           Core.getInstance(ActionHelper.class);
-    helper.init(req, ses);
+    helper.init(req, ses, cok);
 
     return args;
   }

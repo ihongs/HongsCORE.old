@@ -83,7 +83,7 @@ public class User {
         data.put("pageGroups", pageGroups);
 
         // 用户动作分组
-        String id = helper.getParameter("id");
+        String id = helper.getParam("id");
         if (id != null) {
             Set userGroups = model.getGroups(id);
             data.put("userGroups", userGroups);

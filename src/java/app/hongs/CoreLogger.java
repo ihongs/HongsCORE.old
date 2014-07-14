@@ -1,19 +1,18 @@
 package app.hongs;
 
+import app.hongs.action.ActionHelper;
+import app.hongs.util.Text;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import app.hongs.action.ActionHelper;
-import app.hongs.util.Text;
 
 /**
  * 日志记录工具

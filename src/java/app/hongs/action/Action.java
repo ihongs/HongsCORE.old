@@ -1,5 +1,12 @@
 package app.hongs.action;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
+import app.hongs.CoreLanguage;
+import app.hongs.HongsException;
+import app.hongs.HongsThrowable;
+import app.hongs.action.annotation.ActionChain;
+
 import java.lang.reflect.Method;
 import java.io.IOException;
 
@@ -7,13 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import app.hongs.Core;
-import app.hongs.CoreConfig;
-import app.hongs.CoreLanguage;
-import app.hongs.HongsException;
-import app.hongs.HongsThrowable;
-import app.hongs.action.annotation.ActionChain;
 
 /**
  * 动作启动器
@@ -137,6 +137,13 @@ public class Action
     catch (ClassNotFoundException ex)
     {
       helper.print404("Can not find class '" + cls + "'.");
+      return;
+    }
+
+    // 动作类必须加上 Action 注解. Add by Hongs, 2014/7/14
+    if (! klass.isAnnotationPresent(app.hongs.action.annotation.Action.class))
+    {
+      helper.print404("Can not exec class '" + cls + "'.");
       return;
     }
 

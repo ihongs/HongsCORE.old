@@ -11,9 +11,10 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionAnnotation(InjectInvoker.class)
+@ActionDecor(InjectInvoker.class)
 public @interface Verify {
-    String[] rules();
+    String   form();
     String   data() default "";
+    String   conf() default "default";
     String   lang() default "default";
 }

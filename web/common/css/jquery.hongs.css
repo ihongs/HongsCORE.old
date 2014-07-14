@@ -46,7 +46,7 @@ pre, code {
 
 /** 顶部固定 **/
 #head-box {
-    background: #222222;
+    background: #282828;
     position: fixed;
     display: block;
     z-index: 8888;
@@ -241,20 +241,20 @@ fieldset.dropup .dropdown-body {
 
 /** 选择 **/
 
-.choose-tip {
+.pick-box {
     width: 1110px;
 }
 
-.option-box {
+.pick-opt {
     margin-bottom: 3px;
     margin-right: 3px;
 }
-.option-box .option-del {
+.pick-opt .pick-del {
     padding-right: 9px;
     padding-left: 9px;
 }
-.option-box .option-txt {
-    width: 12em;
+.pick-opt .pick-txt {
+    max-width: 372px;
     text-align: left;
     overflow: hidden;
 }

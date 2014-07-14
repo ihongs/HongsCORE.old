@@ -1,5 +1,5 @@
 <root>
-  <data key="ATTR_TYPES" type="json">
+  <data key="DOMAIN_TYPES" type="json">
     <![CDATA[
       [
         [ 1, "字符"],
@@ -14,6 +14,27 @@
         [12, "图片"],
         [13, "音频"],
         [14, "视频"]
+      ]
+    ]]>
+  </data>
+  <data key="entity_form" type="json">
+    <![CDATA[
+      [
+        ["name", "required"],
+        ["xxx", "name.isdfds", 1, 2, 3],
+        ["sdfsd, "/^\d+$/"]
+      ]
+    ]]>
+  </data>
+  <data key="module_form" type="json">
+    <![CDATA[
+      [
+      ]
+    ]]>
+  </data>
+  <data key="domain_form" type="json">
+    <![CDATA[
+      [
       ]
     ]]>
   </data>

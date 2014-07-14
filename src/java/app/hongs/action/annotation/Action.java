@@ -6,16 +6,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 数据注入
+ * 动作注解执行器
+ *
+ * <p>
+ * 非自动调用不起作用, 仅能用于动作方法上;
+ * 其他动作注解需声明此注解, 并指定调用类.
+ * </p>
+ *
  * @author Hong
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@ActionDecor(InjectInvoker.class)
-public @interface Inject {
-    String[] keys();
-    String   conf() default "default";
-    TYPES    type() default TYPES.RSP;
-    
-    public static enum TYPES { REQ, RSP }
+public @interface Action {
 }

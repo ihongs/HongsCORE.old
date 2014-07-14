@@ -13,7 +13,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -136,11 +135,10 @@ implements Filter {
             String sess = conf.getProperty("core.language.session", "lang");
             lang = (String) helper.getSession(sess);
             if (lang == null || lang.length() == 0) {
-                Cookie c = helper.getCookie(sess);
-                lang = c == null ? null : c.getValue();
-                if (lang == null || lang.length() == 0) {
-                    lang = req.getHeader("Accept-Language");
-                }
+                lang = helper.getCookie(sess);
+            if (lang == null || lang.length() == 0) {
+                lang = req.getHeader("Accept-Language");
+            }
             }
 
             /**
@@ -148,9 +146,9 @@ implements Filter {
              */
             if (lang != null) {
                 lang = CoreLanguage.getAcceptLanguage(lang);
-            }
             if (lang != null) {
                 Core.ACTION_LANG.set(lang);
+            }
             }
         }
 

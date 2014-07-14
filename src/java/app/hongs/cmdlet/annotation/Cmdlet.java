@@ -1,4 +1,4 @@
-package app.hongs.action.annotation;
+package app.hongs.cmdlet.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,8 +15,7 @@ import java.lang.annotation.Target;
  *
  * @author Hong
  */
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ActionAnnotation {
-    Class value();
+public @interface Cmdlet {
 }

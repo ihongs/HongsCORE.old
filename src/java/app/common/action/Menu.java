@@ -5,20 +5,22 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionConfig;
 import app.hongs.action.ActionHelper;
-import java.util.List;
+import app.hongs.action.annotation.Action;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 菜单
  * @author Hong
  */
+@Action
 public class Menu {
     public void actionList(ActionHelper helper) throws HongsException {
-        String name  = helper.getParameter("c");
-        String level = helper.getParameter("l");
-        String depth = helper.getParameter("d");
+        String name  = helper.getParam("c");
+        String level = helper.getParam("l");
+        String depth = helper.getParam("d");
         helper.printJSON(getList(name, level, depth));
     }
 
