@@ -65,8 +65,8 @@ import javax.sql.DataSource;
  * 0x1025  无法获取表构造器
  * 0x1027  无法获取表实例
  *
- * 0x35    开启Connection失败
- * 0x37    关闭Connection失败
+ * 0x41    开启Connection失败
+ * 0x43    关闭Connection失败
  * 0x102b  取消Statement失败
  * 0x102d  关闭Statement失败
  * 0x102f  关闭ResultSet失败
@@ -96,9 +96,14 @@ public class DB
 {
 
   /**
-   * 是否为对象模式(即获取的数据以对象的形式存在, 默认为字符模式)
+   * 是否为对象模式(即获取的是对象)
    */
   public boolean IN_OBJECT_MODE;
+
+  /**
+   * 是否为事务模式(即不会自动提交)
+   */
+  public boolean IN_TRANSC_MODE;
 
   /**
    * 库名
@@ -211,7 +216,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsError(0x35, ex);
+      throw new HongsError(0x41, ex);
     }
 
     Exception ez = null;
@@ -400,15 +405,14 @@ public class DB
     Core core = Core.getInstance();
 
     // 自动提交设置
-    if (core.containsKey("__DB_AUTO_COMMIT__"))
+    if (core.containsKey("__DB_IN_TRANSC_MODE__") || this.IN_TRANSC_MODE)
     try {
-        this.connection.setAutoCommit((Boolean)
-                core.get("__DB_AUTO_COMMIT__"));
+      this.connection.setAutoCommit(
+      !(Boolean)core.get("__DB_IN_TRANSC_MODE__") ||!this.IN_TRANSC_MODE);
+    } catch (SQLException ex) {
+      throw new app.hongs.HongsException(0x101b, ex);
     }
-    catch (SQLException ex) {
-        throw new app.hongs.HongsException(0x101b, ex);
-    }
-    
+
     return this.connection;
   }
 
@@ -434,7 +438,29 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsError(0x37, ex);
+      throw new HongsError(0x43, ex);
+    }
+  }
+
+  public void transc()
+  {
+    IN_TRANSC_MODE = true;
+  }
+  public void commit() {
+    IN_TRANSC_MODE = false;
+    try {
+      this.connection.commit();
+    } catch (SQLException ex) {
+      throw new HongsError(0x44, ex);
+    }
+  }
+  public void rollback()
+  {
+    IN_TRANSC_MODE = false;
+    try {
+      this.connection.rollback();
+    } catch (SQLException ex) {
+      throw new HongsError(0x46, ex);
     }
   }
 

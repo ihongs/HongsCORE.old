@@ -30,7 +30,7 @@ import org.json.simple.parser.ParseException;
  *
  * <h3>错误代码</h3>
  * <pre>
- * 0x40 解析JSON数据错误
+ * 0x3a 解析JSON数据错误
  * </pre>
  *
  * @author Hongs
@@ -52,7 +52,7 @@ public class JSON
     }
     catch (ParseException exp)
     {
-      throw new HongsError(0x40, exp);
+      throw new HongsError(0x3a, exp);
     }
   }
 

@@ -293,14 +293,14 @@ public class Verifier {
 
     private String requires(Object value) {
         if (value == null) {
-            return lang.translate("js.form.requires");
+            return lang.translate("fore.form.requires");
         }
         return null;
     }
 
     private String required(String value) {
         if (value == null || "".equals(value)) {
-            return lang.translate("js.form.required");
+            return lang.translate("fore.form.required");
         }
         return null;
     }
@@ -339,14 +339,14 @@ public class Verifier {
 
     private String min(String value, double num) {
         if (num > Double.parseDouble(value)) {
-            return lang.translate("js.form.lt.min");
+            return lang.translate("fore.form.lt.min");
         }
         return null;
     }
 
     private String max(String value, double num) {
         if (num < Double.parseDouble(value)) {
-            return lang.translate("js.form.gt.max");
+            return lang.translate("fore.form.gt.max");
         }
         return null;
     }
@@ -362,7 +362,7 @@ public class Verifier {
         List<String> valuez = values.get(name2);
         String value2 = valuez != null && !valuez.isEmpty() ? valuez.get(0) : "";
         if ( ! value2.equals(value) ) {
-            return lang.translate("js.form.is.not.repeat" );
+            return lang.translate("fore.form.is.not.repeat" );
         }
         return null;
     }
@@ -398,7 +398,7 @@ public class Verifier {
 
         Map row = mode.table.fetchLess(caze);
         if (! row.isEmpty()) {
-            return lang.translate("js.form.is.not.unique");
+            return lang.translate("fore.form.is.not.unique");
         }
 
         return null;

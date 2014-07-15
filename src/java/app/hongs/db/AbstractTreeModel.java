@@ -100,8 +100,8 @@ public class AbstractTreeModel extends AbstractBaseModel
     super(table);
     
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    this.bidKey = conf.getProperty("js.tree.bid.key", "bid");
-    this.rootId = conf.getProperty("js.tree.root.id", "0");
+    this.bidKey = conf.getProperty("fore.tree.bid.key", "bid");
+    this.rootId = conf.getProperty("fore.tree.root.id", "0");
   }
   public AbstractTreeModel(String tableName)
     throws HongsException

@@ -115,11 +115,11 @@ abstract public class AbstractBaseModel
     
     // 配置
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    this.pageKey = conf.getProperty("js.model.page.key", "page");
-    this.rowsKey = conf.getProperty("js.model.rows.key", "rows");
-    this.colsKey = conf.getProperty("js.model.cols.key", "cols");
-    this.sortKey = conf.getProperty("js.model.sort.key", "sort");
-    this.findKey = conf.getProperty("js.model.find.key", "find");
+    this.pageKey = conf.getProperty("fore.model.page.key", "page");
+    this.rowsKey = conf.getProperty("fore.model.rows.key", "rows");
+    this.colsKey = conf.getProperty("fore.model.cols.key", "cols");
+    this.sortKey = conf.getProperty("fore.model.sort.key", "sort");
+    this.findKey = conf.getProperty("fore.model.find.key", "find");
   }
   public AbstractBaseModel(String tableName)
     throws HongsException

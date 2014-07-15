@@ -4,12 +4,13 @@ import app.hongs.HongsException;
 import app.hongs.db.DB;
 import app.hongs.db.Table;
 
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 库结构同步器(DB structure synchronizer)
@@ -35,26 +36,6 @@ public class DBSync
   }
 
   /**
-   * 同步从数据库(多个)
-   * @param slavers
-   * @param tablePrefix 从库表前缀
-   * @param tableSuffix 从库表后缀
-   * @param delExtraTables 删除多余的表
-   * @param delExtraFields 删除多余的字段
-   * @throws app.hongs.HongsException
-   */
-  public void syncSlavers(List<DB> slavers, String tablePrefix, String tableSuffix, boolean delExtraTables, boolean delExtraFields)
-  throws HongsException
-  {
-    Iterator it = slavers.iterator();
-    while (it.hasNext())
-    {
-      DB slaver = (DB)it.next();
-      this.syncSlaver(slaver, tablePrefix, tableSuffix, delExtraTables, delExtraFields);
-    }
-  }
-
-  /**
    * 同步从数据库
    * @param slaver
    * @param tablePrefix 从库表前缀
@@ -66,6 +47,31 @@ public class DBSync
   public void syncSlaver(DB slaver, String tablePrefix, String tableSuffix, boolean delExtraTables, boolean delExtraFields)
   throws HongsException
   {
+    List<String> sqls = this.syncSlaverSqls(slaver, tablePrefix, tableSuffix, delExtraTables, delExtraFields);
+    DB sdb = slaver;
+    try
+    {
+      sdb.transc();
+      for (String sql : sqls)
+      {
+        sdb.execute(sql);
+      }
+      sdb.commit();
+    }
+    catch (HongsException ex)
+    {
+      sdb.rollback();
+      throw ex;
+    }
+  }
+
+  public List<String> syncSlaverSqls(DB slaver, String tablePrefix, String tableSuffix, boolean delExtraTables, boolean delExtraFields)
+  throws HongsException
+  {
+    List<String> sqls = new ArrayList();
+    List<String> sqlz;
+    String       sql;
+
     Set tables = new HashSet();
 
     if (delExtraTables)
@@ -86,15 +92,18 @@ public class DBSync
       Table table = this.db.getTable(tab);
 
       Map config = new HashMap();
-      config.put("name", table.tableName);
-      Table table2 = new Table(slaver, config);
+      config.put("name", table.name);
+      if (tablePrefix != null) config.put("tablePrefix", tablePrefix);
+      if (tableSuffix != null) config.put("tableSuffix", tableSuffix);
+      Table tablz = new Table(slaver, config);
 
-      TableSync sst = new TableSync( table );
-      sst.syncSlaver(table2, delExtraFields);
+      TableSync sync = new TableSync( table );
+      sqlz = sync.syncSlaverSqls(tablz, delExtraFields);
+      sqls.addAll( sqlz );
 
       if (delExtraTables)
       {
-        tables.remove(table2.tableName);
+        tables.remove(tablz.tableName);
       }
     }
 
@@ -104,9 +113,12 @@ public class DBSync
       while (it2.hasNext())
       {
         String table = (String)it2.next();
-        slaver.execute("DROP TABLE '"+table+"'");
+        sql = "DROP TABLE '"+table+"'";
+        sqls.add(sql);
       }
     }
+
+    return sqls;
   }
 
 }

@@ -255,7 +255,7 @@ public class CmdletHelper
         trs += pre + hlp.replaceAll("\\n", pre);
       }
       
-      HongsError er = new HongsError(0x42, msg);
+      HongsError er = new HongsError(0x3c, msg);
                  er.setTranslate(trs);
       throw      er;
     }

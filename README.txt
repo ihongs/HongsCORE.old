@@ -83,8 +83,8 @@ xxxx/Foo/Bar.act    调用 app.xxxx.action.Foo.actionBar
 xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
 xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(执行命令 WEB-INF/run xxxx.Foo)
 common/auth/name.js 读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
-common/conf/name.js 读取 WEB-INF/conf/name.properties 中 js.xxxx. 开头的配置
-common/lang/name.js 读取 WEB-INF/lang/name.xx-xx.properties 中 js.xxxx. 开头的配置
+common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
+common/lang/name.js 读取 WEB-INF/lang/name.xx-xx.properties 中 fore.xxxx. 开头的配置
 注: 以上3个配置请求, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置
 
 框架结构:

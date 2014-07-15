@@ -207,10 +207,10 @@ public class JsConfAction
        * .C   代码
        * .L   链接
        */
-      if (! key.startsWith("js.")) {
+      if (! key.startsWith("fore.")) {
           return "";
       }
-      String name = key.substring(3)
+      String name = key.substring(5)
                        .replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {

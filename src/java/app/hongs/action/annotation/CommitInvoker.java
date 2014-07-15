@@ -24,12 +24,8 @@ public class CommitInvoker {
 
             commit();
         }
-        catch (Throwable ex) {
-            rollback();
-            throw ex;
-        }
         finally {
-            core.remove("__DB_AUTO_COMMIT__");
+            core.remove(  "__DB_AUTO_COMMIT__"  );
         }
     }
 

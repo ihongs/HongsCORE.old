@@ -1,12 +1,14 @@
 package app.hongs.db.sync;
 
 import app.hongs.HongsException;
+import app.hongs.db.DB;
 import app.hongs.db.Table;
 
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 表结构同步器(Table structure synchronizer)
@@ -19,10 +21,7 @@ public class TableSync
 {
 
   private Table table;
-  private TableDesc td;
-  private Table slaver;
-  private TableDesc sd;
-  private String field;
+  private TableDesc tableDesc;
 
   /**
    * 通过表对象构造
@@ -33,8 +32,7 @@ public class TableSync
   throws HongsException
   {
     this.table = table;
-    this.td = TableDesc.getInstance(table);
-    this.field = this.td.fields.keySet().toArray()[0].toString();
+    this.tableDesc = TableDesc.getInstance(table);
   }
 
   /**
@@ -46,6 +44,29 @@ public class TableSync
   public void syncSlaver(Table slaver, boolean delExtraFields)
   throws HongsException
   {
+    List<String> sqls = this.syncSlaverSqls(slaver, delExtraFields);
+    DB sdb = slaver.db;
+    try
+    {
+      sdb.transc();
+      for (String sql : sqls)
+      {
+        sdb.execute(sql);
+      }
+      sdb.commit();
+    }
+    catch (HongsException ex)
+    {
+      sdb.rollback();
+      throw ex;
+    }
+  }
+
+  public List<String> syncSlaverSqls(Table slaver, boolean delExtraFields)
+  throws HongsException
+  {
+    List sqls = new ArrayList();
+
     // 没有表则创建表
     String sql = "SHOW TABLES LIKE '"+slaver.tableName+"'" ;
     Map row = slaver.db.fetchOne(sql);
@@ -57,15 +78,11 @@ public class TableSync
         sql = sql.replaceFirst("^CREATE TABLE `.*?`",
               "CREATE TABLE `"+slaver.tableName+"`");
 
-        slaver.db.execute(sql);
-
-        return;
+        sqls.add(sql);
+        return   sqls;
     }
 
-    // 注册从表及结构
-    this.slaver = slaver;
-    this.sd = TableDesc.getInstance(slaver);
-
+    TableDesc slaverDesc = TableDesc.getInstance(slaver);
     Iterator  it;
     Map.Entry et;
 
@@ -79,52 +96,51 @@ public class TableSync
     if (delExtraFields)
     {
       // 主键
-      if (!this.sd.primaryKey.isEmpty()
-      &&  !this.sd.primaryKey.equals(this.td.primaryKey))
+      if (tableDesc.priCols.isEmpty())
       {
-        this.alterKey(TableDesc.DROP, TableDesc.PRIMARY);
+        sql = tableDesc.alterPriKeySql(slaver.tableName, TableDesc.DROP);
+        sqls.add(sql);
       }
 
       // 唯一键
-      it = this.sd.uniqueKeys.entrySet().iterator();
+      it = slaverDesc.uniKeys.entrySet().iterator();
       while (it.hasNext())
       {
         et = (Map.Entry)it.next();
         String key = (String)et.getKey();
-        Set keys = (Set)et.getValue();
 
-        if (!this.td.uniqueKeys.containsKey(key)
-        ||  !this.td.uniqueKeys.get(key).equals(keys))
+        if (!tableDesc.uniKeys.containsKey(key))
         {
-          this.alterKey(TableDesc.DROP, key);
+          sql = tableDesc.alterUniKeySql(slaver.tableName, TableDesc.DROP, key);
+          sqls.add(sql);
         }
       }
 
       // 索引键
-      it = this.sd.indexKeys.entrySet().iterator();
+      it = slaverDesc.idxKeys.entrySet().iterator();
       while (it.hasNext())
       {
         et = (Map.Entry)it.next();
         String key = (String)et.getKey();
-        Set keys = (Set)et.getValue();
 
-        if (!this.td.indexKeys.containsKey(key)
-        ||  !this.td.indexKeys.get(key).equals(keys))
+        if (!tableDesc.idxKeys.containsKey(key))
         {
-          this.alterKey(TableDesc.DROP, key);
+          sql = tableDesc.alterIdxKeySql(slaver.tableName, TableDesc.DROP, key);
+          sqls.add(sql);
         }
       }
 
       // 字段
-      it = this.sd.fields.entrySet().iterator();
+      it = slaverDesc.columns.entrySet().iterator();
       while (it.hasNext())
       {
         et = (Map.Entry)it.next();
-        String fieldName = (String)et.getKey();
+        String col = (String)et.getKey();
 
-        if (!this.td.fields.containsKey(fieldName))
+        if (!tableDesc.columns.containsKey(col))
         {
-          this.alterField(TableDesc.DROP, fieldName);
+          sql = tableDesc.alterColumnSql(slaver.tableName, TableDesc.DROP, col);
+          sqls.add(sql);
         }
       }
     }
@@ -136,25 +152,22 @@ public class TableSync
      * 找出不同的字段并更新
      */
 
-    it = this.td.fields.entrySet().iterator();
+    it = tableDesc.columns.entrySet().iterator();
     while (it.hasNext())
     {
       et = (Map.Entry)it.next();
-      String fieldName = (String)et.getKey();
-      String fieldSql = (String)et.getValue();
+      String col = (String)et.getKey();
+      String dfn = (String)et.getValue();
 
-      if (! this.sd.fields.containsKey(fieldName))
+      if (! slaverDesc.columns.containsKey(col))
       {
-        this.alterField(TableDesc.ADD, fieldName);
+        sql = tableDesc.alterColumnSql(slaver.tableName, TableDesc.ADD, col);
+        sqls.add(sql);
       }
-      else
+      else if (! dfn.equals(slaverDesc.columns.get(col)))
       {
-        String fieldSql2 = (String)this.sd.fields.get(fieldName);
-
-        if (! fieldSql2.equals(fieldSql))
-        {
-          this.alterField(TableDesc.CHANGE, fieldName);
-        }
+        sql = tableDesc.alterColumnSql(slaver.tableName, TableDesc.MODIFY, col);
+        sqls.add(sql);
       }
     }
 
@@ -165,70 +178,46 @@ public class TableSync
      */
 
     // 主键
-    if (!this.td.primaryKey.isEmpty()
-    &&  !this.td.primaryKey.equals(this.sd.primaryKey))
+    if (!tableDesc.priCols.isEmpty()
+    &&  !tableDesc.priCols.equals(slaverDesc.priCols))
     {
-      this.alterKey(TableDesc.ADD , TableDesc.PRIMARY);
+      sql = tableDesc.alterPriKeySql(table.tableName, TableDesc.ADD);
+      sqls.add(sql);
     }
 
     // 唯一键
-    it = this.td.uniqueKeys.entrySet().iterator();
+    it = tableDesc.uniKeys.entrySet().iterator();
     while (it.hasNext())
     {
       et = (Map.Entry)it.next();
       String key = (String)et.getKey();
-      Set keys = (Set)et.getValue();
+      Set cols = (Set)et.getValue();
 
-      if (!this.sd.uniqueKeys.containsKey(key)
-      ||  !this.sd.uniqueKeys.get(key).equals(keys))
+      if (!slaverDesc.uniKeys.containsKey(key)
+      ||  !slaverDesc.uniKeys.get(key).equals(cols))
       {
-        this.alterKey(TableDesc.ADD, key);
+        sql = tableDesc.alterUniKeySql(slaver.tableName, TableDesc.ADD, key);
+        sqls.add(sql);
       }
     }
 
     // 索引键
-    it = this.td.indexKeys.entrySet().iterator();
+    it = tableDesc.idxKeys.entrySet().iterator();
     while (it.hasNext())
     {
       et = (Map.Entry)it.next();
       String key = (String)et.getKey();
-      Set keys = (Set)et.getValue();
+      Set cols = (Set)et.getValue();
 
-      if (!this.sd.indexKeys.containsKey(key)
-      ||  !this.sd.indexKeys.get(key).equals(keys))
+      if (!slaverDesc.idxKeys.containsKey(key)
+      ||  !slaverDesc.idxKeys.get(key).equals(cols))
       {
-        this.alterKey(TableDesc.ADD, key);
+        sql = tableDesc.alterIdxKeySql(table.tableName, TableDesc.ADD, key);
+        sqls.add(sql);
       }
     }
-  }
 
-  /**
-   * 同步从表结构(多个)
-   * @param slavers
-   * @param delExtraFields 删除多余的字段
-   * @throws app.hongs.HongsException
-   */
-  public void syncSlavers(List<Table> slavers, boolean delExtraFields)
-  throws HongsException
-  {
-    Iterator it = slavers.iterator();
-    while (it.hasNext())
-    {
-      Table slave = (Table)it.next();
-      this.syncSlaver(slave, delExtraFields);
-    }
-  }
-
-  private void alterField(int alterType, String fieldName)
-  throws HongsException
-  {
-    TableDesc.alterField(alterType, this.slaver, this.table, fieldName);
-  }
-
-  private void alterKey(int alterType, String keyName)
-  throws HongsException
-  {
-    TableDesc.alterKey(alterType, this.slaver, this.table, keyName);
+    return sqls;
   }
 
 }

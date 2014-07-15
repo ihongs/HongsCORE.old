@@ -36,7 +36,7 @@ public class VerifyInvoker {
         // 返回错误
         if (! errors.isEmpty()) {
             dat = new HashMap();
-            dat.put("__message__", lng.translate("js.form.invalid"));
+            dat.put("__message__", lng.translate("fore.form.invalid"));
             dat.put("__success__", false);
             dat.put("errors", errors);
             helper.back(dat);
