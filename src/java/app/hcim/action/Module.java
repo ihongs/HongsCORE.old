@@ -3,6 +3,7 @@ package app.hcim.action;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.annotation.Action;
 import app.hongs.action.annotation.CommitSuccess;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import java.util.Map;
  * 模型动作接口
  * @author Hongs
  */
+@Action
 public class Module {
 
     private app.hcim.model.Module model;

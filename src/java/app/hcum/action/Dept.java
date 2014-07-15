@@ -1,10 +1,11 @@
 package app.hcum.action;
 
+import app.hcum.model.User;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.annotation.Action;
 import app.hongs.action.annotation.CommitSuccess;
-import app.hcum.model.User;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Set;
  * 部门动作接口
  * @author Hongs
  */
+@Action
 public class Dept {
 
     private app.hcum.model.Dept model;

@@ -19,7 +19,7 @@ public class VerifyInvoker {
         Verify ann  = (Verify) anno;
         String lang = ann.lang();
         String conf = ann.conf();
-        String form = ann.form();
+        String form = ann.rule();
         String data = ann.data();
 
         // 准备数据

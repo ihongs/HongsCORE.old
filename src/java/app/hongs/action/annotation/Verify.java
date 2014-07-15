@@ -13,8 +13,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ActionDecor(InjectInvoker.class)
 public @interface Verify {
-    String   form();
-    String   data() default "";
+    String   rule();
     String   conf() default "default";
     String   lang() default "default";
+    String   data() default "";
 }

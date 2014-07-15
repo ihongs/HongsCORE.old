@@ -157,9 +157,7 @@ public class DatumsConfig
         }
         else
         {
-          data2 = this.parseData(
-            element2.getTextContent()
-                    .toString(),type);
+          data2 = this.parseData(element2.getTextContent().toString(), type);
         }
 
         if (datas instanceof List)

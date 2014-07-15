@@ -206,6 +206,10 @@ public class ActionHelper
   public String getParam(String name)
   {
     Object o = this.getValue(name);
+    if (o == null)
+    {
+      return null;
+    }
     if (o instanceof List)
     {
       List l = (List) o;

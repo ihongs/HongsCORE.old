@@ -2,8 +2,9 @@ package app.common.cmdlet;
 
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.action.ActionHelper;
+import app.hongs.cmdlet.CmdletHelper;
+import app.hongs.cmdlet.annotation.Cmdlet;
 import app.hongs.util.JSON;
 import app.hongs.util.Text;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map;
  * 测试
  * @author Hongs
  */
+@Cmdlet
 public class test {
 
   public void action(ActionHelper helper)

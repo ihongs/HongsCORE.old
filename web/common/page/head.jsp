@@ -57,9 +57,9 @@ StringBuilder makeMenu(List<Map> menus, int i) {
 %>
 <%
   ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
-  String name  = helper.getParameter("c");
-  String level = helper.getParameter("l");
-  String depth = helper.getParameter("d");
+  String name  = helper.getParam("c");
+  String level = helper.getParam("l");
+  String depth = helper.getParam("d");
   
   List<Map> menus = Menu.getList(name, level, depth);
   List<Map> logom = Menu.getList("default", "1","1");
