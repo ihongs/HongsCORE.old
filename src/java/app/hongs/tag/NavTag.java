@@ -114,9 +114,9 @@ public class NavTag extends SimpleTagSupport {
                 if (! cnf.chkAuth(uri)) {
                     continue;
                 }
+                uri = Core.BASE_HREF + uri;
 
                 String name = (String)node.get("name");
-                uri = Core.BASE_HREF + uri;
                 name = this.translate(name);
 
                 sb.append("<div class=\"nav-item")
@@ -125,7 +125,7 @@ public class NavTag extends SimpleTagSupport {
                 sb.append("<a class=\"nav-link")
                   .append(levelClass)
                   .append("\" href=\"")
-                  .append(uri)
+                  .append(uri )
                   .append("\">")
                   .append(name)
                   .append("</a>");
@@ -143,15 +143,14 @@ public class NavTag extends SimpleTagSupport {
     }
 
     private String translate(String name) {
-        if (name.indexOf("{opt}") != -1) {
-            if (ah.getParam("id") != null) {
-                name = name.replace("{opt}", "set");
-            }
-            else {
-                name = name.replace("{opt}", "add");
-            }
+        if (name.indexOf("{opt}") !=  -1 ) {
+            name = name.replace("{opt}", "create");
         }
-        return cl.translate(name);
+        name = cl.translate(name);
+        if (name.indexOf("{opt}") !=  -1 ) {
+            name = name.replace("{opt}", cl.translate("fore.form.create"));
+        }
+        return name;
     }
 
 }

@@ -21,7 +21,7 @@ public class Menu {
         String name  = helper.getParam("c");
         String level = helper.getParam("l");
         String depth = helper.getParam("d");
-        helper.printJSON(getList(name, level, depth));
+        helper.print(getList(name, level, depth));
     }
 
     public static List getList(String name, String level, String depth) throws HongsException

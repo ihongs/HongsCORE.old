@@ -12,16 +12,16 @@ import java.util.Map;
  * 核心类
  *
  * <p>
- * 承担"唯一实例"(线程内唯一)的申请与注销操作<br/>
- * 必须存在一个无参构造函数或无参"getInstance"方法<br/>
- * 获取当前 Core 的唯一实例总是使用"Core.getInstance()"<br/>
+ * 承担"唯一实例"(线程内唯一)的申请与注销操作,
+ * 必须存在一个无参构造函数或无参"getInstance"方法,
+ * 获取当前 Core 的唯一实例总是使用"Core.getInstance()".
  * </p>
  *
  * <h3>特性解释:</h3>
  * <p>
  * Servlet 在众多实现中总是以单实例多线程的方式工作,
- * 即对于单个请求有且仅有一个线程在为其服务.
- * Core 类为框架的对象请求器, 分配原则为线程内分配.
+ * 即对于单个请求有且仅有一个线程在为其服务;
+ * Core 类为框架的对象请求器, 分配原则为线程内分配;
  * 除个别类通过 getInstance 自定规则外, 其他类的实例均在线程内唯一,
  * 故不需要同步即可确保程序的线程安全, 而同时兼顾单例模式的特点(节省资源, 共享状态).
  * </p>
@@ -42,11 +42,11 @@ import java.util.Map;
  *
  * <h3>错误代码:</h3>
  * <pre>
- * 0x25 实例名称不能为空
- * 0x27 无法获取对应的类
- * 0x28 禁止访问工厂方法
- * 0x2b 无法执行工厂方法
- * 0x2d 执行构造方法失败
+ * 0x14 实例名称不能为空
+ * 0x15 无法获取对应的类
+ * 0x16 禁止访问工厂方法
+ * 0x17 无法执行工厂方法
+ * 0x18 执行构造方法失败
  * </pre>
  *
  * @author Hongs
@@ -125,7 +125,21 @@ extends HashMap<String, Object>
       Object object =  et.getValue();
       if (object instanceof Destroy)
       {
-        ((Destroy) object).destroy();
+        try
+        {
+          ((Destroy) object).destroy();
+        }
+        catch (Error er)
+        {
+          try
+          {
+            CoreLogger.error  (er.getMessage());
+          }
+          catch (HongsException ex)
+          {
+            System.err.println(ex.getMessage());
+          }
+        }
       }
     }
 
@@ -157,7 +171,7 @@ extends HashMap<String, Object>
 
     if (name == null || name.length() == 0)
     {
-      throw new HongsError(0x25, "Instance name can not be empty.");
+      throw new HongsError(0x14, "Instance name can not be empty.");
     }
 
     return null;
@@ -174,7 +188,7 @@ extends HashMap<String, Object>
     }
     catch (ClassNotFoundException ex)
     {
-      throw new HongsError(0x27, "Can not find class by name '" + name + "'.");
+      throw new HongsError(0x15, "Can not find class by name '" + name + "'.");
     }
 
     return build( core, name, klass );
@@ -209,19 +223,19 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x2b, ex);
+        throw new HongsError(0x17, ex);
       }
       catch (IllegalArgumentException ex)
       {
-        throw new HongsError(0x2b, ex);
+        throw new HongsError(0x17, ex);
       }
       catch (InvocationTargetException ex)
       {
         Throwable e = ex.getCause();
         if (e instanceof StackOverflowError)
             throw (Error) e;
-        
-        throw new HongsError(0x2b, ex.getCause());
+
+        throw new HongsError(0x17, ex.getCause());
       }
     }
     catch (NoSuchMethodException ex2)
@@ -248,20 +262,20 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x2d, ex);
+        throw new HongsError(0x18, ex);
       }
       catch (InstantiationException ex)
       {
         Throwable e = ex.getCause();
         if (e instanceof StackOverflowError)
             throw (Error) e;
-        
-        throw new HongsError(0x2d, ex);
+
+        throw new HongsError(0x18, ex);
       }
     }
     catch (SecurityException ex2)
     {
-      throw new HongsError(0x29, ex2);
+      throw new HongsError(0x16, ex2);
     }
   }
 

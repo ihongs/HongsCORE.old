@@ -4,19 +4,20 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
+import app.hongs.HongsException;
 import app.hongs.util.Text;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.LinkedHashSet;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.text.SimpleDateFormat;
 
 /**
  * 外壳程序助手类
@@ -51,7 +52,6 @@ public class CmdletHelper
   };
 
   public static Map<String, Object> getOpts(String[] args, String... chks)
-  throws HongsError
   {
     Map<String, Object[]>  chkz = new HashMap();
     Map<String, Object> newOpts = new HashMap();
@@ -255,8 +255,8 @@ public class CmdletHelper
         trs += pre + hlp.replaceAll("\\n", pre);
       }
       
-      HongsError er = new HongsError(0x3c, msg);
-                 er.setTranslate(trs);
+      HongsError er = new HongsError(0x25, msg);
+                 er.setLocalizedOptions(trs);
       throw      er;
     }
     else if (null != hlp && newOpts.isEmpty( )) {
@@ -291,16 +291,16 @@ public class CmdletHelper
    * 输出到日志
    * @param text
    */
-  public static void print2Log(String text)
+  public static void print2Log(String text) throws HongsException
   {
-    CoreLogger.log(Core.ACTION_PATH.get().replace('.', '_'), text, 0);
+    CoreLogger.getInstance(Core.ACTION_PATH.get().replace('.', '_')).print(text);
   }
 
   /**
    * 输出和日志
    * @param text
    */
-  public static void print4Log(String text)
+  public static void print4Log(String text) throws HongsException
   {
     CmdletHelper.print    (text);
     CmdletHelper.print2Log(text);

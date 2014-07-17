@@ -10,8 +10,7 @@ import java.io.IOException;
  * 配置信息读取工具
  *
  * <p>
- * 采用Properties加载配置选项.<br/>
- * 资源文件名为"xxx.properties".<br/>
+ * 采用Properties加载配置选项, 资源文件名为"xxx.properties"
  * </p>
  *
  * <h3>配置选项:</h3>
@@ -21,8 +20,8 @@ import java.io.IOException;
  *
  * <h3>错误代码:</h3>
  * <pre>
- * 0x21 无法找到配置文件
- * 0x23 无法读取配置文件
+ * 0x1a 无法找到配置文件
+ * 0x1b 无法读取配置文件
  * </pre>
  *
  * @author Hongs
@@ -80,12 +79,12 @@ public class CoreConfig
       this.load(new FileInputStream(file));
     }
     catch (FileNotFoundException ex)
-    {System.out.println(file);
-      throw new app.hongs.HongsError(0x21, "Can not find the properties file '" + file + "'.");
+    {
+      throw new app.hongs.HongsError(0x1a, "Can not find the properties file '" + file + "'.");
     }
     catch (IOException ex)
     {
-      throw new app.hongs.HongsError(0x23, "Can not read the properties file '" + file + "'.");
+      throw new app.hongs.HongsError(0x1b, "Can not read the properties file '" + file + "'.");
     }
   }
 
@@ -103,11 +102,11 @@ public class CoreConfig
     }
     catch (FileNotFoundException ex)
     {
-      throw new app.hongs.HongsError(0x21, "Can not find the xml properties file '" + file + "'.");
+      throw new app.hongs.HongsError(0x1a, "Can not find the xml properties file '" + file + "'.");
     }
     catch (IOException ex)
     {
-      throw new app.hongs.HongsError(0x23, "Can not read the xml properties file '" + file + "'.");
+      throw new app.hongs.HongsError(0x1b, "Can not read the xml properties file '" + file + "'.");
     }
   }
 
@@ -208,8 +207,6 @@ public class CoreConfig
 
   //** 静态属性及方法 **/
 
-  public static CoreConfig instance;
-
   /**
    * 获取唯一实例
    * 如果配置为core.load.config.once为true则仅加载一次
@@ -217,19 +214,7 @@ public class CoreConfig
    */
   public static CoreConfig getInstance()
   {
-    if (CoreConfig.instance != null)
-    {
-      return CoreConfig.instance;
-    }
-
-    CoreConfig conf = new CoreConfig();
-
-    if (conf.getProperty("core.load.config.once", false))
-    {
-      CoreConfig.instance = conf;
-    }
-
-    return conf;
+    return getInstance("default");
   }
 
   /**
@@ -240,16 +225,31 @@ public class CoreConfig
    */
   public static CoreConfig getInstance(String name)
   {
-    String key = "__CONF__." + name;
-    Core  core = Core.getInstance();
-    if (! core.containsKey( key ) )
+    String ck = CoreConfig.class.getName() + ":" + name;
+
+    Core core = Core.getInstance();
+    if (core.containsKey(ck))
     {
-      CoreConfig conf = new CoreConfig(name);
-      core.put(key, conf); return conf;
+      return (CoreConfig)core.get(ck);
+    }
+
+    Core gore = Core.GLOBAL_CORE;
+    if (gore.containsKey(ck))
+    {
+      return (CoreConfig)gore.get(ck);
+    }
+
+    CoreConfig conf =  new  CoreConfig(name);
+    CoreConfig gonf = "default".equals(name) ? conf : getInstance();
+    if (gonf.getProperty("core.load.config.once", false))
+    {
+      gore.put(ck, conf);
     }
     else
     {
-      return (CoreConfig)core.get(key);
+      core.put(ck, conf);
     }
+
+    return conf;
   }
 }

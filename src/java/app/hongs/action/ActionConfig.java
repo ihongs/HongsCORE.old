@@ -451,7 +451,7 @@ public class ActionConfig
   //** 工厂方法 **/
 
   public static ActionConfig getInstance(String name) throws HongsException {
-      String key = "__ACT__." + name;
+      String key = ActionConfig.class.getName() + ":" + name;
       Core core = Core.getInstance();
       ActionConfig inst;
       if (core.containsKey(key)) {

@@ -343,7 +343,7 @@ public class DatumsConfig
   //** 工厂方法 **/
 
   public static DatumsConfig getInstance(String name) throws HongsException {
-      String key = "__DAT__." + name;
+      String key = DatumsConfig.class.getName() + ":" + name;
       Core core = Core.getInstance();
       DatumsConfig inst;
       if (core.containsKey(key)) {

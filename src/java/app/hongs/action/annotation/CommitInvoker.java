@@ -18,14 +18,20 @@ public class CommitInvoker {
     throws Throwable {
         Core core = Core.getInstance();
         try {
-            core.put("__DB_AUTO_COMMIT__", false);
+            core.put("__DB_IN_TRANSC_MODE__", true);
+            for (String k  :  core.keySet()) {
+                if (k.startsWith("__DB__.")) {
+                    DB  db = (DB)core.get(k);
+                    db.transc();
+                }
+            }
 
             chain.doAction();
 
             commit();
         }
         finally {
-            core.remove(  "__DB_AUTO_COMMIT__"  );
+            core.remove("__DB_IN_TRANSC_MODE__");
         }
     }
 
@@ -36,10 +42,7 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    Connection con = db.connect();
-                    if (con.getAutoCommit( ) == false ) {
-                        con.commit();
-                    }
+                    db.commit();
                 }
             }
         }
@@ -60,10 +63,7 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    Connection con = db.connect();
-                    if (con.getAutoCommit( ) == false ) {
-                        con.rollback();
-                    }
+                    db.rollback();
                 }
             }
         }

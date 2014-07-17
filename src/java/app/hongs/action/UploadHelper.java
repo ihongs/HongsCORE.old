@@ -80,7 +80,7 @@ public class UploadHelper
    */
   public UploadHelper(ActionHelper helper)
   {
-    this(helper.request);
+    this(helper.getRequest());
   }
 
   /**
@@ -319,7 +319,7 @@ public class UploadHelper
             String ts = this.allowTypes.toString();
             HongsException ex2 = new HongsException(0x10f6,
               "The type of file '"+name+"' is '"+type+"', but allow types: "+ts);
-            ex2.setTranslate(name, type, ts);
+            ex2.setLocalizedOptions(name, type, ts);
             throw ex2;
           }
 
@@ -335,7 +335,7 @@ public class UploadHelper
             String es = this.allowExts.toString();
             HongsException ex2 = new HongsException(0x10f8,
               "The ext of file '"+name+"' is '"+ext+"', but allow exts: "+es);
-            ex2.setTranslate(name, ext, es);
+            ex2.setLocalizedOptions(name, ext, es);
             throw ex2;
           }
 
@@ -397,7 +397,7 @@ public class UploadHelper
         FileUploadBase.FileSizeLimitExceededException ex1 =
         (FileUploadBase.FileSizeLimitExceededException) ex;
         HongsException ex2 = new HongsException(0x10f4, ex);
-        ex2.setTranslate(ex1.getFileName(),
+        ex2.setLocalizedOptions(ex1.getFileName(),
           String.valueOf(ex1.getActualSize()),
           String.valueOf(ex1.getPermittedSize()));
         throw ex2;
@@ -408,7 +408,7 @@ public class UploadHelper
         FileUploadBase.SizeLimitExceededException ex1 =
         (FileUploadBase.SizeLimitExceededException) ex;
         HongsException ex2 = new HongsException(0x10f2, ex);
-        ex2.setTranslate(
+        ex2.setLocalizedOptions(
           String.valueOf(ex1.getActualSize()),
           String.valueOf(ex1.getPermittedSize()));
         throw ex2;

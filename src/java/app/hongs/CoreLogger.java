@@ -3,8 +3,6 @@ package app.hongs;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.Text;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -84,7 +82,7 @@ public class CoreLogger
    * @param text
    * @param time
    */
-  public synchronized void print(String text, long time)
+  public synchronized void print(String text, long time) throws HongsException
   {
     if (time == 0)
     {
@@ -126,9 +124,9 @@ public class CoreLogger
         Core.getInstance(app.hongs.action.ActionHelper.class);
       sb.append(' ')
         .append('[')
-        .append(helper.request.getRemoteAddr())
+        .append(helper.getRequest().getRemoteAddr())
         .append(' ')
-        .append(helper.request.getRemotePort())
+        .append(helper.getRequest().getRemotePort())
         .append(']');
     }
 
@@ -147,27 +145,17 @@ public class CoreLogger
      */
     sb.append("\r\n");
     sb.append(Text.indent(Text.clearEL(text.trim())));
+    sb.append("\r\n");
 
-    /*
-    try
-    {
-    */
-      this.out.print(sb.toString() + "\r\n");
-      this.out.flush();
-    /*
-    }
-    catch (IOException ex)
-    {
-      throw new HongsError(0x16, ex);
-    }
-    */
+    this.out.print(sb.toString());
+    this.out.flush();
   }
 
   /**
    * 写日志(当前时间)
    * @param text
    */
-  public void print(String text)
+  public void print(String text) throws HongsException
   {
     this.print(text, 0);
   }
@@ -176,7 +164,7 @@ public class CoreLogger
    * 检查日志文件
    * @param time
    */
-  private void check(long time)
+  private void check(long time) throws HongsException
   {
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.name.date.format", "");
@@ -245,7 +233,7 @@ public class CoreLogger
     }
     catch (IOException ex)
     {
-      throw new HongsError(0x18, ex);
+      throw new HongsException(0x1002, ex);
     }
   }
 
@@ -264,79 +252,41 @@ public class CoreLogger
   //** 静态属性及方法 **/
 
   /**
-   * 日志对象集合
-   */
-  public static Map<String, CoreLogger> instances = new HashMap<String, CoreLogger>();
-
-  /**
    * 获取日志对象
    * @param name 日志名称
    * @return CoreLogger对象
    */
-  private static CoreLogger getInstance(String name)
+  public static CoreLogger getInstance(String name)
   {
-    CoreLogger logs;
-    if (! CoreLogger.instances.containsKey(name))
-    {
-      logs = new CoreLogger(name);
-      CoreLogger.instances.put(name, logs);
-    }
-    else
-    {
-      logs = CoreLogger.instances.get(name);
-    }
-    return logs;
-  }
-
-  /**
-   * 获取写入句柄
-   * @param name 日志名称
-   * @return PrintWriter对象
-   */
-  public static PrintWriter getWriter(String name)
-  {
-    CoreLogger logs = CoreLogger.getInstance(name);
-    logs.check(System.currentTimeMillis());
-    return logs.out;
-  }
-
-  /**
-   * 写日志(指定时间)
-   * @param name
-   * @param text
-   * @param time
-   */
-  public static void log(String name, String text, long time)
-  {
-    CoreLogger.getInstance(name).print(text, time);
-  }
-
-  /**
-   * 写日志(当前时间)
-   * @param name
-   * @param text
-   */
-  public static void log(String name, String text)
-  {
-    CoreLogger.log(name, text, 0);
+      String key = CoreLogger.class.getName() + ":" + name;
+      Core core = Core.getInstance();
+      CoreLogger inst;
+      if (core.containsKey(key)) {
+          inst = (CoreLogger)core.get(key);
+      }
+      else {
+          inst = new CoreLogger(name);
+          core.put( key, inst );
+      }
+      return inst;
   }
 
   /**
    * 记录错误信息
    * @param text
    */
-  public static void error(String text)
+  public static void error(String text) throws HongsException
   {
-    CoreLogger.log("error", text);
+    CoreLogger.getInstance("error").print(text, 0);
   }
 
   /**
    * 记录调试信息
    * @param text
    */
-  public static void debug(String text)
+  public static void debug(String text) throws HongsException
   {
-    CoreLogger.log("debug", text);
+    CoreLogger.getInstance("debug").print(text, 0);
   }
 
 }

@@ -3,13 +3,13 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
+import app.hongs.CoreLogger;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.HongsThrowable;
 import app.hongs.action.annotation.ActionChain;
 
-import java.lang.reflect.Method;
 import java.io.IOException;
-
+import java.lang.reflect.Method;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -221,8 +221,8 @@ public class Action
     /**
      * 构建错误消息
      */
-    String error = ta.getMessage();
-    if (!(ta instanceof HongsThrowable))
+    String error = ta.getLocalizedMessage();
+    if (!(ta instanceof HongsException) && !(ta instanceof HongsError))
     {
       CoreLanguage lang = (CoreLanguage)
           Core.getInstance(CoreLanguage.class );
@@ -233,23 +233,24 @@ public class Action
         error = lang.translate("core.error.label",
                 ta.getClass().getName())
                 + ": " + error;
-    }
 
-    /**
-     * 记录跟踪信息
-     */
-    if (Core.IN_DEBUG_MODE)
-    {
       ta.printStackTrace(System.err);
     }
-    else
-    if (!(ta instanceof HongsThrowable))
+    else if (Core.IN_DEBUG_MODE)
     {
       ta.printStackTrace(System.err);
     }
 
-//  throw new ServletException(error,ta);
-    helper.print500 ( error );
+    try
+    {
+      CoreLogger.error(ta.getMessage());
+    }
+    catch (HongsException ex)
+    {
+    }
+    
+    helper.print500(error);
+//  throw new ServletException(error, ta);
   }
 
 }

@@ -104,7 +104,7 @@ implements Filter {
                       Core.getInstance(ActionHelper.class);
                 Map data  = helper.getResponseData();
                 if (data != null) {
-                    helper.printJSON(data);
+                    helper.print(data);
                 }
             }
         } finally {
@@ -117,11 +117,9 @@ implements Filter {
         HttpServletRequest  req = (HttpServletRequest ) request ;
         HttpServletResponse rsp = (HttpServletResponse) response;
 
-        CoreConfig conf = (CoreConfig)
-          Core.getInstance(CoreConfig.class);
-        ActionHelper helper = (ActionHelper)
-              Core.getInstance(ActionHelper.class);
-        helper.init( req, rsp );
+        ActionHelper helper = new ActionHelper(req, rsp);
+        Core.getInstance().put(ActionHelper.class.getName(), helper);
+        CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
 
         Core.ACTION_PATH.set(req.getServletPath());
         Core.ACTION_TIME.set(System.currentTimeMillis());

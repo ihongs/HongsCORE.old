@@ -36,15 +36,15 @@ import java.sql.Timestamp;
  * 0x1072 配置不能为空
  * 0x1074 缺少表名
  *
- * 0x1080 获取字段信息失败
+ * 0x107a 获取字段信息失败
  *
- * 0x1084 不能为空
- * 0x1086 精度超出
- * 0x1088 小数位超出
- * 0x108a 不是整型数值
- * 0x108c 不是浮点数值
- * 0x108e 不能为负值
- * 0x1090 无法识别的日期或时间格式
+ * 0x1080 不能为空
+ * 0x1082 精度超出
+ * 0x1084 小数位超出
+ * 0x1086 不是整型数值
+ * 0x1088 不是浮点数值
+ * 0x108a 不能为负值
+ * 0x108c 无法识别的日期或时间格式
  * </pre>
  *
  * <h3>配置选项:</h3>
@@ -877,37 +877,37 @@ public class Table
 
   private HongsException nullException(String name) {
     String error = "Value for column '"+name+"' can not be NULL";
-    return validateException(0x1084, error, name);
+    return validateException(0x1080, error, name);
   }
 
   private HongsException sizeException(String name, String value, int size) {
     String error = "Size for column '"+name+"'("+value+") must be a less than "+size;
-    return validateException(0x1086, error, name, value, String.valueOf(size));
+    return validateException(0x1082, error, name, value, String.valueOf(size));
   }
 
   private HongsException scaleException(String name, String value, int scale) {
     String error = "Scale for column '"+name+"'("+value+") must be a less than "+scale;
-    return validateException(0x1088, error, name, value, String.valueOf(scale));
+    return validateException(0x1084, error, name, value, String.valueOf(scale));
   }
 
   private HongsException intException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") is not a int number";
-    return validateException(0x108a, error, name, value);
+    return validateException(0x1086, error, name, value);
   }
 
   private HongsException floatException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") is not a float number";
-    return validateException(0x108c, error, name, value);
+    return validateException(0x1088, error, name, value);
   }
 
   private HongsException unsignedException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") must be a unsigned number";
-    return validateException(0x108e, error, name, value);
+    return validateException(0x108a, error, name, value);
   }
 
   private HongsException datetimeException(String name, String value, String format) {
     String error = "Format for column '"+name+"'("+value+") must like this '"+format+"'";
-    return validateException(0x1090, error, name, value, format);
+    return validateException(0x108c, error, name, value, format);
   }
 
   private HongsException validateException(int code, String error, String fieldName, String... otherParams)
@@ -927,7 +927,7 @@ public class Table
     trans.addAll(Arrays.asList(otherParams));
 
     HongsException ex = new HongsException(code, error+" (Table:"+name);
-    ex.setTranslate(trans.toArray(new String[] {}));
+    ex.setLocalizedOptions(trans.toArray(new String[] {}));
     return ex;
   }
 }

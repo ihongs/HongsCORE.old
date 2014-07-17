@@ -1,36 +1,38 @@
 package app.hongs.util;
 
 import app.hongs.Core;
-import app.hongs.HongsError;
-
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Enumeration;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import app.hongs.HongsException;
 
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * 简单JSON格式工具
  *
  * <p>
  * 支持将 <b>数组,集合框架,基础类型</b> 的数据转换为 JSON 字符串,
- * 反向解析 JSON 字符串到 Java 对象; 暂采用 org.json.simple 来完成.<br/>
+ * 反向解析 JSON 字符串到 Java 对象; 暂采用 org.json.simple 来完成.
+ * </p>
+ * 
+ * <p>
  * 顺便说说为什么不采用第3方的 JSON 库:
  * 最开始用 org.json, 还不错, 可惜在解析 JSON 时会解析成他自身的对象而不是 Java 集合框架的对象;
  * 后来采用 org.json.simple, 也很好, 但是不支持 Set, 需要修改其源码将 List 改成 Collection;
  * 考虑到我有一个 Dump 类, 用于调试输出基础类型和集合对象, 其实现与 JSON 大同小异,
- * 故将其修改成该 JSON类. 但是 JSON 的解析太麻烦, 就还是调 org.json.simple 好了.
+ * 故将其修改成该 JSON类; 但是 JSON 的解析太麻烦, 就还是调 org.json.simple 好了.
  * </p>
  *
- * <h3>错误代码</h3>
+ * <h3>异常代码</h3>
  * <pre>
- * 0x3a 解析JSON数据错误
+ * 0x1121 解析JSON数据错误
  * </pre>
  *
  * @author Hongs
@@ -43,32 +45,32 @@ public class JSON
    * @param str JSON字符串
    * @return 数组,集合框架,基础类型
    */
-  public static Object parse(String str)
+  public static Object parse(String str) throws HongsException
   {
     try
     {
       return JSONValue
       .parseWithException(str);
     }
-    catch (ParseException exp)
+    catch (ParseException ex )
     {
-      throw new HongsError(0x3a, exp);
+      throw new HongsException(0x1005, ex);
     }
   }
 
   /**
-   * 直接将Java对象输出到标准控制台, 用于简单调试
+   * 直接将Java对象输出到标准控制台, 用于简单调试, 输出到 STDERR
    * @param obj 数组,集合框架,基础类型
    */
   public static void print(Object obj)
   {
     StringBuilder sb = new StringBuilder();
     JSON.print(sb, "", null, obj, 0, 0);
-    System.out.print(sb.toString());
+    System.err.print(sb.toString());
   }
 
   /**
-   * 直接将Java对象输出到指定输出流, 用于简单调试
+   * 直接将Java对象输出到指定输出流
    * @param obj
    * @param out
    */
@@ -80,7 +82,7 @@ public class JSON
   }
 
   /**
-   * 直接将Java对象输出到指定输出器, 用于简单调试
+   * 直接将Java对象输出到指定书写器
    * @param obj
    * @param out
    */

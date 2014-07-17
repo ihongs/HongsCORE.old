@@ -56,8 +56,8 @@ public class JsLangAction
   {
     ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
-    String name = helper.request.getPathInfo( );
-    if (   name == null || name.length( ) == 0) {
+    String name = helper.getRequest().getPathInfo( );
+    if (name == null || name.length() == 0) {
       helper.print500("Path info required");
       return;
     }
@@ -90,10 +90,10 @@ public class JsLangAction
      * 则直接返回 304 Not modified
      */
     String m;
-    m = helper.request.getHeader("If-Modified-Since");
+    m = helper.getRequest().getHeader("If-Modified-Since");
     if (m != null  &&  m.equals(JsLangAction.lastModified.get(name)))
     {
-      helper.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED );
+      helper.getResponse().setStatus(HttpServletResponse.SC_NOT_MODIFIED );
       return;
     }
 
@@ -128,11 +128,11 @@ public class JsLangAction
     }
 
     // 标明修改时间
-    helper.response.setHeader("Last-Modified", m);
+    helper.getResponse().setHeader("Last-Modified", m);
 
     // 输出语言信息
     if ("json".equals(type)) {
-      helper.printJSON( s );
+      helper.print(s, "application/json");
     }
     else {
       helper.print("if(!window.HsLANG)window.HsLANG={};$.extend(window.HsLANG,"+s+");", "application/javascript");

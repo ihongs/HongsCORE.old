@@ -47,7 +47,7 @@ public class JsAuthAction
   {
     ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
-    String name = helper.request.getPathInfo( );
+    String name = helper.getRequest().getPathInfo( );
     if (   name == null || name.length( ) == 0) {
       helper.print500("Path info required");
       return;
@@ -80,7 +80,7 @@ public class JsAuthAction
 
     // 输出配置信息
     if ( "json".equals(type)) {
-      helper.printJSON(data);
+      helper.print(data, "application/json");
     }
     else {
       helper.print("if(!window.HsAUTH)window.HsAUTH={};$.extend(window.HsAUTH,"+data+");", "application/javascript");

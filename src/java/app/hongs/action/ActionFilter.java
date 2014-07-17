@@ -222,8 +222,8 @@ public class ActionFilter
     /**
      * 追加来源URI
      */
-    String src = helper.request.getRequestURI( );
-    String qry = helper.request.getQueryString();
+    String src = helper.getRequest().getRequestURI( );
+    String qry = helper.getRequest().getQueryString();
     if (src != null && src.length() != -1)
     {
       if (qry != null && qry.length() != -1)
@@ -255,7 +255,7 @@ public class ActionFilter
      * 如果处于AJAX环境, 则是由JSON传递URL和消息
      * 否则使用HTTP错误代码
      */
-    if (helper.request.getRequestURI().endsWith(".act")) {
+    if (helper.getRequest().getRequestURI().endsWith(".act")) {
         Map rsp = new HashMap();
             rsp.put("__success__", false);
             rsp.put("__message__", msg);

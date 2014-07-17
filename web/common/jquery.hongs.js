@@ -422,10 +422,10 @@ function hsSetParam (url, name, value) {
  */
 function hsGetValue (obj, path, def) {
     if (jQuery.isArray(path)) {
-        return hsGetByArr(obj, path, def);
+        return hsGetPoint(obj, path, def);
     }
     if (typeof(path) === "number") {
-        return hsGetByArr(obj,[path],def);
+        return hsGetPoint(obj,[path],def);
     }
     if (typeof(path) !== "string") {
         throw("hsGetValue: 'path' must be a string");
@@ -436,7 +436,7 @@ function hsGetValue (obj, path, def) {
                .replace(/\]/   , "" )
                .replace(/\.+$/ , "" ) // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
                .split  (/\./ );
-    return hsGetByArr(obj, path, def);
+    return hsGetPoint(obj, path, def);
 }
 /**
  * 从树对象获取值(hsGetValue的底层方法)
@@ -445,18 +445,18 @@ function hsGetValue (obj, path, def) {
  * @param def 默认值
  * @return 获取到的值, 如果没有则取默认值
  */
-function hsGetByArr (obj, keys, def) {
+function hsGetPoint (obj, keys, def) {
     if (!obj) {
         return null;
     }
     if (!jQuery.isArray(obj ) && !jQuery.isPlainObject(obj )) {
-        throw("hsGetByArr: 'obj' must be an array or object");
+        throw("hsGetPoint: 'obj' must be an array or object");
     }
     if (!jQuery.isArray(keys)) {
-        throw("hsGetByArr: 'keys' must be an array");
+        throw("hsGetPoint: 'keys' must be an array");
     }
     if (!keys.length) {
-        throw("hsGetByArr: 'keys' can not be empty");
+        throw("hsGetPoint: 'keys' can not be empty");
     }
 
     var i , k;
@@ -483,7 +483,7 @@ function hsSetValue (obj, path, val) {
      a[][k] 空键将作为字符串对待, 但放在末尾可表示push
      */
     if (jQuery.isArray(path)) {
-        hsSetByArr(obj, path, val); return;
+        hsSetPoint(obj, path, val); return;
     }
     if (typeof(path) === "number") {
         obj[path] = val; return;
@@ -495,7 +495,7 @@ function hsSetValue (obj, path, val) {
                .replace(/\[/   , ".")
                .replace(/\]/   , "" )
                .split  (/\./ );
-    hsSetByArr(obj, path, val);
+    hsSetPoint(obj, path, val);
 }
 /**
  * 向树对象设置值(hsSetValue的底层方法)
@@ -503,18 +503,18 @@ function hsSetValue (obj, path, val) {
  * @param {Array} keys ['a','b']
  * @param val
  */
-function hsSetByArr (obj, keys, val) {
+function hsSetPoint (obj, keys, val) {
     if (!obj) {
         return;
     }
     if (!jQuery.isPlainObject(obj)) {
-        throw("hsSetByArr: 'obj' must be an object");
+        throw("hsSetPoint: 'obj' must be an object");
     }
     if (!jQuery.isArray(keys)) {
-        throw("hsSetByArr: 'keys' must be an array");
+        throw("hsSetPoint: 'keys' must be an array");
     }
     if (!keys.length) {
-        throw("hsSetByArr: 'keys' can not be empty");
+        throw("hsSetPoint: 'keys' can not be empty");
     }
 
     var i, k, t = keys[0];
@@ -532,7 +532,7 @@ function hsSetByArr (obj, keys, val) {
                 obj[k] = {};
             }
         else
-            throw("hsSetByArr: key must be a string or number");
+            throw("hsSetPoint: key must be a string or number");
         obj = obj[k];
     }
     if (t !== -1)
@@ -1375,7 +1375,7 @@ function HsForm(opts, context) {
     /**
      * 使用初始化数据填充表单
      * 在打开表单窗口时, 可能指定一些参数(如父ID, 初始选中项等)
-     * 这时有必要将这些参数值填写入对应的表达项, 方便初始化过程
+     * 这时有必要将这些参数值填写入对应的表单项, 方便初始化过程
      */
     var n, v;
     for(i = 0; i < loadData.length; i ++) {
@@ -3070,8 +3070,9 @@ jQuery.fn.load = function(url, data, complete ) {
     });
     $.tools.validator.fn("[data-validate]", function(input, value) {
         var fn = input.attr("data-validate");
+        var fd = input.data() ? input.data(): window;
         try {
-            return hsGetValue(window, fn).call(this, input, value);
+            return hsGetValue(fd, fn).call(this, input, value);
         } catch (ex) {
             if (window.console)
                 window.console.log("Call "+ fn +" error: " + ex, input, value);

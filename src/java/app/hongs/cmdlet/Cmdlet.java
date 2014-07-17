@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
-import app.hongs.HongsThrowable;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 
 import java.util.Arrays;
@@ -36,7 +36,7 @@ public class Cmdlet
 {
 
   public static void main(String[] args)
-    throws IOException
+    throws IOException, HongsException
   {
     args = init(args);
 
@@ -145,8 +145,8 @@ public class Cmdlet
       /**
        * 构建错误消息
        */
-      String error = ta.getMessage();
-      if (!(ta instanceof HongsThrowable))
+      String error = ta.getLocalizedMessage();
+      if (!(ta instanceof HongsException) && !(ta instanceof HongsError))
       {
         CoreLanguage lang = (CoreLanguage)
             Core.getInstance(CoreLanguage.class );
@@ -157,24 +157,15 @@ public class Cmdlet
           error = lang.translate("core.error.label",
                   ta.getClass().getName())
                   + ": " + error;
+
+        ta.printStackTrace(System.err);
+      }
+      else if (Core.IN_DEBUG_MODE)
+      {
+        ta.printStackTrace(System.err);
       }
 
       CmdletHelper.print(error);
-
-      /**
-       * 记录跟踪信息
-       */
-      if (Core.IN_DEBUG_MODE)
-      {
-        ta.printStackTrace(System.err);
-      }
-      else
-      if (!(ta instanceof HongsThrowable))
-      {
-        ta.printStackTrace(System.err);
-      }
-
-      return;
     }
     finally
     {
@@ -192,11 +183,12 @@ public class Cmdlet
   }
 
   public static String[] init(String[] args)
-    throws IOException
+    throws IOException, HongsException
   {
     Map<String, Object> opts;
     opts = CmdletHelper.getOpts(args,
-      "basepath:s","basehref:s","language:s","session:s","request:s","debug:b"
+      "basepath:s", "basehref:s", "language:s",
+      "request:s" , "session:s" , "cookie:s" , "debug:b"
     );
     args = (String[]) opts.get("");
 
@@ -302,21 +294,21 @@ public class Cmdlet
     /** 初始化核心 **/
 
     String str;
-    
+
     str = (String)opts.get("request");
     Map<String, String[]>  req = null;
     if (str != null && str.length( ) > 0)
     {
         req  = parseQueryString(str);
     }
-    
+
     str = (String)opts.get("session");
     Map<String, String[]>  ses = null;
     if (str != null && str.length( ) > 0)
     {
         ses  = parseQueryString(str);
     }
-    
+
     str = (String)opts.get("cookies");
     Map<String, String[]>  cok = null;
     if (str != null && str.length( ) > 0)
@@ -324,9 +316,8 @@ public class Cmdlet
         cok  = parseQueryString(str);
     }
 
-    ActionHelper helper = (ActionHelper)
-          Core.getInstance(ActionHelper.class);
-    helper.init(req, ses, cok);
+    ActionHelper helper = new ActionHelper(req, ses, cok, null );
+    Core.getInstance().put(ActionHelper.class.getName(), helper);
 
     return args;
   }

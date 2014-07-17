@@ -51,42 +51,42 @@ import javax.sql.DataSource;
  *
  * <h3>异常代码:</h3>
  * <pre>
- * 区间: 0x1010~0x105f
+ * 区间: 0x1020~0x105f
  *
- * 0x1011  找不到外部数据源配置
- * 0x1013  连接外部数据源失败
- * 0x1015  找不到内部数据源配置
- * 0x1017  连接内部数据源失败
- * 0x1019  无外部或内部数据源配置
- * 0x101b  设置自动提交失败
+ * 0x1021  找不到外部数据源配置
+ * 0x1022  连接外部数据源失败
+ * 0x1023  找不到内部数据源配置
+ * 0x1024  连接内部数据源失败
+ * 0x1025  找不到数据源配置
+ * 0x1026  设置自动提交失败
  *
- * 0x1021  找不到表配置
- * 0x1023  找不到表对应的类
- * 0x1025  无法获取表构造器
- * 0x1027  无法获取表实例
+ * 0x1031  开启Connection失败
+ * 0x1032  关闭Connection失败
+ * 0x1033  取消Statement失败
+ * 0x1034  关闭Statement失败
+ * 0x1035  关闭ResultSet失败
  *
- * 0x41    开启Connection失败
- * 0x43    关闭Connection失败
- * 0x102b  取消Statement失败
- * 0x102d  关闭Statement失败
- * 0x102f  关闭ResultSet失败
+ * 0x103a  找不到表配置
+ * 0x103b  找不到表对应的类
+ * 0x103c  无法获取表构造器
+ * 0x103d  无法获取表实例
  *
- * 0x1031  构建查询体失败
- * 0x1032  绑定查询参数失败
- * 0x1034  获取列名失败
- * 0x1036  获取行数据失败
+ * 0x1041  构建语句失败
+ * 0x1042  绑定参数失败
+ * 0x1043  获取列名失败
+ * 0x1044  获取行数据失败
  *
- * 0x1041  执行查询语句失败
- * 0x1042  获取查询结果失败
+ * 0x1047  查询语句失败
+ * 0x1048  获取查询结果失败
  *
- * 0x1045  执行语句失败
- * 0x1046  插入的值不能为空
- * 0x1047  执行插入语句失败
- * 0x1048  更新的值不能为空
- * 0x1049  执行更新语句失败
- * 0x104b  执行删除语句失败
+ * 0x104a  执行语句失败
+ * 0x104b  插入的值不能为空
+ * 0x104c  执行插入语句失败
+ * 0x104d  更新的值不能为空
+ * 0x104e  执行更新语句失败
+ * 0x104f  执行删除语句失败
  *
- * 0x1051  查询参数的个数与语句中的插入位置数不符
+ * 0x1051  参数的个数与语句中的插入标识数不符
  * </pre>
  *
  * @author Hongs
@@ -128,7 +128,7 @@ public class DB
   /**
    * 表配置
    */
-  protected Map<String, Map> tableConfigs;
+  protected Map<String, Map  > tableConfigs;
 
   /**
    * 表对象
@@ -138,6 +138,9 @@ public class DB
   private Map           source;
   private Map           origin;
   private Connection    connection;
+
+  private static ReadWriteLock poolslock = new ReentrantReadWriteLock();
+  private static Map<String, ComboPooledDataSource> datapools = new HashMap();
 
   private DB(Map cf)
     throws HongsException
@@ -154,6 +157,9 @@ public class DB
     this.tableObjects = new  HashMap( );
 
     this.connection   = null;
+
+    this.IN_OBJECT_MODE = cf.containsKey("IN_OBJECT_MODE");
+    this.IN_TRANSC_MODE = cf.containsKey("IN_TRANSC_MODE");
   }
 
   public DB(DBConfig cf)
@@ -173,7 +179,14 @@ public class DB
     // 对象模式设置
     CoreConfig conf = (CoreConfig)
       Core.getInstance(CoreConfig.class);
-    this.IN_OBJECT_MODE = conf.getProperty("core.in.object.mode", false);
+    this.IN_OBJECT_MODE = conf.getProperty("core.in.object.mode",false);
+
+    // 事务模式设置
+    Core core = Core.getInstance();
+    if (core.containsKey("__DB_IN_TRANSC_MODE__"))
+    {
+      this.IN_TRANSC_MODE = (Boolean) core.get("__DB_IN_TRANSC_MODE__");
+    }
   }
 
   public DB (String db)
@@ -216,7 +229,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsError(0x41, ex);
+      throw new HongsException(0x1031, ex);
     }
 
     Exception ez = null;
@@ -232,7 +245,7 @@ public class DB
 
       if (!origin.containsKey("name"))
       {
-        throw new HongsException(0x1011, "Can not find name in origin");
+        throw new HongsException(0x1021, "Can not find name in origin");
       }
 
       String comp = "java:comp/env";
@@ -274,7 +287,7 @@ public class DB
       }
       catch (SQLException ex)
       {
-        throw new app.hongs.HongsException(0x1013, ex);
+        throw new app.hongs.HongsException(0x1022, ex);
       }
 
       break TOP;
@@ -292,12 +305,12 @@ public class DB
 
       if (!source.containsKey("drv"))
       {
-        throw new app.hongs.HongsException(0x1015, "Can not find drv in source");
+        throw new app.hongs.HongsException(0x1023, "Can not find drv in source");
       }
 
       if (!source.containsKey("url"))
       {
-        throw new app.hongs.HongsException(0x1015, "Can not find url in source");
+        throw new app.hongs.HongsException(0x1023, "Can not find url in source");
       }
 
       String drv = (String)source.get("drv");
@@ -378,11 +391,11 @@ public class DB
       }
       catch (PropertyVetoException ex)
       {
-        throw new app.hongs.HongsException(0x1017, ex);
+        throw new app.hongs.HongsException(0x1024, ex);
       }
       catch (SQLException ex)
       {
-        throw new app.hongs.HongsException(0x1017, ex);
+        throw new app.hongs.HongsException(0x1024, ex);
       }
 
       break TOP;
@@ -391,26 +404,26 @@ public class DB
 
     if (ez !=null)
     {
-      throw new HongsException(0x1019, ez);
+      throw new HongsException(0x1025, ez);
     }
     else
     {
-      throw new HongsException(0x1019, "Can not find source or origin");
+      throw new HongsException(0x1025, "Can not find source or origin");
     }
 
     } while (false);
 
     /** 初始化设置 **/
 
-    Core core = Core.getInstance();
-
     // 自动提交设置
-    if (core.containsKey("__DB_IN_TRANSC_MODE__") || this.IN_TRANSC_MODE)
-    try {
-      this.connection.setAutoCommit(
-      !(Boolean)core.get("__DB_IN_TRANSC_MODE__") ||!this.IN_TRANSC_MODE);
-    } catch (SQLException ex) {
-      throw new app.hongs.HongsException(0x101b, ex);
+    if (this.IN_TRANSC_MODE)
+    try
+    {
+      this.connection.setAutoCommit(!this.IN_TRANSC_MODE);
+    }
+    catch (SQLException ex )
+    {
+      throw new app.hongs.HongsException(  0x1026 , ex  );
     }
 
     return this.connection;
@@ -436,9 +449,13 @@ public class DB
       this.connection.close();
       this.connection = null;
     }
+    catch (HongsException ex)
+    {
+      throw new Error(new HongsException(0x1032, ex));
+    }
     catch (SQLException ex)
     {
-      throw new HongsError(0x43, ex);
+      throw new Error(new HongsException(0x1032, ex));
     }
   }
 
@@ -446,21 +463,24 @@ public class DB
   {
     IN_TRANSC_MODE = true;
   }
-  public void commit() {
+  public void commit()
+  {
     IN_TRANSC_MODE = false;
     try {
+      if (!this.connection.isClosed())
       this.connection.commit();
     } catch (SQLException ex) {
-      throw new HongsError(0x44, ex);
+      throw new HongsError( 0x44, ex );
     }
   }
   public void rollback()
   {
     IN_TRANSC_MODE = false;
     try {
+      if (!this.connection.isClosed())
       this.connection.rollback();
     } catch (SQLException ex) {
-      throw new HongsError(0x46, ex);
+      throw new HongsError( 0x46, ex );
     }
   }
 
@@ -493,7 +513,7 @@ public class DB
 
     if (!this.tableConfigs.containsKey(table))
     {
-      throw new app.hongs.HongsException(0x1021, "Can not find config for table '"+table+"'.");
+      throw new app.hongs.HongsException(0x103a, "Can not find config for table '"+table+"'.");
     }
 
     /**
@@ -551,7 +571,7 @@ public class DB
     }
     catch (ClassNotFoundException ex)
     {
-      throw new app.hongs.HongsException(0x1023, ex);
+      throw new app.hongs.HongsException(0x103b, ex);
     }
 
     /**
@@ -564,11 +584,11 @@ public class DB
     }
     catch (NoSuchMethodException ex)
     {
-      throw new app.hongs.HongsException(0x1025, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
     catch (SecurityException ex)
     {
-      throw new app.hongs.HongsException(0x1025, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
 
     /**
@@ -581,19 +601,19 @@ public class DB
     }
     catch (InstantiationException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
     catch (IllegalAccessException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
     catch (IllegalArgumentException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
     catch (InvocationTargetException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
 
     this.tableObjects.put(table, tobj);
@@ -651,7 +671,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsException(0x1032, ex);
+      throw new HongsException(0x1042, ex);
     }
 
     return ps;
@@ -667,7 +687,7 @@ public class DB
    *        ResultSet.CONCUR_READ_ONLY);
    * ps.setFetchSize(Integer.MIN_VALUE);
    * </code>
-   * 异常代码为: 0x1031
+   * 异常代码为: 0x1041
    * </p>
    * @param sql
    * @return PreparedStatement对象
@@ -684,7 +704,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsException(0x1031, ex);
+      throw new HongsException(0x1041, ex);
     }
 
     return ps;
@@ -700,7 +720,7 @@ public class DB
    *        ResultSet.CONCUR_READ_ONLY);
    * ps.setFetchSize(Integer.MIN_VALUE);
    * </code>
-   * 异常代码为: 0x1031
+   * 异常代码为: 0x1041
    * </p>
    * @return Statement对象
    * @throws HongsException
@@ -716,7 +736,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsException(0x1031, ex);
+      throw new HongsException(0x1041, ex);
     }
 
     return ps;
@@ -737,7 +757,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x102b, ex);
+      throw new app.hongs.HongsException(0x1033, ex);
     }
   }
 
@@ -756,7 +776,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x102d, ex);
+      throw new app.hongs.HongsException(0x1034, ex);
     }
   }
 
@@ -775,7 +795,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x102f, ex);
+      throw new app.hongs.HongsException(0x1035, ex);
     }
   }
 
@@ -801,7 +821,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1034, ex);
+      throw new app.hongs.HongsException(0x1043, ex);
     }
   }
 
@@ -841,7 +861,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1036, ex);
+      throw new app.hongs.HongsException(0x1044, ex);
     }
   }
 
@@ -877,7 +897,7 @@ public class DB
     }
     catch (SQLException ex )
     {
-      throw new app.hongs.HongsException(0x1041, ex);
+      throw new app.hongs.HongsException(0x1047, ex);
     }
 
     return new FetchNext(this, ps, rs);
@@ -1005,7 +1025,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1045, ex);
+      throw new app.hongs.HongsException(0x104a, ex);
     }
     finally
     {
@@ -1042,7 +1062,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1049, ex);
+      throw new app.hongs.HongsException(0x104e, ex);
     }
     finally
     {
@@ -1065,7 +1085,7 @@ public class DB
   {
     if (values == null || values.isEmpty())
     {
-      throw new app.hongs.HongsException(0x1048, "Update values can not be empty.");
+      throw new app.hongs.HongsException(0x104d, "Update values can not be empty.");
     }
 
     /** 组织语言 **/
@@ -1113,7 +1133,7 @@ public class DB
   {
     if (values == null || values.isEmpty())
     {
-      throw new app.hongs.HongsException(0x1046, "Insert values can not be empty.");
+      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
     }
 
     /** 组织语句 **/
@@ -1348,12 +1368,6 @@ public class DB
 
   //** 构造工厂 **/
 
-  private static Map<String, DB> instances = new HashMap();
-
-  private static Map<String, ComboPooledDataSource> datapools = new HashMap();
-
-  private static  ReadWriteLock  poolslock = new ReentrantReadWriteLock();
-
   /**
    * 获取默认数据库对象
    * <b>注意:</b>
@@ -1396,9 +1410,18 @@ public class DB
   public static DB getInstance(String dbName)
     throws HongsException
   {
-    if (DB.instances.containsKey(dbName))
+    String key = "__DB__." + dbName;
+
+    Core core = Core.THREAD_CORE.get();
+    if ( core.containsKey(key))
     {
-      return    DB.instances.get(dbName);
+      return (DB)core.get(key);
+    }
+
+    Core gore = Core.GLOBAL_CORE;
+    if ( gore.containsKey(key))
+    {
+      return (DB)gore.get(key);
     }
 
     /**
@@ -1415,7 +1438,6 @@ public class DB
     else
     {
       db = new DB(cf);
-      Core.getInstance().put("__DB__." + dbName, db);
     }
 
     /**
@@ -1425,7 +1447,11 @@ public class DB
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     if (conf.getProperty("core.load.db."+dbName+".once", false))
     {
-      DB.instances.put(dbName, db);
+      gore.put(key, db);
+    }
+    else
+    {
+      core.put(key, db);
     }
 
     return db;

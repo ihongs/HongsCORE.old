@@ -4,7 +4,6 @@ import app.hongs.util.Text;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.io.File;
 
 /**
@@ -163,8 +162,6 @@ public class CoreLanguage
 
   //** 静态属性及方法 **/
 
-  public static Map<String, CoreLanguage> instances;
-
   /**
    * 获取唯一语言对象
    * 如果配置core.load.language.once为true则仅加载一次
@@ -172,27 +169,7 @@ public class CoreLanguage
    */
   public static CoreLanguage getInstance()
   {
-    Core   core = Core.getInstance();
-    String name = Core.ACTION_LANG.get();
-    if (CoreLanguage.instances != null
-    &&  CoreLanguage.instances.containsKey(name))
-    {
-      return CoreLanguage.instances.get(name);
-    }
-
-    CoreLanguage lang = new CoreLanguage();
-
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    if (conf.getProperty("core.load.language.once", false))
-    {
-      if (CoreLanguage.instances == null)
-      {
-        CoreLanguage.instances = new HashMap<String, CoreLanguage>();
-      }
-      CoreLanguage.instances.put(name, lang);
-    }
-
-    return lang;
+    return getInstance("default");
   }
 
   /**
@@ -203,17 +180,32 @@ public class CoreLanguage
    */
   public static CoreLanguage getInstance(String name)
   {
-    String key = "__LANG__." + name;
-    Core  core = Core.getInstance();
-    if (! core.containsKey( key ) )
+    String ck = CoreLanguage.class.getName() + ":" + name + "." + Core.ACTION_LANG.get();
+
+    Core core = Core.getInstance();
+    if (core.containsKey(ck))
     {
-      CoreLanguage conf = new CoreLanguage(name);
-      core.put( key, conf ); return conf;
+      return (CoreLanguage)core.get(ck);
+    }
+
+    Core gore = Core.GLOBAL_CORE;
+    if (gore.containsKey(ck))
+    {
+      return (CoreLanguage)gore.get(ck);
+    }
+
+    CoreLanguage lang = new CoreLanguage(name);
+    CoreConfig conf = CoreConfig.getInstance();
+    if (conf.getProperty("core.load.language.once", false))
+    {
+      gore.put(ck, lang);
     }
     else
     {
-      return (CoreLanguage)core.get(key);
+      core.put(ck, lang);
     }
+
+    return lang;
   }
 
   /**

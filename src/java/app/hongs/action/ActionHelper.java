@@ -1,16 +1,16 @@
 package app.hongs.action;
 
 import app.hongs.HongsError;
+import app.hongs.HongsException;
 import app.hongs.util.JSON;
 import app.hongs.util.Tree;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.UnsupportedEncodingException;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,32 +31,37 @@ public class ActionHelper
   /**
    * HttpServletRequest
    */
-  public HttpServletRequest request;
-
-  /**
-   * HttpServletResponse
-   */
-  public HttpServletResponse response;
+  private HttpServletRequest request;
 
   /**
    * 请求数据
    */
-  protected Map<String, Object> requestData;
-
-  /**
-   * 返回数据
-   */
-  protected Map<String, Object> responseData;
+  private Map<String, Object> requestData;
 
   /**
    * 会话数据
    */
-  protected Map<String, Object> session;
+  private Map<String, Object> sessionData;
 
   /**
    * 客户数据
    */
-  protected Map<String, Object> cookies;
+  private Map<String, String> cookiesData;
+
+  /**
+   * HttpServletResponse
+   */
+  private HttpServletResponse response;
+
+  /**
+   * 内部输出, 供 cmdlet 使用
+   */
+  private PrintWriter responseWrtr;
+
+  /**
+   * 返回数据
+   */
+  private Map<String, Object> responseData;
 
   /**
    * 初始化助手
@@ -64,22 +69,27 @@ public class ActionHelper
    * @param req
    * @param rsp
    */
-  public void init(HttpServletRequest req, HttpServletResponse rsp)
+  public ActionHelper(HttpServletRequest req, HttpServletResponse rsp)
   {
-    this.request = req;
+    this.request  = req;
     this.response = rsp;
 
-    this.requestData = null;
+    this.requestData  = null;
     this.responseData = null;
 
     try
     {
-      this.request.setCharacterEncoding("UTF-8");
+      this.request .setCharacterEncoding("UTF-8");
       this.response.setCharacterEncoding("UTF-8");
+      this.responseWrtr = rsp.getWriter();
     }
     catch (UnsupportedEncodingException ex)
     {
-      throw new HongsError(0x31, "Can not set request or response encoding.");
+      throw new HongsError(0x21, "Can not set request or response encoding.", ex);
+    }
+    catch (IOException ex)
+    {
+      throw new HongsError(0x22, "Can not print to browser", ex);
     }
   }
 
@@ -90,32 +100,17 @@ public class ActionHelper
    * @param ses
    * @param cok
    */
-  public void init(Map<String, String[]> req, Map<String, String[]> ses, Map<String, String[]> cok)
+  public ActionHelper(Map<String, String[]> req, Map<String, String[]> ses, Map<String, String[]> cok, PrintWriter out)
   {
-    if (req != null)
-    {
-      this.requestData = parseParams(req);
-    }
-    else
-    {
-      this.requestData = new HashMap();
-    }
-    if (ses != null)
-    {
-      this.session = parseParams(ses);
-    }
-    else
-    {
-      this.session = new HashMap();
-    }
-    if (ses != null)
-    {
-      this.cookies = parseParams(cok);
-    }
-    else
-    {
-      this.cookies = new HashMap();
-    }
+    this.requestData = req != null ? parseParams(req) : new HashMap();
+    this.sessionData = req != null ? parseParams(ses) : new HashMap();
+    this.cookiesData = req != null ? parseParams(cok) : new HashMap();
+    this.responseWrtr = out != null ? out : new PrintWriter(System.out);
+  }
+
+  public HttpServletRequest getRequest()
+  {
+    return this.request;
   }
 
   /**
@@ -155,7 +150,7 @@ public class ActionHelper
    *
    * @return Map对象
    */
-  public Map<String, Object> getRequestData()
+  public Map<String, Object> getRequestData() throws HongsException
   {
     if (this.requestData == null)
     {
@@ -170,6 +165,16 @@ public class ActionHelper
       }
     }
     return this.requestData;
+  }
+
+  public HttpServletResponse getResponse()
+  {
+    return this.response;
+  }
+
+  public PrintWriter getResponseWrtr()
+  {
+    return this.responseWrtr;
   }
 
   /**
@@ -193,7 +198,7 @@ public class ActionHelper
    * @param name
    * @return 当前请求数据
    */
-  public Object getValue(String name)
+  public Object getValue(String name) throws HongsException
   {
     return Tree.getValue(this.getRequestData(), name);
   }
@@ -203,7 +208,7 @@ public class ActionHelper
    * @param name
    * @return 当前请求参数
    */
-  public String getParam(String name)
+  public String getParam(String name) throws HongsException
   {
     Object o = this.getValue(name);
     if (o == null)
@@ -228,9 +233,9 @@ public class ActionHelper
    */
   public Object getSession(String name)
   {
-    if (this.session != null)
+    if (this.sessionData != null)
     {
-      return this.session.get(name);
+      return this.sessionData.get(name);
     }
     else
     {
@@ -246,9 +251,9 @@ public class ActionHelper
    */
   public void setSession(String name, Object value)
   {
-    if (this.session != null)
+    if (this.sessionData != null)
     {
-      this.session.put(name, value);
+      this.sessionData.put(name, value);
     }
     else
     {
@@ -265,9 +270,9 @@ public class ActionHelper
    */
   public String getCookie(String name)
   {
-    if (this.cookies != null)
+    if (this.cookiesData != null)
     {
-        return this.cookies.get(name).toString();
+        return this.cookiesData.get(name).toString();
     }
 
     Cookie ck  = this.getCookia(name);
@@ -283,9 +288,9 @@ public class ActionHelper
    */
   public Cookie setCookie(String name, String value)
   {
-    if (this.cookies != null)
+    if (this.cookiesData != null)
     {
-        this.cookies.put (name, value);
+        this.cookiesData.put (name, value);
         return new Cookie(name, value);
     }
 
@@ -399,29 +404,32 @@ public class ActionHelper
    */
   public void print(String text, String type)
   {
-    if (!this.response.isCommitted())
+    if (this.response != null && !this.response.isCommitted())
     {
       if (type.indexOf(";") == -1) type += "; charset=utf-8";
       this.response.setContentType(type);
     }
 
-    try
-    {
-      this.response.getWriter().print(text);
-    }
-    catch (IOException ex)
-    {
-      throw new HongsError(0x33, "Can not print to browser");
-    }
+      this.getResponseWrtr().print(text);
   }
 
   /**
-   * 输出纯文本内容
+   * 输出文本内容
    * @param text
    */
   public void print(String text)
   {
     this.print(text, "text/plain");
+  }
+
+  /**
+   * 输出JSON格式
+   *
+   * @param list
+   */
+  public void print(Object data)
+  {
+    this.print(JSON.toString(data), "application/json");
   }
 
   //** 常用状态 **/
@@ -482,39 +490,7 @@ public class ActionHelper
    */
   public void print500(Exception ex)
   {
-        ActionHelper.this.print500(ex.getMessage());
-  }
-
-  //** 发送数据 **/
-
-  /**
-   * 发送JSON格式的数据
-   *
-   * @param text
-   */
-  public void printJSON(String text)
-  {
-    this.print(text, "application/json");
-  }
-
-  /**
-   * 发送JSON格式的数据
-   *
-   * @param list
-   */
-  public void printJSON(List list)
-  {
-    this.printJSON(JSON.toString(list));
-  }
-
-  /**
-   * 发送JSON格式的数据
-   *
-   * @param data
-   */
-  public void printJSON(Map data)
-  {
-    this.printJSON(JSON.toString(data));
+    ActionHelper.this.print500(ex.getMessage());
   }
 
   //** 工具方法 **/

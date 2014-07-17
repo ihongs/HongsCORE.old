@@ -112,11 +112,11 @@ public class Verifier {
 
     /**
      * 验证
-     * @param values
+     * @param map
      * @return
      * @throws HongsException
      */
-    public Map<String, List<String>> verify(Map<String, List<String>> values) throws HongsException {
+    public Map<String, List<String>> verify(Map<String, List<String>> map) throws HongsException {
         Map <String, List<String>> errors = new LinkedHashMap();
         Map <String, List< Rule >> rules3 = new LinkedHashMap();
         String error;
@@ -127,7 +127,7 @@ public class Verifier {
         }
 
         for (Rule rule : rules2) {
-            List<String> names = getNames(rule.name, values);
+            List<String> names = getNames(rule.name, map);
             for (String  name  : names) {
                 addValue(name , rule, rules3);
             }
@@ -136,7 +136,7 @@ public class Verifier {
         for (Map.Entry et : rules3.entrySet()) {
             String name = (String)et.getKey();
             List<Rule> rules = (List)et.getValue();
-            List<String> valuez = values.get(name);
+            List<String> valuez = map.get(name);
             for (Rule rule : rules) {
                 if (valuez==null || valuez.isEmpty()) {
                     if (rule.rule.equals("required")) {
@@ -151,7 +151,7 @@ public class Verifier {
                 }
                 else
                 for (String value : valuez) {
-                    item  = new Item(name , value, values);
+                    item  = new Item(name , value, map);
                     error = verify  (item , rule);
                     if (error != null) {
                         addValue(rule.name, error, errors);
@@ -246,16 +246,6 @@ public class Verifier {
         }
     }
 
-    public static String getValue(Item item, String key, String def) {
-        List<String> values = item.values.get(key);
-        if (values == null || values.isEmpty()) {
-            return def;
-        }
-        else {
-            return values.get(0);
-        }
-    }
-
     public static <T>T getParam(Rule rule, int idx, T def) throws HongsException {
         Object val = rule.params.get(idx);
         if (val == null) {
@@ -267,6 +257,16 @@ public class Verifier {
         catch (ClassCastException ex) {
             throw new HongsException(0x1119,
                 "Wrong type for "+rule.name+":"+rule.rule+"["+idx+"]", ex);
+        }
+    }
+
+    public static String getValue(Item item, String key, String def) {
+        List<String> values = item.values.get(key);
+        if (values == null || values.isEmpty()) {
+            return def;
+        }
+        else {
+            return values.get(0);
         }
     }
 

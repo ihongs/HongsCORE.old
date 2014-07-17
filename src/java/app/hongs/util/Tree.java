@@ -238,13 +238,13 @@ public class Tree
   }
 
   /** 遍历工具 **/
-  
+
   public static interface EachValue {
-    public void each(Object value, String   path);
+    public void each(Object value, String path);
   }
 
-  public static interface EachByArr {
-    public void each(Object value, Object[] path);
+  public static interface EachPoint {
+    public void each(Object value,  List  path);
   }
 
   /**
@@ -263,94 +263,94 @@ public class Tree
    * @param data 要遍历的数据
    * @param loop 遍历回调接口
    */
-  public static void each(Object data, EachByArr loop) {
+  public static void each(Object data, EachPoint loop) {
     each(data, loop, new ArrayList());
   }
 
-  private static void each(Object value, EachValue loop, StringBuilder path) {
-    if (value instanceof Map ) {
-      Iterator it = ((Map) value).entrySet().iterator();
+  private static void each(Object data, EachValue loop, StringBuilder path) {
+    if (data instanceof Map ) {
+      Iterator it = ((Map) data).entrySet().iterator();
       while (it.hasNext()) {
         Map.Entry et = (Map.Entry) it.next();
         Object k = et.getKey(  );
         Object v = et.getValue();
-        
+
         StringBuilder p = new StringBuilder(path);
         p.append(".")
          .append( k );
-        
+
         each(v, loop, p);
       }
     }
     else
-    if (value instanceof List) {
-      List a = (List) value;
+    if (data instanceof List) {
+      List a = (List) data;
       for (Object v : a) {
         StringBuilder p = new StringBuilder(path);
         p.append(".");
-        
+
         each(v, loop, p);
       }
     }
     else
-    if (value instanceof Object[]) {
-      Object[] a = (Object[]) value;
+    if (data instanceof Object[]) {
+      Object[] a = (Object[]) data;
       for (Object v : a) {
         StringBuilder p = new StringBuilder(path);
         p.append(".");
-        
+
         each(v, loop, p);
       }
     }
     else
     if (path.length() > 0) {
-        loop.each(value , path.substring(1));
+        loop.each(data, path.substring(1));
     }
   }
 
-  private static void each(Object value, EachByArr loop, List path) {
-    if (value instanceof Map) {
-      Iterator it = ((Map) value).entrySet().iterator();
+  private static void each(Object data, EachPoint loop, List path) {
+    if (data instanceof Map) {
+      Iterator it = ((Map) data).entrySet().iterator();
       while (it.hasNext()) {
         Map.Entry et = (Map.Entry) it.next();
         Object k = et.getKey(  );
         Object v = et.getValue();
-        
+
         List p = new ArrayList(path);
         p.add(k);
-        
+
         each(v, loop, p);
       }
     }
     else
-    if (value instanceof List) {
-      List a = (List) value;
+    if (data instanceof List) {
+      List a = (List) data;
       int k = -1;
       for (Object v : a) {
         k = k +1;
-        
+
         List p = new ArrayList(path);
         p.add(k);
-        
+
         each(v, loop, p);
       }
     }
     else
-    if (value instanceof Object[]) {
-      Object[] a = (Object[]) value;
+    if (data instanceof Object[]) {
+      Object[] a = (Object[]) data;
       int k = -1;
       for (Object v : a) {
         k = k +1;
-        
+
         List p = new ArrayList(path);
         p.add(k);
-        
+
         each(v, loop, p);
       }
     }
     else
     if (!path.isEmpty()) {
-        loop.each(value , path.toArray ( ) );
+        loop.each(data, path);
     }
   }
 
