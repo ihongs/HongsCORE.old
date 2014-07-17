@@ -46,14 +46,14 @@ public class TableSync
   {
     List<String> sqls = this.syncSlaverSqls(slaver, delExtraFields);
     DB sdb = slaver.db;
+    sdb.begin();
     try
     {
-      sdb.transc();
       for (String sql : sqls)
       {
         sdb.execute(sql);
       }
-      sdb.commit();
+      sdb.commit(  );
     }
     catch (HongsException ex)
     {

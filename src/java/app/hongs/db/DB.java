@@ -46,7 +46,7 @@ import javax.sql.DataSource;
  *
  * <h3>配置选项:</h3>
  * <pre>
- * core.load.db.[dbName].once 为true则仅加载一次, 为false由Core控制
+ * core.load.db.[dbName].once 为true则仅加载一次
  * </pre>
  *
  * <h3>异常代码:</h3>
@@ -155,11 +155,6 @@ public class DB
     this.tableSuffix  = "";
     this.tableConfigs = new  HashMap( );
     this.tableObjects = new  HashMap( );
-
-    this.connection   = null;
-
-    this.IN_OBJECT_MODE = cf.containsKey("IN_OBJECT_MODE");
-    this.IN_TRANSC_MODE = cf.containsKey("IN_TRANSC_MODE");
   }
 
   public DB(DBConfig cf)
@@ -173,20 +168,6 @@ public class DB
     this.tableSuffix  = cf.tableSuffix;
     this.tableConfigs = cf.tableConfigs;
     this.tableObjects = new  HashMap( );
-
-    this.connection   = null;
-
-    // 对象模式设置
-    CoreConfig conf = (CoreConfig)
-      Core.getInstance(CoreConfig.class);
-    this.IN_OBJECT_MODE = conf.getProperty("core.in.object.mode",false);
-
-    // 事务模式设置
-    Core core = Core.getInstance();
-    if (core.containsKey("__DB_IN_TRANSC_MODE__"))
-    {
-      this.IN_TRANSC_MODE = (Boolean) core.get("__DB_IN_TRANSC_MODE__");
-    }
   }
 
   public DB (String db)
@@ -459,9 +440,9 @@ public class DB
     }
   }
 
-  public void transc()
+  public void begin()
   {
-    IN_TRANSC_MODE = true;
+    IN_TRANSC_MODE = false;
   }
   public void commit()
   {
@@ -1453,6 +1434,13 @@ public class DB
     {
       core.put(key, db);
     }
+
+    /**
+     * 自动设定模式和事务
+     */
+
+    db.IN_OBJECT_MODE = conf.getProperty( "core.in.object.mode"  ,  false  );
+    db.IN_TRANSC_MODE = Core.getInstance().containsKey("__IN_TRANSC_MODE__");
 
     return db;
   }

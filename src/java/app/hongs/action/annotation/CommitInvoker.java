@@ -18,11 +18,11 @@ public class CommitInvoker {
     throws Throwable {
         Core core = Core.getInstance();
         try {
-            core.put("__DB_IN_TRANSC_MODE__", true);
+            core.put("__IN_TRANSC_MODE__", null);
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    db.transc();
+                    db.begin (  );
                 }
             }
 
@@ -31,7 +31,7 @@ public class CommitInvoker {
             commit();
         }
         finally {
-            core.remove("__DB_IN_TRANSC_MODE__");
+            core.remove("__IN_TRANSC_MODE__");
         }
     }
 

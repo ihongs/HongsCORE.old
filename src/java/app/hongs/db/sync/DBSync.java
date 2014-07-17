@@ -49,14 +49,14 @@ public class DBSync
   {
     List<String> sqls = this.syncSlaverSqls(slaver, tablePrefix, tableSuffix, delExtraTables, delExtraFields);
     DB sdb = slaver;
+    sdb.begin();
     try
     {
-      sdb.transc();
       for (String sql : sqls)
       {
         sdb.execute(sql);
       }
-      sdb.commit();
+      sdb.commit(  );
     }
     catch (HongsException ex)
     {
