@@ -1183,10 +1183,6 @@ function HsReady() {
         // 为所有的input加上type-class, 方便设置样式, 兼容老浏览器
         $(this).addClass("input-" + $(this).attr("type"));
     });
-    box.find("fieldset legend.dropdown-toggle").click(function() {
-        // 如果fieldset legend为dropdown toggle, 则点击显示或隐藏
-        $(this).closest("fieldset").toggleClass("dropup");
-    });
 
     /** 语义标签解析 **/
 
@@ -2549,8 +2545,9 @@ HsTree.prototype = {
  * 在表单配置区域添加:
  * <param name="_fill__pick" value="(hsFormFillPick)"/>
  * 在表单选项区域添加:
- * <div data-ft="_pick" data-fn="xx_id[]"></div>
- * <button type="button" data-pick="xx/pick.html">Pick</button>
+ * 多选: <ul data-fn="xxxxxx_id[]" data-ft="_pick"></ul>
+ * 单选: <input type="hidden" name="x" data-ft="_pick"/>
+ * <button type="button" data-toggle="hsPick" data-pick="x/pick.html">Pick</button>
  * 在选择列表配置添加:
  * <param name="_fill__pick" value="(hsListFillPick)"/>
  * 在选择列表头部添加:
@@ -2595,7 +2592,7 @@ function HsPick(box, url, func) {
         var txt = btn.text( );
         v[val] = txt;
     } else {
-        box.find(".pick-opt").each(function() {
+        box.find("li").each(function() {
             var opt = jQuery(this);
             var val = opt.find( ":hidden" ).val ();
             var txt = opt.find(".pick-txt").text();
@@ -2668,8 +2665,16 @@ function HsPick(box, url, func) {
             do {
                 if (! chk.prop("checked") ) break;
 
-                inf = chk.attr("data-info");
-                if (inf) inf = eval ('('+inf+')');
+                // 获取额外数据
+                inf = chk.data();
+                if (! inf  ) {
+                    inf = chk.attr("data-data");
+                    if (inf) {
+                        inf = eval('('+inf+')');
+                    }  else  {
+                        inf = null;
+                    }
+                }
 
                 txt = chk.attr("data-name");
                 if (txt) break;
@@ -2727,47 +2732,74 @@ function hsFormFillPick(box, v, n, t) {
     }
 
     if (box.is("input") ) {
-        if (! box.data("txt"))  {
-            box.data("txt", btn.text());
-        }
-        if (jQuery.isEmptyObject(v)) {
-            var txt  = box.data("txt" );
-            box.val ("" );
+        function reset(box, btn) {
+            var txt = btn.data("txt");
+            var cls = btn.data("cls");
+            box.val ( "");
             btn.text(txt);
+            btn.attr( "class" , cls );
+        }
+        function inset(box, btn, val, txt) {
+            box.val (val);
+            btn.text(txt);
+            btn.addClass("btn-default");
+            btn.append('<span class="close">&times;</span>');
+        }
+
+        if (! btn.data("pickInited"))  {
+            btn.data("pickInited", 1);
+            btn.data("txt", btn.text( ) );
+            btn.data("cls", btn.attr("class"));
+            btn.on("click", ".close", box, function(evt) {
+                var btn = jQuery(evt.delegateTarget);
+                var box = evt.data;
+                reset(box, btn);
+                return false;
+            });
+        }
+
+        if (jQuery.isEmptyObject(v)) {
+            reset(box, btn);
         }
 
         for(var val in v) {
             var txt  = v[val];
-            box.val (val);
-            btn.text(txt);
+            inset(box, btn, val,txt);
         }
     } else {
-        if (! mul )
+        if (! box.data("pickInited"))  {
+            box.data("pickInited", 1);
+            box.on("click", ".close", btn, function(evt) {
+                var opt = jQuery(this).closest("li");
+                var val = opt.find(":hidden").val( );
+                var btn = evt.data;
+                delete v[val];
+                opt.remove( );
+                btn.show  ( );
+                return false ;
+            });
+            if (! mul) {
+                box.on("click", null, btn, function(evt) {
+                    evt.data.click();
+                });
+            }
+        }
+
         if (jQuery.isEmptyObject(v)) {
-            btn.show( );
-        } else {
-            btn.hide( );
+            btn.show();
+        } else if (! mul) {
+            btn.hide();
         }
 
         box.empty();
         for(var val in v) {
             var txt  = v[val];
-            box.append(jQuery('<div class="btn-group pick-opt"></div>')
-               .append(jQuery('<input type="hidden"/>').attr("name", n).val( val ) ).attr("title" , txt )
-               .append(jQuery('<button type="button" class="btn btn-info pick-txt"></button>').text(txt))
-               .append(jQuery('<button type="button" class="btn btn-info pick-del"></button>').html("&times;")));
-        }
-        box.append(jQuery('<div class="cb"></div>'));
-
-        if (! box.data("pickInited")) {
-            box.data("pickInited", 1);
-            box.on("click", ".pick-del", function() {
-                var opt = jQuery(this).closest(".pick-opt");
-                var val = opt.find(":hidden").val();
-                if (val) delete v[val];
-                opt.remove();
-                btn.show();
-            });
+            box.append(jQuery('<li class="btn btn-default form-control"></li>')
+               .append(jQuery('<input type="hidden"/>').attr("name",n).val(val))
+               .append(jQuery('<span class="close pull-right"> &times;</span>'))
+               .append(jQuery('<span></span>').text( txt ))
+               .attr( "title", txt )
+            );
         }
     }
 }
@@ -2890,25 +2922,6 @@ jQuery.fn.load = function(url, data, complete ) {
             cnf.context.treeBox.trigger(cnf.action+"Error", evt, rst);
         }
     })
-    // /** 选择 **/
-    .on("click", "[data-toggle=hsPick],.pick", function() {
-        var url = $(this).attr("href");
-        var box = $(this).attr("data-target");
-        if (box) {
-            box = box.charAt(0) == "$" ? $(box.substr(1), this) : $(box);
-        } else {
-            box = $(this).siblings( "[name],[data-fn]" );
-        }
-
-        // 填充函数
-        var func = box.attr("data-toggle");
-        if (func) {
-            func = eval ('(' + func + ')');
-        }
-
-        box.hsPick(box , url , func);
-        return false;
-    })
     // /** 打开 **/
     .on("click", "[data-toggle=hsOpen],.open", function() {
         var url = $(this).attr("href");
@@ -2942,6 +2955,25 @@ jQuery.fn.load = function(url, data, complete ) {
         } else {
             $( this ).closest(".load-box").hsClose();
         }
+        return false;
+    })
+    // /** 选择 **/
+    .on("click", "[data-toggle=hsPick],.pick", function() {
+        var url = $(this).attr("href");
+        var box = $(this).attr("data-target");
+        if (box) {
+            box = box.charAt(0) == "$" ? $(box.substr(1), this) : $(box);
+        } else {
+            box = $(this).siblings( "[name],[data-fn]" );
+        }
+
+        // 填充函数
+        var func = box.attr("data-toggle");
+        if (func) {
+            func = eval ('(' + func + ')');
+        }
+
+        box.hsPick(box , url , func);
         return false;
     })
     // /** 表单 **/
@@ -2992,6 +3024,10 @@ jQuery.fn.load = function(url, data, complete ) {
         var box = $(this).closest(".HsTree");
         var obj =        box.data( "HsTree");
         box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
+    })
+    // /** 卷帘 **/
+    .on("click", "legend.dropdown-toggle,.panel-heading.dropdown-toggle", function() {
+        $(this).parent().toggleClass("dropup");
     });
 
     // /** 组件配置 **/
@@ -3115,7 +3151,7 @@ jQuery.fn.load = function(url, data, complete ) {
 
             if (msg == null) {
                 msg = $(conf.message).addClass(conf.messageClass);
-                inp.data("msg" , msg).after(msg);
+                inp.data("msg", msg).after(msg);
             }
 
             // 如果错误的项在隐藏的区域里, 则先将隐藏区域打开
@@ -3126,12 +3162,16 @@ jQuery.fn.load = function(url, data, complete ) {
             msg.css({visibility: 'hidden'}).empty();
             $.each(err.messages, function(i, text ) {
                 msg.append($("<div></div>"). text(text));
-                //msg.append($('<div class="tooltip-inner"></div>').text(text))
-                //   .append($('<div class="tooltip-arrow"></div>'));
             });
             msg.css({visibility: 'visible'}).show();
 
             /*
+            msg.css({visibility: 'hidden'}).empty();
+            $.each(err.messages, function(i, text ) {
+                msg.append($('<div class="tooltip-inner"></div>').text(text))
+                   .append($('<div class="tooltip-arrow"></div>'));
+            });
+
             var p1 =  inp.position();
             var p2 = conf.position.split(/,?\s+/);
             var s1 = [inp.outerHeight(true), inp.outerWidth(true)];

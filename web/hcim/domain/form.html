@@ -17,7 +17,7 @@
                 <div class="form-group">
                     <label class="control-label">所属模块</label>
                     <div data-fn="module_id" data-ft="_pick"></div>
-                    <button type="button" class="btn btn-default" data-toggle="hsPick" href="hcim/module/pick.html" style="display: block;">选择模块</button>
+                    <button type="button" class="btn btn-default form-control" data-toggle="hsPick" href="hcim/module/pick.html" style="display: block;">选择模块</button>
                 </div>
                 <div class="form-group">
                     <label class="control-label">属性名称</label>
@@ -33,10 +33,6 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="form-group">
-                    <label class="control-label">校验规则</label>
-                    <input type="text" name="rule" class="form-control"/>
-                </div>
                 <div class="form-group">
                     <label class="control-label">长度</label>
                     <input type="number" name="size" value="0" class="form-control" style="width: 12em;"/>
@@ -58,6 +54,10 @@
                         <input type="checkbox" name="signed" value="1"/>
                     </label>
                 </div>
+                <div class="form-group">
+                    <label class="control-label">校验规则</label>
+                    <input type="text" name="rule" class="form-control"/>
+                </div>
             </div>
         </div>
         <div>
@@ -70,27 +70,46 @@
 <script type="text/javascript">
     (function() {
         var context = $("#hcim-domain-form");
+        var varItems = {
+            "rule" : "",
+            "size" : "0",
+            "scale" : "0",
+            "signed" : "0",
+            "min" : "0",
+            "max" : "0"
+        };
 
         context.on("change", "[name=type]", function() {
-            context.find("[name=size],[name=scale],[name=signed],[name=min],[name=max],[name=rule]")
-                    .closest(".form-group").hide();
+            var hides = $.extend({}, varItems);
+            var shows = [];
             switch ($(this).val()) {
                 case "2":
-                    context.find("[name=size],[name=scale],[name=signed],[name=min],[name=max]")
-                            .closest(".form-group").show();
+                    shows = ["size", "scale", "signed", "min", "max"];
                     break;
                 case "1":
-                    context.find("[name=size],[name=rule]")
-                            .closest(".form-group").show();
+                case "7":
+                    shows = ["size", "rule"];
                     break;
                 case "6":
-                    context.find("[name=size]")
-                            .closest(".form-group").show();
+                    shows = ["size"];
                     break;
-                case "7":
-                    context.find("[name=rule")
-                            .closest(".form-group").show();
+                case "3":
+                case "4":
+                case "5":
+                    shows = ["rule"];
                     break;
+            }
+            for(var i = 0; i < shows.length; i ++) {
+                var n = shows[i];
+                context.find("[name="+n+"]")
+                       .closest(".form-group")
+                       .show();
+                delete hides[n];
+            }
+            for(var m in hides) {
+                context.find("[name="+m+"]")
+                       .closest(".form-group")
+                       .hide();
             }
         });
     })();

@@ -241,13 +241,13 @@ fieldset.dropup .dropdown-body {
 
 /** 选择 **/
 
-.pick-box {
+.open-box.pick-box,
+.load-box.pick-box {
     width: 1110px;
 }
 
 .pick-opt {
-    margin-bottom: 3px;
-    margin-right: 3px;
+    width: 100%;
 }
 .pick-opt .pick-del {
     padding-right: 9px;
@@ -286,7 +286,7 @@ fieldset {
     margin-bottom: 15px;
 }
 legend {
-    margin-bottom: 2px;
+    margin-bottom: 0;
 }
 
 .btn {
@@ -295,6 +295,21 @@ legend {
 
 .close {
     margin-top: -4px;
+}
+.btn .close {
+    padding: 6px 0 6px 6px;
+    font-size: 15px;
+}
+
+.btn.form-control {
+    text-align: left;
+    overflow: hidden;
+}
+textarea.form-control {
+    min-height: 127px;
+}
+.find-box.input-group {
+    max-width: 240px;
 }
 
 .nav>li.dn {
@@ -313,11 +328,4 @@ legend {
 }
 .list-box .table thead {
     font-weight: bold;
-}
-
-.find-box.input-group {
-    max-width: 240px;
-}
-form textarea.form-control {
-    min-height: 127px;
 }
