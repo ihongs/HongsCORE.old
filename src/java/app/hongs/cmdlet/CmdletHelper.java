@@ -260,7 +260,7 @@ public class CmdletHelper
       throw      er;
     }
     else if (null != hlp && newOpts.isEmpty( )) {
-      System.out.println(hlp.replaceAll("\\n",pre));
+      System.err.println(hlp.replaceAll("\\n",pre));
       System.exit(0);
     }
 
@@ -277,7 +277,7 @@ public class CmdletHelper
    * 通常, 辅助信息输出标准错误, 结果数据输出标准输出, 方便其他程序/进程处理
    * @param text
    */
-  public static void print(String text)
+  public static void println(String text)
   {
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.cmd.line.time.format",
@@ -293,7 +293,7 @@ public class CmdletHelper
    */
   public static void print2Log(String text) throws HongsException
   {
-    CoreLogger.getInstance(Core.ACTION_PATH.get().replace('.', '_')).print(text);
+    CoreLogger.getInstance(Core.ACTION_PATH.get().replace('.', '_')).println(text);
   }
 
   /**
@@ -302,7 +302,7 @@ public class CmdletHelper
    */
   public static void print4Log(String text) throws HongsException
   {
-    CmdletHelper.print    (text);
+    CmdletHelper.println    (text);
     CmdletHelper.print2Log(text);
   }
 
@@ -359,7 +359,7 @@ public class CmdletHelper
     {
       sb.append(" ");
     }
-    sb.append("\r");
+    sb.append("\r" );
 
     if (scale == 100)
     {
@@ -367,7 +367,7 @@ public class CmdletHelper
     }
     else
     {
-      System.err.print(sb.toString());
+      System.err.print  (sb.toString());
     }
   }
 

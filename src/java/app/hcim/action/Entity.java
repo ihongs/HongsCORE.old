@@ -38,7 +38,7 @@ public class Entity {
 
     @CommitSuccess
     public void actionSave(ActionHelper helper)
-    throws HongsException {app.hongs.util.JSON.print(helper.getRequestData());
+    throws HongsException {app.hongs.util.JSON.dumps(helper.getRequestData());
         Map data = helper.getRequestData();
         List<Map<String, String>> cols = (List<Map<String, String>>)
             ((Map)data.get("hcrm_model_cols")).values();

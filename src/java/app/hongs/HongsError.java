@@ -13,7 +13,7 @@ package app.hongs;
  */
 public class HongsError extends Error {
 
-    private HongsLocalized that;
+    protected HongsLocalized that;
 
     public HongsError(int code, String desc, Throwable cause) {
         super(cause);
@@ -48,7 +48,7 @@ public class HongsError extends Error {
 
     @Override
     public String toString() {
-        return this.getMessage();
+        return this.getClass().getName() + this.getMessage();
     }
 
     @Override
@@ -59,6 +59,10 @@ public class HongsError extends Error {
     @Override
     public String getLocalizedMessage() {
         return that.getLocalizedMessage();
+    }
+
+    public String[] getLocalizedOptions() {
+        return that.getLocalizedOptions();
     }
 
     public void setLocalizedOptions(String... options) {

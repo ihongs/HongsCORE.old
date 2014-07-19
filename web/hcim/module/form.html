@@ -12,29 +12,25 @@
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <input type="hidden" name="module_id"/>
-        <div class="form-group">
-            <label class="control-label">模块名称</label>
-            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Module/Unique.act?id={id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">代码</label>
-            <input type="text" name="code" class="form-control" required="required" data-unique="hcim/Module/Unique.act?id={id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">备注</label>
-            <textarea name="note" class="form-control"></textarea>
-        </div>
-        
-        <fieldset>
-            <legend class="dropdown-toggle">高级设置 <span class="caret"></span></legend>
-            <div class="dropdown-body">
+        <div class="row">
+            <div class="col-md-4">
                 <div class="form-group">
-                    <label class="control-label">代号</label>
+                    <label class="control-label">模块名称</label>
+                    <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Module/Unique.act?id={id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">代码</label>
                     <input type="text" name="code" class="form-control" data-unique="hcim/Module/Unique.act?id={id}"/>
                 </div>
             </div>
-        </fieldset>
-        
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">备注</label>
+                    <textarea name="note" class="form-control"></textarea>
+                </div>
+            </div>
+        </div>
+
         <div>
             <button type="submit" class="ensure btn btn-primary">提交</button>
             <button type="button" class="cancel btn btn-link">取消</button>
@@ -45,7 +41,7 @@
 <script type="text/javascript">
     (function() {
         var context = $("#hcim_module_form");
-        
+
         context.on("loadBack", function(evt, rst) {
             var show = rst.info && rst.info.code;
             context.find("fieldset").toggleClass("dropup", !!show);

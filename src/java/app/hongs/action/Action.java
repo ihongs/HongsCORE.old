@@ -97,18 +97,15 @@ public class Action
     cls = act.substring(pos+1);
     act = act.substring(0,pos);
 
-    CoreConfig conf = (CoreConfig)
+    CoreConfig conf = (CoreConfig )
       Core.getInstance(CoreConfig.class);
-    String cnf = "core.app."+act+".action";
-    if (conf.containsKey(cnf)) {
-        act = conf.getProperty( cnf ) +".";
-    }
-    else {
-        act = conf.getProperty("core.app", "app")+"."+act+".action.";
+    act = "app."+act+".action";
+    if (conf.containsKey( act )) {
+        act = conf.getProperty(act);
     }
 
     // app.包.action.类, action方法
-    doAction(act+cls, "action"+mtd, helper);
+    doAction(act+"."+cls, "action"+mtd, helper);
   }
 
   /**
@@ -222,7 +219,8 @@ public class Action
      * 构建错误消息
      */
     String error = ta.getLocalizedMessage();
-    if (!(ta instanceof HongsException) && !(ta instanceof HongsError))
+    if (! (ta instanceof HongsException)
+    &&  ! (ta instanceof HongsError  ) )
     {
       CoreLanguage lang = (CoreLanguage)
           Core.getInstance(CoreLanguage.class );
@@ -233,24 +231,11 @@ public class Action
         error = lang.translate("core.error.label",
                 ta.getClass().getName())
                 + ": " + error;
-
-      ta.printStackTrace(System.err);
-    }
-    else if (Core.IN_DEBUG_MODE)
-    {
-      ta.printStackTrace(System.err);
     }
 
-    try
-    {
-      CoreLogger.error(ta.getMessage());
-    }
-    catch (HongsException ex)
-    {
-    }
-    
-    helper.print500(error);
 //  throw new ServletException(error, ta);
+    CoreLogger.error( ta );
+    helper.print500(error);
   }
 
 }

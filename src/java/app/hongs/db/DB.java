@@ -139,8 +139,8 @@ public class DB
   private Map           origin;
   private Connection    connection;
 
-  private static ReadWriteLock poolslock = new ReentrantReadWriteLock();
-  private static Map<String, ComboPooledDataSource> datapools = new HashMap();
+  private static Map<String, ComboPooledDataSource> sourcePool = new HashMap();
+  private static ReadWriteLock  sourceLock  =  new  ReentrantReadWriteLock(  );
 
   private DB(Map cf)
     throws HongsException
@@ -219,12 +219,12 @@ public class DB
 
     do
     {
-      if (origin == null || origin.isEmpty())
+      if (origin == null || origin.isEmpty( ))
       {
         break;
       }
 
-      if (!origin.containsKey("name"))
+      if (origin.containsKey("name") == false)
       {
         throw new HongsException(0x1021, "Can not find name in origin");
       }
@@ -242,7 +242,7 @@ public class DB
         ct = (Context)ic.lookup(comp);
         ds = (DataSource)ct.lookup(namc);
       }
-      catch (NamingException ex)
+      catch (NamingException ex )
       {
         ez=ex;
         break;
@@ -261,7 +261,7 @@ public class DB
                  info.getProperty("password"));
         }
 
-        if (Core.IN_DEBUG_MODE)
+        if (0 < Core.DEBUG)
         {
           CoreLogger.debug("Connect to database(origin mode): "+name);
         }
@@ -315,23 +315,23 @@ public class DB
 
         String name = drv+" "+url;
         ComboPooledDataSource pool;
-        poolslock.readLock( ).lock();
+        sourceLock.readLock( ).lock();
         try
         {
-          pool = datapools.get(name);
+          pool = sourcePool.get(name);
         }
         finally
         {
-          poolslock.readLock().unlock();
+          sourceLock.readLock().unlock();
         }
 
         if (pool == null)
         {
-          poolslock.writeLock( ).lock();
+          sourceLock.writeLock( ).lock();
           try
           {
             pool = new ComboPooledDataSource();
-            datapools.put( name, pool );
+            sourcePool.put( name, pool );
             pool.setDriverClass(drv);
             pool.setJdbcUrl(url);
 
@@ -359,13 +359,13 @@ public class DB
           }
           finally
           {
-            poolslock.writeLock().unlock();
+            sourceLock.writeLock().unlock();
           }
         }
 
         this.connection = pool.getConnection();
 
-        if (Core.IN_DEBUG_MODE)
+        if (0 < Core.DEBUG)
         {
           CoreLogger.debug("Connect to database(source mode): "+drv+" "+url);
         }
@@ -412,6 +412,7 @@ public class DB
 
   @Override
   public void destroy()
+    throws Throwable
   {
     try
     {
@@ -421,7 +422,7 @@ public class DB
         return;
       }
 
-      if (Core.IN_DEBUG_MODE)
+      if (0 < Core.DEBUG)
       {
         CoreLogger.debug("Close database connection, URL: "
           + this.connection.getMetaData().getURL());
@@ -429,10 +430,6 @@ public class DB
 
       this.connection.close();
       this.connection = null;
-    }
-    catch (HongsException ex)
-    {
-      throw new Error(new HongsException(0x1032, ex));
     }
     catch (SQLException ex)
     {
@@ -536,10 +533,10 @@ public class DB
       return tobj;
     }
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       app.hongs.CoreLogger.debug(
-        "INFO(DB): tableClass("+tcls+") for table("+table+") has been defined, try to get it");
+          "INFO(DB): tableClass("+tcls+") for table("+table+") has been defined, try to get it");
     }
 
     /**
@@ -860,7 +857,7 @@ public class DB
   {
     this.connect();
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -986,7 +983,7 @@ public class DB
   {
     this.connect();
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -1026,7 +1023,7 @@ public class DB
   {
     this.connect();
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));

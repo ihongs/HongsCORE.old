@@ -64,7 +64,7 @@ public class ActionHelper
   private Map<String, Object> responseData;
 
   /**
-   * 初始化助手
+   * 初始化助手(用于action)
    *
    * @param req
    * @param rsp
@@ -81,31 +81,43 @@ public class ActionHelper
     {
       this.request .setCharacterEncoding("UTF-8");
       this.response.setCharacterEncoding("UTF-8");
-      this.responseWrtr = rsp.getWriter();
+      this.responseWrtr  =  rsp.getWriter();
     }
     catch (UnsupportedEncodingException ex)
     {
-      throw new HongsError(0x21, "Can not set request or response encoding.", ex);
+      throw new HongsError(0x21, "Can not set rs encoding.", ex);
     }
     catch (IOException ex)
     {
-      throw new HongsError(0x22, "Can not print to browser", ex);
+      throw new HongsError(0x22, "Can not send to browser.", ex);
     }
   }
 
   /**
-   * 初始化助手(用于shell)
+   * 初始化助手(用于cmdlet)
    *
    * @param req
    * @param ses
    * @param cok
+   * @param out
    */
-  public ActionHelper(Map<String, String[]> req, Map<String, String[]> ses, Map<String, String[]> cok, PrintWriter out)
+  public ActionHelper(
+          Map<String, String[]> req,
+          Map<String, String[]> ses,
+          Map<String, String[]> cok,
+          PrintWriter out)
   {
-    this.requestData = req != null ? parseParams(req) : new HashMap();
-    this.sessionData = req != null ? parseParams(ses) : new HashMap();
-    this.cookiesData = req != null ? parseParams(cok) : new HashMap();
-    this.responseWrtr = out != null ? out : new PrintWriter(System.out);
+    try
+    {
+      this.requestData  = req != null ? parseParams(req) : new HashMap( );
+      this.sessionData  = req != null ? parseParams(ses) : new HashMap( );
+      this.cookiesData  = req != null ? parseParams(cok) : new HashMap( );
+      this.responseWrtr = out != null ? out : new PrintWriter(System.err);
+    }
+    catch (HongsException ex)
+    {
+      throw new HongsError(0x23, "Can not parse params", ex);
+    }
   }
 
   public HttpServletRequest getRequest()
@@ -501,6 +513,7 @@ public class ActionHelper
    * @return 解析后的Map
    */
   protected static Map parseParams(Map<String, String[]> params)
+  throws HongsException
   {
     Map<String, Object> paramz = new HashMap();
     for (Map.Entry et : params.entrySet())

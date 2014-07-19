@@ -31,7 +31,7 @@ public class test {
 
     System.out.println(app.hongs.util.Text.inject("This is $0 and that is ${1}2.", "name", "var"));
       
-    app.hongs.util.JSON.print(args);
+    app.hongs.util.JSON.dumps(args);
     Map<String, Object> opts = CmdletHelper.getOpts(args,
       "show-env:b",
       "show-properties:b",
@@ -43,16 +43,16 @@ public class test {
       "test-inject:b",
       "test-serially:b",
       "?Usage: --test-rate --tset-left");
-    app.hongs.util.JSON.print(opts);
+    app.hongs.util.JSON.dumps(opts);
 
     if (opts.containsKey("show-env")
     && (Boolean)opts.get("show-env")) {
-      JSON.print(System.getenv());
+      JSON.dumps(System.getenv());
     }
 
     if (opts.containsKey("show-properties")
     && (Boolean)opts.get("show-properties")) {
-      JSON.print(System.getProperties());
+      JSON.dumps(System.getProperties());
     }
 
     if (opts.containsKey("test-text")
@@ -94,11 +94,11 @@ public class test {
     String s = "This is Hong's Framework. Ask: \\\"Who ar you?\"\r\n"
              + "这是弘的框架, 问: \\\"你是谁?\"\r\n"
              + "%abc,$def.";
-    CmdletHelper.print("actual: " + s);
+    CmdletHelper.println("actual: " + s);
     String s1 = Text.escape(s);
-    CmdletHelper.print("escape: " + s1);
+    CmdletHelper.println("escape: " + s1);
     String s2 = Text.resume(s1);
-    CmdletHelper.print("resume: " + s2);
+    CmdletHelper.println("resume: " + s2);
   }
 
   private static void testRate() {
@@ -135,18 +135,18 @@ public class test {
   }
 
   private static void testOpts(String[] args) throws HongsException {
-    app.hongs.util.JSON.print(args);
+    app.hongs.util.JSON.dumps(args);
     Map opts = CmdletHelper.getOpts(args,
       "opt_s|opt-s:s", "opt_i|opt-i:i", "opt_f|opt-f:f", "opt_b|opt-b:b",
       "opt_o|opt-o=s", "opt_m|opt-m+s", "opt_n|opt-n*s", "opt_r|opt-r=/(a|b)/i",
       "!U", "!V", "?Useage:\ncmd opt-o xxx opt-m xxx... [opt-n xxx...]"
     );
-    app.hongs.util.JSON.print(opts);
+    app.hongs.util.JSON.dumps(opts);
   }
   
   private static void testRadix(long num) {
-    CmdletHelper.print("36 Radix: "+app.hongs.util.Text.to36Hex(num));
-    CmdletHelper.print("26 Radix: "+app.hongs.util.Text.to26Hex(num));
+    CmdletHelper.println("36 Radix: "+app.hongs.util.Text.to36Hex(num));
+    CmdletHelper.println("26 Radix: "+app.hongs.util.Text.to26Hex(num));
   }
 
   private static void makeDemoData() {

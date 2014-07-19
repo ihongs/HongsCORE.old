@@ -3,6 +3,8 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
+import app.hongs.CoreLogger;
+import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -10,9 +12,9 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,10 +43,12 @@ implements Filter {
         String str;
 
         // 调试开关
-        str = context.getInitParameter( "debug" );
-        if (str != null && Integer.parseInt(str ) > 0) {
-            Core.IN_DEBUG_MODE = true;
+        str = context.getInitParameter ("debug");
+        if (str != null) {
+            Core.DEBUG = Byte.parseByte(  str  );
         }
+
+        Core.ENVIR = 1; // 标明为 Action 模式
 
         // 当前应用根目录
         Core.BASE_HREF = context.getContextPath();
@@ -62,9 +66,8 @@ implements Filter {
         Core.TMPS_PATH = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
         Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
-        if (Core.IN_DEBUG_MODE) {
-            System.out.println(
-                "--------------------------------------------------\r\n"
+        if (0 < Core.DEBUG) {
+            CoreLogger.debug("...\r\n"
                 + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
                 + "BASE_HREF       : " + Core.BASE_HREF + "\r\n"
                 + "BASE_PATH       : " + Core.BASE_PATH + "\r\n"
@@ -77,25 +80,27 @@ implements Filter {
 
     @Override
     public void destroy() {
-        if (Core.IN_DEBUG_MODE) {
+        if (1 == (1 & Core.DEBUG)) {
             Core core = Core.GLOBAL_CORE;
-            long time = Core.GLOBAL_TIME;
-            float secs = (float) (System.currentTimeMillis() - time) / 1000;
-            System.out.println(
-                "--------------------------------------------------\r\n"
+            long time = System.currentTimeMillis() - Core.GLOBAL_TIME;
+            CoreLogger.debug("...\r\n"
                 + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
-                + "Used Seconds    : " + secs + "\r\n"
-                + "Used Objects    : " + core.keySet().toString() + "\r\n");
+                + "Runtime         : " + Text.humanTime(time) + "\r\n"
+                + "Objects         : " + core.keySet().toString() + "\r\n");
         }
 
-        Core.GLOBAL_CORE.destroy();
+        try {
+            Core.GLOBAL_CORE.destroy( );
+        } catch ( Throwable  e) {
+            CoreLogger.error(e);
+        }
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
     throws ServletException, IOException {
         try {
-             this.doFilter(request, response);
+            this .doFilter(request, response);
             chain.doFilter(request, response);
 
             // 将返回数据转换成JSON格式
@@ -150,31 +155,32 @@ implements Filter {
             }
         }
 
-        if (Core.IN_DEBUG_MODE) {
-            System.out.println(
-                "--------------------------------------------------\r\n"
+        if (0 < Core.DEBUG) {
+            CoreLogger.debug("...\r\n"
                 + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
                 + "ACTION_TIME     : " + Core.ACTION_TIME.get() + "\r\n"
                 + "ACTION_PATH     : " + Core.ACTION_PATH.get() + "\r\n"
                 + "ACTION_LANG     : " + Core.ACTION_LANG.get() + "\r\n"
-                + "User Address    : " + req.getRemoteAddr() + " "
+                + "Address         : " + req.getRemoteAddr() + " "
                                        + req.getRemotePort() + "\r\n");
         }
     }
 
     private void doDestroy() {
-        if (Core.IN_DEBUG_MODE) {
+        if (0 < Core.DEBUG) {
             Core core = Core.THREAD_CORE.get();
-            long time = Core.ACTION_TIME.get();
-            float secs = (float) (System.currentTimeMillis() - time) / 1000;
-            System.out.println(
-                "--------------------------------------------------\r\n"
+            long time = System.currentTimeMillis() - Core.ACTION_TIME.get();
+            CoreLogger.debug("...\r\n"
                 + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
-                + "Used Seconds    : " + secs + "\r\n"
-                + "Used Objects    : " + core.keySet().toString() + "\r\n");
+                + "Runtime         : " + Text.humanTime(time) + "\r\n"
+                + "Objects         : " + core.keySet().toString() + "\r\n");
         }
 
-        Core.THREAD_CORE.get().destroy();
+        try {
+            Core.THREAD_CORE.get( ).destroy( );
+        } catch ( Throwable  e) {
+            CoreLogger.error(e);
+        }
     }
 
 }

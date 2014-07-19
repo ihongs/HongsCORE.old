@@ -12,49 +12,54 @@
     </object>
     <form action="" method="POST">
         <input type="hidden" name="id"/>
-        <div class="form-group">
-            <label class="control-label">所属模块</label>
-            <div data-fn="module_id" data-ft="_pick"></div>
-            <button type="button" class="btn btn-default" data-toggle="hsPick" href="hcim/module/pick.html" style="display: block;">选择模块</button>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">所属模块</label>
+                    <div data-fn="module_id" data-ft="_pick"></div>
+                    <button type="button" class="btn btn-default" data-toggle="hsPick" href="hcim/module/pick.html" style="display: block;">选择模块</button>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">属性名称</label>
+                    <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">代码</label>
+                    <input type="text" name="code" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">类型</label>
+                    <select name="type" class="form-control"></select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">校验规则</label>
+                    <input type="text" name="rule" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">长度</label>
+                    <input type="number" name="size" value="0" class="form-control" style="width: 12em;"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">小数位数</label>
+                    <input type="number" name="scale" value="0" class="form-control" style="width: 12em;"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">最小值</label>
+                    <input type="number" name="min" value="0" class="form-control" style="width: 12em;"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">最大值</label>
+                    <input type="number" name="max" value="0" class="form-control" style="width: 12em;"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">可为负数
+                        <input type="checkbox" name="signed" value="1"/>
+                    </label>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label class="control-label">属性名称</label>
-            <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">代码</label>
-            <input type="text" name="code" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">类型</label>
-            <select name="type" class="form-control"></select>
-        </div>
-        <div class="form-group">
-            <label class="control-label">长度</label>
-            <input type="number" name="size" value="0" class="form-control" style="width: 12em;"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">小数位数</label>
-            <input type="number" name="scale" value="0" class="form-control" style="width: 12em;"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">可为负数
-                <input type="checkbox" name="signed" value="1"/>
-            </label>
-        </div>
-        <div class="form-group">
-            <label class="control-label">最小值</label>
-            <input type="number" name="min" value="0" class="form-control" style="width: 12em;"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">最大值</label>
-            <input type="number" name="max" value="0" class="form-control" style="width: 12em;"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">校验规则</label>
-            <input type="text" name="rule" class="form-control"/>
-        </div>
-        
         <div>
             <button type="submit" class="ensure btn btn-primary">提交</button>
             <button type="button" class="cancel btn btn-link">取消</button>
@@ -65,26 +70,26 @@
 <script type="text/javascript">
     (function() {
         var context = $("#hcim-domain-form");
-        
+
         context.on("change", "[name=type]", function() {
             context.find("[name=size],[name=scale],[name=signed],[name=min],[name=max],[name=rule]")
-                   .closest(".form-group").hide();
+                    .closest(".form-group").hide();
             switch ($(this).val()) {
                 case "2":
                     context.find("[name=size],[name=scale],[name=signed],[name=min],[name=max]")
-                           .closest(".form-group").show();
+                            .closest(".form-group").show();
                     break;
                 case "1":
                     context.find("[name=size],[name=rule]")
-                           .closest(".form-group").show();
+                            .closest(".form-group").show();
                     break;
                 case "6":
                     context.find("[name=size]")
-                           .closest(".form-group").show();
+                            .closest(".form-group").show();
                     break;
-                case "11":
+                case "7":
                     context.find("[name=rule")
-                           .closest(".form-group").show();
+                            .closest(".form-group").show();
                     break;
             }
         });

@@ -1,13 +1,12 @@
 package app.hongs.util;
 
-import app.hongs.HongsError;
-
-import java.util.Iterator;
-import java.util.Collection;
-import java.util.List;
+import app.hongs.HongsException;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 树形操作工具
@@ -29,8 +28,10 @@ public class Tree
    * @param map
    * @param path
    * @return 键对应的值
+   * @throws app.hongs.HongsException
    */
   public static Object getValue(Map map, String path)
+  throws HongsException
   {
     return Tree.getValue(map, path, null);
   }
@@ -40,8 +41,10 @@ public class Tree
    * @param map
    * @param keys
    * @return 键对应的值
+   * @throws app.hongs.HongsException
    */
   public static Object getByArr(Map map, Object[] keys)
+  throws HongsException
   {
     return Tree.getByArr(map, keys, null);
   }
@@ -52,8 +55,10 @@ public class Tree
    * @param path
    * @param def
    * @return 键对应的值
+   * @throws app.hongs.HongsException
    */
   public static Object getValue(Map map, String path, Object def)
+  throws HongsException
   {
     path = path.replaceAll("\\]\\[", ".")
                .replace("[", ".")
@@ -69,9 +74,15 @@ public class Tree
    * @param keys
    * @param def
    * @return 键对应的值
+   * @throws app.hongs.HongsException
    */
   public static Object getByArr(Map map, Object[] keys, Object def)
+  throws HongsException
   {
+    if (map == null)
+    {
+      throw new HongsException(0x100c, "`map` can not be null");
+    }
     Object val = map;
     for (int i = 0; i < keys.length; i ++)
     {
@@ -108,8 +119,10 @@ public class Tree
    * @param map
    * @param path
    * @param val
+   * @throws app.hongs.HongsException
    */
   public static void setValue(Map map, String path, Object val)
+  throws HongsException
   {
     path = path.replaceAll("\\]\\[", ".")
              .replace("[", ".")
@@ -123,10 +136,16 @@ public class Tree
    * @param map
    * @param keys
    * @param val
+   * @throws app.hongs.HongsException
    */
   public static void setByArr(Map map, Object[] keys, Object val)
+  throws HongsException
   {
-    if ( keys.length != 0 )
+    if (map == null)
+    {
+      throw new HongsException(0x100c, "`map` can not be null");
+    }
+    if (keys.length  !=  0)
     {
       setValue(map, keys, val, 0);
     }
@@ -138,7 +157,7 @@ public class Tree
     }
     else
     {
-      throw new HongsError(0x10, "Can not set obj to map with empty keys");
+      throw new HongsException(0x10, "`val` is not a map AND `keys` is empty");
     }
   }
 

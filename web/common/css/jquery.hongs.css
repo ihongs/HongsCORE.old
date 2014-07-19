@@ -254,7 +254,7 @@ fieldset.dropup .dropdown-body {
     padding-left: 9px;
 }
 .pick-opt .pick-txt {
-    max-width: 372px;
+    max-width: 100%;
     text-align: left;
     overflow: hidden;
 }
@@ -316,15 +316,8 @@ legend {
 }
 
 .find-box.input-group {
-    width: 20em;
-}
-form input.form-control {
-    max-width: 400px;
-}
-form select.form-control {
-    max-width: 400px;
+    max-width: 240px;
 }
 form textarea.form-control {
-    max-width: 400px;
-    min-height: 80px;
+    min-height: 127px;
 }

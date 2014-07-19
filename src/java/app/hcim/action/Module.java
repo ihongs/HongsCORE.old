@@ -35,7 +35,7 @@ public class Module {
 
     @CommitSuccess
     public void actionSave(ActionHelper helper)
-    throws HongsException {app.hongs.util.JSON.print(helper.getRequestData());
+    throws HongsException {app.hongs.util.JSON.dumps(helper.getRequestData());
         String id = model.save(helper.getRequestData());
 
         String nms = model.getAffectedNames();

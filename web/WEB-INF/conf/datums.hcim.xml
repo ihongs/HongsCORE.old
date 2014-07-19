@@ -20,9 +20,6 @@
   <data key="entity_form" type="json">
     <![CDATA[
       [
-        ["name", "required"],
-        ["xxx", "name.isdfds", 1, 2, 3],
-        ["sdfsd, "/^\d+$/"]
       ]
     ]]>
   </data>

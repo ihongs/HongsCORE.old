@@ -49,48 +49,12 @@ public class JSON
   {
     try
     {
-      return JSONValue
-      .parseWithException(str);
+      return JSONValue.parseWithException(str);
     }
     catch (ParseException ex )
     {
-      throw new HongsException(0x1005, ex);
+      throw  new  HongsException( 0x100a, "Can not parse ", ex );
     }
-  }
-
-  /**
-   * 直接将Java对象输出到标准控制台, 用于简单调试, 输出到 STDERR
-   * @param obj 数组,集合框架,基础类型
-   */
-  public static void print(Object obj)
-  {
-    StringBuilder sb = new StringBuilder();
-    JSON.print(sb, "", null, obj, 0, 0);
-    System.err.print(sb.toString());
-  }
-
-  /**
-   * 直接将Java对象输出到指定输出流
-   * @param obj
-   * @param out
-   */
-  public static void print(Object obj, PrintStream out)
-  {
-    StringBuilder sb = new StringBuilder();
-    JSON.print(sb, "", null, obj, 0, 0);
-    out.print(sb.toString());
-  }
-
-  /**
-   * 直接将Java对象输出到指定书写器
-   * @param obj
-   * @param out
-   */
-  public static void print(Object obj, PrintWriter out)
-  {
-    StringBuilder sb = new StringBuilder();
-    JSON.print(sb, "", null, obj, 0, 0);
-    out.print(sb.toString());
   }
 
   /**
@@ -100,15 +64,50 @@ public class JSON
    */
   public static String toString(Object obj)
   {
-    String sp = Core.IN_DEBUG_MODE ? "" : null;
+    String xx = 1 == (1 & Core.DEBUG) ? "": null;
     StringBuilder sb = new StringBuilder();
-    JSON.print(sb, sp, null, obj, 0, 0);
+    JSON.dumps( sb , xx, null, obj, 0, 0 );
     return sb.toString().trim();
+  }
+
+  /**
+   * 直接将Java对象输出到标准控制台, 用于简单调试, 输出到 STDERR
+   * @param obj 数组,集合框架,基础类型
+   */
+  public static void dumps(Object obj)
+  {
+    StringBuilder sb = new StringBuilder();
+    JSON.dumps( sb, "", null, obj, 0 , 0 );
+    System.err.print(sb.toString());
+  }
+
+  /**
+   * 直接将Java对象输出到指定输出流
+   * @param obj
+   * @param out
+   */
+  public static void dumps(Object obj, PrintStream out)
+  {
+    StringBuilder sb = new StringBuilder();
+    JSON.dumps( sb, "", null, obj, 0 , 0 );
+    out.print(sb.toString());
+  }
+
+  /**
+   * 直接将Java对象输出到指定书写器
+   * @param obj
+   * @param out
+   */
+  public static void dumps(Object obj, PrintWriter out)
+  {
+    StringBuilder sb = new StringBuilder();
+    JSON.dumps( sb, "", null, obj, 0 , 0 );
+    out.print(sb.toString());
   }
 
   //** 操作方法 **/
 
-  private static void print(StringBuilder sb, String pre, Object[] arr)
+  private static void dumps(StringBuilder sb, String pre, Object[] arr)
   {
     sb.append("[");
     if (pre != null)
@@ -122,7 +121,7 @@ public class JSON
     {
       Object obj = arr[i];
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
     }
 
     if (pre != null)
@@ -132,7 +131,7 @@ public class JSON
     sb.append("]");
   }
 
-  private static void print(StringBuilder sb, String pre, Collection col)
+  private static void dumps(StringBuilder sb, String pre, Collection col)
   {
     sb.append("[");
     if (pre != null)
@@ -148,7 +147,7 @@ public class JSON
     {
       Object obj = it.next();
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
 
       i ++;
     }
@@ -160,7 +159,7 @@ public class JSON
     sb.append("]");
   }
 
-  private static void print(StringBuilder sb, String pre, Dictionary dic)
+  private static void dumps(StringBuilder sb, String pre, Dictionary dic)
   {
     sb.append("{");
     if (pre != null)
@@ -177,7 +176,7 @@ public class JSON
       Object key = en.nextElement();
       Object val = dic.get(key);
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", key, val, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", key, val, i, j);
 
       i ++;
     }
@@ -189,7 +188,7 @@ public class JSON
     sb.append("}");
   }
 
-  private static void print(StringBuilder sb, String pre, Map map)
+  private static void dumps(StringBuilder sb, String pre, Map map)
   {
     sb.append("{");
     if (pre != null)
@@ -207,7 +206,7 @@ public class JSON
       Object key = obj.getKey();
       Object val = obj.getValue();
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", key, val, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", key, val, i, j);
 
       i ++;
     }
@@ -219,7 +218,7 @@ public class JSON
     sb.append("}");
   }
 
-  private static void print(StringBuilder sb, String pre, Object key, Object val, int i, int j)
+  private static void dumps(StringBuilder sb, String pre, Object key, Object val, int i, int j)
   {
     /** 键 **/
 
@@ -252,19 +251,19 @@ public class JSON
     }
     else if (val instanceof Object[])
     {
-      JSON.print(sb, pre, (Object[])val);
+      JSON.dumps(sb, pre, (Object[])val);
     }
     else if (val instanceof Collection)
     {
-      JSON.print(sb, pre, (Collection)val);
+      JSON.dumps(sb, pre, (Collection)val);
     }
     else if (val instanceof Dictionary)
     {
-      JSON.print(sb, pre, (Dictionary)val);
+      JSON.dumps(sb, pre, (Dictionary)val);
     }
     else if (val instanceof Map)
     {
-      JSON.print(sb, pre, (Map)val);
+      JSON.dumps(sb, pre, (Map)val);
     }
     else if (val instanceof Number || val instanceof Boolean)
     {

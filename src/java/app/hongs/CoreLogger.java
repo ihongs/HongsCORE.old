@@ -1,16 +1,18 @@
 package app.hongs;
 
 import app.hongs.action.ActionHelper;
+import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.util.Text;
-
-import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 日志记录工具
@@ -21,15 +23,14 @@ import java.io.IOException;
  * core.log.line.time.format    日志记录中的时间格式, 默认为"yyyy/MM/dd HH:mm:ss"
  * </pre>
  *
- * <h3>错误代码:</h3>
+ * <h3>异常代码:</h3>
  * <pre>
- * 0x16 无法打开日志文件
- * 0x18 无法写入日志文件
+ * 0x1002   无法写入日志文件
  * </pre>
  *
  * @author Hongs
  */
-public class CoreLogger
+public class CoreLogger implements Core.Destroy
 {
 
   /**
@@ -82,13 +83,13 @@ public class CoreLogger
    * @param text
    * @param time
    */
-  public synchronized void print(String text, long time) throws HongsException
+  public synchronized void println(String text, long time)
   {
     if (time == 0)
     {
       time = System.currentTimeMillis();
     }
-    this.check(time);
+    this.openlog(time);
 
     StringBuilder sb = new StringBuilder();
 
@@ -109,25 +110,28 @@ public class CoreLogger
     /**
      * 记录请求的地址
      */
-    if (Core.IN_SHELL_MODE)
+    if (Core.ENVIR == 1)
     {
-      sb.append(' ')
-        .append('[')
-        .append("0.0.0.0")
-        .append(' ')
-        .append("0")
-        .append(']');
+      Core core = Core.getInstance();
+      if (core.containsKey(app.hongs.action.ActionHelper.class.getName()))
+      {
+        ActionHelper helper = (ActionHelper)
+          Core.getInstance(app.hongs.action.ActionHelper.class);
+        sb.append(' ')
+          .append('[')
+          .append(helper.getRequest().getRemoteAddr())
+          .append(' ')
+          .append(helper.getRequest().getRemotePort())
+          .append(']');
+      }
+      else
+      {
+        sb.append(" [IN ACTION]");
+      }
     }
     else
     {
-      ActionHelper helper = (ActionHelper)
-        Core.getInstance(app.hongs.action.ActionHelper.class);
-      sb.append(' ')
-        .append('[')
-        .append(helper.getRequest().getRemoteAddr())
-        .append(' ')
-        .append(helper.getRequest().getRemotePort())
-        .append(']');
+        sb.append(" [IN CMDLET]");
     }
 
     /**
@@ -155,16 +159,16 @@ public class CoreLogger
    * 写日志(当前时间)
    * @param text
    */
-  public void print(String text) throws HongsException
+  public void println(String text)
   {
-    this.print(text, 0);
+    this.println(text, 0);
   }
 
   /**
    * 检查日志文件
    * @param time
    */
-  private void check(long time) throws HongsException
+  private void openlog(long time)
   {
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.name.date.format", "");
@@ -233,7 +237,16 @@ public class CoreLogger
     }
     catch (IOException ex)
     {
-      throw new HongsException(0x1002, ex);
+      throw new HongsError(0x19, ex);
+    }
+  }
+
+  public void destroy()
+    throws Throwable
+  {
+    if (this.out != null)
+    {
+        this.out.close( );
     }
   }
 
@@ -242,11 +255,7 @@ public class CoreLogger
     throws Throwable
   {
     super.finalize();
-
-    if (this.out != null)
-    {
-      this.out.close();
-    }
+    this .destroy ();
   }
 
   //** 静态属性及方法 **/
@@ -272,21 +281,54 @@ public class CoreLogger
   }
 
   /**
-   * 记录错误信息
-   * @param text
-   */
-  public static void error(String text) throws HongsException
-  {
-    CoreLogger.getInstance("error").print(text, 0);
-  }
-
-  /**
    * 记录调试信息
    * @param text
    */
-  public static void debug(String text) throws HongsException
+  public static void debug(String text)
   {
-    CoreLogger.getInstance("debug").print(text, 0);
+    if (1 == (1 & Core.DEBUG)) {
+        CmdletHelper.println(text);
+    }
+    if (2 == (2 & Core.DEBUG)) {
+        try {
+            CoreLogger.getInstance("debug").println(text, 0);
+        }
+        catch (HongsError ex ) {
+            if (1 != (1 & Core.DEBUG)) {
+                CmdletHelper.println(text);
+            }
+            System.err.println("ERROR: Write to debug log failed!");
+        }
+    }
+  }
+
+  /**
+   * 记录错误信息
+   * @param text
+   */
+  public static void error(String text)
+  {
+    if (1 == (1 & Core.DEBUG)) {
+        CmdletHelper.println(text);
+    }
+    if (2 == (2 & Core.DEBUG)) {
+        try {
+            CoreLogger.getInstance("error").println(text, 0);
+        }
+        catch (HongsError ex ) {
+            if (1 != (1 & Core.DEBUG)) {
+                CmdletHelper.println(text);
+            }
+            System.err.println("ERROR: Write to error log failed!");
+        }
+    }
+  }
+
+  public static void error(Throwable t)
+  {
+    ByteArrayOutputStream b = new ByteArrayOutputStream();
+    t.printStackTrace(new PrintStream(b));
+    error( b.toString() );
   }
 
 }

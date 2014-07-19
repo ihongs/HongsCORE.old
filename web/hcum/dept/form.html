@@ -12,13 +12,17 @@
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <input type="hidden" name="pid"/>
-        <div class="form-group">
-            <label class="control-label">名称</label>
-            <input type="text" name="name" class="form-control"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">备注</label>
-            <textarea name="note" class="form-control"></textarea>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">名称</label>
+                    <input type="text" name="name" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">备注</label>
+                    <textarea name="note" class="form-control"></textarea>
+                </div>
+            </div>
         </div>
         <div>
             <button type="submit" class="ensure btn btn-primary">提交</button>

@@ -12,25 +12,31 @@
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <input type="hidden" name="a_hcum_user_dept.0.dept_id" data-pn="dept_id"/>
-        <div class="form-group">
-            <label class="control-label">邮箱</label>
-            <input type="email" name="username" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">口令</label>
-            <input type="password" name="password" class="form-control" data-validate="validate"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">重复口令</label>
-            <input type="password" name="password2" class="form-control" data-repeat="password" data-message="请重复输入口令" placeholder="请重复输入口令"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">昵称</label>
-            <input type="text" name="name" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">备注</label>
-            <textarea name="note" class="form-control"></textarea>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">邮箱</label>
+                    <input type="email" name="username" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">口令</label>
+                    <input type="password" name="password" class="form-control" data-validate="validate"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">重复口令</label>
+                    <input type="password" name="password2" class="form-control" data-repeat="password" data-message="请重复输入口令" placeholder="请重复输入口令"/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">昵称</label>
+                    <input type="text" name="name" class="form-control" required="required" data-unique="hcum/User/Unique.act?id={id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">备注</label>
+                    <textarea name="note" class="form-control"></textarea>
+                </div>
+            </div>
         </div>
         <div>
             <button type="submit" class="ensure btn btn-primary">提交</button>
@@ -40,14 +46,14 @@
 </div>
 
 <script type="text/javascript">
-(function() {
-    var context = $("#hcum_user_form").removeAttr("id");
+    (function() {
+        var context = $("#hcum_user_form").removeAttr("id");
 
-    $("[name=password]", context).data("validate", function(input, value) {
-        if (!value && !$("[name=id]", context).val()) {
-            return "必须填写";
-        }
-        return true;
-    });
-})();
+        $("[name=password]", context).data("validate", function(input, value) {
+            if (!value && !$("[name=id]", context).val()) {
+                return "必须填写";
+            }
+            return true;
+        });
+    })();
 </script>

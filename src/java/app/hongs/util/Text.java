@@ -423,23 +423,20 @@ public final class Text
 
     n = (int) Math.floor(time / 86400000);
     if (n > 0) {  time = time % 86400000;
-      sb.append(n).append("D");
+      sb.append(n).append("d");
     }
     n = (int) Math.floor(time / 3600000);
     if (n > 0) {  time = time % 3600000;
-      sb.append(n).append("H");
+      sb.append(n).append("h");
     }
     n = (int) Math.floor(time / 60000);
     if (n > 0) {  time = time % 60000;
-      sb.append(n).append("M");
+      sb.append(n).append("m");
     }
-    n = (int) Math.floor(time / 1000);
-    if (n > 0) {
-      sb.append(n).append("S");
-    }
-
-    if (sb.length() < 1) {
-        sb.append( "0S");
+    
+    float m = (float) time / 1000;
+    if (0 != m || 0 == sb.length()) {
+      sb.append(m).append("s");
     }
 
     return sb.toString();
@@ -471,13 +468,10 @@ public final class Text
     if (n > 0) {  size = size % 1024;
       sb.append(n).append("K");
     }
-    n = (int) size;
-    if (n > 0) {
-      sb.append(n);
-    }
 
-    if (sb.length() < 1) {
-        sb.append( "0" );
+    n = (int) size;
+    if (0 != n || 0 == sb.length()) {
+      sb.append(n);
     }
 
     return sb.toString();

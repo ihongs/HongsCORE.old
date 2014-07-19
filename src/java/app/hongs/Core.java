@@ -28,17 +28,17 @@ import java.util.Map;
  *
  * <h3>静态属性:</h3>
  * <pre>
- * IN_DEBUG_MODE    标识是否处于调试模式(develop)
- * IN_SHELL_MODE    标识是否处于外壳模式(cmdlet)
- * BASE_HREF        应用访问路径(WEB应用中为ContextPath)
- * BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
- * CONF_PATH        配置信息存放目录
- * LANG_PATH        语言资源存放目录
- * LOGS_PATH        日志文件存放目录
- * TMPS_PATH        临时文件存放目录
- * SERVER_ID        服务器ID
- * 注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
- * </pre>
+ DEBUG            标识不同调试模式(0 无, 1 输出, 2 日志, 3 复合)
+ ENVIR            标识不同运行环境(0 cmd, 1 web)
+ BASE_HREF        应用访问路径(WEB应用中为ContextPath)
+ BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
+ CONF_PATH        配置信息存放目录
+ LANG_PATH        语言资源存放目录
+ LOGS_PATH        日志文件存放目录
+ TMPS_PATH        临时文件存放目录
+ SERVER_ID        服务器ID
+ 注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
+ </pre>
  *
  * <h3>错误代码:</h3>
  * <pre>
@@ -92,7 +92,7 @@ extends HashMap<String, Object>
   @Override
   public Object get(Object name)
   {
-    throw new HongsError(0x10,
+    throw new UnsupportedOperationException(
       "May cause an error on 'get(Object)', use 'get(String|Class)'");
   }
 
@@ -104,7 +104,7 @@ extends HashMap<String, Object>
   @Override
   public void clear()
   {
-    throw new HongsError(0x10,
+    throw new UnsupportedOperationException(
       "May cause an error on 'clear', use the 'destroy'");
   }
 
@@ -113,40 +113,34 @@ extends HashMap<String, Object>
    *
    * Destory对象会执行destroy方法
    * GlobalSingleton和ThreadSingleton对象不会被移除
+   *
+   * @throws java.lang.Throwable
    */
   public final void destroy()
+  throws Throwable
   {
     Iterator it;
 
-    it = this.entrySet().iterator();
+    /**
+     * 先执行 destroy 再执行 remove
+     * 不会因 destroy 里用到了其他对象而导致失败了
+     */
+
+    it = this.entrySet().iterator( );
     while (it.hasNext())
     {
-      Map.Entry  et = (Map.Entry) it.next();
+      Map.Entry  et = (Map.Entry) it.next( );
       Object object =  et.getValue();
       if (object instanceof Destroy)
       {
-        try
-        {
-          ((Destroy) object).destroy();
-        }
-        catch (Error er)
-        {
-          try
-          {
-            CoreLogger.error  (er.getMessage());
-          }
-          catch (HongsException ex)
-          {
-            System.err.println(ex.getMessage());
-          }
-        }
+        ((Destroy) object).destroy();
       }
     }
 
-    it = this.entrySet().iterator();
+    it = this.entrySet().iterator( );
     while (it.hasNext())
     {
-      Map.Entry  et = (Map.Entry) it.next();
+      Map.Entry  et = (Map.Entry) it.next( );
       Object object =  et.getValue();
       if (object instanceof GlobalSingleton
       ||  object instanceof ThreadSingleton)
@@ -223,11 +217,11 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x17, ex);
+        throw new HongsError(0x17, "Can not build "+name, ex);
       }
       catch (IllegalArgumentException ex)
       {
-        throw new HongsError(0x17, ex);
+        throw new HongsError(0x17, "Can not build "+name, ex);
       }
       catch (InvocationTargetException ex)
       {
@@ -235,7 +229,7 @@ extends HashMap<String, Object>
         if (e instanceof StackOverflowError)
             throw (Error) e;
 
-        throw new HongsError(0x17, ex.getCause());
+        throw new HongsError(0x17, "Can not build "+name, ex.getCause());
       }
     }
     catch (NoSuchMethodException ex2)
@@ -262,7 +256,7 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x18, ex);
+        throw new HongsError(0x18, "Can not build "+name, ex);
       }
       catch (InstantiationException ex)
       {
@@ -270,26 +264,26 @@ extends HashMap<String, Object>
         if (e instanceof StackOverflowError)
             throw (Error) e;
 
-        throw new HongsError(0x18, ex);
+        throw new HongsError(0x18, "Can not build "+name, ex);
       }
     }
     catch (SecurityException ex2)
     {
-      throw new HongsError(0x16, ex2);
+      throw new HongsError(0x16, "Can not build "+name, ex2);
     }
   }
 
   //** 静态属性及方法 **/
 
   /**
-   * 是否处于调试模式
+   * 调试级别(0 无, 1输出, 2日志, 3复合)
    */
-  public static boolean IN_DEBUG_MODE;
+  public static byte DEBUG;
 
   /**
-   * 是否处于外壳模式(cmdlet)
+   * 运行环境(0 Cmd, 1 Web)
    */
-  public static boolean IN_SHELL_MODE;
+  public static byte ENVIR;
 
   /**
    * 应用基础路径
@@ -396,6 +390,18 @@ extends HashMap<String, Object>
   /**
    * 获取唯一ID
    *
+   * 采用当前服务器ID(Core.SERVER_ID)
+   *
+   * @return 唯一ID
+   */
+  public static String getUniqueId()
+  {
+    return Core.getUniqueId(Core.SERVER_ID);
+  }
+
+  /**
+   * 获取唯一ID
+   *
    * 36进制的12位字串(不包括服务器ID),
    * 至少支持到"2059/01/01 00:00:00".
    * 取值范围: 0~9A~Z
@@ -421,18 +427,6 @@ extends HashMap<String, Object>
     return (s1 + s2 + s3 + svid).replace(' ', '0');
   }
 
-  /**
-   * 获取唯一ID
-   *
-   * 采用当前服务器ID(Core.SERVER_ID)
-   *
-   * @return 唯一ID
-   */
-  public static String getUniqueId()
-  {
-    return Core.getUniqueId(Core.SERVER_ID);
-  }
-
   //** 核心接口 **/
 
   /**
@@ -440,7 +434,7 @@ extends HashMap<String, Object>
    * 当Core结束时(程序结束, Servlet请求结束)
    * 将执行实现了该接口的类的无参destroy方法
    */
-  public static interface Destroy { public void destroy(); }
+  public static interface Destroy { public void destroy() throws Throwable; }
 
   /**
    * 全局唯一

@@ -94,9 +94,9 @@ public class DatumsConfig
 
       // 测试
       /*
-      app.hongs.util.JSON.print(datas);
-      app.hongs.util.JSON.print(reqDatas);
-      app.hongs.util.JSON.print(refDatas);
+      app.hongs.util.JSON.dumps(datas);
+      app.hongs.util.JSON.dumps(reqDatas);
+      app.hongs.util.JSON.dumps(refDatas);
       */
     }
     catch (IOException ex)

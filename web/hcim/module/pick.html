@@ -1,50 +1,50 @@
 <ul class="nav nav-tabs" data-toggle="tabs">
-  <li><a href="javascript:;">选择模块</a></li>
-  <li class="dn"><a href="javascript:;"></a></li>
+    <li><a href="javascript:;">选择模块</a></li>
+    <li class="dn"><a href="javascript:;"></a></li>
 </ul>
 <div class="nav-panes">
 
-<div id="hcim-module-pick-list">
-    <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('hcim/Module/List.act?sort=-ctime')"/>
-        <param name="openUrls[]" value="['.create','hcim/module/form.html','#hcim-module-pick-pane']"/>
-        <param name="_fill__pick" value="(hsListFillPick)"/>
-        <param name="idKey" value="id"/>
-    </object>
-    <div>
-        <div class="fl tool-box btn-group">
-            <button type="button" class="ensure btn btn-primary">确认选择</button>
-            <button type="button" class="create btn btn-default">创建模块</button>
+    <div id="hcim-module-pick-list">
+        <object class="config" name="hsList" data="">
+            <param name="loadUrl" value="('hcim/Module/List.act?sort=-ctime')"/>
+            <param name="openUrls[]" value="['.create','hcim/module/form.html','#hcim-module-pick-pane']"/>
+            <param name="_fill__pick" value="(hsListFillPick)"/>
+            <param name="idKey" value="id"/>
+        </object>
+        <div>
+            <div class="fl tool-box btn-group">
+                <button type="button" class="ensure btn btn-primary">确认选择</button>
+                <button type="button" class="create btn btn-default">创建模块</button>
+            </div>
+            <form class="fr find-box input-group" action="" method="POST">
+                <input type="search" name="find" class="form-control"/>
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-default">查找</button>
+                </span>
+            </form>
+            <div class="cb"></div>
         </div>
-        <form class="fr find-box input-group" action="" method="POST">
-            <input type="search" name="find" class="form-control"/>
-            <span class="input-group-btn">
-                <button type="submit" class="btn btn-default">查找</button>
-            </span>
-        </form>
-        <div class="cb"></div>
+        <div class="list-box">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th data-fn="id" data-ft="_pick" class="_check">
+                            <input type="checkbox" class="check-all" name="id[]"/>
+                        </th>
+                        <th data-fn="name" class="sortable">模块名称</th>
+                        <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
+                        <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="page-box"></div>
+        <div class="btn-group">
+            <button type="button" class="ensure btn btn-primary">确认选择</button>
+            <button type="button" class="cancel btn btn-link">取消</button>
+        </div>
     </div>
-    <div class="list-box">
-        <table class="table table-hover table-striped">
-            <thead>
-                <tr>
-                    <th data-fn="id" data-ft="_pick" class="_check">
-                        <input type="checkbox" class="check-all" name="id[]"/>
-                    </th>
-                    <th data-fn="name" class="sortable">模块名称</th>
-                    <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
-                    <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-    <div class="page-box"></div>
-    <div class="btn-group">
-        <button type="button" class="ensure btn btn-primary">确认选择</button>
-        <button type="button" class="cancel btn btn-link">取消</button>
-    </div>
-</div>
 
-<div id="hcim-module-pick-pane"></div>
+    <div id="hcim-module-pick-pane"></div>
 </div>

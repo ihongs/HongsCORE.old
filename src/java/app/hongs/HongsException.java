@@ -48,7 +48,7 @@ public class HongsException extends Exception {
 
     @Override
     public String toString() {
-        return this.getMessage();
+        return this.getClass().getName() + this.getMessage();
     }
 
     @Override
@@ -59,6 +59,10 @@ public class HongsException extends Exception {
     @Override
     public String getLocalizedMessage() {
         return that.getLocalizedMessage();
+    }
+
+    public String[] getLocalizedOptions() {
+        return that.getLocalizedOptions();
     }
 
     public void setLocalizedOptions(String... options) {

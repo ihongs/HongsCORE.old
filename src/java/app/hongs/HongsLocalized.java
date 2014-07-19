@@ -1,7 +1,5 @@
 package app.hongs;
 
-import app.hongs.util.Text;
-
 /**
  * 异常本地化工具
  * @author Hongs
@@ -39,8 +37,8 @@ public class HongsLocalized {
      */
     public String getMessage()
     {
-        return "HongsException(0x" + Integer.toHexString(code) + "): "
-                                   + (  desc != null  ?  desc  : "" );
+        return "(Ex" + Integer.toHexString(code) + ")"
+              + ( desc == null  ?  "" : ": " + desc );
     }
 
     /**
@@ -50,7 +48,7 @@ public class HongsLocalized {
     public String getLocalizedMessage() {
         CoreLanguage lang = new CoreLanguage("_error_");
         String ckey, dkey, codx, desx; String[] optx;
-        codx = "0x" + Integer.toHexString(code);
+        codx = "Ex" + Integer.toHexString(code);
         desx = desc != null ? desc : "" ;
         optx = opts != null ? opts : new String[] {};
 
@@ -83,7 +81,15 @@ public class HongsLocalized {
     }
 
     /**
-     * 设置翻译参数
+     * 获取翻译选项
+     * @return
+     */
+    public String[] getLocalizedOptions() {
+        return this.opts;
+    }
+
+    /**
+     * 设置翻译选项
      * @param opts
      */
     public void setLocalizedOptions(String... opts) {

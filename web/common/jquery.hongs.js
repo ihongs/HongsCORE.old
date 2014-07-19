@@ -3001,7 +3001,8 @@ jQuery.fn.load = function(url, data, complete ) {
     $.tools.tabs.conf.current = "active";
     $.tools.tooltip.conf.tipClass = "popover";
     $.tools.validator.conf.errorClass = "has-error";
-    $.tools.validator.conf.messageClass = "tooltip right fade in";
+    $.tools.validator.conf.messageClass = "help-block";
+    //$.tools.validator.conf.messageClass = "tooltip right fade in";
 
     // 设置jquery tools遮罩层
     $.tools.overlay.conf.top = "10%",
@@ -3122,13 +3123,15 @@ jQuery.fn.load = function(url, data, complete ) {
                          .parent("fieldset" ).addClass("dropup");
             inp.closest(".form-group").addClass(conf.errorClass);
 
-            inp.parent().css({position: "relative"});
-            msg.css({visibility: 'hidden'}).empty( );
-            $.each(err.messages, function(i, txt) {
-                msg.append($('<div class="tooltip-inner"></div>').text(txt))
-                   .append($('<div class="tooltip-arrow"></div>'));
+            msg.css({visibility: 'hidden'}).empty();
+            $.each(err.messages, function(i, text ) {
+                msg.append($("<div></div>"). text(text));
+                //msg.append($('<div class="tooltip-inner"></div>').text(text))
+                //   .append($('<div class="tooltip-arrow"></div>'));
             });
+            msg.css({visibility: 'visible'}).show();
 
+            /*
             var p1 =  inp.position();
             var p2 = conf.position.split(/,?\s+/);
             var s1 = [inp.outerHeight(true), inp.outerWidth(true)];
@@ -3142,7 +3145,9 @@ jQuery.fn.load = function(url, data, complete ) {
             if (p2[1] == 'right' ) p1.left +=  s1[1];
             if (p2[1] == 'center') p1.left += (s1[1] / 2) - (s2[1] / 2);
 
+            inp.parent().css({position: "relative"});
             msg.css({visibility: 'visible', position: 'absolute', top: p1.top, left: p1.left}).show();
+            */
         });
     }, function(ipts) {
         var conf = this.getConf();

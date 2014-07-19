@@ -162,7 +162,7 @@ public class JsConfAction
     if ("default".equals(confName))
     {
       sb.append("DEBUG:")
-        .append(String.valueOf(Core.IN_DEBUG_MODE))
+        .append(String.valueOf(Core.DEBUG))
         .append(",\n")
         .append("SERVER_ID:\"")
         .append(Core.SERVER_ID)

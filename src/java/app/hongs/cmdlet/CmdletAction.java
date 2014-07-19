@@ -85,18 +85,15 @@ public class CmdletAction
     cls = act.substring(pos+1);
     act = act.substring(0,pos);
 
-    CoreConfig conf = (CoreConfig)
+    CoreConfig conf = (CoreConfig )
       Core.getInstance(CoreConfig.class);
-    String cnf = "core.app."+act+".cmdlet";
-    if (conf.containsKey(cnf)) {
-        act = conf.getProperty( cnf ) +".";
-    }
-    else {
-        act = conf.getProperty("core.app", "app")+"."+act+".cmdlet.";
+    act = "app."+act+".cmdlet";
+    if (conf.containsKey( act )) {
+        act = conf.getProperty(act);
     }
 
     // app.包.cmdlet.类, action方法
-    doAction(act+cls, "action", helper);
+    doAction(act+"."+cls, "action", helper);
   }
 
 }

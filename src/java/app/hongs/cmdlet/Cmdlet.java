@@ -3,9 +3,11 @@ package app.hongs.cmdlet;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
+import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.util.Text;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,20 +47,20 @@ public class Cmdlet
 
     if (act == null || act.length() == 0)
     {
-      CmdletHelper.print("ERROR: Cmdlet name can not be empty.");
+      CmdletHelper.println("ERROR: Cmdlet name can not be empty.");
       return;
     }
 
     if (act.startsWith(".") || act.endsWith("."))
     {
-      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+act+"'.");
+      CmdletHelper.println("ERROR: Can not parse Cmdlet name '"+act+"'.");
       return;
     }
 
     int pos = act.lastIndexOf('.');
     if (pos == -1)
     {
-      CmdletHelper.print("ERROR: Can not parse Cmdlet name '"+act+"'.");
+      CmdletHelper.println("ERROR: Can not parse Cmdlet name '"+act+"'.");
       return;
     }
 
@@ -67,17 +69,14 @@ public class Cmdlet
     cls = act.substring(pos+1);
     act = act.substring(0,pos);
 
-    CoreConfig conf = (CoreConfig)
+    CoreConfig conf = (CoreConfig )
       Core.getInstance(CoreConfig.class);
-    String cnf = "core.app."+act+".cmdlet";
-    if (conf.containsKey( cnf )) {
-        act = conf.getProperty( cnf ) +".";
-    }
-    else {
-        act = conf.getProperty("core.app", "app")+"."+act+".cmdlet.";
+    act = "app."+act+".cmdlet";
+    if (conf.containsKey( act )) {
+        act = conf.getProperty(act);
     }
 
-    cls = act+cls;
+    cls = act+"."+cls;
 
     /** 执行指定程序 **/
 
@@ -89,14 +88,14 @@ public class Cmdlet
     }
     catch (ClassNotFoundException ex)
     {
-      CmdletHelper.print("ERROR: Can not find class '" + cls + "'.");
+      CmdletHelper.println("ERROR: Can not find class '" + cls + "'.");
       return;
     }
 
     // 动作类必须加上 Cmdlet 注解. Add by Hongs, 2014/7/14
     if (! klass.isAnnotationPresent(app.hongs.cmdlet.annotation.Cmdlet.class))
     {
-      CmdletHelper.print("ERROR: Can not exec class '" + cls + "'.");
+      CmdletHelper.println("ERROR: Can not exec class '" + cls + "'.");
       return;
     }
 
@@ -108,12 +107,12 @@ public class Cmdlet
     }
     catch (NoSuchMethodException ex)
     {
-      CmdletHelper.print("ERROR: Can not find method '" + cls + "." + mtd + "'.");
+      CmdletHelper.println("ERROR: Can not find method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (SecurityException ex)
     {
-      CmdletHelper.print("ERROR: Can not execute method  '" + cls + "." + mtd + "'.");
+      CmdletHelper.println("ERROR: Can not execute method  '" + cls + "." + mtd + "'.");
       return;
     }
     finally
@@ -124,18 +123,26 @@ public class Cmdlet
     // 执行方法
     try
     {
+      if (0 < Core.DEBUG)
+      {
+        CoreLogger.debug(Core.ACTION_PATH.get() + "Starting...");
+      }
+
       method.invoke(null, new Object[] {args});
 
-      //ShellHelper.print(core.ACTION_PATH + " complete.");
+      if (0 < Core.DEBUG)
+      {
+        CoreLogger.debug(Core.ACTION_PATH.get() + "Finished!!!");
+      }
     }
     catch (IllegalAccessException ex)
     {
-      CmdletHelper.print("ERROR: Illegal access for method '" + cls + "." + mtd + "'.");
+      CmdletHelper.println("ERROR: Illegal access for method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (IllegalArgumentException ex)
     {
-      CmdletHelper.print("ERROR: Illegal argument for method '" + cls + "." + mtd + "'.");
+      CmdletHelper.println("ERROR: Illegal argument for method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (InvocationTargetException ex)
@@ -146,7 +153,8 @@ public class Cmdlet
        * 构建错误消息
        */
       String error = ta.getLocalizedMessage();
-      if (!(ta instanceof HongsException) && !(ta instanceof HongsError))
+      if (! (ta instanceof HongsException)
+      &&  ! (ta instanceof HongsError  ) )
       {
         CoreLanguage lang = (CoreLanguage)
             Core.getInstance(CoreLanguage.class );
@@ -156,16 +164,11 @@ public class Cmdlet
         }
           error = lang.translate("core.error.label",
                   ta.getClass().getName())
-                  + ": " + error;
-
-        ta.printStackTrace(System.err);
-      }
-      else if (Core.IN_DEBUG_MODE)
-      {
-        ta.printStackTrace(System.err);
+                  + ": " + error ;
       }
 
-      CmdletHelper.print(error);
+      CoreLogger  .error  ( ta  );
+      CmdletHelper.println(error);
     }
     finally
     {
@@ -175,10 +178,20 @@ public class Cmdlet
        * 输出总的运行时间
        * 并清除参数及核心
        */
-      if (Core.IN_DEBUG_MODE)
-          CmdletHelper.printETime("Total exec time", core.GLOBAL_TIME);
+      if (1 < Core.DEBUG)
+      {
+          CoreLogger.debug("Total exec time: "
+          +(Text.humanTime(System.currentTimeMillis()-core.GLOBAL_TIME)));
+      }
 
-      core.destroy();
+      try
+      {
+          core.destroy( );
+      }
+      catch (Throwable e)
+      {
+          CoreLogger.error(e);
+      }
     }
   }
 
@@ -188,7 +201,7 @@ public class Cmdlet
     Map<String, Object> opts;
     opts = CmdletHelper.getOpts(args,
       "basepath:s", "basehref:s", "language:s",
-      "request:s" , "session:s" , "cookie:s" , "debug:b"
+      "request:s" , "session:s" , "cookie:s" , "debug:i"
     );
     args = (String[]) opts.get("");
 
@@ -197,12 +210,12 @@ public class Cmdlet
 
     /** 静态属性配置 **/
 
-    Core.IN_SHELL_MODE = true ;
-    Core.IN_DEBUG_MODE = false;
+    Core.ENVIR = 0;
+    Core.DEBUG = 0;
 
     if (opts.containsKey("debug"))
     {
-      Core.IN_DEBUG_MODE = (Boolean)opts.get("debug");
+      Core.DEBUG = Byte.parseByte(opts.get("debug").toString());
     }
 
     if (opts.containsKey("basepath"))
@@ -285,7 +298,7 @@ public class Cmdlet
           lang = CoreLanguage.getAcceptLanguage(lang);
       if (lang == null)
       {
-        CmdletHelper.print("ERROR: Unsupported language: "+lang+".");
+        CmdletHelper.println("ERROR: Unsupported language: "+lang+".");
         System.exit(1);
       }
     }
