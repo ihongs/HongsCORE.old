@@ -48,7 +48,6 @@ public class User {
         helper.back(data);
     }
 
-    @CommitSuccess
     public void actionSave(ActionHelper helper)
     throws HongsException {app.hongs.util.JSON.dumps(helper.getRequestData());
         String id = model.save(helper.getRequestData());

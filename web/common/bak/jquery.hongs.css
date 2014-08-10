@@ -93,9 +93,8 @@ html, body {
 }
 
 object.config,
-.panes .hide-in-tabs,
-.nav-panes .hide-in-tabs,
-.overlay .hide-in-overlay {
+.nav-panes>*>.load-box>h1,
+.nav-panes>*>.load-box>h2 {
     display: none;
 }
 
@@ -241,22 +240,20 @@ fieldset.dropup .dropdown-body {
 
 /** 选择 **/
 
-.open-box.pick-box,
-.load-box.pick-box {
-    width: 1110px;
+@media (min-width: 768px) {
+  .open-box.pick-box {
+    width: 750px;
+  }
 }
-
-.pick-opt {
-    width: 100%;
+@media (min-width: 992px) {
+  .open-box.pick-box {
+    width: 970px;
+  }
 }
-.pick-opt .pick-del {
-    padding-right: 9px;
-    padding-left: 9px;
-}
-.pick-opt .pick-txt {
-    max-width: 100%;
-    text-align: left;
-    overflow: hidden;
+@media (min-width: 1200px) {
+  .open-box.pick-box {
+    width: 1170px;
+  }
 }
 
 /** jquery.tools 设置 **/
@@ -277,7 +274,7 @@ fieldset.dropup .dropdown-body {
     opacity: 0.9;
 }
 .overlay .open-box {
-    margin: 15px;
+    padding: 15px;
 }
 
 /** bootstrap 调整 **/
@@ -296,8 +293,10 @@ legend {
 .close {
     margin-top: -4px;
 }
+.nav .close,
 .btn .close {
-    padding: 6px 0 6px 6px;
+    margin-right: -12px;
+    padding: 6px;
     font-size: 15px;
 }
 

@@ -1,52 +1,43 @@
-<ul class="nav nav-tabs" data-toggle="tabs">
-    <li><a href="javascript:;">选择属性</a></li>
-    <li class="dn"><a href="javascript:;"></a></li>
-</ul>
-<div class="nav-panes">
+<h2>选择属性</h2>
 
-    <div id="hcim-domain-pick-list">
-        <object class="config" name="hsList" data="">
-            <param name="loadUrl" value="('hcim/Domain/List.act?sort=-ctime')"/>
-            <param name="openUrls[]" value="['.create','hcim/domain/form.html','#hcim-domain-pick-pane']"/>
-            <param name="_fill__pick" value="(hsListFillPick)"/>
-            <param name="idKey" value="id"/>
-        </object>
-        <div>
-            <div class="fl tool-box btn-group">
-                <button type="button" class="ensure btn btn-primary">确认选择</button>
-                <button type="button" class="create btn btn-default">创建模块</button>
-            </div>
-            <form class="fr find-box input-group" action="" method="POST">
-                <input type="search" name="find" class="form-control"/>
-                <span class="input-group-btn">
-                    <button type="submit" class="btn btn-default">查找</button>
-                </span>
-            </form>
-            <div class="cb"></div>
-        </div>
-        <div class="list-box">
-            <table class="table table-hover table-striped">
-                <thead>
-                    <tr>
-                        <th data-fn="id" data-ft="_pick" class="_check">
-                            <input type="checkbox" class="check-all" name="id[]"/>
-                        </th>
-                        <th data-fn="name" class="sortable">属性名称</th>
-                        <th data-fn="type" class="sortable">类型</th>
-                        <th data-fn="note">备注</th>
-                        <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
-                        <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <div class="page-box"></div>
-        <div class="btn-group">
+<div id="hcim-domain-pick-list">
+    <object class="config" name="hsList" data="">
+        <param name="loadUrl" value="('hcim/Domain/List.act?sort=-ctime')"/>
+        <param name="openUrls[]" value="['.create','hcim/domain/form.html','{OPENBOX}']"/>
+        <param name="_fill__pick" value="(hsListFillPick)"/>
+        <param name="idKey" value="id"/>
+    </object>
+    <div>
+        <form class="fl tool-box btn-group">
             <button type="button" class="ensure btn btn-primary">确认选择</button>
-            <button type="button" class="cancel btn btn-link">取消</button>
-        </div>
+            <button type="button" class="create btn btn-default">创建属性</button>
+        </form>
+        <form class="fr find-box btn-group" action="" method="POST">
+            <input type="search" name="find" class="form-control"/>
+            <button type="submit" class="btn btn-default">查找</button>
+        </form>
+        <div class="cb"></div>
     </div>
-
-    <div id="hcim-domain-pick-pane"></div>
+    <div class="listbox table-responsive">
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th data-fn="id" data-ft="_pick" class="_check">
+                        <input type="checkbox" class="check-all" name="id[]"/>
+                    </th>
+                    <th data-fn="name" class="sortable">属性名称</th>
+                    <th data-fn="type" class="sortable">类型</th>
+                    <th data-fn="note">备注</th>
+                    <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
+                    <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="pagebox"></div>
+    <div>
+        <button type="button" class="ensure btn btn-primary">确认选择</button>
+        <button type="button" class="cancel btn btn-link">取消</button>
+    </div>
 </div>

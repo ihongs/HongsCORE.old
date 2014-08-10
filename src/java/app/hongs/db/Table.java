@@ -516,7 +516,7 @@ public class Table
    */
   protected static List<String> getAssocPath(Map assoc)
   {
-    List<String> ts = (List)assoc.get("name");
+    List<String> ts = (List)assoc.get("path");
     if (   ts == null  ) ts = new ArrayList();
     return ts;
   }

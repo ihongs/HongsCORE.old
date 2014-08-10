@@ -143,12 +143,12 @@ public class NavTag extends SimpleTagSupport {
     }
 
     private String translate(String name) {
-        if (name.indexOf("{opt}") !=  -1 ) {
-            name = name.replace("{opt}", "create");
+        if (name.indexOf("{opr}") !=  -1 ) {
+            name = name.replace("{opr}", "create");
         }
         name = cl.translate(name);
-        if (name.indexOf("{opt}") !=  -1 ) {
-            name = name.replace("{opt}", cl.translate("fore.form.create"));
+        if (name.indexOf("{opr}") !=  -1 ) {
+            name = name.replace("{opr}", cl.translate("fore.form.create"));
         }
         return name;
     }

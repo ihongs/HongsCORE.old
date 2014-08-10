@@ -4,13 +4,13 @@
       xsi:schemaLocation="http://hongs-core ac.xsd">
     <page name="通用信息管理" uri="/hcim/index.html">
         <page name="实体" uri="/hcim/entity/list.html">
-            <page name="${opt}模型" uri="/hcim/entity/form.html"/>
+            <page name="${opr}模型" uri="/hcim/entity/form.html"/>
         </page>
         <page name="模块" uri="/hcim/module/list.html">
-            <page name="${opt}模块" uri="/hcim/module/form.html"/>
+            <page name="${opr}模块" uri="/hcim/module/form.html"/>
         </page>
         <page name="属性" uri="/hcim/domain/list.html">
-            <page name="${opt}属性" uri="/hcim/domain/form.html"/>
+            <page name="${opr}属性" uri="/hcim/domain/form.html"/>
         </page>
     </page>
 </root>

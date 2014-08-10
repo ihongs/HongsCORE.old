@@ -45,9 +45,6 @@ node-TYPE       节点类型, TYPE为类型标识, 在.tree-node上
 pick            打开href对应的选择窗口, 用于选择组件, 下同
 pick-box        选项窗口
 pick-mul        多选窗口
-pick-opt        选项区域
-pick-txt        选项文本区域
-pick-del        选项删除按钮
 
 [Attr]
 
@@ -993,6 +990,27 @@ function _HsReadOpts() {
 }
 
 /**
+ * 获取相对目标区域
+ * @param {string} sel
+ * @param {jQuery} that
+ * @returns {jQuery}
+ */
+function _hsTarget(sel, that) {
+    that = jQuery(that);
+    var flg = sel.charAt(0);
+    var sal = sel.substr(1);
+    switch (flg) {
+        case '@':
+            that = that.closest(".load-box");
+            return sal ? jQuery(sal, that) : that;
+        case '>':
+            return sal ? jQuery(sel, that) : that;
+        default :
+            return jQuery(sel);
+    }
+}
+
+/**
  * bootstrap方位转jquery.tools方位
  * @param {String} pos
  * @returns {String}
@@ -1111,15 +1129,42 @@ function HsOpen(url, data, callback) {
     }
 
     var box  = jQuery(this);
+    if (box.is( ".nav" )) {
+        var lnk = box.find("[data-href='"+url+"']" );
+        if (! lnk.size()) {
+            lnk = jQuery('<a href="javascript:;"><span></span><span class="close">&times;</span></a>');
+            var tab = jQuery('<li class="dn"></li>');
+            var div = jQuery('<div></div>');
+            var pns = box.siblings(  );
+            lnk.attr("data-href", url);
+            tab.appendTo(box);
+            lnk.appendTo(tab);
+            div.appendTo(pns);
+            // 重建 tabs
+            var tabs = box.data("tabs");
+            var cnf = tabs.getConf ( );
+            var idx = tabs.getIndex( );console.log(idx)
+            tabs = box.tabs(pns.children(), cnf);
+            tabs.click(idx);
+        }
+        box  = lnk.parent();
+    }
     var tabs = box.parent().data("tabs");
     if (tabs) {
+        var pre = tabs.getCurrentTab ( );console.log(pre.index());
         tabs.click(box.index());
-        var tab = tabs.getCurrentTab(  );
-        tab.show().find( "a" ).text( hsGetLang("tab.loading"));
-        box = tabs.getCurrentPane();
+        var tab = tabs.getCurrentTab ( );
+            box = tabs.getCurrentPane( );
+        var lab = tab.find("a");
+        if (lab.find("span:first").size()) {
+            lab = lab.find( "span:first" );
+        }
+        lab.text(hsGetLang("tab.loading"));
+        tab.show();
         if (! box.data("tabs")) {
             box.data("tabs", tabs );
             box.data("tab" , tab  );
+            box.data("pre" , pre  );
         }
     } else {
         if (! box.data("baks")) {
@@ -1144,15 +1189,17 @@ function HsClose() {
     box.trigger("hsClose");
     if (box.data("overlay")) {
         box.data("overlay").close();
-    }
-    else if (prt.data("tabs")) {
-        var idx = prt.data("idx") || 0;
+    } else
+    if (prt.data("tabs")) {
+        var pre = prt.data( "pre" );
+        var idx = pre.is(":hidden")
+                ?  0 : pre.index( );
         prt.data("tabs").click(idx);
         prt.data("tab").hide();
         prt.removeData("tabs");
-    }
-    else if (prt.data("baks")) {
-        prt.data("baks").appendTo(prt);
+    } else
+    if (prt.data("baks")) {
+        prt.data("baks").appendTo( prt );
         prt.removeData("baks");
     }
     box.remove();
@@ -1164,25 +1211,28 @@ function HsClose() {
  * @return 浮窗或区域对象
  */
 function HsReady() {
-    var box = jQuery(this);
-    box.trigger("hsReady");
-    if (box.data("overlay")
+    var $   =  jQuery;
+    var box = $(this);
+    box.trigger ("hsReady");
+
+    if (box.is(".load-box")
     &&  box.children("object.config[name=hsInit]").size() == 0) {
-        box.data("overlay").load(); // 有hsIint则交给HsInit去处理
+        HsInit.call(box,{});
     }
 
-    var $ = jQuery;
-
-    /** 样式相关处理 **/
-
-    box.find('*').contents().filter(function() {
-        // 清除全部空白文本节点, 避免在chrome等浏览器中显示空白间隔
-        return 3 == this.nodeType && /^\s+$/.test(this.nodeValue);
-    }).remove();
+    /**
+     * 为所有的 input 加上 type-CLASS, 方便设置样式, 兼容老浏览器
+     */
     box.find('input').each(function() {
-        // 为所有的input加上type-class, 方便设置样式, 兼容老浏览器
         $(this).addClass("input-" + $(this).attr("type"));
     });
+
+    /**
+     * 为避免在 chrome 等浏览器中显示空白间隔, 清除全部空白文本节点
+     */
+    box.find('*').contents().filter(function() {
+        return this.nodeType == 3 && /^\s+$/.test(this.nodeValue);
+    }).remove();
 
     /** 语义标签解析 **/
 
@@ -1208,7 +1258,7 @@ function HsReady() {
         var m = $(this), n;
         do {
             n = m.attr("data-target");
-            if (n) break;
+            if (n) { n = _hsTarget(n, m); break; }
             n = m.siblings(".panes,.nav-panes");
             if (n.size()) break;
             return;
@@ -1219,7 +1269,7 @@ function HsReady() {
         var m = $(this), n;
         do {
             n = m.attr("data-target");
-            if (n) break;
+            if (n) { n = _hsTarget(n, m); break; }
             n = m.siblings(".overlay,.alert,.modal");
             if (n.size()) break;
             return;
@@ -1239,7 +1289,7 @@ function HsReady() {
         do {
             n = m.attr("data-target");
             r = false;
-            if (n) break;
+            if (n) { n = _hsTarget(n, m); break; }
             n = m.siblings(".tooltip,.popover,.dropdown-menu");
             r = true ;
             if (n.size()) break;
@@ -1288,28 +1338,41 @@ function HsReady() {
 function HsInit(opts) {
     var box = jQuery(this);
 
-    /** jquery tools, bootstrap 初始配置处理 **/
-
     // 自动提取标题, 替换编辑文字
     // 如主键不叫id, 打开编辑页面, 则需加上id=1
     var h = box.children("h1,h2,h3,h4,h5,h6");
     if (h.length) opts.title = h.text();
     if (opts.title) {
         opts.title  =  H$( "&id", box )?
-            hsGetLang(opts.title,{'opt':opts.update||hsGetLang("form.update")}):
-            hsGetLang(opts.title,{'opt':opts.create||hsGetLang("form.create")});
+            hsGetLang(opts.title,{'opr':opts.update||hsGetLang("form.update")}):
+            hsGetLang(opts.title,{'opr':opts.create||hsGetLang("form.create")});
     }
-    if (h.length) h.text ( opts.title );
+    if (h.length)h.text(opts.title);
 
-    var v, o, c;
-    if (box.data( "overlay" )) {
-        o = box.data( "overlay" );  c = o.getConf();
-        v = hsGetValue(opts, "top"); if (v) c.top = v;
-        v = hsGetValue(opts, "left"); if (v) c.left = v;
-        v = hsGetValue(opts, "width"); if (v) box.css("width" , v);  o.load();
+    if (box.data("overlay")) {
+        var o = box.data("overlay");
+        for(var k in opts  ) {
+            var v  = opts[k];
+            switch (k) {
+                case "class":
+                    box.addClass(v);
+                    break;
+                default:
+                    box.css ( k, v);
+                    break;
+            }
+        }
+        o.load();
     }
-    else if (box.parent().data("tabs")) {
-        v = hsGetValue(opts, "title"); if (v) box.parent().data("tab").find("a").text(v);
+    else if (box.parent( ).data("tabs")) {
+        var v = hsGetValue(opts,"title");
+        if (v) {
+            var o = box.parent().data("tab").find("a");
+            if (o.find("span").size( ) ) {
+                o = o.find("span:first");
+            }
+            o.text(v);
+        }
     }
 }
 
@@ -2012,11 +2075,11 @@ HsList.prototype = {
     open     : function(btn, box, url, data) {
         var that = this;
         var dat2 = jQuery.extend({}, hsSerialObj(url), hsSerialObj(data||{}));
-        if (box == "@") box = jQuery(btn).parent(".load-box");
+        if (box == "@") box = jQuery(btn).closest(".load-box");
         if (box)
             HsOpen.call(box, url, data, function() {
                that.openBack(btn, this, dat2);
-            });
+            }).data("related", btn.closest(".load-box")[0]);
         else
             hsOpen     (     url, data, function() {
                that.openBack(btn, this, dat2);
@@ -2473,7 +2536,7 @@ HsTree.prototype = {
         if (box)
             HsOpen.call(box, url, data, function() {
                that.openBack(btn, this, dat2);
-            });
+            }).data("related", btn.closest(".load-box")[0]);
         else
             hsOpen     (     url, data, function() {
                that.openBack(btn, this, dat2);
@@ -2556,34 +2619,45 @@ HsTree.prototype = {
 
 /**
  * 选择控件
- * @param {jQuery} box
- * @param {String} url
- * @param {Function} func
+ * @param {String} url 要打开的选择页地址
+ * @param {jQuery} tip 在哪打开
+ * @param {jQuery} box 在哪填充
+ * @param {Function} fil 填充函数
  * @returns {jQuery}
  */
-function HsPick(box, url, func) {
+function HsPick(url, tip, box, fil) {
+    if (fil == undefined
+    &&  typeof url == "function") {
+        fil  = url;
+        url  = tip;
+        tip  = null;
+    } else if (url == undefined ) {
+        url  = tip;
+        tip  = null;
+    }
+
     var v    = { };
     var n    = box.attr("name")||box.attr("data-fn");
     var form = box.closest(".HsForm").data("HsForm");
     var mul  = /(\[\]|\.)$/.test( n );
     var btn  = jQuery(this);
 
-    if (! func) {
+    if (! fil) {
         do {
-            func = form["_fill_"+ n ];
-            if (func) break;
+            fil = form["_fill_"+ n];
+            if (fil) break;
 
             var t;
 
-            t = box.attr( "data-fn" );
-            func = form["_fill_"+ t ];
-            if (func) break;
+            t = box.attr("data-ft");
+            fil = form["_fill_"+ t];
+            if (fil) break;
 
-            t = box.attr( "data-fn" );
-            func = form["_fill_"+ t ];
-            if (func) break;
+            t = box.attr("data-fn");
+            fil = form["_fill_"+ t];
+            if (fil) break;
 
-            func = hsFormFillPick;
+            fil = hsFormFillPick;
         } while (false);
     }
 
@@ -2594,45 +2668,45 @@ function HsPick(box, url, func) {
     } else {
         box.find("li").each(function() {
             var opt = jQuery(this);
-            var val = opt.find( ":hidden" ).val ();
+            var val = opt.find(".pick-val").val ();
             var txt = opt.find(".pick-txt").text();
             v[val] = txt;
         });
     }
 
-    hsOpen(url, undefined, function() {
-        function pickBack() {
-            var evt = jQuery.Event("pickBack");
-            box.trigger( evt, [ v ] );
-            if (evt.isDefaultPrevented()) {
-                return false;
-            }
-
-            func.call(form, box, v, n, "data");
-            return true;
+    function pickItem(val, txt) {
+        var evt = jQuery.Event("pickItem");
+        box.trigger( evt, arguments );
+        if (evt.isDefaultPrevented()) {
+            return false;
         }
 
-        function pickItem(val, txt) {
-            var evt = jQuery.Event("pickItem");
-            box.trigger( evt, arguments );
-            if (evt.isDefaultPrevented()) {
-                return false;
-            }
+        if (! mul) {
+            for( var  key  in  v )
+                delete v[key];
+            if (txt !== undefined)
+                v[val] = txt ;
+        } else {
+            if (txt !== undefined)
+                v[val] = txt ;
+            else
+                delete v[val];
+        }
+        return true;
+    }
 
-            if (! mul) {
-                for( var  key  in  v )
-                    delete v[key];
-                if (txt !== undefined)
-                    v[val] = txt ;
-            } else {
-                if (txt !== undefined)
-                    v[val] = txt ;
-                else
-                    delete v[val];
-            }
-            return true;
+    function pickBack() {
+        var evt = jQuery.Event("pickBack");
+        box.trigger( evt, [ v ] );
+        if (evt.isDefaultPrevented()) {
+            return false;
         }
 
+        fil.call(form , box, v, n, "data");
+        return true;
+    }
+
+    function pickOpen() {
         var tip = jQuery( this );
         tip.data("pickData", v )
            .addClass("pick-box")
@@ -2695,7 +2769,16 @@ function HsPick(box, url, func) {
 
             pickItem(val, txt, inf);
         });
-    });
+    };
+
+    var win;
+    if (tip) {
+        win = HsOpen.call(tip, url, undefined, pickOpen);
+        win.data("related", btn.closest(".load-box")[0]);
+    } else {
+        win = hsOpen     (     url, undefined, pickOpen);
+    }
+    return win;
 }
 
 /**
@@ -2795,10 +2878,9 @@ function hsFormFillPick(box, v, n, t) {
         for(var val in v) {
             var txt  = v[val];
             box.append(jQuery('<li class="btn btn-default form-control"></li>')
-               .append(jQuery('<input type="hidden"/>').attr("name",n).val(val))
-               .append(jQuery('<span class="close pull-right"> &times;</span>'))
-               .append(jQuery('<span></span>').text( txt ))
-               .attr( "title", txt )
+               .append(jQuery('<input type="hidden" class="pick-val"/>').attr("name", n).val(val))
+               .append(jQuery('<span class="close pull-right">&times;</span>'))
+               .append(jQuery('<span class="pick-txt"></span>').text( txt )).attr( "title" , txt )
             );
         }
     }
@@ -2927,7 +3009,7 @@ jQuery.fn.load = function(url, data, complete ) {
         var url = $(this).attr("href");
         var box = $(this).attr("data-target");
         if (box) {
-            box = box.charAt(0) == "$" ? $(box.substr(1), this) : $(box);
+            box = _hsTarget(box, this);
         } else {
             var nav = $(this).closest(".nav");
             if (nav.size()) {
@@ -2935,18 +3017,20 @@ jQuery.fn.load = function(url, data, complete ) {
                 box = nav.data("tabs").getPanes().eq(idx);
             }
         }
-        box ? box.hsOpen(url) : $.hsOpen(url);
+        box = box ? box.hsOpen(url, undefined, undefined, this)
+                  :   $.hsOpen(url, undefined, undefined, this);
+        box.data( "related" , $(this).closest(".load-box")[0] );
         return false;
     })
     .on("click", ".close,.cancel", function() {
         var nav = $(this).closest(".nav");
         if (nav.size()) {
             var tabs = nav.data("tabs");
-            var cidx = tabs.getIndex( );
-            var pane = tabs.getPanes( ).eq(idx);
-            var idx  = $(this).closest("li").index();
-            if (idx != cidx) {
-                pane.data("idx", cidx);
+            var idx  = tabs.getIndex( );
+            var idz  = $(this).closest("li").index();
+            var pane = tabs.getPanes(  ).eq(  idz  );
+            if (idx != idz) {
+                pane.data("idx", idx );
                 pane.children(".load-box").hsClose();
                 pane.removeData("idx");
             } else {
@@ -2962,18 +3046,30 @@ jQuery.fn.load = function(url, data, complete ) {
         var url = $(this).attr("href");
         var box = $(this).attr("data-target");
         if (box) {
-            box = box.charAt(0) == "$" ? $(box.substr(1), this) : $(box);
+            box = _hsTarget(box, this);
         } else {
-            box = $(this).siblings( "[name],[data-fn]" );
+            var nav = $(this).closest(".nav");
+            if (nav.size()) {
+                var idx = $(this).closest( "li" ).index();
+                box = nav.data("tabs").getPanes().eq(idx);
+            }
+        }
+
+        // 填充区域
+        var inp = $(this).attr("data-fill-area");
+        if (inp) {
+            inp = inp.charAt(0) == ">" ? $(inp, this) : $(inp);
+        } else {
+            inp = $(this).siblings("[name],[data-fn]");
         }
 
         // 填充函数
-        var func = box.attr("data-toggle");
-        if (func) {
-            func = eval ('(' + func + ')');
+        var fun = $(this).attr("data-fill-func");
+        if (fun) {
+            fun = eval ( '(' + fun + ')' );
         }
 
-        box.hsPick(box , url , func);
+        $(this).hsPick(url, box, inp, fun);
         return false;
     })
     // /** 表单 **/
@@ -3028,6 +3124,16 @@ jQuery.fn.load = function(url, data, complete ) {
     // /** 卷帘 **/
     .on("click", "legend.dropdown-toggle,.panel-heading.dropdown-toggle", function() {
         $(this).parent().toggleClass("dropup");
+    })
+    .on("hsClose", ".load-box", function(evt) {
+        if (evt.target !== evt.currentTarget) return;
+        var that = this;
+        $( this ).removeData("related");
+        $(".load-box").not(this).each(function( ) {
+            if ($(this).data("related") === that) {
+                $(this).hsClose();
+            }
+        });
     });
 
     // /** 组件配置 **/

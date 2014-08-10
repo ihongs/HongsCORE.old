@@ -1,31 +1,27 @@
-<ul class="nav nav-tabs" data-toggle="tabs">
+<ul class="nav nav-tabs" data-toggle="tabs" id="hcim-entity-tabs">
     <li><a href="javascript:;">实体列表</a></li>
-    <li class="dn"><a href="javascript:;"></a></li>
 </ul>
-<div class="nav-panes">
-
-    <div id="hcim-entity-list">
+<div class="panes">
+    <div id="hcim-entity-list" class="row">
         <object class="config" name="hsList" data="">
             <param name="loadUrl" value="('hcim/Entity/List.act')"/>
-            <param name="openUrls[]" value="['.create','hcim/entity/form.html','#hcim-entity-pane']"/>
-            <param name="openUrls[]" value="['.modify','hcim/entity/form.html?id={ID}','#hcim-entity-pane']"/>
+            <param name="openUrls[]" value="['.create','hcim/entity/form.html','{OPENBOX}']"/>
+            <param name="openUrls[]" value="['.modify','hcim/entity/form.html?id={ID}','{OPENBOX}']"/>
             <param name="sendUrls[]" value="['.remove','hcim/Entity/Remove.act']"/>
         </object>
         <div>
-            <div class="fl tool-box btn-group">
+            <form class="fl toolbox btn-group">
                 <button type="button" class="create btn btn-default">创建实体</button>
                 <button type="button" class="modify for-select btn btn-default">修改</button>
                 <button type="button" class="remove for-checks btn btn-danger" >删除</button>
-            </div>
-            <form class="fr find-box input-group" action="" method="POST">
+            </form>
+            <form class="fr findbox btn-group" action="" method="POST">
                 <input type="search" name="find" class="form-control"/>
-                <span class="input-group-btn">
-                    <button type="submit" class="btn btn-default">查找</button>
-                </span>
+                <button type="submit" class="btn btn-default">查找</button>
             </form>
             <div class="cb"></div>
         </div>
-        <div class="list-box">
+        <div class="listbox table-responsive">
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
@@ -41,8 +37,6 @@
                 <tbody></tbody>
             </table>
         </div>
-        <div class="page-box"></div>
+        <div class="pagebox"></div>
     </div>
-
-    <div id="hcim-entity-pane"></div>
 </div>

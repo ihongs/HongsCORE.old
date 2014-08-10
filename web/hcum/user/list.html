@@ -1,25 +1,23 @@
 <div id="hcum-user-list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcum/User/List.act?dept_id='+H$('&dept_id',this))"/>
-        <param name="openUrls[]" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'#hcum-user-pane']"/>
-        <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','#hcum-user-pane']"/>
+        <param name="openUrls[]" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'{OPENBOX}']"/>
+        <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','{OPENBOX}']"/>
         <param name="sendUrls[]" value="['.remove','hcum/User/Remove.act']"/>
     </object>
     <div>
-        <div class="fl tool-box btn-group">
+        <form class="fl toolbox btn-group">
             <button type="button" class="create btn btn-default">创建用户</button>
             <button type="button" class="modify for-select btn btn-default">修改</button>
             <button type="button" class="remove for-checks btn btn-danger" >删除</button>
-        </div>
-        <form class="fr find-box input-group" action="" method="POST">
+        </form>
+        <form class="fr findbox btn-group" action="" method="POST">
             <input type="search" name="find" class="form-control"/>
-            <span class="input-group-btn">
-                <button type="submit" class="btn btn-default">查找</button>
-            </span>
+            <button type="submit" class="btn btn-default">查找</button>
         </form>
         <div class="cb"></div>
     </div>
-    <div class="list-box">
+    <div class="listbox table-responsive">
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
@@ -35,5 +33,5 @@
             <tbody></tbody>
         </table>
     </div>
-    <div class="page-box"></div>
+    <div class="pagebox"></div>
 </div>
