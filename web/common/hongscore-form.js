@@ -237,16 +237,21 @@ HsForm.prototype = {
     saveBack : function(rst) {
         rst = hsResponObj(rst, !!this.formBox.attr("target"));
         if (rst.__success__ === false) {
-            if (typeof(rst.errors) !== "undefined") {
-                this.formBox.data("validator").invalidate(rst.errors);
+            if (typeof rst.errors !== "undefined") {
+                for(var n in rst.errors) {
+                    var e =  rst.errors[ n ];
+                    this.haserror(n , e);
+                }
             }
-            this.formBox.trigger("saveFail", [rst]);
-            return;
+            var evt = new jQuery.Event("saveFail");
+            this.formBox.trigger(evt, [rst]);
+        } else {
+            var evt = new jQuery.Event("saveBack");
+            this.formBox.trigger(evt, [rst]);
+            if (! evt.isDefaultPrevented( )) {
+                this.loadBox.hsClose();
+            }
         }
-        var evt = new jQuery.Event("saveBack");
-        this.formBox.trigger(evt, [rst]);
-        if (evt.isDefaultPrevented() == false)
-            HsClose.call( this.loadBox );
     },
 
     _fill__review : function(inp, v, n, t) {

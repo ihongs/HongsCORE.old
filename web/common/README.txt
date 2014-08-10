@@ -12,13 +12,17 @@
 #### 环境设置 ####
 
 <link rel="stylesheet" type="text/css" href="../common/css/bootstrap.css"/>
-<link rel="stylesheet" type="text/css" href="../common/css/jquery.hongs.css"/>
+<link rel="stylesheet" type="text/css" href="../common/css/hongscore.css"/>
 <script type="text/javascript" src="../common/jquery.min.js"></script>
-<script type="text/javascript" src="../common/jquery.tools.min.js"></script>
-<script type="text/javascript" src="../common/auth/default.js"></script>
+<script type="text/javascript" src="../common/bootstrap.min.js"></script>
 <script type="text/javascript" src="../common/conf/default.js"></script>
 <script type="text/javascript" src="../common/lang/default.js"></script>
-<script type="text/javascript" src="../common/jquery.hongs.js"></script>
+<script type="text/javascript" src="../common/auth/default.js"></script>
+<script type="text/javascript" src="../common/hongscore.js"></script>
+<script type="text/javascript" src="../common/hongscore-form.js"></script>
+<script type="text/javascript" src="../common/hongscore-list.js"></script>
+<script type="text/javascript" src="../common/hongscore-tree.js"></script>
+<script type="text/javascript" src="../common/hongscore-pick.js"></script>
 
 注: 将以上代码加入 head 中，注意 link 的 href 和 script 的 src 路. common/auth 为框架提供的权限列表.
 
@@ -118,9 +122,3 @@
         </div>
     </form>
 </div>
-
-#### HsOpen 打开的浮层设置 ####
-
-<object class="config" name="hsInit" data="">
-    <param name="width" value="600px"/><!-- 定义浮层宽度为 600px -->
-</object>
