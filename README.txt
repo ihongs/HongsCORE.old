@@ -72,11 +72,12 @@ HongsCORE
     - tmps          临时文件(可配置)
   + common          前端通用库(js,flash)
     - css           前端样式
+    - fonts         前端字体
     - img           前端图片
-    - page          通用页面(页头\页尾\组件等jsp,html文件)
-    - auth          权限信息(虚拟目录)
+    - pages         通用页面(页头\页尾\组件等jsp,html文件)
     - conf          配置信息(虚拟目录)
     - lang          语言资源(虚拟目录)
+    - auth          权限信息(虚拟目录)
   - xxxx            项目模块页面
 
 文件映射:
