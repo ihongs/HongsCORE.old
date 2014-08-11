@@ -116,7 +116,7 @@ function hsResponObj(rst, qut) {
         if (! qut) {
             if (rst.__success__) {
                 if (rst.__message__) {
-                    hsNote(rst.__message__, 'alert-success');
+                    jQuery.hsNote(rst.__message__, 'alert-success');
                 }
             }
             else {
@@ -1169,8 +1169,8 @@ $.fn.hsInit = function(cnf) {
     }
     if (cnf.title) {
         cnf.title = H$("&id", box)?
-            hsGetLang(cnf.title, {'opr':cnf.update||H$(":form.update")}):
-            hsGetLang(cnf.title, {'opr':cnf.create||H$(":form.create")});
+            hsGetLang(cnf.title, {'opr':cnf.update||hsGetLang("form.update")}):
+            hsGetLang(cnf.title, {'opr':cnf.create||hsGetLang("form.create")});
     }
     if (h.length ) {
         h.text(  cnf.title  );
@@ -1204,7 +1204,7 @@ $.fn.hsInit = function(cnf) {
                     a.find(".modal-title" ).text(v);
                     break;
                 case "modal":
-                    a.find(".modal-dialog").addClass(v);
+                    a.find(".modal-dialog").addClass("modal-"+v);
                     break;
             }
         }

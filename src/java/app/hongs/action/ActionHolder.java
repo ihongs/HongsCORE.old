@@ -26,6 +26,13 @@ import javax.servlet.http.HttpServletResponse;
  * 必须作为第一个 filter
  * </p>
  *
+ * <h3>配置选项:</h3>
+ * <pre>
+ * core.server.id         服务ID
+ * core.language.probing  自动识别语言
+ * core.language.default  默认语言类型
+ * </pre>
+ *
  * @author Hong
  */
 public class ActionHolder
@@ -130,7 +137,7 @@ implements Filter {
         Core.ACTION_TIME.set(System.currentTimeMillis());
         Core.ACTION_LANG.set(conf.getProperty("core.language.default", "en-us"));
 
-        if (conf.getProperty("core.language.detect", false)) {
+        if (conf.getProperty("core.language.probing", false)) {
             /**
              * 语言可以记录到Session/Cookie里
              */

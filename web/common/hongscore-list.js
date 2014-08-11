@@ -17,10 +17,10 @@ function HsList(opts, context) {
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
 
-    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("model.sort.key", "sort"));
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("model.page.key", "page"));
-    this.firstOfPage = hsGetConf("first.of.page", 1 );
+    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("model.sort.key", "sort"));
     this.rowsPerPage = hsGetConf("rows.per.page", 25);
+    this.firstOfPage = hsGetConf("first.of.page", 1 );
 
     this.context = context;
     this.loadBox = loadBox;

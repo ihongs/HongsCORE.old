@@ -211,77 +211,77 @@ function hsFormFillPick(box, v, n, t) {
         v = {};
     }
 
-//    if (box.is("input") ) {
-//        function reset(box, btn) {
-//            var txt = btn.data("txt");
-//            var cls = btn.data("cls");
-//            box.val ( "");
-//            btn.text(txt);
-//            btn.attr( "class" , cls );
-//        }
-//        function inset(box, btn, val, txt) {
-//            box.val (val);
-//            btn.text(txt);
-//            btn.addClass("btn-default");
-//            btn.append('<span class="close">&times;</span>');
-//        }
-//
-//        if (! btn.data("pickInited"))  {
-//            btn.data("pickInited", 1);
-//            btn.data("txt", btn.text( ) );
-//            btn.data("cls", btn.attr("class"));
-//            btn.on("click", ".close", box, function(evt) {
-//                var btn = jQuery(evt.delegateTarget);
-//                var box = evt.data;
-//                reset(box, btn);
-//                box.trigger("change");
-//                return false;
-//            });
-//        }
-//
-//        if (jQuery.isEmptyObject(v)) {
-//            reset(box, btn);
-//        } else
-//        for(var val in v) {
-//            var txt  = v[val];
-//            inset(box, btn, val,txt);
-//        }
-//    } else {
-    if (! box.data("pickInited"))  {
-        box.data("pickInited", 1);
-        box.on("click", ".close", btn, function(evt) {
-            var opt = jQuery(this).closest("li");
-            var val = opt.find(":hidden").val( );
-            var btn = evt.data;
-            delete v[val];
-            opt.remove( );
-            btn.show  ( );
-            box.trigger("change");
-            return false ;
-        });
-        if (! mul) {
-            box.on("click", null, btn, function(evt) {
-                evt.data.click();
+    if (box.is("input") ) {
+        function reset(box, btn) {
+            var txt = btn.data("txt");
+            var cls = btn.data("cls");
+            box.val ( "");
+            btn.text(txt);
+            btn.attr( "class" , cls );
+        }
+        function inset(box, btn, val, txt) {
+            box.val (val);
+            btn.text(txt);
+            btn.addClass("btn-default");
+            btn.append('<span class="close">&times;</span>');
+        }
+
+        if (! btn.data("pickInited"))  {
+            btn.data("pickInited", 1);
+            btn.data("txt", btn.text( ) );
+            btn.data("cls", btn.attr("class"));
+            btn.on("click", ".close", box, function(evt) {
+                var btn = jQuery(evt.delegateTarget);
+                var box = evt.data;
+                reset(box, btn);
+                box.trigger("change");
+                return false;
             });
         }
-    }
 
-    if (jQuery.isEmptyObject(v)) {
-        btn.show();
-    } else if (! mul) {
-        btn.hide();
-    }
+        if (jQuery.isEmptyObject(v)) {
+            reset(box, btn);
+        } else
+        for(var val in v) {
+            var txt  = v[val];
+            inset(box, btn, val,txt);
+        }
+    } else {
+        if (! box.data("pickInited"))  {
+            box.data("pickInited", 1);
+            box.on("click", ".close", btn, function(evt) {
+                var opt = jQuery(this).closest("li");
+                var val = opt.find(":hidden").val( );
+                var btn = evt.data;
+                delete v[val];
+                opt.remove( );
+                btn.show  ( );
+                box.trigger("change");
+                return false ;
+            });
+            if (! mul) {
+                box.on("click", null, btn, function(evt) {
+                    evt.data.click();
+                });
+            }
+        }
 
-    box.empty();
-    for(var val in v) {
-        var txt  = v[val];
-        box.append(jQuery('<li class="btn btn-default form-control"></li>').attr("title", txt )
-           .append(jQuery('<input class="pickval" type="hidden"/>').attr( "name", n ).val(val))
-           .append(jQuery('<span  class="picktxt"></span>').text(   txt   ))
-           .append(jQuery('<span  class="close pull-right">&times;</span>'))
-        );
+        if (jQuery.isEmptyObject(v)) {
+            btn.show();
+        } else if (! mul) {
+            btn.hide();
+        }
+
+        box.empty();
+        for(var val in v) {
+            var txt  = v[val];
+            box.append(jQuery('<li class="btn btn-default form-control"></li>').attr("title", txt )
+               .append(jQuery('<input class="pickval" type="hidden"/>').attr( "name", n ).val(val))
+               .append(jQuery('<span  class="picktxt"></span>').text(   txt   ))
+               .append(jQuery('<span  class="close pull-right">&times;</span>'))
+            );
+        }
     }
-//    }
 }
 
 /**

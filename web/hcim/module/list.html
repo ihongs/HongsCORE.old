@@ -2,7 +2,7 @@
     <li><a href="javascript:;">模块列表</a></li>
 </ul>
 <div class="panes">
-    <div id="hcim-module-list row">
+    <div id="hcim-module-list" class="row">
         <object class="config" name="hsList" data="">
             <param name="loadUrl" value="('hcim/Module/List.act')"/>
             <param name="openUrls[]" value="['.create','hcim/module/form.html','{OPENBOX}']"/>
@@ -16,7 +16,7 @@
                 <button type="button" class="remove for-checks btn btn-danger" >删除</button>
             </form>
             <form class="fr findbox btn-group" action="" method="POST">
-                <input type="search" name="find" class="form-control"/>
+                <input type="search" name="wd" class="form-control"/>
                 <button type="submit" class="btn btn-default">查找</button>
             </form>
             <div class="cb"></div>

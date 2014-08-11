@@ -55,31 +55,19 @@ object.config,
     width: 500px;
 }
 
-/** 顶部固定 **/
-#headbox {
-    position: fixed;
-    display: block;
-    z-index: 8888;
-    width: 100%;
-    left: 0;
-    top: 0;
-}
-
 /** 主体区域 **/
 #bodybox {
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
-    padding-top: 71px; /* 顶部菜单 */
-    margin-bottom: -71px; /* 底部通栏 */
+    padding-top: 72px; /* 顶部菜单 */
+    padding-bottom: 54px; /* 底部通栏 */
 }
 
-/** 底部固定 **/
-#footbox {
-    height: 71px;
+/** 底部区域 **/
+#footbox  {
+    background: #fff;
+    border-top-color: #fff;
 }
 #footbox blockquote {
-    margin: 21px 0 0 0;
+    margin: 15px 0 0 0;
 }
 #footbox blockquote p {
     font-size: 10px;
@@ -116,6 +104,10 @@ fieldset.dropup .dropdown-body {
     height: auto;
     margin: auto;
     padding: auto;
+}
+
+.input-number {
+    width: 50%;
 }
 
 /** 列表 **/
@@ -160,12 +152,16 @@ fieldset.dropup .dropdown-body {
 
 /** 树形 **/
 
-.tree-node {
-    border-left: 1px dotted #000;
-    cursor: pointer;
-    line-height: 24px;
+.treebox:hover .tree-list {
+    border-left: 1px dotted #ccc;
+}
+.tree-list {
+    border-left: 1px dotted #eee;
     margin-left: 11px;
-    padding-left: 6px;
+}
+.tree-node {
+    cursor: pointer;
+    line-height: 30px;
 }
 .tree-root {
     border-left: 0;
@@ -176,52 +172,62 @@ fieldset.dropup .dropdown-body {
 .tree-node table td {
     border: 0;
     border-spacing: 0;
-    margin: 0 2px;
+    margin: 0 4px;
 }
 .tree-curr>table,
 .tree-curr>table td{
     color: #000;
+    font-weight: bold;
     text-decoration: underline;
 }
 
 .tree-hand {
-    width: 14px;
+    width: 20px;
 }
 .tree-hand .caret {
+    /*
     background-image: url(../img/tree-hand.gif);
+    */
     border: 0;
-    height: 22px;
-    width: 16px;
+    margin-left: 0;
 }
 .tree-fold>table .tree-hand .caret {
-    background-image: url(../img/tree-hand-fold.gif);
     /*
-    border-left: 8px solid #666;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
+    background-image: url(../img/tree-hand-fold.gif);
     */
+    margin-top: -2px;
+    margin-left: 9px;
+    border-right: 0;
+    border-left: 4px solid #999;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
 }
 .tree-fold>table .tree-hand:hover .caret {
-    /*
-    border-left: 8px solid #f66;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    */
+    margin-top: -2px;
+    margin-left: 9px;
+    border-right: 0;
+    border-left: 4px solid #f99;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
 }
 .tree-open>table .tree-hand .caret {
-    background-image: url(../img/tree-hand-open.gif);
     /*
-    border-top: 8px solid #666;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
+    background-image: url(../img/tree-hand-open.gif);
     */
+    margin-top: -2px;
+    margin-left: 0;
+    border-bottom: 0;
+    border-right: 6px solid #666;
+    border-left: 6px solid transparent;
+    border-top: 6px solid transparent;
 }
 .tree-open>table .tree-hand:hover .caret {
-    /*
-    border-top: 8px solid #f66;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    */
+    margin-top: -2px;
+    margin-left: 0;
+    border-bottom: 0;
+    border-right: 6px solid #f66;
+    border-left: 6px solid transparent;
+    border-top: 6px solid transparent;
 }
 
 .tree-cnum {

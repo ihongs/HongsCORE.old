@@ -738,7 +738,7 @@ abstract public class AbstractBaseModel
    *    可使用-field=xxx表示排除条件.
    * 5. 如果有子表.字段名相同的参数则获取与之对应的记录,
    *    可是有-table.field=xxx表示排除条件.
-   * 注: "+"在URL中表示空格. 以上设计目录均已实现.
+   * 注: "+"在URL中表示空格. 以上设计目录均已实现. 以上1/2/3中的参数名可统一设置或单独指定.
    * </pre>
    *
    * @param req

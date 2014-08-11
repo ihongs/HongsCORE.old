@@ -28,7 +28,7 @@ import java.io.UnsupportedEncodingException;
  * <h3>配置选项:</h3>
  * <pre>
  * core.server.id         服务ID
- * core.language.detect   自动识别语言
+ * core.language.probing  自动识别语言
  * core.language.default  默认语言类型
  * </pre>
  *
@@ -259,13 +259,13 @@ public class Cmdlet
     }
     if (lang == null || lang.length() == 0)
     {
-      if (conf.getProperty("core.language.detect", true))
+      if (conf.getProperty("core.language.probing", false))
       {
         String l = System.getProperty("user.language");
         String c = System.getProperty("user.country" );
         if (l != null && c != null)
         {
-          lang = l.toLowerCase() + "-" + c.toUpperCase();
+          lang = l.toLowerCase() +"-"+ c.toUpperCase();
         }
         else
         if (l != null)

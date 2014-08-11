@@ -205,7 +205,7 @@ public class DB
       if (this.connection != null
       && !this.connection.isClosed())
       {
-        break TOP;
+        break;
       }
     }
     catch (SQLException ex)
@@ -260,6 +260,7 @@ public class DB
                  info.getProperty(  "user"  ),
                  info.getProperty("password"));
         }
+        this.connection.setAutoCommit( false );
 
         if (0 < Core.DEBUG)
         {
@@ -364,6 +365,7 @@ public class DB
         }
 
         this.connection = pool.getConnection();
+        this.connection.setAutoCommit( false );
 
         if (0 < Core.DEBUG)
         {

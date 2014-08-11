@@ -467,12 +467,6 @@ HsForm.prototype = {
             }
             return true;
         },
-        "[type=range]" : function(val) {
-            if (!/^-?[0-9]*$/.test(val)) {
-                return hsGetLang("form.is.not.range");
-            }
-            return true;
-        },
         "[type=email]" : function(val) {
             if (!/^([a-z0-9_\.\-\+]+)@([\da-z\.\-]+)\.([a-z\.]{2,6})$/i.test(val)) {
                 return hsGetLang("form.is.not.email");

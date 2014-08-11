@@ -1,5 +1,7 @@
+<object class="config" name="hsInit" data="">
+    <param name="modal" value="lg"/>
+</object>
 <h2>选择模块</h2>
-
 <div id="hcim-module-pick-list row">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcim/Module/List.act?sort=-ctime')"/>
@@ -13,7 +15,7 @@
             <button type="button" class="create btn btn-default">创建模块</button>
         </form>
         <form class="fr findbox btn-group" action="" method="POST">
-            <input type="search" name="find" class="form-control"/>
+            <input type="search" name="wd" class="form-control"/>
             <button type="submit" class="btn btn-default">查找</button>
         </form>
         <div class="cb"></div>
@@ -34,8 +36,4 @@
         </table>
     </div>
     <div class="pagebox"></div>
-    <div class="btn-group">
-        <button type="button" class="ensure btn btn-primary">确认选择</button>
-        <button type="button" class="cancel btn btn-link">取消</button>
-    </div>
 </div>

@@ -1,9 +1,4 @@
-<object class="config" name="hsInit" data="">
-    <param name="width" value="800px"/>
-</object>
-
 <h2>${opr}属性</h2>
-
 <div id="hcim-domain-form">
     <object class="config" name="hsForm" data="">
         <param name="loadUrl" value="hcim/Domain/Info.act"/>
@@ -27,31 +22,34 @@
                     <label class="control-label">代码</label>
                     <input type="text" name="code" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
                 </div>
-                <div class="form-group">
-                    <label class="control-label">类型</label>
-                    <select name="type" class="form-control"></select>
-                </div>
             </div>
             <div class="col-md-4">
                 <div class="form-group">
+                    <label class="control-label">类型</label>
+                    <select name="type" class="form-control">
+                        <option value="" class="disabled">请选择类型</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label class="control-label">长度</label>
-                    <input type="number" name="size" value="0" class="form-control" style="width: 12em;"/>
+                    <input type="number" name="size" value="0" class="form-control"/>
                 </div>
                 <div class="form-group">
                     <label class="control-label">小数位数</label>
-                    <input type="number" name="scale" value="0" class="form-control" style="width: 12em;"/>
+                    <input type="number" name="scale" value="0" class="form-control"/>
                 </div>
                 <div class="form-group">
                     <label class="control-label">最小值</label>
-                    <input type="number" name="min" value="0" class="form-control" style="width: 12em;"/>
+                    <input type="number" name="min" value="0" class="form-control"/>
                 </div>
                 <div class="form-group">
                     <label class="control-label">最大值</label>
-                    <input type="number" name="max" value="0" class="form-control" style="width: 12em;"/>
+                    <input type="number" name="max" value="0" class="form-control"/>
                 </div>
                 <div class="form-group">
-                    <label class="control-label">可为负数
+                    <label class="control-label">
                         <input type="checkbox" name="signed" value="1"/>
+                        可为负数
                     </label>
                 </div>
                 <div class="form-group">
