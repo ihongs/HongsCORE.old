@@ -326,7 +326,7 @@ HsForm.prototype = {
     valiInit : function() {
         var that = this;
         this.formBox.attr("novalidate", "novalidate");
-        this.formBox.on("change", "input,select,textarea,[data-fn]",
+        this.formBox.on("change blur", "input,select,textarea,[data-fn]",
         function() {
             var inp = jQuery(this);
             that.validate(inp.attr("name") || inp.attr("data-fn"));
@@ -356,7 +356,7 @@ HsForm.prototype = {
     },
     validate : function(inp ) {
         if (typeof inp == "string") {
-            inp = this.formBox.find('[name="'+inp+'"],[data-fn="'+inp+'"]');
+            inp = this.formBox.find('[name="' + inp + '"],[data-fn="' + inp + '"]');
         } else {
             inp = jQuery(inp);
         }
@@ -366,7 +366,7 @@ HsForm.prototype = {
             }
             var err = this.rules[key].call(this, inp.val(), inp);
             if (err !== true) {
-                err = err || hsGetLang("form.haserror");
+                err = inp.attr("data-message") || err || hsGetLang("form.haserror");
                 this.haserror(inp, err);
                 return false;
             } else {
@@ -534,6 +534,14 @@ HsForm.prototype = {
             }
             return true;
         },
+        "[data-relate]" : function(val, inp) {
+            var fn = inp.attr("data-relate");
+            var fd = this.formBox.find("[name=" + fn + "]");
+            if (fd.val()) {
+                this.validate(fd);
+            }
+            return true;
+        },
         "[data-repeat]" : function(val, inp) {
             var fn = inp.attr("data-repeat");
             var fd = this.formBox.find("[name=" + fn + "]");
@@ -546,7 +554,7 @@ HsForm.prototype = {
 };
 
 jQuery.fn.hsForm = function(opts) {
-    return _hsConstr( this, opts, HsForm );
+    return this._hsConstr(opts, HsForm);
 };
 
 (function($) {

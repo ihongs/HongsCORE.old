@@ -1,43 +1,39 @@
-<ul class="nav nav-tabs" data-toggle="tabs" id="hcim-domain-tabs">
-    <li><a href="javascript:;">属性列表</a></li>
-</ul>
-<div class="panes">
-    <div id="hcim-domain-list" class="row">
-        <object class="config" name="hsList" data="">
-            <param name="loadUrl" value="('hcim/Domain/List.act?sort=-ctime')"/>
-            <param name="openUrls[]" value="['.create','hcim/domain/form.html','{OPENBOX}']"/>
-            <param name="openUrls[]" value="['.modify','hcim/domain/form.html?id={ID}','{OPENBOX}']"/>
-            <param name="sendUrls[]" value="['.remove','hcim/Domain/Remove.act']"/>
-        </object>
-        <div>
-            <form class="fl toolbox btn-group">
-                <button type="button" class="create btn btn-default">创建属性</button>
-                <button type="button" class="modify for-select btn btn-default">修改</button>
-                <button type="button" class="remove for-checks btn btn-danger" >删除</button>
-            </form>
-            <form class="fr findbox btn-group" action="" method="POST">
-                <input type="search" name="wd" class="form-control"/>
-                <button type="submit" class="btn btn-default">查找</button>
-            </form>
-            <div class="cb"></div>
-        </div>
-        <div class="listbox table-responsive">
-            <table class="table table-hover table-striped">
-                <thead>
-                    <tr>
-                        <th data-fn="id" data-ft="_check" class="_check">
-                            <input type="checkbox" class="check-all" name="id[]"/>
-                        </th>
-                        <th data-fn="name" class="sortable">属性名称</th>
-                        <th data-fn="type" class="sortable">类型</th>
-                        <th data-fn="note">备注</th>
-                        <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
-                        <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <div class="pagebox"></div>
+<h2>属性列表</h2>
+<div id="hcim-domain-list" class="row">
+    <object class="config" name="hsList" data="">
+        <param name="loadUrl" value="('hcim/Domain/List.act?sort=-ctime')"/>
+        <param name="openUrls[]" value="['.create','hcim/domain/form.html','@']"/>
+        <param name="openUrls[]" value="['.modify','hcim/domain/form.html?id={ID}','@']"/>
+        <param name="sendUrls[]" value="['.remove','hcim/Domain/Remove.act']"/>
+    </object>
+    <div>
+        <form class="fl toolbox btn-group">
+            <button type="button" class="create btn btn-default">创建属性</button>
+            <button type="button" class="modify for-select btn btn-default">修改</button>
+            <button type="button" class="remove for-checks btn btn-danger" >删除</button>
+        </form>
+        <form class="fr findbox btn-group" action="" method="POST">
+            <input type="search" name="wd" class="form-control"/>
+            <button type="submit" class="btn btn-default">查找</button>
+        </form>
+        <div class="cb"></div>
     </div>
+    <div class="listbox table-responsive">
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th data-fn="id" data-ft="_check" class="_check">
+                        <input type="checkbox" class="check-all" name="id[]"/>
+                    </th>
+                    <th data-fn="name" class="sortable">属性名称</th>
+                    <th data-fn="type" class="sortable">类型</th>
+                    <th data-fn="note">备注</th>
+                    <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
+                    <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="pagebox"></div>
 </div>

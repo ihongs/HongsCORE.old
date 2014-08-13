@@ -56,8 +56,7 @@ function HsTree(opts, context) {
         switch (m) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
-            case "{OPENBOX}": m = _hsTarget(n, '%'); break;
-            default: m = _hsTarget(n, m);
+            default: m = n._hsTarget(m);
         }
 
         /*
@@ -445,7 +444,7 @@ HsTree.prototype = {
 };
 
 jQuery.fn.hsTree = function(opts) {
-    return _hsConstr( this, opts, HsTree );
+    return this._hsConstr(opts, HsTree);
 };
 
 (function($) {

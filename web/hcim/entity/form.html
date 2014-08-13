@@ -13,7 +13,7 @@
                 <div class="form-group">
                     <label class="control-label">所属模块</label>
                     <div data-fn="module_id" data-ft="_pick" requires="requires"></div>
-                    <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="%" href="hcim/module/pick.html">选择模块</button>
+                    <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" href="hcim/module/pick.html">选择模块</button>
                 </div>
                 <div class="form-group">
                     <label class="control-label">实体名称</label>
@@ -36,7 +36,7 @@
                             <div class="row add-row-tpl" style="display:none;">
                                 <div class="col-md-5">
                                     <input type="hidden" data-name="a_hcim_entity_cols[I][domain_id]" data-fk="domain_id">
-                                    <button type="button" class="btn btn-default form-control pick-doamin" data-fk="domain.name" data-toggle="hsPick" data-target="%" href="hcim/domain/pick.html">选择属性</button>
+                                    <button type="button" class="btn btn-default form-control" data-fk="domain.name" data-toggle="hsPick" data-target="@" href="hcim/domain/pick.html">选择属性</button>
                                 </div>
                                 <div class="col-md-5">
                                     <input type="text" class="form-control" data-name="a_hcim_entity_cols[I][name]" data-fk="name" placeholder="属性名">
@@ -56,7 +56,7 @@
                             <div class="row add-row-tpl" style="display:none;">
                                 <div class="col-md-5">
                                     <input type="hidden" data-name="a_hcim_entity_rels[I][relate_id]" data-fk="relate_id">
-                                    <button type="button" class="btn btn-default form-control pick-doamin" data-fk="relate.name" data-toggle="hsPick" data-target="%" href="hcim/entity/pick.html?deny=create">选择实体</button>
+                                    <button type="button" class="btn btn-default form-control" data-fk="relate.name" data-toggle="hsPick" data-target="@" href="hcim/entity/pick.html?deny=create">选择实体</button>
                                 </div>
                                 <div class="col-md-5">
                                     <select data-name="a_hcim_entiry_rels[I][type]" data-fk="type" class="form-control">

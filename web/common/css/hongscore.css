@@ -255,7 +255,14 @@ legend {
     padding-right: 6px;
     padding-left: 6px;
     font-size: 20px;
-    color: #ccc;
+}
+.btn.btn-default .close,
+.btn.btn-primary .close,
+.btn.btn-success .close,
+.btn.btn-warning .close,
+.btn.btn-danger .close,
+.btn.btn-info .close {
+    color: #fff;
 }
 
 .form-control {

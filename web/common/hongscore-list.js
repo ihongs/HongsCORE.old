@@ -46,8 +46,7 @@ function HsList(opts, context) {
         switch (m) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
-            case "{OPENBOX}": m = _hsTarget(n, '%'); break;
-            default: m = _hsTarget(n, m);
+            default: m = n._hsTarget(m);
         }
 
         /*
@@ -460,7 +459,7 @@ HsList.prototype = {
 };
 
 jQuery.fn.hsList = function(opts) {
-    return _hsConstr( this, opts, HsList );
+    return this._hsConstr(opts, HsList);
 };
 
 (function($) {

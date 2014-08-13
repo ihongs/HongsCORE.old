@@ -7,6 +7,8 @@ import app.hongs.action.annotation.Action;
 import app.hongs.action.annotation.CommitSuccess;
 import app.hongs.action.annotation.InForm;
 import app.hongs.action.annotation.InList;
+import app.hongs.db.FetchCase;
+import app.hongs.util.Tree;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,14 @@ public class Entity {
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
+        
+        // 加入选择的模块
+        FetchCase fc = new FetchCase();
+        fc.select(".id, .name")
+          .where (".id = ?", Tree.getValue(data, "info.module_id"));
+        Map dd = model.db.getTable("a_hcim_module").fetchLess(fc);
+        Tree.setValue(data, "data.module_id.", dd);
+        
         helper.back(data);
     }
 

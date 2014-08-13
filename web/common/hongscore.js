@@ -819,79 +819,6 @@ function hsEach(data, func) {
     }
 }
 
-function _hsConstr(elem, opts, func) {
-    elem = jQuery (elem);
-    var name = func.name;
-    var inst = elem.data(name);
-    if (! inst) {
-        inst = new func(opts, elem);
-        elem.data(name, inst);
-        elem.addClass ( name);
-    }
-    if (opts) for ( var k in opts ) {
-        if ('_'===k.substring(0, 1)
-        ||  inst[k] !== undefined ) {
-            inst[k]  =  opts[k];
-        }
-    }
-    return inst;
-}
-
-function _hsTarget(elem, selr) {
-    var flag = selr.charAt(0);
-    var salr = selr.substr(1);
-    elem = jQuery(elem);
-    switch (flag) {
-        case '%':
-            elem = elem.closest(".loadbox,.openbox,.panes").first();
-            if (!elem.is(".panes")) {
-                var x = elem.parent().parent();
-                if (x.is(".panes")) {
-                    elem = x;
-                }
-            }
-            return salr ? jQuery(salr, elem) : elem;
-        case '@':
-            elem = elem.closest(".loadbox" );
-            return salr ? jQuery(salr, elem) : elem;
-        case '>':
-            return salr ? jQuery(selr, elem) : elem;
-        default :
-            return jQuery(selr);
-    }
-}
-
-function _hsConfig(elem) {
-    var obj = {};
-    var arr = jQuery(elem).find("param");
-    for(var i = 0; i < arr.length; i ++) {
-        var n = jQuery(arr[i]).attr("name" );
-        var v = jQuery(arr[i]).attr("value");
-        switch (v.substring(0, 2)) {
-        case "S:": // String
-            v = v.substring(2);
-            break;
-        case "N:": // Number
-            v = v.substring(2);
-            v =  parseFloat(v);
-            break;
-        case "B:": // Boolean
-            v = v.substring(2);
-            v = /(true|yes|ok|t|y|1)/i.test(v);
-            break;
-        default:
-            (function () {
-                if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
-                    v = eval('('+v+')');
-                else  if  (/^\s*(\(.*\))\s*$/.test(v))
-                    v = eval(v);
-            }).call(elem);
-        }
-        if (n) hsSetValue(obj, n, v);
-    }
-    return obj;
-}
-
 /**
  * bootstrap方位转jquery.tools方位
  * @param {String} pos
@@ -1106,23 +1033,17 @@ $.fn.hsReady = function() {
         box.hsInit({});
     }
 
-    /**
-     * 将 nav 与 panes 进行关联, 方便后面的操作
-     */
-    box.find(".nav" ).each(function() {
-        var rel;
-        var box = $(this);
-        if (box.attr("data-target") ) {
-            rel = _hsTarget(this, box.attr("data-target"));
-        } else {
-            rel = box.siblings(".panes");
-        }
-        box.data("rel", rel);
-        rel.data("rel", box);
-        if (! box.has(".active").size()) {
-            box.find("li>a").first().click();
-        }
-    });
+    if (box.is(".tabsbox")) {
+        var tbs = $('<ul class="nav nav-tabs"><li><a href="javascript:;"></a></li></ul>');
+        var pns = $('<div class="panes"></div>');
+        var pan = $('<div></div>').appendTo(pns);
+        var div = $('<div></div>').appendTo(pan);
+        div.append(box.contents()).addClass("openbox");
+        box.append(tbs);
+        box.append(pns);
+        tbs.hsTabs(   );
+        div.hsInit({ });
+    }
 
     /**
      * 为所有的 input 加上 input-type, 方便设置样式, 兼容老浏览器
@@ -1140,6 +1061,9 @@ $.fn.hsReady = function() {
 
     //** 语义标签解析 **/
 
+    box.find(".nav").each(function() {
+        $(this).hsTabs();
+    });
     box.find("div[data-eval]").each(function() {
         eval($(this).attr("data-eval"));
     });
@@ -1152,10 +1076,25 @@ $.fn.hsReady = function() {
     box.find("object.config" ).each(function() {
         var prnt = $(this).parent();
         var func = $(this).attr("name");
-        var opts =  _hsConfig(this);
+        var opts = $(this)._hsConfig( );
         if (typeof(prnt[func]) === "function") prnt[func](opts);
     }).remove();
 
+    return box;
+};
+$.fn.hsTabs = function() {
+    var rel;
+    var box = $(this);
+    if (box.attr("data-target")) {
+        rel = _hsTarget(this, box.attr("data-target"));
+    } else {
+        rel = box.siblings(".panes");
+    }
+    box.data("rel", rel);
+    rel.data("rel", box);
+    if (! box.has(".active").size()) {
+        box.find("li>a").first().click();
+    }
     return box;
 };
 $.fn.hsInit = function(cnf) {
@@ -1163,7 +1102,7 @@ $.fn.hsInit = function(cnf) {
 
     // 自动提取标题, 替换编辑文字
     // 如主键不叫id, 打开编辑页面, 则需加上id=1
-    var h = box.children("h1,h2,h3,h4,h5,h6");
+    var h = box.children("h1,h2,h3");
     if (h.length ) {
         cnf.title = h.text( );
     }
@@ -1214,6 +1153,88 @@ $.fn.hsInit = function(cnf) {
     return box;
 };
 
+$.fn._hsConfig = function() {
+    var obj = {};
+    var arr = jQuery(this).find("param");
+    for(var i = 0; i < arr.length; i ++) {
+        var n = jQuery(arr[i]).attr("name" );
+        var v = jQuery(arr[i]).attr("value");
+        switch (v.substring(0, 2)) {
+        case "S:": // String
+            v = v.substring(2);
+            break;
+        case "N:": // Number
+            v = v.substring(2);
+            v =  parseFloat(v);
+            break;
+        case "B:": // Boolean
+            v = v.substring(2);
+            v = /(true|yes|ok|t|y|1)/i.test(v);
+            break;
+        default:
+            (function () {
+                if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
+                    v = eval('('+v+')');
+                else  if  (/^\s*(\(.*\))\s*$/.test(v))
+                    v = eval(v);
+            }).call(this);
+        }
+        if (n) hsSetValue(obj, n, v);
+    }
+    return obj;
+};
+$.fn._hsTarget = function(selr) {
+    var elem = this;
+    var flag = selr.charAt(0);
+    var salr = selr.substr(1);
+    switch (flag) {
+        case '@':
+            do {
+                var x;
+
+                x = elem.closest(".panes");
+                if (x.size()) {
+                    elem = x;
+                    break;
+                }
+
+                x = elem.closest(".openbox");
+                if (x.size()) {
+                    elem = x;
+                    break;
+                }
+
+                x = elem.closest(".loadbox");
+                if (x.size()) {
+                    elem = x;
+                    break;
+                }
+            } while (false);
+            return salr ? jQuery(salr, elem) : elem;
+        case '>':
+            return salr ? jQuery(selr, elem) : elem;
+        default :
+            return jQuery(selr);
+    }
+};
+$.fn._hsConstr = function(opts, func) {
+    var elem = this;
+    var name = func.name;
+    var inst = elem.data(name);
+    if (! inst) {
+        inst = new func(opts, elem);
+        elem.data(name, inst);
+        elem.addClass ( name);
+    }
+    if (opts) for ( var k in opts ) {
+        if ('_'===k.substring(0, 1)
+        ||  inst[k] !== undefined ) {
+            inst[k]  =  opts[k];
+        }
+    }
+    return inst;
+};
+
 $(document)
 .on("ajaxError", function(evt, xhr, cnf) {
     var rst = hsResponObj(xhr);
@@ -1238,7 +1259,7 @@ function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
     if (box) {
-        box = _hsTarget(this, box);
+        box = $(this)._hsTarget(box);
         box.hsLoad( url );
     }
     evt.stopPropagation();
@@ -1248,7 +1269,7 @@ function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
     if (box) {
-        box = _hsTarget(this, box);
+        box = $(this)._hsTarget(box);
         box.hsOpen( url );
     } else {
           $.hsOpen( url );

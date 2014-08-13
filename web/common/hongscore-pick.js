@@ -204,7 +204,7 @@ function hsFormFillPick(box, v, n, t) {
         var x = {};
         for(var i = 0; i < v.length; i++) {
             var j = v[i];
-            x[j[vk]] = x[j[tk]];
+            x[j[vk]] = j[tk];
         }
         v = x ;
     } else if (! jQuery.isPlainObject(v)) {
@@ -222,7 +222,7 @@ function hsFormFillPick(box, v, n, t) {
         function inset(box, btn, val, txt) {
             box.val (val);
             btn.text(txt);
-            btn.addClass("btn-default");
+            btn.addClass("btn-success");
             btn.append('<span class="close">&times;</span>');
         }
 
@@ -275,7 +275,7 @@ function hsFormFillPick(box, v, n, t) {
         box.empty();
         for(var val in v) {
             var txt  = v[val];
-            box.append(jQuery('<li class="btn btn-default form-control"></li>').attr("title", txt )
+            box.append(jQuery('<li class="btn btn-success form-control"></li>').attr("title", txt )
                .append(jQuery('<input class="pickval" type="hidden"/>').attr( "name", n ).val(val))
                .append(jQuery('<span  class="picktxt"></span>').text(   txt   ))
                .append(jQuery('<span  class="close pull-right">&times;</span>'))
@@ -321,7 +321,7 @@ function hsListFillPick(cel, v, n) {
         var url = $(this).attr("href");
         var box = $(this).attr("data-target");
         if (box) {
-            box = _hsTarget(this, box);
+            box = $(this)._hsTarget(box);
         } else {
             var nav = $(this).closest(".nav");
             if (nav.size()) {
