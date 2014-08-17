@@ -281,6 +281,10 @@ public class FetchCase
     return this;
   }
 
+  public int[] getLimit() {
+      return this.limits;
+  }
+
   //** 关联 **/
 
   private FetchCase link(FetchCase caze,
@@ -579,11 +583,11 @@ public class FetchCase
          .append(pf.matcher(o).replaceFirst(""));
     }
 
-    // 查询限额
-    if (this.limits.length > 0)
-    {
-      sql.append(" LIMIT ?, ?");
-    }
+    // 限额(不同数据库的限额方式不一样, 在 DB.limit 中实现)
+//    if (this.limits.length > 0)
+//    {
+//      sql.append(" LIMIT ?, ?");
+//    }
 
     //sql = DB.formatSQLFields(sql);
 
@@ -724,17 +728,17 @@ public class FetchCase
     List wparamz = new ArrayList();
     List hparamz = new ArrayList();
 
-    // 查询参数
+    // 参数
     this.getParamsDeep(wparamz, hparamz);
     paramz.addAll(wparamz);
     paramz.addAll(hparamz);
 
-    // 查询限额
-    if (this.limits.length > 0)
-    {
-      paramz.add(this.limits[0]);
-      paramz.add(this.limits[1]);
-    }
+    // 限额(不同数据库的限额方式不一样, 在 DB.limit 中实现)
+//    if (this.limits.length > 0)
+//    {
+//      paramz.add(this.limits[0]);
+//      paramz.add(this.limits[1]);
+//    }
 
     return paramz;
   }
@@ -815,50 +819,6 @@ public class FetchCase
   }
 
   /**
-   * 是否有设置分组
-   * @return 存在为true, 反之为false
-   * @deprecated
-   */
-  public boolean hasGroupBy()
-  {
-    return this.groups.length() != 0;
-  }
-
-  /**
-   * 设置分组字段
-   * @param fields
-   * @return 当前查询结构对象
-   * @deprecated
-   */
-  public FetchCase setGroupBy(String fields)
-  {
-    this.groups = new StringBuilder(checkField(fields));
-    return this;
-  }
-
-  /**
-   * 是否有设置排序
-   * @return 存在为true, 反之为false
-   * @deprecated
-   */
-  public boolean hasOrderBy()
-  {
-    return this.orders.length() != 0;
-  }
-
-  /**
-   * 设置排序字段
-   * @param fields
-   * @return 当前查询结构对象
-   * @deprecated
-   */
-  public FetchCase setOrderBy(String fields)
-  {
-    this.orders = new StringBuilder(checkField(fields));
-    return this;
-  }
-
-  /**
    * 是否有设置查询条件
    * @return 存在为true, 反之为false
    * @deprecated
@@ -884,6 +844,28 @@ public class FetchCase
   }
 
   /**
+   * 是否有设置分组
+   * @return 存在为true, 反之为false
+   * @deprecated
+   */
+  public boolean hasGroupBy()
+  {
+    return this.groups.length() != 0;
+  }
+
+  /**
+   * 设置分组字段
+   * @param fields
+   * @return 当前查询结构对象
+   * @deprecated
+   */
+  public FetchCase setGroupBy(String fields)
+  {
+    this.groups = new StringBuilder(checkField(fields));
+    return this;
+  }
+
+  /**
    * @deprecated
    */
   public boolean hasHaving()
@@ -898,6 +880,28 @@ public class FetchCase
   {
     this.havins = new StringBuilder(checkWhere(where));
     this.hparams = Arrays.asList(params);
+    return this;
+  }
+
+  /**
+   * 是否有设置排序
+   * @return 存在为true, 反之为false
+   * @deprecated
+   */
+  public boolean hasOrderBy()
+  {
+    return this.orders.length() != 0;
+  }
+
+  /**
+   * 设置排序字段
+   * @param fields
+   * @return 当前查询结构对象
+   * @deprecated
+   */
+  public FetchCase setOrderBy(String fields)
+  {
+    this.orders = new StringBuilder(checkField(fields));
     return this;
   }
 

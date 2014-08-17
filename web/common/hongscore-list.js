@@ -16,6 +16,7 @@ function HsList(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
+    var loadMode = hsGetValue(opts, "loadMode", 1); // 加载模式, 0无 1附带上层数据
 
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("model.page.key", "page"));
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("model.sort.key", "sort"));
@@ -46,6 +47,12 @@ function HsList(opts, context) {
         switch (m) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
+            case "{AUTOBOX}": m = n._hsTarget('@'); break;
+            case "{TABSBOX}":
+                m = context.closest(".panes").data("rel");
+                m = m.hsTaba(context.attr("id"));
+                m = m[0];
+                break;
             default: m = n._hsTarget(m);
         }
 
@@ -174,7 +181,25 @@ function HsList(opts, context) {
         });
     }
 
-    if (loadUrl) this.load(loadUrl, hsSerialArr(loadUrl));
+    if (loadUrl) {
+        var loadData = [];
+        loadMode = parseInt(loadMode);
+        if ( 1 & loadMode ) {
+            a = hsSerialArr(loadBox.data("url" ));
+            for (i = 0; i < a.length; i ++ ) {
+                loadData.push(a[i] );
+            }
+            a = hsSerialArr(loadBox.data("data"));
+            for (i = 0; i < a.length; i ++ ) {
+                loadData.push(a[i] );
+            }
+        }
+        a = hsSerialArr(loadUrl);
+        for (i = 0; i < a.length; i ++ ) {
+            loadData.push(a[i] );
+        }
+        this.load(loadUrl, loadData);
+    }
 }
 HsList.prototype = {
     load     : function(url, data) {
@@ -215,27 +240,27 @@ HsList.prototype = {
             // 排序
             if (td.hasClass("sortable")) {
                 if (td.find(".caret").size() == 0) {
-                    td.append('<span class="caret"></span>');
                     var that = this;
+                    td.append('<span class="caret"></span>');
                     td.click(function( ) {
-                        var td = jQuery(this);
-                        var fn = td.attr("data-fn");
+                        var td = jQuery ( this );
+                        var fn = td.attr("data-sn")||td.attr("data-fn");
                         var sn = "";
-                        if (td.hasClass("sort-a-z")) {
+                        if ( td.hasClass("sort-a-z")) {
                             sn = "-"+fn;
                         } else
-                        if (td.hasClass("sort-z-a") == false) {
-                            sn = fn;
+                        if (!td.hasClass("sort-z-a")) {
+                            sn =     fn;
                         }
-                        hsSetSeria(that._data, that.sortKey, sn);
+                        hsSetSeria(that._data,that.sortKey, sn);
                         that.load();
                     });
                 }
 
-                var sn = hsGetSeria(this._data, this.sortKey);
-                var fn = td.attr("data-fn");
+                var sn = hsGetSeria( this._data, this.sortKey );
+                var fn = td.attr("data-sn")||td.attr("data-fn");
                 td.removeClass("sort-a-z sort-z-a");
-                if (sn == fn) {
+                if (sn ==     fn) {
                     td.addClass("sort-a-z");
                 } else
                 if (sn == '-'+fn) {
@@ -255,7 +280,7 @@ HsList.prototype = {
 
                 n = fns[j];
                 if (!n) continue;
-                v = hsGetValue(list[i], n);
+                v = hsGetValue(list[i] , n) || "";
 
                 if (typeof(this["_fill_"+n]) !== "undefined") {
                     v = this["_fill_"+n].call(this, td, v, n);
@@ -370,29 +395,29 @@ HsList.prototype = {
         if (box == "@") box = jQuery(btn).closest(".loadbox");
         if (box)
             box.hsOpen(url, data, function() {
-               that.openBack(btn, box, dat2);
+               that.openBack(btn, jQuery(this), dat2 );
             }).data("rel", btn.closest(".loadbox")[0]);
         else
               $.hsOpen(url, data, function() {
-               that.openBack(btn, box, dat2);
+               that.openBack(btn, jQuery(this), dat2 );
             });
     },
     openBack : function(btn, box, data) {
         var that = this;
         btn.trigger("openBack", [box, data]);
-        box.on("saveBack", function(evt) {
+        box.on("saveBack", function(evt,rst) {
             if(evt.isDefaultPrevented()) return;
-            btn.trigger ( evt , [box, data]);
-            if(evt.isDefaultPrevented()) return;
+            btn.trigger ( evt , [rst, data]);
+            if(evt.isDefaultPrevented()) return;console.log("----")
             that.load();
         });
     },
 
     getRow   : function(o) {
-        return o.parents("tr").find(".check-one").filter(":checkbox,:radio,:hidden");
+        return o.parents("tr").find(".checkone").filter(":checkbox,:radio,:hidden");
     },
     getAll   : function() {
-        var cks = this.context.find(".check-one").filter(":checked");
+        var cks = this.context.find(".checkone").filter(":checked");
         if (cks.length == 0) {
             alert(hsGetLang("list.get.all"));
             return null;
@@ -402,7 +427,7 @@ HsList.prototype = {
         }
     },
     getOne   : function() {
-        var cks = this.context.find(".check-one").filter(":checked");
+        var cks = this.context.find(".checkone").filter(":checked");
         if (cks.length != 1) {
             alert(hsGetLang("list.get.one"));
             return null;
@@ -415,13 +440,13 @@ HsList.prototype = {
     // /** 填充函数 **/
 
     _fill__check : function(td, v, n) {
-        jQuery('<input type="checkbox" class="input-checkbox check-one"/>')
+        jQuery('<input type="checkbox" class="input-checkbox checkone"/>')
             .attr("name", n).val(v)
             .appendTo(td);
         return false;
     },
     _fill__radio : function(td, v, n) {
-        jQuery('<input type="radio" class="input-radio check-one"/>')
+        jQuery('<input type="radio" class="input-radio checkone"/>')
             .attr("name", n).val(v)
             .appendTo(td);
         return false;
@@ -472,31 +497,32 @@ jQuery.fn.hsList = function(opts) {
         // 但是复选框太小不方便操作, 故让点击单元格即单选该行, 方便操作
         if (this != evt.target) return;
         var tr = $(this).closest("tr");
-        var ck = tr.find(".check-one");
+        var ck = tr.find(".checkone" );
         if (this !=  ck .closest("td"))
-            tr.closest("tbody").find(".check-one").not(ck)
+            tr.closest("tbody").find(".checkone").not(ck )
                                .prop( "checked"  , false );
         ck.prop("checked", ! ck.prop( "checked")).change();
     })
-    .on("change", ".HsList .check-one",
+    .on("change", ".HsList .checkone",
     function() {
         var box = $(this).closest(".HsList");
-        var siz = box.find(".check-one").length;
-        var len = box.find(".check-one:checked").length;
-        box.find(".check-all" ).prop("checked" , siz && siz == len );
+        var siz = box.find(".checkone" ).length;
+        var len = box.find(".checkone:checked").length;
         box.find(".for-select").prop("disabled", len != 1);
         box.find(".for-checks").prop("disabled", len == 0);
+        box.find(".checkall"  ).prop("checked" , siz && siz == len );
     })
-    .on("change", ".HsList .check-all",
+    .on("change", ".HsList .checkall",
     function() {
+        var ckd = $(this).prop ( "checked" );
         var box = $(this).closest(".HsList");
-        var ckd = $(this).prop   ("checked");
-        box.find(".check-one").prop("checked",ckd).trigger("change");
+        box.find(".checkone").prop("checked", ckd).trigger("change");
     })
     .on("loadBack", ".HsList .listbox",
     function() {
         var box = $(this).closest(".HsList");
-        box.find(".check-all").prop("checked", false);
-        box.find(".for-select,.for-checks").prop("disabled", true);
+        box.find(".for-select,.for-checks" ).prop("disabled", true );
+        box.find(".checkall").prop("checked", false);
+        box.find(".checkone").change();
     });
 })(jQuery);

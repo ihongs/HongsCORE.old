@@ -16,6 +16,7 @@ function HsTree(opts, context) {
     var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
     var linkUrls = hsGetValue(opts, "linkUrls");
+    var loadMode = hsGetValue(opts, "loadMode", 0); // 加载模式, 0无 1附带上层数据
 
     // 数据的节点属性的键
     this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
@@ -24,7 +25,6 @@ function HsTree(opts, context) {
     this.noteKey = hsGetValue(opts, "noteKey");
     this.typeKey = hsGetValue(opts, "typeKey");
     this.cnumKey = hsGetValue(opts, "cnumKey");
-    this.bidKey  = hsGetValue(opts, "bidKey", hsGetConf("tree.bid.key", "bid")); // 移动定位字段(虚拟字段)
 
     // 根节点信息
     var rootInfo = {
@@ -56,6 +56,12 @@ function HsTree(opts, context) {
         switch (m) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
+            case "{AUTOBOX}": m = n._hsTarget('@'); break;
+            case "{TABSBOX}":
+                m = context.closest(".panes").data("rel");
+                m = m.hsTaba(context.attr("id"));
+                m = m[0];
+                break;
             default: m = n._hsTarget(m);
         }
 
@@ -375,19 +381,19 @@ HsTree.prototype = {
         if (box == "@") box = jQuery(btn).parent(".loadbox");
         if (box)
             box.hsOpen(url, data, function( ) {
-               that.openBack(btn, this, dat2);
+               that.openBack(btn, jQuery(this), dat2 );
             }).data("rel", btn.closest(".loadbox")[0]);
         else
               $.hsOpen(url, data, function( ) {
-               that.openBack(btn, this, dat2);
+               that.openBack(btn, jQuery(this), dat2 );
             });
     },
     openBack : function(btn, box, data) {
         var that = this;
-        btn.trigger("openBack",[box, data]);
-        box.on("saveBack", function(evt) {
+        btn.trigger("openBack", [box, data]);
+        box.on("saveBack", function(evt,rst) {
             if (evt.isDefaultPrevented()) return;
-            btn.trigger(evt, [box, data]);
+            btn.trigger ( evt , [rst, data]);
             if (evt.isDefaultPrevented()) return;
 
             if (data[that.idKey] !== undefined)

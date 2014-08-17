@@ -5,10 +5,7 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.Action;
 import app.hongs.action.annotation.CommitSuccess;
-import app.hongs.action.annotation.InForm;
-import app.hongs.action.annotation.InList;
-import app.hongs.db.FetchCase;
-import app.hongs.util.Tree;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +16,7 @@ import java.util.Map;
 @Action
 public class Entity {
 
-    private app.hcim.model.Entity model;
+    private final app.hcim.model.Entity model;
 
     public Entity() {
         model = (app.hcim.model.Entity)
@@ -35,32 +32,34 @@ public class Entity {
     public void actionInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
-        
-        // 加入选择的模块
-        FetchCase fc = new FetchCase();
-        fc.select(".id, .name")
-          .where (".id = ?", Tree.getValue(data, "info.module_id"));
-        Map dd = model.db.getTable("a_hcim_module").fetchLess(fc);
-        Tree.setValue(data, "data.module_id.", dd);
-        
         helper.back(data);
     }
 
     @CommitSuccess
     public void actionSave(ActionHelper helper)
-    throws HongsException {app.hongs.util.JSON.dumps(helper.getRequestData());
+    throws HongsException {
         Map data = helper.getRequestData();
-        List<Map<String, String>> cols = (List<Map<String, String>>)
-            ((Map)data.get("hcrm_model_cols")).values();
-        int i = 0;
-        for (Map col : cols) {
-            col.put("serialno", i++);
+        if (data.containsKey("a_hcim_entity_cols")) {
+            List<Map<String, String>> cols = (List<Map<String, String>>)
+                new ArrayList(((Map)data.get("a_hcim_entity_cols")).values());
+            int i = 0;
+            for (Map col : cols) {
+                col.put("serialno", i++);
+            }
+        }
+        if (data.containsKey("a_hcim_entity_rels")) {
+            List<Map<String, String>> cols = (List<Map<String, String>>)
+                new ArrayList(((Map)data.get("a_hcim_entity_rels")).values());
+            int i = 0;
+            for (Map col : cols) {
+                col.put("serialno", i++);
+            }
         }
         
         String id = model.save(data);
 
         String nms = model.getAffectedNames();
-        String msg = "保存模型 "+nms+" 成功";
+        String msg = "保存实体 "+nms+" 成功";
 
         helper.back(msg, id, nms);
     }

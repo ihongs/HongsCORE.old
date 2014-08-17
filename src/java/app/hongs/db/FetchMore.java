@@ -538,6 +538,7 @@ public class FetchMore
             // 上级外键连接下级主键, 交换主外键
             String xk = fk; fk = pk; pk = xk;
             if (fk == null) fk = table2.primaryKey;
+            caze2.setOption("MULTI_ASSOC", false);
         }
         else if ("HAS_ONE".equals(tp)) {
             // 上级主键连接下级外键

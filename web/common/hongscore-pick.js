@@ -4,12 +4,12 @@
  * 在选择列表配置添加:
  * <param name="_fill__pick" value="(hsListFillPick)"/>
  * 在选择列表头部添加:
- * <td data-ft="_pick"><input type="checkbox" class="check-all"/></td>
+ * <td data-ft="_pick"><input type="checkbox" class="checkall"/></td>
  * 在表单配置区域添加:
  * <param name="_fill__pick" value="(hsFormFillPick)"/>
  * 在表单选项区域添加:
- * <ul data-fn="x" data-ft="_pick" requires="requires"></ul>
- * <button type="button" data-toggle="hsPick" data-pick="x/pick.html">Pick</button>
+ * <ul data-fn="x" data-ft="_pick" required="required"></ul>
+ * <button type="button" data-toggle="hsPick" data-pick="_pick.html">Pick</button>
  */
 
 /**
@@ -57,9 +57,11 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
     }
 
     if (box.is("input")) {
-        var val = box.val ( );
-        var txt = btn.text( );
-        v[val] = txt;
+        var val = box.val( );
+        var txt = btn.text();
+        if (val) {
+            v[val] = txt;
+        }
     } else {
         box.find("li").each(function() {
             var opt = jQuery(this);
@@ -92,14 +94,13 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
 
     function pickBack() {
         var evt = jQuery.Event("pickBack");
-        box.trigger(evt, [v]);
+        box.trigger(evt, [v, tip]);
         if (evt.isDefaultPrevented()) {
             return false;
         }
 
         fil.call(form, box , v, n, "data");
-
-        box.trigger("change");
+        box.trigger( "change" );
         return true;
     }
 
@@ -110,21 +111,23 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
         .toggleClass("pickmul", mul)
         .on("saveBack", function(evt, rst) {
             if (! rst || ! rst.back
-            ||  ! pickItem.apply( self, rst.back )
+            ||  ! pickItem.apply(self, rst.back )
             ||  ! pickBack())
-                return;
+                return false;
 
             tip.hsClose();
+            return false;
         })
         .on("click", ".ensure", function() {
             var btn = jQuery(this);
             if (! btn.closest(".openbox").is(tip)
             ||  ! pickBack())
-                return;
+                return false;
 
-           tip.hsClose();
+            tip.hsClose();
+            return false;
         })
-        .on("change", ".check-one", function() {
+        .on("change", ".checkone", function() {
             var chk = jQuery(this);
             if (chk.closest(".HsList").data("HsList")._info)
                 return;
@@ -164,18 +167,25 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
             }
             while (false);
 
-            pickItem(val, txt, inf);
+            if (pickItem( val, txt, inf  ) === false) {
+                chk.prop("checked", false);
+                return false;
+            }
         });
     };
 
-    var win;
     if (tip) {
-        win = tip.hsOpen(url, undefined, pickOpen );
-        win.data("rel", btn.closest(".openbox")[0]);
+        tip = tip.hsOpen(url, undefined, pickOpen );
+        tip.data("rel", btn.closest(".openbox")[0]);
     } else {
-        win =   $.hsOpen(url, undefined, pickOpen );
+        tip =   $.hsOpen(url, undefined, pickOpen );
     }
-    return win;
+
+    tip.on("hsClose", function() {
+        box.trigger("pickClose");
+    });
+
+    return tip;
 };
 
 /**
@@ -187,21 +197,22 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
  * @returns {undefined}
  */
 function hsFormFillPick(box, v, n, t) {
-    // 注意: 填充是用 data 而不理会 info
-    if (t == "info") return;
     // 注意: 绑定当前函数用于选择后的填充
     box.data("pickFunc", hsFormFillPick);
 
     var btn = box.siblings("[data-toggle=hsPick]");
-    var mul = /(\[\]|\.)$/.test(n);
-    var vk  = box.attr("data-vk" );
-    var tk  = box.attr("data-tk" );
+    var mul = /(\[\]|\.)$/.test( n );
 
-    if (! vk) vk = 0;
-    if (! tk) tk = 0;
-
+    if (t == "info") {
+        var tn = box.attr("data-tn") || '';
+        v = hsGetValue(this._info, tn);
+        if (! v ) return ;
+        if (!mul) v = [v];
+    }
     if (jQuery.isArray(v)) {
-        var x = {};
+        var vk = box.attr("data-vk") || 0;
+        var tk = box.attr("data-tk") || 1;
+        var x  = {};
         for(var i = 0; i < v.length; i++) {
             var j = v[i];
             x[j[vk]] = j[tk];
@@ -294,11 +305,11 @@ function hsFormFillPick(box, v, n, t) {
 function hsListFillPick(cel, v, n) {
     var box = cel.closest(".pickbox");
     var mul = box.hasClass("pickmul");
-    var dat = box.data("pickData");
+    var dat = box.data("pickData") || {};
 
     // 单选还是多选
     if (! mul) {
-        box.find(".check-all").hide( );
+        box.find(".checkall").hide( );
     }
 
     // 填充选择控件
@@ -309,8 +320,8 @@ function hsListFillPick(cel, v, n) {
     }
 
     // 判断是否选中
-    if (dat[v] !== undefined ) {
-        cel.find(".check-one").prop("checked", true).change();
+    if (dat[v] !== undefined) {
+        cel.find(".checkone").prop("checked", true).change( );
     }
 }
 

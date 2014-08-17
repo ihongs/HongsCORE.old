@@ -892,12 +892,6 @@ $.hsNote = function(msg, cls, sec) {
     return box;
 };
 $.hsOpen = function(url, data, complete) {
-    var callfore;
-    if ($.isArray( complete )) {
-        callfore = complete[0];
-        complete = complete[1];
-    }
-
     var div = $('<div class="modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header">'
               + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
               + '<h4 class="modal-title">' + H$(":tabs.loading") + '</h4>'
@@ -907,8 +901,7 @@ $.hsOpen = function(url, data, complete) {
     var box = div.find( '.openbox' );
     div.modal();
 
-    if (callfore) callfore.call(box);
-    box.hsLoad( url, data, complete);
+    box.hsLoad(url, data, complete );
     return box;
 };
 
@@ -927,39 +920,28 @@ $.fn.hsLoad = function(url, data, complete) {
     return $.fn.jqLoad.call(this, hsFixUri(url ), data, function() {
         var that = $(this);
         that.removeClass(  "loading"  );
-        complete.apply(that, arguments);
+        complete.apply(this, arguments);
         that.hsReady(    );
     });
 };
 $.fn.hsOpen = function(url, data, complete) {
-    var callfore;
-    if ($.isArray( complete )) {
-        callfore = complete[0];
-        complete = complete[1];
-    }
-
     var prt = $(this);
+    var box;
     var pre;
     var tab;
 
     if (prt.is(".panes")) {
         prt = prt.data("rel");
-    }
+        prt = prt.hsTaba(url);
+        tab = prt[0]; prt = prt[1];
+    } else
     if (prt.is( ".nav" )) {
-        tab = prt.find("[data-href='"+url+"']").closest("li");
-        if (! tab.size()) {
-            tab = $('<li></li>').append(
-                  $('<a href="javascript:;"></a>').append(
-                  $('<span></span><span class="close">&times;</span>')
-                  ).attr('data-href', url)).appendTo( prt  );
-            prt = $('<div></div>').appendTo(prt.data("rel"));
-        } else {
-            prt = prt.data("rel").children().eq(tab.index());
-        }
+        prt = prt.hsTaba(url);
+        tab = prt[0]; prt = prt[1];
     } else
     if (prt.parent().is( ".nav" )) {
         tab = prt;
-        prt = prt.parent().data("rel").children().eq(prt.index());
+        prt = tab.parent().data("rel").children().eq(tab.index());
     } else
     if (prt.parent().is(".panes")) {
         tab = prt.parent().data("rel").children().eq(prt.index());
@@ -973,39 +955,42 @@ $.fn.hsOpen = function(url, data, complete) {
         } else {
             tab.find("a").text(hsGetLang("tabs.loading"));
         }
+        // 关闭关联的 tab
+        if (prt.children( ).size( ) ) {
+            prt.children( ).hsTabc( );
+            prt.empty();
+        }
     } else {
         pre = prt.contents().detach();
     }
 
-    var box = $('<div class="openbox"></div>').appendTo(prt).data("pre", pre);
-    if (callfore) callfore.call(box);
-    box.hsLoad( url, data, complete);
+    box = $('<div class="openbox"></div>')
+          .appendTo(prt).data("pre", pre );
+    box.hsLoad( url, data, complete );
     return box;
 };
 $.fn.hsClose = function() {
+    var prt = $(this).parent();
     var box = $(this);
-
-    var prt = box.parent();
     var tab;
 
-    if (prt.parent().is( ".nav" )) {
-        tab = prt;
-        prt = prt.parent().data("rel").children().eq(tab.index());
-        box = prt.children(".openbox");
-    } else
     if (prt.parent().is(".panes")) {
         tab = prt.parent().data("rel").children().eq(prt.index());
+    } else
+    if (prt.parent().is( ".nav" )) {
+        tab = prt;
+        prt = tab.parent().data("rel").children().eq(tab.index());
+        box = prt.children(".openbox");
     }
 
     // 联动关闭
-    $(document.body).find(".openbox").each(function() {
-        if (box.is($(this).data("rel"))) {
-            $(this).hsClose();
-        }
-    });
+    box.hsTabc ();
 
+    // 触发事件
+    box.trigger("hsClose");
+
+    // 恢复标签
     if (tab) {
-        // 恢复标签
         var idx = box.data("pre") ? box.data("pre").index() : 0;
         tab.parent().children().eq(idx).find( "a" ).click() ;
         if (tab.has(".close").size()) {
@@ -1013,36 +998,26 @@ $.fn.hsClose = function() {
             prt.remove();
         }
     } else
-    if (box.data("pre")) {
-        prt.append(box.data( "pre" ));
+    // 恢复内容
+    if (box.data( "pre" )) {
+        prt.append(box.data( "pre" )) ; box.remove();
     } else
+    // 关闭浮窗
     if (box.closest(".modal").size()) {
         box.closest(".modal").modal("hide").remove();
     }
 
-    box.trigger("hsClose");
-    box.remove();
     return box;
 };
 $.fn.hsReady = function() {
     var box = $(this);
-    box.trigger("hsReady");
-
-    if (box.is(".loadbox")
-    && !box.children("object.config[name=hsInit]").size()) {
-        box.hsInit({});
-    }
 
     if (box.is(".tabsbox")) {
-        var tbs = $('<ul class="nav nav-tabs"><li><a href="javascript:;"></a></li></ul>');
-        var pns = $('<div class="panes"></div>');
-        var pan = $('<div></div>').appendTo(pns);
-        var div = $('<div></div>').appendTo(pan);
-        div.append(box.contents()).addClass("openbox");
-        box.append(tbs);
-        box.append(pns);
-        tbs.hsTabs(   );
-        div.hsInit({ });
+        box.hsTabw({});
+    } else
+    if (box.is(".openbox")
+    && !box.children("object.config[name=hsInit]").size()) {
+        box.hsInit({});
     }
 
     /**
@@ -1080,21 +1055,7 @@ $.fn.hsReady = function() {
         if (typeof(prnt[func]) === "function") prnt[func](opts);
     }).remove();
 
-    return box;
-};
-$.fn.hsTabs = function() {
-    var rel;
-    var box = $(this);
-    if (box.attr("data-target")) {
-        rel = _hsTarget(this, box.attr("data-target"));
-    } else {
-        rel = box.siblings(".panes");
-    }
-    box.data("rel", rel);
-    rel.data("rel", box);
-    if (! box.has(".active").size()) {
-        box.find("li>a").first().click();
-    }
+    box.trigger("hsReady");
     return box;
 };
 $.fn.hsInit = function(cnf) {
@@ -1151,6 +1112,64 @@ $.fn.hsInit = function(cnf) {
     }
 
     return box;
+};
+$.fn.hsTabw = function(cnf) {
+    var box = $(this);
+    var tbs = $('<ul class="nav nav-tabs"><li><a href="javascript:;"></a></li></ul>');
+    var pns = $('<div class="panes"></div>');
+    var pan = $('<div></div>').appendTo(pns);
+    var div = $('<div></div>').appendTo(pan);
+    div.append(box.contents()).addClass("openbox");
+    box.append(tbs);
+    box.append(pns);
+    tbs.hsTabs(   );
+    div.hsInit(cnf);
+};
+$.fn.hsTabs = function(rel) {
+    var box = $(this);
+    if (! rel) {
+        if (box.attr("data-target")) {
+            rel = _hsTarget(this, box.attr("data-target"));
+                  rel.addClass( "panes");
+        } else {
+            rel = box.siblings(".panes");
+        }
+    }
+    box.data("rel", rel);
+    rel.data("rel", box);
+    if (! box.has(".active").size()) {
+        box.find("li>a").first().click();
+    }
+    return box;
+};
+$.fn.hsTaba = function(url) {
+    var box = $(this);
+    var tab;
+    if (! url) {
+        url  =  '';
+        tab  =  [];
+    } else {
+        tab  =  box.find("[data-for='"+url+"']").closest("li");
+    }
+    if (! tab.length) {
+        tab = $('<li></li>').attr( 'data-for', url )
+            .appendTo(box)
+            .append($('<a href="javascript:;"></a>')
+                .append( '<span></span>' )
+                .append( '<span class="close">&times;</span>' )
+            );
+        return [tab, $('<div></div>').appendTo(box.data("rel"))];
+    } else {
+        return [tab, box.data("rel").children().eq(tab.index())];
+    }
+};
+$.fn.hsTabc = function() {
+    var box = $(this);
+    $(document.body).find(".openbox").each(function() {
+        if (box.is($(this).data("rel"))) {
+            $(this).hsClose();
+        }
+    });
 };
 
 $.fn._hsConfig = function() {

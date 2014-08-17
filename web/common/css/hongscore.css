@@ -106,11 +106,20 @@ fieldset.dropup .dropdown-body {
     padding: auto;
 }
 
-.input-number {
+form .form-control.input-number {
     width: 50%;
 }
 
+form ul.pickbox {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
 /** 列表 **/
+
+.listbox .table {
+    table-layout: fixed;
+}
 
 .listbox ._check,
 .listbox ._radio,
@@ -131,6 +140,7 @@ fieldset.dropup .dropdown-body {
 }
 .listbox .sortable .caret {
     border: 0;
+    margin-left: 4px;
 }
 .listbox .sortable.sort-a-z .caret,
 .listbox .sortable.sort-z-a .caret {
@@ -152,12 +162,12 @@ fieldset.dropup .dropdown-body {
 
 /** 树形 **/
 
+.tree-list {
+    margin-left: 13px;
+    border-left: 1px dotted #eee;
+}
 .treebox:hover .tree-list {
     border-left: 1px dotted #ccc;
-}
-.tree-list {
-    border-left: 1px dotted #eee;
-    margin-left: 11px;
 }
 .tree-node {
     cursor: pointer;
@@ -214,16 +224,16 @@ fieldset.dropup .dropdown-body {
     /*
     background-image: url(../img/tree-hand-open.gif);
     */
-    margin-top: -2px;
-    margin-left: 0;
+    margin-top: -3px;
+    margin-left: 1px;
     border-bottom: 0;
     border-right: 6px solid #666;
     border-left: 6px solid transparent;
     border-top: 6px solid transparent;
 }
 .tree-open>table .tree-hand:hover .caret {
-    margin-top: -2px;
-    margin-left: 0;
+    margin-top: -3px;
+    margin-left: 1px;
     border-bottom: 0;
     border-right: 6px solid #f66;
     border-left: 6px solid transparent;

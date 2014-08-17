@@ -13,9 +13,8 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"   );
     var saveUrl  = hsGetValue(opts, "saveUrl");
     var loadUrl  = hsGetValue(opts, "loadUrl");
+    var loadMode = hsGetValue(opts, "loadMode", 1); // 加载模式, 0无 1附带上层数据 2总是进行加载
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
-    var probeMode= hsGetValue(opts, "probeMode"  ); // 刺探模式, 无论有无id都请求信息
-    var aloneMode= hsGetValue(opts, "aloneMode"  ); // 独立模式, 请求时不携带上层数据
 
     if (formBox.length === 0) formBox = context;
 
@@ -36,7 +35,8 @@ function HsForm(opts, context) {
      * 获取並使用上层数据
      */
     var loadData = [];
-    if ( ! aloneMode) {
+    loadMode = parseInt(loadMode);
+    if ( 1 & loadMode ) {
         a = hsSerialArr(loadBox.data("url" ));
         for (i = 0; i < a.length; i ++ ) {
             loadData.push(a[i] );
@@ -51,7 +51,7 @@ function HsForm(opts, context) {
         loadData.push(a[i] );
     }
     a = hsGetSeria (loadData, idKey);
-    if (a||probeMode) {
+    if ((2 & loadMode) || a) {
         this.load(loadUrl, loadData);
     } else {
         this.fillData( { } );
@@ -326,7 +326,7 @@ HsForm.prototype = {
     valiInit : function() {
         var that = this;
         this.formBox.attr("novalidate", "novalidate");
-        this.formBox.on("change blur", "input,select,textarea,[data-fn]",
+        this.formBox.on("change", "input,select,textarea,[data-fn]",
         function() {
             var inp = jQuery(this);
             that.validate(inp.attr("name") || inp.attr("data-fn"));
@@ -396,26 +396,27 @@ HsForm.prototype = {
         }
     },
     rules : {
-        "[required]" : function(val) {
-            if (!val) {
-                return hsGetLang("form.required");
-            }
-            return true;
-        },
-        "[requires]" : function(val, inp) {
-            var rst;
-            if (inp.prop("tagName") == "SELECT") {
-                rst = !!val;
-            }
-            else if (inp.is(":checkbox,:radio")) {
-                rst = !!inp.parent().parent()
-                    .find(":checkbox,:radio").val( );
-            }
-            else {
-                rst = !!inp.find( ":hidden" ).length;
-            }
-            if (! rst) {
-                return hsGetLang("form.requires");
+        "[required]" : function(val, inp) {
+            if (inp.is("select")) {
+                if (!val) {
+                    return hsGetLang("form.requires");
+                }
+            } else if (inp.is(":checkbox,:radio" )) {
+                if (!inp.filter(":checked").length) {
+                    return hsGetLang("form.requires");
+                }
+            } else if (inp.is(".checkbox")) {
+                if (!inp. find (":checked").length) {
+                    return hsGetLang("form.requires");
+                }
+            } else if (inp.is(  "ul,div" )) {
+                if (!inp. find (":hidden" ).length) {
+                    return hsGetLang("form.requires");
+                }
+            } else {
+                if (!val) {
+                    return hsGetLang("form.required");
+                }
             }
             return true;
         },
@@ -498,9 +499,9 @@ HsForm.prototype = {
                 "n" : inp.attr("name"),
                 "v" : val
             };
-            if (! url) url = inp.attr("data-server");
-            url = url.replace(/\{(.*?)\}/, function(x, n) {
-                return obj.find("[name='" +n+ "']").val();
+            if (! url) url = inp.attr("data-verify");
+            url = url.replace(/\{(.*?)\}/g, function(x, n) {
+                return obj.find("[name='" +n+ "']").val( ) || "";
             });
             jQuery.hsAjax({
                 "url": url,

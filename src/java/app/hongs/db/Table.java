@@ -915,10 +915,10 @@ public class Table
     CoreLanguage lang = (CoreLanguage)
         Core.getInstance(CoreLanguage.class);
 
-    String tl = lang.getProperty("user.table."+name, name);
-    String fl = lang.getProperty("user.field."+name+"."+fieldName);
+    String tl = lang.getProperty("core.table."+name, name);
+    String fl = lang.getProperty("core.field."+name+"."+fieldName);
     if (fl == null) {
-        fl =  lang.getProperty("user.field."+fieldName, fieldName);
+        fl =  lang.getProperty("core.field."+fieldName, fieldName);
     }
 
     List<String> trans = new ArrayList();

@@ -10,7 +10,7 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                primaryKey="id">
             <assoc type="BLS_TO"
                    name="a_hcim_module"
-                   foreignKey="moduel_id"/>
+                   foreignKey="module_id"/>
             <assoc type="HAS_MANY"
                    name="a_hcim_entity_cols"
                    foreignKey="entity_id">
@@ -46,9 +46,13 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                 </assoc>
             </assoc>
         </table>
-        <table name="a_hcim_module"
-               primaryKey="id"/>
         <table name="a_hcim_domain"
+               primaryKey="id">
+            <assoc type="BLS_TO"
+                   name="a_hcim_module"
+                   foreignKey="module_id"/>
+        </table>
+        <table name="a_hcim_module"
                primaryKey="id"/>
         <table name="a_hcim_entity_cols"
                primaryKey="id"/>

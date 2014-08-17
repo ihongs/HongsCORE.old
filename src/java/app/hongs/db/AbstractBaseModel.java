@@ -19,10 +19,10 @@ import java.util.HashMap;
  * 
  * <p>
  * 当要使用 getInfo(get),save(add,put),remove(del) 时请确保表有配置主键.<br/>
- * getPage,getList,getInfo,save,update,remove,exists 为基础动作方法, 通常它们被动作类直接调用;
- * get,add,put,remove 为基础模型方法, 一般改写只需覆盖它们即可;
- * reqFilter,idFilter 分别用于对获取和更改数据等常规操作进行过滤,
- * 其中 idFilter 默认是调用 reqFilter 来实现的, 可覆盖它来做资源过滤操作.<br/>
+ getPage,getList,getInfo,save,perform,remove,exists 为基础动作方法, 通常它们被动作类直接调用;
+ get,add,put,remove 为基础模型方法, 一般改写只需覆盖它们即可;
+ reqFilter,idFilter 分别用于对获取和更改数据等常规操作进行过滤,
+ 其中 idFilter 默认是调用 reqFilter 来实现的, 可覆盖它来做资源过滤操作.<br/>
  * 可使用查询参数:
  * <code>
  * ?f1=123&-f2=456&find=a+b&sort=-f1+f2&page=1&rows=10&cols[]=id&cols[]=f1&cols[]=f2
@@ -93,7 +93,7 @@ abstract public class AbstractBaseModel
 
   /**
    * 受影响的ID
-   * 在save/update/remove后被设置为影响的行id
+ 在save/perform/remove后被设置为影响的行id
    */
   protected List<String> affectedIds;
 
@@ -1133,7 +1133,7 @@ abstract public class AbstractBaseModel
 
   /**
    * 获取可操作的 ID
-   * getOperableNames,update,remove 均是调用此方法获取 ID
+ getOperableNames,perform,remove 均是调用此方法获取 ID
    * @param req
    * @param caze
    * @return IDs
@@ -1161,9 +1161,9 @@ abstract public class AbstractBaseModel
   }
   /**
    * 获取可操作的名称
-   * 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
-   * 此方法逻辑与 update,remove 完全一致, 最终获取仍是调用 getAffetctedNames
-   * 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
+ 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
+ 此方法逻辑与 perform,remove 完全一致, 最终获取仍是调用 getAffetctedNames
+ 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
    * @param req
    * @param caze
    * @return 用", "连接的可操作的名称
@@ -1184,10 +1184,10 @@ abstract public class AbstractBaseModel
   }
   /**
    * 获取受影响的名称
-   * 默认取 findKeys 的第一位作为名称字段
-   * 仅对调用过 save,update,remove 的有效
-   * 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
-   * 此方法不是线程安全的
+ 默认取 findKeys 的第一位作为名称字段
+ 仅对调用过 save,perform,remove 的有效
+ 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
+ 此方法不是线程安全的
    * @return 用", "连接的受影响的名称
    * @throws app.hongs.HongsException
    */

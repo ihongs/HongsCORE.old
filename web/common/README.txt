@@ -72,7 +72,7 @@
             <thead>
                 <tr>
                     <th data-fn="id[]" data-ft="_check" class="_check"><!-- 使用 data-fn 提取行数据的指定值, 使用 data-ft 指定填充的类型 -->
-                        <input type="checkbox" class="check-all" name="id[]"/>
+                        <input type="checkbox" class="checkall" name="id[]"/>
                     </th>
                     <th data-fn="username" class="sortable">邮箱</th><!-- class 为 sortable 的列可以在点击表头该列是排序 -->
                     <th data-fn="name" class="sortable">昵称</th>

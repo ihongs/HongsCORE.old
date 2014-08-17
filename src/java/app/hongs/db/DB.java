@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Pattern;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -635,18 +634,10 @@ public class DB
      */
     try
     {
-      int   i =0;
+      int i = 0;
       for (Object x : paramz)
       {
-            i ++;
-        if (x == null)
-        {
-          ps.setString(i, "");
-        }
-        else
-        {
-          ps.setObject(i,  x);
-        }
+        ps.setObject(++ i, x);
       }
     }
     catch (SQLException ex)
@@ -847,6 +838,33 @@ public class DB
 
   //** 查询语句 **/
 
+  public String limit(String sql, int start, int limit) {
+      try {
+          Connection con = connect();
+          String nam = con.getMetaData().getDatabaseProductName();
+          if ("MySQL".equals(nam)) {
+              sql += " LIMIT " + start + "," + limit;
+          } else if ("PostgreSQL".equals(nam)) {
+              sql += " LIMIT " + limit + " OFFSET " + start;
+          } else if ("Oracle".equals(nam)) {
+              sql = "SELECT * FROM (" + sql + ") WHERE rno>" + (start - 1) + " AND rno<" + (start + limit);
+//          } else if ("SQLServer".equals(nam)) {
+//              sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum>" + (start - 1) + " AND rno<" + (start + limit);
+          } else {
+              throw new HongsError(0x10, "Limit not support " + nam);
+          }
+      } catch (HongsException ex) {
+          throw new HongsError(0x10, ex);
+      } catch (SQLException ex) {
+          throw new HongsError(0x10, ex);
+      }
+      return sql;
+  }
+
+  public String limit(String sql, int limit) {
+      return limit(sql, 0, limit);
+  }
+
   /**
    * 查询方法
    * @param sql
@@ -917,12 +935,7 @@ public class DB
   public Map<String, Object> fetchOne(String sql, Object... params)
     throws HongsException
   {
-    if (Pattern.compile("^SELECT\\s+.*\\s+(?!LIMIT[\\s\\d,]+)$",
-                Pattern.CASE_INSENSITIVE)
-               .matcher( sql ).matches())
-    {
-      sql += " LIMIT 1";
-    }
+    sql = limit(sql, 1 );
 
     List<Map<String, Object>> rows = this.fetchAll(sql, params);
 
@@ -946,7 +959,13 @@ public class DB
   public List fetchMore(FetchCase caze)
     throws HongsException
   {
-    return this.fetchAll(caze.getSQL(), caze.getParams());
+    String sql = caze.getSQL  ();
+    int[]  lmt = caze.getLimit();
+    if (lmt.length > 0)
+    {
+      sql = limit(sql, lmt[0], lmt[1]);
+    }
+    return this.fetchAll(sql, caze.getParams());
   }
 
   /**
@@ -1020,7 +1039,7 @@ public class DB
    * @return 更新条数
    * @throws HongsException
    */
-  public int update(String sql, Object... params)
+  public int perform(String sql, Object... params)
     throws HongsException
   {
     this.connect();
@@ -1031,7 +1050,7 @@ public class DB
       List      paramz = new ArrayList(Arrays.asList(params));
       DB.checkSQLParams(sb, paramz);
       DB.mergeSQLParams(sb, paramz);
-      app.hongs.CoreLogger.debug("INFO(DB.update): " + sb.toString());
+      app.hongs.CoreLogger.debug("INFO(DB.perform): " + sb.toString());
     }
 
     PreparedStatement ps = this.prepareStatement(sql, params);
@@ -1048,6 +1067,48 @@ public class DB
     {
       this.closeStatement(ps);
     }
+  }
+
+  /**
+   * 添加记录
+   * <p>注: 调用update(sql, params...)实现</p>
+   * @param table
+   * @param values
+   * @return 插入条数
+   * @throws app.hongs.HongsException
+   */
+  public int insert(String table, Map<String, Object> values)
+    throws HongsException
+  {
+    if (values == null || values.isEmpty())
+    {
+      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
+    }
+
+    /** 组织语句 **/
+
+    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
+    List params2 = new ArrayList();
+    String fs = "", vs = "";
+
+    Iterator it = values.entrySet().iterator();
+    while (it.hasNext())
+    {
+      Map.Entry entry = (Map.Entry)it.next();
+      String field = (String)entry.getKey();
+      params2.add((Object)entry.getValue());
+
+      fs += "`" + Text.escape(field, "`") + "`, ";
+      vs += "?, ";
+    }
+
+    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
+    sql += " VALUES";
+    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
+
+    /** 执行更新 **/
+
+    return this.perform(sql, params2.toArray());
   }
 
   /**
@@ -1097,49 +1158,7 @@ public class DB
 
     /** 执行更新 **/
 
-    return this.update(sql, params2.toArray());
-  }
-
-  /**
-   * 添加记录
-   * <p>注: 调用update(sql, params...)实现</p>
-   * @param table
-   * @param values
-   * @return 插入条数
-   * @throws app.hongs.HongsException
-   */
-  public int insert(String table, Map<String, Object> values)
-    throws HongsException
-  {
-    if (values == null || values.isEmpty())
-    {
-      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
-    }
-
-    /** 组织语句 **/
-
-    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
-    List params2 = new ArrayList();
-    String fs = "", vs = "";
-
-    Iterator it = values.entrySet().iterator();
-    while (it.hasNext())
-    {
-      Map.Entry entry = (Map.Entry)it.next();
-      String field = (String)entry.getKey();
-      params2.add((Object)entry.getValue());
-
-      fs += "`" + Text.escape(field, "`") + "`, ";
-      vs += "?, ";
-    }
-
-    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
-    sql += " VALUES";
-    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
-
-    /** 执行更新 **/
-
-    return this.update(sql, params2.toArray());
+    return this.perform(sql, params2.toArray());
   }
 
   /**
@@ -1165,7 +1184,7 @@ public class DB
 
     /** 执行更新 **/
 
-    return this.update(sql, params);
+    return this.perform(sql, params);
   }
 
   //** 静态工具 **/

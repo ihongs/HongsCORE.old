@@ -1,9 +1,9 @@
-<h2>选择模块</h2>
+<h2>模块列表</h2>
 <div id="hcim-module-list" class="row">
     <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('hcim/Module/List.act')"/>
-        <param name="openUrls[]" value="['.create','hcim/module/form.html','@']"/>
-        <param name="openUrls[]" value="['.modify','hcim/module/form.html?id={ID}','@']"/>
+        <param name="loadUrl" value="('hcim/Module/List.act?ob=-ctime')"/>
+        <param name="openUrls[]" value="['.create','hcim/module/form.html','{TABSBOX}']"/>
+        <param name="openUrls[]" value="['.modify','hcim/module/form.html?id={ID}','{TABSBOX}']"/>
         <param name="sendUrls[]" value="['.remove','hcim/Module/Remove.act']"/>
     </object>
     <div>
@@ -23,7 +23,7 @@
             <thead>
                 <tr>
                     <th data-fn="id[]" data-ft="_check" class="_check">
-                        <input type="checkbox" class="check-all" name="id[]"/>
+                        <input type="checkbox" class="checkall" name="id[]"/>
                     </th>
                     <th data-fn="name" class="sortable">模块名称</th>
                     <th data-fn="code" class="sortable">代号</th>
