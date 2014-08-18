@@ -1,5 +1,10 @@
 package app.hongs.action;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
+import app.hongs.HongsError;
+import app.hongs.util.Text;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,26 +19,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import app.hongs.Core;
-import app.hongs.CoreConfig;
-import app.hongs.HongsError;
-import app.hongs.util.Str;
-
 /**
- * <h1>配置信息输出动作</h1>
+ * 配置信息输出动作
  *
- * <h2>web.xml配置:</h2>
- * <pre>
- * &lt;!-- Config Servlet --&gt;
+ * <h3>web.xml配置:</h3>
+ * <code>
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;Config&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;JsConf&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.action.JSConfAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;Config&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.jsc&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;JsConf&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;/common/conf/*&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
- * <pre>
+ * <code>
  *
  * @author Hongs
  */
@@ -55,22 +54,35 @@ public class JsConfAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    Core core = Core.getInstance();
-    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
-    String name = Core.ACTION_PATH.get();
-           name = name.substring(1, name.lastIndexOf('.'));
-    String type = req.getParameter( "t");
-    String m, s;
+    String name = helper.getRequest().getPathInfo();
+    if (name == null || name.length() == 0) {
+      helper.print500("Path info required");
+      return;
+    }
+    int p = name.lastIndexOf('.');
+    if (p < 0) {
+      helper.print500("File type required");
+      return;
+    }
+    String type = name.substring(1 + p);
+           name = name.substring(1 , p);
+
+    if ( !"js".equals(type) && !"json".equals(type)) {
+      helper.print500("Wrong file type: "+type);
+      return;
+    }
 
     /**
      * 如果指定配置的数据并没有改变
      * 则直接返回 304 Not modified
      */
-    m = helper.request.getHeader("If-Modified-Since");
-    if (m != null && m.equals(JsConfAction.lastModified.get(name)) )
+    String m;
+    m = helper.getRequest().getHeader("If-Modified-Since");
+    if (m != null && m.equals(JsConfAction.lastModified.get(name)))
     {
-      helper.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      helper.getResponse().setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
 
@@ -78,13 +90,14 @@ public class JsConfAction
      * 如果没有配置
      * 则调用工厂方法构造 JS 代码
      */
+    String s;
     if (!JsConfAction.config.containsKey(name))
     {
       try {
         s = this.makeConfig(name);
       }
       catch (HongsError ex) {
-        helper.print500Code(ex.getMessage());
+        helper.print500(ex.getMessage());
         return;
       }
 
@@ -104,14 +117,14 @@ public class JsConfAction
     }
 
     // 标明修改时间
-    helper.response.setHeader("Last-Modified", m);
+    helper.getResponse().setHeader("Last-Modified", m);
 
     // 输出配置信息
     if ("json".equals(type)) {
-      helper.printJSON( s );
+      helper.print(s, "application/json");
     }
     else {
-      helper.printJS("if(!HsCONF)HsCONF={};$.extend(HsCONF,"+s+");");
+      helper.print("if(!window.HsCONF)window.HsCONF={};$.extend(window.HsCONF,"+s+");", "application/javascript");
     }
   }
 
@@ -149,7 +162,7 @@ public class JsConfAction
     if ("default".equals(confName))
     {
       sb.append("DEBUG:")
-        .append(String.valueOf(Core.IN_DEBUG_MODE))
+        .append(String.valueOf(Core.DEBUG))
         .append(",\n")
         .append("SERVER_ID:\"")
         .append(Core.SERVER_ID)
@@ -170,7 +183,7 @@ public class JsConfAction
     return sb.toString();
   }
 
-  /** 辅助工具类 **/
+  //** 辅助工具类 **/
 
   /**
    * 配置信息辅助构造类
@@ -194,11 +207,10 @@ public class JsConfAction
        * .C   代码
        * .L   链接
        */
-      if (!key.startsWith("core.js.")
-      &&  !key.startsWith("user.js.")) {
+      if (! key.startsWith("fore.")) {
           return "";
       }
-      String name = key.substring( 8 )
+      String name = key.substring(5)
                        .replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {
@@ -225,7 +237,7 @@ public class JsConfAction
     private String makeConf(String name, String key, String def)
     {
       String value = this.conf.getProperty(key, def);
-      value = Str.escape(value);
+      value = Text.escape(value);
       return "\"" + name + "\":\"" + value + "\",\r\n";
     }
 

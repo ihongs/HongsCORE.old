@@ -1,37 +1,40 @@
 package app.hongs.action;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
+import app.hongs.CoreLanguage;
+import app.hongs.CoreLogger;
+import app.hongs.HongsError;
+import app.hongs.HongsException;
+import app.hongs.action.annotation.ActionChain;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import app.hongs.Core;
-import app.hongs.CoreLanguage;
-import app.hongs.HongsException;
-import app.hongs.HongsThrowable;
-import app.hongs.action.annotation.ActionChain;
-
 /**
- * <h1>动作启动器</h2>
- * <pre>
- * 在 app.xxx.action 中建立一个类, 指定多个
- * public void actionXxx(app.hongs.action.ActionHelper helper)
- * 方法接收来自Web的请求动作.
- * </pre>
+ * 动作启动器
  *
- * <h2>web.xml配置:</h2>
+ * <p>
+ * 在 app.xxx.action 中建立一个类, 指定多个
+ * <code>
+ * public void actionXxx(app.hongs.action.ActionHelper helper)
+ * </core>
+ * 方法接收来自 Web 的请求, 可使用 helper.back() 返回数据.
+ * </p>
+ *
+ * <h3>web.xml配置:</h3>
  * <pre>
- * &lt;!-- Action Servlet --&gt;
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;Action&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.action.Action&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
  *   &lt;servlet-name&gt;Action&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;
+ *   &lt;url-pattern&gt;*.act&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * <pre>
  *
@@ -44,7 +47,7 @@ public class Action
   /**
    * 服务方法
    *
-   * Servlet Mapping: *.do
+   * Servlet Mapping: *.act<br/>
    * 注意: 不支持请求URI的路径中含有"."(句点), 且必须区分大小写;
    * 其目的是为了防止产生多种形式的请求路径, 影响动作过滤, 产生安全隐患.
    *
@@ -58,17 +61,17 @@ public class Action
     throws IOException, ServletException
   {
     ActionHelper helper = (ActionHelper)
-    Core.getInstance(app.hongs.action.ActionHelper.class);
-    String action = Core.ACTION_PATH.get();
-    action = action.substring(1, action.lastIndexOf('.')); // 去掉前导"/", 去掉扩展名
+          Core.getInstance(ActionHelper.class);
+    String act = Core.ACTION_PATH.get();
+    act = act.substring(1,act.lastIndexOf('.')); // 去掉前导"/"和扩展名
 
-    if (action != null && action.length() == 0) {
-        helper.print404Code("Can not find action name.");
+    if (act != null && act.length() == 0) {
+        helper.print404("Can not find action name.");
         return;
     }
 
-    if (action.indexOf('.') != -1 || action.startsWith("hongs/action")) {
-        helper.print404Code("Illegal action '"+Core.ACTION_PATH.get()+"'.");
+    if (act.indexOf('.') != -1 || act.startsWith("hongs")) {
+        helper.print404("Illegal action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
 
@@ -76,26 +79,33 @@ public class Action
 
     int pos;
     String cls, mtd;
-    action = action.replace('/', '.');
+    act = act.replace('/','.');
 
-    pos = action.lastIndexOf('.');
+    pos = act.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
+        helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
-    mtd    = action.substring(pos+1);
-    action = action.substring(0,pos);
+    mtd = act.substring(pos+1);
+    act = act.substring(0,pos);
 
-    pos = action.lastIndexOf('.');
+    pos = act.lastIndexOf('.');
     if (pos == -1) {
-        helper.print404Code("Wrong action '"+Core.ACTION_PATH.get()+"'.");
+        helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
-    cls    = action.substring(pos+1);
-    action = action.substring(0,pos);
+    cls = act.substring(pos+1);
+    act = act.substring(0,pos);
+
+    CoreConfig conf = (CoreConfig )
+      Core.getInstance(CoreConfig.class);
+    act = "app."+act+".action";
+    if (conf.containsKey( act )) {
+        act = conf.getProperty(act);
+    }
 
     // app.包.action.类, action方法
-    doAction("app."+action+".action."+cls, "action"+mtd, helper);
+    doAction(act+"."+cls, "action"+mtd, helper);
   }
 
   /**
@@ -104,6 +114,7 @@ public class Action
    * @param cls
    * @param mtd
    * @param helper
+   * @throws javax.servlet.ServletException
    */
   protected void doAction(String cls, String mtd, ActionHelper helper)
     throws ServletException
@@ -122,7 +133,14 @@ public class Action
     }
     catch (ClassNotFoundException ex)
     {
-      helper.print404Code("Can not find class '" + cls + "'.");
+      helper.print404("Can not find class '" + cls + "'.");
+      return;
+    }
+
+    // 动作类必须加上 Action 注解. Add by Hongs, 2014/7/14
+    if (! klass.isAnnotationPresent(app.hongs.action.annotation.Action.class))
+    {
+      helper.print404("Can not exec class '" + cls + "'.");
       return;
     }
 
@@ -134,12 +152,12 @@ public class Action
     }
     catch (NoSuchMethodException ex)
     {
-      helper.print404Code("Can not find method '" + cls + "." + mtd + "'.");
+      helper.print404("Can not find method '" + cls + "." + mtd + "'.");
       return;
     }
     catch (SecurityException ex)
     {
-      helper.print500Code("Can not exec method '" + cls + "." + mtd + "'.");
+      helper.print500("Can not exec method '" + cls + "." + mtd + "'.");
       return;
     }
 
@@ -165,12 +183,12 @@ public class Action
     }
     catch (InstantiationException ex)
     {
-      helper.print500Code("Cannot instantiate class '" + cls + "'.");
+      helper.print500("Cannot instantiate class '" + cls + "'.");
       return;
     }
     catch (IllegalAccessException ex)
     {
-      helper.print500Code("Illegal access for class '" + cls + "'.");
+      helper.print500("Illegal access for class '" + cls + "'.");
       return;
     }
 
@@ -200,11 +218,12 @@ public class Action
     /**
      * 构建错误消息
      */
-    String error = ta.getMessage();
-    if (!(ta instanceof HongsThrowable))
+    String error = ta.getLocalizedMessage();
+    if (! (ta instanceof HongsException)
+    &&  ! (ta instanceof HongsError  ) )
     {
       CoreLanguage lang = (CoreLanguage)
-        Core.getInstance(app.hongs.CoreLanguage.class);
+          Core.getInstance(CoreLanguage.class );
       if (error == null || error.length() == 0)
       {
         error = lang.translate("core.error.unkwn");
@@ -214,21 +233,9 @@ public class Action
                 + ": " + error;
     }
 
-    /**
-     * 记录跟踪信息
-     */
-    if (Core.IN_DEBUG_MODE)
-    {
-      ta.printStackTrace(System.out);
-    }
-    else
-    if (!(ta instanceof HongsThrowable))
-    {
-      ta.printStackTrace(System.err);
-    }
-
-//  throw new ServletException(error,ta);
-    helper.print500Code ( error );
+//  throw new ServletException(error, ta);
+    CoreLogger.error( ta );
+    helper.print500(error);
   }
 
 }

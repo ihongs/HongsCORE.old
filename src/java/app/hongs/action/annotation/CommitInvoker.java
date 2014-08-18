@@ -1,13 +1,16 @@
 package app.hongs.action.annotation;
 
 import app.hongs.Core;
-import app.hongs.db.DB;
 import app.hongs.action.ActionHelper;
+import app.hongs.db.DB;
 import java.lang.annotation.Annotation;
+import java.sql.Connection;
 
 /**
- * 操作成功才提交
+ * 操作成功才提交数据更改
+ *
  * 由Action.doAction自动调用
+ *
  * @author Hongs
  */
 public class CommitInvoker {
@@ -15,21 +18,23 @@ public class CommitInvoker {
     throws Throwable {
         Core core = Core.getInstance();
         try {
-            core.put("__DB_AUTO_COMMIT__", false);
+            core.put("__IN_TRANSC_MODE__", null);
+            for (String k  :  core.keySet()) {
+                if (k.startsWith("__DB__.")) {
+                    DB  db = (DB)core.get(k);
+                    db.begin (  );
+                }
+            }
 
             chain.doAction();
 
             commit();
         }
-        catch (Throwable ex) {
-            rollback();
-            throw ex;
-        }
         finally {
-            core.remove("__DB_AUTO_COMMIT__");
+            core.remove("__IN_TRANSC_MODE__");
         }
     }
-    
+
     public static void commit()
     throws Exception {
         try {
@@ -37,8 +42,7 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    if(!db.connection.getAutoCommit())
-                        db.connection.commit();
+                    db.commit();
                 }
             }
         }
@@ -51,7 +55,7 @@ public class CommitInvoker {
             throw ex;
         }
     }
-    
+
     public static void rollback()
     throws Exception {
         try {
@@ -59,8 +63,7 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    if(!db.connection.getAutoCommit())
-                        db.connection.rollback();
+                    db.rollback();
                 }
             }
         }

@@ -6,10 +6,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * 操作成功才提交
+ * 操作成功才提交数据更改
  * @author Hongs
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionAnnotation(CommitInvoker.class)
+@ActionDecor(CommitInvoker.class)
 public @interface CommitSuccess { }

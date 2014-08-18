@@ -1,7 +1,25 @@
 package app.hongs.db;
 
-import java.util.Iterator;
+import app.hongs.Core;
+import app.hongs.CoreConfig;
+import app.hongs.CoreLogger;
+import app.hongs.HongsError;
+import app.hongs.HongsException;
+import app.hongs.util.Text;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
+import java.beans.PropertyVetoException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -9,79 +27,65 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.regex.Pattern;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
-
-import javax.sql.DataSource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-import app.hongs.Core;
-import app.hongs.CoreConfig;
-import app.hongs.CoreLogger;
-import app.hongs.HongsError;
-import app.hongs.HongsException;
-import app.hongs.util.Str;
+import javax.sql.DataSource;
 
 /**
- * <h1>数据库基础类</h1>
- * <pre>
+ * 数据库基础类
+ *
+ * <p>
  * 当需要库对象时, 一般情况可调用其工厂方法getInstance获取;
  * 当需要扩展类时, 请从DB继承并实现一个无参getInstance方法.
+ * </p>
+ *
+ * <h3>配置选项:</h3>
+ * <pre>
+ * core.load.db.[dbName].once 为true则仅加载一次
  * </pre>
  *
- * <h2>异常代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
- * 区间: 0x1010~0x105f
+ * 区间: 0x1020~0x105f
  *
- * 0x1011  找不到数据源名称配置
- * 0x1013  连接数据源失败
- * 0x1015  找不到数据库驱动配置
- * 0x1017  连接数据库失败
- * 0x1019  无数据源或无驱动配置
+ * 0x1021  找不到外部数据源配置
+ * 0x1022  连接外部数据源失败
+ * 0x1023  找不到内部数据源配置
+ * 0x1024  连接内部数据源失败
+ * 0x1025  找不到数据源配置
+ * 0x1026  设置自动提交失败
  *
- * 0x1021  找不到表配置
- * 0x1023  找不到表对应的类
- * 0x1025  无法获取表构造器
- * 0x1027  无法获取表实例
+ * 0x1031  开启Connection失败
+ * 0x1032  关闭Connection失败
+ * 0x1033  取消Statement失败
+ * 0x1034  关闭Statement失败
+ * 0x1035  关闭ResultSet失败
  *
- * 0x35    开启Connection失败
- * 0x37    关闭Connection失败
- * 0x102b  取消Statement失败
- * 0x102d  关闭Statement失败
- * 0x102f  关闭ResultSet失败
+ * 0x103a  找不到表配置
+ * 0x103b  找不到表对应的类
+ * 0x103c  无法获取表构造器
+ * 0x103d  无法获取表实例
  *
- * 0x1031  构建查询体失败
- * 0x1032  绑定查询参数失败
- * 0x1034  获取列名失败
- * 0x1036  获取行数据失败
+ * 0x1041  构建语句失败
+ * 0x1042  绑定参数失败
+ * 0x1043  获取列名失败
+ * 0x1044  获取行数据失败
  *
- * 0x1041  执行查询语句失败
- * 0x1042  获取查询结果失败
+ * 0x1047  查询语句失败
+ * 0x1048  获取查询结果失败
  *
- * 0x1045  执行语句失败
- * 0x1046  插入的值不能为空
- * 0x1047  执行插入语句失败
- * 0x1048  更新的值不能为空
- * 0x1049  执行更新语句失败
- * 0x104b  执行删除语句失败
+ * 0x104a  执行语句失败
+ * 0x104b  插入的值不能为空
+ * 0x104c  执行插入语句失败
+ * 0x104d  更新的值不能为空
+ * 0x104e  执行更新语句失败
+ * 0x104f  执行删除语句失败
  *
- * 0x1051  查询参数的个数与语句中的插入位置数不符
- * </pre>
- *
- * <h2>配置选项:</h2>
- * <pre>
- * core.load.db.[dbName].once 为true则仅加载一次, 为false由Core控制
+ * 0x1051  参数的个数与语句中的插入标识数不符
  * </pre>
  *
  * @author Hongs
@@ -90,12 +94,15 @@ public class DB
   implements Core.Destroy
 {
 
+  /**
+   * 是否为对象模式(即获取的是对象)
+   */
   public boolean IN_OBJECT_MODE;
 
   /**
-   * 数据库连接
+   * 是否为事务模式(即不会自动提交)
    */
-  public Connection connection;
+  public boolean IN_TRANSC_MODE;
 
   /**
    * 库名
@@ -120,29 +127,46 @@ public class DB
   /**
    * 表配置
    */
-  protected Map<String, Map> tableConfigs;
+  protected Map<String, Map  > tableConfigs;
 
   /**
    * 表对象
    */
   protected Map<String, Table> tableObjects;
 
-  private Map       driver;
-  private Map       source;
+  private Map           source;
+  private Map           origin;
+  private Connection    connection;
+
+  private static Map<String, ComboPooledDataSource> sourcePool = new HashMap();
+  private static ReadWriteLock  sourceLock  =  new  ReentrantReadWriteLock(  );
+
+  private DB(Map cf)
+    throws HongsException
+  {
+    if (cf == null) cf = new HashMap();
+
+    this.name         = "";
+    this.source       = (Map) cf.get("source");
+    this.origin       = (Map) cf.get("origin");
+    this.tableClass   = "";
+    this.tablePrefix  = "";
+    this.tableSuffix  = "";
+    this.tableConfigs = new  HashMap( );
+    this.tableObjects = new  HashMap( );
+  }
 
   public DB(DBConfig cf)
     throws HongsException
   {
     this.name         = cf.name;
-    this.driver       = cf.driver;
     this.source       = cf.source;
+    this.origin       = cf.origin;
     this.tableClass   = cf.tableClass;
     this.tablePrefix  = cf.tablePrefix;
     this.tableSuffix  = cf.tableSuffix;
     this.tableConfigs = cf.tableConfigs;
     this.tableObjects = new  HashMap( );
-
-    this.connection   = null;
   }
 
   public DB (String db)
@@ -169,41 +193,44 @@ public class DB
     this(DBConfig.parseByDocument(db));
   }
 
-  public final void open()
+  public Connection connect()
     throws HongsException
   {
-    TOP: do {
+    TOP: do
+    {
 
     try
     {
       if (this.connection != null
       && !this.connection.isClosed())
       {
-        break TOP;
+        break;
       }
     }
     catch (SQLException ex)
     {
-      throw new HongsError(0x35, ex);
+      throw new HongsException(0x1031, ex);
     }
 
-    Exception e = null;
+    Exception ez = null;
+
+    /** 使用外部数据源 **/
 
     do
     {
-      if (source == null || source.isEmpty())
+      if (origin == null || origin.isEmpty( ))
       {
         break;
       }
 
-      if (!source.containsKey("name"))
+      if (origin.containsKey("name") == false)
       {
-        throw new HongsException(0x1011, "Can not find name in source");
+        throw new HongsException(0x1021, "Can not find name in origin");
       }
 
       String comp = "java:comp/env";
-      String namc = (String)source.get("name");
-      Properties info = (Properties)source.get("info");
+      String namc = (String)origin.get("name");
+      Properties info = (Properties)origin.get("info");
 
       Context ct;
       DataSource ds;
@@ -214,9 +241,9 @@ public class DB
         ct = (Context)ic.lookup(comp);
         ds = (DataSource)ct.lookup(namc);
       }
-      catch (NamingException ex)
+      catch (NamingException ex )
       {
-        e =ex;
+        ez=ex;
         break;
       }
 
@@ -229,48 +256,51 @@ public class DB
         else
         {
           this.connection = ds.getConnection(
-                 info.getProperty("user"),
+                 info.getProperty(  "user"  ),
                  info.getProperty("password"));
         }
+        this.connection.setAutoCommit( false );
 
-        if (Core.IN_DEBUG_MODE)
+        if (0 < Core.DEBUG)
         {
-          CoreLogger.debug("Connect to database(source mode), URL: "
-                           +this.connection.getMetaData().getURL());
+          CoreLogger.debug("Connect to database(origin mode): "+name);
         }
       }
       catch (SQLException ex)
       {
-        throw new app.hongs.HongsException(0x1013, ex);
+        throw new app.hongs.HongsException(0x1022, ex);
       }
 
       break TOP;
     }
     while (false);
 
+    /** 使用内部数据源 **/
+
     do
     {
-      if (driver == null || driver.isEmpty())
+      if (source == null || source.isEmpty())
       {
         break;
       }
 
-      if (!driver.containsKey("drv"))
+      if (!source.containsKey("drv"))
       {
-        throw new app.hongs.HongsException(0x1015, "Can not find drv in driver");
+        throw new app.hongs.HongsException(0x1023, "Can not find drv in source");
       }
 
-      if (!driver.containsKey("url"))
+      if (!source.containsKey("url"))
       {
-        throw new app.hongs.HongsException(0x1015, "Can not find url in driver");
+        throw new app.hongs.HongsException(0x1023, "Can not find url in source");
       }
 
-      String drv = (String)driver.get("drv");
-      String url = (String)driver.get("url");
-      Properties info = (Properties)driver.get("info");
+      String drv = (String)source.get("drv");
+      String url = (String)source.get("url");
+      Properties info = (Properties)source.get("info");
 
       try
       {
+        /*
         Class.forName(drv);
 
         if (info.isEmpty())
@@ -281,58 +311,109 @@ public class DB
         {
           this.connection = DriverManager.getConnection(url, info);
         }
+        */
 
-        if (Core.IN_DEBUG_MODE)
+        String name = drv+" "+url;
+        ComboPooledDataSource pool;
+        sourceLock.readLock( ).lock();
+        try
         {
-          CoreLogger.debug("Connect to database(driver mode), URL: "
-                           +this.connection.getMetaData().getURL());
+          pool = sourcePool.get(name);
+        }
+        finally
+        {
+          sourceLock.readLock().unlock();
+        }
+
+        if (pool == null)
+        {
+          sourceLock.writeLock( ).lock();
+          try
+          {
+            pool = new ComboPooledDataSource();
+            sourcePool.put( name, pool );
+            pool.setDriverClass(drv);
+            pool.setJdbcUrl(url);
+
+            if (info.containsKey("user")) {
+              pool.setUser(info.getProperty("user"));
+            }
+            if (info.containsKey("password")) {
+              pool.setPassword(info.getProperty("password"));
+            }
+            if (info.containsKey("initialPoolSize")) {
+              pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
+            }
+            if (info.containsKey("minPoolSize")) {
+              pool.setMinPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
+            }
+            if (info.containsKey("maxPoolSize")) {
+              pool.setMaxPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
+            }
+            if (info.containsKey("maxIdleTime")) {
+              pool.setMaxIdleTime(Integer.parseInt(info.getProperty("maxIdleTime")));
+            }
+            if (info.containsKey("maxStatements")) {
+              pool.setMaxStatements(Integer.parseInt(info.getProperty("maxStatements")));
+            }
+          }
+          finally
+          {
+            sourceLock.writeLock().unlock();
+          }
+        }
+
+        this.connection = pool.getConnection();
+        this.connection.setAutoCommit( false );
+
+        if (0 < Core.DEBUG)
+        {
+          CoreLogger.debug("Connect to database(source mode): "+drv+" "+url);
         }
       }
-      catch (ClassNotFoundException ex)
+      catch (PropertyVetoException ex)
       {
-        throw new app.hongs.HongsException(0x1017, ex);
+        throw new app.hongs.HongsException(0x1024, ex);
       }
       catch (SQLException ex)
       {
-        throw new app.hongs.HongsException(0x1017, ex);
+        throw new app.hongs.HongsException(0x1024, ex);
       }
 
       break TOP;
     }
     while (false);
 
-    if (e !=null)
+    if (ez !=null)
     {
-      throw new HongsException(0x1019, e);
+      throw new HongsException(0x1025, ez);
     }
     else
     {
-      throw new HongsException(0x1019, "Can not find source and driver");
+      throw new HongsException(0x1025, "Can not find source or origin");
     }
 
     } while (false);
 
     /** 初始化设置 **/
 
-    Core core = Core.getInstance();
-
     // 自动提交设置
-    if (core.containsKey("__DB_AUTO_COMMIT__"))
-    try {
-        this.connection.setAutoCommit((Boolean)
-                core.get("__DB_AUTO_COMMIT__"));
+    if (this.IN_TRANSC_MODE)
+    try
+    {
+      this.connection.setAutoCommit(!this.IN_TRANSC_MODE);
     }
-    catch (SQLException ex) {
-        throw new app.hongs.HongsError(0x10,ex);
+    catch (SQLException ex )
+    {
+      throw new app.hongs.HongsException(  0x1026 , ex  );
     }
 
-    // 对象模式设置
-    CoreConfig conf = (CoreConfig)
-                       Core.getInstance( app.hongs.CoreConfig.class);
-     IN_OBJECT_MODE =  conf.getProperty("core.in.object.mode",false);
+    return this.connection;
   }
 
-  public void close()
+  @Override
+  public void destroy()
+    throws Throwable
   {
     try
     {
@@ -342,7 +423,7 @@ public class DB
         return;
       }
 
-      if (Core.IN_DEBUG_MODE)
+      if (0 < Core.DEBUG)
       {
         CoreLogger.debug("Close database connection, URL: "
           + this.connection.getMetaData().getURL());
@@ -353,14 +434,33 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsError(0x37, ex);
+      throw new Error(new HongsException(0x1032, ex));
     }
   }
 
-  @Override
-  public void destroy()
+  public void begin()
   {
-    this.close();
+    IN_TRANSC_MODE = false;
+  }
+  public void commit()
+  {
+    IN_TRANSC_MODE = false;
+    try {
+      if (!this.connection.isClosed())
+      this.connection.commit();
+    } catch (SQLException ex) {
+      throw new HongsError( 0x44, ex );
+    }
+  }
+  public void rollback()
+  {
+    IN_TRANSC_MODE = false;
+    try {
+      if (!this.connection.isClosed())
+      this.connection.rollback();
+    } catch (SQLException ex) {
+      throw new HongsError( 0x46, ex );
+    }
   }
 
   /**
@@ -392,7 +492,7 @@ public class DB
 
     if (!this.tableConfigs.containsKey(table))
     {
-      throw new app.hongs.HongsException(0x1021, "Can not find config for table '"+table+"'.");
+      throw new app.hongs.HongsException(0x103a, "Can not find config for table '"+table+"'.");
     }
 
     /**
@@ -434,10 +534,10 @@ public class DB
       return tobj;
     }
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       app.hongs.CoreLogger.debug(
-        "INFO(DB): tableClass("+tcls+") for table("+table+") has been defined, try to get it");
+          "INFO(DB): tableClass("+tcls+") for table("+table+") has been defined, try to get it");
     }
 
     /**
@@ -450,7 +550,7 @@ public class DB
     }
     catch (ClassNotFoundException ex)
     {
-      throw new app.hongs.HongsException(0x1023, ex);
+      throw new app.hongs.HongsException(0x103b, ex);
     }
 
     /**
@@ -463,11 +563,11 @@ public class DB
     }
     catch (NoSuchMethodException ex)
     {
-      throw new app.hongs.HongsException(0x1025, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
     catch (SecurityException ex)
     {
-      throw new app.hongs.HongsException(0x1025, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
 
     /**
@@ -480,19 +580,19 @@ public class DB
     }
     catch (InstantiationException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
     catch (IllegalAccessException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
     catch (IllegalArgumentException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
     catch (InvocationTargetException ex)
     {
-      throw new app.hongs.HongsException(0x1027, ex);
+      throw new app.hongs.HongsException(0x103d, ex);
     }
 
     this.tableObjects.put(table, tobj);
@@ -534,23 +634,15 @@ public class DB
      */
     try
     {
-      int   i =0;
+      int i = 0;
       for (Object x : paramz)
       {
-            i ++;
-        if (x == null)
-        {
-          ps.setString(i, "");
-        }
-        else
-        {
-          ps.setObject(i,  x);
-        }
+        ps.setObject(++ i, x);
       }
     }
     catch (SQLException ex)
     {
-      throw new HongsException(0x1032, ex);
+      throw new HongsException(0x1042, ex);
     }
 
     return ps;
@@ -566,7 +658,7 @@ public class DB
    *        ResultSet.CONCUR_READ_ONLY);
    * ps.setFetchSize(Integer.MIN_VALUE);
    * </code>
-   * 异常代码为: 0x1031
+   * 异常代码为: 0x1041
    * </p>
    * @param sql
    * @return PreparedStatement对象
@@ -583,7 +675,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsException(0x1031, ex);
+      throw new HongsException(0x1041, ex);
     }
 
     return ps;
@@ -599,7 +691,7 @@ public class DB
    *        ResultSet.CONCUR_READ_ONLY);
    * ps.setFetchSize(Integer.MIN_VALUE);
    * </code>
-   * 异常代码为: 0x1031
+   * 异常代码为: 0x1041
    * </p>
    * @return Statement对象
    * @throws HongsException
@@ -615,7 +707,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new HongsException(0x1031, ex);
+      throw new HongsException(0x1041, ex);
     }
 
     return ps;
@@ -636,7 +728,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x102b, ex);
+      throw new app.hongs.HongsException(0x1033, ex);
     }
   }
 
@@ -655,7 +747,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x102d, ex);
+      throw new app.hongs.HongsException(0x1034, ex);
     }
   }
 
@@ -674,7 +766,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x102f, ex);
+      throw new app.hongs.HongsException(0x1035, ex);
     }
   }
 
@@ -700,7 +792,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1034, ex);
+      throw new app.hongs.HongsException(0x1043, ex);
     }
   }
 
@@ -740,11 +832,38 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1036, ex);
+      throw new app.hongs.HongsException(0x1044, ex);
     }
   }
 
-  /** 查询语句 **/
+  //** 查询语句 **/
+
+  public String limit(String sql, int start, int limit) {
+      try {
+          Connection con = connect();
+          String nam = con.getMetaData().getDatabaseProductName();
+          if ("MySQL".equals(nam)) {
+              sql += " LIMIT " + start + "," + limit;
+          } else if ("PostgreSQL".equals(nam)) {
+              sql += " LIMIT " + limit + " OFFSET " + start;
+          } else if ("Oracle".equals(nam)) {
+              sql = "SELECT * FROM (" + sql + ") WHERE rno>" + (start - 1) + " AND rno<" + (start + limit);
+//          } else if ("SQLServer".equals(nam)) {
+//              sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum>" + (start - 1) + " AND rno<" + (start + limit);
+          } else {
+              throw new HongsError(0x10, "Limit not support " + nam);
+          }
+      } catch (HongsException ex) {
+          throw new HongsError(0x10, ex);
+      } catch (SQLException ex) {
+          throw new HongsError(0x10, ex);
+      }
+      return sql;
+  }
+
+  public String limit(String sql, int limit) {
+      return limit(sql, 0, limit);
+  }
 
   /**
    * 查询方法
@@ -756,9 +875,9 @@ public class DB
   public FetchNext query(String sql, Object... params)
     throws HongsException
   {
-    this.open();
+    this.connect();
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -776,7 +895,7 @@ public class DB
     }
     catch (SQLException ex )
     {
-      throw new app.hongs.HongsException(0x1041, ex);
+      throw new app.hongs.HongsException(0x1047, ex);
     }
 
     return new FetchNext(this, ps, rs);
@@ -816,12 +935,7 @@ public class DB
   public Map<String, Object> fetchOne(String sql, Object... params)
     throws HongsException
   {
-    if (Pattern.compile("^SELECT\\s+.*\\s+(?!LIMIT[\\s\\d,]+)$",
-                Pattern.CASE_INSENSITIVE)
-               .matcher( sql ).matches())
-    {
-      sql += " LIMIT 1";
-    }
+    sql = limit(sql, 1 );
 
     List<Map<String, Object>> rows = this.fetchAll(sql, params);
 
@@ -838,27 +952,33 @@ public class DB
   /**
    * 采用查询体获取全部数据
    * <p>注: 调fetchAll实现</p>
-   * @param more
+   * @param caze
    * @return 全部数据
    * @throws app.hongs.HongsException
    */
-  public List fetchMore(FetchMore more)
+  public List fetchMore(FetchCase caze)
     throws HongsException
   {
-    return this.fetchAll(more.getSQL(), more.getParams());
+    String sql = caze.getSQL  ();
+    int[]  lmt = caze.getLimit();
+    if (lmt.length > 0)
+    {
+      sql = limit(sql, lmt[0], lmt[1]);
+    }
+    return this.fetchAll(sql, caze.getParams());
   }
 
   /**
    * 采用查询体获取单条数据
    * <p>注: 调fetchMore实现</p>
-   * @param less
+   * @param caze
    * @return 单条数据
    * @throws app.hongs.HongsException
    */
-  public Map fetchLess(FetchMore less)
+  public Map fetchLess(FetchCase caze)
     throws HongsException
   {
-    List<Map<String, Object>> rows = this.fetchMore(less.limit(1));
+    List<Map<String, Object>> rows = this.fetchMore(caze.limit(1));
 
     if (!rows.isEmpty())
     {
@@ -882,9 +1002,9 @@ public class DB
   public boolean execute(String sql, Object... params)
     throws HongsException
   {
-    this.open();
+    this.connect();
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -904,7 +1024,7 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1045, ex);
+      throw new app.hongs.HongsException(0x104a, ex);
     }
     finally
     {
@@ -919,18 +1039,18 @@ public class DB
    * @return 更新条数
    * @throws HongsException
    */
-  public int update(String sql, Object... params)
+  public int perform(String sql, Object... params)
     throws HongsException
   {
-    this.open();
+    this.connect();
 
-    if (Core.IN_DEBUG_MODE)
+    if (0 < Core.DEBUG)
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
       DB.checkSQLParams(sb, paramz);
       DB.mergeSQLParams(sb, paramz);
-      app.hongs.CoreLogger.debug("INFO(DB.update): " + sb.toString());
+      app.hongs.CoreLogger.debug("INFO(DB.perform): " + sb.toString());
     }
 
     PreparedStatement ps = this.prepareStatement(sql, params);
@@ -941,12 +1061,54 @@ public class DB
     }
     catch (SQLException ex)
     {
-      throw new app.hongs.HongsException(0x1049, ex);
+      throw new app.hongs.HongsException(0x104e, ex);
     }
     finally
     {
       this.closeStatement(ps);
     }
+  }
+
+  /**
+   * 添加记录
+   * <p>注: 调用update(sql, params...)实现</p>
+   * @param table
+   * @param values
+   * @return 插入条数
+   * @throws app.hongs.HongsException
+   */
+  public int insert(String table, Map<String, Object> values)
+    throws HongsException
+  {
+    if (values == null || values.isEmpty())
+    {
+      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
+    }
+
+    /** 组织语句 **/
+
+    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
+    List params2 = new ArrayList();
+    String fs = "", vs = "";
+
+    Iterator it = values.entrySet().iterator();
+    while (it.hasNext())
+    {
+      Map.Entry entry = (Map.Entry)it.next();
+      String field = (String)entry.getKey();
+      params2.add((Object)entry.getValue());
+
+      fs += "`" + Text.escape(field, "`") + "`, ";
+      vs += "?, ";
+    }
+
+    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
+    sql += " VALUES";
+    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
+
+    /** 执行更新 **/
+
+    return this.perform(sql, params2.toArray());
   }
 
   /**
@@ -964,12 +1126,12 @@ public class DB
   {
     if (values == null || values.isEmpty())
     {
-      throw new app.hongs.HongsException(0x1048, "Update values can not be empty.");
+      throw new app.hongs.HongsException(0x104d, "Update values can not be empty.");
     }
 
     /** 组织语言 **/
 
-    String sql = "UPDATE `" + Str.escape(table, "`") + "` SET ";
+    String sql = "UPDATE `" + Text.escape(table, "`") + "` SET ";
     List params2 = new ArrayList();
 
     Iterator it = values.entrySet().iterator();
@@ -979,7 +1141,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      sql += "`" + Str.escape(field, "`") + "` = ?, ";
+      sql += "`" + Text.escape(field, "`") + "` = ?, ";
     }
 
     sql = sql.substring(0, sql.length()  - 2);
@@ -996,49 +1158,7 @@ public class DB
 
     /** 执行更新 **/
 
-    return this.update(sql, params2.toArray());
-  }
-
-  /**
-   * 添加记录
-   * <p>注: 调用update(sql, params...)实现</p>
-   * @param table
-   * @param values
-   * @return 插入条数
-   * @throws app.hongs.HongsException
-   */
-  public int insert(String table, Map<String, Object> values)
-    throws HongsException
-  {
-    if (values == null || values.isEmpty())
-    {
-      throw new app.hongs.HongsException(0x1046, "Insert values can not be empty.");
-    }
-
-    /** 组织语句 **/
-
-    String sql = "INSERT INTO `" + Str.escape(table, "`") + "`";
-    List params2 = new ArrayList();
-    String fs = "", vs = "";
-
-    Iterator it = values.entrySet().iterator();
-    while (it.hasNext())
-    {
-      Map.Entry entry = (Map.Entry)it.next();
-      String field = (String)entry.getKey();
-      params2.add((Object)entry.getValue());
-
-      fs += "`" + Str.escape(field, "`") + "`, ";
-      vs += "?, ";
-    }
-
-    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
-    sql += " VALUES";
-    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
-
-    /** 执行更新 **/
-
-    return this.update(sql, params2.toArray());
+    return this.perform(sql, params2.toArray());
   }
 
   /**
@@ -1055,7 +1175,7 @@ public class DB
   {
     /** 组织语句 **/
 
-    String sql = "DELETE FROM `" + Str.escape(table, "`") + "`";
+    String sql = "DELETE FROM `" + Text.escape(table, "`") + "`";
 
     if (where != null && where.length() != 0)
     {
@@ -1064,10 +1184,10 @@ public class DB
 
     /** 执行更新 **/
 
-    return this.update(sql, params);
+    return this.perform(sql, params);
   }
 
-  /** 静态工具 **/
+  //** 静态工具 **/
 
   /**
    * 引用字段名
@@ -1076,7 +1196,7 @@ public class DB
    */
   public static String quoteField(String field)
   {
-    return "`" + Str.escape(field, "`") + "`";
+    return "`" + Text.escape(field, "`") + "`";
   }
 
   /**
@@ -1086,20 +1206,7 @@ public class DB
    */
   public static String quoteValue(String value)
   {
-    return "'" + Str.escape(value, "'") + "'";
-  }
-
-  /**
-   * 格式化SQL字段名
-   * @param sql
-   * @return 格式好的SQL
-   */
-  public static String formatSQLFields(String sql)
-  {
-    return sql.replaceAll("(^|[ ,\\(])([^ ,`\\(\\)]+)\\.([^ ,`\\(\\)]+)([ ,\\)]|$)", "$1`$2`.`$3`$4")
-              .replaceAll("([^ ,`'\\(\\)]+) +AS +", "`$1` AS ")
-              .replaceAll(" +AS +([^ ,`'\\(\\)]+)", " AS `$1`")
-              .replaceAll("`\\*`", "*");
+    return "'" + Text.escape(value, "'") + "'";
   }
 
   /**
@@ -1258,9 +1365,7 @@ public class DB
     }
   }
 
-  /** 构造工厂 **/
-
-  public static Map<String, DB> instances;
+  //** 构造工厂 **/
 
   /**
    * 获取默认数据库对象
@@ -1304,10 +1409,18 @@ public class DB
   public static DB getInstance(String dbName)
     throws HongsException
   {
-    if (DB.instances != null
-    &&  DB.instances.containsKey(dbName))
+    String key = "__DB__." + dbName;
+
+    Core core = Core.THREAD_CORE.get();
+    if ( core.containsKey(key))
     {
-      return    DB.instances.get(dbName);
+      return (DB)core.get(key);
+    }
+
+    Core gore = Core.GLOBAL_CORE;
+    if ( gore.containsKey(key))
+    {
+      return (DB)gore.get(key);
     }
 
     /**
@@ -1324,76 +1437,65 @@ public class DB
     else
     {
       db = new DB(cf);
-      Core.getInstance().put("__DB__." + dbName, db);
     }
 
     /**
      * 如有设置dbName的单次加载则将其放入静态映射
      */
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     if (conf.getProperty("core.load.db."+dbName+".once", false))
     {
-      if (DB.instances == null)
-      {
-          DB.instances = new HashMap();
-      }
-          DB.instances.put(dbName, db);
+      gore.put(key, db);
     }
+    else
+    {
+      core.put(key, db);
+    }
+
+    /**
+     * 自动设定模式和事务
+     */
+
+    db.IN_OBJECT_MODE = conf.getProperty( "core.in.object.mode"  ,  false  );
+    db.IN_TRANSC_MODE = Core.getInstance().containsKey("__IN_TRANSC_MODE__");
 
     return db;
   }
 
-  public static DB getInstanceByDriver(String drv, String url, Properties info)
-  throws HongsException {
-      Map config = new HashMap();
-      Map driver = new HashMap();
-
-      config.put("driver", driver);
-      driver.put("drv" , drv );
-      driver.put("url" , url );
-      driver.put("info", info);
-
-      return new DB(config);
-  }
-
-  public static DB getInstanceByDriver(String drv, String url)
-  throws HongsException {
-      return getInstanceByDriver(drv, url, new Properties());
-  }
-
-  public static DB getInstanceBySource(String name, Properties info)
+  public static DB getInstanceBySource(String drv, String url, Properties info)
   throws HongsException {
       Map config = new HashMap();
       Map source = new HashMap();
 
       config.put("source", source);
-      source.put("name", name);
+      source.put("drv" , drv );
+      source.put("url" , url );
       source.put("info", info);
 
       return new DB(config);
   }
 
-  public static DB getInstanceBySource(String name)
+  public static DB getInstanceBySource(String drv, String url)
   throws HongsException {
-      return getInstanceBySource(name, new Properties());
+      return getInstanceBySource(drv, url, new Properties());
   }
 
-  private DB(Map cf)
-    throws HongsException
-  {
-    if (cf == null) cf = new HashMap();
+  public static DB getInstanceByOrigin(String name, Properties info)
+  throws HongsException {
+      Map config = new HashMap();
+      Map origin = new HashMap();
 
-    this.name         = "";
-    this.driver       = (Map) cf.get("driver");
-    this.source       = (Map) cf.get("source");
-    this.tableClass   = "";
-    this.tablePrefix  = "";
-    this.tableSuffix  = "";
-    this.tableConfigs = new  HashMap( );
-    this.tableObjects = new  HashMap( );
+      config.put("origin", origin);
+      origin.put("name", name);
+      origin.put("info", info);
 
-    this.connection   = null;
+      return new DB(config);
+  }
+
+  public static DB getInstanceByOrigin(String name)
+  throws HongsException {
+      return DB.getInstanceByOrigin(name, new Properties());
   }
 
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="http://hongs-core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://hongs-core ac.xsd">
+    <page name="通用用户管理" uri="/hcum/index.html">
+        <page name="用户" uri="/hcum/user/main.html">
+            <page name="${opr}用户" uri="/hcum/user/form.html"/>
+            <page name="${opr}部门" uri="/hcum/dept/form.html"/>
+        </page>
+    </page>
+</root>

@@ -1,21 +1,39 @@
+<!--
+Hong's Common User Module
+用户模块
+//-->
 <!doctype html>
 <html>
-<head>
-    <title>用户管理</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="../lib/core/jquery.tools.css"/>
-    <link rel="stylesheet" type="text/css" href="../lib/core/jquery.hongs.css"/>
-    <script type="text/javascript" src="../lib/core/jquery.min.js"></script>
-    <script type="text/javascript" src="../lib/core/jquery.tools.min.js"></script>
-    <script type="text/javascript" src="../lib/core/jquery.hongs.src.js"></script>
-    <script type="text/javascript" src="../default.js-conf"></script>
-    <script type="text/javascript" src="../default.js-lang"></script>
-</head>
-<body>
-    <div class="main-container">
-        <div class="side-context" data-load="hcum/dept/tree.html"></div>
-        <div class="main-context"></div>
-        <div class="cb"></div>
-    </div>
-</body>
+    <head>
+        <title>用户管理</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../common/css/bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="../common/css/hongscore.css"/>
+        <script type="text/javascript" src="../common/jquery.min.js"></script>
+        <script type="text/javascript" src="../common/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../common/conf/default.js"></script>
+        <script type="text/javascript" src="../common/lang/default.js"></script>
+        <script type="text/javascript" src="../common/auth/default.js"></script>
+        <script type="text/javascript" src="../common/hongscore.js"></script>
+        <script type="text/javascript" src="../common/hongscore-form.js"></script>
+        <script type="text/javascript" src="../common/hongscore-list.js"></script>
+        <script type="text/javascript" src="../common/hongscore-tree.js"></script>
+    </head>
+    <body>
+        <div id="notebox"></div>
+        <div id="headbox" class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="row" data-load="../common/pages/head.jsp?c=hcum"></div>
+            </div>
+        </div>
+        <div id="bodybox">
+            <div class="container tabsbox" id="main-context"></div>
+        </div>
+        <div id="footbox" class="navbar navbar-default navbar-fixed-bottom">
+            <div class="container">
+                <div class="row" data-load="../common/pages/foot.jsp"></div>
+            </div>
+        </div>
+    </body>
 </html>

@@ -1,38 +1,36 @@
 package app.hongs;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
+import app.hongs.action.ActionHelper;
+import app.hongs.cmdlet.CmdletHelper;
+import app.hongs.util.Text;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import app.hongs.action.ActionHelper;
-import app.hongs.util.Str;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
- * <h1>日志记录工具</h1>
+ * 日志记录工具
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
  * core.log.name.date.format    日志名称中的日期格式, 为空则不按日期拆分日志
  * core.log.line.time.format    日志记录中的时间格式, 默认为"yyyy/MM/dd HH:mm:ss"
  * </pre>
  *
- * <h2>错误代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
- * 0x16 无法打开日志文件
- * 0x18 无法写入日志文件
+ * 0x1002   无法写入日志文件
  * </pre>
  *
  * @author Hongs
  */
-public class CoreLogger
+public class CoreLogger implements Core.Destroy
 {
 
   /**
@@ -85,13 +83,13 @@ public class CoreLogger
    * @param text
    * @param time
    */
-  public synchronized void print(String text, long time)
+  public synchronized void println(String text, long time)
   {
     if (time == 0)
     {
       time = System.currentTimeMillis();
     }
-    this.check(time);
+    this.openlog(time);
 
     StringBuilder sb = new StringBuilder();
 
@@ -99,7 +97,7 @@ public class CoreLogger
      * 记录发生的时间
      */
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.line.time.format",
                                 "yyyy/MM/dd HH:mm:ss");
     DateFormat df = new SimpleDateFormat(f);
@@ -112,25 +110,28 @@ public class CoreLogger
     /**
      * 记录请求的地址
      */
-    if (Core.IN_SHELL_MODE)
+    if (Core.ENVIR == 1)
     {
-      sb.append(' ')
-        .append('[')
-        .append("0.0.0.0")
-        .append(' ')
-        .append("0")
-        .append(']');
+      Core core = Core.getInstance();
+      if (core.containsKey(app.hongs.action.ActionHelper.class.getName()))
+      {
+        ActionHelper helper = (ActionHelper)
+          Core.getInstance(app.hongs.action.ActionHelper.class);
+        sb.append(' ')
+          .append('[')
+          .append(helper.getRequest().getRemoteAddr())
+          .append(' ')
+          .append(helper.getRequest().getRemotePort())
+          .append(']');
+      }
+      else
+      {
+        sb.append(" [IN ACTION]");
+      }
     }
     else
     {
-      ActionHelper helper = (ActionHelper)
-        Core.getInstance(app.hongs.action.ActionHelper.class);
-      sb.append(' ')
-        .append('[')
-        .append(helper.request.getRemoteAddr())
-        .append(' ')
-        .append(helper.request.getRemotePort())
-        .append(']');
+        sb.append(" [IN CMDLET]");
     }
 
     /**
@@ -147,39 +148,29 @@ public class CoreLogger
      * 去掉空行, 行首缩进
      */
     sb.append("\r\n");
-    sb.append(Str.indent(Str.clearEL(text.trim())));
+    sb.append(Text.indent(Text.clearEL(text.trim())));
+    sb.append("\r\n");
 
-    /*
-    try
-    {
-    */
-      this.out.print(sb.toString() + "\r\n");
-      this.out.flush();
-    /*
-    }
-    catch (IOException ex)
-    {
-      throw new HongsError(0x16, ex);
-    }
-    */
+    this.out.print(sb.toString());
+    this.out.flush();
   }
 
   /**
    * 写日志(当前时间)
    * @param text
    */
-  public void print(String text)
+  public void println(String text)
   {
-    this.print(text, 0);
+    this.println(text, 0);
   }
 
   /**
    * 检查日志文件
    * @param time
    */
-  private void check(long time)
+  private void openlog(long time)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.name.date.format", "");
     String p = this.path + File.separator + this.name;
     String x;
@@ -246,7 +237,16 @@ public class CoreLogger
     }
     catch (IOException ex)
     {
-      throw new HongsError(0x18, ex);
+      throw new HongsError(0x19, ex);
+    }
+  }
+
+  public void destroy()
+    throws Throwable
+  {
+    if (this.out != null)
+    {
+        this.out.close( );
     }
   }
 
@@ -255,80 +255,29 @@ public class CoreLogger
     throws Throwable
   {
     super.finalize();
-
-    if (this.out != null)
-    {
-      this.out.close();
-    }
+    this .destroy ();
   }
 
-  /** 静态属性及方法 **/
-
-  /**
-   * 日志对象集合
-   */
-  public static Map<String, CoreLogger> instances = new HashMap<String, CoreLogger>();
+  //** 静态属性及方法 **/
 
   /**
    * 获取日志对象
    * @param name 日志名称
    * @return CoreLogger对象
    */
-  private static CoreLogger getInstance(String name)
+  public static CoreLogger getInstance(String name)
   {
-    CoreLogger logs;
-    if (! CoreLogger.instances.containsKey(name))
-    {
-      logs = new CoreLogger(name);
-      CoreLogger.instances.put(name, logs);
-    }
-    else
-    {
-      logs = CoreLogger.instances.get(name);
-    }
-    return logs;
-  }
-
-  /**
-   * 获取写入句柄
-   * @param name 日志名称
-   * @return PrintWriter对象
-   */
-  public static PrintWriter getWriter(String name)
-  {
-    CoreLogger logs = CoreLogger.getInstance(name);
-    logs.check(System.currentTimeMillis());
-    return logs.out;
-  }
-
-  /**
-   * 写日志(指定时间)
-   * @param name
-   * @param text
-   * @param time
-   */
-  public static void log(String name, String text, long time)
-  {
-    CoreLogger.getInstance(name).print(text, time);
-  }
-
-  /**
-   * 写日志(当前时间)
-   * @param name
-   * @param text
-   */
-  public static void log(String name, String text)
-  {
-    CoreLogger.log(name, text, 0);
-  }
-
-  /**
-   * 记录错误信息
-   * @param text
-   */
-  public static void error(String text)
-  {
-    CoreLogger.log("error", text);
+      String key = CoreLogger.class.getName() + ":" + name;
+      Core core = Core.getInstance();
+      CoreLogger inst;
+      if (core.containsKey(key)) {
+          inst = (CoreLogger)core.get(key);
+      }
+      else {
+          inst = new CoreLogger(name);
+          core.put( key, inst );
+      }
+      return inst;
   }
 
   /**
@@ -337,7 +286,49 @@ public class CoreLogger
    */
   public static void debug(String text)
   {
-    CoreLogger.log("debug", text);
+    if (1 == (1 & Core.DEBUG)) {
+        CmdletHelper.println(text);
+    }
+    if (2 == (2 & Core.DEBUG)) {
+        try {
+            CoreLogger.getInstance("debug").println(text, 0);
+        }
+        catch (HongsError ex ) {
+            if (1 != (1 & Core.DEBUG)) {
+                CmdletHelper.println(text);
+            }
+            System.err.println("ERROR: Write to debug log failed!");
+        }
+    }
+  }
+
+  /**
+   * 记录错误信息
+   * @param text
+   */
+  public static void error(String text)
+  {
+    if (1 == (1 & Core.DEBUG)) {
+        CmdletHelper.println(text);
+    }
+    if (2 == (2 & Core.DEBUG)) {
+        try {
+            CoreLogger.getInstance("error").println(text, 0);
+        }
+        catch (HongsError ex ) {
+            if (1 != (1 & Core.DEBUG)) {
+                CmdletHelper.println(text);
+            }
+            System.err.println("ERROR: Write to error log failed!");
+        }
+    }
+  }
+
+  public static void error(Throwable t)
+  {
+    ByteArrayOutputStream b = new ByteArrayOutputStream();
+    t.printStackTrace(new PrintStream(b));
+    error( b.toString() );
   }
 
 }

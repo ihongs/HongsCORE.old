@@ -1,6 +1,9 @@
 package app.hongs.db;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
 import app.hongs.HongsException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,27 +13,26 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <h1>树模型</h1>
+ * 树形模型
  *
- * <pre>
+ * <p>
  * 用于与树JS组件进行交互
- * </pre>
+ * </p>
  *
- * <h2>URL参数说明:</h2>
+ * <h3>URL参数说明:</h3>
  * <pre>
- *   pid          获取pid指定的一组节点
- *   ids          获取ids指定的全部节点
- *   only_id      仅获取节点的id
- *   with_sub     获取子级节点
- *   with_path    附带节点路径
- * </pre>
+   pid          获取pid 指定的一组节点
+   id[]         获取id[]指定的全部节点
+   get_id       仅获取节点的id
+   get_path     附带节点的路径
+ </pre>
  *
- * <h2>JS请求参数组合:</h2>
+ * <h3>JS请求参数组合:</h3>
  * <pre>
- *   获取一层: ?pid=xxx
- *   查找节点: ?find=xxx&only_id=1
- *   获取节点: ?id=xxx&only_id=1&with_path=1
- *   获取节点: ?ids[]=xxx&only_id=1&with_path=1
+ * 获取一层: ?pid=xxx
+ * 查找节点: ?find=xxx&get_id=1
+ * 获取节点: ?id=xxx&get_id=1&get_path=1
+ * 获取节点: ?id[]=xxx&get_id=1&get_path=1
  * </pre>
  *
  * @author Hong
@@ -45,10 +47,10 @@ public class AbstractTreeModel extends AbstractBaseModel
   protected String rootId = "0";
 
   /**
-   * 父级id参数名
-   * 用于getAll/getList/getTree
+   * 参考id参数名
+   * 影响put, 用于移动节点时指定顺序
    */
-  protected String pidVar = "pid";
+  protected String bidKey = "bid";
 
   /**
    * 父级id字段名
@@ -84,9 +86,11 @@ public class AbstractTreeModel extends AbstractBaseModel
    * 构造方法
    *
    * 需指定该模型对应的表对象.
-   * 如传递的id/ids等参数名不同,
-   * 可在构造时分别指定;
-   * 请指定被搜索的字段.
+   * 如传递的newPid,bid参数名不同,
+ 或newPid,name等字段名不同,
+ 或rootId不同,
+ 可在构造时分别指定;
+ 请指定被搜索的字段.
    *
    * @param table
    */
@@ -94,6 +98,10 @@ public class AbstractTreeModel extends AbstractBaseModel
     throws HongsException
   {
     super(table);
+    
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    this.bidKey = conf.getProperty("fore.tree.bid.key", "bid");
+    this.rootId = conf.getProperty("fore.tree.root.id", "0");
   }
   public AbstractTreeModel(String tableName)
     throws HongsException
@@ -106,130 +114,118 @@ public class AbstractTreeModel extends AbstractBaseModel
     this(DB.getInstance(dbName).getTable(tableName));
   }
 
-  /** 标准动作方法 **/
+  //** 标准动作方法 **/
 
   /**
-   * <b>获取树</p>
+   * 获取树
    *
    * @param req
-   * @param fs
+   * @param caze
    * @return 树列表
+   * @throws HongsException
    */
-  public Map getTree(Map req, FetchMore fs)
+  public Map getTree(Map req, FetchCase caze)
     throws HongsException
   {
     if (req == null)
     {
       req = new HashMap();
     }
-    if (fs == null)
+    if (caze == null)
     {
-      fs = new FetchMore();
+      caze = new FetchCase();
     }
 
-    if (!fs.hasOption("ASSOC_TABLES")
-    &&  !fs.hasOption("ASSOC_TYPES")
-    &&  !fs.hasOption("ASSOC_JOINS"))
+    if (!caze.hasOption("ASSOC_TABLES")
+    &&  !caze.hasOption("ASSOC_TYPES")
+    &&  !caze.hasOption("ASSOC_JOINS"))
     {
-      fs.setOption("ASSOC_TABLES", new HashSet());
+      caze.setOption("ASSOC_TABLES", new HashSet());
     }
 
-    boolean onlyId = req.containsKey("only_id")
-                  && req.get("only_id").equals("1");
-    boolean withSub = req.containsKey("with_sub")
-                   && req.get("with_sub").equals("1");
-    boolean withPath = req.containsKey("with_path")
-                    && req.get("with_path").equals("1");
-    req.remove("only_id");
-    req.remove("with_sub");
-    req.remove("with_path");
-
-    if (onlyId)
+    String pid = (String)req.get(this.pidKey);
+    if (pid == null || pid.length() == 0)
     {
-      fs.select(".`" + this.table.primaryKey + "` AS `id`");
+      pid =  this.rootId;
+    }
+
+    // 这些参数为约定参数
+    boolean getId   = req.containsKey("get_id"  )
+                    && req.get("get_id"  ).equals("1");
+    boolean getPath = req.containsKey("get_path")
+                    && req.get("get_path").equals("1");
+    req.remove("get_id"  );
+    req.remove("get_path");
+
+    if (getId)
+    {
+      caze.select(".`" + this.table.primaryKey + "`");
     }
     else
     {
-      fs.select(".`" + this.table.primaryKey + "` AS `id`")
-        .select(".`" + this.pidKey  + "` AS `pid`" )
-        .select(".`" + this.nameKey + "` AS `name`");
+      caze.select(".`" + this.table.primaryKey + "`")
+          .select(".`" + this.pidKey  + "`")
+          .select(".`" + this.nameKey + "`");
 
       if (this.noteKey != null)
       {
-        fs.select(".`" + this.noteKey + "` AS `note`");
+        caze.select(".`" + this.noteKey + "`");
       }
       if (this.typeKey != null)
       {
-        fs.select(".`" + this.typeKey + "` AS `type`");
+        caze.select(".`" + this.typeKey + "`");
       }
       if (this.cnumKey != null)
       {
-        fs.select(".`" + this.cnumKey + "` AS `cnum`");
+        caze.select(".`" + this.cnumKey + "`");
       }
       else
       {
-        fs.select("'1' AS `cnum`");
+        caze.select("'1' AS `"+ cnumKey + "`");
       }
       if (this.snumKey != null)
       {
-        fs.select(".`" + this.snumKey + "` AS `snum`");
+        caze.select(".`" + this.snumKey + "`");
       }
       else
       {
-        fs.select("'0' AS `snum`");
+        caze.select("'0' AS `"+ snumKey + "`");
       }
     }
 
-    String pid = (String)req.get(this.pidVar);
-    if (pid == null || pid.length() == 0)
-        pid =  this.rootId;
-
-    if (withSub)
-    {
-      if (!pid.equals(this.rootId))
-      {
-        List pids = this.getChildIds(pid, true);
-        pids.add(0, pid);
-
-        fs.where("."+this.pidKey+" IN (?)", pids);
-
-        req.remove(this.pidVar);
-      }
-    }
-
-    Map  data = this.getList(req , fs);
+    Map  data = this.getList(req , caze);
     List list = (List)data.get("list");
 
-    if (withPath)
+    if (getPath)
     {
-      if (onlyId)
+      if (getId)
       {
-        List path = this.getPathIds(pid);
+        List path = this.getParentIds(pid);
 
         Iterator it = list.iterator();
         while (it.hasNext())
         {
           Map info = (Map)it.next();
-          String id = (String)info.get("id");
+          String id = (String)info.get(this.table.primaryKey);
           List subPath = new ArrayList(path);
           info.put("path", subPath);
 
-          subPath.addAll(this.getPathIds(id, pid));
+          subPath.addAll(this.getParentIds(id, pid));
         }
       }
       else
       {
-        List path = this.getPath(pid);
+        List path = this.getParents(pid);
 
         Iterator it = list.iterator();
         while (it.hasNext())
         {
           Map info = (Map)it.next();
-          String id = (String)info.get("id");
+          String id = (String)info.get(this.table.primaryKey);
           List subPath = new ArrayList(path);
           info.put("path", subPath);
 
-          subPath.addAll(this.getPath(id, pid));
+          subPath.addAll(this.getParents(id, pid));
         }
       }
     }
@@ -242,6 +238,7 @@ public class AbstractTreeModel extends AbstractBaseModel
    *
    * @param req
    * @return 树列表
+   * @throws HongsException
    */
   public Map getTree(Map req)
     throws HongsException
@@ -249,7 +246,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     return this.getTree(req, null);
   }
 
-  /** 标准模型方法 **/
+  //** 标准模型方法 **/
 
   /**
    * 添加节点
@@ -315,39 +312,33 @@ public class AbstractTreeModel extends AbstractBaseModel
     }
 
     /**
-     * 如果有指定aid(AfterID)或bid(BeforeID)
+     * 如有指定bid(BeforeID)
      * 则将新的pid(ParentID)重设为其pid
      */
-    String aid = (String)data.get("aid");
-    String bid = (String)data.get("bid");
-    if (null != aid && !"".equals(aid))
-    {
-      data.put(this.pidKey, this.getParentId(aid));
-    }
-    else
+    String bid = (String)data.get(this.bidKey);
     if (null != bid && !"".equals(bid))
     {
-      data.put(this.pidKey, this.getParentId(bid));
+      data.put(this.pidKey,this.getParentId(bid));
     }
 
     String newPid = (String)data.get(this.pidKey);
-    String oldPid = this.getParentId(id);
-    int ordNum = this.getSerialNum(id);
+    String oldPid = this.getParentId (id);
+    int    ordNum = this.getSerialNum(id);
 
     id = super.put(id, data);
 
     /**
-     * 如果有指定新的pid且不同于旧的pid
-     * 则将其新的父级子节点数目加1
+     * 如果有指定新的pid且不同于旧的pid, 则
+     * 将其新的父级子节点数目加1
      * 将其旧的父级子节点数目减1
-     * 同时将排序设为末尾
-     * 并将旧的弟弟节点均往前移动1位
+     * 将其置于新父级列表的末尾
+     * 并将旧的弟节点序号往前加1
      */
     if(null != newPid && !"".equals(newPid) && !oldPid.equals(newPid))
     {
       if (this.cnumKey != null)
       {
-        this.setChildsOffset(newPid, 1);
+        this.setChildsOffset(newPid,  1);
         this.setChildsOffset(oldPid, -1);
       }
 
@@ -359,24 +350,15 @@ public class AbstractTreeModel extends AbstractBaseModel
     }
 
     /**
-     * 如果有指定aid或bid
+     * 如果有指定bid
      * 且其位置有所改变
-     * 则将改节点排序置为aid后或bid前
+     * 则将节点排序置为bid前
      */
     if (this.snumKey != null)
     {
       ordNum = this.getSerialNum(id);
       int ordNum2 = -1;
 
-      if (null != aid && !"".equals(aid))
-      {
-        ordNum2 = this.getSerialNum(aid);
-        if (ordNum2 < ordNum)
-        {
-          ordNum2 += 1;
-        }
-      }
-      else
       if (null != bid && !"".equals(bid))
       {
         ordNum2 = this.getSerialNum(bid);
@@ -399,17 +381,17 @@ public class AbstractTreeModel extends AbstractBaseModel
    * 删除节点
    *
    * @param id
-   * @param fs
+   * @param caze
    * @return 删除条数
    */
   @Override
-  public int del(String id, FetchMore fs)
+  public int del(String id, FetchCase caze)
     throws HongsException
   {
     String pid = this.getParentId(id);
     int on = this.getSerialNum(id);
 
-    int i = super.del(id, fs);
+    int i = super.del(id, caze);
 
     // 父级节点子节点数目减1
     this.setChildsOffset(pid, -1);
@@ -428,42 +410,27 @@ public class AbstractTreeModel extends AbstractBaseModel
   }
 
   @Override
-  protected void getFilter(Map req, FetchMore fs)
+  protected void reqFilter(Map req, FetchCase caze)
     throws HongsException
   {
-    super.getFilter(req, fs);
+    super.reqFilter(req, caze);
 
-    if (!this.pidKey.equals(this.pidVar))
-    {
-      if (req.containsKey(this.pidVar))
-      {
-        fs.where(".`" + this.pidKey + "` = ?",
-                req.get(this.pidVar).toString());
-      }
-      else
-      if (req.containsKey(this.pidKey+"!"))
-      {
-        fs.where(".`" + this.pidKey + "` != ?",
-                req.get(this.pidVar).toString());
-      }
-    }
-
-    if (!req.containsKey(this.sortVar))
+    if (!req.containsKey(this.sortKey))
     {
       if (this.snumKey != null)
       {
-        fs.orderBy(this.snumKey);
+        caze.orderBy(this.snumKey);
       }
       else if (this.cnumKey != null)
       {
-        fs.orderBy("(CASE WHEN `"
-                      + this.cnumKey +
-                      "` > 0 THEN 1 END) DESC");
+        caze.orderBy("(CASE WHEN `"
+             + this.cnumKey +
+           "` > 0 THEN 1 END) DESC");
       }
     }
   }
 
-  /** 树基础操作 **/
+  //** 树基础操作 **/
 
   public String getParentId(String id)
     throws HongsException
@@ -488,6 +455,51 @@ public class AbstractTreeModel extends AbstractBaseModel
             + this.table.primaryKey +
             "` = ?";
     return this.db.fetchOne(sql, id);
+  }
+
+  public List<String> getParentIds(String id, String rootId)
+    throws HongsException
+  {
+    List<String> ids = new ArrayList<String>();
+    String pid = this.getParentId(id);
+    if (pid != null)
+    {
+      if (!pid.equals(rootId))
+      {
+        ids.addAll(this.getParentIds(pid, rootId));
+      }
+      ids.add(pid);
+    }
+    return ids;
+  }
+
+  public List<String> getParentIds(String id)
+    throws HongsException
+  {
+    return this.getParentIds(id, this.rootId);
+  }
+
+  public List<Map> getParents(String id, String rootId)
+    throws HongsException
+  {
+    List<Map> list = new ArrayList<Map>();
+    Map info = this.getParent(id);
+    if (info != null)
+    {
+      String pid = (String)info.get(this.pidKey);
+      if (pid.equals(rootId))
+      {
+        list.addAll(this.getParents(pid, rootId));
+      }
+      list.add(info);
+    }
+    return list;
+  }
+
+  public List<Map> getParents(String id)
+    throws HongsException
+  {
+    return this.getParents(id, this.rootId);
   }
 
   public List<String> getChildIds(String id, boolean all)
@@ -516,12 +528,12 @@ public class AbstractTreeModel extends AbstractBaseModel
             + this.pidKey +
             "` = ?";
     }
-    List list = this.db.fetchAll(sql, id);
+    List list = this.db.fetchAll(sql,id);
 
-    Set ids = new HashSet();
-    FetchJoin fa = new FetchJoin(list);
-    fa.fetchIds(this.table.primaryKey, ids);
-    List cids = new ArrayList(ids);
+    Set        ids = new  HashSet ();
+    FetchMore join = new FetchMore(list);
+    join.fetchIds(this.table.primaryKey,ids);
+    List      cids = new ArrayList( ids);
 
     if (all)
     {
@@ -602,52 +614,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     return this.getChilds(id, false);
   }
 
-  public List<String> getPathIds(String id, String rootId)
-    throws HongsException
-  {
-    List<String> ids = new ArrayList<String>();
-    String pid = this.getParentId(id);
-    if (pid != null)
-    {
-      if (!pid.equals(rootId))
-      {
-        ids.addAll(this.getPathIds(pid, rootId));
-      }
-      ids.add(pid);
-    }
-    return ids;
-  }
-
-  public List<String> getPathIds(String id)
-    throws HongsException
-  {
-    return this.getPathIds(id, this.rootId);
-  }
-
-  public List<Map> getPath(String id, String rootId)
-    throws HongsException
-  {
-    List<Map> list = new ArrayList<Map>();
-    Map info = this.getParent(id);
-    if (info != null)
-    {
-      String pid = (String)info.get(this.pidKey);
-      if (pid.equals(rootId))
-      {
-        list.addAll(this.getPath(pid, rootId));
-      }
-      list.add(info);
-    }
-    return list;
-  }
-
-  public List<Map> getPath(String id)
-    throws HongsException
-  {
-    return this.getPath(id, this.rootId);
-  }
-
-  /** 子数目相关 **/
+  //** 子数目相关 **/
 
   public int getChildsNum(String id, List excludeIds)
     throws HongsException
@@ -775,7 +742,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     this.db.execute(sql, params);
   }
 
-  /** 排序号相关 **/
+  //** 排序号相关 **/
 
   public int getSerialNum(String id)
     throws HongsException
@@ -953,7 +920,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     this.db.execute(sql, params);
   }
 
-  /** 检查及修复 **/
+  //** 检查及修复 **/
 
   public void checkAndRepair(String pid)
     throws HongsException

@@ -3,20 +3,23 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.util.Tree;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.HashMap;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -26,9 +29,13 @@ import org.apache.commons.fileupload.util.Streams;
 
 /**
  * 上传助手
- * 需要依赖apache的commons-fileupload(1.2)
- * 参考API: http://commons.apache.org/fileupload/apidocs/index.html
- * 默认上传目录: TMPS_PATH + "/uploads";
+ *
+ * <p>
+ * 需要依赖 apache 的 commons-fileupload(1.2)<br/>
+ * 参考接口文档: http://commons.apache.org/fileupload/apidocs/index.html<br/>
+ * 默认上传目录: TMPS_PATH + "/uploads"
+ * </p>
+ *
  * @author Hongs
  */
 public class UploadHelper
@@ -73,7 +80,7 @@ public class UploadHelper
    */
   public UploadHelper(ActionHelper helper)
   {
-    this(helper.request);
+    this(helper.getRequest());
   }
 
   /**
@@ -245,7 +252,7 @@ public class UploadHelper
     }
   }
 
-  /** 工具函数 **/
+  //** 工具函数 **/
 
   private void parseRequest()
   throws HongsException
@@ -289,7 +296,7 @@ public class UploadHelper
            * 是普通字段则直接放入请求数据中
            */
           String value = Streams.asString(stream);
-          Tree.setArrayValue(requestData, fame, value);
+          Tree.setValue(requestData, fame, value);
         }
         else {
           /**
@@ -312,7 +319,7 @@ public class UploadHelper
             String ts = this.allowTypes.toString();
             HongsException ex2 = new HongsException(0x10f6,
               "The type of file '"+name+"' is '"+type+"', but allow types: "+ts);
-            ex2.setTranslate(name, type, ts);
+            ex2.setLocalizedOptions(name, type, ts);
             throw ex2;
           }
 
@@ -328,7 +335,7 @@ public class UploadHelper
             String es = this.allowExts.toString();
             HongsException ex2 = new HongsException(0x10f8,
               "The ext of file '"+name+"' is '"+ext+"', but allow exts: "+es);
-            ex2.setTranslate(name, ext, es);
+            ex2.setLocalizedOptions(name, ext, es);
             throw ex2;
           }
 
@@ -341,7 +348,7 @@ public class UploadHelper
           if (this.uploadUri != null) {
                  value = this.uploadUri + "/" + fname;
           }
-          Tree.setArrayValue(requestData, fame, value);
+          Tree.setValue(requestData, fame, value);
 
           /**
            * 将名称放入列表中
@@ -390,7 +397,7 @@ public class UploadHelper
         FileUploadBase.FileSizeLimitExceededException ex1 =
         (FileUploadBase.FileSizeLimitExceededException) ex;
         HongsException ex2 = new HongsException(0x10f4, ex);
-        ex2.setTranslate(ex1.getFileName(),
+        ex2.setLocalizedOptions(ex1.getFileName(),
           String.valueOf(ex1.getActualSize()),
           String.valueOf(ex1.getPermittedSize()));
         throw ex2;
@@ -401,7 +408,7 @@ public class UploadHelper
         FileUploadBase.SizeLimitExceededException ex1 =
         (FileUploadBase.SizeLimitExceededException) ex;
         HongsException ex2 = new HongsException(0x10f2, ex);
-        ex2.setTranslate(
+        ex2.setLocalizedOptions(
           String.valueOf(ex1.getActualSize()),
           String.valueOf(ex1.getPermittedSize()));
         throw ex2;

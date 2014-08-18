@@ -3,6 +3,7 @@ package app.hcum.action;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.annotation.Action;
 import app.hongs.action.annotation.CommitSuccess;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Set;
  * 用户动作接口
  * @author Hongs
  */
+@Action
 public class User {
 
     private app.hcum.model.User model;
@@ -46,23 +48,30 @@ public class User {
         helper.back(data);
     }
 
-    @CommitSuccess
     public void actionSave(ActionHelper helper)
-    throws HongsException {app.hongs.util.JSON.print(helper.getRequestData());
+    throws HongsException {app.hongs.util.JSON.dumps(helper.getRequestData());
         String id = model.save(helper.getRequestData());
-        helper.back(id);
+
+        String nms = model.getAffectedNames();
+        String msg = "保存用户 "+nms+" 成功";
+
+        helper.back(msg, id, nms);
     }
 
     @CommitSuccess
     public void actionRemove(ActionHelper helper)
     throws HongsException {
         int num = model.remove(helper.getRequestData());
-        helper.back(num);
+
+        String nms = model.getAffectedNames();
+        String msg = "删除用户 "+nms+" 成功";
+
+        helper.back(msg);
     }
 
-    public void actionExists(ActionHelper helper)
+    public void actionUnique(ActionHelper helper)
     throws HongsException {
-        boolean rst = model.exists(helper.getRequestData());
+        boolean rst = model.unique(helper.getRequestData());
         helper.back(rst);
     }
 
@@ -75,7 +84,7 @@ public class User {
         data.put("pageGroups", pageGroups);
 
         // 用户动作分组
-        String id = helper.getParameter("id");
+        String id = helper.getParam("id");
         if (id != null) {
             Set userGroups = model.getGroups(id);
             data.put("userGroups", userGroups);

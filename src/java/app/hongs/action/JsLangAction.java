@@ -1,5 +1,10 @@
 package app.hongs.action;
 
+import app.hongs.Core;
+import app.hongs.CoreLanguage;
+import app.hongs.HongsError;
+import app.hongs.util.Text;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,24 +19,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import app.hongs.Core;
-import app.hongs.CoreLanguage;
-import app.hongs.HongsError;
-import app.hongs.util.Str;
-
 /**
- * <h1>语言信息输出动作</h1>
+ * 语言信息输出动作
  *
- * <h2>web.xml配置:</h2>
+ * <h3>web.xml配置:</h3>
  * <pre>
- * &lt;!-- Config Servlet --&gt;
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;Language&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;JsLang&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;app.hongs.action.JSLangAction&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;Language&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.jsl&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;JsLang&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;*.js-lang&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;<br/>
  * <pre>
  *
@@ -55,26 +54,46 @@ public class JsLangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core core = Core.getInstance();
-    ActionHelper helper = (ActionHelper)Core.getInstance(app.hongs.action.ActionHelper.class);
+    ActionHelper helper = (ActionHelper)Core.getInstance(ActionHelper.class);
 
-    String conf = Core.ACTION_PATH.get();
-           conf = conf.substring(1, conf.lastIndexOf('.'));
-    String type = helper.getParameter("t");
-    String lang = helper.getParameter("l");
-    if (lang == null || lang.length()==0 )
-           lang = Core.ACTION_LANG.get(  );
-    String name = conf+"."+lang;
-    String m, s;
+    String name = helper.getRequest().getPathInfo( );
+    if (name == null || name.length() == 0) {
+      helper.print500("Path info required");
+      return;
+    }
+    int p = name.lastIndexOf('.');
+    if (p < 0) {
+      helper.print500("File type required");
+      return;
+    }
+    String type = name.substring(1 + p);
+           name = name.substring(1 , p);
+
+    if ( !"js".equals(type) && !"json".equals(type)) {
+      helper.print500("Wrong file type: "+type);
+      return;
+    }
+
+    String conf, lang;
+    p = name.lastIndexOf('.');
+    if (p != -1) {
+      lang = name.substring( p+ 1 );
+      conf = name.substring( 0, p );
+    }
+    else {
+      lang = Core.ACTION_LANG.get();
+      conf = name;
+    }
 
     /**
      * 如果指定语言的数据并没有改变
      * 则直接返回 304 Not modified
      */
-    m = helper.request.getHeader("If-Modified-Since");
+    String m;
+    m = helper.getRequest().getHeader("If-Modified-Since");
     if (m != null  &&  m.equals(JsLangAction.lastModified.get(name)))
     {
-      helper.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED );
+      helper.getResponse().setStatus(HttpServletResponse.SC_NOT_MODIFIED );
       return;
     }
 
@@ -82,13 +101,14 @@ public class JsLangAction
      * 如果没有语言
      * 则调用工厂方法构造 JS 代码
      */
+    String s;
     if (!JsLangAction.language.containsKey(name))
     {
       try {
         s = this.makeLanguage(conf, lang);
       }
       catch (HongsError ex) {
-        helper.print500Code(ex.getMessage());
+        helper.print500(ex.getMessage());
         return;
       }
 
@@ -108,14 +128,14 @@ public class JsLangAction
     }
 
     // 标明修改时间
-    helper.response.setHeader("Last-Modified", m);
+    helper.getResponse().setHeader("Last-Modified", m);
 
     // 输出语言信息
     if ("json".equals(type)) {
-      helper.printJSON( s );
+      helper.print(s, "application/json");
     }
     else {
-      helper.printJS("if(!HsLANG)HsLANG={};$.extend(HsLANG,"+s+");");
+      helper.print("if(!window.HsLANG)window.HsLANG={};$.extend(window.HsLANG,"+s+");", "application/javascript");
     }
   }
 
@@ -178,7 +198,7 @@ public class JsLangAction
     return sb.toString();
   }
 
-  /** 辅助工具类 **/
+  //** 辅助工具类 **/
 
   /**
    * 语言信息辅助构造类
@@ -202,11 +222,10 @@ public class JsLangAction
        * .C   代码
        * .L   链接
        */
-      if (!key.startsWith("core.js.")
-      &&  !key.startsWith("user.js.")) {
+      if (! key.startsWith("fore.")) {
           return "";
       }
-      String name = key.substring( 8 )
+      String name = key.substring(5)
                        .replaceFirst("\\.[B|N|C|L]$", "");
       if (key.endsWith(".L"))
       {
@@ -233,7 +252,7 @@ public class JsLangAction
     private String makeLang(String name, String key, String def)
     {
       String value = this.lang.getProperty(key, def);
-      value = Str.escape(value);
+      value = Text.escape(value);
       return "\"" + name + "\":\"" + value + "\",\r\n";
     }
 

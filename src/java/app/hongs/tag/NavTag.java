@@ -1,17 +1,16 @@
 package app.hongs.tag;
 
+import java.util.Map;
+
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
-import java.util.Map;
-
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionConfig;
-import app.hongs.action.ActionFilter;
 import app.hongs.action.ActionHelper;
 
 /**
@@ -20,10 +19,8 @@ import app.hongs.action.ActionHelper;
  */
 public class NavTag extends SimpleTagSupport {
 
-    private String type = "title";
     private String conf = "default";
-    private String sess = "actions";
-    private boolean ckin = false;
+    private String type = "title";
     private int level = 0;
     private int depth = 0;
 
@@ -67,16 +64,8 @@ public class NavTag extends SimpleTagSupport {
         }
     }
 
-    public void setCkin(Boolean ckin) {
-        this.ckin = ckin;
-    }
-
     public void setConf(String conf) {
         this.conf = conf;
-    }
-
-    public void setSess(String sess) {
-        this.sess = sess;
     }
 
     public void setType(String type) {
@@ -91,12 +80,20 @@ public class NavTag extends SimpleTagSupport {
         this.depth = depth;
     }
 
-    private StringBuilder buildmenu(Map<String, Map> pages, int i) {
-        StringBuilder sb = new StringBuilder();
+    private StringBuilder buildmenu(Map<String, Map> pages, int i) throws JspException {
+        StringBuilder sb = new StringBuilder(  );
+        ActionConfig cnf;
+        try {
+            cnf = ActionConfig.getInstance(conf);
+        }
+        catch (HongsException ex) {
+            throw new JspException(ex);
+        }
+
         if (i < level) {
             for (Map node : pages.values()) {
                 String uri = (String)node.get("uri");
-                if (! ActionFilter.checkAction(uri, conf, sess, ckin)) {
+                if (! cnf.chkAuth(uri)) {
                     continue;
                 }
 
@@ -114,12 +111,12 @@ public class NavTag extends SimpleTagSupport {
 
             for (Map node : pages.values()) {
                 String uri = (String)node.get("uri");
-                if (! ActionFilter.checkAction(uri, conf, sess, ckin)) {
+                if (! cnf.chkAuth(uri)) {
                     continue;
                 }
+                uri = Core.BASE_HREF + uri;
 
                 String name = (String)node.get("name");
-                uri = Core.BASE_HREF + uri;
                 name = this.translate(name);
 
                 sb.append("<div class=\"nav-item")
@@ -128,7 +125,7 @@ public class NavTag extends SimpleTagSupport {
                 sb.append("<a class=\"nav-link")
                   .append(levelClass)
                   .append("\" href=\"")
-                  .append(uri)
+                  .append(uri )
                   .append("\">")
                   .append(name)
                   .append("</a>");
@@ -139,22 +136,21 @@ public class NavTag extends SimpleTagSupport {
 
                 sb.append("</div>");
             }
-            
+
             sb.append("</div>");
         }
         return sb;
     }
 
     private String translate(String name) {
-        if (name.indexOf("{opt}") != -1) {
-            if (ah.getParameter("id") != null) {
-                name = name.replace("{opt}", "set");
-            }
-            else {
-                name = name.replace("{opt}", "add");
-            }
+        if (name.indexOf("{opr}") !=  -1 ) {
+            name = name.replace("{opr}", "create");
         }
-        return cl.translate(name);
+        name = cl.translate(name);
+        if (name.indexOf("{opr}") !=  -1 ) {
+            name = name.replace("{opr}", cl.translate("fore.form.create"));
+        }
+        return name;
     }
 
 }

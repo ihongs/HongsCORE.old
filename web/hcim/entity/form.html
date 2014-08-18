@@ -1,0 +1,220 @@
+<h2>${opr}实体</h2>
+<div id="hcim-entity-form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcim/Entity/Info.act"/>
+        <param name="saveUrl" value="hcim/Entity/Save.act"/>
+        <param name="loadMode" value="(1|3)"/>
+        <param name="_fill__pick" value="(hsFormFillPick)"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">所属模块</label>
+                    <ul class="pickbox" data-ft="_pick" data-fn="module_id" data-tn="a_hcim_module" data-vk="id" data-tk="name" required="required"></ul>
+                    <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" href="hcim/module/pick.html">选择模块</button>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">实体名称</label>
+                    <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Entity/Unique.act?id={id}&module_id={module_id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">代码</label>
+                    <input type="text" name="code" class="form-control" data-unique="hcim/Entity/Unique.act?id={id}&module_id={module_id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">备注</label>
+                    <textarea name="note" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <fieldset class="panel cols-box">
+                    <legend class="panel-heading dropdown-toggle">属性设置 <span class="caret"></span></legend>
+                    <div class="panel-body dropdown-body">
+                        <div data-type="cols">
+                            <div class="row add-row-tpl" style="display:none;">
+                                <div class="col-md-5">
+                                    <input type="hidden" data-name="a_hcim_entity_cols[I][domain_id]" data-fk="a_hcim_domain" data-vk="id" data-tk="name"/>
+                                    <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" href="hcim/domain/pick.html">选择属性</button>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" data-name="a_hcim_entity_cols[I][name]" data-fk="name" placeholder="属性名">
+                                </div>
+                                <div class="col-md-3">
+                                    <select data-name="a_hcim_entity_cols[I][required]" data-fk="required" class="form-control">
+                                        <option value="0">选填</option>
+                                        <option value="1">必填</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-warning remove">&times;</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-default append">添加属性</button>
+                    </div>
+                </fieldset>
+                <fieldset class="panel rels-box">
+                    <legend class="panel-heading dropdown-toggle">关联设置 <span class="caret"></span></legend>
+                    <div class="panel-body dropdown-body">
+                        <div data-type="rels">
+                            <div class="row add-row-tpl" style="display:none;">
+                                <div class="col-md-5">
+                                    <input type="hidden" data-name="a_hcim_entity_rels[I][relate_id]" data-fk="a_hcim_entity" data-vk="id" data-tk="name"/>
+                                    <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" href="hcim/entity/pick.html?deny=create&-id={id}">选择实体</button>
+                                </div>
+                                <div class="col-md-3">
+                                    <select data-name="a_hcim_entity_rels[I][type]" data-fk="type" class="form-control">
+                                        <option value="1">隶属于</option>
+                                        <option value="2">一对一</option>
+                                        <option value="1">一对多</option>
+                                        <option value="1">多对多</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select data-name="a_hcim_entity_rels[I][required]" data-fk="required" class="form-control">
+                                        <option value="0">可选</option>
+                                        <option value="1">必选</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-warning remove">&times;</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-default append">添加关联</button>
+                    </div>
+                </fieldset>
+                <fieldset class="panel rels-box">
+                    <legend class="panel-heading dropdown-toggle">唯一约束 <span class="caret"></span></legend>
+                    <div class="panel-body dropdown-body">
+                        <button type="button" class="btn btn-default append">添加关联</button>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div>
+            <button type="submit" class="ensure btn btn-primary">提交</button>
+            <button type="button" class="cancel btn btn-link">取消</button>
+        </div>
+    </form>
+</div>
+
+<style type="text/css">
+    #hcim-entity-form .panel-body
+    {padding: 0 0 2px 0;}
+    #hcim-entity-form .panel-body>div
+    {padding: 2px 0 0 0;}
+    #hcim-entity-form .panel-body>div .row
+    {padding: 0 0 2px 0; margin-left: -1px; margin-right: -1px;}
+    #hcim-entity-form .panel-body>div .row>div
+    {padding-left: 1px; padding-right: 1px;}
+</style>
+
+<script type="text/javascript">
+    (function($) {
+        var context = $("#hcim-entity-form");
+        var indexes = {cols: 0, rels: 0, unis: 0};
+        var colsList = context.find("[data-type=cols]");
+        var relsList = context.find("[data-type=rels]");
+        var valueTypes;
+
+        function addRow(list, info) {
+            var form = list.closest(".HsForm").data("HsForm");
+            var row = list.find(".add-row-tpl").clone();
+            var typ = list.attr("data-type");
+            var idx = indexes[typ]++;
+            row.find("[data-name]").each(function() {
+                var name = $(this).attr("data-name").replace('I', idx);
+                $(this).removeAttr("data-name");
+                $(this).attr("name", name);
+            });
+            row.removeClass("add-row-tpl")
+                    .show().appendTo(list);
+            if (info) {
+                row.find("[data-fk]").each(function() {
+                    var a = hsGetValue(info, $(this).attr("data-fk"));
+                    if (typeof a != "string") {
+                        hsFormFillPick.call(form, $(this), [a], $(this).attr("name"), "fill");
+                    } else {
+                        $(this).val(a);
+                    }
+                });
+            }
+            return row;
+        }
+
+        context.on("loadBack", function(evt, rst) {
+            if (rst.data) {
+                valueTypes = rst.data.ENTITY_VALUE_TYPES;
+            }
+            if (rst.info) {
+                var a, i, x;
+                a = rst.info.a_hcim_entity_cols;
+                if (a) {
+                    for(i = 0; i < a.length; i++) {
+                        x = a[i].a_hcim_domain;
+                        addRow(colsList, a[i]);
+                    }
+                }
+                a = rst.info.a_hcim_entity_rels;
+                if (a) {
+                    for (i = 0; i < a.length; i++) {
+                        addRow(relsList, a[i]);
+                    }
+                }
+            }
+        });
+        context.on("click", ".append", function() {
+            var row = addRow($(this).prev());
+            row.find("[data-toggle=hsPick]").click();
+        });
+        context.on("click", ".remove", function() {
+            $(this).closest(".row").remove();
+        });
+        context.find("[data-type=cols]").sortable({
+            items: ">.row"
+        });
+        context.find("[data-type=rels]").sortable({
+            items: ">.row"
+        });
+
+        context.on("pickItem", "input:hidden", function(evt, val, txt) {
+            evt.stopPropagation();
+            if (txt) {
+                var inp  = $(this);
+                var inps = inp.closest(".row").siblings().find("input:hidden");
+                for (var i = 0; i < inps.size(); i ++) {
+                    if ($(inps[i]).val() == val) {
+                        alert(txt + " 已经被选过了!");
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
+        context.on("pickBack", "input:hidden", function(evt, dat, tip) {
+            evt.stopPropagation();
+            if ($.isEmptyObject(dat)) {
+                tip.hsClose();
+                return false;
+            }
+        });
+        context.find(".panel-body").on("pickClose", ":hidden", function(evt) {
+            evt.stopPropagation();
+            if (!$(this).val()) {
+                $(this).closest(".row").remove();
+            }
+        });
+        
+        context.find("button[href]").each(function() {
+            $(this).attr("href", $(this).attr("href")
+                .replace(/\{(.*?)\}/g, function(x, n) {
+                    return H$("&"+n, context) || "";
+                })
+            );
+        });
+    })(jQuery);
+</script>

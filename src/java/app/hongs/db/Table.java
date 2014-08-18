@@ -1,16 +1,19 @@
 package app.hongs.db;
 
+import app.hongs.Core;
+import app.hongs.CoreConfig;
+import app.hongs.CoreLanguage;
+import app.hongs.HongsException;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
-
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.sql.Types;
 import java.sql.Date;
 import java.sql.Time;
@@ -18,18 +21,14 @@ import java.sql.Timestamp;
 //import java.sql.ResultSet;
 //import java.sql.SQLException;
 
-import app.hongs.HongsException;
-import app.hongs.Core;
-import app.hongs.CoreConfig;
-import app.hongs.CoreLanguage;
-
 /**
- * <h1>数据表基础类</h1>
- * <pre>
- * 请总是用DB.getTable("Table_Name")来获取表对象
- * </pre>
+ * 数据表基础类
  *
- * <h2>错误代码:</h2>
+ * <p>
+ * 请总是用DB.getTable("Table_Name")来获取表对象
+ * </p>
+ *
+ * <h3>错误代码:</h3>
  * <pre>
  * 区间: 0x1070~0x109f
  *
@@ -37,25 +36,27 @@ import app.hongs.CoreLanguage;
  * 0x1072 配置不能为空
  * 0x1074 缺少表名
  *
- * 0x1080 获取字段信息失败
+ * 0x107a 获取字段信息失败
  *
- * 0x1084 不能为空
- * 0x1086 精度超出
- * 0x1088 小数位超出
- * 0x108a 不是整型数值
- * 0x108c 不是浮点数值
- * 0x108e 不能为负值
- * 0x1090 无法识别的日期或时间格式
+ * 0x1080 不能为空
+ * 0x1082 精度超出
+ * 0x1084 小数位超出
+ * 0x1086 不是整型数值
+ * 0x1088 不是浮点数值
+ * 0x108a 不能为负值
+ * 0x108c 无法识别的日期或时间格式
  * </pre>
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
- * core.disable.check.values  设置为true禁止在存储时对数据进行检查
- * core.default.date.format   可识别的日期类型, 默认"yyyy/MM/dd", 已移到语言
- * core.default.time.format   可识别的时间类型, 默认"HH:mm:ss", 已移到语言
- * core.table.field.ctime     创建时间字段名
- * core.table.field.mtime     修改时间字段名
- * </pre>
+ core.disable.check.values  设置为true禁止在存储时对数据进行检查
+ core.default.date.format   可识别的日期类型, 默认"yyyy/MM/dd", 已移到语言
+ core.default.time.format   可识别的时间类型, 默认"HH:mm:ss", 已移到语言
+ core.table.ctime.field     创建时间字段名
+ core.table.mtime.field     修改时间字段名
+ core.table.etime.field     结束时间字段名
+ core.table.state.field     删除状态字段名
+ </pre>
  *
  * @author Hongs
  */
@@ -154,10 +155,10 @@ public class Table
   public Table (DB db, String tableName)
     throws HongsException
   {
-    this(db, buildTableConfig(tableName));
+    this(db, _buildTableConfig(tableName));
   }
 
-  private static Map buildTableConfig(String name)
+  private static Map _buildTableConfig(String name)
   {
     Map tableConfig = new HashMap();
     tableConfig.put( "name", name );
@@ -166,40 +167,39 @@ public class Table
 
   /**
    * 查询多条记录(采用查询结构)
-   * @param more
+   * @param caze
    * @return 全部记录
    * @throws app.hongs.HongsException
    */
-  public List fetchMore(FetchMore more)
+  public List fetchMore(FetchCase caze)
     throws HongsException
   {
-    more.from(tableName, name);
+    caze.from(tableName, name);
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
-    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
-
-    this.getColumns();
+    String rstat = getField( "state" );
+    String rflag = getState("removed");
 
     // 默认不查询已经删除的记录
-    if (this.columns.containsKey(dflag) && !more.hasOption("FETCH_DFLAG"))
+    if (rstat != null && rflag != null
+    && !caze.hasOption("INCLUDE_REMOVED"))
     {
-        more.where("`"+dflag+"` != 1" );
+      caze.where(".`"+rstat+"` != ?", rflag);
     }
 
-    return FetchJoin.assocSelect(this, assocs, more);
+    return FetchMore.fetchMore(this, caze, assocs);
   }
 
   /**
    * 获取单条记录(采用查询结构)
-   * @param less
+   * @param caze
    * @return 单条记录
    * @throws app.hongs.HongsException
    */
-  public Map fetchLess(FetchMore less)
+  public Map fetchLess(FetchCase caze)
     throws HongsException
   {
-    less.limit(1);
-    List<Map> rows = this.fetchMore(less);
+    caze.limit(1);
+    List<Map> rows = this.fetchMore(caze);
 
     if (! rows.isEmpty( ))
     {
@@ -220,18 +220,14 @@ public class Table
   public int insert(Map<String, Object> values)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
-    String ctime = conf.getProperty("core.table.field.ctime", "__ctime__");
-    String etime = conf.getProperty("core.table.field.etime", "__etime__");
-    String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
+    String mtime = getField("mtime");
+    String ctime = getField("ctime");
+    String etime = getField("etime");
 
     long time = System.currentTimeMillis();
 
-    this.getColumns();
-
-    // 存在__mtime__字段则自动放入当前时间
-    if (this.columns.containsKey(mtime)
-          && !values.containsKey(mtime))
+    // 存在 mtime 字段则自动放入当前时间
+    if (mtime != null && !values.containsKey(mtime))
     {
       int type = (Integer)((Map)this.columns.get(mtime)).get("type");
       switch (type)
@@ -250,9 +246,8 @@ public class Table
       }
     }
 
-    // 存在__ctime__字段则自动放入当前时间
-    if (this.columns.containsKey(ctime)
-          && !values.containsKey(ctime))
+    // 存在 ctime 字段则自动放入当前时间
+    if (ctime != null && !values.containsKey(ctime))
     {
       int type = (Integer)((Map)this.columns.get(ctime)).get("type");
       switch (type)
@@ -271,10 +266,8 @@ public class Table
       }
     }
 
-    // 存在__etime__字段则自动放入结束时间
-    if (this.columns.containsKey(etime)
-          && !values.containsKey(etime)
-          && this.primaryKey  !=  null)
+    // 存在 etime 字段则自动放入结束时间
+    if (etime != null && !values.containsKey(etime) && this.primaryKey != null)
     {
       Map<String, Object> valuez = new HashMap();
       List<Object> paramz = new ArrayList(  );
@@ -325,16 +318,12 @@ public class Table
   public int update(Map<String, Object> values, String where, Object... params)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
-    String mtime = conf.getProperty("core.table.field.mtime", "__mtime__");
+    String mtime = getField("mtime");
 
     long time = System.currentTimeMillis();
 
-    this.getColumns();
-
-    // 存在__mtime__字段则自动放入当前时间
-    if (this.columns.containsKey(mtime)
-          && !values.containsKey(mtime))
+    // 存在 mtime 字段则自动放入当前时间
+    if (mtime != null && !values.containsKey(mtime))
     {
       int type = (Integer)((Map)this.columns.get(mtime)).get("type");
       switch (type)
@@ -373,48 +362,97 @@ public class Table
   public int delete(String where, Object... params)
     throws HongsException
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
-    String dflag = conf.getProperty("core.table.field.dflag", "__dflag__");
+    String rstat = getField( "state" );
+    String rflag = getState("removed");
 
-    this.getColumns();
-
-    // 存在__dflag__字段则将删除标识设置为1
-    if (this.columns.containsKey(dflag))
+    // 存在 rstat 字段则将删除标识设置为1
+    if (rstat != null && rflag != null)
     {
-      Map data=new HashMap();data.put(dflag,1);
+      Map data = new HashMap();
+      data.put( rstat, rflag );
       return  this.update(data, where, params);
     }
 
     return this.db.delete(this.tableName, where, params);
   }
 
-  /** 工具方法 **/
+  //** 工具方法 **/
 
   /**
    * 获取字段(包含名称及类型等)
    * @return 全部字段信息
    * @throws app.hongs.HongsException
    */
-  public Map getColumns()
+  protected Map getColumns()
     throws HongsException
   {
     if (this.columns == null)
     {
-        this.columns = (new TableCols(this)).columns;
+        this.columns = (new DTColumn(this)).columns;
     }
     return this.columns;
   }
 
-  /**
-   * 获取字段名
-   * @return 全部字段名
-   * @throws app.hongs.HongsException
-   */
-  public String[] getColumnNames()
+  protected String getField(String field)
     throws HongsException
   {
-    Map<String, Map> cols = (Map)this.getColumns();
-    return cols.keySet( ).toArray( new String[0] );
+    Map        cols = getColumns();
+    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    field = conf.getProperty("core.table." + field + ".field", field);
+    return  cols.containsKey(field) ? field : null;
+  }
+
+  protected String getState(String state)
+  {
+    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    return  conf.getProperty("core.table." + state + ".state", null );
+  }
+
+  /**
+   * 获取日期(时间)格式
+   * <p>
+   * 也可在 values 中通过 __type_format__,__name__format__ 来告知格式;
+   * 其中 type 为 date,time,datetime; name 为 values 中的键.
+   * </p>
+   * @param type
+   * @param name
+   * @param values
+   * @return 
+   */
+  protected String getFormat(String type, String name, Map values)
+  {
+    String key;
+    key = "__"+name+"_format__";
+    if (values.containsKey(key))
+    {
+      if (values.get(key) instanceof String)
+      {
+        return (String) values.remove( key );
+      }
+    }
+    key = "__"+type+"_format__";
+    if (values.containsKey(key))
+    {
+      if (values.get(key) instanceof String)
+      {
+        return (String) values.remove( key );
+      }
+    }
+    
+    String fmt;
+    if ("time".equals(type)) {
+      fmt = "HH:mm:ss";
+    }
+    else
+    if ("date".equals(type)) {
+      fmt = "yyyy/MM/dd";
+    }
+    else {
+      fmt = "yyyy/MM/dd HH:mm:ss";
+    }
+
+    CoreLanguage conf = (CoreLanguage) Core.getInstance(CoreLanguage.class);
+    return conf.getProperty("core.default."+type+".format", fmt);
   }
 
   /**
@@ -422,7 +460,7 @@ public class Table
    * @param name 关联名
    * @return 关联信息
    */
-  public Map getAssoc(String name)
+  protected Map getAssoc(String name)
   {
     if (this.scossa.containsKey(name))
     return (Map)this.scossa.get(name);
@@ -445,17 +483,17 @@ public class Table
 
   /**
    * 获取关联查询体
-   * @param bean 查询体
    * @param name 关联名
+   * @param caze 查询体
    * @return 关联查询体
    * @throws HongsException
    */
-  public FetchMore getAssocBean(FetchMore bean, String name)
+  public FetchCase getAssocFetch(String name, FetchCase caze)
     throws HongsException
   {
     Map tc =  this.getAssoc(name);
     if (tc == null) return  null ;
-    return bean.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
+    return caze.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
   }
 
   /**
@@ -465,9 +503,9 @@ public class Table
    */
   protected static String getAssocName(Map assoc)
   {
-    String tn = (String)assoc.get("realName");
-    if (   tn == null || tn.length() == 0   )
-           tn = (String)assoc.get(  "name"  );
+    String tn = (String) assoc.get("tableName"); // 原名 realName
+    if (   tn == null || tn.length() == 0)
+           tn = (String) assoc.get("name");
     return tn;
   }
 
@@ -478,7 +516,7 @@ public class Table
    */
   protected static List<String> getAssocPath(Map assoc)
   {
-    List<String> ts = (List)assoc.get("name");
+    List<String> ts = (List)assoc.get("path");
     if (   ts == null  ) ts = new ArrayList();
     return ts;
   }
@@ -486,41 +524,46 @@ public class Table
   /**
    * 检验主数据
    *
+   * <pre>
    * 会进行校验的类型:
    * CHAR, VARCHAR, LONGVARCHAR, NCHAR, NVARCHAR, NLONGVARCHAR
-   * TINYINT, SMALLINT, INTEGER, BIGINT
+   * INTEGER, TINYINT, SMALLINT, BIGINT
    * FLOAT, DOUBLE, NUMERIC, DECIMAL
    * DATE, TIME, TIMESTAMP
    * 推荐构建数据库时采用以上类型
    * 日期时间格式采用默认配置定义
-   * 通过配置"core.dsiable.check.values=true"来关闭检查
-   * 通过配置"core.default.date.format=日期格式串"来设置可识别的日期格式, 已移到语言
-   * 通过配置"core.defualt.time.format=时间格式串"来设置可识别的时间格式, 已移到语言
+   * 通过配置"core.table.donot.check=true"来关闭检查
+   * 通过语言"core.default.date.format=日期格式串"来设置可识别的日期格式
+   * 通过语言"core.defualt.time.format=时间格式串"来设置可识别的时间格式
+   * </pre>
    *
    * @param values
-   * @param isNew
-   * @return
+   * @param isNew 新增还是修改
+   * @return 可供提交的数据
    * @throws app.hongs.HongsException
    */
   private Map checkMainValues(Map values, boolean isNew)
     throws HongsException
   {
-    /**
-     * 日期时间格式
-     */
-    String dateFormat = null, timeFormat = null, dateTimeFormat = null;
+    Map mainValues = new HashMap();
 
     /**
      * 是否关闭检查
      */
-    boolean disable = this.getDisableCheck(values);
+    CoreConfig conf = ( CoreConfig ) Core.getInstance(CoreConfig.class);
+    boolean disable = conf.getProperty("core.table.donot.check", false);
+
+    /**
+     * 日期时间格式
+     */
+    String dateFormat = null,
+           timeFormat = null,
+       datetimeFormat = null;
 
     /**
      * 获取字段信息
      */
     this.getColumns();
-
-    Map mainValues = new HashMap();
 
     Iterator it = this.columns.entrySet().iterator();
     while (it.hasNext())
@@ -544,7 +587,7 @@ public class Table
             value =  null;
 
         if (value == null
-        && (Integer)column.get("isNullable")
+        && (Integer)column.get("nullable")
         ==  java.sql.ResultSetMetaData.columnNoNulls)
         {
           throw nullException(namc);
@@ -553,8 +596,8 @@ public class Table
       else
       {
         if (isNew == true
-        &&!(Boolean)column.get("isAutoIncrement")
-        && (Integer)column.get("isNullable")
+        &&!(Boolean)column.get("autoIncrement")
+        && (Integer)column.get("nullable")
         ==  java.sql.ResultSetMetaData.columnNoNulls)
         {
           throw nullException(namc);
@@ -564,7 +607,7 @@ public class Table
 
       /**
        * 如果关闭了检查或值不是基础类型, 则跳过数据检查
-       * 通常POST或GET过来的总是String, 而JSON过来的是String/Number/Boolean/Null
+       * 通常POST或GET过来的总是String, JSON过来的是String/Number/Boolean/Null
        */
       if (disable || !(value instanceof String || value instanceof Number))
       {
@@ -574,32 +617,32 @@ public class Table
 
       String valueStr = value.toString().trim();
 
-      int precision = (Integer)column.get("precision");
+      int type  = (Integer)column.get("type");
+      int size  = (Integer)column.get("size");
       int scale = (Integer)column.get("scale");
-      int type = (Integer)column.get("type");
 
       // 判断字符串类型
       if (type == Types.CHAR  || type == Types.VARCHAR  || type == Types.LONGVARCHAR
        || type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR)
       {
         // 判断精度
-        if (valueStr.length() > precision)
+        if (valueStr.length() > size)
         {
-          throw precisionException(namc, valueStr, precision);
+          throw sizeException(namc, valueStr, size);
         }
 
         mainValues.put(namc, valueStr);
       }
 
       // 判断整型数值
-      else if (type == Types.TINYINT || type == Types.SMALLINT || type == Types.INTEGER || type == Types.BIGINT)
+      else if (type == Types.INTEGER || type == Types.TINYINT || type == Types.SMALLINT || type == Types.BIGINT)
       {
         if (!valueStr.matches("^[\\-+]?[0-9]+$"))
         {
           throw intException(namc, valueStr);
         }
 
-        if (!(Boolean)column.get("isSigned") && valueStr.startsWith("-"))
+        if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
         {
           throw unsignedException(namc, valueStr);
         }
@@ -612,9 +655,9 @@ public class Table
         String valueStr2 = df.format(Math.abs(valueNum));
 
         // 判断精度
-        if (valueStr2.length() > precision)
+        if (valueStr2.length() > size)
         {
-          throw precisionException(namc, valueStr, precision);
+          throw sizeException(namc, valueStr, size);
         }
 
         mainValues.put(namc, valueNum);
@@ -628,7 +671,7 @@ public class Table
           throw floatException(namc, valueStr);
         }
 
-        if (!(Boolean)column.get("isSigned") && valueStr.startsWith("-"))
+        if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
         {
           throw unsignedException(namc, valueStr);
         }
@@ -653,9 +696,9 @@ public class Table
           /**
            * 判断精度
            */
-          if (valueStr2.length() > precision)
+          if (valueStr2.length() > size)
           {
-            throw precisionException(namc, valueStr, precision);
+            throw sizeException(namc, valueStr, size);
           }
         }
         else
@@ -676,9 +719,9 @@ public class Table
           /**
            * 判断精度
            */
-          if (allLen > precision)
+          if (allLen > size)
           {
-            throw precisionException(namc, valueStr, precision);
+            throw sizeException(namc, valueStr, size);
           }
 
           /**
@@ -686,7 +729,7 @@ public class Table
            */
           if (subLen > scale)
           {
-            throw scaleException(namc, valueStr, precision);
+            throw scaleException(namc, valueStr, size);
           }
         }
 
@@ -709,7 +752,7 @@ public class Table
         {
           if (dateFormat == null)
           {
-            dateFormat = this.getDatimeFormat(values, "date");
+            dateFormat = getFormat("date", namc, values);
           }
           SimpleDateFormat sdf = new java.text.SimpleDateFormat(dateFormat);
 
@@ -719,7 +762,7 @@ public class Table
           }
           catch (ParseException ex)
           {
-            throw dateTimeException(namc, valueStr, dateFormat);
+            throw datetimeException(namc, valueStr, dateFormat);
           }
 
           mainValues.put(namc, value);
@@ -742,7 +785,7 @@ public class Table
         {
           if (timeFormat == null)
           {
-            timeFormat = this.getDatimeFormat(values, "time");
+            timeFormat = getFormat("time", namc, values);
           }
           SimpleDateFormat sdf = new java.text.SimpleDateFormat(timeFormat);
 
@@ -752,7 +795,7 @@ public class Table
           }
           catch (ParseException ex)
           {
-            throw dateTimeException(namc, valueStr, timeFormat);
+            throw datetimeException(namc, valueStr, timeFormat);
           }
 
           mainValues.put(namc, value);
@@ -773,11 +816,11 @@ public class Table
         }
         else
         {
-          if (dateTimeFormat == null)
+          if (datetimeFormat == null)
           {
-            dateTimeFormat = this.getDatimeFormat(values, "datetime");
+            datetimeFormat = getFormat("datetime", namc, values);
           }
-          SimpleDateFormat sdf = new java.text.SimpleDateFormat(dateTimeFormat);
+          SimpleDateFormat sdf = new java.text.SimpleDateFormat(datetimeFormat);
 
           try
           {
@@ -785,7 +828,7 @@ public class Table
           }
           catch (ParseException ex)
           {
-            throw dateTimeException(namc, valueStr, dateTimeFormat);
+            throw datetimeException(namc, valueStr, datetimeFormat);
           }
 
           mainValues.put(namc, value);
@@ -813,7 +856,7 @@ public class Table
   protected void insertSubValues(Map values)
     throws HongsException
   {
-    FetchJoin.assocInsert(this, assocs, values);
+    FetchMore.insertMore(this, assocs, values);
   }
 
   /**
@@ -827,94 +870,55 @@ public class Table
   protected void deleteSubValues(String id)
     throws HongsException
   {
-    FetchJoin.assocDelete(this, assocs, id);
+    FetchMore.deleteMore(this, assocs, id);
   }
 
-  /** 其他私有方法 **/
-
-  private static boolean getDisableCheck(Map values)
-  {
-    String key = "__disable_check__";
-    if (values.containsKey(key))
-    {
-      if (values.get(key) instanceof Boolean)
-      {
-        return !(Boolean)values.remove(key);
-      }
-    }
-
-    CoreConfig conf = (CoreConfig) Core.getInstance(app.hongs.CoreConfig.class);
-    return conf.getProperty("core.disable.check.values", false);
-  }
-
-  private static String getDatimeFormat(Map values, String type)
-  {
-    String key = "__"+type+"_format__";
-    if (values.containsKey(key))
-    {
-      if (values.get(key) instanceof String)
-      {
-        return (String)values.remove(key);
-      }
-    }
-
-    String dftFmt;
-    if ("time".equals(type))
-      dftFmt = "HH:mm:ss";
-    else
-    if ("date".equals(type))
-      dftFmt = "yyyy/MM/dd";
-    else
-      dftFmt = "yyyy/MM/dd HH:mm:ss";
-
-    CoreConfig conf = (CoreConfig) Core.getInstance(app.hongs.CoreLanguage.class);
-    return conf.getProperty("core.default."+type+".format", dftFmt);
-  }
+  //** 私有方法 **/
 
   private HongsException nullException(String name) {
     String error = "Value for column '"+name+"' can not be NULL";
-    return validateException(0x1084, error, name);
+    return validateException(0x1080, error, name);
+  }
+
+  private HongsException sizeException(String name, String value, int size) {
+    String error = "Size for column '"+name+"'("+value+") must be a less than "+size;
+    return validateException(0x1082, error, name, value, String.valueOf(size));
   }
 
   private HongsException scaleException(String name, String value, int scale) {
     String error = "Scale for column '"+name+"'("+value+") must be a less than "+scale;
-    return validateException(0x1088, error, name, value, String.valueOf(scale));
-  }
-
-  private HongsException precisionException(String name, String value, int precision) {
-    String error = "Precision for column '"+name+"'("+value+") must be a less than "+precision;
-    return validateException(0x1086, error, name, value, String.valueOf(precision));
+    return validateException(0x1084, error, name, value, String.valueOf(scale));
   }
 
   private HongsException intException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") is not a int number";
-    return validateException(0x108a, error, name, value);
+    return validateException(0x1086, error, name, value);
   }
 
   private HongsException floatException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") is not a float number";
-    return validateException(0x108c, error, name, value);
+    return validateException(0x1088, error, name, value);
   }
 
   private HongsException unsignedException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") must be a unsigned number";
-    return validateException(0x108e, error, name, value);
+    return validateException(0x108a, error, name, value);
   }
 
-  private HongsException dateTimeException(String name, String value, String format) {
+  private HongsException datetimeException(String name, String value, String format) {
     String error = "Format for column '"+name+"'("+value+") must like this '"+format+"'";
-    return validateException(0x1090, error, name, value, format);
+    return validateException(0x108c, error, name, value, format);
   }
 
   private HongsException validateException(int code, String error, String fieldName, String... otherParams)
   {
     CoreLanguage lang = (CoreLanguage)
-    Core.getInstance(app.hongs.CoreLanguage.class);
+        Core.getInstance(CoreLanguage.class);
 
-    String tl = lang.getProperty("user.table."+name, name);
-    String fl = lang.getProperty("user.field."+name+"."+fieldName);
+    String tl = lang.getProperty("core.table."+name, name);
+    String fl = lang.getProperty("core.field."+name+"."+fieldName);
     if (fl == null) {
-        fl =  lang.getProperty("user.field."+fieldName, fieldName);
+        fl =  lang.getProperty("core.field."+fieldName, fieldName);
     }
 
     List<String> trans = new ArrayList();
@@ -923,7 +927,7 @@ public class Table
     trans.addAll(Arrays.asList(otherParams));
 
     HongsException ex = new HongsException(code, error+" (Table:"+name);
-    ex.setTranslate(trans.toArray(new String[] {}));
+    ex.setLocalizedOptions(trans.toArray(new String[] {}));
     return ex;
   }
 }

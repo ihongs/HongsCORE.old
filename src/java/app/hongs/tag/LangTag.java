@@ -11,12 +11,12 @@ import javax.servlet.jsp.tagext.DynamicAttributes;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
-import app.hongs.util.Str;
+import app.hongs.util.Text;
 
 /**
- * <h1>语言信息读取标签</h1>
+ * 语言信息读取标签
  *
- * <h2>使用方法:</h2>
+ * <h3>使用方法:</h3>
  * <pre>
  * &lt;hs:lang load="language.name"/&gt;
  * &lt;hs:lang key="language.key" [esc="yes|no|EscapeSymbol"] [_0="replacement0" _1="replacement1"]/&gt;
@@ -39,7 +39,7 @@ public class LangTag extends TagSupport implements DynamicAttributes {
   public int doStartTag() throws JspException {
     JspWriter out = this.pageContext.getOut();
 
-    CoreLanguage lang = (CoreLanguage)Core.getInstance(app.hongs.CoreLanguage.class);
+    CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
 
     if (this.load != null) {
       if (this.load.endsWith(".xml")) {
@@ -69,10 +69,10 @@ public class LangTag extends TagSupport implements DynamicAttributes {
       && ! "".equals(this.esc)
       && ! "no".equals(this.esc)) {
         if ("yes".equals(this.esc)) {
-          str = Str.escape(str);
+          str = Text.escape(str);
         }
         else {
-          str = Str.escape(str, this.esc);
+          str = Text.escape(str, this.esc);
         }
       }
 

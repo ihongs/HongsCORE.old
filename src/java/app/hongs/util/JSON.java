@@ -1,35 +1,38 @@
 package app.hongs.util;
 
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Enumeration;
-
-import java.io.PrintStream;
+import app.hongs.Core;
+import app.hongs.HongsException;
 
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import app.hongs.Core;
-import app.hongs.HongsError;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * <h1>简单JSON格式工具</h1>
- * <pre>
- * 支持将 <b>数组,集合框架,基础类型</b> 的数据转换为JSON字符串, 反向解析JSON字符串到
- * Java对象; 暂采用 org.json.simple 来完成.
- * 顺便说说为什么不采用第3方的JSON库: 最开始采用的是org.json, 效果相当不错, 可惜在解
- * 析JSON时首先解析成他自身的对象而不是Java集合框架的对象; 后来采用org.json.simple,
- * 也很好, 但是对Set类型不支持, 修改其源码将List改成Collection即可解决; 再后来考虑到
- * 我已经有一个Dump类, 用于调试输出基础数据类型, 其实现与JSON大同小异, 故将其修改成该
- * JSON类. 但是JSON的解析太麻烦, 就还是调org.json.simple来做了.
- * </pre>
+ * 简单JSON格式工具
+ *
+ * <p>
+ * 支持将 <b>数组,集合框架,基础类型</b> 的数据转换为 JSON 字符串,
+ * 反向解析 JSON 字符串到 Java 对象; 暂采用 org.json.simple 来完成.
+ * </p>
  * 
- * <h2>错误代码</h2>
+ * <p>
+ * 顺便说说为什么不采用第3方的 JSON 库:
+ * 最开始用 org.json, 还不错, 可惜在解析 JSON 时会解析成他自身的对象而不是 Java 集合框架的对象;
+ * 后来采用 org.json.simple, 也很好, 但是不支持 Set, 需要修改其源码将 List 改成 Collection;
+ * 考虑到我有一个 Dump 类, 用于调试输出基础类型和集合对象, 其实现与 JSON 大同小异,
+ * 故将其修改成该 JSON类; 但是 JSON 的解析太麻烦, 就还是调 org.json.simple 好了.
+ * </p>
+ *
+ * <h3>异常代码</h3>
  * <pre>
- * 0x40 解析JSON数据错误
+ * 0x1121 解析JSON数据错误
  * </pre>
  *
  * @author Hongs
@@ -41,53 +44,18 @@ public class JSON
    * 将JSON字符串解析成Java对象
    * @param str JSON字符串
    * @return 数组,集合框架,基础类型
+   * @throws HongsException
    */
-  public static Object parse(String str)
+  public static Object parse(String str) throws HongsException
   {
     try
     {
-      return JSONValue
-      .parseWithException(str);
+      return JSONValue.parseWithException(str);
     }
-    catch (ParseException exp)
+    catch (ParseException ex)
     {
-      throw new HongsError(0x40, exp);
+      throw new HongsException(0x100a, "Can not parse ", ex);
     }
-  }
-
-  /**
-   * 直接将Java对象输出到标准控制台, 用于简单调试
-   * @param obj 数组,集合框架,基础类型
-   */
-  public static void print(Object obj)
-  {
-    StringBuilder sb = new StringBuilder();
-    JSON.print(sb, "", null, obj, 0, 0);
-    System.out.print(sb.toString());
-  }
-
-  /**
-   * 直接将Java对象输出到指定输出流, 用于简单调试
-   * @param obj
-   * @param out
-   */
-  public static void print(Object obj, PrintStream out)
-  {
-    StringBuilder sb = new StringBuilder();
-    JSON.print(sb, "", null, obj, 0, 0);
-    out.print(sb.toString());
-  }
-
-  /**
-   * 直接将Java对象输出到指定输出器, 用于简单调试
-   * @param obj
-   * @param out
-   */
-  public static void print(Object obj, PrintWriter out)
-  {
-    StringBuilder sb = new StringBuilder();
-    JSON.print(sb, "", null, obj, 0, 0);
-    out.print(sb.toString());
   }
 
   /**
@@ -97,15 +65,50 @@ public class JSON
    */
   public static String toString(Object obj)
   {
-    String sp = Core.IN_DEBUG_MODE ? "" : null;
+    String xx = 1 == (1 & Core.DEBUG) ? "": null;
     StringBuilder sb = new StringBuilder();
-    JSON.print(sb, sp, null, obj, 0, 0);
-    return sb.toString();
+    JSON.dumps( sb , xx, null, obj, 0, 0 );
+    return sb.toString().trim();
   }
 
-  /** 操作方法 **/
+  /**
+   * 直接将Java对象输出到标准控制台, 用于简单调试, 输出到 STDERR
+   * @param obj 数组,集合框架,基础类型
+   */
+  public static void dumps(Object obj)
+  {
+    StringBuilder sb = new StringBuilder();
+    JSON.dumps( sb, "", null, obj, 0 , 0 );
+    System.err.print(sb.toString());
+  }
 
-  private static void print(StringBuilder sb, String pre, Object[] arr)
+  /**
+   * 直接将Java对象输出到指定输出流
+   * @param obj
+   * @param out
+   */
+  public static void dumps(Object obj, PrintStream out)
+  {
+    StringBuilder sb = new StringBuilder();
+    JSON.dumps( sb, "", null, obj, 0 , 0 );
+    out.print(sb.toString());
+  }
+
+  /**
+   * 直接将Java对象输出到指定书写器
+   * @param obj
+   * @param out
+   */
+  public static void dumps(Object obj, PrintWriter out)
+  {
+    StringBuilder sb = new StringBuilder();
+    JSON.dumps( sb, "", null, obj, 0 , 0 );
+    out.print(sb.toString());
+  }
+
+  //** 操作方法 **/
+
+  private static void dumps(StringBuilder sb, String pre, Object[] arr)
   {
     sb.append("[");
     if (pre != null)
@@ -119,7 +122,7 @@ public class JSON
     {
       Object obj = arr[i];
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
     }
 
     if (pre != null)
@@ -129,7 +132,7 @@ public class JSON
     sb.append("]");
   }
 
-  private static void print(StringBuilder sb, String pre, Collection col)
+  private static void dumps(StringBuilder sb, String pre, Collection col)
   {
     sb.append("[");
     if (pre != null)
@@ -145,7 +148,7 @@ public class JSON
     {
       Object obj = it.next();
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", null, obj, i, j);
 
       i ++;
     }
@@ -157,7 +160,7 @@ public class JSON
     sb.append("]");
   }
 
-  private static void print(StringBuilder sb, String pre, Dictionary dic)
+  private static void dumps(StringBuilder sb, String pre, Dictionary dic)
   {
     sb.append("{");
     if (pre != null)
@@ -174,7 +177,7 @@ public class JSON
       Object key = en.nextElement();
       Object val = dic.get(key);
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", key, val, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", key, val, i, j);
 
       i ++;
     }
@@ -186,7 +189,7 @@ public class JSON
     sb.append("}");
   }
 
-  private static void print(StringBuilder sb, String pre, Map map)
+  private static void dumps(StringBuilder sb, String pre, Map map)
   {
     sb.append("{");
     if (pre != null)
@@ -204,7 +207,7 @@ public class JSON
       Object key = obj.getKey();
       Object val = obj.getValue();
 
-      JSON.print(sb, pre == null ? pre : pre + "  ", key, val, i, j);
+      JSON.dumps(sb, pre == null ? pre : pre + "  ", key, val, i, j);
 
       i ++;
     }
@@ -216,7 +219,7 @@ public class JSON
     sb.append("}");
   }
 
-  private static void print(StringBuilder sb, String pre, Object key, Object val, int i, int j)
+  private static void dumps(StringBuilder sb, String pre, Object key, Object val, int i, int j)
   {
     /** 键 **/
 
@@ -249,19 +252,19 @@ public class JSON
     }
     else if (val instanceof Object[])
     {
-      JSON.print(sb, pre, (Object[])val);
+      JSON.dumps(sb, pre, (Object[])val);
     }
     else if (val instanceof Collection)
     {
-      JSON.print(sb, pre, (Collection)val);
+      JSON.dumps(sb, pre, (Collection)val);
     }
     else if (val instanceof Dictionary)
     {
-      JSON.print(sb, pre, (Dictionary)val);
+      JSON.dumps(sb, pre, (Dictionary)val);
     }
     else if (val instanceof Map)
     {
-      JSON.print(sb, pre, (Map)val);
+      JSON.dumps(sb, pre, (Map)val);
     }
     else if (val instanceof Number || val instanceof Boolean)
     {
@@ -284,7 +287,7 @@ public class JSON
     }
   }
 
-  /** 编码 **/
+  //** 编码 **/
   /*
   private final static String[] hex = {
       "00","01","02","03","04","05","06","07","08","09","0A","0B","0C","0D","0E","0F",

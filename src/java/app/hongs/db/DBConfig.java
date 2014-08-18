@@ -1,10 +1,18 @@
 package app.hongs.db;
 
-import java.util.Properties;
+import app.hongs.Core;
+import app.hongs.CoreSerially;
+import app.hongs.HongsException;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-
+import java.util.Properties;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
@@ -13,36 +21,26 @@ import java.io.Serializable;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+
 import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import app.hongs.Core;
-import app.hongs.CoreSerially;
-import app.hongs.HongsException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.w3c.dom.NamedNodeMap;
 
 /**
- * <h1>数据库配置信息解析类</h1>
+ * 数据库配置信息解析类
  *
- * <h2>异常代码区间:</h2>
- * <b>0x1060~0x106f</b>
- *
- * <h2>异常代码说明:</h2>
- * <ul>
- * <li>0x1061  找不到数据库配置文件</li>
- * <li>0x1063  无法解析数据库配置文档</li>
- * <li>0x1065  在配置文档中找不到根节点</li>
- * <li>0x1067  无法读取XML文件</li>
- * <li>0x1069  无法读取XML流</li>
- * </ul>
+ * <h3>异常代码:</h3>
+ * <pre>
+ * 区间: 0x1060~0x106f
+ * 0x1061  找不到数据库配置文件
+ * 0x1063  无法解析数据库配置文档
+ * 0x1065  在配置文档中找不到根节点
+ * 0x1067  无法读取XML文件
+ * 0x1069  无法读取XML流
+ * </pre>
  *
  * @author Hongs
  */
@@ -51,7 +49,7 @@ public class DBConfig
   implements Serializable
 {
 
-  /** 缓存 **/
+  //** 缓存 **/
 
   protected String name;
 
@@ -59,16 +57,16 @@ public class DBConfig
     throws HongsException
   {
     this.name = name;
-    this.init("db-" + name);
+    this.init("db." + name);
   }
 
   @Override
   protected boolean isExpired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                 + File.separator + "db-" + name + ".xml");
+                 + File.separator + "db." + name + ".xml");
     File serFile = new File(Core.TMPS_PATH
-                 + File.separator + "db-" + name + ".ser");
+                 + File.separator + "db." + name + ".ser");
     return xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -78,8 +76,8 @@ public class DBConfig
   {
     DBConfig cp = DBConfig.parseByName(name);
 
-    this.driver       = cp.driver;
     this.source       = cp.source;
+    this.origin       = cp.origin;
     this.dbClass      = cp.dbClass;
     this.tableClass   = cp.tableClass;
     this.tablePrefix  = cp.tablePrefix;
@@ -87,7 +85,7 @@ public class DBConfig
     this.tableConfigs = cp.tableConfigs;
   }
 
-  /** 数据 **/
+  //** 数据 **/
 
   public String dbClass;
 
@@ -99,17 +97,17 @@ public class DBConfig
 
   public Map<String, Map> tableConfigs;
 
-  public Map<String, String> driver;
-
   public Map<String, String> source;
+
+  public Map<String, String> origin;
 
   private static Set<String> tableAttrs = new HashSet(
   Arrays.asList( new String[] {
-    "name","primaryKey","class","prefix","suffix"
+    "name","class","prefix","suffix","primaryKey"
   }));
   private static Set<String> assocAttrs = new HashSet(
   Arrays.asList( new String[] {
-    "type","join","name","realName","primaryKey","foreignKey",
+    "type","join","name","tableName","primaryKey","foreignKey",
     "select","where","groupBy","having","orderBy"
   }));
 
@@ -123,7 +121,7 @@ public class DBConfig
   public static DBConfig parseByName(String dn)
     throws HongsException
   {
-    File dbConfFile = new File(Core.CONF_PATH + File.separator + "db-" + dn + ".xml");
+    File dbConfFile = new File(Core.CONF_PATH + File.separator + "db." + dn + ".xml");
     if (!dbConfFile.exists())
     {
       throw new app.hongs.HongsException(0x1061, "Can not find DB config file 'db-"+dn+".xml'");
@@ -218,7 +216,7 @@ public class DBConfig
      * 仅当type为BLS_TO或HAS_ONE时join可用;
      * 当type为BLS_TO时, foreignKey为基本表的外键,
      * 当type为HAS_ONE或HAS_MANY时, foreignKey为关联表的外键;
-     * 关联表其他可选配置fields|where|groupBy|orderBy|limit见FetchBean说明.
+     * 关联表其他可选配置fields|where|groupBy|orderBy|limit见FetchCase说明.
      */
 
     Element root = doc.getDocumentElement();
@@ -232,8 +230,8 @@ public class DBConfig
     this.tableClass = "";
     this.tablePrefix = "";
     this.tableSuffix = "";
-    this.driver = new HashMap<String, String>();
     this.source = new HashMap<String, String>();
+    this.origin = new HashMap<String, String>();
     this.tableConfigs = new HashMap<String, Map>();
 
     NodeList childs = root.getChildNodes();
@@ -268,20 +266,6 @@ public class DBConfig
         }
       }
       else
-      if (tagName.equals("driver"))
-      {
-        link = getAttribute(element, "link", null);
-        if (link != null)
-        {
-          DBConfig conf = new DBConfig(link);
-          this.driver = conf.driver;
-        }
-        else
-        {
-          this.driver = DBConfig.getDriver(element);
-        }
-      }
-      else
       if (tagName.equals("source"))
       {
         link = getAttribute(element, "link", null);
@@ -296,6 +280,20 @@ public class DBConfig
         }
       }
       else
+      if (tagName.equals("origin"))
+      {
+        link = getAttribute(element, "link", null);
+        if (link != null)
+        {
+          DBConfig conf = new DBConfig(link);
+          this.origin = conf.origin;
+        }
+        else
+        {
+          this.origin = DBConfig.getOrigin(element);
+        }
+      }
+      else
       if (tagName.equals("tables"))
       {
         this.tableConfigs = DBConfig.getTables(element);
@@ -305,7 +303,7 @@ public class DBConfig
     //app.hongs.util.JSON.dump(this.tableConfigs);
   }
 
-  private static Map getDriver(Element element)
+  private static Map getSource(Element element)
   {
     String drv = "";
     String url = "";
@@ -332,15 +330,15 @@ public class DBConfig
       }
     }
 
-    Map driver = new HashMap();
-    driver.put("drv", drv);
-    driver.put("url", url);
-    driver.put("info", info);
+    Map source = new HashMap();
+    source.put("drv", drv);
+    source.put("url", url);
+    source.put("info", info);
 
-    return driver;
+    return source;
   }
 
-  private static Map getSource(Element element)
+  private static Map getOrigin(Element element)
   {
     String name = "";
     Properties info = new Properties();
@@ -362,11 +360,11 @@ public class DBConfig
       }
     }
 
-    Map driver = new HashMap();
-    driver.put("name", name);
-    driver.put("info", info);
+    Map origin = new HashMap();
+    origin.put("name", name);
+    origin.put("info", info);
 
-    return driver;
+    return origin;
   }
 
   private static Map getTables(Element element)

@@ -1,23 +1,22 @@
 package app.hongs;
 
+import app.hongs.util.Text;
+
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
 import java.io.File;
 
-import app.hongs.util.Str;
-
 /**
- * <h1>语言资源读取工具</h1>
- * <pre>
- * 为与配置保持一致, 故从CoreConfig继承.
- * 放弃使用"ResourceBundle"类加载语言资源.
- * 资源文件名为"xxx.语言[-国家].properties".
- * </pre>
+ * 语言资源读取工具
  *
- * <h2>配置选项:</h2>
- * <re>
+ * <p>
+ * 为与配置保持一致, 故从CoreConfig继承.<br/>
+ * 放弃使用"ResourceBundle"类加载语言资源.<br/>
+ * 资源文件名为"xxx.语言[-国家].properties".<br/>
+ * </p>
+ *
+ * <h3>配置选项:</h3>
+ * <pre>
  * core.load.language.once  为true则仅加载一次, 为false由Core控制
  * core.language.link.xx    语言链接, xx为语言, 如: link.zh=zh-cn
  * </pre>
@@ -122,7 +121,7 @@ public class CoreLanguage
      * 将语句中的$xxx或${xxx}替换成指定文字
      * 如果指定的替换文字不存在, 则替换为空
      */
-    return Str.inject(str, rep);
+    return Text.inject(str, rep);
   }
 
   /**
@@ -140,7 +139,7 @@ public class CoreLanguage
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
      */
-    return Str.inject(str, rep);
+    return Text.inject(str, rep);
   }
 
   /**
@@ -158,56 +157,55 @@ public class CoreLanguage
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
      */
-    return Str.inject(str, rep);
+    return Text.inject(str, rep);
   }
 
-  /** 静态属性及方法 **/
-
-  public static Map<String, CoreLanguage> instances;
+  //** 静态属性及方法 **/
 
   /**
    * 获取唯一语言对象
    * 如果配置core.load.language.once为true则仅加载一次
-   * @return 语言对象
+   * @return 唯一语言实例
    */
   public static CoreLanguage getInstance()
   {
-    Core   core = Core.getInstance();
-    String name = Core.ACTION_LANG.get();
-    if (CoreLanguage.instances != null
-    &&  CoreLanguage.instances.containsKey(name))
-    {
-      return CoreLanguage.instances.get(name);
-    }
-
-    CoreLanguage lang = new CoreLanguage();
-
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
-    if (conf.getProperty("core.load.language.once", false))
-    {
-      if (CoreLanguage.instances == null)
-      {
-        CoreLanguage.instances = new HashMap<String, CoreLanguage>();
-      }
-      CoreLanguage.instances.put(name, lang);
-    }
-
-    return lang;
+    return getInstance("default");
   }
 
+  /**
+   * 按配置名获取唯一语言对象
+   * 如果配置core.load.language.once为true则仅加载一次
+   * @param name 配置名
+   * @return 唯一语言实例
+   */
   public static CoreLanguage getInstance(String name)
   {
-    String key = "__LANG__." + name;
-    Core  core = Core.getInstance();
-    if (! core.containsKey( key ) )
+    String ck = CoreLanguage.class.getName() + ":" + name + "." + Core.ACTION_LANG.get();
+
+    Core core = Core.getInstance();
+    if (core.containsKey(ck))
     {
-      CoreLanguage conf = new CoreLanguage(name);
-      core.put( key, conf ); return conf;
+      return (CoreLanguage)core.get(ck);
+    }
+
+    Core gore = Core.GLOBAL_CORE;
+    if (gore.containsKey(ck))
+    {
+      return (CoreLanguage)gore.get(ck);
+    }
+
+    CoreLanguage lang = new CoreLanguage(name);
+    CoreConfig conf = CoreConfig.getInstance();
+    if (conf.getProperty("core.load.language.once", false))
+    {
+      gore.put(ck, lang);
     }
     else
     {
-      return (CoreLanguage)core.get(key);
+      core.put(ck, lang);
     }
+
+    return lang;
   }
 
   /**
@@ -217,7 +215,7 @@ public class CoreLanguage
    */
   public static String getAcceptLanguage(String lang)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     String[]   arr1 = lang.toLowerCase().split(",");
     String[]   arr2;
 

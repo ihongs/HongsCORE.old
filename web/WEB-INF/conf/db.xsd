@@ -13,24 +13,29 @@
     </xs:complexType>
   </xs:element>
 
-  <!-- 数据库驱动 -->
-  <xs:element name="driver">
-    <xs:complexType>
-      <xs:attribute name="link" type="xs:string"/>
-      <xs:attribute name="drv" type="xs:string"/>
-      <xs:attribute name="url" type="xs:string"/>
-      <xs:attribute name="user" type="xs:string" use="required"/>
-      <xs:attribute name="password" type="xs:string" use="required"/>
-    </xs:complexType>
-  </xs:element>
-
-  <!-- 数据源配置 -->
+  <!-- 内部数据源驱动 -->
   <xs:element name="source">
     <xs:complexType>
       <xs:attribute name="link" type="xs:string"/>
-      <xs:attribute name="name" type="xs:string"/>
-      <xs:attribute name="user" type="xs:string" use="required"/>
-      <xs:attribute name="password" type="xs:string" use="required"/>
+      <xs:attribute name="drv" type="xs:string" use="required"/>
+      <xs:attribute name="url" type="xs:string" use="required"/>
+      <xs:attribute name="user" type="xs:string"/>
+      <xs:attribute name="password" type="xs:string"/>
+      <xs:attribute name="minPoolSize" type="xs:int"/>
+      <xs:attribute name="maxPoolSize" type="xs:int"/>
+      <xs:attribute name="maxIdleSize" type="xs:int"/>
+      <xs:attribute name="maxStatements" type="xs:int"/>
+      <xs:attribute name="initialPoolSize" type="xs:int"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- 外部数据源配置 -->
+  <xs:element name="origin">
+    <xs:complexType>
+      <xs:attribute name="link" type="xs:string"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="user" type="xs:string"/>
+      <xs:attribute name="password" type="xs:string"/>
     </xs:complexType>
   </xs:element>
 
@@ -40,7 +45,7 @@
       <xs:attribute ref="type" use="required"/>
       <xs:attribute ref="join"/>
       <xs:attribute ref="name" use="required"/>
-      <xs:attribute ref="realName"/>
+      <xs:attribute ref="tableName"/>
       <xs:attribute ref="foreignKey" use="required"/>
       <xs:attribute ref="primaryKey"/>
       <xs:attribute ref="updateKeys"/>
@@ -87,7 +92,7 @@
     <xs:complexType>
       <xs:all>
         <xs:element ref="config" minOccurs="0"/>
-        <xs:element ref="driver" minOccurs="0"/>
+        <xs:element ref="origin" minOccurs="0"/>
         <xs:element ref="source" minOccurs="0"/>
         <xs:element ref="tables" minOccurs="0"/>
       </xs:all>

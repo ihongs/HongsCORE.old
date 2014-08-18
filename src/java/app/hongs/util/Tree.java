@@ -1,18 +1,22 @@
 package app.hongs.util;
 
-import java.util.Collection;
-import java.util.List;
+import app.hongs.HongsException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * <h1>树型操作工具</h1>
- * <pre>
- * 用于获取和设置树型结构(&lt;Map&lt;Map...&gt;&gt;)数据的值
- * </pre>
+ * 树形操作工具
+ *
+ * <p>
+ * 用于获取和设置树型结构
+ * (&lt;Object,Map&lt;Object,Map&lt;...&gt;&gt;&gt;)
+ * 数据的值;
+ * 切记：keys
+ * </p>
  *
  * @author Hongs
  */
@@ -20,93 +24,190 @@ public class Tree
 {
 
   /**
+   * 获取树纵深值(以属性或键方式"a.b[c]"获取)
+   * @param map
+   * @param path
+   * @return 键对应的值
+   * @throws app.hongs.HongsException
+   */
+  public static Object getValue(Map map, String path)
+  throws HongsException
+  {
+    return Tree.getValue(map, path, null);
+  }
+
+  /**
    * 获取树纵深值
-   * @param tree
+   * @param map
    * @param keys
    * @return 键对应的值
+   * @throws app.hongs.HongsException
    */
-  public static Object getTreeValue(Map tree, String... keys)
+  public static Object getByArr(Map map, Object[] keys)
+  throws HongsException
   {
-    Object obj = tree;
+    return Tree.getByArr(map, keys, null);
+  }
+
+  /**
+   * 获取树纵深值(以属性或键方式"a.b[c]"获取)
+   * @param map
+   * @param path
+   * @param def
+   * @return 键对应的值
+   * @throws app.hongs.HongsException
+   */
+  public static Object getValue(Map map, String path, Object def)
+  throws HongsException
+  {
+    path = path.replaceAll("\\]\\[", ".")
+               .replace("[", ".")
+               .replace("]", "" )
+               .replaceFirst("\\.+$", ""); // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
+    String[] keys = path.split("\\.", -1);
+    return Tree.getByArr(map, keys, def);
+  }
+
+  /**
+   * 获取树纵深值
+   * @param map
+   * @param keys
+   * @param def
+   * @return 键对应的值
+   * @throws app.hongs.HongsException
+   */
+  public static Object getByArr(Map map, Object[] keys, Object def)
+  throws HongsException
+  {
+    if (map == null)
+    {
+      throw new HongsException(0x100c, "`map` can not be null");
+    }
+    Object val = map;
     for (int i = 0; i < keys.length; i ++)
     {
-      if (obj instanceof Map)
+      if (val instanceof Map)
       {
-        Map map  =  (Map)obj;
-        String key = keys[i];
-        if (map.containsKey(key))
+        Map obj  =  (Map)val;
+        Object key = keys[i];
+        if (obj.containsKey(key))
         {
-          obj = map.get(key);
+          val = obj.get(key);
           continue;
         }
       }
       else
-      if (obj instanceof List)
+      if (val instanceof List)
       {
-        List lst = (List)obj;
-        String key = keys[i];
-        int idx = Integer.parseInt(key);
+        List lst = (List)val;
+        Object key = keys[i];
+        int idx = key instanceof Integer ? (Integer)key
+                : Integer.parseInt ( key.toString( ) );
         if (idx < lst.size())
         {
-          obj = lst.get(idx);
+          val = lst.get(idx);
           continue;
         }
       }
-      return null;
+      return def;
     }
-    return obj;
+    return val;
   }
 
   /**
-   * 获取树纵深值(类数组键方式"a[b][c]")
-   * @param tree
-   * @param key
-   * @return 键对应的值
+   * 设置树纵深值(以属性或键方式"a.b[c]"设置)
+   * @param map
+   * @param path
+   * @param val
+   * @throws app.hongs.HongsException
    */
-  public static Object getArrayValue(Map tree, String key)
+  public static void setValue(Map map, String path, Object val)
+  throws HongsException
   {
-    key = key.replaceAll("\\]\\[", ".")
+    path = path.replaceAll("\\]\\[", ".")
              .replace("[", ".")
-             .replace("]", "" )
-             .replaceFirst("\\.$", "" );
-    String[] keys = key.split("\\.", -1);
-    return Tree.getTreeValue(tree, keys);
-  }
-
-  /**
-   * 获取树纵深值(类对象属性方式"a.b.c")
-   * @param tree
-   * @param key
-   * @return 键对应的值
-   */
-  public static Object getObjectValue(Map tree, String key)
-  {
-    String[] keys = key.split("\\.", -1);
-    return Tree.getTreeValue(tree, keys);
+             .replace("]", "" );
+    String[] keys = path.split("\\.", -1);
+    Tree.setByArr(map, keys, val);
   }
 
   /**
    * 设置树纵深值
-   * @param value
-   * @param tree
+   * @param map
    * @param keys
-   * @param pos
+   * @param val
+   * @throws app.hongs.HongsException
    */
-  private static void setTreeValue(Object tree, String[] keys, Object value, int pos)
+  public static void setByArr(Map map, Object[] keys, Object val)
+  throws HongsException
   {
-    String key = keys[pos];
-
-    if (key.length() != 0)
+    if (map == null)
     {
-      Map map = (Map)tree;
+      throw new HongsException(0x100c, "`map` can not be null");
+    }
+    if (keys.length  !=  0)
+    {
+      setValue(map, keys, val, 0);
+    }
+    else
+    if (val instanceof Map)
+    {
+      map.clear ();
+      map.putAll((Map) val);
+    }
+    else
+    {
+      throw new HongsException(0x10, "`val` is not a map AND `keys` is empty");
+    }
+  }
 
-      if (keys.length == pos + 1)
+  /**
+   * 设置树纵深值
+   * @param obj
+   * @param keys
+   * @param val
+   * @param idx
+   */
+  private static void setValue(Object obj, Object[] keys, Object val, int idx)
+  {
+    Object key = keys[idx];
+
+    if (key == null || key.equals(""))
+    {
+      Collection col = (Collection)obj;
+
+      if (keys.length == idx + 1)
       {
-        map.put(key, value);
+        col.add(val);
       }
       else
       {
-        String subKey = keys[pos + 1];
+        Object subNode;
+
+        Object key2 = keys[idx + 1];
+        if (key2 == null || key2.equals(""))
+        {
+          subNode = new ArrayList();
+        }
+        else
+        {
+          subNode = new LinkedHashMap();
+        }
+        col.add(subNode);
+
+        setValue(subNode, keys, val, idx + 1);
+      }
+    }
+    else
+    {
+      Map map = (Map)obj;
+
+      if (keys.length == idx + 1)
+      {
+        map.put(key, val);
+      }
+      else
+      {
         Object subNode;
 
         if (map.containsKey(key))
@@ -115,133 +216,161 @@ public class Tree
         }
         else
         {
-          if (subKey.length() != 0)
+          Object key2 = keys[idx + 1];
+          if (key2 == null || key2.equals(""))
           {
-            subNode = new HashMap();
+            subNode = new ArrayList();
           }
           else
           {
-            subNode = new ArrayList();
+            subNode = new LinkedHashMap();
           }
           map.put(key, subNode);
         }
 
-        Tree.setTreeValue(subNode, keys, value, pos + 1);
+        setValue(subNode, keys, val, idx + 1);
       }
     }
-    else
-    {
-      Collection col = (Collection)tree;
+  }
 
-      if (keys.length == pos + 1)
-      {
-        col.add(value);
-      }
-      else
-      {
-        String subKey = keys[pos + 1];
-        Object subNode;
+  /**
+   * 将 oth 追加到 map 中
+   * 与 Map.putAll 的不同在于: 本函数会将其子级的 Map 也进行合并
+   * @param map
+   * @param oth
+   */
+  public static void putDepth(Map map, Map oth) {
+    Iterator i = oth.entrySet().iterator();
+    while (i.hasNext()) {
+        Map.Entry e = (Map.Entry) i.next();
+        Object k2 = e.getKey(  );
+        Object v2 = e.getValue();
+        Object v1 =  map.get(k2);
 
-        if (subKey.length() != 0)
-        {
-          subNode = new HashMap();
+        if (v1 instanceof Map && v2 instanceof Map) {
+            putDepth((Map)v1, (Map)v2);
         }
-        else
-        {
-          subNode = new ArrayList();
+        else {
+            map.put(k2, v2);
         }
-        col.add(subNode);
-
-        Tree.setTreeValue(subNode, keys, value, pos + 1);
-      }
     }
   }
 
-  /**
-   * 设置树纵深值
-   * @param tree
-   * @param keys
-   * @param value
-   */
-  public static void setTreeValue(Map tree, String[] keys, Object value)
-  {
-    if (keys.length == 0)
-    {
-      tree.put(keys[0], value);
-    }
-    else
-    {
-      Tree.setTreeValue(tree, keys, value, 0);
-    }
+  /** 遍历工具 **/
+
+  public static interface EachValue {
+    public void each(Object value, String path);
+  }
+
+  public static interface EachPoint {
+    public void each(Object value,  List  path);
   }
 
   /**
-   * 设置树纵深值(类数组键方式"a[b][c]")
-   * @param tree
-   * @param key
-   * @param value
+   * 遍历所有的叶子节点
+   * 路径以字串形式给出(.分割层级, 如 a.b.c.)
+   * @param data 要遍历的数据
+   * @param loop 遍历回调接口
    */
-  public static void setArrayValue(Map tree, String key, Object value)
-  {
-    key = key.replaceAll("\\]\\[", ".")
-             .replace("[", ".")
-             .replace("]", "" );
-    String[] keys = key.split("\\.", -1);
-    Tree.setTreeValue(tree, keys, value);
+  public static void each(Object data, EachValue loop) {
+    each(data, loop, new StringBuilder());
   }
 
   /**
-   * 设置树纵深值(类对象属性方式"a.b.c")
-   * @param tree
-   * @param key
-   * @param value
+   * 遍历所有的叶子节点
+   * 路径以列表形式给出
+   * @param data 要遍历的数据
+   * @param loop 遍历回调接口
    */
-  public static void setObjectValue(Map tree, String key, Object value)
-  {
-    String[] keys = key.split("\\.", -1);
-    Tree.setTreeValue(tree, keys, value);
+  public static void each(Object data, EachPoint loop) {
+    each(data, loop, new ArrayList());
   }
 
-  /**
-   * 将map2追加到map1中
-   * @param map1
-   * @param map2
-   */
-  public static void putAllDeep(Map map1, Map map2) {
-      putAllDeep(map1, map2, new ArrayList());
-  }
-
-  /**
-   * 将map2追加到map1的keys层级中
-   * @param map1
-   * @param map2
-   * @param keys 
-   */
-  public static void putAllDeep(Map map1, Map map2, String[] keys) {
-      putAllDeep(map1, map2, Arrays.asList(keys));
-  }
-  
-  /**
-   * 将map2追加到map1的keys层级中
-   * @param map1
-   * @param map2
-   * @param keys 
-   */
-  public static void putAllDeep(Map map1, Map map2, List<String> keys) {
-      Iterator it = map2.entrySet().iterator();
+  private static void each(Object data, EachValue loop, StringBuilder path) {
+    if (data instanceof Map ) {
+      Iterator it = ((Map) data).entrySet().iterator();
       while (it.hasNext()) {
-          Map.Entry et = (Map.Entry) it.next();
-          Object key = et.getKey(  );
-          Object val = et.getValue();
-          List<String> keyz = new ArrayList(keys);
-                       keyz.add( key.toString() );
-          if (val instanceof Map) {
-              putAllDeep( map1, (Map) val, keyz );
-          }
-          else {
-              setTreeValue(map1, keyz.toArray(new String[]{}), val);
-          }
+        Map.Entry et = (Map.Entry) it.next();
+        Object k = et.getKey(  );
+        Object v = et.getValue();
+
+        StringBuilder p = new StringBuilder(path);
+        p.append(".")
+         .append( k );
+
+        each(v, loop, p);
       }
+    }
+    else
+    if (data instanceof List) {
+      List a = (List) data;
+      for (Object v : a) {
+        StringBuilder p = new StringBuilder(path);
+        p.append(".");
+
+        each(v, loop, p);
+      }
+    }
+    else
+    if (data instanceof Object[]) {
+      Object[] a = (Object[]) data;
+      for (Object v : a) {
+        StringBuilder p = new StringBuilder(path);
+        p.append(".");
+
+        each(v, loop, p);
+      }
+    }
+    else
+    if (path.length() > 0) {
+        loop.each(data, path.substring(1));
+    }
+  }
+
+  private static void each(Object data, EachPoint loop, List path) {
+    if (data instanceof Map) {
+      Iterator it = ((Map) data).entrySet().iterator();
+      while (it.hasNext()) {
+        Map.Entry et = (Map.Entry) it.next();
+        Object k = et.getKey(  );
+        Object v = et.getValue();
+
+        List p = new ArrayList(path);
+        p.add(k);
+
+        each(v, loop, p);
+      }
+    }
+    else
+    if (data instanceof List) {
+      List a = (List) data;
+      int k = -1;
+      for (Object v : a) {
+        k = k +1;
+
+        List p = new ArrayList(path);
+        p.add(k);
+
+        each(v, loop, p);
+      }
+    }
+    else
+    if (data instanceof Object[]) {
+      Object[] a = (Object[]) data;
+      int k = -1;
+      for (Object v : a) {
+        k = k +1;
+
+        List p = new ArrayList(path);
+        p.add(k);
+
+        each(v, loop, p);
+      }
+    }
+    else
+    if (!path.isEmpty()) {
+        loop.each(data, path);
+    }
   }
 
 }

@@ -1,49 +1,52 @@
 package app.hongs;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.lang.reflect.Method;
+import app.hongs.util.Text;
+
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * <h1>核心类</h1>
- * <pre>
- * 承担"唯一实例"(线程内唯一)的申请与注销操作
- * 必须存在一个无参构造函数或无参"getInstance"方法
- * 获取当前 Core 的唯一实例总是使用"Core.getInstance()"
- * </pre>
+ * 核心类
  *
- * <h2>特性解释:</h2>
- * <pre>
- * Servlet 在众多实现中总是以单实例多线程的方式工作, 对于某一个请求有且仅有一个线程为
- * 其服务.
- * Core 类为框架的对象请求器, 其分配原则为线程内分配, 除个别类通过 getInstance 自定规
- * 则外, 其他类的实例均在线程内唯一. 故不需要同步即可确保程序的线程安全, 而同时兼顾单例
- * 模式的特点(节省资源, 共享状态).
- * </pre>
- *
- * <h2>静态属性:</h2>
- * <pre>
- * IN_DEBUG_MODE    标识是否处于调试模式
- * IN_SHELL_MODE    标识是否处于外壳模式(cmdlet)
- * BASE_HREF        应用访问路径(WEB应用中为ContextPath)
- * BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
- * CONF_PATH        配置信息存放目录
- * LANG_PATH        语言资源存放目录
- * LOGS_PATH        日志文件存放目录
- * TMPS_PATH        临时文件存放目录
- * SERVER_ID        服务器ID
- * 注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
+ * <p>
+ * 承担"唯一实例"(线程内唯一)的申请与注销操作,
+ * 必须存在一个无参构造函数或无参"getInstance"方法,
+ * 获取当前 Core 的唯一实例总是使用"Core.getInstance()".
  * </p>
  *
- * <h2>错误代码:</h2>
+ * <h3>特性解释:</h3>
+ * <p>
+ * Servlet 在众多实现中总是以单实例多线程的方式工作,
+ * 即对于单个请求有且仅有一个线程在为其服务;
+ * Core 类为框架的对象请求器, 分配原则为线程内分配;
+ * 除个别类通过 getInstance 自定规则外, 其他类的实例均在线程内唯一,
+ * 故不需要同步即可确保程序的线程安全, 而同时兼顾单例模式的特点(节省资源, 共享状态).
+ * </p>
+ *
+ * <h3>静态属性:</h3>
  * <pre>
- * 0x25 实例名称不能为空
- * 0x27 无法获取对应的类
- * 0x28 禁止访问工厂方法
- * 0x2b 无法执行工厂方法
- * 0x2d 执行构造方法失败
+ DEBUG            标识不同调试模式(0 无, 1 输出, 2 日志, 3 复合)
+ ENVIR            标识不同运行环境(0 cmd, 1 web)
+ BASE_HREF        应用访问路径(WEB应用中为ContextPath)
+ BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
+ CONF_PATH        配置信息存放目录
+ LANG_PATH        语言资源存放目录
+ LOGS_PATH        日志文件存放目录
+ TMPS_PATH        临时文件存放目录
+ SERVER_ID        服务器ID
+ 注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
+ </pre>
+ *
+ * <h3>错误代码:</h3>
+ * <pre>
+ * 0x14 实例名称不能为空
+ * 0x15 无法获取对应的类
+ * 0x16 禁止访问工厂方法
+ * 0x17 无法执行工厂方法
+ * 0x18 执行构造方法失败
  * </pre>
  *
  * @author Hongs
@@ -81,7 +84,7 @@ extends HashMap<String, Object>
 
   /**
    * 不支持get(Object), 仅支持get(String)
-   * 
+   *
    * @param name
    * @return 抛出错误
    * @deprecated
@@ -89,20 +92,19 @@ extends HashMap<String, Object>
   @Override
   public Object get(Object name)
   {
-    throw new HongsError(0x10,
+    throw new UnsupportedOperationException(
       "May cause an error on 'get(Object)', use 'get(String|Class)'");
   }
 
   /**
    * 不支持clear
-   * 
-   * @return 抛出错误
+   *
    * @deprecated
    */
   @Override
   public void clear()
   {
-    throw new HongsError(0x10,
+    throw new UnsupportedOperationException(
       "May cause an error on 'clear', use the 'destroy'");
   }
 
@@ -111,15 +113,23 @@ extends HashMap<String, Object>
    *
    * Destory对象会执行destroy方法
    * GlobalSingleton和ThreadSingleton对象不会被移除
+   *
+   * @throws java.lang.Throwable
    */
   public final void destroy()
+  throws Throwable
   {
     Iterator it;
 
-    it = this.entrySet().iterator();
+    /**
+     * 先执行 destroy 再执行 remove
+     * 不会因 destroy 里用到了其他对象而导致失败了
+     */
+
+    it = this.entrySet().iterator( );
     while (it.hasNext())
     {
-      Map.Entry  et = (Map.Entry) it.next();
+      Map.Entry  et = (Map.Entry) it.next( );
       Object object =  et.getValue();
       if (object instanceof Destroy)
       {
@@ -127,10 +137,10 @@ extends HashMap<String, Object>
       }
     }
 
-    it = this.entrySet().iterator();
+    it = this.entrySet().iterator( );
     while (it.hasNext())
     {
-      Map.Entry  et = (Map.Entry) it.next();
+      Map.Entry  et = (Map.Entry) it.next( );
       Object object =  et.getValue();
       if (object instanceof GlobalSingleton
       ||  object instanceof ThreadSingleton)
@@ -155,7 +165,7 @@ extends HashMap<String, Object>
 
     if (name == null || name.length() == 0)
     {
-      throw new HongsError(0x25, "Instance name can not be empty.");
+      throw new HongsError(0x14, "Instance name can not be empty.");
     }
 
     return null;
@@ -172,7 +182,7 @@ extends HashMap<String, Object>
     }
     catch (ClassNotFoundException ex)
     {
-      throw new HongsError(0x27, "Can not find class by name '" + name + "'.");
+      throw new HongsError(0x15, "Can not find class by name '" + name + "'.");
     }
 
     return build( core, name, klass );
@@ -207,15 +217,19 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x2b, ex);
+        throw new HongsError(0x17, "Can not build "+name, ex);
       }
       catch (IllegalArgumentException ex)
       {
-        throw new HongsError(0x2b, ex);
+        throw new HongsError(0x17, "Can not build "+name, ex);
       }
       catch (InvocationTargetException ex)
       {
-        throw new HongsError(0x2b, ex.getCause());
+        Throwable e = ex.getCause();
+        if (e instanceof StackOverflowError)
+            throw (Error) e;
+
+        throw new HongsError(0x17, "Can not build "+name, ex.getCause());
       }
     }
     catch (NoSuchMethodException ex2)
@@ -242,30 +256,34 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x2d, ex);
+        throw new HongsError(0x18, "Can not build "+name, ex);
       }
       catch (InstantiationException ex)
       {
-        throw new HongsError(0x2d, ex);
+        Throwable e = ex.getCause();
+        if (e instanceof StackOverflowError)
+            throw (Error) e;
+
+        throw new HongsError(0x18, "Can not build "+name, ex);
       }
     }
     catch (SecurityException ex2)
     {
-      throw new HongsError(0x29, ex2);
+      throw new HongsError(0x16, "Can not build "+name, ex2);
     }
   }
 
-  /** 静态属性及方法 **/
+  //** 静态属性及方法 **/
 
   /**
-   * 是否处于调试模式(devlop)
+   * 调试级别(0 无, 1输出, 2日志, 3复合)
    */
-  public static boolean IN_DEBUG_MODE;
+  public static byte DEBUG;
 
   /**
-   * 是否处于外壳模式(cmdlet)
+   * 运行环境(0 Cmd, 1 Web)
    */
-  public static boolean IN_SHELL_MODE;
+  public static byte ENVIR;
 
   /**
    * 应用基础路径
@@ -303,13 +321,14 @@ extends HashMap<String, Object>
   public static String SERVER_ID;
 
   /**
-   * 全局核心对象
-   */
-  public static Core GLOBAL_CORE = new Core();
-  /**
    * 全局开始时间
    */
   public static Long GLOBAL_TIME = System.currentTimeMillis();
+
+  /**
+   * 全局核心对象
+   */
+  public static Core GLOBAL_CORE = new Core();
 
   /**
    * 线程核心对象
@@ -321,16 +340,19 @@ extends HashMap<String, Object>
             return new Core();
       }
   };
+
   /**
    * 动作开始时间
    */
   public static InheritableThreadLocal< Long > ACTION_TIME
          =  new InheritableThreadLocal();
+
   /**
    * 动作路径标识
    */
   public static InheritableThreadLocal<String> ACTION_PATH
          =  new InheritableThreadLocal();
+
   /**
    * 动作语言标识
    */
@@ -339,7 +361,7 @@ extends HashMap<String, Object>
 
   /**
    * 获取核心对象
-   * @return 
+   * @return 核心对象
    */
   public static Core getInstance() {
     return THREAD_CORE.get();
@@ -349,7 +371,7 @@ extends HashMap<String, Object>
    * 按类获取单例
    *
    * @param klass
-   * @return 
+   * @return 类的对象
    */
   public static Object getInstance(Class klass) {
     return getInstance().get(klass);
@@ -359,10 +381,22 @@ extends HashMap<String, Object>
    * 按类名获取单例
    *
    * @param name
-   * @return 
+   * @return 类的对象
    */
   public static Object getInstance(String name) {
     return getInstance().get( name);
+  }
+
+  /**
+   * 获取唯一ID
+   *
+   * 采用当前服务器ID(Core.SERVER_ID)
+   *
+   * @return 唯一ID
+   */
+  public static String getUniqueId()
+  {
+    return Core.getUniqueId(Core.SERVER_ID);
   }
 
   /**
@@ -378,13 +412,13 @@ extends HashMap<String, Object>
   public static String getUniqueId(String svid)
   {
     long n1 = System.currentTimeMillis();
-    String s1 = String.format("%8s", app.hongs.util.Num.to36Radix(n1));
+    String s1 = String.format("%8s", Text.to36Hex(n1));
 
     long n2 = Thread.currentThread().getId();
-    String s2 = String.format("%4s", app.hongs.util.Num.to36Radix(n2));
+    String s2 = String.format("%4s", Text.to36Hex(n2));
 
     long n3 = (long)(Math.random() * 1000000);
-    String s3 = String.format("%4s", app.hongs.util.Num.to36Radix(n3));
+    String s3 = String.format("%4s", Text.to36Hex(n3));
 
     if (s1.length() > 8) s1 = s1.substring(s1.length() - 8);
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);
@@ -393,26 +427,14 @@ extends HashMap<String, Object>
     return (s1 + s2 + s3 + svid).replace(' ', '0');
   }
 
-  /**
-   * 获取唯一ID
-   *
-   * 采用当前服务器ID(Core.SERVER_ID)
-   *
-   * @return 唯一ID
-   */
-  public static String getUniqueId()
-  {
-    return Core.getUniqueId(Core.SERVER_ID);
-  }
-
-  /** 核心接口 **/
+  //** 核心接口 **/
 
   /**
    * 核心处理结束事件接口
    * 当Core结束时(程序结束, Servlet请求结束)
    * 将执行实现了该接口的类的无参destroy方法
    */
-  public static interface Destroy { public void destroy(); }
+  public static interface Destroy { public void destroy() throws Throwable; }
 
   /**
    * 全局唯一

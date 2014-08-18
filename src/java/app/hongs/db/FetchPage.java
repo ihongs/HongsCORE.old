@@ -1,20 +1,21 @@
 package app.hongs.db;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 /**
- * <h1>分页查询</h1>
- * <pre>
+ * 分页查询
+ * 
+ * <p>
  * 注意: 必须先调 getList 然后调 getPage
- * </pre
+ * </p>
  *
- * <h2>配置选项:</h2>
+ * <h3>配置选项:</h3>
  * <pre>
  * core.first.of.page 首页序号, 0或1
  * core.rows.per.page 每页多少条记录
@@ -29,7 +30,7 @@ public class FetchPage
 
   private Table table;
 
-  private FetchMore fs;
+  private FetchCase caze;
 
   private int page;
 
@@ -37,31 +38,31 @@ public class FetchPage
 
   private Map info;
 
-  public FetchPage(DB db, FetchMore fs)
+  public FetchPage(DB db, FetchCase caze)
   {
     this.db    = db;
-    this.fs    = fs;
+    this.caze  = caze;
     this.table = null;
 
-    Object page2 = fs.getOption("page");
+    Object page2 = caze.getOption("page");
     if (page2 != null && page2.equals(""))
     {
       this.page = Integer.parseInt(page2.toString());
     }
 
-    Object rows2 = fs.getOption("rows");
+    Object rows2 = caze.getOption("rows");
     if (rows2 != null && page2.equals(""))
     {
       this.rows = Integer.parseInt(rows2.toString());
     }
   }
 
-  public FetchPage(Table table, FetchMore fs)
+  public FetchPage(Table table, FetchCase caze)
   {
-    this(table.db, fs);
-    this.table = table;
+    this(table.db, caze);
+    this.table  =  table;
 
-    this.fs.from(table.tableName, table.name);
+    this.caze.from(table.tableName, table.name);
   }
 
   public void setPage(int page)
@@ -81,12 +82,12 @@ public class FetchPage
 
     if (this.page == 0)
     {
-      CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+      CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
       this.page = (int)conf.getProperty("core.first.of.page", 1 );
     }
     if (this.rows == 0)
     {
-      CoreConfig conf = (CoreConfig)Core.getInstance(app.hongs.CoreConfig.class);
+      CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
       this.rows = (int)conf.getProperty("core.rows.per.page", 10);
     }
 
@@ -114,15 +115,15 @@ public class FetchPage
     this.info.put("rows", this.rows);
 
     // 查询列表
-    fs.limit(rows * (page - 1), rows);
+    caze.limit(rows * (page - 1), rows);
     List list;
     if (null != this.table)
     {
-      list = this.table.fetchMore(fs);
+      list = this.table.fetchMore(caze);
     }
     else
     {
-      list = this.db.fetchMore(fs);
+      list = this.db.fetchMore(caze);
     }
 
     // 获取真实行数
@@ -160,24 +161,24 @@ public class FetchPage
     // 查询总行数
     String   sql;
     Object[] params;
-    FetchMore      fs2 = this.fs.clone();
-    for (FetchMore fs3 : fs2.joinList)
+    FetchCase      caze2 = this.caze.clone();
+    for (FetchCase caze3 : caze2.joinList)
     {
-      fs3.setSelect("");
+      caze3.setSelect("");
     }
-    fs2.limit(0);
-    fs2.setOrderBy("");
-    if (fs2.hasGroupBy( ))
+    caze2.limit(0);
+    caze2.setOrderBy( "");
+    if (caze2.hasGroupBy( ))
     {
       sql    = "SELECT COUNT(*) AS __count__ FROM ("
-             + fs2.getSQL( )+") AS __table__";
-      params = fs2.getParams( );
+             + caze2.getSQL()+") AS __table__";
+      params = caze2.getParams();
     }
     else
     {
-      fs2.setSelect(  "COUNT(*) AS __count__"  );
-      sql    = fs2.getSQL(    );
-      params = fs2.getParams( );
+      caze2.setSelect("COUNT(*) AS __count__");
+      sql    = caze2.getSQL();
+      params = caze2.getParams();
     }
 
     // 计算总行数及总页数

@@ -1,0 +1,45 @@
+<h2>${opr}模块</h2>
+<div id="hcim-module-form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hcim/Module/Info.act"/>
+        <param name="saveUrl" value="hcim/Module/Save.act"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="module_id"/>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">模块名称</label>
+                    <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Module/Unique.act?id={id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">代码</label>
+                    <input type="text" name="code" class="form-control" data-unique="hcim/Module/Unique.act?id={id}"/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="control-label">备注</label>
+                    <textarea name="note" class="form-control"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <button type="submit" class="ensure btn btn-primary">提交</button>
+            <button type="button" class="cancel btn btn-link">取消</button>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    (function() {
+        var context = $("#hcim_module_form");
+
+        context.on("loadBack", function(evt, rst) {
+            var show = rst.info && rst.info.code;
+            context.find("fieldset").toggleClass("dropup", !!show);
+        });
+    })();
+</script>

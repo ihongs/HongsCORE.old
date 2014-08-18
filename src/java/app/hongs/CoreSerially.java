@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,18 +17,20 @@ import java.io.ObjectOutputStream;
 import java.io.IOException;
 
 /**
- * <h1>临时数据工具</h1>
+ * 本地缓存工具
  *
- * <h2>特别注意:</h2>
- * <pre>
+ * <h3>特别注意:</h3>
+ * <p>
  * 只有"当前类"的"非" static 类型的 public 的属性会被存储, 特殊情况可重载
  * saveData(data) 和 loadData(data) 来实现.
+ * <p>
+ * <pre>
  * entrySet(),keySet(),values() 返回的对象无法被序列化,
  * 可 new HashSet(x.entrySet()) 预处理后再存入当前对象.
  * 详见: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4756277
  * </pre>
  *
- * <h2>异常代码:</h2>
+ * <h3>异常代码:</h3>
  * <pre>
  * 区间: 0x10d0~0x10df
  * 0x10d0 创建临时文件失败
@@ -46,8 +47,8 @@ import java.io.IOException;
 public abstract class CoreSerially
   implements Serializable
 {
-    
-  private static ReadWriteLock lock = new ReentrantReadWriteLock();  
+
+  private static ReadWriteLock lock = new ReentrantReadWriteLock();
 
   /**
    * 以有效到期时间方式构造实例
@@ -256,7 +257,7 @@ public abstract class CoreSerially
   {
     try
     {
-      lock.writeLock().lock(); 
+      lock.writeLock().lock();
 
         FileOutputStream fos = new   FileOutputStream(file);
       ObjectOutputStream oos = new ObjectOutputStream(fos );
