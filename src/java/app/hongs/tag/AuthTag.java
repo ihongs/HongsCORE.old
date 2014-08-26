@@ -1,7 +1,7 @@
 package app.hongs.tag;
 
 import app.hongs.HongsException;
-import app.hongs.action.ActionConfig;
+import app.hongs.action.AuthConfig;
 import java.io.IOException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
@@ -30,7 +30,7 @@ public class AuthTag extends BodyTagSupport {
   @Override
   public int doStartTag() throws JspException {
     try {
-      this.ebb = ActionConfig.getInstance(this.cnf).chkAuth(this.act);
+      this.ebb = AuthConfig.getInstance(this.cnf).chkAuth(this.act);
     } catch ( HongsException ex) {
       throw new JspException(ex);
     }

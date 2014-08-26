@@ -33,12 +33,12 @@ import org.w3c.dom.NodeList;
  * 有些数据需要方便修改, 而修改代码比较麻烦;<br/>
  * 需要统一管理一些数据, 如状态/类型/选项等.<br/>
  * 故编写此类用于解决以上问题, 可从 XML 中读取结构数据或 JSON 数据.<br/>
- * XML 的结构请参考 WEB-INF/conf 中的 datums.xsd 和 datums-default.xml
+ * XML 的结构请参考 WEB-INF/conf 中的 data.xsd 和 data-default.xml
  * </p>
  *
  * @author Hongs
  */
-public class DatumsConfig
+public class DataConfig
   extends CoreSerially
 {
 
@@ -48,20 +48,20 @@ public class DatumsConfig
   public Map<String, Set<String[]>> reqDatas;
   public Map<String, Set<String[]>> rspDatas;
 
-  public DatumsConfig(String name)
+  public DataConfig(String name)
     throws HongsException
   {
     this.name = name;
-    this.init("datums." + name);
+    this.init("data." + name);
   }
 
   @Override
   protected boolean isExpired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + "datums." + name + ".xml");
+                + File.separator + "data." + name + ".xml");
     File serFile = new File(Core.TMPS_PATH
-                + File.separator + "datums." + name + ".ser");
+                + File.separator + "data." + name + ".ser");
     return xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -70,12 +70,12 @@ public class DatumsConfig
     throws HongsException
   {
     File df = new File(Core.CONF_PATH
-                + File.separator + "datums." + name + ".xml");
+                + File.separator + "data." + name + ".xml");
     if (!df.exists())
     {
-      throw new HongsException(0x10e4, "Datums config file '"
+      throw new HongsException(0x10e4, "Data config file '"
                 + Core.CONF_PATH
-                + File.separator + "datums." + name + ".xml"
+                + File.separator + "data." + name + ".xml"
                 + "' is not exists");
     }
 
@@ -342,21 +342,21 @@ public class DatumsConfig
 
   //** 工厂方法 **/
 
-  public static DatumsConfig getInstance(String name) throws HongsException {
-      String key = DatumsConfig.class.getName() + ":" + name;
+  public static DataConfig getInstance(String name) throws HongsException {
+      String key = DataConfig.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      DatumsConfig inst;
+      DataConfig inst;
       if (core.containsKey(key)) {
-          inst = (DatumsConfig)core.get(key);
+          inst = (DataConfig)core.get(key);
       }
       else {
-          inst = new DatumsConfig(name);
+          inst = new DataConfig(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static DatumsConfig getInstance() throws HongsException {
+  public static DataConfig getInstance() throws HongsException {
       return getInstance("default");
   }
 }

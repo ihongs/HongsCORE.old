@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 /**
  * 基础模型
- * 
+ *
  * <p>
  * 当要使用 getInfo(get),save(add,put),remove(del) 时请确保表有配置主键.<br/>
  getPage,getList,getInfo,save,perform,remove,exists 为基础动作方法, 通常它们被动作类直接调用;
@@ -112,7 +112,7 @@ abstract public class AbstractBaseModel
   {
     this.db = table.db;
     this.table = table;
-    
+
     // 配置
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     this.pageKey = conf.getProperty("fore.model.page.key", "page");
@@ -686,7 +686,7 @@ abstract public class AbstractBaseModel
  "idFilter".equals(FetchCase.getOption("FILTER_METHOD"))
  来区分是不是"idFilter"发起的
  </pre>
-   * 
+   *
    * @param id
    * @param caze
    * @return 可操作则返回true, 反之返回false
@@ -876,12 +876,23 @@ abstract public class AbstractBaseModel
   protected void colsFilter(Object value, Map columns, FetchCase caze)
     throws HongsException
   {
-    if (caze.hasSelect()
-    ||!(value instanceof List))
+    List<String> cols;
+    if (caze.hasSelect())
     {
       return;
     }
-    List<String> cols = (List)value;
+    else if (value instanceof List)
+    {
+      cols = (List<String>)value;
+    }
+    else if (value instanceof String)
+    {
+      cols = Arrays.asList(((String)value).split("[ \\+]"));
+    }
+    else
+    {
+      return;
+    }
     if (cols.isEmpty())
     {
       return;
@@ -940,13 +951,24 @@ abstract public class AbstractBaseModel
   protected void sortFilter(Object value, Map columns, FetchCase caze)
     throws HongsException
   {
-    if (caze.hasOrderBy()
-    ||!(value instanceof String))
+    List<String> cols;
+    if (caze.hasSelect())
     {
       return;
     }
-    String text = (String)value;
-    if (text.length() == 0)
+    else if (value instanceof List)
+    {
+      cols = (List<String>)value;
+    }
+    else if (value instanceof String)
+    {
+      cols = Arrays.asList(((String)value).split("[ \\+]"));
+    }
+    else
+    {
+      return;
+    }
+    if (cols.isEmpty())
     {
       return;
     }
@@ -957,27 +979,25 @@ abstract public class AbstractBaseModel
         tns =  new HashSet();
     }
 
-    String[] a = text.split("\\s+");
-    for (int i = 0; i < a.length; i ++)
+    for (String col : cols)
     {
-      String    sort = a[i];
-      boolean   desc = sort.startsWith("-");
-      if (desc) sort = sort.substring ( 1 );
+      boolean   des = col.startsWith("-");
+      if (des)  col = col.substring ( 1 );
 
-      int pos = sort.indexOf('.');
+      int pos = col.indexOf('.');
       if (pos == -1)
       {
-        if (!columns.containsKey(sort))
+        if (!columns.containsKey(col))
         {
           continue;
         }
 
-        caze.orderBy(sort +(desc?" DESC":""));
+        caze.orderBy(col +(des?" DESC":""));
       }
       else
       {
-        String tn = sort.substring(0 , pos);
-        String fn = sort.substring(pos + 1);
+        String tn  = col.substring(0 , pos);
+        String fn  = col.substring(pos + 1);
 
         Map   tc;
         Map   cs;
@@ -993,57 +1013,7 @@ abstract public class AbstractBaseModel
         tns.add(tn);
         tns.addAll(ts);
         caze.join(ts).join(tn);
-        caze.orderBy(sort +(desc?" DESC":""));
-      }
-    }
-  }
-
-  /**
-   * 搜索过滤(被reqFilter调用)
-   * @param keys
-   * @param val
-   * @param not
-   * @param caze
-   */
-  protected void findFilter(String[] keys, Object val, boolean not, FetchCase caze)
-  {
-    if (keys  ==  null
-    ||!(val instanceof String))
-    {
-      return;
-    }
-    String text = (String)val;
-    if (text.length() == 0)
-    {
-      return;
-    }
-
-    String[] a = text.split("\\s+");
-    for (int i = 0; i < a.length; i ++)
-    {
-      String find = a[i];
-
-      /**
-       * 符号"%_^[]"在SQL LIKE中有特殊意义,
-       * 需要对这些符号进行转义;
-       * 前后加"%"用于模糊匹配.
-       */
-      find = Text.escape( find, "%_", "/" );
-      find = "%" + find + "%";
-
-      for (String key : keys)
-      {
-        if (key.indexOf('.') != -1 )
-        {
-          String[] b = key.split("\\.", 2 );
-          key = "`"+ b[0] +"`.`"+ b[1] +"`";
-        }
-        else
-        {
-          key = ".`" + key + "`";
-        }
-
-        caze.where(key + (not?" NOT LIKE ?":" LIKE ?") + " ESCAPE '/'", find);
+        caze.orderBy(col +(des?" DESC":""));
       }
     }
   }
@@ -1129,11 +1099,69 @@ abstract public class AbstractBaseModel
     }
   }
 
+  /**
+   * 搜索过滤(被reqFilter调用)
+   * @param keys
+   * @param val
+   * @param not
+   * @param caze
+   */
+  protected void findFilter(String[] keys, Object val, boolean not, FetchCase caze)
+  {
+    List<String> vals;
+    if (keys  ==  null)
+    {
+      return;
+    }
+    else if (val instanceof List)
+    {
+      vals = (List<String>)val;
+    }
+    else if (val instanceof String)
+    {
+      vals = Arrays.asList(((String)val).split("[ \\s]+"));
+    }
+    else
+    {
+      return;
+    }
+    if (vals.isEmpty())
+    {
+      return;
+    }
+
+    for (String find : vals)
+    {
+      /**
+       * 符号"%_^[]"在SQL LIKE中有特殊意义,
+       * 需要对这些符号进行转义;
+       * 前后加"%"用于模糊匹配.
+       */
+      find = Text.escape( find, "%_", "/" );
+      find = "%" + find + "%";
+
+      for (String key : keys)
+      {
+        if (key.indexOf('.') != -1 )
+        {
+          String[] b = key.split("\\.", 2 );
+          key = "`"+ b[0] +"`.`"+ b[1] +"`";
+        }
+        else
+        {
+          key = ".`" + key + "`";
+        }
+
+        caze.where(key + (not?" NOT LIKE ?":" LIKE ?") + " ESCAPE '/'", find);
+      }
+    }
+  }
+
   /** 操作记录 **/
 
   /**
    * 获取可操作的 ID
- getOperableNames,perform,remove 均是调用此方法获取 ID
+   * getOperableNames,update,remove 均是调用此方法获取 ID
    * @param req
    * @param caze
    * @return IDs

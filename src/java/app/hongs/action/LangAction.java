@@ -32,15 +32,15 @@ import javax.servlet.http.HttpServletResponse;
  *   &lt;servlet-name&gt;JsLang&lt;/servlet-name&gt;
  *   &lt;url-pattern&gt;*.js-lang&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;<br/>
- * <pre>
+ * </pre>
  *
  * @author Hongs
  */
-public class JsLangAction
+public class LangAction
   extends HttpServlet
 {
-  private static Map<String, String> language = new HashMap<String, String>();
-  private static Map<String, String> lastModified = new HashMap<String, String>();
+  private static final Map<String, String> caches = new HashMap<String, String>();
+  private static final Map<String, String> lastModified = new HashMap<String, String>();
 
   /**
    * 服务方法
@@ -91,7 +91,7 @@ public class JsLangAction
      */
     String m;
     m = helper.getRequest().getHeader("If-Modified-Since");
-    if (m != null  &&  m.equals(JsLangAction.lastModified.get(name)))
+    if (m != null  &&  m.equals(LangAction.lastModified.get(name)))
     {
       helper.getResponse().setStatus(HttpServletResponse.SC_NOT_MODIFIED );
       return;
@@ -102,7 +102,7 @@ public class JsLangAction
      * 则调用工厂方法构造 JS 代码
      */
     String s;
-    if (!JsLangAction.language.containsKey(name))
+    if (!LangAction.caches.containsKey(name))
     {
       try {
         s = this.makeLanguage(conf, lang);
@@ -118,13 +118,13 @@ public class JsLangAction
           sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
       m = sdf.format(new Date());
 
-      JsLangAction.language.put(name , s);
-      JsLangAction.lastModified.put(name , m);
+      LangAction.caches.put(name , s);
+      LangAction.lastModified.put(name , m);
     }
     else
     {
-      s = JsLangAction.language.get(name);
-      m = JsLangAction.lastModified.get(name);
+      s = LangAction.caches.get(name);
+      m = LangAction.lastModified.get(name);
     }
 
     // 标明修改时间
@@ -149,7 +149,7 @@ public class JsLangAction
     super.destroy();
 
     // 销毁配置信息
-    JsLangAction.language.clear();
+    LangAction.caches.clear();
   }
 
   /**

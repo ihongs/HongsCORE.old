@@ -1,7 +1,7 @@
 package app.hongs.action.annotation;
 
 import app.hongs.action.ActionHelper;
-import app.hongs.action.DatumsConfig;
+import app.hongs.action.DataConfig;
 import app.hongs.util.Tree;
 import java.util.Map;
 import java.util.HashMap;
@@ -19,7 +19,7 @@ public class InjectInvoker {
         String       conf = ann.conf();
         String[]     keys = ann.keys();
 
-        DatumsConfig cnf = DatumsConfig.getInstance(conf);
+        DataConfig cnf = DataConfig.getInstance(conf);
         Map<String,Object> map = new HashMap();
         for(String key : keys) {
             String val;

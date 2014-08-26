@@ -2,9 +2,6 @@ package app.hcim.model;
 
 import app.hongs.HongsException;
 import app.hongs.db.AbstractBaseModel;
-import app.hongs.db.FetchCase;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 通用信息模型处理类
@@ -16,4 +13,8 @@ public class Entity extends AbstractBaseModel {
         super("hcim", "a_hcim_entity");
     }
 
+    public void buildEntityTable(String id) {
+        
+    }
+    
 }

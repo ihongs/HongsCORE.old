@@ -1,7 +1,7 @@
 package app.hcum.model;
 
 import app.hongs.HongsException;
-import app.hongs.action.ActionConfig;
+import app.hongs.action.AuthConfig;
 import app.hongs.db.AbstractBaseModel;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
@@ -45,7 +45,7 @@ extends AbstractBaseModel {
     public static List getPageGroups(String name)
     throws HongsException {
         List pageGroups = new ArrayList();
-        ActionConfig ac = new ActionConfig(name);
+        AuthConfig ac = new AuthConfig(name);
 
         Map<String, Map> pages1 = ac.pages;
         for (Map.Entry et1 : pages1.entrySet()) {
@@ -94,7 +94,7 @@ extends AbstractBaseModel {
                 groups.add( group2 );
                 group2.put("key" , group1.get("key" ));
                 group2.put("name", group1.get("name"));
-                group2.put("groups", ac.getGroups(k).keySet());
+                group2.put("groups", ac.getTotalGroups(k).keySet());
             }
 
                 }

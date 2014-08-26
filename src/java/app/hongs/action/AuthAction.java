@@ -25,11 +25,11 @@ import javax.servlet.http.HttpServletResponse;
  *   &lt;servlet-name&gt;JsAuth&lt;/servlet-name&gt;
  *   &lt;url-pattern&gt;/common/auth/*&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
- * <pre>
+ * </pre>
  *
  * @author Hongs
  */
-public class JsAuthAction
+public class AuthAction
   extends HttpServlet
 {
 
@@ -67,7 +67,7 @@ public class JsAuthAction
 
     String data;
     try {
-      data = JSON.toString(ActionConfig.getInstance(name).getAuthMap());
+      data = JSON.toString(AuthConfig.getInstance(name).getAuthMap());
     }
     catch (HongsException ex) {
       helper.print500(ex.getMessage());

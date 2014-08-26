@@ -1,6 +1,7 @@
 package app.hcim.action;
 
 import app.hongs.Core;
+import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.Action;
@@ -57,9 +58,11 @@ public class Entity {
         }
         
         String id = model.save(data);
+        
+        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
 
         String nms = model.getAffectedNames();
-        String msg = "保存实体 "+nms+" 成功";
+        String msg = lang.translate("core.save.entity.success", nms);
 
         helper.back(msg, id, nms);
     }
@@ -69,8 +72,10 @@ public class Entity {
     throws HongsException {
         model.remove(helper.getRequestData());
 
+        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
+
         String nms = model.getAffectedNames();
-        String msg = "删除模型 "+nms+" 成功";
+        String msg = lang.translate("core.remove.entity.success", nms);
 
         helper.back(msg);
     }

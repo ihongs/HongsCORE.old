@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  * 动作助手
  *
  * <p>
- 通过 getRequestData,getParam,getSession,getCookie
+ 通过 getRequestData,getParameter,getSession,getCookie
  来获取请求/会话/Cookie数据; 通过 back 来通知前端动作的成功或失败.
  </p>
  *
@@ -54,7 +54,7 @@ public class ActionHelper
   private HttpServletResponse response;
 
   /**
-   * 内部输出, 供 cmdlet 使用
+   * 内部输出
    */
   private PrintWriter responseWrtr;
 
@@ -206,23 +206,14 @@ public class ActionHelper
   }
 
   /**
-   * 获取数据
-   * @param name
-   * @return 当前请求数据
-   */
-  public Object getValue(String name) throws HongsException
-  {
-    return Tree.getValue(this.getRequestData(), name);
-  }
-
-  /**
    * 获取参数
    * @param name
    * @return 当前请求参数
+   * @throws HongsException
    */
-  public String getParam(String name) throws HongsException
+  public String getParameter(String name) throws HongsException
   {
-    Object o = this.getValue(name);
+    Object o = this.getAttribute(name);
     if (o == null)
     {
       return null;
@@ -234,6 +225,28 @@ public class ActionHelper
       o =  l.get(i + 1);
     }
     return o.toString();
+  }
+
+  /**
+   * 获取属性
+   * @param name
+   * @return 当前请求数据
+   * @throws HongsException
+   */
+  public Object getAttribute(String name) throws HongsException
+  {
+    return Tree.getValue(this.getRequestData(), name);
+  }
+
+  /**
+   * 设置属性
+   * @param name
+   * @param value
+   * @throws HongsException
+   */
+  public void setAttribute(String name, Object value) throws HongsException
+  {
+    Tree.setValue(this.getRequestData(), name, value);
   }
 
   /**
@@ -284,11 +297,11 @@ public class ActionHelper
   {
     if (this.cookiesData != null)
     {
-        return this.cookiesData.get(name).toString();
+      return this.cookiesData.get(name);
     }
 
-    Cookie ck  = this.getCookia(name);
-    return ck == null  ?  null  :  ck.getValue();
+    Cookie cook  = this.getCookia(name);
+    return cook == null ? null : cook.getValue();
   }
 
   /**
@@ -302,11 +315,11 @@ public class ActionHelper
   {
     if (this.cookiesData != null)
     {
-        this.cookiesData.put (name, value);
-        return new Cookie(name, value);
+      this.cookiesData.put(name, value);
+      return   new  Cookie(name, value);
     }
 
-    return this.setCookia(name, value);
+    return  this.setCookia(name, value);
   }
 
   private Cookie getCookia(String name)
@@ -416,13 +429,13 @@ public class ActionHelper
    */
   public void print(String text, String type)
   {
-    if (this.response != null && !this.response.isCommitted())
+    if (this.response != null && ! this.response.isCommitted())
     {
-      if (type.indexOf(";") == -1) type += "; charset=utf-8";
+      if (!type.contains(";")) type += "; charset=utf-8";
       this.response.setContentType(type);
     }
 
-      this.getResponseWrtr().print(text);
+    this.getResponseWrtr(  ).print(text);
   }
 
   /**

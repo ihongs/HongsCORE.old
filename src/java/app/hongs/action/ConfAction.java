@@ -3,6 +3,7 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
+import app.hongs.action.ActionHelper;
 import app.hongs.util.Text;
 
 import java.util.Map;
@@ -32,15 +33,15 @@ import javax.servlet.http.HttpServletResponse;
  *   &lt;servlet-name&gt;JsConf&lt;/servlet-name&gt;
  *   &lt;url-pattern&gt;/common/conf/*&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
- * <pre>
+ * </pre>
  *
  * @author Hongs
  */
-public class JsConfAction
+public class ConfAction
   extends HttpServlet
 {
-  private static Map<String, String> config = new HashMap<String, String>();
-  private static Map<String, String> lastModified = new HashMap<String, String>();
+  private static final Map<String, String> caches = new HashMap<String, String>();
+  private static final Map<String, String> lastModified = new HashMap<String, String>();
 
   /**
    * 服务方法
@@ -80,7 +81,7 @@ public class JsConfAction
      */
     String m;
     m = helper.getRequest().getHeader("If-Modified-Since");
-    if (m != null && m.equals(JsConfAction.lastModified.get(name)))
+    if (m != null && m.equals(ConfAction.lastModified.get(name)))
     {
       helper.getResponse().setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
@@ -91,7 +92,7 @@ public class JsConfAction
      * 则调用工厂方法构造 JS 代码
      */
     String s;
-    if (!JsConfAction.config.containsKey(name))
+    if (!ConfAction.caches.containsKey(name))
     {
       try {
         s = this.makeConfig(name);
@@ -107,13 +108,13 @@ public class JsConfAction
           sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
       m = sdf.format(new Date());
 
-      JsConfAction.config.put(name , s);
-      JsConfAction.lastModified.put(name , m);
+      ConfAction.caches.put(name , s);
+      ConfAction.lastModified.put(name , m);
     }
     else
     {
-      s = JsConfAction.config.get(name);
-      m = JsConfAction.lastModified.get(name);
+      s = ConfAction.caches.get(name);
+      m = ConfAction.lastModified.get(name);
     }
 
     // 标明修改时间
@@ -138,7 +139,7 @@ public class JsConfAction
     super.destroy();
 
     // 销毁配置信息
-    JsConfAction.config.clear();
+    ConfAction.caches.clear();
   }
 
   /**

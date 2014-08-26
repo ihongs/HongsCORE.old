@@ -11,7 +11,7 @@ import app.hongs.Core;
  * 唯一ID生成器
  * @author Hongs
  */
-public class UidTag extends SimpleTagSupport {
+public class SuidTag extends SimpleTagSupport {
 
   private String sid = null;
 

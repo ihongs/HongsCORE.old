@@ -1,6 +1,7 @@
 package app.hcim.action;
 
 import app.hongs.Core;
+import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.Action;
@@ -38,8 +39,10 @@ public class Module {
     throws HongsException {app.hongs.util.JSON.dumps(helper.getRequestData());
         String id = model.save(helper.getRequestData());
 
+        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
+
         String nms = model.getAffectedNames();
-        String msg = "保存模块 "+nms+" 成功";
+        String msg = lang.translate("core.save.module.success", nms);
 
         helper.back(msg, id, nms);
     }
@@ -49,8 +52,10 @@ public class Module {
     throws HongsException {
         model.remove(helper.getRequestData());
 
+        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
+
         String nms = model.getAffectedNames();
-        String msg = "删除模块 "+nms+" 成功";
+        String msg = lang.translate("core.remove.module.success", nms);
 
         helper.back(msg);
     }

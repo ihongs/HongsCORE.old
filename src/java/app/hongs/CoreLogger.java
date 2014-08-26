@@ -286,6 +286,9 @@ public class CoreLogger implements Core.Destroy
    */
   public static void debug(String text)
   {
+    if (4 == (4 & Core.DEBUG)) {
+        return; // 禁止了调试
+    }
     if (1 == (1 & Core.DEBUG)) {
         CmdletHelper.println(text);
     }
@@ -308,6 +311,9 @@ public class CoreLogger implements Core.Destroy
    */
   public static void error(String text)
   {
+    if (8 == (8 & Core.DEBUG)) {
+        return; // 禁止了错误
+    }
     if (1 == (1 & Core.DEBUG)) {
         CmdletHelper.println(text);
     }
@@ -324,6 +330,10 @@ public class CoreLogger implements Core.Destroy
     }
   }
 
+  /**
+   * 记录异常信息
+   * @param t 
+   */
   public static void error(Throwable t)
   {
     ByteArrayOutputStream b = new ByteArrayOutputStream();

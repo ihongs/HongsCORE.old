@@ -33,7 +33,7 @@ import javax.servlet.ServletException;
  *
  * @author Hongs
  */
-public class ActionFilter
+public class AuthFilter
   implements Filter
 {
 
@@ -119,9 +119,9 @@ public class ActionFilter
     /**
      * 从配置中提取首页
      */
-    ActionConfig conf;
+    AuthConfig conf;
     try {
-        conf = ActionConfig.getInstance(configName);
+        conf = AuthConfig.getInstance(configName);
     }
     catch (HongsException ex) {
         throw new ServletException(ex);
@@ -172,9 +172,9 @@ public class ActionFilter
         }
     }
 
-    ActionConfig conf;
+    AuthConfig conf;
     try {
-        conf = ActionConfig.getInstance(configName);
+        conf = AuthConfig.getInstance(configName);
     }
     catch (HongsException ex) {
         throw new ServletException(ex);

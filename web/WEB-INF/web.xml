@@ -5,33 +5,33 @@
         <param-name>debug</param-name>
         <param-value>3</param-value>
     </context-param>
-    <!-- Action Holder Filter -->
+    <!-- Init Filter -->
     <filter>
-        <filter-name>ActionHolder</filter-name>
-        <filter-class>app.hongs.action.ActionHolder</filter-class>
+        <filter-name>InitFilter</filter-name>
+        <filter-class>app.hongs.action.InitFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>ActionHolder</filter-name>
+        <filter-name>InitFilter</filter-name>
         <url-pattern>*.act</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ActionHolder</filter-name>
+        <filter-name>InitFilter</filter-name>
         <url-pattern>*.api</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ActionHolder</filter-name>
+        <filter-name>InitFilter</filter-name>
         <url-pattern>*.jsp</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ActionHolder</filter-name>
+        <filter-name>InitFilter</filter-name>
         <url-pattern>/common/auth/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ActionHolder</filter-name>
+        <filter-name>InitFilter</filter-name>
         <url-pattern>/common/conf/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ActionHolder</filter-name>
+        <filter-name>InitFilter</filter-name>
         <url-pattern>/common/lang/*</url-pattern>
     </filter-mapping>
     <!-- Action Servlet -->
@@ -52,31 +52,31 @@
         <servlet-name>Cmdlet</servlet-name>
         <url-pattern>*.api</url-pattern>
     </servlet-mapping>
-    <!-- JsAuth Servlet -->
+    <!-- Auth Servlet -->
     <servlet>
-        <servlet-name>JsAuth</servlet-name>
-        <servlet-class>app.hongs.action.JsAuthAction</servlet-class>
+        <servlet-name>Auth</servlet-name>
+        <servlet-class>app.hongs.action.AuthAction</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>JsAuth</servlet-name>
+        <servlet-name>Auth</servlet-name>
         <url-pattern>/common/auth/*</url-pattern>
     </servlet-mapping>
-    <!-- JsConf Servlet -->
+    <!-- Conf Servlet -->
     <servlet>
-        <servlet-name>JsConf</servlet-name>
-        <servlet-class>app.hongs.action.JsConfAction</servlet-class>
+        <servlet-name>Conf</servlet-name>
+        <servlet-class>app.hongs.action.ConfAction</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>JsConf</servlet-name>
+        <servlet-name>Conf</servlet-name>
         <url-pattern>/common/conf/*</url-pattern>
     </servlet-mapping>
-    <!-- JsLang Servlet -->
+    <!-- Lang Servlet -->
     <servlet>
-        <servlet-name>JsLang</servlet-name>
-        <servlet-class>app.hongs.action.JsLangAction</servlet-class>
+        <servlet-name>Lang</servlet-name>
+        <servlet-class>app.hongs.action.LangAction</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>JsLang</servlet-name>
+        <servlet-name>Lang</servlet-name>
         <url-pattern>/common/lang/*</url-pattern>
     </servlet-mapping>
     <!-- Default Tags -->

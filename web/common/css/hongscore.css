@@ -106,10 +106,6 @@ fieldset.dropup .dropdown-body {
     padding: auto;
 }
 
-form .form-control.input-number {
-    width: 50%;
-}
-
 form ul.pickbox {
     padding-left: 0;
     margin-bottom: 0;
@@ -286,8 +282,11 @@ textarea.form-control {
     min-height: 127px;
 }
 .input-search.form-control {
-    max-width: 154px;
+    width: 12em;
     float: left;
+}
+.input-number.form-control {
+    width: 50%;
 }
 
 .nav-tabs {

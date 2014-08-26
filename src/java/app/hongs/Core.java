@@ -276,7 +276,7 @@ extends HashMap<String, Object>
   //** 静态属性及方法 **/
 
   /**
-   * 调试级别(0 无, 1输出, 2日志, 3复合)
+   * 调试级别(0 无, 1输出, 2日志, 4禁用调试, 8禁用错误)
    */
   public static byte DEBUG;
 

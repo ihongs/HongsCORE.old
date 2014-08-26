@@ -1,10 +1,11 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="utf-8"%>
-<%@page import="app.common.action.Menu"%>
-<%@page import="app.hongs.Core"%>
-<%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
+<%@page import="java.util.List"%>
+<%@page import="app.hongs.Core"%>
+<%@page import="app.hongs.CoreLanguage"%>
+<%@page import="app.hongs.action.AuthConfig"%>
+<%@page import="app.hongs.action.ActionHelper"%>
 <%!
     StringBuilder makeMenu(List<Map> menus, int i) {
         StringBuilder menuz = new StringBuilder();
@@ -13,7 +14,7 @@
         }
 
         for (Map menu : menus) {
-            List<Map> subMenus = (List) menu.get("menus");
+            List<Map> subMenus = (List) menu.get("list");
             String claz = !subMenus.isEmpty() ? "dropdown-toggle" : "";
             String cart = !subMenus.isEmpty() ? "<b class=\"caret\"></b>" : "";
             String name = (String) menu.get("name");
@@ -28,20 +29,20 @@
                 hash = hash.substring(0, hash.length() - 4);
             } else if (hash.endsWith(".html")) {
                 hash = hash.substring(0, hash.length() - 5);
-            } else if (hash.startsWith("hongs/util/Jump/To.act")) {
+            } else if (hash.startsWith("common/Menu/Goto.act")) {
                 hash = hash.substring(19).replaceAll("=", ".");
             }
             menuz.append("<li>")
-                    .append("<a class=\"")
-                    .append(claz)
-                    .append("\" href=\"")
-                    .append(hash)
-                    .append("\" data-href=\"")
-                    .append(href)
-                    .append("\">")
-                    .append(name)
-                    .append(cart)
-                    .append("</a>");
+                 .append("<a class=\"")
+                 .append(claz)
+                 .append("\" href=\"" )
+                 .append(hash)
+                 .append("\" data-href=\"")
+                 .append(href)
+                 .append("\">" )
+                 .append(name)
+                 .append(cart)
+                 .append("</a>");
             StringBuilder subMenuz = makeMenu(subMenus, i + 1);
             if (subMenuz.length() > 0) {
                 menuz.append("<ul class=\"dropdown-menu\">")
@@ -56,18 +57,38 @@
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String name = helper.getParam("c");
-    String level = helper.getParam("l");
-    String depth = helper.getParam("d");
+    String name  = helper.getParameter("c");
+    String level = helper.getParameter("l");
+    String depth = helper.getParameter("d");
 
-    List<Map> menus = Menu.getList(name, level, depth);
-    List<Map> logom = Menu.getList("default", "1", "1");
+    if (name  == null || name .length() == 0) {
+        name  = "default";
+    }
+
+    int l , d;
+    if (level == null || level.length() == 0) {
+        l = 1;
+    } else {
+        l = Integer.parseInt(level);
+    }
+    if (depth == null || depth.length() == 0) {
+        d = 1;
+    } else {
+        d = Integer.parseInt(depth);
+    }
+
+    AuthConfig euth = AuthConfig.getInstance("default");
+    AuthConfig auth = AuthConfig.getInstance( name );
+    CoreLanguage lang = CoreLanguage.getInstance(  );
+
+    List<Map> logoMenu = euth.getNavList(lang, 1, 1);
+    List<Map> mainMenu = auth.getNavList(lang, l, d);
 %>
 
 <div class="navbar-header dropdown">
     <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown">HongsCORE <b class="caret"></b></a>
     <ul class="dropdown-menu">
-        <%=makeMenu(logom, -1).toString()%>
+        <%=makeMenu(logoMenu, -1).toString()%>
     </ul>
     <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#main-menubar">
         <span class="icon-bar"></span>
@@ -77,7 +98,7 @@
 </div>
 <div class="navbar-collapse collapse" id="main-menubar">
     <ul class="nav navbar-nav menu">
-        <%=makeMenu(menus, 0).toString()%>
+        <%=makeMenu(mainMenu, 0).toString()%>
     </ul>
     <ul class="nav navbar-nav navbar-right" style="margin-right: -1px;">
         <li class="dropdown">

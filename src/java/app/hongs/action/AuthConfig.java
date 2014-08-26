@@ -2,6 +2,7 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
+import app.hongs.CoreLanguage;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 
@@ -90,7 +91,7 @@ import org.w3c.dom.Node;
  *
  * @author Hongs
  */
-public class ActionConfig
+public class AuthConfig
   extends CoreSerially
 {
 
@@ -121,20 +122,20 @@ public class ActionConfig
    */
   public     String      session;
 
-  public ActionConfig(String name)
+  public AuthConfig(String name)
     throws HongsException
   {
     this.name = name;
-    this.init("action." + name);
+    this.init("auth." + name);
   }
 
   @Override
   protected boolean isExpired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + "action." + name + ".xml");
+                + File.separator + "auth." + name + ".xml");
     File serFile = new File(Core.TMPS_PATH
-                + File.separator + "action." + name + ".ser");
+                + File.separator + "auth." + name + ".ser");
     return xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -143,12 +144,12 @@ public class ActionConfig
     throws HongsException
   {
     File df = new File(Core.CONF_PATH
-                + File.separator + "action." + name + ".xml");
+                + File.separator + "auth." + name + ".xml");
     if (!df.exists())
     {
-      throw new HongsException(0x10e0, "Action config file '"
+      throw new HongsException(0x10e0, "Auth config file '"
                 + Core.CONF_PATH
-                + File.separator + "action." + name + ".xml"
+                + File.separator + "auth." + name + ".xml"
                 + "' is not exists");
     }
 
@@ -307,7 +308,7 @@ public class ActionConfig
       if ("include".equals(tagName2))
       {
         String    include = element2.getTextContent();
-        ActionConfig conf = new ActionConfig(include);
+        AuthConfig conf = new AuthConfig(include);
         paths.putAll(conf.paths);
         pages.putAll(conf.pages);
         groups.putAll(conf.groups);
@@ -356,14 +357,42 @@ public class ActionConfig
   }
 
   /**
+   * 获取页面分组
+   * @param urls
+   * @return 页面分组信息
+   */
+  public Map<String, Map> getPageGroups(String... urls)
+  {
+    Map<String, Map> groupz = new HashMap();
+
+    for (String url : urls) {
+        Map page = getPage(url);
+
+        Map gs = (Map)page.get("groups");
+        if (gs != null && !gs.isEmpty()) {
+            gs = getTotalGroups((String[])gs.keySet().toArray(new String[0]));
+            groupz.putAll(gs);
+        }
+
+        Map ps = (Map)page.get( "pages");
+        if (ps != null && !ps.isEmpty()) {
+            gs =  getPageGroups((String[])ps.keySet().toArray(new String[0]));
+            groupz.putAll(gs);
+        }
+    }
+
+    return groupz;
+  }
+
+  /**
    * 获取全部分组
    * @param keys
    * @return 全部分组信息
    */
-  public Map<String, Map> getGroups(String... keys)
+  public Map<String, Map> getTotalGroups(String... keys)
   {
     Map<String, Map> gs = new HashMap();
-    this.runGroupActions(gs, new HashSet(), keys);
+    this.getGroupsActions(gs, new HashSet(), keys);
     return gs;
   }
 
@@ -375,40 +404,46 @@ public class ActionConfig
   public Set<String> getGroupActions(String... keys)
   {
     Set<String> as = new HashSet();
-    this.runGroupActions(new HashMap(), as, keys);
+    this.getGroupsActions(new HashMap(), as, keys);
     return as;
   }
 
   /**
    * 获取全部分组和动作
+   * @param grps
+   * @param acts
    * @param keys
    */
-  private void runGroupActions(Map groupz, Set actionz, String... keys)
+  public void getGroupsActions(Map grps, Set acts, String... keys)
   {
     for (String key : keys)
     {
       Map group = this.groups.get(key);
-      if (group == null || groupz.containsKey(key))
+      if (group == null || grps.containsKey(key))
       {
         continue;
       }
 
-      groupz.put(key, group);
+      grps.put(key, group);
 
       if (group.containsKey("actions"))
       {
         Set<String> actionsSet = (Set<String>)group.get("actions");
-        actionz.addAll(actionsSet);
+        acts.addAll(actionsSet);
       }
       if (group.containsKey("depends"))
       {
         Set<String> dependsSet = (Set<String>)group.get("depends");
         String[]    dependsArr = dependsSet.toArray(new String[0]);
-        this.runGroupActions(groupz, actionz, dependsArr);
+        this.getGroupsActions(grps, acts, dependsArr);
       }
     }
   }
 
+  /**
+   * 获取动作权限集合表
+   * @return 
+   */
   public Set<String> getAuthSet() {
       if (! session.contains(".")) {
           ActionHelper help = (ActionHelper)
@@ -420,6 +455,10 @@ public class ActionConfig
       }
   }
 
+  /**
+   * 获取动作权限对照表
+   * @return 
+   */
   public Map<String, Boolean> getAuthMap() {
       Set<String> authset = getAuthSet();
       if (authset == null || (authset.size() == 1 && authset.contains(null))) {
@@ -435,36 +474,100 @@ public class ActionConfig
       return map;
   }
 
+  /**
+   * 检查动作权限
+   * @param url
+   * @return 可访问则为true
+   */
   public Boolean chkAuth(String url) {
       Set<String> authset = getAuthSet();
-      if (authset == null || (authset.size() == 1 && authset.contains(null))) {
+      if (authset == null) {
+          return false;
+      }
+      if (authset.size(  ) == 1 && authset.contains(null)) {
           return false;
       }
       if (actions.contains(url) && !authset.contains(url)) {
           return false;
       }
-      else {
-          return true ;
-      }
+      return true;
   }
+
+  /**
+   * 检查页面权限
+   * @param url
+   * @return 有一个动作可访问即返回true
+   */
+  public Boolean chkPage(String url) {
+      Map<String, Map> grps = getPageGroups(url);
+      if (grps == null || grps.isEmpty()) {
+          return  true;
+      }
+      Set<String> acts = getGroupActions((String[])grps.keySet().toArray(new String[0]));
+      if (acts == null || acts.isEmpty()) {
+          return  true;
+      }
+      for (String act : acts) {
+          if (! chkAuth(act)) {
+              continue;
+          }
+          return  true;
+      }
+      return false;
+  }
+
+    public List getNavList(CoreLanguage lang, int level, int depth)
+    throws HongsException
+    {
+        return getNavList(lang, pages, level, depth, 0);
+    }
+
+    private List getNavList(CoreLanguage lang, Map<String, Map> pages, int level, int depth, int i) {
+        List list = new ArrayList();
+
+        if (i >= level + depth || pages == null) {
+            return list;
+        }
+
+        for (Map.Entry item : pages.entrySet( )) {
+            Map  v = (Map)item.getValue();
+            Map  p = (Map) v.get("pages");
+            List a = getNavList(lang, p, level, depth, i + 1);
+            if (i >= level) {
+                String u = (String)item.getKey();
+                String n = (String)v.get("name");
+                Map page = new HashMap();
+                n = lang.translate(n);
+                page.put("uri" , u);
+                page.put("name", n);
+                page.put("list", a);
+                page.put("auth", chkPage(u));
+                list.add(page);
+            } else {
+                list.addAll(a);
+            }
+        }
+
+        return list;
+    }
 
   //** 工厂方法 **/
 
-  public static ActionConfig getInstance(String name) throws HongsException {
-      String key = ActionConfig.class.getName() + ":" + name;
+  public static AuthConfig getInstance(String name) throws HongsException {
+      String key = AuthConfig.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      ActionConfig inst;
+      AuthConfig inst;
       if (core.containsKey(key)) {
-          inst = (ActionConfig)core.get(key);
+          inst = (AuthConfig)core.get(key);
       }
       else {
-          inst = new ActionConfig(name);
+          inst = new AuthConfig(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static ActionConfig getInstance() throws HongsException {
+  public static AuthConfig getInstance() throws HongsException {
       return getInstance("default");
   }
 }

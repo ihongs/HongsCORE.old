@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class ActionHolder
+public class InitFilter
 implements Filter {
 
     @Override
@@ -133,9 +133,9 @@ implements Filter {
         Core.getInstance().put(ActionHelper.class.getName(), helper);
         CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
 
-        Core.ACTION_PATH.set(req.getServletPath());
         Core.ACTION_TIME.set(System.currentTimeMillis());
-        Core.ACTION_LANG.set(conf.getProperty("core.language.default", "en-us"));
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default", "zh-cn"));
+        Core.ACTION_PATH.set(req.getRequestURI().substring(req.getContextPath().length()));
 
         if (conf.getProperty("core.language.probing", false)) {
             /**
@@ -166,10 +166,12 @@ implements Filter {
             CoreLogger.debug("...\r\n"
                 + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
                 + "ACTION_TIME     : " + Core.ACTION_TIME.get() + "\r\n"
-                + "ACTION_PATH     : " + Core.ACTION_PATH.get() + "\r\n"
                 + "ACTION_LANG     : " + Core.ACTION_LANG.get() + "\r\n"
-                + "Address         : " + req.getRemoteAddr() + " "
-                                       + req.getRemotePort() + "\r\n");
+                + "ACTION_PATH     : " + Core.ACTION_PATH.get() + "\r\n"
+                + "Method          : " + req.getMethod() + "\r\n"
+                + "Client          : " + req.getRemoteAddr() + " "
+                                       + req.getRemotePort() + "\r\n"
+                + "User-Agent      : " + req.getHeader("User-Agent") + "\r\n");
         }
     }
 
