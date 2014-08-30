@@ -382,7 +382,7 @@ function hsSetValue (obj, path, val) {
     path = path.replace(/\]\[/g, ".")
                .replace(/\[/   , ".")
                .replace(/\]/   , "" )
-               .split  (/\./ );
+               .split  ( "." );
     hsSetPoint(obj, path, val);
 }
 /**
@@ -594,11 +594,11 @@ function hsFmtNum(num, len, dec, sep, dot) {
  */
 function hsFmtDate(date, format) {
   if (typeof(date) === "string") {
-    if ( ! /^\d*$/.test(date)) {
-      date = Date.parse(date);
+    if ( /^\d+$/.test(date)) {
+      date = parseInt(date);
     }
     else {
-      date = parseInt(date);
+      date = Date.parse(date.replace(/-/g, "/").replace(/\.\d+$/, ""));
     }
   }
   if (typeof(date) === "number") {
@@ -820,34 +820,21 @@ function hsEach(data, func) {
 }
 
 /**
- * bootstrap方位转jquery.tools方位
- * @param {String} pos
- * @returns {String}
- */
-function _bs2jtPos(pos) {
-    return {
-        top     : "top center",
-        left    : "center left",
-        right   : "center right",
-        bottom  : "bottom center"
-    }[pos];
-}
-/**
- * HongsCORE日期格式转jquery.tools日期格式
+ * HongsCORE日期格式转Bootstrap日期格式
  * @param {String} format
  * @return {String)
  */
-function _hs2jtDF(format) {
+function _hs2bsDF(format) {
   return format.replace(/EE/g, "dddd")
                .replace(/E/g , "ddd" )
                .replace(/M/g , "m"   );
 }
 /**
- * jquery.tools日期格式转HongsCORE日期格式
+ * Bootstrap日期格式转HongsCORE日期格式
  * @param {String} format
  * @return {String)
  */
-function _jt2hsDF(format) {
+function _bs2hsDF(format) {
   return format.replace(/dddd/g, "EE")
                .replace(/ddd/g , "E" )
                .replace(/m/g   , "M" );
@@ -957,7 +944,7 @@ $.fn.hsOpen = function(url, data, complete) {
         }
         // 关闭关联的 tab
         if (prt.children( ).size( ) ) {
-            prt.children( ).hsTabc( );
+            prt.children( ).hsCloze();
             prt.empty();
         }
     } else {
@@ -983,11 +970,11 @@ $.fn.hsClose = function() {
         box = prt.children(".openbox");
     }
 
-    // 联动关闭
-    box.hsTabc ();
-
     // 触发事件
     box.trigger("hsClose");
+
+    // 联动关闭
+    box.hsCloze();
 
     // 恢复标签
     if (tab) {
@@ -1009,57 +996,68 @@ $.fn.hsClose = function() {
 
     return box;
 };
+$.fn.hsCloze = function() {
+    var box = $(this);
+    $( document.body).find(".openbox").each(function() {
+        if (box.is($(this).data("rel"))) {
+            $(this).hsClose();
+        }
+    });
+    return box;
+};
 $.fn.hsReady = function() {
     var box = $(this);
 
-    if (box.is(".tabsbox")) {
-        box.hsTabw({});
-    } else
-    if (box.is(".openbox")
-    && !box.children("object.config[name=hsInit]").size()) {
-        box.hsInit({});
+    // 为标签页进行包裹
+    if (box.is( ".tabsbox" ) ) {
+        box.hsTabw().hsReady();
+        return box;
     }
 
-    /**
-     * 为所有的 input 加上 input-type, 方便设置样式, 兼容老浏览器
-     */
+    // 为所有的 input 加上 input-type , 方便设置样式, 兼容老浏览器
     box.find('input').each(function() {
-        $(this).addClass( "input-" + $(this).attr("type"));
+        $(this).addClass("input-" + $(this).attr("type"));
     });
 
-    /**
-     * 为避免在 chrome 等浏览器中显示空白间隔, 清除全部空白文本节点
-     */
+    // 为避免在 chrome 等浏览器中显示空白间隔, 清除全部空白文本节点
     box.find('*').contents().filter(function() {
         return this.nodeType == 3 && /^\s+$/.test(this.nodeValue);
     }).remove();
 
+    // 至少要执行 hsInit
+    if (box.children("object.config[name=hsInit]").size( ) === 0) {
+        box.hsInit({});
+    }
+
     //** 语义标签解析 **/
 
-    box.find(".nav").each(function() {
-        $(this).hsTabs();
-    });
-    box.find("div[data-eval]").each(function() {
-        eval($(this).attr("data-eval"));
-    });
-    box.find("div[data-load]").each(function() {
-        $(this).hsLoad($(this).attr("data-load"));
-    });
-    box.find("div[data-open]").each(function() {
-        $(this).hsOpen($(this).attr("data-open"));
-    });
     box.find("object.config" ).each(function() {
         var prnt = $(this).parent();
         var func = $(this).attr("name");
         var opts = $(this)._hsConfig( );
-        if (typeof(prnt[func]) === "function") prnt[func](opts);
+        if (typeof(prnt[func]) === "function")
+            prnt[func]( opts );
     }).remove();
+
+    box.find("[data-eval]").each(function() {
+        eval($(this).attr("data-eval"));
+    });
+    box.find("[data-load]").each(function() {
+        $(this).hsLoad($(this).attr("data-load"));
+    });
+    box.find("[data-open]").each(function() {
+        $(this).hsOpen($(this).attr("data-open"));
+    });
+
+    box.find(".nav").each(function() {
+        $(this).hsTabs(  );
+    });
 
     box.trigger("hsReady");
     return box;
 };
 $.fn.hsInit = function(cnf) {
-    var box = jQuery(this);
+    var box = $(this);
 
     // 自动提取标题, 替换编辑文字
     // 如主键不叫id, 打开编辑页面, 则需加上id=1
@@ -1113,7 +1111,8 @@ $.fn.hsInit = function(cnf) {
 
     return box;
 };
-$.fn.hsTabw = function(cnf) {
+// 包裹标签
+$.fn.hsTabw = function() {
     var box = $(this);
     var tbs = $('<ul class="nav nav-tabs"><li><a href="javascript:;"></a></li></ul>');
     var pns = $('<div class="panes"></div>');
@@ -1122,9 +1121,10 @@ $.fn.hsTabw = function(cnf) {
     div.append(box.contents()).addClass("openbox");
     box.append(tbs);
     box.append(pns);
-    tbs.hsTabs(   );
-    div.hsInit(cnf);
+    tbs.hsTabs();
+    return div;
 };
+// 关联窗格
 $.fn.hsTabs = function(rel) {
     var box = $(this);
     if (! rel) {
@@ -1142,6 +1142,7 @@ $.fn.hsTabs = function(rel) {
     }
     return box;
 };
+// 添加标签
 $.fn.hsTaba = function(url) {
     var box = $(this);
     var tab;
@@ -1149,7 +1150,7 @@ $.fn.hsTaba = function(url) {
         url  =  '';
         tab  =  [];
     } else {
-        tab  =  box.find("[data-for='"+url+"']").closest("li");
+        tab  =  box.find("[data-for='" + url + "']").closest("li");
     }
     if (! tab.length) {
         tab = $('<li></li>').attr( 'data-for', url )
@@ -1162,14 +1163,6 @@ $.fn.hsTaba = function(url) {
     } else {
         return [tab, box.data("rel").children().eq(tab.index())];
     }
-};
-$.fn.hsTabc = function() {
-    var box = $(this);
-    $(document.body).find(".openbox").each(function() {
-        if (box.is($(this).data("rel"))) {
-            $(this).hsClose();
-        }
-    });
 };
 
 $.fn._hsConfig = function() {
@@ -1198,7 +1191,11 @@ $.fn._hsConfig = function() {
                     v = eval(v);
             }).call(this);
         }
-        if (n) hsSetValue(obj, n, v);
+        if (n) {
+            // IE 对相同 name 的 param 只取一个, 故需要加编号来表示数组
+            n = n.replace(/:.*$/ , ".");
+            hsSetValue(obj, n, v);
+        };
     }
     return obj;
 };
@@ -1238,7 +1235,7 @@ $.fn._hsTarget = function(selr) {
 };
 $.fn._hsConstr = function(opts, func) {
     var elem = this;
-    var name = func.name;
+    var name = func.name || /^function (\w+)/.exec(func.toString())[1];
     var inst = elem.data(name);
     if (! inst) {
         inst = new func(opts, elem);

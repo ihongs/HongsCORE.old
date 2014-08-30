@@ -102,9 +102,7 @@ function HsTree(opts, context) {
         that.open( n, m, u );
     }
 
-    if (openUrls)
-    for(i = 0; i < openUrls.length; i ++) {
-        a = openUrls[i]; m = undefined;
+    if (openUrls) jQuery.each(openUrls, function(i, a) {
         switch (a.length) {
         case 3:
             n = a[0];
@@ -114,16 +112,17 @@ function HsTree(opts, context) {
         case 2:
             n = a[0];
             u = a[1];
+            m = undefined;
             break;
         default:
-            continue;
+            return;
         }
 
         if (typeof(n) === "string")
             context.on("click", n, [n, m, u], openHand);
         else if (n)
             n.on("click", [n, m, u], openHand);
-    }
+    });
 
     function sendHand(evt) {
         //var n = evt.data[0];
@@ -162,9 +161,7 @@ function HsTree(opts, context) {
         that.send(n, m, u, dat );
     }
 
-    if (sendUrls)
-    for(i = 0; i < sendUrls.length; i ++) {
-        a = sendUrls[i]; m = undefined;
+    if (sendUrls) jQuery.each(sendUrls, function(i, a) {
         switch (a.length) {
         case 3:
             n = a[0];
@@ -174,16 +171,17 @@ function HsTree(opts, context) {
         case 2:
             n = a[0];
             u = a[1];
+            m = undefined;
             break;
         default:
-            continue;
+            return;
         }
 
         if (typeof(n) === "string")
             context.on("click", n, [n, m, u], sendHand);
         else if (n)
             n.on("click", [n, m, u], sendHand);
-    }
+    });
 
     // 当选中时, 在指定区域加载指定页面, 并附带树节点ID
     if (linkUrls) {

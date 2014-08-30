@@ -179,13 +179,11 @@ abstract public class AbstractBaseModel
     fp.setRows(rows);
     List list = fp.getList();
     Map  info = fp.getInfo();
-    int errno = (Integer)info.get("errno");
 
     // 组织返回数据
     Map data = new HashMap();
     data.put("list" , list );
     data.put("page" , info );
-    data.put("errno", errno);
 
     return data;
   }
@@ -234,12 +232,10 @@ abstract public class AbstractBaseModel
 
     // 获取列表
     List list = this.table.fetchMore(caze);
-    int errno = list.isEmpty() ? 1 : 0;
 
     // 组织数据
     Map data = new HashMap();
     data.put("list" , list );
-    data.put("errno", errno);
 
     return data;
   }
@@ -292,11 +288,9 @@ abstract public class AbstractBaseModel
     {
       info = new HashMap();
     }
-    int errno = info.isEmpty() ? 1 : 0;
 
     Map data = new HashMap();
     data.put("info", info);
-    data.put("errno", errno);
 
     return data;
   }

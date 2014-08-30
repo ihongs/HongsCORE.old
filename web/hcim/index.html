@@ -8,6 +8,7 @@ Hong's Common Info Module
         <title>信息管理</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="../favicon.ico" type="image/x-icon" /> 
         <link rel="stylesheet" type="text/css" href="../common/css/bootstrap.css"/>
         <link rel="stylesheet" type="text/css" href="../common/css/hongscore.css"/>
         <script type="text/javascript" src="../common/jquery.min.js"></script>
@@ -23,18 +24,18 @@ Hong's Common Info Module
     </head>
     <body>
         <div id="notebox"></div>
-        <div id="headbox" class="navbar navbar-default navbar-fixed-top">
+        <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
                 <div class="row" data-load="../common/pages/head.jsp?c=hcim"></div>
             </div>
-        </div>
+        </nav>
         <div id="bodybox">
             <div class="container tabsbox" id="main-context"></div>
         </div>
-        <div id="footbox" class="navbar navbar-default navbar-fixed-bottom">
+        <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
                 <div class="row" data-load="../common/pages/foot.jsp"></div>
             </div>
-        </div>
+        </nav>
     </body>
 </html>

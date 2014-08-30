@@ -7,7 +7,7 @@
 <%@page import="app.hongs.action.AuthConfig"%>
 <%@page import="app.hongs.action.ActionHelper"%>
 <%!
-    StringBuilder makeMenu(List<Map> menus, int i) {
+    StringBuilder makeMenu(List<Map> menus, boolean realHref) {
         StringBuilder menuz = new StringBuilder();
         if (menus.isEmpty()) {
             return menuz;
@@ -23,8 +23,8 @@
             if (name.indexOf("${opr}") != -1) {
                 continue; // 操作类的内页不要
             }
-            if (i == -1) {
-                hash = Core.BASE_HREF + "/" + href; // Logo Menu
+            if (realHref) {
+                hash = Core.BASE_HREF + "/" + href; // User Menu
             } else if (hash.endsWith(".jsp")) {
                 hash = hash.substring(0, hash.length() - 4);
             } else if (hash.endsWith(".html")) {
@@ -43,7 +43,7 @@
                  .append(name)
                  .append(cart)
                  .append("</a>");
-            StringBuilder subMenuz = makeMenu(subMenus, i + 1);
+            StringBuilder subMenuz = makeMenu(subMenus, realHref);
             if (subMenuz.length() > 0) {
                 menuz.append("<ul class=\"dropdown-menu\">")
                         .append(subMenuz)
@@ -81,59 +81,67 @@
     AuthConfig auth = AuthConfig.getInstance( name );
     CoreLanguage lang = CoreLanguage.getInstance(  );
 
-    List<Map> logoMenu = euth.getNavList(lang, 1, 1);
     List<Map> mainMenu = auth.getNavList(lang, l, d);
+    List<Map> userMenu = euth.getNavList(lang, 1, 1);
 %>
 
-<div class="navbar-header dropdown">
-    <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown">HongsCORE <b class="caret"></b></a>
-    <ul class="dropdown-menu">
-        <%=makeMenu(logoMenu, -1).toString()%>
-    </ul>
-    <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#main-menubar">
+<div class="navbar-header">
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-collapse">
+        <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
+    <a class="navbar-brand" href="#">HongsCORE</a>
 </div>
-<div class="navbar-collapse collapse" id="main-menubar">
-    <ul class="nav navbar-nav menu">
-        <%=makeMenu(mainMenu, 0).toString()%>
+
+<div class="collapse navbar-collapse" id="main-collapse">
+    <ul class="nav navbar-nav navbar-left " id="main-menubar">
+        <%=makeMenu(mainMenu, false)%>
     </ul>
-    <ul class="nav navbar-nav navbar-right" style="margin-right: -1px;">
+    <ul class="nav navbar-nav navbar-right" id="user-menubar">
         <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">ihongs@live.cn <span class="badge" style="background: #eee; color: #666;">3</span> <span class="caret"></span></a>
-            <ul class="dropdown-menu">
-                <li><a href="#">个人中心</a></li>
-                <li><a href="#">通知中心</a></li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">ihongs@live.cn <span class="badge">9+</span> <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+                <%=makeMenu(userMenu, true)%>
                 <li class="divider"></li>
+                <li><a href="#">消息中心</a></li>
                 <li><a href="#">修改密码</a></li>
             </ul>
         </li>
     </ul>
-</div>
+</div><!-- /.navbar-collapse -->
 
 <script type="text/javascript">
     (function($) {
-        $("#main-menubar .menu>li>a")
-                .filter(function() {
-                    return $(this).attr("href").substring(0, 1) == "#";
-                })
-                .click(function() {
-                    $("#main-context").hsLoad($(this).attr("data-href"));
-                    $(this).closest("li")
-                            .addClass("active")
-                            .siblings()
-                            .removeClass("active");
-                });
+        $("#main-menubar>li>a")
+            .filter(function() {
+                return $(this).attr( "href" ).substring(0, 1) == "#";
+            })
+            .click(function() {
+                $("#main-context").hsLoad($(this).attr("data-href"));
+                $(this).closest("li").addClass("active")
+                       .siblings().removeClass("active");
+            });
+        $("#user-menubar>li>a")
+            .click(function() {
+                var that = $(this);
+                setTimeout(function() {
+                    that.parent( ).removeClass("active");
+                    that.blur  ( );
+                }, 100);
+            });
 
         $(function() {
             if (location.hash) {
-                $("#main-menubar .menu a[href='" + location.hash + "']").click();
+                $("#main-menubar>li>a[href='" + location.hash + "']").click(  );
             }
             else {
-                $("#main-menubar .menu a").first().click();
+                $("#main-menubar>li>a").first().click();
             }
+            setTimeout(function() {
+                $("#user-menubar>li>a").first().click();
+            }, 500);
         });
     })(jQuery);
 </script>

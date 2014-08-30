@@ -94,9 +94,7 @@ function HsList(opts, context) {
         that.open( n, m, u );
     }
 
-    if (openUrls)
-    for(i = 0; i < openUrls.length; i ++) {
-        a = openUrls[i]; m = undefined;
+    if (openUrls) jQuery.each(openUrls, function(i, a) {
         switch (a.length) {
         case 3:
             n = a[0];
@@ -106,16 +104,17 @@ function HsList(opts, context) {
         case 2:
             n = a[0];
             u = a[1];
+            m = undefined;
             break;
         default:
-            continue;
+            return;
         }
 
         if (typeof(n) === "string")
             context.on("click", n, [n, m, u], openHand);
         else if (n)
             n.on("click", [n, m, u], openHand);
-    }
+    });
 
     function sendHand(evt) {
         //var n = evt.data[0];
@@ -151,9 +150,7 @@ function HsList(opts, context) {
         that.send(n, m, u, cks );
     }
 
-    if (sendUrls)
-    for(i = 0; i < sendUrls.length; i ++) {
-        a = sendUrls[i]; m = undefined;
+    if (sendUrls) jQuery.each(sendUrls, function(i, a) {
         switch (a.length) {
         case 3:
             n = a[0];
@@ -163,16 +160,17 @@ function HsList(opts, context) {
         case 2:
             n = a[0];
             u = a[1];
+            m = undefined;
             break;
         default:
-            continue;
+            return;
         }
 
         if (typeof(n) === "string")
             context.on("click", n, [n, m, u], sendHand);
         else if (n)
             n.on("click", [n, m, u], sendHand);
-    }
+    });
 
     if (findBox.length) {
         findBox.on("submit", function() {
@@ -309,7 +307,7 @@ HsList.prototype = {
             case 2:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
                 this.listBox.hide();
-                hsSetSerial(this._data, "page", page.total_pages);
+                hsSetSerial(this._data, "page", -1);
                 this.load();
                 return;
             default:
@@ -318,7 +316,7 @@ HsList.prototype = {
 
         var i, p, t, pn, pmin, pmax, that = this;
         p  = page.page || this.firstOfPage;
-        t  = page.total_pages || 1 ;
+        t  = page.pagecount || 1;
         pn = this.pageBox.attr("data-pn" );
         pn = pn ? parseInt(pn) : 10;
         pmin = Math.floor((p - 1) / pn) * pn + 1;
@@ -408,7 +406,7 @@ HsList.prototype = {
         box.on("saveBack", function(evt,rst) {
             if(evt.isDefaultPrevented()) return;
             btn.trigger ( evt , [rst, data]);
-            if(evt.isDefaultPrevented()) return;console.log("----")
+            if(evt.isDefaultPrevented()) return;
             that.load();
         });
     },

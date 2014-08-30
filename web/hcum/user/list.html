@@ -1,9 +1,9 @@
 <div id="hcum-user-list">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcum/User/List.act?dept_id='+H$('&dept_id',this))"/>
-        <param name="openUrls[]" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'{TABSBOX}']"/>
-        <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','{TABSBOX}']"/>
-        <param name="sendUrls[]" value="['.remove','hcum/User/Remove.act','您确定要删除此用户?']"/>
+        <param name="openUrls:0" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'{TABSBOX}']"/>
+        <param name="openUrls:1" value="['.modify','hcum/user/form.html?id={ID}','{TABSBOX}']"/>
+        <param name="sendUrls:0" value="['.remove','hcum/User/Remove.act','您确定要删除此用户?']"/>
     </object>
     <div>
         <form class="fl toolbox btn-group">

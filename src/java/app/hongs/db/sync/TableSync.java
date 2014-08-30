@@ -20,8 +20,8 @@ import java.util.Set;
 public class TableSync
 {
 
-  private Table table;
-  private TableDesc tableDesc;
+  private final Table table;
+  private final TableDesc tableDesc;
 
   /**
    * 通过表对象构造

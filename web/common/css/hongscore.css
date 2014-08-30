@@ -40,7 +40,7 @@ object.config,
 
 /** 布局 **/
 
-/** 通知固定 **/
+/** 通知区域 **/
 #notebox {
     background: transparent;
     position: fixed;
@@ -52,29 +52,35 @@ object.config,
 }
 #notebox .alert {
     margin: 0 auto 1px auto;
-    width: 500px;
+    width: 600px;
 }
 
 /** 主体区域 **/
 #bodybox {
     padding-top: 72px; /* 顶部菜单 */
-    padding-bottom: 54px; /* 底部通栏 */
+    padding-bottom: 62px; /* 底部通栏 */
 }
 
 /** 底部区域 **/
-#footbox  {
+#footbox.navbar  {
+    min-height: 40px;
     background: #fff;
     border-top-color: #fff;
+    border-bottom-color: #fff;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 #footbox blockquote {
-    margin: 15px 0 0 0;
+    background: #f8f8f8;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 #footbox blockquote p {
     font-size: 10px;
 }
 #footbox blockquote small {
+    padding-left: 0.5em; text-align: right;
     display: inline-block;
-    padding-left: 1em;
 }
 
 .main-context {
@@ -115,6 +121,10 @@ form ul.pickbox {
 
 .listbox .table {
     table-layout: fixed;
+}
+.listbox .table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .listbox ._check,
@@ -255,6 +265,9 @@ legend {
     padding-left: 6px;
     font-size: 20px;
     color: #666;
+    float: none;
+    display: inline-block;
+    vertical-align: top;
 }
 .btn .close {
     margin-right: -12px;
@@ -271,22 +284,25 @@ legend {
     color: #fff;
 }
 
+.btn,
 .form-control {
-    height: 43px;
+    line-height: 21px;
 }
 .btn.form-control {
-    overflow: hidden;
     text-align: left;
+    overflow: hidden;
 }
 textarea.form-control {
     min-height: 127px;
 }
-.input-search.form-control {
-    width: 12em;
-    float: left;
-}
 .input-number.form-control {
     width: 50%;
+}
+.input-search.form-control {
+    width: 12em;
+}
+.btn-group > .form-control {
+    float: left;
 }
 
 .nav-tabs {

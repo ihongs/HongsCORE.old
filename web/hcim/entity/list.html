@@ -2,9 +2,9 @@
 <div id="hcim-entity-list" class="row">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('hcim/Entity/List.act?ob=-ctime')"/>
-        <param name="openUrls[]" value="['.create','hcim/entity/form.html','{TABSBOX}']"/>
-        <param name="openUrls[]" value="['.modify','hcim/entity/form.html?id={ID}','{TABSBOX}']"/>
-        <param name="sendUrls[]" value="['.remove','hcim/Entity/Remove.act']"/>
+        <param name="openUrls:0" value="['.create','hcim/entity/form.html','{TABSBOX}']"/>
+        <param name="openUrls:1" value="['.modify','hcim/entity/form.html?id={ID}','{TABSBOX}']"/>
+        <param name="sendUrls:0" value="['.remove','hcim/Entity/Remove.act']"/>
     </object>
     <div>
         <form class="fl toolbox btn-group">
@@ -13,7 +13,7 @@
             <button type="button" class="remove for-checks btn btn-danger" >删除</button>
         </form>
         <form class="fr findbox btn-group" action="" method="POST">
-            <input type="search" name="wd" class="form-control"/>
+            <input type="search" name="wd" class="form-control input-search"/>
             <button type="submit" class="btn btn-default">查找</button>
         </form>
         <div class="cb"></div>
@@ -27,7 +27,7 @@
                     </th>
                     <th data-fn="name" class="sortable">实体名称</th>
                     <th data-fn="code" class="sortable">代号</th>
-                    <th data-fn="a_hcim_module.name" class="sortable">所属模块</th>
+                    <th data-fn="a_hcim_module.name" data-sn="module_id" class="sortable">所属模块</th>
                     <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
                     <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
                 </tr>

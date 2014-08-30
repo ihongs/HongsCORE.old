@@ -174,16 +174,19 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
         });
     };
 
+    tip.on("hsOpen" , function() {
+        box.trigger("pickOpen" );
+    });
+    tip.on("hsClose", function() {
+        box.trigger("pickClose");
+    });
+
     if (tip) {
         tip = tip.hsOpen(url, undefined, pickOpen );
         tip.data("rel", btn.closest(".openbox")[0]);
     } else {
         tip =   $.hsOpen(url, undefined, pickOpen );
     }
-
-    tip.on("hsClose", function() {
-        box.trigger("pickClose");
-    });
 
     return tip;
 };

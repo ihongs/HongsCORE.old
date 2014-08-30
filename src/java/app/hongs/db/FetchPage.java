@@ -83,12 +83,12 @@ public class FetchPage
     if (this.page == 0)
     {
       CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-      this.page = (int)conf.getProperty("core.first.of.page", 1 );
+      this.page = conf.getProperty("core.first.of.page", 1 );
     }
     if (this.rows == 0)
     {
       CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-      this.rows = (int)conf.getProperty("core.rows.per.page", 10);
+      this.rows = conf.getProperty("core.rows.per.page", 10);
     }
 
     /**
@@ -97,25 +97,28 @@ public class FetchPage
      */
     if (this.page == 0)
     {
-      this.page = 1;
+      this.page = 1 ;
     }
     else
     if (this.page <  0)
     {
       this.getInfo();
-      int tp = (Integer)this.info.get("total_pages");
-      int ap = this.page + 1;
-      while (ap < 0)
+      int pc = (Integer)this.info.get("pagecount");
+      int pn = this.page + 1;
+      while (pn < 0)
       {
-        ap += tp;
+        pn = pn + pc;
       }
+      this.page = pn;
     }
 
     this.info.put("page", this.page);
     this.info.put("rows", this.rows);
 
     // 查询列表
-    caze.limit(rows * (page - 1), rows);
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    int pn = page - conf.getProperty("core.first.of.page", 1);
+    caze.limit(pn * rows, rows);
     List list;
     if (null != this.table)
     {
@@ -137,12 +140,10 @@ public class FetchPage
       {
         this.info.put("errno", 2); // 页码超出
       }
-      this.info.put("real_rows", 0);
     }
     else
     {
       this.info.put("errno", 0);
-      this.info.put("real_rows", list.size());
     }
 
     return list;
@@ -153,8 +154,8 @@ public class FetchPage
   {
     if (this.info.containsKey("errno") && (Integer)this.info.get("errno") == 1)
     {
-      this.info.put("total_rows" , 0);
-      this.info.put("total_pages", 0);
+      this.info.put("rowscount", 0);
+      this.info.put("pagecount", 0);
       return this.info;
     }
 
@@ -170,13 +171,13 @@ public class FetchPage
     caze2.setOrderBy( "");
     if (caze2.hasGroupBy( ))
     {
-      sql    = "SELECT COUNT(*) AS __count__ FROM ("
-             + caze2.getSQL()+") AS __table__";
+      sql    =  "SELECT COUNT(*) AS __count__ FROM ("
+             + caze2.getSQL()+") AS __table__" ;
       params = caze2.getParams();
     }
     else
     {
-      caze2.setSelect("COUNT(*) AS __count__");
+      caze2.setSelect( "COUNT(*) AS __count__");
       sql    = caze2.getSQL();
       params = caze2.getParams();
     }
@@ -185,10 +186,10 @@ public class FetchPage
     Map row = this.db.fetchOne(sql, params);
     if (row.isEmpty() == false)
     {
-      int tr = Integer.parseInt(row.get("__count__").toString());
-      int tp = (int)Math.ceil((float)tr / this.rows);
-      this.info.put("total_rows" , tr);
-      this.info.put("total_pages", tp);
+      int rc = Integer.parseInt(row.get("__count__").toString());
+      int pc = (int)Math.ceil((float)rc / this.rows);
+      this.info.put("rowscount", rc);
+      this.info.put("pageocunt", pc);
     }
 
     return this.info;
