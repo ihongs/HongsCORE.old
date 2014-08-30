@@ -1,5 +1,5 @@
 /**
- * Use localization configure by HongsCORE
+ * Datetime 国际化及启动器
  * Huang Hong <ihongs@live.cn>
  * @param $ jQuery
  */
