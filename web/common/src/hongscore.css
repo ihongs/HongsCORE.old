@@ -119,6 +119,11 @@ form ul.pickbox {
 
 /** 列表 **/
 
+.toolbox,
+.findbox,
+.listbox {
+    margin-bottom: 15.75px
+}
 .listbox .table {
     table-layout: fixed;
 }
@@ -322,7 +327,7 @@ textarea.form-control {
 .listbox .table,
 .pagebox .alert,
 .pagebox .pagination {
-    margin: 1px 0;
+    margin: 0;
 }
 .listbox .table thead {
     font-weight: bold;

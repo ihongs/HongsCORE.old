@@ -443,8 +443,7 @@ public class FetchMore
 
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
-        FetchCase caze2 = caze.join(an)
-                              .from(table2.tableName);
+        FetchCase caze2 = caze.join(an).from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
 
@@ -528,8 +527,7 @@ public class FetchMore
 
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
-        FetchCase caze2 = caze.join(an)
-                              .from(table2.tableName);
+        FetchCase caze2 = caze.join(an).from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
 

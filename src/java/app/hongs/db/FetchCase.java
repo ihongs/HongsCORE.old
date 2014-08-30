@@ -153,7 +153,7 @@ public class FetchCase
    * 构造表结构对象
    * @param table 取tableName和name
    */
-  public FetchCase(Table  table)
+  public FetchCase(Table table)
   {
     this(table.tableName, table.name);
   }
@@ -450,7 +450,7 @@ public class FetchCase
   {
     for (FetchCase caze : this.joinList)
     {
-      if (this.name.equals(name))
+      if (name.equals(caze.name))
       {
         return caze;
       }
