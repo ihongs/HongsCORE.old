@@ -325,7 +325,6 @@ HsList.prototype = {
         this.pageBox.empty();
         var btns = jQuery('<ul class="fl pagination"></ul>').appendTo(this.pageBox);
         var nums = jQuery('<ul class="fr pagination"></ul>').appendTo(this.pageBox);
-        var rows = jQuery('<select class="fr"></select>');
         jQuery('<div class="cb"></div>').appendTo(this.pageBox);
 
         if (1 != p) {

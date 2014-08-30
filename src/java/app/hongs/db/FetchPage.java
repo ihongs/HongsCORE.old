@@ -189,7 +189,7 @@ public class FetchPage
       int rc = Integer.parseInt(row.get("__count__").toString());
       int pc = (int)Math.ceil((float)rc / this.rows);
       this.info.put("rowscount", rc);
-      this.info.put("pageocunt", pc);
+      this.info.put("pagecount", pc);
     }
 
     return this.info;
