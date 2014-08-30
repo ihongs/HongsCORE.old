@@ -825,9 +825,13 @@ function hsEach(data, func) {
  * @return {String)
  */
 function _hs2bsDF(format) {
-  return format.replace(/EE/g, "dddd")
-               .replace(/E/g , "ddd" )
-               .replace(/M/g , "m"   );
+  return format.replace(/a/g , 'P')
+               .replace(/m/g , 'i')
+               .replace(/M/g , 'm')
+               // 交换 H h
+               .replace(/H/g , 'x')
+               .replace(/h/g , 'H')
+               .replace(/x/g , 'h');
 }
 /**
  * Bootstrap日期格式转HongsCORE日期格式
@@ -835,9 +839,13 @@ function _hs2bsDF(format) {
  * @return {String)
  */
 function _bs2hsDF(format) {
-  return format.replace(/dddd/g, "EE")
-               .replace(/ddd/g , "E" )
-               .replace(/m/g   , "M" );
+  return format.replace(/m/g , 'M')
+               .replace(/i/g , 'm')
+               .replace(/P/gi, 'a')
+               // 交换 H h
+               .replace(/H/g , 'x')
+               .replace(/h/g , 'H')
+               .replace(/x/g , 'h');
 }
 
 (function($) {
