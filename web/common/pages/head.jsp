@@ -92,7 +92,18 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="#">HongsCORE</a>
+    <a class="navbar-brand" href="#" style="font-weight:bold;">
+        <span style="color:#f00" class="glyphicon glyphicon-fire"></span>
+        <span style="color:#f22">H</span>
+        <span style="color:#f33">o</span>
+        <span style="color:#f55">n</span>
+        <span style="color:#f66">g</span>
+        <span style="color:#f88">s</span>
+        <span style="color:#faa">C</span>
+        <span style="color:#fbb">O</span>
+        <span style="color:#fcc">R</span>
+        <span style="color:#fdd">E</span>
+    </a>
 </div>
 
 <div class="collapse navbar-collapse" id="main-collapse">

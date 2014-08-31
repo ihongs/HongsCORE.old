@@ -55,6 +55,11 @@ object.config,
     width: 600px;
 }
 
+/** 头部区域 **/
+#headbox ul.nav>li.active {
+    font-weight: bolder;
+}
+
 /** 主体区域 **/
 #bodybox {
     padding-top: 72px; /* 顶部菜单 */
@@ -119,17 +124,9 @@ form ul.pickbox {
 
 /** 列表 **/
 
-.toolbox,
-.findbox,
 .listbox {
+    margin-top: 15.75px;
     margin-bottom: 15.75px
-}
-.listbox .table {
-    table-layout: fixed;
-}
-.listbox .table td {
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .listbox ._check,
@@ -146,30 +143,55 @@ form ul.pickbox {
     width: 6em;
 }
 
-.listbox .sortable {
+.listbox thead .sortable {
     cursor: pointer;
 }
-.listbox .sortable .caret {
+.listbox thead .sort-arr {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+.listbox thead .sort-arr:before {
+    color: #2780e3;
+    font-size: 12px;
+    margin-left:0.25em;
+}
+.listbox thead .sort-a-z .sort-arr:before {
+    content: "\e151";
+}
+.listbox thead .sort-z-a .sort-arr:before {
+    content: "\e152";
+}
+
+/** 旧的三角排序符 **/
+/*
+.listbox thead .sort-arr {
     border: 0;
     margin-left: 4px;
 }
-.listbox .sortable.sort-a-z .caret,
-.listbox .sortable.sort-z-a .caret {
+.listbox thead .sort-a-z .sort-arr,
+.listbox thead .sort-z-a .sort-arr {
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
 }
-.listbox .sortable.sort-a-z .caret {
+.listbox thead .sort-a-z .sort-arr {
     border-bottom: 6px solid #ccc;
 }
-.listbox .sortable.sort-a-z:hover .caret {
+.listbox thead .sort-a-z:hover .sort-arr {
     border-bottom-color: #666;
 }
-.listbox .sortable.sort-z-a .caret {
+.listbox thead .sort-z-a .sort-arr {
     border-top: 6px solid #ccc;
 }
-.listbox .sortable.sort-z-a:hover .caret {
+.listbox thead .sort-z-a:hover .sort-arr {
     border-top-color: #666;
 }
+*/
 
 /** 树形 **/
 
@@ -298,7 +320,7 @@ legend {
     overflow: hidden;
 }
 textarea.form-control {
-    min-height: 127px;
+    min-height: 126px;
 }
 .input-number.form-control {
     width: 50%;

@@ -58,7 +58,7 @@ public class HongsLocalized {
             case 0x1000:
             case 0x10:
                 ckey = "fore.error";
-                dkey = null;
+                dkey = "";
                 break;
             case 0x1001:
             case 0x11:

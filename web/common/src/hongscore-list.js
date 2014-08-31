@@ -237,9 +237,9 @@ HsList.prototype = {
 
             // 排序
             if (td.hasClass("sortable")) {
-                if (td.find(".caret").size() == 0) {
+                if (td.find(".sort-arr").size() == 0) {
                     var that = this;
-                    td.append('<span class="caret"></span>');
+                    td.append('<span class="sort-arr"></span>');
                     td.click(function( ) {
                         var td = jQuery ( this );
                         var fn = td.attr("data-sn")||td.attr("data-fn");
@@ -254,7 +254,6 @@ HsList.prototype = {
                         that.load();
                     });
                 }
-
                 var sn = hsGetSeria( this._data, this.sortKey );
                 var fn = td.attr("data-sn")||td.attr("data-fn");
                 td.removeClass("sort-a-z sort-z-a");
