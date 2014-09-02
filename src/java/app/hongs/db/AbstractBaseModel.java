@@ -760,7 +760,6 @@ abstract public class AbstractBaseModel
       caze.setOption("ASSOC_TYPES", types);
     }
 
-    // 如果req为空则返回
     if (req.isEmpty())
     {
       return;
@@ -771,6 +770,9 @@ abstract public class AbstractBaseModel
     Iterator it = req.entrySet()
                      .iterator();
 
+    /**
+     * 依据设计规则, 解析请求参数, 转为查询结构
+     */
     while (it.hasNext())
     {
       Map.Entry et = (Map.Entry)it.next();
