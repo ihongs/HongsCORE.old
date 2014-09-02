@@ -52,7 +52,7 @@ public class Entity extends AbstractBaseModel {
         Map       info;
         DB        dd;
         String    dn, tn, xn;
-        StringBuilder sb;
+        StringBuilder sb, sp;
 
         caze = new FetchCase(   );
         info = this.get(id, caze);
@@ -62,10 +62,11 @@ public class Entity extends AbstractBaseModel {
         dn   = "hcxm/" + info.get("module_id").toString();
         //dd   = DB.getInstance(dn);
         sb   =new StringBuilder();
-        
-        sb.append("CREATE TABLE `").append(xn).append("` (");
+        sp   =new StringBuilder();
+
+        sb.append("CREATE TABLE `").append(xn).append("` (\r\n");
         sb.append("  `id` CHAR(20) NOT NULL,\r\n");
-        
+
         // 提取属性类型
         DataConfig dc = DataConfig.getInstance( "hcim" );
         List dl = (List) dc.getDataByKey("DOMAIN_TYPES");
@@ -74,53 +75,92 @@ public class Entity extends AbstractBaseModel {
             List di = (List) oo;
             dm.put(di.get(0).toString(), di.get(2).toString());
         }
-        
-        // 组织建表语句
-        List<Map> cols = (List) info.get("a_hcim_entity_cols");
-        if (cols == null) cols = new ArrayList();
-        for(Map col : cols) {
-            Map dom = (Map) col.get("a_hcim_domain");
-            if (dom == null) dom = new HashMap();
-            
-            String cm = (String) col.get("name");
-            if (cm == null) {
-                cm = (String) dom.get("name");
-            }
-            
-            String fn = (String) dom.get( "id" );
-            String ft = (String) dom.get("type");
-            
-            int size = Integer.parseInt(dom.get("size"  ).toString());
-            int scale = Integer.parseInt(dom.get("scale" ).toString());
-            int signed = Integer.parseInt(dom.get("signed").toString());
-            int required = Integer.parseInt(col.get("required").toString());
-            
-            sb.append("  `").append(fn).append("` ").append(dm.get(ft));
-            
-            if (size > 0) {
-                if (scale > 0) {
-                    sb.append("(").append(size).append(",").append(scale).append(")");
-                } else {
-                    sb.append("(").append(size).append(")");
+
+        List<Map> cols;
+
+        // 字段
+        cols = (List) info.get("a_hcim_entity_cols");
+        if (cols != null) {
+            for(Map col : cols) {
+                Map tab = (Map) col.get("a_hcim_domain");
+                if (tab == null) tab = new HashMap();
+
+                String fn = (String) tab.get( "id" );
+                String ft = (String) tab.get("type");
+                String cm = (String) col.get("name");
+                if (   cm == null  ) {
+                       cm = (String) tab.get("name");
                 }
+                int size = Integer.parseInt(tab.get("size").toString());
+                int scale = Integer.parseInt(tab.get("scale").toString());
+                int signed = Integer.parseInt(tab.get("signed").toString());
+                int required = Integer.parseInt(col.get("required").toString());
+
+                sb.append("  `").append(fn).append("` ").append(dm.get(ft));
+
+                if (size > 0) {
+                    if (scale > 0) {
+                        sb.append("(").append(size).append(",").append(scale).append(")");
+                    } else {
+                        sb.append("(").append(size).append(")");
+                    }
+                }
+
+                if ( signed  == 0) {
+                    sb.append(" UNSIGNED");
+                }
+
+                if (required != 0) {
+                    sb.append(" NOT NULL");
+                } else {
+                    sb.append(" NULL");
+                }
+
+                if (cm != null && ! cm.equals("")) {
+                    sb.append(" COMMENT '"+cm+"'");
+                }
+
+                sb.append(",\r\n");
             }
-            
-            if (signed == 0) {
-                sb.append(" UNSIGNED");
-            }
-            
-            if (required != 0) {
-                sb.append(" NOT NULL");
-            } else {
-                sb.append(" NULL");
-            }
-            
-            sb.append(",\r\n");
         }
         
+        // 外键
+        cols = (List) info.get("a_hcim_entity_rels");
+        if (cols != null) {
+            for(Map col : cols) {
+                Map tab = (Map) col.get("a_hcim_entity");
+
+                String ln = (String) tab.get( "id" );
+                String lt = (String) col.get("type");
+                String cm = (String) tab.get("name");
+                int required = Integer.parseInt(col.get("required").toString());
+
+                if ("1".equals(lt)) {
+                    sb.append("  `"+ln+"_id`");
+
+                    if (required != 0) {
+                        sb.append(" NOT NULL");
+                    } else {
+                        sb.append(" NULL");
+                    }
+
+                    if (cm != null && ! cm.equals("")) {
+                        sb.append(" COMMENT '"+cm+"'");
+                    }
+
+                    sb.append(",\r\n");
+                } else {
+                    sb.append("CREATE TABLE `x_hcxm_"+xn+"_"+ln+"` (");
+                    sb.append("`"+id+"_id` NOT NULL");
+                    sb.append("`"+ln+"_id` NOT NULL");
+                    sb.append(");");
+                }
+            }
+        }
+
         sb.append("  PRIMARY KEY (`id`)\r\n");
         sb.append(")");
-        
+
         System.out.println(sb);
     }
 

@@ -807,39 +807,7 @@ abstract public class AbstractBaseModel
       // 搜索
       if (key.equals(this.findKey))
       {
-        /**
-         * 为实现对指定的字段进行模糊搜索
-         * 增加find.col和find.sub.col的用法
-         * Add by Hongs, 2013.8.9
-         */
-        if (value instanceof Map) {
-            List ks = Arrays.asList(this.findCols);
-            Map  m1 = (Map) value;
-            for (Object o1 : m1.entrySet()) {
-                Map.Entry e1 = (Map.Entry) o1;
-                String k1 = e1.getKey().toString();
-                Object v1 = e1.getValue();
-
-                if (v1 instanceof Map) {
-                    Map m2 = (Map) v1;
-                    for (Object o2 : m2.entrySet()) {
-                        Map.Entry e2 = (Map.Entry) o2;
-                        String k2 = k1+"."+e2.getKey().toString();
-                        String v2 = e2.getValue().toString();
-
-                        if (ks.contains(k2)) {
-                            this.findFilter(new String[]{k2}, v2, not, caze);
-                        }
-                    }
-                } else {
-                    if (ks.contains(k1)) {
-                        this.findFilter(new String[]{k1}, v1, not, caze);
-                    }
-                }
-            }
-        } else {
-                this.findFilter(this.findCols, value, not, caze);
-        }
+        this.findFilter(this.findCols, value, not, caze);
         continue;
       }
 
@@ -1095,6 +1063,42 @@ abstract public class AbstractBaseModel
 
   /**
    * 搜索过滤(被reqFilter调用)
+   * 针对具体搜索字段
+   * @param keys
+   * @param val
+   * @param not
+   * @param caze
+   */
+  protected void findFilter(String[] keys, Map val, boolean not, FetchCase caze)
+  {
+    List ks = Arrays.asList(this.findCols);
+    Map  m1 = val;
+    for (Object o1 : m1.entrySet()) {
+        Map.Entry e1 = (Map.Entry) o1;
+        Object v1 = e1.getValue();
+        String k1 = e1.getKey().toString();
+
+        if (v1 instanceof Map) {
+            Map m2 = (Map) v1;
+            for (Object o2 : m2.entrySet()) {
+                Map.Entry e2 = (Map.Entry) o2;
+                String v2 = e2.getValue().toString();
+                String k2 = k1 + "." + e2.getKey().toString();
+
+                if (ks.contains(k2)) {
+                    this.findFilter(new String[]{k2}, v2, not, caze);
+                }
+            }
+        } else {
+                if (ks.contains(k1)) {
+                    this.findFilter(new String[]{k1}, v1, not, caze);
+                }
+        }
+    }
+  }
+
+  /**
+   * 搜索过滤(被reqFilter调用)
    * @param keys
    * @param val
    * @param not
@@ -1102,6 +1106,14 @@ abstract public class AbstractBaseModel
    */
   protected void findFilter(String[] keys, Object val, boolean not, FetchCase caze)
   {
+    // 由于 reqFilter 取的是 Object
+    // 不会直接调用上面的函数
+    // 故需要进行强制类型转换
+    if ( val instanceof Map)
+    {
+      findFilter(keys, (Map)val, not, caze);
+    }
+
     List<String> vals;
     if (keys  ==  null)
     {

@@ -217,7 +217,7 @@ public class TableDesc {
     /**
      * 获取更改字段的SQL
      *
-     * @param table 要更改的表
+     * @param tableName 要更改的表
      * @param opr 更改类型(DROP,ADD,MODIFY)
      * @param col 字段名
      * @return 返回构造好的SQL语句
@@ -229,7 +229,7 @@ public class TableDesc {
         sql.append("ALTER TABLE `").append(tableName).append("`");
         switch (opr) {
             case TableDesc.DROP:
-                sql.append( " DROP `" ).append(col).append("`");
+                sql.append( " DROP `" ).append(col).append("`" );
                 break;
             case TableDesc.ADD:
                 sql.append(  " ADD `" ).append(col).append("` ").append(this.columns.get(col));
@@ -253,6 +253,7 @@ public class TableDesc {
     }
 
     public String alterUniKeySql(String tableName, int opr, String key) {
+        key = key.replaceFirst(":.*$", ""); // 去掉临时键标识
         StringBuilder sql = new StringBuilder();
         sql.append("ALTER TABLE `").append(tableName).append("`");
         if (opr == DROP) {
@@ -265,6 +266,7 @@ public class TableDesc {
     }
 
     public String alterIdxKeySql(String tableName, int opr, String key) {
+        key = key.replaceFirst(":.*$", ""); // 去掉临时键标识
         StringBuilder sql = new StringBuilder();
         sql.append("ALTER TABLE `").append(tableName).append("`");
         if (opr == DROP) {
