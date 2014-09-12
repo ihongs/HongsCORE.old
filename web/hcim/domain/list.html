@@ -6,17 +6,16 @@
         <param name="openUrls:1" value="['.modify','hcim/domain/form.html?id={ID}','{TABSBOX}']"/>
         <param name="sendUrls:0" value="['.remove','hcim/Domain/Remove.act']"/>
     </object>
-    <div>
-        <form class="fl toolbox btn-group">
+    <div class="clearfix">
+        <form class="toolbox btn-group pull-left">
             <button type="button" class="create btn btn-default">创建属性</button>
             <button type="button" class="modify for-select btn btn-default">修改</button>
             <button type="button" class="remove for-checks btn btn-danger" >删除</button>
         </form>
-        <form class="fr findbox btn-group" action="" method="POST">
+        <form class="findbox btn-group pull-right" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>
             <button type="submit" class="btn btn-default">查找</button>
         </form>
-        <div class="cb"></div>
     </div>
     <div class="listbox table-responsive">
         <table class="table table-hover table-striped">

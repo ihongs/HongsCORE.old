@@ -53,19 +53,16 @@
         <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','#hcum-user-pane']"/><!-- 同上, 此为修改, 故传递了 ID 参数, ID 参数会从列表选中的行中提取 -->
         <param name="sendUrls[]" value="['.remove','hcum/User/Remove.act']"/><!-- 点击第1个参数的按钮, 将选中的行 ID 发送到第2个参数的URL -->
     </object>
-    <div>
-        <div class="fl tool-box btn-group">
+    <div class="clearfix">
+        <form class="toolbox btn-group pull-left">
             <button type="button" class="create btn btn-default">创建用户</button>
             <button type="button" class="modify for-select btn btn-default">修改</button>
             <button type="button" class="remove for-checks btn btn-danger" >删除</button>
-        </div>
-        <form class="fr find-box input-group" action="" method="POST">
-            <input type="search" name="find" class="form-control"/>
-            <span class="input-group-btn">
-                <button type="submit" class="btn btn-default">查找</button>
-            </span>
         </form>
-        <div class="cb"></div>
+        <form class="findbox btn-group pull-right" action="" method="POST">
+            <input type="search" name="wd" class="form-control input-search"/>
+            <button type="submit" class="btn btn-default">查找</button>
+        </form>
     </div>
     <div class="list-box">
         <table class="table table-hover table-striped">

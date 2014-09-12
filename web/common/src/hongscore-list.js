@@ -237,9 +237,9 @@ HsList.prototype = {
 
             // 排序
             if (td.hasClass("sortable")) {
-                if (td.find(".sort-arr").size() == 0) {
+                if (td.find(".sort-ico").size() == 0) {
                     var that = this;
-                    td.append('<span class="sort-arr"></span>');
+                    td.append('<span class="sort-ico"></span>');
                     td.click(function( ) {
                         var td = jQuery ( this );
                         var fn = td.attr("data-sn")||td.attr("data-fn");
@@ -301,16 +301,16 @@ HsList.prototype = {
         switch (page.errno) {
             case 1:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
-                this.listBox.hide();
+                this.listBox.children().hide();
                 return;
             case 2:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
-                this.listBox.hide();
+                this.listBox.children().hide();
                 hsSetSerial(this._data, "page", -1);
                 this.load();
                 return;
             default:
-                this.listBox.show();
+                this.listBox.children().show();
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
@@ -322,9 +322,9 @@ HsList.prototype = {
         pmax = pmin+pn - 1; if (t<pmax) pmax = t;
 
         this.pageBox.empty();
-        var btns = jQuery('<ul class="fl pagination"></ul>').appendTo(this.pageBox);
-        var nums = jQuery('<ul class="fr pagination"></ul>').appendTo(this.pageBox);
-        jQuery('<div class="cb"></div>').appendTo(this.pageBox);
+        this.pageBox.addClass("clearfix");
+        var btns = jQuery('<ul class="pagination pull-left" ></ul>').appendTo(this.pageBox);
+        var nums = jQuery('<ul class="pagination pull-right"></ul>').appendTo(this.pageBox);
 
         if (1 != p) {
             btns.append(jQuery('<li><a href="javascript:;" data-pn="'+(p-1)+'">'+hsGetLang("list.prev.page")+'</a></li>'));
@@ -449,7 +449,7 @@ HsList.prototype = {
     },
     _fill__admin : function(td, v, n) {
         var th = this.listBox.find('thead [data-fn="'+n+'"]');
-        td.append(th.find(".vh").clone( ).removeClass("vh")).hsInit();
+        td.append(th.find(".invisible").clone().removeClass("invisible")).hsInit();
         return false;
     },
     _fill__hdate : function(td, v, n) {

@@ -1119,6 +1119,7 @@ $.fn.hsInit = function(cnf) {
 
     return box;
 };
+
 // 包裹标签
 $.fn.hsTabw = function() {
     var box = $(this);
@@ -1306,10 +1307,10 @@ function(evt) {
     var idx = tab.index  (      );
     var nav = tab.closest(".nav");
     var pns = nav.data   ( "rel");
-    nav.children( ).removeClass("active")
-       .eq(idx).addClass("active").show();
+    nav.children().removeClass("active")
+            .eq (idx).addClass("active").show();
     if (pns) {
-    pns.children( ).hide().eq(idx).show();
+        pns.children( ).hide( ).eq(idx ).show();
     }
     evt.stopPropagation();
 })
@@ -1318,15 +1319,37 @@ function(evt) {
     $(this).closest("a").hsClose();
     evt.stopPropagation();
 })
-.on("click", ".close,.cancel,.destroy",
+.on("click", ".close,.cancel,.repeal",
 function(evt) {
-    $(this).closest(".openbox,.modal").hsClose();
+    $(this).closest(".modal,.openbox").hsClose();
     evt.stopPropagation();
 })
 .on("click", "legend.dropdown-toggle,.panel-heading.dropdown-toggle",
 function(evt) {
     $(this).parent().toggleClass("dropup");
     evt.stopPropagation();
+})
+.on("click", "select[multiple]",
+function(evt) {
+    if (evt.shiftKey || evt.ctrlKey || evt.altKey) {
+        return;
+    }
+    var vals = $(this).data("vals") || [];
+    var valz = $(this).val();
+    if (valz.length == 0) {
+        vals = [];
+    } else {
+        $.each(valz, function(x,  v  ) {
+            var i = $.inArray(v, vals);
+            if (i >= 0) {
+                vals.splice(i, 1);
+            } else {
+                vals.push( v );
+            }
+        });
+    }
+    $(this).data("vals", vals);
+    $(this).val ( vals);
 });
 
 $(function () {

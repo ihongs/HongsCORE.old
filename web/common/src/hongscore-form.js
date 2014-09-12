@@ -275,9 +275,8 @@ HsForm.prototype = {
         }
         inp.empty();
         for(i == 0; i < v.length; i ++) {
-            inp.append($('<div class="fl"></div>').text(b[v[i]]));
+            inp.append(jQuery('<li></li>').text(b[v[i]]));
         }
-        inp.append($('<div class="cb"></div>'));
     },
     _fill__select : function(inp, v, n, t) {
         if (t !== "data")  return v;
@@ -290,7 +289,7 @@ HsForm.prototype = {
                .data("data", v[i]);
             inp.append(opt);
         }
-        inp.change();
+        inp.change().click(); // multiple 必须触发 click 才初始化
     },
     _fill__check : function(inp, v, n, t) {
         if (t !== "data") return v;
@@ -304,8 +303,7 @@ HsForm.prototype = {
             lab.data("data", v[i]);
             inp.append(lab);
         }
-        inp.append($('<div class="cb"></div>'));
-        inp.find(":checkbox").change();
+        inp.find(":checkbox").first().change();
     },
     _fill__radio : function(inp, v, n, t) {
         if (t !== "data") return v;
@@ -319,8 +317,7 @@ HsForm.prototype = {
             lab.data("data", v[i]);
             inp.append(lab);
         }
-        inp.append($('<div class="cb"></div>'));
-        inp.find(":radio").change();
+        inp.find(":radio").first().change();
     },
 
     valiInit : function() {
@@ -388,10 +385,10 @@ HsForm.prototype = {
         }
         if (err == undefined) {
             grp.removeClass("has-error");
-            blk.   addClass("vh");
+            blk.   addClass("invisible");
         } else {
             grp.   addClass("has-error");
-            blk.removeClass("vh");
+            blk.removeClass("invisible");
             blk.text(err);
         }
     },

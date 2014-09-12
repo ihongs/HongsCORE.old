@@ -57,6 +57,19 @@
                     <label class="control-label">校验规则</label>
                     <input type="text" name="rule" class="form-control"/>
                 </div>
+                <div class="form-group">
+                    <label class="control-label">校验规则</label>
+                    <select class="form-control" multiple="multiple">
+                        <option value="1">手机登录方式地方</option>
+                        <option value="2">手机登录方式地方</option>
+                        <option value="3">手机登录方式地方</option>
+                        <option value="4">手机登录方式地方</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">选项</label>
+                    <textarea name="options" class="form-control" placeholder="一行一个选项, 格式: 选项名 或 选项值:选项名"></textarea>
+                </div>
             </div>
         </div>
         <div>
@@ -74,6 +87,7 @@
             "size" : "0",
             "scale" : "0",
             "signed" : "0",
+            "options": "",
             "min" : "0",
             "max" : "0"
         };
@@ -96,6 +110,10 @@
                 case "4":
                 case "5":
                     shows = ["rule"];
+                    break;
+                case "81":
+                case "82":
+                    shows = ["options"];
                     break;
             }
             for(var i = 0; i < shows.length; i ++) {
