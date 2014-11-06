@@ -3,7 +3,7 @@ package app.hongs.util;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
-import app.hongs.action.DataConfig;
+import app.hongs.action.CollConfig;
 import app.hongs.db.AbstractBaseModel;
 import app.hongs.db.FetchCase;
 
@@ -56,7 +56,7 @@ public class Verifier {
     }
 
     public Verifier setRule(String conf, String form) throws HongsException {
-        DataConfig cnf = DataConfig.getInstance(conf);
+        CollConfig cnf = CollConfig.getInstance(conf);
 
         int i = 0;
         try {

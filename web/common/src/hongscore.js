@@ -1022,15 +1022,15 @@ $.fn.hsReady = function() {
         return box;
     }
 
-    // 为所有的 input 加上 input-type , 方便设置样式, 兼容老浏览器
-    box.find('input').each(function() {
-        $(this).addClass("input-" + $(this).attr("type"));
-    });
-
     // 为避免在 chrome 等浏览器中显示空白间隔, 清除全部空白文本节点
     box.find('*').contents().filter(function() {
         return this.nodeType == 3 && /^\s+$/.test(this.nodeValue);
     }).remove();
+
+    // 为所有的 input 加上 input-type , 方便设置样式, 兼容老浏览器
+    box.find('input').each(function() {
+        $(this).addClass("input-" + $(this).attr("type"));
+    });
 
     // 至少要执行 hsInit
     if (box.children("object.config[name=hsInit]").size( ) === 0) {
@@ -1059,6 +1059,11 @@ $.fn.hsReady = function() {
 
     box.find(".nav").each(function() {
         $(this).hsTabs(  );
+    });
+
+    box.find(".dropdown-body").each(function() {
+        var x = $(this).parent().is(".dropup");
+        $(this).toggleClass("invisible" , ! x);
     });
 
     box.trigger("hsReady");
@@ -1324,9 +1329,13 @@ function(evt) {
     $(this).closest(".modal,.openbox").hsClose();
     evt.stopPropagation();
 })
-.on("click", "legend.dropdown-toggle,.panel-heading.dropdown-toggle",
+.on("click", ".dropdown-toggle",
 function(evt) {
-    $(this).parent().toggleClass("dropup");
+    var body = $(this).siblings(  ".dropdown-body"  );
+    if (body.size() == 0) return;
+    var cont = $(this).parent( );
+    cont.toggleClass( "dropup" );
+    body.toggleClass("invisible",!cont.is(".dropup"));
     evt.stopPropagation();
 })
 .on("click", "select[multiple]",

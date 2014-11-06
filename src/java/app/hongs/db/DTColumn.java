@@ -13,7 +13,7 @@ import java.sql.SQLException;
  * 表字段信息缓存类
  *
  * <p>
- * 缓存文件存放在 "WEB-INF/tmps/dc-库名.表名.ser" 的文件中;
+ * 缓存文件存放在 "WEB-INF/tmps/库名.表名.dc.ser" 的文件中;
  * 当表结构发生改变, 程序不会自动重载, 务必删除对应的缓存文件.
  * </p>
  *
@@ -34,16 +34,16 @@ public class DTColumn
     this.table = table;
     if (table.db.name != null && table.db.name.length()!=0)
     {
-      this.init("dt." +table.db.name+ "." +table.tableName);
+      this.init(table.db.name +"."+ table.tableName +".dc");
     }
     else
     {
-      this.loadData();
+      this.imports();
     }
   }
 
   @Override
-  protected final void loadData()
+  protected final void imports()
     throws HongsException
   {
     this.columns = new HashMap();

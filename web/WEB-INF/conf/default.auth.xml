@@ -13,7 +13,7 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://hongs-core ac.xsd">
     <page name="首页" uri="/">
-        <include>hcam</include>
+        <include>hcim</include>
         <page name="信息管理" uri="/hcim/index.html"></page>
         <page name="用户管理" uri="/hcum/index.html"></page>
         <!--

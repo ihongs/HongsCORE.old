@@ -2,7 +2,7 @@ package app.hongs.action.annotation;
 
 import app.hongs.CoreLanguage;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.DataConfig;
+import app.hongs.action.CollConfig;
 import app.hongs.util.Tree;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class InListInvoker {
         String   lang = ann.lang();
         String[] keys = ann.keys();
 
-        DataConfig cnf = DataConfig.getInstance(conf);
+        CollConfig cnf = CollConfig.getInstance(conf);
         CoreLanguage lng = CoreLanguage.getInstance(lang);
 
         for(String key : keys) {

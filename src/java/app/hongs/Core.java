@@ -122,7 +122,7 @@ extends HashMap<String, Object>
     Iterator it;
 
     /**
-     * 先执行 destroy 再执行 remove
+     * 先执行 destroy 再执行 remove 就
      * 不会因 destroy 里用到了其他对象而导致失败了
      */
 
@@ -286,7 +286,7 @@ extends HashMap<String, Object>
   public static byte ENVIR;
 
   /**
-   * 应用基础路径
+   * 应用基础链接
    */
   public static String BASE_HREF;
 
@@ -321,9 +321,9 @@ extends HashMap<String, Object>
   public static String SERVER_ID;
 
   /**
-   * 全局开始时间
+   * 系统启动时间
    */
-  public static Long GLOBAL_TIME = System.currentTimeMillis();
+  public static long STARTS_TIME = System.currentTimeMillis();
 
   /**
    * 全局核心对象
@@ -412,13 +412,13 @@ extends HashMap<String, Object>
   public static String getUniqueId(String svid)
   {
     long n1 = System.currentTimeMillis();
-    String s1 = String.format("%8s", Text.to36Hex(n1));
+    String s1 = String.format("%8s", Text.as36Hex(n1));
 
     long n2 = Thread.currentThread().getId();
-    String s2 = String.format("%4s", Text.to36Hex(n2));
+    String s2 = String.format("%4s", Text.as36Hex(n2));
 
-    long n3 = (long)(Math.random() * 1000000);
-    String s3 = String.format("%4s", Text.to36Hex(n3));
+    long n3 = (long)(Math.random() * 1679615); //36^4-1
+    String s3 = String.format("%4s", Text.as36Hex(n3));
 
     if (s1.length() > 8) s1 = s1.substring(s1.length() - 8);
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);

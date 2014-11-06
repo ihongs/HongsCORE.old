@@ -2,17 +2,18 @@ package app.hongs.db;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.util.Text;
 import app.hongs.HongsException;
-
+import app.hongs.util.Text;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 基础模型
@@ -93,7 +94,7 @@ abstract public class AbstractBaseModel
 
   /**
    * 受影响的ID
- 在save/perform/remove后被设置为影响的行id
+   * 在save/perform/remove后被设置为影响的行id
    */
   protected List<String> affectedIds;
 
@@ -916,7 +917,7 @@ abstract public class AbstractBaseModel
     throws HongsException
   {
     List<String> cols;
-    if (caze.hasSelect())
+    if (caze.hasOrderBy())
     {
       return;
     }
@@ -1065,42 +1066,6 @@ abstract public class AbstractBaseModel
 
   /**
    * 搜索过滤(被reqFilter调用)
-   * 针对具体搜索字段
-   * @param keys
-   * @param val
-   * @param not
-   * @param caze
-   */
-  protected void findFilter(String[] keys, Map val, boolean not, FetchCase caze)
-  {
-    List ks = Arrays.asList(this.findCols);
-    Map  m1 = val;
-    for (Object o1 : m1.entrySet()) {
-        Map.Entry e1 = (Map.Entry) o1;
-        Object v1 = e1.getValue();
-        String k1 = e1.getKey().toString();
-
-        if (v1 instanceof Map) {
-            Map m2 = (Map) v1;
-            for (Object o2 : m2.entrySet()) {
-                Map.Entry e2 = (Map.Entry) o2;
-                String v2 = e2.getValue().toString();
-                String k2 = k1 + "." + e2.getKey().toString();
-
-                if (ks.contains(k2)) {
-                    this.findFilter(new String[]{k2}, v2, not, caze);
-                }
-            }
-        } else {
-                if (ks.contains(k1)) {
-                    this.findFilter(new String[]{k1}, v1, not, caze);
-                }
-        }
-    }
-  }
-
-  /**
-   * 搜索过滤(被reqFilter调用)
    * @param keys
    * @param val
    * @param not
@@ -1162,6 +1127,42 @@ abstract public class AbstractBaseModel
 
         caze.where(key + (not?" NOT LIKE ?":" LIKE ?") + " ESCAPE '/'", find);
       }
+    }
+  }
+
+  /**
+   * 搜索过滤(被reqFilter调用)
+   * 针对具体搜索字段
+   * @param keys
+   * @param val
+   * @param not
+   * @param caze
+   */
+  protected void findFilter(String[] keys, Map val, boolean not, FetchCase caze)
+  {
+    List ks = Arrays.asList(this.findCols);
+    Map  m1 = val;
+    for (Object o1 : m1.entrySet()) {
+        Map.Entry e1 = (Map.Entry) o1;
+        Object v1 = e1.getValue();
+        String k1 = e1.getKey().toString();
+
+        if (v1 instanceof Map) {
+            Map m2 = (Map) v1;
+            for (Object o2 : m2.entrySet()) {
+                Map.Entry e2 = (Map.Entry) o2;
+                String v2 = e2.getValue().toString();
+                String k2 = k1 + "." + e2.getKey().toString();
+
+                if (ks.contains(k2)) {
+                    this.findFilter(new String[]{k2}, v2, not, caze);
+                }
+            }
+        } else {
+                if (ks.contains(k1)) {
+                    this.findFilter(new String[]{k1}, v1, not, caze);
+                }
+        }
     }
   }
 

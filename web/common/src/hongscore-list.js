@@ -322,19 +322,16 @@ HsList.prototype = {
         pmax = pmin+pn - 1; if (t<pmax) pmax = t;
 
         this.pageBox.empty();
-        this.pageBox.addClass("clearfix");
-        var btns = jQuery('<ul class="pagination pull-left" ></ul>').appendTo(this.pageBox);
-        var nums = jQuery('<ul class="pagination pull-right"></ul>').appendTo(this.pageBox);
+        //this.pageBox.addClass("clearfix");
+        var pbox = jQuery('<ul class="pagination"></ul>').appendTo(this.pageBox);
+        var btns = pbox;//jQuery('<ul class="pagination pull-left" ></ul>').appendTo(this.pageBox);
+        var nums = pbox;//jQuery('<ul class="pagination pull-right"></ul>').appendTo(this.pageBox);
 
         if (1 != p) {
-            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+(p-1)+'">'+hsGetLang("list.prev.page")+'</a></li>'));
+            pn = p - 1;
+            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
         } else {
-            btns.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.prev.page")+'</a></li>'));
-        }
-        if (t != p) {
-            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+(p+1)+'">'+hsGetLang("list.next.page")+'</a></li>'));
-        } else {
-            btns.append(jQuery('<li class="disabled"><a href="javascript:;">'+hsGetLang("list.next.page")+'</a></li>'));
+            btns.append(jQuery('<li class="disabled"><a href="javascript:;" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
         }
         if (1 < pmin-1) {
             nums.append(jQuery('<li><a href="javascript:;" data-pn="'+1+'">'+1+'</a></li>'));
@@ -348,6 +345,12 @@ HsList.prototype = {
             nums.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmax+1)+'">'+(pmax+1)+'</a></li>'));
             nums.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
             nums.append(jQuery('<li><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
+        }
+        if (t != p) {
+            pn = p + 1;
+            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
+        } else {
+            btns.append(jQuery('<li class="disabled"><a href="javascript:;" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
         }
 
         this.pageBox.find("[data-pn="+p+"]").addClass("page-curr");

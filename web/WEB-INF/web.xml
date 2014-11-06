@@ -5,33 +5,33 @@
         <param-name>debug</param-name>
         <param-value>3</param-value>
     </context-param>
-    <!-- Init Filter -->
+    <!-- Action Filter -->
     <filter>
-        <filter-name>InitFilter</filter-name>
-        <filter-class>app.hongs.action.InitFilter</filter-class>
+        <filter-name>ActionFilter</filter-name>
+        <filter-class>app.hongs.action.ActionFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>InitFilter</filter-name>
+        <filter-name>ActionFilter</filter-name>
         <url-pattern>*.act</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>InitFilter</filter-name>
+        <filter-name>ActionFilter</filter-name>
         <url-pattern>*.api</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>InitFilter</filter-name>
+        <filter-name>ActionFilter</filter-name>
         <url-pattern>*.jsp</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>InitFilter</filter-name>
+        <filter-name>ActionFilter</filter-name>
         <url-pattern>/common/auth/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>InitFilter</filter-name>
+        <filter-name>ActionFilter</filter-name>
         <url-pattern>/common/conf/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>InitFilter</filter-name>
+        <filter-name>ActionFilter</filter-name>
         <url-pattern>/common/lang/*</url-pattern>
     </filter-mapping>
     <!-- Action Servlet -->
@@ -82,8 +82,8 @@
     <!-- Default Tags -->
     <jsp-config>
         <taglib>
-            <taglib-uri>/hs.tags</taglib-uri>
-            <taglib-location>/WEB-INF/conf/default.tld</taglib-location>
+            <taglib-uri>/hongs.tag</taglib-uri>
+            <taglib-location>/WEB-INF/tag.tld</taglib-location>
         </taglib>
     </jsp-config>
     <!-- Other Settings -->

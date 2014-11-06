@@ -25,19 +25,19 @@ public final class Text
    * <pre>
    * 所用字符集: 0-9A-Za-z
    * 随想:
-   * 这拉丁字符实在太乱了, 字符高矮不齐, 单词长短不一...
-   * 对于一个中国人, 早已习惯中文的整齐, 看着确有些别扭.
-   * 不过发现了16进制的一个特点, 从a到f, 偶数矮, 奇数高.
+   * 这拉丁字符实在太乱了, 字符高矮不齐, 单词长短不一;
+   * 对于一个中国人, 早已习惯中文的整齐, 看着有些别扭;
+   * 不过发现了16进制的一个特点, 从a到f, 偶数矮奇数高;
    * 正所谓: 阳中有阴, 阴中有阳, 呵呵^________________^
    * </pre>
    */
-  private final static char[] arr36 = {
+  private final static char[] _36Hex = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
   };
-  private final static char[] arr26 = {
+  private final static char[] _26Hex = {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
@@ -50,7 +50,7 @@ public final class Text
    * @param arr 转换序列
    * @return 指定进制的数字字符串
    */
-  public static String toXHex(long num, char[] arr)
+  public static String asXHex(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
@@ -75,7 +75,7 @@ public final class Text
    * @param arr 转换序列
    * @return 指定进制的数字字符串
    */
-  public static String toYHex(long num, char[] arr)
+  public static String asYHex(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
@@ -96,9 +96,9 @@ public final class Text
    * @param num 0~MAX
    * @return 36进制串
    */
-  public static String to36Hex(long num)
+  public static String as36Hex(long num)
   {
-    return toXHex(num, arr36);
+    return Text.asXHex(num, _36Hex);
   }
 
   /**
@@ -106,12 +106,12 @@ public final class Text
    * @param num 1~MAX
    * @return 26进制串
    */
-  public static String to26Hex(long num)
+  public static String as26Hex(long num)
   {
-    return toYHex(num, arr26);
+    return Text.asYHex(num, _26Hex);
   }
 
-  public static long fromXHex(String str, char[] arr) {
+  public static long asXHex(String str, char[] arr) {
       Map<Character, Integer> map = new HashMap();
       char[] chs = str.toCharArray();
       long   num = 0;
@@ -127,7 +127,7 @@ public final class Text
       return num;
   }
 
-  public static long fromYHex(String str, char[] arr) {
+  public static long asYHex(String str, char[] arr) {
       Map<Character, Integer> map = new HashMap();
       char[] chs = str.toCharArray();
       long   num = 0;
@@ -143,12 +143,12 @@ public final class Text
       return num;
   }
 
-  public static long from36Hex(String str) {
-      return fromXHex(str, arr36);
+  public static long as36Hex(String str) {
+      return asXHex(str, _36Hex);
   }
 
-  public static long from26Hex(String str) {
-      return fromYHex(str, arr26);
+  public static long as26Hex(String str) {
+      return asYHex(str, _26Hex);
   }
 
   //** 转义 **/

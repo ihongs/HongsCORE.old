@@ -85,6 +85,7 @@ public class CmdletAction
     cls = act.substring(pos+1);
     act = act.substring(0,pos);
 
+    // 动作地址映射
     CoreConfig conf = (CoreConfig )
       Core.getInstance(CoreConfig.class);
     act = "app."+act+".cmdlet";

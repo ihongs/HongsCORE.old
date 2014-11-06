@@ -130,26 +130,26 @@ public class AuthConfig
   }
 
   @Override
-  protected boolean isExpired(long time)
+  protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + "auth." + name + ".xml");
+                + File.separator + name + ".auth.xml");
     File serFile = new File(Core.TMPS_PATH
-                + File.separator + "auth." + name + ".ser");
+                + File.separator + name + ".auth.ser");
     return xmlFile.lastModified() > serFile.lastModified();
   }
 
   @Override
-  protected void loadData()
+  protected void imports()
     throws HongsException
   {
     File df = new File(Core.CONF_PATH
-                + File.separator + "auth." + name + ".xml");
+                + File.separator + name + ".auth.xml");
     if (!df.exists())
     {
       throw new HongsException(0x10e0, "Auth config file '"
                 + Core.CONF_PATH
-                + File.separator + "auth." + name + ".xml"
+                + File.separator + name + ".auth.xml"
                 + "' is not exists");
     }
 

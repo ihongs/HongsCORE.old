@@ -8,19 +8,18 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.Text;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.regex.Pattern;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * 外壳程序启动器(原名shell)
@@ -69,6 +68,7 @@ public class Cmdlet
     cls = act.substring(pos+1);
     act = act.substring(0,pos);
 
+    // 命令地址映射
     CoreConfig conf = (CoreConfig )
       Core.getInstance(CoreConfig.class);
     act = "app."+act+".cmdlet";
@@ -125,14 +125,14 @@ public class Cmdlet
     {
       if (0 < Core.DEBUG)
       {
-        CoreLogger.debug(Core.ACTION_PATH.get() + "Starting...");
+        CoreLogger.debug(Core.ACTION_PATH.get() + " Starting...");
       }
 
       method.invoke(null, new Object[] {args});
 
       if (0 < Core.DEBUG)
       {
-        CoreLogger.debug(Core.ACTION_PATH.get() + "Finished!!!");
+        CoreLogger.debug(Core.ACTION_PATH.get() + " Finished!!!");
       }
     }
     catch (IllegalAccessException ex)
@@ -181,7 +181,7 @@ public class Cmdlet
       if (1 < Core.DEBUG)
       {
           CoreLogger.debug("Total exec time: "
-          +(Text.humanTime(System.currentTimeMillis()-core.GLOBAL_TIME)));
+          +(Text.humanTime(System.currentTimeMillis()-core.STARTS_TIME)));
       }
 
       try
@@ -206,16 +206,25 @@ public class Cmdlet
     args = (String[]) opts.get("");
 
     Core.THREAD_CORE.set(Core.GLOBAL_CORE);
-    Core.ACTION_TIME.set(Core.GLOBAL_TIME);
+    Core.ACTION_TIME.set(Core.STARTS_TIME);
 
     /** 静态属性配置 **/
 
     Core.ENVIR = 0;
     Core.DEBUG = 0;
+    Core.BASE_HREF = "";
+    Core.BASE_PATH = System.getProperty("user.dir");
 
     if (opts.containsKey("debug"))
     {
       Core.DEBUG = Byte.parseByte(opts.get("debug").toString());
+    }
+
+    if (opts.containsKey("basehref"))
+    {
+      Core.BASE_HREF = (String)opts.get( "basehref" );
+      Core.BASE_HREF =  Pattern.compile( "[/\\\\]$" )
+          .matcher(Core.BASE_HREF).replaceFirst( "" );
     }
 
     if (opts.containsKey("basepath"))
@@ -224,21 +233,39 @@ public class Cmdlet
       Core.BASE_PATH =  Pattern.compile( "[/\\\\]$" )
           .matcher(Core.BASE_PATH).replaceFirst( "" );
     }
-    else
-    {
-      Core.BASE_PATH = System.getProperty("user.dir");
-    }
 
     Core.CONF_PATH = Core.BASE_PATH + File.separator + "conf";
     Core.LANG_PATH = Core.BASE_PATH + File.separator + "lang";
     Core.LOGS_PATH = Core.BASE_PATH + File.separator + "logs";
     Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    Core.LOGS_PATH  = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
-    Core.TMPS_PATH  = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
-    Core.BASE_HREF  = conf.getProperty("core.base.href", "" );
-    Core.SERVER_ID  = conf.getProperty("core.server.id", "" );
+    CoreConfig conf = (CoreConfig)Core.getInstance( CoreConfig.class );
+    Core.LOGS_PATH = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
+    Core.TMPS_PATH = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
+    Core.SERVER_ID = conf.getProperty("core.server.id", "");
+
+    /** 系统属性配置 **/
+
+        // 启动系统属性
+        for (Map.Entry et : conf.entrySet()) {
+            String k = (String)et.getKey  ();
+            String v = (String)et.getValue();
+            if (k.startsWith("start.")) {
+                System.setProperty(k.substring(6), v);
+            }
+        }
+
+    if (0 < Core.DEBUG) {
+        // 调试系统属性
+        for (Map.Entry et : conf.entrySet()) {
+            String k = (String)et.getKey  ();
+            String v = (String)et.getValue();
+            if (k.startsWith("debug.")) {
+                System.setProperty(k.substring(6), v);
+            }
+        }
+    }
+
 
     /** 实例属性配置 **/
 

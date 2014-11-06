@@ -8,7 +8,8 @@ public class HongsLocalized {
 
     private int code;
     private String desc;
-    private String[ ] opts;
+    private String lang;
+    private String[] opts;
 
     public HongsLocalized(int code, String desc) {
         this.code = code;
@@ -37,8 +38,15 @@ public class HongsLocalized {
      */
     public String getMessage()
     {
-        return "(Ex" + Integer.toHexString(code) + ")"
-              + ( desc == null  ?  "" : ": " + desc );
+        String codx = "Ex" + Integer.toHexString(code);
+        String desx = desc != null ? desc : "";
+        if (null  !=  lang) {
+            codx   =  lang
+                  .replaceAll("[/\\\\]", ".")
+                .replaceFirst("\\.error$","")
+              + "." + codx;
+        }
+        return codx + ": " + desx;
     }
 
     /**
@@ -46,11 +54,15 @@ public class HongsLocalized {
      * @return
      */
     public String getLocalizedMessage() {
-        CoreLanguage lang = new CoreLanguage("_error_");
-        String ckey, dkey, codx, desx; String[] optx;
-        codx = "Ex" + Integer.toHexString(code);
+        CoreLanguage trns;
+        String ckey, dkey;
+        String codx, desx;
+        String[] optx;
+
+        codx = "Ex" + Integer.toHexString(  code  );
         desx = desc != null ? desc : "" ;
-        optx = opts != null ? opts : new String[] {};
+        optx = opts != null ? opts : new String[]{};
+        trns = new CoreLanguage("error");
 
         // 0x10,0x11,0x1000,0x1001 为保留的代号
         // 0x11,0x1001 使用消息作为语言键
@@ -70,18 +82,41 @@ public class HongsLocalized {
                 dkey = "error." + codx;
         }
 
-        if (lang.containsKey(ckey)) {
-            codx = lang.translate(ckey, codx);
+        if (null  !=  lang) {
+            trns.load(lang);
+            codx   =  lang
+                  .replaceAll("[/\\\\]", ".")
+                .replaceFirst("\\.error$","")
+              + "." + codx ;
         }
-        if (lang.containsKey(dkey)) {
-            desx = lang.translate(dkey, optx);
+        if (trns.containsKey(ckey)) {
+            codx = trns.translate(ckey, codx);
+        }
+        if (trns.containsKey(dkey)) {
+            desx = trns.translate(dkey, optx);
         }
 
-        return codx + " " + desx;
+        return codx + ' ' + desx;
     }
 
     /**
-     * 获取翻译选项
+     * 获取翻译章节(模块语言)
+     * @return
+     */
+    public String getLocalizedSection() {
+        return this.lang;
+    }
+
+    /**
+     * 设置翻译章节(模块语言)
+     * @param lang
+     */
+    public void setLocalizedSection(String lang) {
+        this.lang = lang;
+    }
+
+    /**
+     * 获取翻译选项(填充参数)
      * @return
      */
     public String[] getLocalizedOptions() {
@@ -89,7 +124,7 @@ public class HongsLocalized {
     }
 
     /**
-     * 设置翻译选项
+     * 设置翻译选项(填充参数)
      * @param opts
      */
     public void setLocalizedOptions(String... opts) {

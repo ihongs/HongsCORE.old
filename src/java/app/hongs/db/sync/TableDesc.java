@@ -272,7 +272,7 @@ public class TableDesc {
         if (opr == DROP) {
             sql.append(" DROP INDEX `" ).append(key).append("`");
         } else {
-            Set<String> cols = this.uniKeys.get(key);
+            Set<String> cols = this.idxKeys.get(key);
             sql.append( " ADD INDEX `" ).append(key).append("` (").append(getCols(cols)).append(")");
         }
         return sql.toString();
@@ -282,7 +282,7 @@ public class TableDesc {
         StringBuilder sb = new StringBuilder();
         Iterator it = keys.iterator();
         while (it.hasNext()) {
-            sb.append(",`" + (String) it.next() + "`");
+            sb.append(",`").append((String) it.next()).append("`");
         }
         return sb.substring(1);
     }

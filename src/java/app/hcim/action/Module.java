@@ -15,11 +15,15 @@ import java.util.Map;
 @Action
 public class Module {
 
-    private app.hcim.model.Module model;
+    private final app.hcim.model.Module model;
+    private final CoreLanguage lang;
 
     public Module() {
         model = (app.hcim.model.Module)
                 Core.getInstance(app.hcim.model.Module.class);
+        lang  = (CoreLanguage)
+                Core.getInstance(CoreLanguage.class);
+        lang.load("hcim");
     }
 
     public void actionList(ActionHelper helper)
@@ -39,8 +43,6 @@ public class Module {
     throws HongsException {app.hongs.util.JSON.dumps(helper.getRequestData());
         String id = model.save(helper.getRequestData());
 
-        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
-
         String nms = model.getAffectedNames();
         String msg = lang.translate("core.save.module.success", nms);
 
@@ -51,8 +53,6 @@ public class Module {
     public void actionRemove(ActionHelper helper)
     throws HongsException {
         model.remove(helper.getRequestData());
-
-        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
 
         String nms = model.getAffectedNames();
         String msg = lang.translate("core.remove.module.success", nms);

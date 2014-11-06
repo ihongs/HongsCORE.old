@@ -4,84 +4,81 @@ import app.hongs.Core;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 import app.hongs.util.JSON;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.io.File;
 import java.io.IOException;
-
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
- * 数据配置
+ * 集合配置
  *
  * <p>
  * 在 Java 7 之前写 List,Set,Map 很麻烦, 不能像写 JSON 那样方便;<br/>
  * 有些数据需要方便修改, 而修改代码比较麻烦;<br/>
  * 需要统一管理一些数据, 如状态/类型/选项等.<br/>
  * 故编写此类用于解决以上问题, 可从 XML 中读取结构数据或 JSON 数据.<br/>
- * XML 的结构请参考 WEB-INF/conf 中的 data.xsd 和 data-default.xml
+ * XML 的结构请参考 WEB-INF/conf 中的 coll.xsd 和 default.coll.xml
  * </p>
  *
  * @author Hongs
  */
-public class DataConfig
+public class CollConfig
   extends CoreSerially
 {
 
   private String name;
 
   public Map<String, Object> datas;
-  public Map<String, Set<String[]>> reqDatas;
-  public Map<String, Set<String[]>> rspDatas;
+//  public Map<String, Set<String[]>> reqDatas;
+//  public Map<String, Set<String[]>> rspDatas;
 
-  public DataConfig(String name)
+  public CollConfig(String name)
     throws HongsException
   {
     this.name = name;
-    this.init("data." + name);
+    this.init("coll." + name);
   }
 
   @Override
-  protected boolean isExpired(long time)
+  protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + "data." + name + ".xml");
+                + File.separator + name + ".coll.xml");
     File serFile = new File(Core.TMPS_PATH
-                + File.separator + "data." + name + ".ser");
-    return xmlFile.lastModified() > serFile.lastModified();
+                + File.separator + name + ".coll.ser");
+    return xmlFile.lastModified() > serFile.lastModified( );
   }
 
   @Override
-  protected void loadData()
+  protected void imports()
     throws HongsException
   {
     File df = new File(Core.CONF_PATH
-                + File.separator + "data." + name + ".xml");
+                + File.separator + name + ".coll.xml");
     if (!df.exists())
     {
-      throw new HongsException(0x10e4, "Data config file '"
+      throw new HongsException(0x10e4, "Coll config file '"
                 + Core.CONF_PATH
-                + File.separator + "data." + name + ".xml"
+                + File.separator + name + ".coll.xml"
                 + "' is not exists");
     }
 
-    this.datas = new HashMap();
-    this.reqDatas = new HashMap();
-    this.rspDatas = new HashMap();
+    this.datas = new LinkedHashMap();
+//    this.reqDatas = new HashMap();
+//    this.rspDatas = new HashMap();
 
     try
     {
@@ -90,7 +87,7 @@ public class DataConfig
       Document doc = dbn.parse(df);
 
       this.parseData(doc.getDocumentElement(),
-        this.datas, this.reqDatas, this.rspDatas, null);
+        this.datas, /*this.reqDatas, this.rspDatas,*/ null);
 
       // 测试
       /*
@@ -114,7 +111,7 @@ public class DataConfig
   }
 
   private void parseData(Element element, Object datas,
-    Map reqDatas, Map rspDatas, Set links)
+    /*Map reqDatas, Map rspDatas,*/ Set links)
     throws HongsException
   {
     if (!element.hasChildNodes())
@@ -143,12 +140,12 @@ public class DataConfig
         Object data2;
         if ("map".equals(type))
         {
-          data2 = new HashMap();
+          data2 = new LinkedHashMap();
         }
         else
         if ("set".equals(type))
         {
-          data2 = new HashSet();
+          data2 = new LinkedHashSet();
         }
         else
         if ("list".equals(type))
@@ -157,7 +154,7 @@ public class DataConfig
         }
         else
         {
-          data2 = this.parseData(element2.getTextContent().toString(), type);
+          data2 = this.parseData(element2.getTextContent(), type);
         }
 
         if (datas instanceof List)
@@ -175,7 +172,7 @@ public class DataConfig
           ((Map)datas).put(key, data2);
         }
 
-        this.parseData(element2, data2, null, null, null);
+        this.parseData(element2, data2, /*null, null,*/ null);
       }
       else
       if ("link".equals(tagName2))
@@ -185,38 +182,38 @@ public class DataConfig
 
         links.add(new String[] {key, link});
       }
-      else
-      if ("req".equals(tagName2)
-      ||  "rsp".equals(tagName2))
-      {
-        Map data2 = new HashMap();
-        Set link2 = new HashSet();
-
-        this.parseData(element2, data2, null, null, link2);
-
-        String uri = element2.getAttribute("uri");
-
-        Iterator it = data2.entrySet().iterator();
-        while (it.hasNext())
-        {
-          Map.Entry et = (Map.Entry)it.next();
-          String key = (String)et.getKey();
-          Object value = et.getValue();
-
-          String uriKey = uri+"."+key;
-          ((Map) datas).put(uriKey, value);
-          link2.add(new String[] {key, uriKey});
-        }
-
-        if ("rsp".equals(tagName2))
-        {
-          rspDatas.put(uri, link2);
-        }
-        else
-        {
-          reqDatas.put(uri, link2);
-        }
-      }
+//      else
+//      if ("req".equals(tagName2)
+//      ||  "rsp".equals(tagName2))
+//      {
+//        Map data2 = new HashMap();
+//        Set link2 = new HashSet();
+//
+//        this.parseData(element2, data2, /*null, null,*/ link2);
+//
+//        String uri = element2.getAttribute("uri");
+//
+//        Iterator it = data2.entrySet().iterator();
+//        while (it.hasNext())
+//        {
+//          Map.Entry et = (Map.Entry)it.next();
+//          String key = (String)et.getKey();
+//          Object value = et.getValue();
+//
+//          String uriKey = uri+"."+key;
+//          ((Map) datas).put(uriKey, value);
+//          link2.add(new String[] {key, uriKey});
+//        }
+//
+//        if ("rsp".equals(tagName2))
+//        {
+//          rspDatas.put(uri, link2);
+//        }
+//        else
+//        {
+//          reqDatas.put(uri, link2);
+//        }
+//      }
     }
   }
 
@@ -312,51 +309,51 @@ public class DataConfig
     return data;
   }
 
-  public Map getDataByReq(String uri)
-  {
-    Map map = new HashMap();
-    if (this.reqDatas.containsKey(uri))
-    {
-      Set <String[]> data = this.reqDatas.get(uri);
-      for (String[] key : data)
-      {
-        map.put(key[0], this.getDataByKey(key[1]));
-      }
-    }
-    return map;
-  }
+//  public Map getDataByReq(String uri)
+//  {
+//    Map map = new HashMap();
+//    if (this.reqDatas.containsKey(uri))
+//    {
+//      Set <String[]> data = this.reqDatas.get(uri);
+//      for (String[] key : data)
+//      {
+//        map.put(key[0], this.getDataByKey(key[1]));
+//      }
+//    }
+//    return map;
+//  }
 
-  public Map getDataByRsp(String uri)
-  {
-    Map map = new HashMap();
-    if (this.rspDatas.containsKey(uri))
-    {
-      Set <String[]> data = this.rspDatas.get(uri);
-      for (String[] key : data)
-      {
-        map.put(key[0], this.getDataByKey(key[1]));
-      }
-    }
-    return map;
-  }
+//  public Map getDataByRsp(String uri)
+//  {
+//    Map map = new HashMap();
+//    if (this.rspDatas.containsKey(uri))
+//    {
+//      Set <String[]> data = this.rspDatas.get(uri);
+//      for (String[] key : data)
+//      {
+//        map.put(key[0], this.getDataByKey(key[1]));
+//      }
+//    }
+//    return map;
+//  }
 
   //** 工厂方法 **/
 
-  public static DataConfig getInstance(String name) throws HongsException {
-      String key = DataConfig.class.getName() + ":" + name;
+  public static CollConfig getInstance(String name) throws HongsException {
+      String key = CollConfig.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      DataConfig inst;
+      CollConfig inst;
       if (core.containsKey(key)) {
-          inst = (DataConfig)core.get(key);
+          inst = (CollConfig)core.get(key);
       }
       else {
-          inst = new DataConfig(name);
+          inst = new CollConfig(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static DataConfig getInstance() throws HongsException {
+  public static CollConfig getInstance() throws HongsException {
       return getInstance("default");
   }
 }

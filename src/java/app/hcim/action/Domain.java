@@ -17,11 +17,15 @@ import java.util.Map;
 @Action
 public class Domain {
 
-    private app.hcim.model.Domain model;
+    private final app.hcim.model.Domain model;
+    private final CoreLanguage lang;
 
     public Domain() {
         model = (app.hcim.model.Domain)
                 Core.getInstance(app.hcim.model.Domain.class);
+        lang  = (CoreLanguage)
+                Core.getInstance(CoreLanguage.class);
+        lang.load("hcim");
     }
 
     @InList(conf="hcim", keys={"type=DOMAIN_TYPES"})
@@ -72,8 +76,6 @@ public class Domain {
         
         String id = model.save(data);
 
-        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
-
         String nms = model.getAffectedNames();
         String msg = lang.translate("core.save.domain.success", nms);
 
@@ -84,8 +86,6 @@ public class Domain {
     public void actionRemove(ActionHelper helper)
     throws HongsException {
         model.remove(helper.getRequestData());
-
-        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
 
         String nms = model.getAffectedNames();
         String msg = lang.translate("core.remove.domain.success", nms);

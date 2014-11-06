@@ -22,7 +22,7 @@ public class HongsError extends Error {
 
         if (code < 0x10 || code > 0xFFF) {
             throw new HongsError(0x12,
-                "Error code must be from 0x100(256) to 0xFFF(4095).");
+                "Error code must be from 0x10(16) to 0xFFF(4095).");
         }
     }
 
@@ -48,7 +48,7 @@ public class HongsError extends Error {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + this.getMessage();
+        return this.getMessage();
     }
 
     @Override
@@ -61,12 +61,20 @@ public class HongsError extends Error {
         return that.getLocalizedMessage();
     }
 
+    public String getLocalizedSection() {
+        return that.getLocalizedSection();
+    }
+
+    public void setLocalizedOptions(String lang) {
+        that.setLocalizedSection(lang);
+    }
+
     public String[] getLocalizedOptions() {
         return that.getLocalizedOptions();
     }
 
-    public void setLocalizedOptions(String... options) {
-        that.setLocalizedOptions(options);
+    public void setLocalizedOptions(String... opts) {
+        that.setLocalizedOptions(opts);
     }
 
 }

@@ -18,10 +18,14 @@ import java.util.Map;
 public class Entity {
 
     private final app.hcim.model.Entity model;
+    private final CoreLanguage lang;
 
     public Entity() {
         model = (app.hcim.model.Entity)
                 Core.getInstance(app.hcim.model.Entity.class);
+        lang  = (CoreLanguage)
+                Core.getInstance(CoreLanguage.class);
+        lang.load("hcim");
     }
 
     public void actionList(ActionHelper helper)
@@ -59,8 +63,6 @@ public class Entity {
         
         String id = model.save(data);
         
-        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
-
         String nms = model.getAffectedNames();
         String msg = lang.translate("core.save.entity.success", nms);
 
@@ -71,8 +73,6 @@ public class Entity {
     public void actionRemove(ActionHelper helper)
     throws HongsException {
         model.remove(helper.getRequestData());
-
-        CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
 
         String nms = model.getAffectedNames();
         String msg = lang.translate("core.remove.entity.success", nms);

@@ -69,7 +69,7 @@ public class TableSync
 
     // 没有表则创建表
     String sql = "SHOW TABLES LIKE '"+slaver.tableName+"'" ;
-    Map row = slaver.db.fetchOne(sql);
+    Map row = slaver.db.fetchAll(sql).get(0);
     if (row.isEmpty())
     {
         sql = "SHOW CREATE TABLE `"+table.tableName+"`";
@@ -93,8 +93,6 @@ public class TableSync
      * 找出缺失的字段并删除
      */
 
-    if (delExtraFields)
-    {
       // 主键
       if (tableDesc.priCols.isEmpty())
       {
@@ -130,6 +128,8 @@ public class TableSync
         }
       }
 
+    if (delExtraFields)
+    {
       // 字段
       it = slaverDesc.columns.entrySet().iterator();
       while (it.hasNext())
@@ -181,7 +181,7 @@ public class TableSync
     if (!tableDesc.priCols.isEmpty()
     &&  !tableDesc.priCols.equals(slaverDesc.priCols))
     {
-      sql = tableDesc.alterPriKeySql(table.tableName, TableDesc.ADD);
+      sql = tableDesc.alterPriKeySql(slaver.tableName, TableDesc.ADD);
       sqls.add(sql);
     }
 
@@ -212,7 +212,7 @@ public class TableSync
       if (!slaverDesc.idxKeys.containsKey(key)
       ||  !slaverDesc.idxKeys.get(key).equals(cols))
       {
-        sql = tableDesc.alterIdxKeySql(table.tableName, TableDesc.ADD, key);
+        sql = tableDesc.alterIdxKeySql(slaver.tableName, TableDesc.ADD, key);
         sqls.add(sql);
       }
     }

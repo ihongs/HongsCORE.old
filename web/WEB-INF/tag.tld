@@ -2,9 +2,9 @@
 <taglib version="2.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee web-jsptaglibrary_2_0.xsd">
     <tlib-version>1.0</tlib-version>
     <short-name>hs</short-name>
-    <uri>/hs.tags</uri>
+    <uri>/hongs.tag</uri>
     <tag>
-        <name>act</name>
+        <name>auth</name>
         <tag-class>app.hongs.tag.AuthTag</tag-class>
         <body-content>JSP</body-content>
         <attribute>

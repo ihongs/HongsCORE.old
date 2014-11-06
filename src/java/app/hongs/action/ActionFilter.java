@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class InitFilter
+public class ActionFilter
 implements Filter {
 
     @Override
@@ -49,17 +49,16 @@ implements Filter {
 
         String str;
 
+        Core.ENVIR = 1;
+        Core.DEBUG = 0;
+        Core.BASE_HREF = context.getContextPath();
+        Core.BASE_PATH = context.getRealPath("" ) + File.separator + "WEB-INF";
+
         // 调试开关
         str = context.getInitParameter ("debug");
         if (str != null) {
             Core.DEBUG = Byte.parseByte(  str  );
         }
-
-        Core.ENVIR = 1; // 标明为 Action 模式
-
-        // 当前应用根目录
-        Core.BASE_HREF = context.getContextPath();
-        Core.BASE_PATH = context.getRealPath("" ) + File.separator + "WEB-INF";
 
         // 资源目录
         Core.CONF_PATH = Core.BASE_PATH + File.separator + "conf";
@@ -68,12 +67,30 @@ implements Filter {
         Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
 
         // 资源配置
-        CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+        CoreConfig conf = (CoreConfig)Core.getInstance( CoreConfig.class );
         Core.LOGS_PATH = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
         Core.TMPS_PATH = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
-        Core.SERVER_ID = conf.getProperty("core.server.id", "" );
+        Core.SERVER_ID = conf.getProperty("core.server.id", "");
+
+            // 启动系统属性
+            for (Map.Entry et : conf.entrySet()) {
+                String k = (String)et.getKey  ();
+                String v = (String)et.getValue();
+                if (k.startsWith("start.")) {
+                    System.setProperty(k.substring(6), v);
+                }
+            }
 
         if (0 < Core.DEBUG) {
+            // 调试系统属性
+            for (Map.Entry et : conf.entrySet()) {
+                String k = (String)et.getKey  ();
+                String v = (String)et.getValue();
+                if (k.startsWith("debug.")) {
+                    System.setProperty(k.substring(6), v);
+                }
+            }
+
             CoreLogger.debug("...\r\n"
                 + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
                 + "BASE_HREF       : " + Core.BASE_HREF + "\r\n"
@@ -89,7 +106,7 @@ implements Filter {
     public void destroy() {
         if (1 == (1 & Core.DEBUG)) {
             Core core = Core.GLOBAL_CORE;
-            long time = System.currentTimeMillis() - Core.GLOBAL_TIME;
+            long time = System.currentTimeMillis() - Core.STARTS_TIME;
             CoreLogger.debug("...\r\n"
                 + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
                 + "Runtime         : " + Text.humanTime(time) + "\r\n"

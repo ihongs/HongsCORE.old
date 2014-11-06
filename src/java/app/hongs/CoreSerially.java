@@ -1,29 +1,30 @@
 package app.hongs;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Date;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.IOException;
 
 /**
  * 本地缓存工具
  *
  * <h3>特别注意:</h3>
  * <p>
- * 只有"当前类"的"非" static 类型的 public 的属性会被存储, 特殊情况可重载
- * saveData(data) 和 loadData(data) 来实现.
- * <p>
+ 只有"当前类"的"非" static 类型的 public 的属性会被存储, 特殊情况可重载
+ save(data) 和 load(data) 来实现.
+ <p>
  * <pre>
  * entrySet(),keySet(),values() 返回的对象无法被序列化,
  * 可 new HashSet(x.entrySet()) 预处理后再存入当前对象.
@@ -48,7 +49,18 @@ public abstract class CoreSerially
   implements Serializable
 {
 
-  private static ReadWriteLock lock = new ReentrantReadWriteLock();
+  /**
+   * 以有效时间间隔方式构造实例
+   * @param path
+   * @param name
+   * @param time
+   * @throws app.hongs.HongsException
+   */
+  public CoreSerially(String path, String name, long time)
+    throws HongsException
+  {
+    this.init(path, name, time);
+  }
 
   /**
    * 以有效到期时间方式构造实例
@@ -65,15 +77,14 @@ public abstract class CoreSerially
 
   /**
    * 以有效时间间隔方式构造实例
-   * @param path
    * @param name
    * @param time
    * @throws app.hongs.HongsException
    */
-  public CoreSerially(String path, String name, long time)
+  public CoreSerially(String name, long time)
     throws HongsException
   {
-    this.init(path, name, time);
+    this.init(name, time);
   }
 
   /**
@@ -86,18 +97,6 @@ public abstract class CoreSerially
     throws HongsException
   {
     this.init(name, date);
-  }
-
-  /**
-   * 以有效时间间隔方式构造实例
-   * @param name
-   * @param time
-   * @throws app.hongs.HongsException
-   */
-  public CoreSerially(String name, long time)
-    throws HongsException
-  {
-    this.init(name, time);
   }
 
   /**
@@ -120,52 +119,22 @@ public abstract class CoreSerially
   }
 
   /**
-   * 初始化方法(有效到期时间方式)
-   * @param path
-   * @param name
-   * @param date
+   * 从外部获取属性写入当前对象
    * @throws app.hongs.HongsException
    */
-  protected void init(String path, String name, Date date)
+  abstract protected void imports()
+    throws HongsException;
+
+  /**
+   * 是否已经过期
+   * @param time
+   * @return 返回true将重建缓存
+   * @throws app.hongs.HongsException
+   */
+  protected boolean expired(long time)
     throws HongsException
   {
-    if (path == null)
-    {
-      path = Core.TMPS_PATH;
-    }
-
-    /**
-     * 如果文件不存在, 则加载数据并存入缓存文件
-     * 如果文件已到期, 则加载数据并存入缓存文件
-     * 否则从文件加载对象数据
-     */
-
-    File file = new File(path + File.separator + name + ".ser");
-
-    if (!file.exists())
-    {
-      try
-      {
-        file.createNewFile();
-      }
-      catch (IOException ex)
-      {
-        throw new HongsException(0x10d0, ex);
-      }
-
-      this.loadData();
-      this.saveToFile(file);
-    }
-    else
-    if (this.isExpired(date != null ? date.getTime() : 0))
-    {
-      this.loadData();
-      this.saveToFile(file);
-    }
-    else
-    {
-      this.loadByFile(file);
-    }
+    return time != 0 && time < System.currentTimeMillis();
   }
 
   /**
@@ -182,45 +151,26 @@ public abstract class CoreSerially
     {
       path = Core.TMPS_PATH;
     }
-
-    /**
-     * 如果文件不存在, 则加载数据并存入缓存文件
-     * 如果文件已到期, 则加载数据并存入缓存文件
-     * 否则从文件加载对象数据
-     */
-
     File file = new File(path + File.separator + name + ".ser");
-
-    if (!file.exists())
-    {
-      try
-      {
-        file.createNewFile();
-      }
-      catch (IOException ex)
-      {
-        throw new HongsException(0x10d0, ex);
-      }
-
-      this.loadData();
-      this.saveToFile(file);
-    }
-    else
-    if (this.isExpired(time + file.lastModified()))
-    {
-      this.loadData();
-      this.saveToFile(file);
-    }
-    else
-    {
-      this.loadByFile(file);
-    }
+    this.load(file, time + file.lastModified( ));
   }
 
-  protected void init(String name, Date date)
+  /**
+   * 初始化方法(有效到期时间方式)
+   * @param path
+   * @param name
+   * @param date
+   * @throws app.hongs.HongsException
+   */
+  protected void init(String path, String name, Date date)
     throws HongsException
   {
-    this.init(null, name, date);
+    if (path == null)
+    {
+      path = Core.TMPS_PATH;
+    }
+    File file = new File(path + File.separator + name + ".ser");
+    this.load(file, date!=null?date.getTime():0);
   }
 
   protected void init(String name, long time)
@@ -229,59 +179,82 @@ public abstract class CoreSerially
     this.init(null, name, time);
   }
 
+  protected void init(String name, Date date)
+    throws HongsException
+  {
+    this.init(null, name, date);
+  }
+
   protected void init(String name)
     throws HongsException
   {
     this.init(null, name, null);
   }
 
-  /**
-   * 是否已经过期
-   * @param time
-   * @return 返回true将重建缓存
-   * @throws app.hongs.HongsException
-   */
-  protected boolean isExpired(long time)
-    throws HongsException
+  /** 私有方法 **/
+
+  private static ReadWriteLock lockr = new ReentrantReadWriteLock();
+  private static Map< String, ReadWriteLock > locks = new HashMap();
+
+  private ReadWriteLock lock(String flag)
   {
-    return time != 0 && time < System.currentTimeMillis();
+      ReadWriteLock rwlock;
+      Lock lock;
+
+      lock = lockr. readLock();
+      lock.lock();
+      try {
+          rwlock = locks.get(flag);
+          if (rwlock != null) {
+              return rwlock;
+          }
+      } finally {
+          lock.unlock();
+      }
+
+      lock = lockr.writeLock();
+      lock.lock();
+      try {
+          rwlock = new ReentrantReadWriteLock();
+          locks.put(flag, rwlock);
+          return rwlock;
+      } finally {
+          lock.unlock();
+      }
   }
 
   /**
-   * 将对象存入文件
-   * @param file
+   * 加载方法
+   * @param path
+   * @param name
+   * @param time
    * @throws app.hongs.HongsException
    */
-  protected void saveToFile(File file)
+  private void load(File file, long time)
     throws HongsException
   {
-    try
-    {
-      lock.writeLock().lock();
+      ReadWriteLock rwlock = lock(file.getAbsolutePath());
+      Lock lock;
 
-        FileOutputStream fos = new   FileOutputStream(file);
-      ObjectOutputStream oos = new ObjectOutputStream(fos );
+      lock = rwlock. readLock();
+      lock.lock();
+      try {
+          if (file.exists() && !expired(time)) {
+              load(file);
+              return;
+          }
+      } finally {
+          lock.unlock( );
+      }
 
-//    fos.getChannel().tryLock();
-      Map map = new HashMap();
-        this.saveData(map);
-      oos.writeObject(map);
-
-      oos.flush();
-      oos.close();
-    }
-    catch (FileNotFoundException ex)
-    {
-      throw new HongsException(0x10d6, ex);
-    }
-    catch (IOException ex)
-    {
-      throw new HongsException(0x10d2, ex);
-    }
-    finally
-    {
-      lock.writeLock().unlock();
-    }
+      lock = rwlock.writeLock();
+      lock.lock();
+      try {
+          imports( );
+          save(file);
+      } finally {
+          lock.unlock( );
+      }
   }
 
   /**
@@ -289,18 +262,17 @@ public abstract class CoreSerially
    * @param file
    * @throws app.hongs.HongsException
    */
-  protected void loadByFile(File file)
+  private void load(File file)
     throws HongsException
   {
     try
     {
-      lock.readLock().lock();
-
         FileInputStream fis = new   FileInputStream(file);
       ObjectInputStream ois = new ObjectInputStream(fis );
+      //fis.getChannel().lock();
 
       Map map = (Map)ois.readObject();
-        this.loadData(map);
+      load( map );
 
       ois.close();
     }
@@ -316,44 +288,45 @@ public abstract class CoreSerially
     {
       throw new HongsException(0x10d4, ex);
     }
-    finally
-    {
-      lock.readLock().unlock();
-    }
   }
 
   /**
-   * 从当前对象获取属性写入缓存
-   * @param map
-   * @throws HongsException
+   * 将对象存入文件
+   * @param file
+   * @throws app.hongs.HongsException
    */
-  protected void saveData(Map<String, Object> map)
+  private void save(File file)
     throws HongsException
   {
-    Field[] fields = this.getClass().getDeclaredFields();
-    for (Field field : fields)
+    // 文件不存在则创建
+    if (!file.exists()) {
+      try {
+        file.createNewFile(  );
+      } catch (IOException ex) {
+        throw new HongsException(0x10d0, ex);
+      }
+    }
+
+    try
     {
-      int ms = field.getModifiers();
-      if (Modifier.isStatic(ms)
-      || !Modifier.isPublic(ms))
-      {
-        continue;
-      }
+        FileOutputStream fos = new   FileOutputStream(file);
+      ObjectOutputStream oos = new ObjectOutputStream(fos );
+      //fos.getChannel().lock();
 
-      String name = field.getName();
+      Map map = new HashMap();
+      save( map );
+      oos.writeObject ( map );
 
-      try
-      {
-        map.put(name, field.get(this));
-      }
-      catch (IllegalArgumentException ex)
-      {
-        throw new HongsException(0x10da, ex);
-      }
-      catch (IllegalAccessException ex)
-      {
-        throw new HongsException(0x10da, ex);
-      }
+      oos.flush();
+      oos.close();
+    }
+    catch (FileNotFoundException ex)
+    {
+      throw new HongsException(0x10d6, ex);
+    }
+    catch (IOException ex)
+    {
+      throw new HongsException(0x10d2, ex);
     }
   }
 
@@ -362,7 +335,7 @@ public abstract class CoreSerially
    * @param map
    * @throws app.hongs.HongsException
    */
-  protected void loadData(Map<String, Object> map)
+  private void load(Map<String, Object> map)
     throws HongsException
   {
     Field[] fields = this.getClass().getDeclaredFields();
@@ -393,10 +366,38 @@ public abstract class CoreSerially
   }
 
   /**
-   * 从外部获取属性写入当前对象
-   * @throws app.hongs.HongsException
+   * 从当前对象获取属性写入缓存
+   * @param map
+   * @throws HongsException
    */
-  abstract protected void loadData()
-    throws HongsException;
+  private void save(Map<String, Object> map)
+    throws HongsException
+  {
+    Field[] fields = this.getClass().getDeclaredFields();
+    for (Field field : fields)
+    {
+      int ms = field.getModifiers();
+      if (Modifier.isStatic(ms)
+      || !Modifier.isPublic(ms))
+      {
+        continue;
+      }
+
+      String name = field.getName();
+
+      try
+      {
+        map.put(name, field.get(this));
+      }
+      catch (IllegalArgumentException ex)
+      {
+        throw new HongsException(0x10da, ex);
+      }
+      catch (IllegalAccessException ex)
+      {
+        throw new HongsException(0x10da, ex);
+      }
+    }
+  }
 
 }

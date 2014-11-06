@@ -1,6 +1,7 @@
 package app.hcum.action;
 
 import app.hongs.Core;
+import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.Action;
@@ -18,10 +19,14 @@ import java.util.Set;
 public class User {
 
     private app.hcum.model.User model;
+    private CoreLanguage lang;
 
     public User() {
         model = (app.hcum.model.User)
                 Core.getInstance(app.hcum.model.User.class);
+        lang  = (CoreLanguage)
+                Core.getInstance(CoreLanguage.class);
+        lang.load("hcum");
     }
 
     public void actionList(ActionHelper helper)
@@ -53,7 +58,7 @@ public class User {
         String id = model.save(helper.getRequestData());
 
         String nms = model.getAffectedNames();
-        String msg = "保存用户 "+nms+" 成功";
+        String msg = lang.translate("core.save.user.success", nms);
 
         helper.back(msg, id, nms);
     }
@@ -64,7 +69,7 @@ public class User {
         int num = model.remove(helper.getRequestData());
 
         String nms = model.getAffectedNames();
-        String msg = "删除用户 "+nms+" 成功";
+        String msg = lang.translate("core.remove.user.success", nms);
 
         helper.back(msg);
     }

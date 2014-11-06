@@ -2,6 +2,7 @@ package app.hcum.action;
 
 import app.hcum.model.User;
 import app.hongs.Core;
+import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.annotation.Action;
@@ -19,10 +20,14 @@ import java.util.Set;
 public class Dept {
 
     private app.hcum.model.Dept model;
+    private CoreLanguage lang;
 
     public Dept() {
         model = (app.hcum.model.Dept)
                 Core.getInstance(app.hcum.model.Dept.class);
+        lang  = (CoreLanguage)
+                Core.getInstance(CoreLanguage.class);
+        lang.load("hcum");
     }
 
     public void actionTree(ActionHelper helper)
@@ -43,7 +48,7 @@ public class Dept {
         String id = model.save(helper.getRequestData());
 
         String nms = model.getAffectedNames();
-        String msg = "保存部门 "+nms+" 成功";
+        String msg = lang.translate("core.svae.dept.success", nms);
 
         helper.back(msg, id, nms);
     }
@@ -54,7 +59,7 @@ public class Dept {
         int num = model.remove(helper.getRequestData());
 
         String nms = model.getAffectedNames();
-        String msg = "删除部门 "+nms+" 成功";
+        String msg = lang.translate("core.remove.dept.success", nms);
 
         helper.back(msg);
     }

@@ -1,12 +1,17 @@
 package app.common.cmdlet;
 
+import app.hongs.Core;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.cmdlet.annotation.Cmdlet;
+import app.hongs.db.DB;
+import app.hongs.db.Table;
+import app.hongs.db.sync.TableSync;
 import app.hongs.util.JSON;
 import app.hongs.util.Text;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,14 +29,15 @@ public class test {
   public static void cmdlet(String[] args)
           throws app.hongs.HongsException {
 
+    /*
     Map vars = new java.util.HashMap();
     vars.put("var",  "var1");
     vars.put("var.2", "var2");
     System.out.println(app.hongs.util.Text.inject("This is $var and that is ${var.2}.", vars));
-
     System.out.println(app.hongs.util.Text.inject("This is $0 and that is ${1}2.", "name", "var"));
+    */
       
-    app.hongs.util.JSON.dumps(args);
+    //app.hongs.util.JSON.dumps(args);
     Map<String, Object> opts = CmdletHelper.getOpts(args,
       "show-env:b",
       "show-properties:b",
@@ -42,8 +48,9 @@ public class test {
       "test-radix:i",
       "test-inject:b",
       "test-serially:b",
+      "sync-table:s",
       "?Usage: --test-rate --tset-left");
-    app.hongs.util.JSON.dumps(opts);
+    //app.hongs.util.JSON.dumps(opts);
 
     if (opts.containsKey("show-env")
     && (Boolean)opts.get("show-env")) {
@@ -83,6 +90,10 @@ public class test {
     && (Boolean)opts.get("test-serially")) {
       new TestSerially();
     }
+    
+    if (opts.containsKey("sync-table")) {
+      diffTable((String)opts.get("sync-table"));
+    }
 
     if (opts.containsKey("make-demo-data")
     && (Boolean)opts.get("make-demo-data")) {
@@ -90,6 +101,20 @@ public class test {
     }
   }
 
+  private static void diffTable(String tables) throws HongsException {
+      String[] ts = tables.split(":");
+      String srcTableName = ts[0];
+      String dstTableName = ts[1];
+      DB db = (DB)Core.getInstance(app.hongs.db.DB.class);
+      Table srcTable = new Table(db, srcTableName);
+      Table dstTable = new Table(db, dstTableName);
+      TableSync sync = new TableSync(srcTable);
+      List<String> sqls = sync.syncSlaverSqls(dstTable, true);
+      for (String sql : sqls) {
+          System.out.println(sql);
+      }
+  }
+  
   private static void testText() {
     String s = "This is Hong's Framework. Ask: \\\"Who ar you?\"\r\n"
              + "这是弘的框架, 问: \\\"你是谁?\"\r\n"
@@ -145,8 +170,8 @@ public class test {
   }
   
   private static void testRadix(long num) {
-    CmdletHelper.println("36 Radix: "+app.hongs.util.Text.to36Hex(num));
-    CmdletHelper.println("26 Radix: "+app.hongs.util.Text.to26Hex(num));
+    CmdletHelper.println("36 Radix: "+app.hongs.util.Text.as36Hex(num));
+    CmdletHelper.println("26 Radix: "+app.hongs.util.Text.as26Hex(num));
   }
 
   private static void makeDemoData() {
@@ -163,7 +188,7 @@ public class test {
     }
 
     @Override
-    protected void loadData() {
+    protected void imports() {
       a = new java.util.ArrayList();
       b = new java.util.HashSet();
       c = new java.util.HashMap();
