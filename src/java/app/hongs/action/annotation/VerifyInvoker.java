@@ -3,7 +3,7 @@ package app.hongs.action.annotation;
 import app.hongs.CoreLanguage;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.Tree;
-import app.hongs.util.Verifier;
+import app.hongs.action.VerifyHelper;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +30,8 @@ public class VerifyInvoker {
 
         // 开始校验
         CoreLanguage lng = CoreLanguage.getInstance(lang);
-        Verifier ver = new Verifier( lng ).setRule( conf, form );
-        Map<String, List<String>> errors = ver.verify4RD( dat  );
+        VerifyHelper ver = new VerifyHelper(lng).setRule(conf, form);
+        Map<String, List<String>> errors = ver.verify4RD(dat);
 
         // 返回错误
         if (! errors.isEmpty()) {

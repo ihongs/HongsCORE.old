@@ -1,11 +1,12 @@
-package app.hongs.util;
+package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
-import app.hongs.action.CollConfig;
 import app.hongs.db.AbstractBaseModel;
 import app.hongs.db.FetchCase;
+import app.hongs.util.Text;
+import app.hongs.util.Tree;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,23 +31,23 @@ import java.util.regex.Pattern;
  * 0x1119 参数与要求的格式不匹配
  * </pre>
  */
-public class Verifier {
+public class VerifyHelper {
 
     private CoreLanguage lang; // 错误语言
     private List<Rule> rules1; // 无适配符的规则
     private List<Rule> rules2; // 带适配符的规则
 
-    public Verifier(CoreLanguage lang) {
+    public VerifyHelper(CoreLanguage lang) {
         this.lang = lang;
         this.rules1 = new ArrayList();
         this.rules2 = new ArrayList();
     }
 
-    public Verifier(String lang) {
+    public VerifyHelper(String lang) {
         this(CoreLanguage.getInstance(lang));
     }
 
-    public Verifier addRule(String name, String rule, Object... args) {
+    public VerifyHelper addRule(String name, String rule, Object... args) {
         if (name.indexOf('*') == -1) {
             this.rules1.add(new Rule(name, rule, Arrays.asList(args)));
         } else {
@@ -55,7 +56,7 @@ public class Verifier {
         return this;
     }
 
-    public Verifier setRule(String conf, String form) throws HongsException {
+    public VerifyHelper setRule(String conf, String form) throws HongsException {
         CollConfig cnf = CollConfig.getInstance(conf);
 
         int i = 0;
@@ -435,7 +436,7 @@ public class Verifier {
         }
         @Override
         public void each(Object value, String path) {
-            Verifier.addValue(path, value.toString(), values);
+            VerifyHelper.addValue(path, value.toString(), values);
         }
     }
 
