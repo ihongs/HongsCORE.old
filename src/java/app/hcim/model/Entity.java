@@ -6,6 +6,8 @@ import app.hongs.action.CollConfig;
 import app.hongs.db.AbstractBaseModel;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
+import app.hongs.db.Table;
+import app.hongs.db.sync.TableSync;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -74,26 +76,26 @@ public class Entity extends AbstractBaseModel {
         // 实体信息
         Map    tableInfo = this.get(tn);
         String tableName = "a_haim_"+tn;
-        String xn = Core.getUniqueId( );
         String tc = tableInfo.get("name").toString();
+        String xn = Core.getUniqueId( );
 
         // 实体配置
-        File file = new File( Core.CONF_PATH + "/haim.xml" );
+        File file = new File(Core.CONF_PATH + "/haim.db.xml");
         Element root = loadDbConfig (  file  );
         Document doc = root.getOwnerDocument();
-        NodeList lst = root.getElementsByTagName ( "table" );
-        Element tableElem = getElemByName(lst, tableName);
+        NodeList tbs = root.getElementsByTagName("table");
+        Element tableElem = getElemByName(tbs, tableName);
         if (tableElem == null) {
             tableElem = doc.createElement("table");
-            tableElem.setAttribute("name" , tableName );
-            tableElem.setAttribute("primaryKey" , "id");
+            tableElem.setAttribute("name" , tableName);
+            tableElem.setAttribute("primaryKey", "id");
             root.appendChild(tableElem);
         }
 
-        Map<String,StringBuilder> sqls = new LinkedHashMap();
-
+        Map<String, StringBuilder> sqls = new LinkedHashMap();
         StringBuilder tableSql = new StringBuilder();
-        sqls.put(tn , tableSql);
+        sqls.put("" , tableSql);
+
         tableSql.append("CREATE TABLE `x_haim_").append(xn).append("` (\r\n");
         tableSql.append("  `id` CHAR(20) NOT NULL,\r\n");
 
@@ -128,20 +130,20 @@ public class Entity extends AbstractBaseModel {
 
                 String ln = (String) tab.get( "id" );
                 String lt = (String) col.get("type");
-                String cm = (String) tab.get("name");
 
                 String assocName = "a_haim_" + ln;
-                String relatName = buildRelatName(ln, tn);
+                String relatName = "a_haim_" + buildRelatName(ln, tn);
                 String assocType = "2".equals( lt ) ? "HAS_ONE" : "HAS_MANY";
 
-                buildAssocSql(sqls, relatName, xn, tn, ln, tc, cm);
-                buildAssocElem(doc, tableElem, assocType, assocName, ln, relatName, tn);
+                buildAssocElem(doc, tableElem, assocType, assocName, relatName, tn, ln);
+                StringBuilder relatSql = buildAssocSql(xn, tn, ln);
+                sqls.put(ln , relatSql);
 
-                Element assocElem = getElemByName(lst, tableName );
-                if (assocElem == null) {
-                    assocElem = doc.createElement("table");
-                    assocElem.setAttribute("name", relatName);
-                    root.appendChild(assocElem);
+                Element relatElem = getElemByName(tbs , relatName);
+                if (relatElem == null) {
+                    relatElem = doc.createElement("table");
+                    relatElem.setAttribute("name", relatName);
+                    root.appendChild(relatElem);
                 }
             }
         }
@@ -149,14 +151,19 @@ public class Entity extends AbstractBaseModel {
         tableSql.append("  PRIMARY KEY (`id`)\r\n");
         tableSql.append(") ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='").append(tc).append("'");
 
+        TableSync ts;
+        DB tb = DB.getInstance("haim");
         for (Map.Entry et : sqls.entrySet()) {
-            tn  = (String) et.getKey();
             tableSql = (StringBuilder) et.getValue();
-            System.out.print(tn + ":");
-            System.out.println(tableSql);
+            String s = (String) et.getKey();
+            if (s.length() > 0) s = "_" + s;
+            String a = "a_haim_" + tn + s;
+            String b = "x_haim_" + xn + s;
+            tb.execute(tableSql.toString());
+            ts = new TableSync(new Table(tb, b) );
+            ts.syncSlaver(new Table(tb, a), true);
         }
 
-        System.out.println(root.toString());
         saveDbConfig(file, doc);
     }
 
@@ -233,13 +240,15 @@ public class Entity extends AbstractBaseModel {
         return sql2;
     }
 
-    private StringBuilder buildAssocSql(Map sqls, String relatName, String xn, String tn, String ln, String tm, String lm) {
+    private StringBuilder buildAssocSql(String xn, String tn, String ln) {
         StringBuilder sql2 = new StringBuilder();
-        sql2.append("CREATE TABLE `x_haim_").append(xn).append("` (\r\n");
-        sql2.append("  `").append(tn).append("_id` CHAR(20) NOT NULL COMMETN '").append(tm).append("',\r\n");
-        sql2.append("  `").append(ln).append("_id` CHAR(20) NOT NULL COMMENT '").append(lm).append("' \r\n");
-        sql2.append(") ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='").append(tm).append(" :: ").append(lm).append("'");
-        sqls.put(relatName, sql2);
+        sql2.append("CREATE TABLE `x_haim_" ).append( xn ).append("_").append(ln).append("` (\r\n");
+        sql2.append("  `").append(tn).append("_id` CHAR(20) NOT NULL").append(",\r\n");
+        sql2.append("  `").append(ln).append("_id` CHAR(20) NOT NULL").append(",\r\n");
+        sql2.append("  PRIMARY KEY (`").append(tn).append("_id`,`").append(ln).append("_id`),\r\n");
+        sql2.append("  KEY `fk_").append(ln).append("_").append(tn).append("_id` (`").append(tn).append("_id`),\n");
+        sql2.append("  KEY `fk_").append(tn).append("_").append(ln).append("_id` (`").append(ln).append("_id`) \n");
+        sql2.append(") ENGINE=MyISAM DEFAULT CHARSET=utf8");
         return sql2;
     }
 
@@ -253,10 +262,11 @@ public class Entity extends AbstractBaseModel {
         }
     }
     
-    private Element buildAssocElem(Document doc, Element tableElem, String assocType, String assocName, String ln, String relatName, String tn) {
+    private Element buildAssocElem(Document doc, Element tableElem, String assocType, String assocName, String relatName, String tn, String ln) {
         Element assocElem;
         assocElem = buildAssocElem(doc, tableElem, assocType, relatName, tn);
         assocElem = buildAssocElem(doc, assocElem, "BLS_TO" , assocName, ln);
+        assocElem.setAttribute("primaryKey", tn+"_id");
         return  assocElem;
     }
 
@@ -307,7 +317,7 @@ public class Entity extends AbstractBaseModel {
             Element root = doc.createElement("db");
             root.setAttribute("xmlns", "http://hongs-core");
             root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-            root.setAttribute("xsi:schemaLocation", "http://hongs-core ../db.xsd");
+            root.setAttribute("xsi:schemaLocation", "http://hongs-core .db.xsd");
             doc .appendChild(root);
 
             elem = doc.createElement("source");

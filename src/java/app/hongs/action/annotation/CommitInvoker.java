@@ -4,7 +4,6 @@ import app.hongs.Core;
 import app.hongs.action.ActionHelper;
 import app.hongs.db.DB;
 import java.lang.annotation.Annotation;
-import java.sql.Connection;
 
 /**
  * 操作成功才提交数据更改
@@ -22,7 +21,7 @@ public class CommitInvoker {
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
                     DB  db = (DB)core.get(k);
-                    db.begin (  );
+                    db.IN_TRANSC_MODE = true;
                 }
             }
 

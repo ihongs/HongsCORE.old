@@ -56,41 +56,51 @@ public class TableDesc {
     }
     
     public static TableDesc getInstance(Table table) throws HongsException {
-        TableDesc desc = new TableDesc();
+        TableDesc  desc = new TableDesc();
 
-        List   rows;
-        Iterator it;
+        try {
+            List   rows;
+            Iterator it;
 
-        /**
-         * 组织字段描述
-         */
-        rows = table.db.fetchAll("SHOW FULL COLUMNS FROM `" + table.tableName + "`");
-        it = rows.iterator();
-        while (it.hasNext()) {
-            Map row = (Map) it.next();
-            String dfn = desc.getDefine(row);
-            String col = (String) row.get("Field");
+            /**
+             * 组织字段描述
+             */
+            rows = table.db.fetchAll("SHOW FULL COLUMNS FROM `" + table.tableName + "`");
+            it = rows.iterator();
+            while (it.hasNext()) {
+                Map row = (Map) it.next();
+                String dfn = desc.getDefine(row);
+                String col = (String) row.get("Field");
 
-            desc.addColumn(col , dfn);
-        }
-
-        /**
-         * 获取索引字段
-         */
-        rows = table.db.fetchAll("SHOW INDEXES FROM `" + table.tableName + "`");
-        it = rows.iterator();
-        while (it.hasNext()) {
-            Map row = (Map) it.next();
-            String key = (String) row.get(   "Key_name");
-            String col = (String) row.get("Column_name");
-
-            if ("PRIMARY".equals(key)) {
-                desc.addPriCol(col);
-            } else if ("0".equals(row.get("Non_unique"))) {
-                desc.addUniKey(col, key);
-            } else {
-                desc.addIdxKey(col, key);
+                desc.addColumn(col , dfn);
             }
+
+            /**
+             * 获取索引字段
+             */
+            rows = table.db.fetchAll("SHOW INDEXES FROM `" + table.tableName + "`");
+            it = rows.iterator();
+            while (it.hasNext()) {
+                Map row = (Map) it.next();
+                String key = (String) row.get(   "Key_name");
+                String col = (String) row.get("Column_name");
+
+                if ("PRIMARY".equals(key)) {
+                    desc.addPriCol(col);
+                } else if ("0".equals(row.get("Non_unique"))) {
+                    desc.addUniKey(col, key);
+                } else {
+                    desc.addIdxKey(col, key);
+                }
+            }
+        } catch (HongsException ex) {
+            if (ex.getCode() == 0x1047) {
+                String msg = ex.getMessage();
+                if (msg.startsWith("Ex1047: Table ") && msg.endsWith(" doesn't exist")) {
+                    return desc;
+                }
+            }
+            throw ex;
         }
         
         return desc;

@@ -438,28 +438,36 @@ public class DB
     }
   }
 
-  public void begin()
-  {
-    IN_TRANSC_MODE = false;
-  }
+  /**
+   * 事务:提交
+   */
   public void commit()
   {
-    IN_TRANSC_MODE = false;
-    try {
-      if (!this.connection.isClosed())
-      this.connection.commit();
-    } catch (SQLException ex) {
-      throw new HongsError( 0x44, ex );
+    if (IN_TRANSC_MODE) {
+        IN_TRANSC_MODE = false;
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.commit();
+            }
+        } catch (SQLException ex) {
+          throw new HongsError(0x44, ex);
+        }
     }
   }
+  /**
+   * 事务:回滚
+   */
   public void rollback()
   {
-    IN_TRANSC_MODE = false;
-    try {
-      if (!this.connection.isClosed())
-      this.connection.rollback();
-    } catch (SQLException ex) {
-      throw new HongsError( 0x46, ex );
+    if (IN_TRANSC_MODE) {
+        IN_TRANSC_MODE = false;
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.rollback();
+            }
+        } catch (SQLException ex) {
+          throw new HongsError(0x44, ex);
+        }
     }
   }
 

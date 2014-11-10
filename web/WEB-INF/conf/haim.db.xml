@@ -1,11 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-
-
-<root>
-    
-</root>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<db xmlns="http://hongs-core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hongs-core .db.xsd">
+    <source link="hcim"/>
+    <origin link="hcim"/>
+    <tables>
+        <table name="a_haim_HYZ6PKPG001B4PC001" primaryKey="id">
+            <assoc foreignKey="HYZ6PKPG001B4PC001_id" name="a_haim_HYZ6PKPG001B4PC001_HYWA5QOQ00828S5H01" type="HAS_MANY">
+                <assoc foreignKey="HYWA5QOQ00828S5H01_id" name="a_haim_HYWA5QOQ00828S5H01" primaryKey="HYZ6PKPG001B4PC001_id" type="BLS_TO"/>
+            </assoc>
+            <assoc foreignKey="HYZ6PKPG001B4PC001_id" name="a_haim_HYZ6PKPG001B4PC001_HYVKDG0O009CI47M01" type="HAS_ONE">
+                <assoc foreignKey="HYVKDG0O009CI47M01_id" name="a_haim_HYVKDG0O009CI47M01" primaryKey="HYZ6PKPG001B4PC001_id" type="BLS_TO"/>
+            </assoc>
+        </table>
+    </tables>
+</db>

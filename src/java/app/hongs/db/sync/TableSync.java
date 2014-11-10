@@ -46,7 +46,7 @@ public class TableSync
   {
     List<String> sqls = this.syncSlaverSqls(slaver, delExtraFields);
     DB sdb = slaver.db;
-    sdb.begin();
+    sdb.IN_TRANSC_MODE = true;
     try
     {
       for (String sql : sqls)
@@ -68,9 +68,8 @@ public class TableSync
     List sqls = new ArrayList();
 
     // 没有表则创建表
-    String sql = "SHOW TABLES LIKE '"+slaver.tableName+"'" ;
-    Map row = slaver.db.fetchAll(sql).get(0);
-    if (row.isEmpty())
+    String sql = "SHOW TABLES LIKE '"+slaver.tableName+"'";
+    if (slaver.db.fetchAll(sql).isEmpty())
     {
         sql = "SHOW CREATE TABLE `"+table.tableName+"`";
         sql = ((Map) table.db.fetchAll(sql).get( 0 ))

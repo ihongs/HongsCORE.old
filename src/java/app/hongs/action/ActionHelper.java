@@ -373,8 +373,8 @@ public class ActionHelper
   }
 
   /**
-   * 返回保存结果
-   * 针对model的save方法
+   * 返回保操作结果
+   * 针对model的save,remove方法
    * @param msg
    * @param rst
    */
@@ -383,7 +383,9 @@ public class ActionHelper
     Map data = new HashMap();
     data.put("__success__",true);
     data.put("__message__", msg);
-    data.put("back", rst);
+    if (rst != null && rst.length > 0) {
+        data.put( "back"  , rst);
+    }
     back(data);
   }
 
@@ -402,8 +404,7 @@ public class ActionHelper
 
   /**
    * 返回操作消息
-   * 针对model的delete方法
-   * @param rst
+   * @param msg 
    */
   public void back(String msg)
   {
@@ -412,7 +413,6 @@ public class ActionHelper
 
   /**
    * 返回检验结果
-   * 针对model的exists方法
    * @param rst
    */
   public void back(Boolean rst)

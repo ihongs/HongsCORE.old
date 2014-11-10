@@ -49,7 +49,7 @@ public class DBSync
   {
     List<String> sqls = this.syncSlaverSqls(slaver, tablePrefix, tableSuffix, delExtraTables, delExtraFields);
     DB sdb = slaver;
-    sdb.begin();
+    sdb.IN_TRANSC_MODE = true;
     try
     {
       for (String sql : sqls)
