@@ -105,8 +105,8 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classesDirectory>${project.basedir}/src/web/WEB-INF/classes</classesDirectory>
-                            <outputDirectory>${project.basedir}/src/web/WEB-INF/lib</outputDirectory>
+                            <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
+                            <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
                             <finalName>json-simple_v1.1</finalName>
                             <includes>
                                 <include>org/json/simple/**</include>
