@@ -1,10 +1,9 @@
 << HongsCORE Framework for Java >>
 
-文档版本: 10.09.25
-软件版本: 0.1.1-20110925
+文档版本: 14.11.11
+软件版本: 0.3.4-20141111
 设计作者: 黄弘(Kevin Hongs)
 技术支持:
-  Phone: +8618621523173
   Email: kevin.hongs@gmail.com
 
 [特别说明]
@@ -38,9 +37,12 @@ HongsCORE
 
 [更新日志]
 
-[1014-08-10] 全面倒向 bootstrap; 大规模的使用 tab, 放弃使用浮层作为选择框; 为更好的实现自己的规则, 重写了前端验证程序
-[2014-05-17] 增加后端验证类 app.hongs.util.Verifier, 配合 Verify 注解可以更方便的对传递过来的表单数据进行验证
-[2014-04-04] 使用 c3p0 作为数据源组件, 去掉原来的用 jdbc 直接连接的方式, 但保留了使用外部容器的数据源的方式; 引入动作注解链，对常规数据的注入、验证以及存储事务提供更方便的操作
+[2014-11-10] 切换到 Maven
+[2014-08-10] 全面倒向 bootstrap; 大规模的使用 tab, 放弃使用浮层作为选择框
+[2014-08-09] 为更好的实现自己的规则, 重写了前端验证程序
+[2014-05-17] 增加后端验证助手类 app.hongs.action.VerifyHelper, 配合 Verify 注解可以更方便的对传递过来的表单数据进行验证
+[2014-04-04] 使用 c3p0 作为数据源组件, 去掉原来的用 jdbc 直接连接的方式, 但保留了使用外部容器的数据源的方式
+[2014-04-03] 引入动作注解链，对常规数据的注入、验证以及存储事务提供更方便的操作
 [2014-01-27] 去掉全部模型属性的外部名称(id,pid等), 统一使用实际的属性名, 避免因名称转换(同一属性不同场合不同名称)导致理解困难
 [2014-01-25] 重写CmdletHelper的args解析程序, 保留原来类似Perl的Getopt::Longs的解析规则, 去掉对短参的支持, 不再转换args的数组类型. cmdlet函数也与main函数参数一致
 [2013-12-26] 使用InitFilter处理框架的初始化, 返回数据在InitFilter结束前不写入response对象, 方便动作注解和其他过滤器对返回数据进行处理
@@ -65,12 +67,12 @@ HongsCORE
 物理分层:
 /
   + WEB-INF
-    - conf          配置资源(常规配置/动作配置/数据配置/数据库配置/自定义标签配置)
+    - conf          配置资源(常规/权限/集合/数据库)
     - lang          语言资源
     - lib           后端库
     - logs          运行日志(可配置)
     - tmps          临时文件(可配置)
-  + common          前端通用库(js,flash)
+  + common          前端通用库(js)
     - css           前端样式
     - fonts         前端字体
     - img           前端图片
@@ -78,6 +80,7 @@ HongsCORE
     - conf          配置信息(虚拟目录)
     - lang          语言资源(虚拟目录)
     - auth          权限信息(虚拟目录)
+  - compon          其他前端组件
   - xxxx            项目模块页面
 
 文件映射:
@@ -87,13 +90,14 @@ xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(执行命令 WEB-INF/run x
 common/auth/name.js 读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
 common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
 common/lang/name.js 读取 WEB-INF/lang/name.xx-xx.properties 中 fore.xxxx. 开头的配置
-注: 以上3个配置请求, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置
+注: 可以在 default.properties 中加入 app.xxxx.action=[完整Action类名] 或 app.xxxx.cmdlet=[完整Cmdlet类名] 来定义 action 和 cmdlet 路径对应的包; 最后3个配置请求, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置。
 
 框架结构:
 app.hongs           核心
 app.hongs.action    动作支持
 app.hongs.action.annotation     动作注解
 app.hongs.cmdlet    命令支持
+app.hongs.cmdlet.annotation     命令注解
 app.hongs.db        数据模型
 app.hongs.tag       JSP标签
 app.hongs.util      工具
@@ -133,11 +137,11 @@ cols[]  限定列名
   id        主键, CHAR(20)
   pid       父键, CHAR(20)
   xx_id     外键, CHAR(20), xx为关联表缩写
-  dflag     删除标识, TINYINT, 0为正常, 1为删除, 可用其他数字表示其他状态
   ctime     创建时间, DATETIME或TIMESTAMP
   mtime     修改时间, DATETIME或TIMESTAMP
   btime     开始时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
+  dflag     删除标识, TINYINT, 0为正常, 1为删除, 可用其他数字表示其他状态
 
 注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: page,rows,cols,sort,find. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
