@@ -1,4 +1,8 @@
-/nbproject/
-/build.xml
 /target/
+/build/
+/dist/
 /bin/
+/.project
+/nbproject/
+/nb-configuration.xml
+/build.xml
