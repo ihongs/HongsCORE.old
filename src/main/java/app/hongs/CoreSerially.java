@@ -300,6 +300,10 @@ public abstract class CoreSerially
   {
     // 文件不存在则创建
     if (!file.exists()) {
+      File dn = file.getParentFile();
+      if (!dn.exists()) {
+           dn.mkdirs();
+      }
       try {
         file.createNewFile(  );
       } catch (IOException ex) {

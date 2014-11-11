@@ -219,8 +219,13 @@ public class CoreLogger implements Core.Destroy
 
       // 如果文件不存在则建立
       // 并将文件设为可读可写
-      if (file.exists() != true)
+      if (!file.exists())
       {
+        File dn = file.getParentFile();
+        if (!dn.exists())
+        {
+             dn.mkdirs();
+        }
         file.createNewFile();
         file.setReadable(true, false);
         file.setWritable(true, false);

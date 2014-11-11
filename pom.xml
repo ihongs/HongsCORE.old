@@ -44,10 +44,8 @@
         </dependency>
     </dependencies>
     <build>
-        <directory>dist</directory>
-        <sourceDirectory>src/java</sourceDirectory>
-        <testSourceDirectory>src/test</testSourceDirectory>
-        <finalName>Hongs-CORE_v${project.version}</finalName>
+        <directory>bin</directory>
+        <finalName>Hongs-CORE-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -55,6 +53,7 @@
                 <version>2.1.1</version>
                 <configuration>
                     <warSourceDirectory>web</warSourceDirectory>
+                    <packagingExcludes>WEB-INF/classes/**</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -74,7 +73,7 @@
                         <configuration>
                             <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
                             <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
-                            <finalName>hongs-core_v${project.version}</finalName>
+                            <finalName>hongs-core-${project.version}</finalName>
                             <includes>
                                 <include>app/hongs/**</include>
                             </includes>
@@ -89,7 +88,7 @@
                         <configuration>
                             <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
                             <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
-                            <finalName>hongs-apps_v${project.version}</finalName>
+                            <finalName>hongs-apps-${project.version}</finalName>
                             <includes>
                                 <include>app/common/**</include>
                                 <include>app/haim/**</include>
@@ -107,7 +106,7 @@
                         <configuration>
                             <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
                             <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
-                            <finalName>json-simple_v1.1</finalName>
+                            <finalName>json-simple-1.1</finalName>
                             <includes>
                                 <include>org/json/simple/**</include>
                             </includes>
