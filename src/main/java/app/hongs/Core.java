@@ -301,11 +301,6 @@ extends HashMap<String, Object>
   public static String CONF_PATH;
 
   /**
-   * 临时文件存放目录
-   */
-  public static String VARS_PATH;
-
-  /**
    * 日志文件存放目录
    */
   public static String LOGS_PATH;
@@ -314,6 +309,11 @@ extends HashMap<String, Object>
    * 缓存文件存放目录
    */
   public static String SERS_PATH;
+
+  /**
+   * 临时文件存放目录
+   */
+  public static String VARS_PATH;
 
   /**
    * 服务器编号
