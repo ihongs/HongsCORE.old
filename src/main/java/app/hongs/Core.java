@@ -28,14 +28,14 @@ import java.util.Map;
  *
  * <h3>静态属性:</h3>
  * <pre>
- DEBUG            标识不同调试模式(0 无, 1 输出, 2 日志, 3 复合)
+ DEBUG            标识不同调试模式(0 无 , 1 输出, 2 日志, 3 复合)
  ENVIR            标识不同运行环境(0 cmd, 1 web)
  BASE_HREF        应用访问路径(WEB应用中为ContextPath)
  BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
  CONF_PATH        配置信息存放目录
- LANG_PATH        语言资源存放目录
+ VARS_PATH        临时文件存放目录
  LOGS_PATH        日志文件存放目录
- TMPS_PATH        临时文件存放目录
+ SERS_PATH        缓存文件存放目录
  SERVER_ID        服务器ID
  注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
  </pre>
@@ -301,9 +301,9 @@ extends HashMap<String, Object>
   public static String CONF_PATH;
 
   /**
-   * 语言文件存放目录
+   * 临时文件存放目录
    */
-  public static String LANG_PATH;
+  public static String VARS_PATH;
 
   /**
    * 日志文件存放目录
@@ -311,9 +311,9 @@ extends HashMap<String, Object>
   public static String LOGS_PATH;
 
   /**
-   * 临时数据存放目录
+   * 缓存文件存放目录
    */
-  public static String TMPS_PATH;
+  public static String SERS_PATH;
 
   /**
    * 服务器编号

@@ -234,15 +234,16 @@ public class Cmdlet
           .matcher(Core.BASE_PATH).replaceFirst( "" );
     }
 
-    Core.CONF_PATH = Core.BASE_PATH + File.separator + "conf";
-    Core.LANG_PATH = Core.BASE_PATH + File.separator + "lang";
-    Core.LOGS_PATH = Core.BASE_PATH + File.separator + "logs";
-    Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
+    Core.CONF_PATH = Core.BASE_PATH + File.separator + "etc";
+    Core.VARS_PATH = Core.BASE_PATH + File.separator + "var";
 
-    CoreConfig conf = (CoreConfig)Core.getInstance( CoreConfig.class );
-    Core.LOGS_PATH = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
-    Core.TMPS_PATH = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
-    Core.SERVER_ID = conf.getProperty("core.server.id", "");
+    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    Core.VARS_PATH = conf.getProperty("core.vars.path", Core.VARS_PATH);
+    Core.LOGS_PATH = Core.VARS_PATH + File.separator + "log";
+    Core.SERS_PATH = Core.VARS_PATH + File.separator + "ser";
+    Core.LOGS_PATH = conf.getProperty("core.logs.path", Core.LOGS_PATH);
+    Core.SERS_PATH = conf.getProperty("core.tmps.path", Core.SERS_PATH);
+    Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
     /** 系统属性配置 **/
 

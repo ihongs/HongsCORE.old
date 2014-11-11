@@ -59,10 +59,10 @@ public class HongsLocalized {
         String codx, desx;
         String[] optx;
 
+        trns = new CoreLanguage("_error_");
         codx = "Ex" + Integer.toHexString(  code  );
-        desx = desc != null ? desc : "" ;
+        desx = desc != null ? desc : "";
         optx = opts != null ? opts : new String[]{};
-        trns = new CoreLanguage("error");
 
         // 0x10,0x11,0x1000,0x1001 为保留的代号
         // 0x11,0x1001 使用消息作为语言键

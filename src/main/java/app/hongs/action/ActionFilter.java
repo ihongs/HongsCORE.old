@@ -61,16 +61,17 @@ implements Filter {
         }
 
         // 资源目录
-        Core.CONF_PATH = Core.BASE_PATH + File.separator + "conf";
-        Core.LANG_PATH = Core.BASE_PATH + File.separator + "lang";
-        Core.LOGS_PATH = Core.BASE_PATH + File.separator + "logs";
-        Core.TMPS_PATH = Core.BASE_PATH + File.separator + "tmps";
+        Core.CONF_PATH = Core.BASE_PATH + File.separator + "etc";
+        Core.VARS_PATH = Core.BASE_PATH + File.separator + "var";
 
         // 资源配置
-        CoreConfig conf = (CoreConfig)Core.getInstance( CoreConfig.class );
-        Core.LOGS_PATH = conf.getProperty("core.logs.dir", Core.LOGS_PATH);
-        Core.TMPS_PATH = conf.getProperty("core.tmps.dir", Core.TMPS_PATH);
-        Core.SERVER_ID = conf.getProperty("core.server.id", "");
+        CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+        Core.VARS_PATH = conf.getProperty("core.vars.path", Core.VARS_PATH);
+        Core.LOGS_PATH = Core.VARS_PATH + File.separator + "log";
+        Core.SERS_PATH = Core.VARS_PATH + File.separator + "ser";
+        Core.LOGS_PATH = conf.getProperty("core.logs.path", Core.LOGS_PATH);
+        Core.SERS_PATH = conf.getProperty("core.tmps.path", Core.SERS_PATH);
+        Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
             // 启动系统属性
             for (Map.Entry et : conf.entrySet()) {
@@ -96,9 +97,9 @@ implements Filter {
                 + "BASE_HREF       : " + Core.BASE_HREF + "\r\n"
                 + "BASE_PATH       : " + Core.BASE_PATH + "\r\n"
                 + "CONF_PATH       : " + Core.CONF_PATH + "\r\n"
-                + "LANG_PATH       : " + Core.LANG_PATH + "\r\n"
+                + "VARS_PATH       : " + Core.VARS_PATH + "\r\n"
                 + "LOGS_PATH       : " + Core.LOGS_PATH + "\r\n"
-                + "TMPS_PATH       : " + Core.TMPS_PATH + "\r\n");
+                + "SERS_PATH       : " + Core.SERS_PATH + "\r\n");
         }
     }
 

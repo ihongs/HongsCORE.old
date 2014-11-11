@@ -57,7 +57,7 @@ public class CollConfig
   {
     File xmlFile = new File(Core.CONF_PATH
                 + File.separator + name + ".coll.xml");
-    File serFile = new File(Core.TMPS_PATH
+    File serFile = new File(Core.SERS_PATH
                 + File.separator + name + ".coll.ser");
     return xmlFile.lastModified() > serFile.lastModified( );
   }

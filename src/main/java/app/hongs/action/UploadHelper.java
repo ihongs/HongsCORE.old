@@ -33,8 +33,8 @@ import org.apache.commons.fileupload.util.Streams;
  * <p>
  * 需要依赖 apache 的 commons-fileupload(1.2)<br/>
  * 参考接口文档: http://commons.apache.org/fileupload/apidocs/index.html<br/>
- * 默认上传目录: TMPS_PATH + "/upload"
- * </p>
+ 默认上传目录: VARS_PATH + "/upload"
+ </p>
  *
  * @author Hongs
  */
@@ -65,7 +65,7 @@ public class UploadHelper
     this.uploadFiles  = null;
     this.uploadNames  = null;
 
-    this.uploadDir    = Core.TMPS_PATH + "/upload";
+    this.uploadDir    = Core.VARS_PATH + "/upload";
     this.uploadUri    = null;
 
     this.fileSizeMax  = 0;

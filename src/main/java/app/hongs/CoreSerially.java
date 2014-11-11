@@ -149,7 +149,7 @@ public abstract class CoreSerially
   {
     if (path == null)
     {
-      path = Core.TMPS_PATH;
+      path = Core.SERS_PATH;
     }
     File file = new File(path + File.separator + name + ".ser");
     this.load(file, time + file.lastModified( ));
@@ -167,7 +167,7 @@ public abstract class CoreSerially
   {
     if (path == null)
     {
-      path = Core.TMPS_PATH;
+      path = Core.SERS_PATH;
     }
     File file = new File(path + File.separator + name + ".ser");
     this.load(file, date!=null?date.getTime():0);

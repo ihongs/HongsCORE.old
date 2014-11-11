@@ -54,7 +54,7 @@ public class CoreLanguage
    */
   public CoreLanguage(String name, String lang)
   {
-    this(Core.LANG_PATH, name, lang);
+    this(Core.CONF_PATH, name, lang);
   }
 
   /**
@@ -63,7 +63,7 @@ public class CoreLanguage
    */
   public CoreLanguage(String name)
   {
-    this(Core.LANG_PATH, name, Core.ACTION_LANG.get());
+    this(Core.CONF_PATH, name, Core.ACTION_LANG.get());
   }
 
   /**
@@ -71,7 +71,7 @@ public class CoreLanguage
    */
   public CoreLanguage()
   {
-    this(Core.LANG_PATH, "default", Core.ACTION_LANG.get());
+    this(Core.CONF_PATH, "default", Core.ACTION_LANG.get());
   }
 
   /**
@@ -267,7 +267,7 @@ public class CoreLanguage
    */
   public static boolean hasAcceptLanguage(String lang)
   {
-    String path = Core.LANG_PATH + File.separator
+    String path = Core.CONF_PATH + File.separator
           + "default." + lang + ".properties";
     return (new File(path)).exists();
   }
