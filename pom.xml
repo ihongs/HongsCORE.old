@@ -113,21 +113,6 @@
                             </includes>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>json.simple</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
-                            <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
-                            <finalName>json-simple-1.1</finalName>
-                            <includes>
-                                <include>org/json/simple/**</include>
-                            </includes>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
