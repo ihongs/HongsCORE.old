@@ -1,7 +1,6 @@
 package app.hongs.cmdlet;
 
 import app.hongs.Core;
-import app.hongs.CoreConfig;
 import app.hongs.action.Action;
 import app.hongs.action.ActionHelper;
 
@@ -58,43 +57,41 @@ public class CmdletAction
   {
     ActionHelper helper = (ActionHelper)
           Core.getInstance(ActionHelper.class);
-    String act = Core.ACTION_PATH.get();
-    act = act.substring(1,act.lastIndexOf('.')); // 去掉前导"/"和扩展名
-
-    if (act != null && act.length() == 0) {
-        helper.print404("Can not find action name.");
-        return;
-    }
-
-    if (act.indexOf('.') != -1 || act.startsWith("hongs")) {
-        helper.print404("Illegal action '"+Core.ACTION_PATH.get()+"'.");
-        return;
-    }
-
-    /** 提取action路径里的"包.类" **/
-
-    int pos;
+    String act = Core.ACTION_PATH.get( );
     String cls;
-    act = act.replace('/','.');
+    int    pos;
 
-    pos = act.lastIndexOf('.');
-    if (pos == -1) {
+    if (act == null || act.length() ==0) {
+        helper.print404("Action name can not be empty.");
+        return;
+    }
+
+    try {
+        // 去掉扩展名
+        pos = act.lastIndexOf('.');
+        act = act.substring(0,pos);
+
+        // 检查URL中是否存在".", 会造成路径歧义, 不利于控制权限
+        if (act.indexOf('.') !=-1) {
+            helper.print404("Illegal action '"+Core.ACTION_PATH.get()+"'.");
+            return;
+        }
+
+        // 提取类名
+        pos = act.lastIndexOf('.');
+        cls = act.substring(pos+1);
+        act = act.substring(0,pos);
+    }
+    catch (StringIndexOutOfBoundsException ex ) {
         helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
-    cls = act.substring(pos+1);
-    act = act.substring(0,pos);
-
-    // 动作地址映射
-    CoreConfig conf = (CoreConfig )
-      Core.getInstance(CoreConfig.class);
-    act = "app."+act+".cmdlet";
-    if (conf.containsKey( act )) {
-        act = conf.getProperty(act);
+    if (act.length() == 0 || cls.length() == 0) {
+        helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
+        return;
     }
 
-    // app.包.cmdlet.类, action方法
-    doAction(act+"."+cls, "action", helper);
+    doAction("app."+act+".action."+cls, "action", helper);
   }
 
 }

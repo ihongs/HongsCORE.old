@@ -153,7 +153,7 @@ implements Filter {
 
         Core.ACTION_TIME.set(System.currentTimeMillis());
         Core.ACTION_LANG.set(conf.getProperty("core.language.default", "zh-cn"));
-        Core.ACTION_PATH.set(req.getRequestURI().substring(req.getContextPath().length()));
+        Core.ACTION_PATH.set(req.getRequestURI().substring(req.getContextPath().length() + 1));
 
         if (conf.getProperty("core.language.probing", false)) {
             /**

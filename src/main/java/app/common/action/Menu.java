@@ -70,7 +70,7 @@ public class Menu {
             for (Map.Entry et : pages.entrySet()) {
                 String uri2 = (String)et.getKey();
                 if (conf.chkAuth(uri2)) {
-                    helper.print302(Core.BASE_HREF+uri2);
+                    helper.print302(Core.BASE_HREF+"/"+uri2);
                     return;
                 }
             }

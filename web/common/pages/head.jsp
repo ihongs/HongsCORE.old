@@ -18,7 +18,7 @@
             String claz = !subMenus.isEmpty() ? "dropdown-toggle" : "";
             String cart = !subMenus.isEmpty() ? "<b class=\"caret\"></b>" : "";
             String name = (String) menu.get("name");
-            String href = ((String) menu.get("uri")).substring(1);
+            String href = (String) menu.get("uri" );
             String hash = "#" + href.substring(href.indexOf("/") + 1);
             if (name.indexOf("${opr}") != -1) {
                 continue; // 操作类的内页不要

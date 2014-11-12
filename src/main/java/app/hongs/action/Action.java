@@ -1,7 +1,6 @@
 package app.hongs.action;
 
 import app.hongs.Core;
-import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
@@ -10,6 +9,7 @@ import app.hongs.action.annotation.ActionChain;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
  *   &lt;servlet-name&gt;Action&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.act&lt;/url-pattern&gt;
+ *   &lt;url-pattern&gt;***.act&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * <pre>
  *
@@ -46,7 +46,6 @@ public class Action
 
   /**
    * 服务方法
-   *
    * Servlet Mapping: *.act<br/>
    * 注意: 不支持请求URI的路径中含有"."(句点), 且必须区分大小写;
    * 其目的是为了防止产生多种形式的请求路径, 影响动作过滤, 产生安全隐患.
@@ -62,51 +61,47 @@ public class Action
   {
     ActionHelper helper = (ActionHelper)
           Core.getInstance(ActionHelper.class);
-    String act = Core.ACTION_PATH.get();
-    act = act.substring(1,act.lastIndexOf('.')); // 去掉前导"/"和扩展名
-
-    if (act != null && act.length() == 0) {
-        helper.print404("Can not find action name.");
+    String act = Core.ACTION_PATH.get( );
+    String cls;
+    String mtd;
+    int    pos;
+    
+    if (act == null || act.length() ==0) {
+        helper.print404("Action name can not be empty.");
         return;
     }
 
-    if (act.indexOf('.') != -1 || act.startsWith("hongs")) {
-        helper.print404("Illegal action '"+Core.ACTION_PATH.get()+"'.");
-        return;
+    try {
+        // 去掉扩展名
+        pos = act.lastIndexOf('.');
+        act = act.substring(0,pos);
+
+        // 检查URL中是否存在".", 会造成路径歧义, 不利于控制权限
+        if (act.indexOf('.') !=-1) {
+            helper.print404("Illegal action '"+Core.ACTION_PATH.get()+"'.");
+            return;
+        }
+
+        // 提取方法名
+        pos = act.lastIndexOf('.');
+        mtd = act.substring(pos+1);
+        act = act.substring(0,pos);
+
+        // 提取类名
+        pos = act.lastIndexOf('.');
+        cls = act.substring(pos+1);
+        act = act.substring(0,pos);
     }
-
-    /** 提取action路径里的"包.类.方法" **/
-
-    int pos;
-    String cls, mtd;
-    act = act.replace('/','.');
-
-    pos = act.lastIndexOf('.');
-    if (pos == -1) {
+    catch (StringIndexOutOfBoundsException ex ) {
         helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
-    mtd = act.substring(pos+1);
-    act = act.substring(0,pos);
-
-    pos = act.lastIndexOf('.');
-    if (pos == -1) {
+    if (act.length() == 0 || cls.length() == 0 || mtd.length() == 0 ) {
         helper.print404("Wrong action '"+Core.ACTION_PATH.get()+"'.");
         return;
     }
-    cls = act.substring(pos+1);
-    act = act.substring(0,pos);
 
-    // 动作地址映射
-    CoreConfig conf = (CoreConfig )
-      Core.getInstance(CoreConfig.class);
-    act = "app."+act+".action";
-    if (conf.containsKey( act )) {
-        act = conf.getProperty(act);
-    }
-
-    // app.包.action.类, action方法
-    doAction(act+"."+cls, "action"+mtd, helper);
+    doAction("app."+act+".action."+cls, "action"+mtd, helper);
   }
 
   /**
@@ -137,7 +132,6 @@ public class Action
       helper.print404("Can not find class '" + cls + "'.");
       return;
     }
-
     // 动作类必须加上 Action 注解. Add by Hongs, 2014/7/14
     if (! klass.isAnnotationPresent(app.hongs.action.annotation.Action.class))
     {

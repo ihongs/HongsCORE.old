@@ -12,10 +12,10 @@
 <root xmlns="http://hongs-core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://hongs-core ac.xsd">
-    <page name="首页" uri="/">
+    <page name="首页" uri="">
         <include>hcim</include>
-        <page name="信息管理" uri="/hcim/index.html"></page>
-        <page name="用户管理" uri="/hcum/index.html"></page>
+        <page name="信息管理" uri="hcim/index.html"></page>
+        <page name="用户管理" uri="hcum/index.html"></page>
         <!--
         <page name="首页" uri="/"/>
         <page name="广告中心" uri="/hongs/util/Jump/To.act/ad">

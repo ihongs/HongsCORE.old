@@ -40,9 +40,11 @@ public class Cmdlet
     throws IOException, HongsException
   {
     args = init(args);
-
-    Core core = Core.getInstance();
+    Core  core = Core.getInstance();
     String act = Core.ACTION_PATH.get();
+    String cls;
+    String mtd;
+    int    pos;
 
     if (act == null || act.length() == 0)
     {
@@ -50,33 +52,25 @@ public class Cmdlet
       return;
     }
 
-    if (act.startsWith(".") || act.endsWith("."))
+    try
     {
-      CmdletHelper.println("ERROR: Can not parse Cmdlet name '"+act+"'.");
+      pos = act.lastIndexOf('.');
+      cls = act.substring(pos+1);
+      act = act.substring(0,pos);
+    }
+    catch (StringIndexOutOfBoundsException ex )
+    {
+      CmdletHelper.println("ERROR: Wrong cmdlet '"+Core.ACTION_PATH.get()+"'.");
+      return;
+    }
+    if (act.length() == 0 || cls.length() == 0)
+    {
+      CmdletHelper.println("ERROR: Wrong cmdlet '"+Core.ACTION_PATH.get()+"'.");
       return;
     }
 
-    int pos = act.lastIndexOf('.');
-    if (pos == -1)
-    {
-      CmdletHelper.println("ERROR: Can not parse Cmdlet name '"+act+"'.");
-      return;
-    }
-
-    String cls, mtd;
-    mtd =  "cmdlet";
-    cls = act.substring(pos+1);
-    act = act.substring(0,pos);
-
-    // 命令地址映射
-    CoreConfig conf = (CoreConfig )
-      Core.getInstance(CoreConfig.class);
-    act = "app."+act+".cmdlet";
-    if (conf.containsKey( act )) {
-        act = conf.getProperty(act);
-    }
-
-    cls = act+"."+cls;
+    cls = act+".cmldlet."+cls;
+    mtd = "cmdlet";
 
     /** 执行指定程序 **/
 
@@ -266,7 +260,6 @@ public class Cmdlet
             }
         }
     }
-
 
     /** 实例属性配置 **/
 

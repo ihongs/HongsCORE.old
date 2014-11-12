@@ -67,19 +67,19 @@ HongsCORE
 物理分层:
 /
   + WEB-INF
-    - conf          配置资源(常规/权限/集合/数据库)
-    - lang          语言资源
+    - etc           配置资源(配置/语言/权限/集合/数据库等)
     - lib           后端库
-    - logs          运行日志(可配置)
-    - tmps          临时文件(可配置)
+    - var           临时文件(可配置)
+      - log         运行日志(可配置)
+      - ser         缓存文件(可配置)
   + common          前端通用库(js)
     - css           前端样式
     - fonts         前端字体
     - img           前端图片
-    - pages         通用页面(页头\页尾\组件等jsp,html文件)
+    - pages         通用页面(页头/页尾/组件等jsp,html文件)
+    - auth          权限信息(虚拟目录)
     - conf          配置信息(虚拟目录)
     - lang          语言资源(虚拟目录)
-    - auth          权限信息(虚拟目录)
   - compon          其他前端组件
   - xxxx            项目模块页面
 
@@ -89,8 +89,8 @@ xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
 xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(执行命令 WEB-INF/run xxxx.Foo)
 common/auth/name.js 读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
 common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
-common/lang/name.js 读取 WEB-INF/lang/name.xx-xx.properties 中 fore.xxxx. 开头的配置
-注: 可以在 default.properties 中加入 app.xxxx.action=[完整Action类名] 或 app.xxxx.cmdlet=[完整Cmdlet类名] 来定义 action 和 cmdlet 路径对应的包; 最后3个配置请求, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置。
+common/lang/name.js 读取 WEB-INF/conf/name.xx-xx.properties 中 fore.xxxx. 开头的配置
+注: 后3个路径, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置; 可以在 default.properties 中加入 app.xxxx.action=[完整Action类名] 或 app.xxxx.cmdlet=[完整Cmdlet类名] 来定义 action 和 cmdlet 路径对应的包.
 
 框架结构:
 app.hongs           核心

@@ -335,42 +335,6 @@ abstract public class AbstractBaseModel
   }
 
   /**
-   * 更新记录
-   *
-   * @param req
-   * @param caze
-   * @return 更新条数
-   * @throws app.hongs.HongsException
-   */
-  public int update(Map req, FetchCase caze)
-    throws HongsException
-  {
-    List<String> ids = this.getOperableIds(req, caze);
-    if (ids.isEmpty()) this.put("", null);
-
-    for (String id : ids )
-    {
-      this.put( id , req );
-    }
-
-    this.affectedIds = ids;
-    return ids.size();
-  }
-
-  /**
-   * 更新记录
-   *
-   * @param req
-   * @return 更新条数
-   * @throws app.hongs.HongsException
-   */
-  public int update(Map req)
-    throws HongsException
-  {
-    return this.update(req, null);
-  }
-
-  /**
    * 删除记录
    *
    * @param req
@@ -381,7 +345,7 @@ abstract public class AbstractBaseModel
   public int remove(Map req, FetchCase caze)
     throws HongsException
   {
-    List<String> ids = this.getOperableIds(req, caze);
+    List<String> ids = this.getOperableFlags(req, caze, null);
     if (ids.isEmpty()) this.del("", null);
 
     for (String id : ids )
@@ -685,6 +649,7 @@ abstract public class AbstractBaseModel
    * @param id
    * @param caze
    * @return 可操作则返回true, 反之返回false
+   * @throws app.hongs.HongsException
    */
   protected boolean idFilter(String id, FetchCase caze)
     throws HongsException
@@ -984,35 +949,12 @@ abstract public class AbstractBaseModel
   }
 
   /**
-   * 当前表字段过滤
-   * @param key
-   * @param val
-   * @param not
-   * @param caze
-   */
-  protected void mkeyFilter(String key, Object val, boolean not, FetchCase caze)
-  {
-    if (val instanceof String)
-    {
-      String id = (String)val;
-      if (!"".equals(id))
-        caze.where(".`"+key+(not?"` != ?":"` = ?"), id);
-    }
-    else
-    if (val instanceof List)
-    {
-      List<String> ids = (List)val;
-      if (!ids.isEmpty())
-        caze.where(".`"+key+(not?"` NOT IN (?)":"` IN (?)"), ids);
-    }
-  }
-
-  /**
    * 关联表字段过滤
    * @param key
    * @param val
    * @param not
    * @param caze
+   * @throws app.hongs.HongsException
    */
   protected void skeyFilter(String key, Object val, boolean not, FetchCase caze)
   throws HongsException
@@ -1061,6 +1003,30 @@ abstract public class AbstractBaseModel
           caze2.where(".`"+key2+(not?"` NOT IN (?)":"` IN (?)"), ids);
         }
       }
+    }
+  }
+
+  /**
+   * 当前表字段过滤
+   * @param key
+   * @param val
+   * @param not
+   * @param caze
+   */
+  protected void mkeyFilter(String key, Object val, boolean not, FetchCase caze)
+  {
+    if (val instanceof String)
+    {
+      String id = (String)val;
+      if (!"".equals(id))
+        caze.where(".`"+key+(not?"` != ?":"` = ?"), id);
+    }
+    else
+    if (val instanceof List)
+    {
+      List<String> ids = (List)val;
+      if (!ids.isEmpty())
+        caze.where(".`"+key+(not?"` NOT IN (?)":"` IN (?)"), ids);
     }
   }
 
@@ -1170,46 +1136,72 @@ abstract public class AbstractBaseModel
 
   /**
    * 获取可操作的 ID
-   * getOperableNames,update,remove 均是调用此方法获取 ID
+   * remove 均是调用此方法获取 ID
    * @param req
    * @param caze
+   * @param fn
    * @return IDs
    * @throws app.hongs.HongsException
    */
-  protected List<String> getOperableIds(Map req, FetchCase caze) throws HongsException {
-    if (req == null)
-    {
-      req = new HashMap();
+  protected List<String> getOperableFlags(Map req, FetchCase caze, String fn) throws HongsException {
+    if (fn   == null) {
+      fn   = table.primaryKey;
     }
-    if (caze == null)
-    {
-      caze = new FetchCase();
+    if (req  == null) {
+      req  = new HashMap();
+    }
+    if (caze == null) {
+      caze = new FetchCase( );
+    } else {
+      caze = caze.clone( );
     }
 
-    List<String> ids = new ArrayList();
-    String pk = this.table.primaryKey;
-    this.reqFilter(req, caze);
-    caze.setSelect(".`"+pk+"` AS id");
-    List<Map> rows = this.table.fetchMore(caze);
-    for (Map  row  : rows) {
-      ids.add(row.get(pk).toString());
+    this.reqFilter(req, caze );
+    caze.setSelect(fn+" AS f");
+    List<Map   > rs = this.table.fetchMore(caze);
+    List<String> fs = new ArrayList();
+    for (Map ra: rs) {
+      fs.add(ra.get("f").toString( ));
     }
-    return ids;
+    return fs;
   }
+
   /**
    * 获取可操作的名称
- 同 getAffectedNames 一样, 用于对没有 dflag 的数据, 在 remove 前获取名称
- 此方法逻辑与 perform,remove 完全一致, 最终获取仍是调用 getAffetctedNames
- 故如要重写获取名称的方法仅需重写 getAffectedNames 即可
+   * @param req
+   * @param caze
+   * @param sp
+   * @return 用 sp (默认为", ")连接的操作名称
+   * @throws app.hongs.HongsException
+   */
+  protected String getOperableNames(Map req, FetchCase caze, String sp) throws HongsException {
+    if (sp ==  null ) {
+        sp = ", ";
+    }
+
+    List<String> ns = getOperableFlags(req, caze, findCols[0]);
+    if (ns.isEmpty()) {
+        return "";
+    }
+    
+    StringBuilder sb = new StringBuilder();
+    for ( String  nm : ns ) {
+        sb.append( sp ).append( nm );
+    }
+    return sb.substring(sp.length());
+  }
+
+  /**
+   * 获取可操作的名称
    * @param req
    * @param caze
    * @return 用", "连接的可操作的名称
    * @throws app.hongs.HongsException
    */
   public String getOperableNames(Map req, FetchCase caze) throws HongsException {
-    affectedIds = getOperableIds(req, caze);
-    return getAffectedNames();
+    return getOperableNames(req, caze, null);
   }
+
   /**
    * 获取可操作的名称
    * @param req
@@ -1217,28 +1209,18 @@ abstract public class AbstractBaseModel
    * @throws app.hongs.HongsException
    */
   public String getOperableNames(Map req) throws HongsException {
-    return getOperableNames(req, null);
+    return getOperableNames(req, null, null);
   }
+
   /**
    * 获取受影响的名称
- 默认取 findKeys 的第一位作为名称字段
- 仅对调用过 save,perform,remove 的有效
- 如果没有 dflag 则在 remove 后获取不到名称, 请通过 getOperableNames 获取
- 此方法不是线程安全的
    * @return 用", "连接的受影响的名称
    * @throws app.hongs.HongsException
    */
   public String getAffectedNames() throws HongsException {
-    StringBuilder sb = new StringBuilder( );
-    String        fn = this.findCols[0];
-    FetchCase   caze = new FetchCase( );
-    caze.setOption("INCLUDE_REMOVED", true);
-    caze.select(".`"+fn+"`").where("id IN (?)", affectedIds);
-    List<Map> rows = this.table.fetchMore(caze);
-    for (Map  row  : rows) {
-      sb.append(", ").append(row.get(fn).toString());
-    }
-    return sb.length()>0 ? sb.substring(2) : sb.toString();
+    Map req = new HashMap();
+    req.put( table.primaryKey, affectedIds );
+    return getOperableNames(req, null, null);
   }
 
 }
