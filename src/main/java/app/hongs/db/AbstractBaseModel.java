@@ -2,6 +2,7 @@ package app.hongs.db;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
+import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.util.Text;
 import java.util.ArrayList;
@@ -12,8 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 基础模型
@@ -1140,18 +1139,18 @@ abstract public class AbstractBaseModel
    * @param req
    * @param caze
    * @param fn
-   * @return IDs
+   * @return fn 对应的查询结果
    * @throws app.hongs.HongsException
    */
   protected List<String> getOperableFlags(Map req, FetchCase caze, String fn) throws HongsException {
     if (fn   == null) {
-      fn   = table.primaryKey;
+      fn   = ".`"+table.primaryKey+"`";
     }
     if (req  == null) {
       req  = new HashMap();
     }
     if (caze == null) {
-      caze = new FetchCase( );
+      caze = new FetchCase(  );
     } else {
       caze = caze.clone( );
     }
@@ -1171,22 +1170,24 @@ abstract public class AbstractBaseModel
    * @param req
    * @param caze
    * @param sp
-   * @return 用 sp (默认为", ")连接的操作名称
+   * @return sp 分隔的操作名称
    * @throws app.hongs.HongsException
    */
   protected String getOperableNames(Map req, FetchCase caze, String sp) throws HongsException {
-    if (sp ==  null ) {
-        sp = ", ";
-    }
-
-    List<String> ns = getOperableFlags(req, caze, findCols[0]);
+    List<String> ns = getOperableFlags(req, caze, ".`"+findCols[0]+"`");
     if (ns.isEmpty()) {
         return "";
     }
-    
+
+    if (sp ==  null ) {
+        CoreLanguage lang = (CoreLanguage)
+                             Core.getInstance(CoreLanguage.class);
+        sp = lang.getProperty("core.default.enum.separator",", ");
+    }
+
     StringBuilder sb = new StringBuilder();
     for ( String  nm : ns ) {
-        sb.append( sp ).append( nm );
+        sb.append(sp).append(  nm  );
     }
     return sb.substring(sp.length());
   }
@@ -1195,7 +1196,7 @@ abstract public class AbstractBaseModel
    * 获取可操作的名称
    * @param req
    * @param caze
-   * @return 用", "连接的可操作的名称
+   * @return 可操作的名称
    * @throws app.hongs.HongsException
    */
   public String getOperableNames(Map req, FetchCase caze) throws HongsException {
@@ -1205,7 +1206,7 @@ abstract public class AbstractBaseModel
   /**
    * 获取可操作的名称
    * @param req
-   * @return 用", "连接的可操作的名称
+   * @return 可操作的名称
    * @throws app.hongs.HongsException
    */
   public String getOperableNames(Map req) throws HongsException {
@@ -1214,7 +1215,7 @@ abstract public class AbstractBaseModel
 
   /**
    * 获取受影响的名称
-   * @return 用", "连接的受影响的名称
+   * @return 受影响的名称
    * @throws app.hongs.HongsException
    */
   public String getAffectedNames() throws HongsException {

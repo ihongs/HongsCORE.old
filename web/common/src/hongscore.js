@@ -889,7 +889,7 @@ $.hsNote = function(msg, cls, sec) {
 $.hsOpen = function(url, data, complete) {
     var div = $('<div class="modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header">'
               + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
-              + '<h4 class="modal-title">' + H$(":tabs.loading") + '</h4>'
+              + '<h4 class="modal-title">' +hsGetLang("opening")+ '</h4>'
               + '</div><div class="modal-body openbox">'
               + '</div></div></div></div>')
               .css('z-index', 99999);
@@ -946,9 +946,9 @@ $.fn.hsOpen = function(url, data, complete) {
         pre = tab.parent( ).children( ).filter(".active");
         tab.show().find( "a" ).click();
         if (tab.find("a span").size()) {
-            tab.find("a span").not(".close").text(hsGetLang("tabs.loading"));
+            tab.find("a span").not(".close").text(hsGetLang("loading"));
         } else {
-            tab.find("a").text(hsGetLang("tabs.loading"));
+            tab.find("a").text(hsGetLang("loading"));
         }
         // 关闭关联的 tab
         if (prt.children( ).size( ) ) {

@@ -237,14 +237,14 @@ HsForm.prototype = {
     saveBack : function(rst) {
         rst = hsResponObj(rst, !!this.formBox.attr("target"));
         if (rst.__success__ === false) {
+            var evt = new jQuery.Event("saveFail");
+            this.formBox.trigger(evt, [rst]);
             if (typeof rst.errors !== "undefined") {
                 for(var n in rst.errors) {
                     var e =  rst.errors[ n ];
                     this.haserror(n , e);
                 }
             }
-            var evt = new jQuery.Event("saveFail");
-            this.formBox.trigger(evt, [rst]);
         } else {
             var evt = new jQuery.Event("saveBack");
             this.formBox.trigger(evt, [rst]);
@@ -562,16 +562,16 @@ jQuery.fn.hsForm = function(opts) {
         if (evt.isDefaultPrevented()) {
             return;
         }
-        var btn = $(this).find(":submit");
+        var btn = $(this).find( ":submit" );
         btn.prop("disabled", true );
         btn.data("txt", btn.text());
-        btn.text(hsGetLang("form.saving"));
+        btn.text(hsGetLang("form.sending"));
     })
     .on("saveBack saveFail", "form",
     function() {
-        var btn = $(this).find(":submit");
-        var txt = btn.data("txt");
-        if (txt)  btn.text( txt );
+        var btn = $(this).find( ":submit" );
+        var txt = btn.data( "txt" );
+        if (txt)  btn.text(  txt  );
         btn.prop("disabled", false);
     });
 })(jQuery);
