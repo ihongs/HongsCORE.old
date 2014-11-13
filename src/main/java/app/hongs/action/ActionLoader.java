@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class ActionBooter
+public class ActionLoader
 implements Filter {
 
     @Override
