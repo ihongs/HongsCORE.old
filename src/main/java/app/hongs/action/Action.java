@@ -5,7 +5,6 @@ import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.action.annotation.ActionChain;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -188,7 +187,7 @@ public class Action
     }
 
     // 执行方法
-    ActionChain chain = new ActionChain(method, object, helper);
+    ActionChains chain = new ActionChains(method, object, helper);
     try
     {
       chain.doAction();

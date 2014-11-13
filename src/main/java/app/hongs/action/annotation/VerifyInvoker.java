@@ -1,9 +1,11 @@
 package app.hongs.action.annotation;
 
+import app.hongs.action.ActionChains;
 import app.hongs.CoreLanguage;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.util.Tree;
 import app.hongs.action.VerifyHelper;
+import app.hongs.util.Tree;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +15,10 @@ import java.util.Map;
  * 数据追加处理器
  * @author Hong
  */
-public class VerifyInvoker {
-    public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
-    throws Throwable {
+public class VerifyInvoker implements ActionInvoker {
+    @Override
+    public void invoke(ActionHelper helper, ActionChains chains, Annotation anno)
+    throws HongsException {
         Verify ann  = (Verify) anno;
         String lang = ann.lang();
         String conf = ann.conf();
@@ -43,6 +46,6 @@ public class VerifyInvoker {
             return;
         }
 
-        chain.doAction();
+        chains.doAction();
     }
 }

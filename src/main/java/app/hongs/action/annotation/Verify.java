@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionDecor(InjectInvoker.class)
+@ActionWrapper(InjectInvoker.class)
 public @interface Verify {
     String   rule();
     String   conf() default "default";

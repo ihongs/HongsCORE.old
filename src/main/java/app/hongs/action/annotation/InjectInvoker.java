@@ -1,19 +1,22 @@
 package app.hongs.action.annotation;
 
+import app.hongs.action.ActionChains;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.CollConfig;
 import app.hongs.util.Tree;
-import java.util.Map;
-import java.util.HashMap;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 数据追加处理器
  * @author Hong
  */
-public class InjectInvoker {
-    public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
-    throws Throwable {
+public class InjectInvoker implements ActionInvoker {
+    @Override
+    public void invoke(ActionHelper helper, ActionChains chains, Annotation anno)
+    throws HongsException {
         Inject       ann  = (Inject) anno;
         Inject.TYPES type = ann.type();
         String       conf = ann.conf();
@@ -35,10 +38,10 @@ public class InjectInvoker {
         if (type == Inject.TYPES.REQ) {
             Map data = helper.getRequestData();
             Tree.putDepth(data, map);
-            chain.doAction();
+            chains.doAction();
         }
         else {
-            chain.doAction();
+            chains.doAction();
             Map data = helper.getResponseData();
             if (data == null || (Boolean)data.get("__success__") == false) {
                 return;

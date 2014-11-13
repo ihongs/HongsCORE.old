@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionDecor(InFormInvoker.class)
+@ActionWrapper(InFormInvoker.class)
 public @interface InForm {
     String[] keys();
     String   conf() default "default";

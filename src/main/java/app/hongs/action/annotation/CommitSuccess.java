@@ -11,5 +11,5 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionDecor(CommitInvoker.class)
+@ActionWrapper(CommitInvoker.class)
 public @interface CommitSuccess { }

@@ -6,12 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 动作注解执行器
+ * 动作类识别标识
  *
- * <p>
- * 非自动调用不起作用, 仅能用于动作方法上;
- * 其他动作注解需声明此注解, 并指定调用类.
- * </p>
+ * 有此标识的才可能被外部访问到
  *
  * @author Hong
  */

@@ -1,6 +1,9 @@
 package app.hongs.action.annotation;
 
+import app.hongs.action.ActionChains;
 import app.hongs.Core;
+import app.hongs.HongsError;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.db.DB;
 import java.lang.annotation.Annotation;
@@ -12,65 +15,40 @@ import java.lang.annotation.Annotation;
  *
  * @author Hongs
  */
-public class CommitInvoker {
-    public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
-    throws Throwable {
+public class CommitInvoker implements ActionInvoker {
+    @Override
+    public void invoke(ActionHelper helper, ActionChains chains, Annotation anno)
+    throws HongsException {
         Core core = Core.getInstance();
+        core.put("__IN_TRANSC_MODE__", true);
         try {
-            core.put("__IN_TRANSC_MODE__", null);
             for (String k  :  core.keySet()) {
                 if (k.startsWith("__DB__.")) {
-                    DB  db = (DB)core.get(k);
+                    DB db = (DB) core.get(k);
                     db.IN_TRANSC_MODE = true;
                 }
             }
 
-            chain.doAction();
+            chains.doAction();
 
-            commit();
-        }
-        finally {
+            try {
+                for (String k  :  core.keySet()) {
+                    if (k.startsWith("__DB__.")) {
+                        DB  db = (DB)core.get(k);
+                        db.commit(  );
+                    }
+                }
+            } catch (HongsError ex) {
+                for (String k  :  core.keySet()) {
+                    if (k.startsWith("__DB__.")) {
+                        DB  db = (DB)core.get(k);
+                        db.rollback();
+                    }
+                }
+                throw ex;
+            }
+        } finally {
             core.remove("__IN_TRANSC_MODE__");
-        }
-    }
-
-    public static void commit()
-    throws Exception {
-        try {
-            Core core = Core.getInstance(  );
-            for (String k  :  core.keySet()) {
-                if (k.startsWith("__DB__.")) {
-                    DB  db = (DB)core.get(k);
-                    db.commit();
-                }
-            }
-        }
-        catch (Exception ex) {
-            rollback();
-            throw ex;
-        }
-        catch (Error ex) {
-            rollback();
-            throw ex;
-        }
-    }
-
-    public static void rollback()
-    throws Exception {
-        try {
-            Core core = Core.getInstance(  );
-            for (String k  :  core.keySet()) {
-                if (k.startsWith("__DB__.")) {
-                    DB  db = (DB)core.get(k);
-                    db.rollback();
-                }
-            }
-        }
-        catch (Exception ex) {
-            throw ex;
-        }
-        catch (Error ex) {
-            throw ex;
         }
     }
 }

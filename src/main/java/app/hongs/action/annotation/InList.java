@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionDecor(InListInvoker.class)
+@ActionWrapper(InListInvoker.class)
 public @interface InList {
     String[] keys() default {};
     String   conf() default "default";

@@ -1,22 +1,25 @@
 package app.hongs.action.annotation;
 
+import app.hongs.action.ActionChains;
 import app.hongs.CoreLanguage;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.CollConfig;
 import app.hongs.util.Tree;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.lang.annotation.Annotation;
 
 /**
  * 处理列表中的选择数据
  * @author Hong
  */
-public class InListInvoker {
-    public static void invoke(ActionHelper helper, ActionChain chain, Annotation anno)
-    throws Throwable {
-        chain.doAction();
+public class InListInvoker implements ActionInvoker {
+    @Override
+    public void invoke(ActionHelper helper, ActionChains chains, Annotation anno)
+    throws HongsException {
+        chains.doAction();
 
         Map data = helper.getResponseData();
         if (data == null || (Boolean)data.get("__success__") == false)
