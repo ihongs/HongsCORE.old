@@ -5,7 +5,7 @@ respond     [js]
 bootstrap   [js, css]
 glyphicons  [bootstrap]
 
-Java 部分请参见 pom.xml 的依赖部分.
+注: Java 版本 JDK 1.6 及以上; Java 库请参见 pom.xml 的依赖部分.
 
 [特别说明]
 
