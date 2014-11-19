@@ -92,6 +92,7 @@ common/auth/name.js 读取 WBE-INF/conf/act-name.xml 中 actions+session 的组�
 common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
 common/lang/name.js 读取 WEB-INF/conf/name.xx-xx.properties 中 fore.xxxx. 开头的配置
 注: 后3个路径, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置; 可以在 default.properties 中加入 app.xxxx.action=[完整Action类名] 或 app.xxxx.cmdlet=[完整Cmdlet类名] 来定义 action 和 cmdlet 路径对应的包.
+注[2]: action 和 cmdlet 已改为使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用报名作为路径; 请设置配置 core.action.packages 和 core.cmdlet.package 告知哪些包下存在 action 和 cmdlet 类
 
 框架结构:
 app.hongs           核心
