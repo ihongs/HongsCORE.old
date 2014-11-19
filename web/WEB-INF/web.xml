@@ -13,11 +13,16 @@
     <filter-mapping>
         <filter-name>Loader</filter-name>
         <url-pattern>*.act</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
+    <!--
     <filter-mapping>
         <filter-name>Loader</filter-name>
         <url-pattern>*.api</url-pattern>
     </filter-mapping>
+    //-->
     <filter-mapping>
         <filter-name>Loader</filter-name>
         <url-pattern>*.jsp</url-pattern>
@@ -36,20 +41,20 @@
     </filter-mapping>
     <!-- Action Servlet -->
     <servlet>
-        <servlet-name>Action</servlet-name>
-        <servlet-class>app.hongs.action.Action</servlet-class>
+        <servlet-name>Acts</servlet-name>
+        <servlet-class>app.hongs.action.ActsAction</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Action</servlet-name>
+        <servlet-name>Acts</servlet-name>
         <url-pattern>*.act</url-pattern>
     </servlet-mapping>
-    <!-- Cmdlet Servlet -->
+    <!-- Apilet Servlet -->
     <servlet>
-        <servlet-name>Cmdlet</servlet-name>
-        <servlet-class>app.hongs.cmdlet.CmdletAction</servlet-class>
+        <servlet-name>Apis</servlet-name>
+        <servlet-class>app.hongs.action.ApisAction</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Cmdlet</servlet-name>
+        <servlet-name>Apis</servlet-name>
         <url-pattern>*.api</url-pattern>
     </servlet-mapping>
     <!-- Auth Servlet -->

@@ -447,11 +447,11 @@ public class AuthConfig
   public Set<String> getAuthSet() {
       if (! session.contains(".")) {
           ActionHelper help = (ActionHelper)
-            Core.getInstance(ActionHelper.class);
-          return (Set) help.getSession (session);
+            Core.getInstance(ActionHelper.class );
+          return (Set) help.getAttribute(session);
       }
       else {
-          return (Set) Core.getInstance(session);
+          return (Set) Core.getInstance (session);
       }
   }
 

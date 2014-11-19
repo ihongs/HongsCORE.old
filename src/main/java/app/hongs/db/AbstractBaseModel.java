@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.Set;
  * 基础模型
  *
  * <p>
- * 当要使用 getInfo(get),save(add,put),remove(del) 时请确保表有配置主键.<br/>
+ 当要使用 getInfo(get),save(add,put),remove(del) 时请确保表有配置主键.<br/>
  getPage,getList,getInfo,save,perform,remove,exists 为基础动作方法, 通常它们被动作类直接调用;
  get,add,put,remove 为基础模型方法, 一般改写只需覆盖它们即可;
  reqFilter,idFilter 分别用于对获取和更改数据等常规操作进行过滤,
@@ -38,6 +38,8 @@ import java.util.Set;
  * 0x10a4 指定字段不存在(检查存在)
  * 0x10a6 主键值不存在(修改)
  * 0x10a8 无权操作该资源
+ * 0x10aa 创建时不得含有id
+ * 0x10ac 修改时必须含有id
  * </pre>
  *
  * @author Hongs
@@ -311,65 +313,6 @@ abstract public class AbstractBaseModel
   }
 
   /**
-   * 添加/修改记录
-   *
-   * @param req
-   * @return 记录ID
-   * @throws app.hongs.HongsException
-   */
-  public String save(Map req)
-    throws HongsException
-  {
-    String id = (String)req.get(this.table.primaryKey);
-    if (id == null || id.length() == 0)
-        id =  this.add(    req);
-    else
-        id =  this.put(id, req);
-
-    // 记录为受影响的ID
-    this.affectedIds = new ArrayList( );
-    this.affectedIds.add(id);
-
-    return id;
-  }
-
-  /**
-   * 删除记录
-   *
-   * @param req
-   * @param caze
-   * @return 删除条数
-   * @throws app.hongs.HongsException
-   */
-  public int remove(Map req, FetchCase caze)
-    throws HongsException
-  {
-    List<String> ids = this.getOperableFlags(req, caze, null);
-    if (ids.isEmpty()) this.del("", null);
-
-    for (String id : ids )
-    {
-      this.del( id  );
-    }
-
-    this.affectedIds = ids;
-    return ids.size();
-  }
-
-  /**
-   * 删除记录
-   *
-   * @param req
-   * @return 删除条数
-   * @throws app.hongs.HongsException
-   */
-  public int remove(Map req)
-    throws HongsException
-  {
-    return this.remove(req, null);
-  }
-
-  /**
    * 检查是否存在
    *
    * @param req
@@ -462,6 +405,97 @@ abstract public class AbstractBaseModel
     throws HongsException
   {
     return !exists(req);
+  }
+
+  /**
+   * 删除记录
+   *
+   * @param req
+   * @param caze
+   * @return 删除条数
+   * @throws app.hongs.HongsException
+   */
+  public int remove(Map req, FetchCase caze)
+    throws HongsException
+  {
+    List<String> ids = this.getOperableFlags(req, caze, null);
+    if (ids.isEmpty()) this.del("", null);
+
+    for (String id : ids )
+    {
+      this.del( id  );
+    }
+
+    this.affectedIds = ids;
+    return ids.size();
+  }
+
+  /**
+   * 删除记录
+   *
+   * @param req
+   * @return 删除条数
+   * @throws app.hongs.HongsException
+   */
+  public int remove(Map req)
+    throws HongsException
+  {
+    return this.remove(req, null);
+  }
+
+  public String create(Map req) throws HongsException {
+    String id = (String)req.get(this.table.primaryKey);
+    if (id != null && id.length() != 0)
+    {
+      throw new HongsException(0x10aa, "create cant have id");
+    }
+
+    id = this.add(     req );
+
+    // 记录为受影响的ID
+    this.affectedIds = new ArrayList( );
+    this.affectedIds.add(id);
+
+    return id;
+  }
+
+  public String modify(Map req) throws HongsException {
+    String id = (String)req.get(this.table.primaryKey);
+    if (id == null || id.length() == 0)
+    {
+      throw new HongsException(0x10ac, "modify must have id");
+    }
+
+    id = this.put( id, req );
+
+    // 记录为受影响的ID
+    this.affectedIds = new ArrayList( );
+    this.affectedIds.add(id);
+
+    return id;
+  }
+
+  /**
+   * 添加/修改记录
+   *
+   * @param req
+   * @return 记录ID
+   * @throws app.hongs.HongsException
+   */
+  public String save(Map req)
+    throws HongsException
+  {
+    String id = (String)req.get(this.table.primaryKey);
+    if (id == null || id.length() == 0)
+      id = this.add(    req);
+    else
+      id = this.put(id, req);
+
+    // 记录为受影响的ID
+    this.affectedIds = new ArrayList( );
+    this.affectedIds.add(id);
+
+    return id;
   }
 
   //** 标准模型方法 **/
@@ -1075,7 +1109,7 @@ abstract public class AbstractBaseModel
        * 需要对这些符号进行转义;
        * 前后加"%"用于模糊匹配.
        */
-      find = Text.escape( find, "%_", "/" );
+      find = Util.escape( find, "%_", "/" );
       find = "%" + find + "%";
 
       for (String key : keys)
@@ -1135,7 +1169,7 @@ abstract public class AbstractBaseModel
 
   /**
    * 获取可操作的 ID
-   * remove 均是调用此方法获取 ID
+ remove 均是调用此方法获取 ID
    * @param req
    * @param caze
    * @param fn

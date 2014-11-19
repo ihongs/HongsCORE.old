@@ -5,7 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -293,7 +293,7 @@ public class CmdletHelper
    */
   public static void print2Log(String text) throws HongsException
   {
-    CoreLogger.getInstance(Core.ACTION_PATH.get().replace('.', '_')).println(text);
+    CoreLogger.getInstance(Core.ACTION_NAME.get().replace('.', '_')).println(text);
   }
 
   /**
@@ -314,7 +314,7 @@ public class CmdletHelper
   public static void printETime(String label, long start)
   {
     start = System.currentTimeMillis() - start;
-    String notes = Text.humanTime(start);
+    String notes = Util.humanTime(start);
     System.err.println(new StringBuilder()
                           .append(label)
                           .append( ": ")
@@ -416,7 +416,7 @@ public class CmdletHelper
     float  scale = (float)ok / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Text.humanTime((long) left1);
+    String left2 = Util.humanTime((long) left1);
     String left3 = String.format("ok(%d) Time left: %s",
                                     ok, left2);
     printERate(scale, left3);
@@ -434,7 +434,7 @@ public class CmdletHelper
     float  scale = (float)(err + ok) / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Text.humanTime((long) left1);
+    String left2 = Util.humanTime((long) left1);
     String left3 = String.format("ok(%d) error(%d) Time left: %s",
                                ok, err, left2);
     printERate(scale, left3);

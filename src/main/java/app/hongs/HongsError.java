@@ -13,6 +13,16 @@ package app.hongs;
  */
 public class HongsError extends Error {
 
+    /**
+     * 通用错误
+     */
+    public static final int COMMON = 0x10;
+
+    /**
+     * 通知错误
+     */
+    public static final int NOTICE = 0x11;
+
     protected HongsLocalized that;
 
     public HongsError(int code, String desc, Throwable cause) {
@@ -65,7 +75,7 @@ public class HongsError extends Error {
         return that.getLocalizedSection();
     }
 
-    public void setLocalizedOptions(String lang) {
+    public void setLocalizedSection(String lang) {
         that.setLocalizedSection(lang);
     }
 

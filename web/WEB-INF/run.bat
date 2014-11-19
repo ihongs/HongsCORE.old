@@ -7,7 +7,7 @@ set CLASSPATH=%CLASSPATH%;%BASE_PATH%lib\*;%BASE_PATH%classes
 
 "%JAVA_HOME%\bin\java" ^
 -classpath "%CLASSPATH%" ^
-app.hongs.cmdlet.Cmdlet %* ^
+app.hongs.apilet.ApiletRunner %* ^
 --basepath "%BASE_PATH%"
 
 set CLASSPATH=%KLASSPATH%

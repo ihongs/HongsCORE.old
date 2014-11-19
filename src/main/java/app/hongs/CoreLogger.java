@@ -2,7 +2,7 @@ package app.hongs;
 
 import app.hongs.action.ActionHelper;
 import app.hongs.cmdlet.CmdletHelper;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -139,7 +139,7 @@ public class CoreLogger implements Core.Destroy
      */
     sb.append(' ')
       .append('[')
-      .append(Core.ACTION_PATH.get())
+      .append(Core.ACTION_NAME.get())
       .append(' ')
       .append(Thread.currentThread().getId())
       .append(']');
@@ -148,7 +148,7 @@ public class CoreLogger implements Core.Destroy
      * 去掉空行, 行首缩进
      */
     sb.append("\r\n");
-    sb.append(Text.indent(Text.clearEL(text.trim())));
+    sb.append(Util.indent(Util.clearEL(text.trim())));
     sb.append("\r\n");
 
     this.out.print(sb.toString());
@@ -273,7 +273,7 @@ public class CoreLogger implements Core.Destroy
   public static CoreLogger getInstance(String name)
   {
       String key = CoreLogger.class.getName() + ":" + name;
-      Core core = Core.getInstance();
+      Core core = Core.getInstance( );
       CoreLogger inst;
       if (core.containsKey(key)) {
           inst = (CoreLogger)core.get(key);

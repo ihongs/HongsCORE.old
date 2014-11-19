@@ -3,7 +3,7 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -58,19 +58,19 @@ public class LangAction
 
     String name = helper.getRequest().getPathInfo( );
     if (name == null || name.length() == 0) {
-      helper.print500("Path info required");
+      helper.error500("Path info required");
       return;
     }
     int p = name.lastIndexOf('.');
     if (p < 0) {
-      helper.print500("File type required");
+      helper.error500("File type required");
       return;
     }
     String type = name.substring(1 + p);
            name = name.substring(1 , p);
 
     if ( !"js".equals(type) && !"json".equals(type)) {
-      helper.print500("Wrong file type: "+type);
+      helper.error500("Wrong file type: "+type);
       return;
     }
 
@@ -108,7 +108,7 @@ public class LangAction
         s = this.makeLanguage(conf, lang);
       }
       catch (HongsError ex) {
-        helper.print500(ex.getMessage());
+        helper.error500(ex.getMessage());
         return;
       }
 
@@ -170,19 +170,19 @@ public class LangAction
     // 公共语言
     if ("default".equals(confName))
     {
-      sb.append("\"error.err\":\"")
+      sb.append("\t\"error.err\":\"")
         .append(mk.lang.getProperty("core.error.label", "ERROR"))
         .append("\",\n")
-        .append("\"error.ukw\":\"")
+        .append("\t\"error.ukw\":\"")
         .append(mk.lang.getProperty("core.error.unkwn", "UNKWN"))
         .append("\",\n")
-        .append("'date.format':\"")
+        .append("\t\"date.format\":\"")
         .append(mk.lang.getProperty("core.default.date.format", "yyyy/MM/dd"))
         .append("\",\n")
-        .append("'time.format':\"")
+        .append("\t\"time.format\":\"")
         .append(mk.lang.getProperty("core.default.time.format",  "HH:mm:ss" ))
         .append("\",\n")
-        .append("'datetime.format':\"")
+        .append("\t\"datetime.format\":\"")
         .append(mk.lang.getProperty("core.default.datetime.format", "yyyy/MM/dd HH:mm:ss"))
         .append("\",\n");
     }
@@ -252,26 +252,26 @@ public class LangAction
     private String makeLang(String name, String key, String def)
     {
       String value = this.lang.getProperty(key, def);
-      value = Text.escape(value);
-      return "\"" + name + "\":\"" + value + "\",\r\n";
+      value = Util.escape(value);
+      return "\t\"" + name + "\":\"" + value + "\",\r\n";
     }
 
     private String makeLang(String name, String key, double def)
     {
       String value = String.valueOf(this.lang.getProperty(key, def));
-      return "\"" + name + "\":" + value + ",\r\n";
+      return "\t\"" + name + "\":" + value + ",\r\n";
     }
 
     private String makeLang(String name, String key, boolean def)
     {
       String value = String.valueOf(this.lang.getProperty(key, def));
-      return "\"" + name + "\":" + value + ",\r\n";
+      return "\t\"" + name + "\":" + value + ",\r\n";
     }
 
     private String makeCode(String name, String key)
     {
       String value = this.lang.getProperty(key, "null");
-      return "\"" + name + "\":" + value + ",\r\n";
+      return "\t\"" + name + "\":" + value + ",\r\n";
     }
 
     private String makeLink(String name, String key)

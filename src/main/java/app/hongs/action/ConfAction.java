@@ -3,8 +3,7 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
-import app.hongs.action.ActionHelper;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -59,19 +58,19 @@ public class ConfAction
 
     String name = helper.getRequest().getPathInfo();
     if (name == null || name.length() == 0) {
-      helper.print500("Path info required");
+      helper.error500("Path info required");
       return;
     }
     int p = name.lastIndexOf('.');
     if (p < 0) {
-      helper.print500("File type required");
+      helper.error500("File type required");
       return;
     }
     String type = name.substring(1 + p);
            name = name.substring(1 , p);
 
     if ( !"js".equals(type) && !"json".equals(type)) {
-      helper.print500("Wrong file type: "+type);
+      helper.error500("Wrong file type: "+type);
       return;
     }
 
@@ -98,7 +97,7 @@ public class ConfAction
         s = this.makeConfig(name);
       }
       catch (HongsError ex) {
-        helper.print500(ex.getMessage());
+        helper.error500(ex.getMessage());
         return;
       }
 
@@ -162,13 +161,13 @@ public class ConfAction
     // 公共配置
     if ("default".equals(confName))
     {
-      sb.append("DEBUG:")
+      sb.append("\t\"DEBUG\":")
         .append(String.valueOf(Core.DEBUG))
         .append(",\n")
-        .append("SERVER_ID:\"")
+        .append("\t\"SERVER_ID\":\"")
         .append(Core.SERVER_ID)
         .append("\",\n")
-        .append("BASE_HREF:\"")
+        .append("\t\"BASE_HREF\":\"")
         .append(Core.BASE_HREF)
         .append("\",\n");
     }
@@ -238,26 +237,26 @@ public class ConfAction
     private String makeConf(String name, String key, String def)
     {
       String value = this.conf.getProperty(key, def);
-      value = Text.escape(value);
-      return "\"" + name + "\":\"" + value + "\",\r\n";
+      value = Util.escape(value);
+      return "\t\"" + name + "\":\"" + value + "\",\r\n";
     }
 
     private String makeConf(String name, String key, double def)
     {
       String value = String.valueOf(this.conf.getProperty(key, def));
-      return "\"" + name + "\":" + value + ",\r\n";
+      return "\t\"" + name + "\":" + value + ",\r\n";
     }
 
     private String makeConf(String name, String key, boolean def)
     {
       String value = String.valueOf(this.conf.getProperty(key, def));
-      return "\"" + name + "\":" + value + ",\r\n";
+      return "\t\"" + name + "\":" + value + ",\r\n";
     }
 
     private String makeCode(String name, String key)
     {
       String value = this.conf.getProperty(key, "null");
-      return "\"" + name + "\":" + value + ",\n";
+      return "\t\"" + name + "\":" + value + ",\n";
     }
 
     private String makeLink(String name, String key)

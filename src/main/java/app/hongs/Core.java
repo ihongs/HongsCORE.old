@@ -1,6 +1,6 @@
 package app.hongs;
 
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -151,6 +151,11 @@ extends HashMap<String, Object>
     }
   }
 
+  public boolean containsKey(Class klass)
+  {
+    return this.containsKey(klass.getName());
+  }
+  
   private Object check(Core core, String name)
   {
     if (super.containsKey(name))
@@ -225,11 +230,11 @@ extends HashMap<String, Object>
       }
       catch (InvocationTargetException ex)
       {
-        Throwable e = ex.getCause();
-        if (e instanceof StackOverflowError)
-            throw (Error) e;
+        Throwable ta = ex.getCause();
+        if (ta instanceof StackOverflowError)
+            throw (Error) ta;
 
-        throw new HongsError(0x17, "Can not build "+name, ex.getCause());
+        throw new HongsError(0x17, "Can not build "+name, ta);
       }
     }
     catch (NoSuchMethodException ex2)
@@ -269,7 +274,7 @@ extends HashMap<String, Object>
     }
     catch (SecurityException ex2)
     {
-      throw new HongsError(0x16, "Can not build "+name, ex2);
+        throw new HongsError(0x16, "Can not build "+name, ex2);
     }
   }
 
@@ -350,7 +355,7 @@ extends HashMap<String, Object>
   /**
    * 动作路径标识
    */
-  public static InheritableThreadLocal<String> ACTION_PATH
+  public static InheritableThreadLocal<String> ACTION_NAME
          =  new InheritableThreadLocal();
 
   /**
@@ -411,20 +416,24 @@ extends HashMap<String, Object>
    */
   public static String getUniqueId(String svid)
   {
-    long n1 = System.currentTimeMillis();
-    String s1 = String.format("%8s", Text.as36Hex(n1));
+    long n;
 
-    long n2 = Thread.currentThread().getId();
-    String s2 = String.format("%4s", Text.as36Hex(n2));
+    n = System.currentTimeMillis();
+    String s1 = String.format("%8s", Util.as36Hex(n));
 
-    long n3 = (long)(Math.random() * 1679615); //36^4-1
-    String s3 = String.format("%4s", Text.as36Hex(n3));
+    n = Thread.currentThread().getId();
+    String s2 = String.format("%4s", Util.as36Hex(n));
+
+    n = (long) ( Math.random() * 1679615 ); //36^4-1
+    String s3 = String.format("%4s", Util.as36Hex(n));
 
     if (s1.length() > 8) s1 = s1.substring(s1.length() - 8);
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);
     if (s3.length() > 4) s3 = s3.substring(s3.length() - 4);
 
-    return (s1 + s2 + s3 + svid).replace(' ', '0');
+    return (  new StringBuilder( )  )
+        .append(svid).append(s1).append(s2).append(s3)
+        .toString().replace(' ', '0');
   }
 
   //** 核心接口 **/

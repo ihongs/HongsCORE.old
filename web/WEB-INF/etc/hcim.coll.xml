@@ -1,4 +1,7 @@
 <root>
+  <data key="__FORE_DATA__" type="set">
+      <data>DOMAIN_TYPES</data>
+  </data>
   <data key="DOMAIN_TYPES" type="json">
     <![CDATA[
       [

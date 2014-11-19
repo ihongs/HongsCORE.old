@@ -3,7 +3,8 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-import app.hongs.util.JSON;
+import app.hongs.util.Data;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,9 +14,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,10 +29,10 @@ import org.xml.sax.SAXException;
  * 集合配置
  *
  * <p>
- * 在 Java 7 之前写 List,Set,Map 很麻烦, 不能像写 JSON 那样方便;<br/>
+ 在 Java 7 之前写 List,Set,Map 很麻烦, 不能像写 Data 那样方便;<br/>
  * 有些数据需要方便修改, 而修改代码比较麻烦;<br/>
  * 需要统一管理一些数据, 如状态/类型/选项等.<br/>
- * 故编写此类用于解决以上问题, 可从 XML 中读取结构数据或 JSON 数据.<br/>
+ 故编写此类用于解决以上问题, 可从 XML 中读取结构数据或 Data 数据.<br/>
  * XML 的结构请参考 WEB-INF/conf 中的 coll.xsd 和 default.coll.xml
  * </p>
  *
@@ -91,9 +94,9 @@ public class CollConfig
 
       // 测试
       /*
-      app.hongs.util.JSON.dumps(datas);
-      app.hongs.util.JSON.dumps(reqDatas);
-      app.hongs.util.JSON.dumps(refDatas);
+      app.hongs.util.Data.dumps(datas);
+      app.hongs.util.Data.dumps(reqDatas);
+      app.hongs.util.Data.dumps(refDatas);
       */
     }
     catch (IOException ex)
@@ -224,7 +227,7 @@ public class CollConfig
 
     if ("json".equals(type))
     {
-      data = JSON.parse(text);
+      data = Data.toObject(text);
     }
     else
     if ("number".equals(type))

@@ -2,16 +2,14 @@ package app.hongs.action;
 
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.JSON;
+import app.hongs.util.Data;
 import app.hongs.util.Tree;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,9 +17,16 @@ import javax.servlet.http.HttpServletResponse;
  * 动作助手
  *
  * <p>
- 通过 getRequestData,getParameter,getSession,getCookie
- 来获取请求/会话/Cookie数据; 通过 back 来通知前端动作的成功或失败.
+ 通过 getRequestData,getParameter,getAttribute,getCookie
+ 来获取请求/会话/Cookie数据; 通过 reply 来通知前端动作的成功或失败
  </p>
+ *
+ * <h3>异常代码</h3>
+ * <pre>
+ * 代码区间: 0x1120~0x112f
+ * 0x1120 转发'%0'失败
+ * 0x1122 引用'%0'失败
+ * </pre>
  *
  * @author Hongs
  */
@@ -44,24 +49,19 @@ public class ActionHelper
   private Map<String, Object> sessionData;
 
   /**
-   * 客户数据
-   */
-  private Map<String, String> cookiesData;
-
-  /**
    * HttpServletResponse
    */
   private HttpServletResponse response;
 
   /**
-   * 内部输出
-   */
-  private PrintWriter responseWrtr;
-
-  /**
-   * 返回数据
+   * 响应数据
    */
   private Map<String, Object> responseData;
+
+  /**
+   * 响应输出
+   */
+  private PrintWriter responseWrtr;
 
   /**
    * 初始化助手(用于action)
@@ -81,15 +81,10 @@ public class ActionHelper
     {
       this.request .setCharacterEncoding("UTF-8");
       this.response.setCharacterEncoding("UTF-8");
-      this.responseWrtr  =  rsp.getWriter();
     }
     catch (UnsupportedEncodingException ex)
     {
       throw new HongsError(0x21, "Can not set rs encoding.", ex);
-    }
-    catch (IOException ex)
-    {
-      throw new HongsError(0x22, "Can not send to browser.", ex);
     }
   }
 
@@ -98,20 +93,17 @@ public class ActionHelper
    *
    * @param req
    * @param ses
-   * @param cok
    * @param out
    */
   public ActionHelper(
           Map<String, String[]> req,
           Map<String, String[]> ses,
-          Map<String, String[]> cok,
           PrintWriter out)
   {
     try
     {
       this.requestData  = req != null ? parseParams(req) : new HashMap( );
-      this.sessionData  = req != null ? parseParams(ses) : new HashMap( );
-      this.cookiesData  = req != null ? parseParams(cok) : new HashMap( );
+      this.sessionData  = ses != null ? parseParams(ses) : new HashMap( );
       this.responseWrtr = out != null ? out : new PrintWriter(System.err);
     }
     catch (HongsException ex)
@@ -126,10 +118,10 @@ public class ActionHelper
   }
 
   /**
-   * 获取请求的文本
+   * 获取请求文本
    * @return 请求文本
    */
-  public String getRequestBody()
+  public String getRequestText()
   {
     try
     {
@@ -153,14 +145,15 @@ public class ActionHelper
   }
 
   /**
-   * 获取请求的Map数据
+   * 获取请求数据
    *
    * 不同于 request.getParameterMap,
    * 该方法会将带"[]"的拆成子List, 将带"[xxx]"的拆成子Map, 并逐级递归.
    * 也可以解析用"."连接的参数, 如 a.b.c 与上面的 a[b][c] 是同样的效果.
    * 故请务必注意参数中的"."和"[]"符号.
    *
-   * @return Map对象
+   * @return 请求数据
+   * @throws app.hongs.HongsException
    */
   public Map<String, Object> getRequestData() throws HongsException
   {
@@ -169,7 +162,7 @@ public class ActionHelper
       String ct = this.request.getContentType();
       if (null != ct && ("text/json".equals(ct) || "application/json".equals(ct) ))
       {
-        this.requestData = (Map<String, Object>) JSON.parse(this.getRequestBody( ));
+        this.requestData = (Map<String,Object>)Data.toObject(this.getRequestText());
       }
       else
       {
@@ -184,21 +177,16 @@ public class ActionHelper
     return this.response;
   }
 
-  public PrintWriter getResponseWrtr()
-  {
-    return this.responseWrtr;
-  }
-
   /**
-   * 获取返回数据
+   * 获取响应数据
+
+ 注意:
+ 该函数为过滤器提供原始的返回数据,
+ 只有使用 reply 函数返回的数据才会被记录,
+ 其他方式返回的数据均不会记录在此,
+ 使用时务必判断是否为 null.
    *
-   * 注意:
-   * 该函数为过滤器提供原始的返回数据,
-   * 只有使用 back 函数返回的数据才会被记录,
-   * 其他方式返回的数据均不会记录在此,
-   * 使用时务必判断是否为 null.
-   *
-   * @return 返回数据
+   * @return 响应数据
    */
   public Map<String, Object> getResponseData()
   {
@@ -206,57 +194,61 @@ public class ActionHelper
   }
 
   /**
-   * 获取参数
+   * 获取响应输出
+   * @return 响应输出
+   */
+  public PrintWriter getResponseWrtr()
+  {
+    if (this.responseWrtr != null)
+    {
+        return this.responseWrtr;
+    }
+    else
+    {
+      try
+      {
+        return this.response.getWriter();
+      }
+      catch (IOException ex)
+      {
+        throw new HongsError(0x22, "Can not send to browser.", ex);
+      }
+    }
+  }
+
+  /**
+   * 获取请求参数
    * @param name
    * @return 当前请求参数
    * @throws HongsException
    */
   public String getParameter(String name) throws HongsException
   {
-    Object o = this.getAttribute(name);
+    Object o = Tree.getValue(getRequestData(), name);
     if (o == null)
     {
       return null;
     }
-    if (o instanceof List)
-    {
-      List l = (List) o;
-      int  i = l.size();
-      o =  l.get(i + 1);
-    }
+//    if (o instanceof Map )
+//    {
+//      o = new ArrayList(((Map) o).values());
+//    }
+//    if (o instanceof List)
+//    {
+//      List l = (List) o;
+//      int  i = l.size();
+//      o =  l.get(i + 1);
+//    }
     return o.toString();
   }
 
   /**
-   * 获取属性
+   * 获取会话属性
+   * 注意; 为防止歧义, 请不要在 name 中使用 "[","]"和"."
    * @param name
-   * @return 当前请求数据
-   * @throws HongsException
+   * @return 当前会话属性, 没有则为null
    */
-  public Object getAttribute(String name) throws HongsException
-  {
-    return Tree.getValue(this.getRequestData(), name);
-  }
-
-  /**
-   * 设置属性
-   * @param name
-   * @param value
-   * @throws HongsException
-   */
-  public void setAttribute(String name, Object value) throws HongsException
-  {
-    Tree.setValue(this.getRequestData(), name, value);
-  }
-
-  /**
-   * 获取session
-   * 没有则返回null
-   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
-   * @param name
-   * @return Session值
-   */
-  public Object getSession(String name)
+  public Object getAttribute(String name)
   {
     if (this.sessionData != null)
     {
@@ -264,121 +256,77 @@ public class ActionHelper
     }
     else
     {
-      return this.request.getSession(/**/).getAttribute(name);
+      return this.request.getSession( ).getAttribute(name);
     }
   }
 
   /**
-   * 设置session
-   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
+   * 设置会话属性
+   * 注意; 为防止歧义, 请不要在 name 中使用 "[","]"和"."
+   *       当 value 为 null 时 name 对应的会话属性将删除
    * @param name
    * @param value
    */
-  public void setSession(String name, Object value)
+  public void setAttribute(String name, Object value)
   {
     if (this.sessionData != null)
     {
-      this.sessionData.put(name, value);
-    }
-    else
-    {
-      this.request.getSession(true).setAttribute(name, value);
-    }
-  }
-
-  /**
-   * 获取cookie
-   * 没有则返回null
-   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
-   * @param name
-   * @return Cookie值
-   */
-  public String getCookie(String name)
-  {
-    if (this.cookiesData != null)
-    {
-      return this.cookiesData.get(name);
-    }
-
-    Cookie cook  = this.getCookia(name);
-    return cook == null ? null : cook.getValue();
-  }
-
-  /**
-   * 设置cookie
-   * 注意; 为防止歧义, 请不要在 name 中使用"[","]"和"."
-   * @param name
-   * @param value
-   * @return Cookie
-   */
-  public Cookie setCookie(String name, String value)
-  {
-    if (this.cookiesData != null)
-    {
-      this.cookiesData.put(name, value);
-      return   new  Cookie(name, value);
-    }
-
-    return  this.setCookia(name, value);
-  }
-
-  private Cookie getCookia(String name)
-  {
-    Cookie[] cookiez = this.request.getCookies();
-
-    if (cookiez != null)
-    {
-      for (int i = 0; i < cookiez.length; i ++ )
+      if (value == null)
       {
-        if ( cookiez[i].getName().equals(name) )
-        {
-          return cookiez[i];
-        }
+        this.sessionData.remove(name);
+      }
+      else
+      {
+        this.sessionData.put   (name, value);
       }
     }
-
-    return null;
-  }
-
-  private Cookie setCookia(String name, String value)
-  {
-    Cookie cookie = this.getCookia(name);
-
-    if (cookie != null)
-    {
-      cookie.setValue(value);
-    }
     else
     {
-      cookie = new Cookie(name,value);
+      if (value == null)
+      {
+        this.request.getSession( ).removeAttribute(name);
+      }
+      else
+      {
+        this.request.getSession(true).setAttribute(name, value);
+      }
     }
-    this.response.addCookie( cookie );
-
-    return cookie;
   }
 
-  //** 快捷动作 **/
+  //** 返回数据 **/
 
   /**
    * 返回指定数据
    * 针对model的getList,getInfo方法
    * @param rst
    */
-  public void back(Map<String, Object> rst)
+  public void reply(Map<String, Object> rst)
   {
+    // 默认加上 SESSIONID
+//    if(!rst.containsKey("__session__")) {
+//        String ssid = (String) getAttribute("__session__");
+//        if (ssid == null  &&  request != null ) {
+//            ssid = request.getSession().getId();
+//        }
+//        rst.put( "__session__", ssid );
+//    }
     // 默认为成功
-    if(!rst.containsKey("__success__"))
+    if(!rst.containsKey("__success__")) {
         rst.put( "__success__", true );
+    }
+    if(!rst.containsKey("__message__")) {
+        rst.put( "__message__",  ""  );
+    }
     this.responseData = rst;
   }
 
   /**
    * 返回保操作结果
-   * 针对model的save,remove方法
+   * 针对model的save,create,modify,remove方法
    * @param msg
    * @param rst
    */
-  public void back(String msg, Object... rst)
+  public void reply(String msg, Object... rst)
   {
     Map data = new HashMap();
     data.put("__success__",true);
@@ -386,7 +334,7 @@ public class ActionHelper
     if (rst != null && rst.length > 0) {
         data.put( "back"  , rst);
     }
-    back(data);
+    ActionHelper.this.reply(data);
   }
 
   /**
@@ -394,30 +342,31 @@ public class ActionHelper
    * @param rst
    * @param msg
    */
-  public void back(String msg, boolean rst)
+  public void reply(String msg, boolean rst)
   {
     Map data = new HashMap();
     data.put("__success__", rst);
     data.put("__message__", msg);
-    back(data);
+    ActionHelper.this.reply(data);
   }
 
   /**
    * 返回操作消息
-   * @param msg 
+   * @param msg
    */
-  public void back(String msg)
+  public void reply(String msg)
   {
-    back(msg, true);
+    ActionHelper.this.reply(msg, true);
   }
 
   /**
    * 返回检验结果
+   * 针对model的exists,unique方法
    * @param rst
    */
-  public void back(Boolean rst)
+  public void reply(boolean rst)
   {
-    back(null, rst);
+    ActionHelper.this.reply(null, rst);
   }
 
   //** 输出内容 **/
@@ -450,30 +399,20 @@ public class ActionHelper
   /**
    * 输出JSON格式
    *
-   * @param list
+   * @param data
    */
   public void print(Object data)
   {
-    this.print(JSON.toString(data), "application/json");
+    this.print(Data.toString(data), "application/json");
   }
 
-  //** 常用状态 **/
-
-  /**
-   * 301重定向
-   * @param url
-   */
-  public void print301(String url)
-  {
-    this.response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-    this.response.setHeader("Location", url);
-  }
+  //** 跳转及错误 **/
 
   /**
    * 302重定向
    * @param url
    */
-  public void print302(String url)
+  public void redirect(String url)
   {
     this.response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
     this.response.setHeader("Location", url);
@@ -483,7 +422,7 @@ public class ActionHelper
    * 403禁止访问
    * @param msg
    */
-  public void print403(String msg)
+  public void error403(String msg)
   {
     this.response.setStatus(HttpServletResponse.SC_FORBIDDEN);
     this.print(msg);
@@ -493,7 +432,7 @@ public class ActionHelper
    * 404缺少页面
    * @param msg
    */
-  public void print404(String msg)
+  public void error404(String msg)
   {
     this.response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     this.print(msg);
@@ -503,7 +442,7 @@ public class ActionHelper
    * 500内部错误
    * @param msg
    */
-  public void print500(String msg)
+  public void error500(String msg)
   {
     this.response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     this.print(msg);
@@ -513,17 +452,32 @@ public class ActionHelper
    * 500 系统异常
    * @param ex
    */
-  public void print500(Exception ex)
+  public void error500(Exception ex)
   {
-    ActionHelper.this.print500(ex.getMessage());
+    ActionHelper.this.error500(ex.getMessage());
   }
 
   //** 工具方法 **/
 
   /**
+   * 重置请求响应对象
+   * 
+   * 供 ActionLoader 调用, 因 forward 后 response 会变
+   *
+   * @param req
+   * @param rsp 
+   */
+  protected void reset(HttpServletRequest req, HttpServletResponse rsp)
+  {
+    this.request  = req;
+    this.response = rsp;
+  }
+
+  /**
    * 解析参数
    * @param params
    * @return 解析后的Map
+   * @throws app.hongs.HongsException
    */
   protected static Map parseParams(Map<String, String[]> params)
   throws HongsException

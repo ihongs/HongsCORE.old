@@ -3,10 +3,8 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.JSON;
-
+import app.hongs.util.Data;
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -49,32 +47,32 @@ public class AuthAction
 
     String name = helper.getRequest().getPathInfo( );
     if (   name == null || name.length( ) == 0) {
-      helper.print500("Path info required");
+      helper.error500("Path info required");
       return;
     }
     int p = name.lastIndexOf('.');
     if (p < 0) {
-      helper.print500("File type required");
+      helper.error500("File type required");
       return;
     }
     String type = name.substring(1 + p);
            name = name.substring(1 , p);
 
     if ( !"js".equals(type) && !"json".equals(type)) {
-      helper.print500("Wrong file type: "+type);
+      helper.error500("Wrong file type: "+type);
       return;
     }
 
     String data;
     try {
-      data = JSON.toString(AuthConfig.getInstance(name).getAuthMap());
+      data = Data.toString(AuthConfig.getInstance(name).getAuthMap());
     }
     catch (HongsException ex) {
-      helper.print500(ex.getMessage());
+      helper.error500(ex.getMessage());
       return;
     }
     catch (HongsError ex) {
-      helper.print500(ex.getMessage());
+      helper.error500(ex.getMessage());
       return;
     }
 

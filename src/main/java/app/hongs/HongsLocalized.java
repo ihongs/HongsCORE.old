@@ -67,13 +67,13 @@ public class HongsLocalized {
         // 0x10,0x11,0x1000,0x1001 为保留的代号
         // 0x11,0x1001 使用消息作为语言键
         switch (code) {
-            case 0x1000:
-            case 0x10:
+            case HongsException.COMMON:
+            case HongsError.COMMON:
                 ckey = "fore.error";
                 dkey = "";
                 break;
-            case 0x1001:
-            case 0x11:
+            case HongsException.NOTICE:
+            case HongsError.NOTICE:
                 ckey = "fore.error";
                 dkey = desx;
                 break;

@@ -4,21 +4,20 @@ import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-
-import java.util.Set;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.net.URLEncoder;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 动作过滤器
@@ -28,7 +27,7 @@ import javax.servlet.ServletException;
  * index-path   首页地址(为空则不跳转)
  * login-path   登录地址(为空则不跳转)
  * config-name  动作配置(默认为default)
- * exclude-urls 不包含的URL, 用","分割多个
+ * exclude-uris 不包含的URL, 可用","分割多个, 可用"*"为前后缀
  * </pre>
  *
  * @author Hongs
@@ -55,51 +54,54 @@ public class AuthFilter
   /**
    * 不包含的URL
    */
-  private String excludeUrls[][];
+  private String[][] excludeUris;
 
   @Override
   public void init(FilterConfig config)
     throws ServletException
   {
+    String xp;
+      
     /**
      * 获取首页URL
      */
-    String ip = config.getInitParameter("index-page");
-    if (ip != null)
+    xp = config.getInitParameter("index-page");
+    if (xp != null)
     {
-      this.indexPage = Core.BASE_HREF + ip;
+      this.indexPage = Core.BASE_HREF +"/"+ xp;
     }
 
     /**
      * 获取登录URL
      */
-    String lp = config.getInitParameter("login-page");
-    if (lp != null)
+    xp = config.getInitParameter("login-page");
+    if (xp != null)
     {
-      this.loginPage = Core.BASE_HREF + lp;
+      this.loginPage = Core.BASE_HREF +"/"+ xp;
     }
 
     /**
      * 获取权限配置名
      */
-    String cn = config.getInitParameter("config-name");
-    if (cn == null)
+    xp = config.getInitParameter("config-name");
+    if (xp == null)
     {
-      cn = "default";
+      xp = "default";
     }
-    this.configName = cn;
+    this.configName = xp;
 
     /**
      * 获取不包含的URL
      */
-    String xu = config.getInitParameter("exclude-urls");
-    if (xu != null)
+    xp = config.getInitParameter("exclude-uris");
+    if (xp != null)
     {
       Set<String> cu = new HashSet();
       Set<String> su = new HashSet();
       Set<String> eu = new HashSet();
-      for (String u : xu.split(","))
+      for (String u : xp.split(","))
       {
+        u = u.trim();
         if (u.endsWith("*")) {
             su.add(u.substring( 0, u.length() - 2));
         } else if(u.startsWith("*")) {
@@ -113,7 +115,7 @@ public class AuthFilter
           su.toArray(new String[0]),
           eu.toArray(new String[0])
       };
-      this.excludeUrls = u3;
+      this.excludeUris = u3;
     }
 
     /**
@@ -140,7 +142,7 @@ public class AuthFilter
     indexPage   = null;
     loginPage   = null;
     configName  = null;
-    excludeUrls = null;
+    excludeUris = null;
   }
 
   @Override
@@ -149,24 +151,24 @@ public class AuthFilter
   {
     DO:do {
 
-    String act = Core.ACTION_PATH.get(  );
+    String act = Core.ACTION_NAME.get(  );
 
     /**
      * 依次校验是否是需要排除的URL
      */
-    if (excludeUrls != null) {
-        for (String url : excludeUrls[0]) {
+    if (excludeUris != null) {
+        for (String url : excludeUris[0]) {
             if (act.equals(url)) {
                 break DO;
             }
         }
-        for (String url : excludeUrls[1]) {
+        for (String url : excludeUris[1]) {
             if (act.startsWith(url)) {
                 break DO;
             }
         }
-        for (String url : excludeUrls[2]) {
-            if (act.endsWith(url)) {
+        for (String url : excludeUris[2]) {
+            if (act.  endsWith(url)) {
                 break DO;
             }
         }
@@ -240,7 +242,7 @@ public class AuthFilter
         src = "";
       }
 
-      if (uri.indexOf("?") == -1)
+      if (!uri.contains("?"))
       {
         uri += "?ref=" + src;
       }
@@ -259,17 +261,17 @@ public class AuthFilter
         Map rsp = new HashMap();
             rsp.put("__success__", false);
             rsp.put("__message__", msg);
-        if (uri != null || uri.length() != 0) {
+        if (uri != null && uri.length() != 0) {
             rsp.put("__refresh__", uri);
         }
-        helper.back(rsp);
+        helper.reply(rsp);
     }
     else {
-        if (uri != null || uri.length() != 0) {
-            helper.print302(uri);
+        if (uri != null && uri.length() != 0) {
+            helper.redirect(uri);
         }
         else {
-            helper.print403(msg);
+            helper.error403(msg);
         }
     }
   }

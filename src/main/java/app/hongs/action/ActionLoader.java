@@ -4,17 +4,19 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  * 动作承载器
  *
  * <p>
- * 映射到 *.act *.api *.jsp /common/auth/* /common/conf/* /common/lang/*<br/>
+ 映射到 *.act *.api *.jsp /common/auth/* /common/conf/* /common/lang/*<br/>
  * 必须作为第一个 filter
  * </p>
  *
@@ -37,6 +39,21 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ActionLoader
 implements Filter {
+
+    /**
+     * Request 属性: 不要初始设置
+     */
+    public static final String DONT_INIT = "app.hongs.action.loader.dont.init";
+
+    /**
+     * Request 属性: 不要发送数据
+     */
+    public static final String DONT_SEND = "app.hongs.action.loader.dont.send";
+
+    /**
+     * Request 属性: 待发送的数据
+     */
+    public static final String SEND_DATA = "app.hongs.action.loader.send.data";
 
     @Override
     public void init(FilterConfig config)
@@ -92,14 +109,15 @@ implements Filter {
                 }
             }
 
-            CoreLogger.debug("...\r\n"
-                + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
-                + "BASE_HREF       : " + Core.BASE_HREF + "\r\n"
-                + "BASE_PATH       : " + Core.BASE_PATH + "\r\n"
-                + "CONF_PATH       : " + Core.CONF_PATH + "\r\n"
-                + "VARS_PATH       : " + Core.VARS_PATH + "\r\n"
-                + "LOGS_PATH       : " + Core.LOGS_PATH + "\r\n"
-                + "SERS_PATH       : " + Core.SERS_PATH + "\r\n");
+            CoreLogger.debug(new StringBuilder("...")
+                .append("\r\n\tSERVER_ID   : ").append(Core.SERVER_ID)
+                .append("\r\n\tBASE_HREF   : ").append(Core.BASE_HREF)
+                .append("\r\n\tBASE_PATH   : ").append(Core.BASE_PATH)
+                .append("\r\n\tCONF_PATH   : ").append(Core.CONF_PATH)
+                .append("\r\n\tVARS_PATH   : ").append(Core.VARS_PATH)
+                .append("\r\n\tLOGS_PATH   : ").append(Core.LOGS_PATH)
+                .append("\r\n\tSERS_PATH   : ").append(Core.SERS_PATH)
+                .toString());
         }
     }
 
@@ -108,10 +126,11 @@ implements Filter {
         if (1 == (1 & Core.DEBUG)) {
             Core core = Core.GLOBAL_CORE;
             long time = System.currentTimeMillis() - Core.STARTS_TIME;
-            CoreLogger.debug("...\r\n"
-                + "SERVER_ID       : " + Core.SERVER_ID + "\r\n"
-                + "Runtime         : " + Text.humanTime(time) + "\r\n"
-                + "Objects         : " + core.keySet().toString() + "\r\n");
+            CoreLogger.debug(new StringBuilder("...")
+                .append("\r\n\tSERVER_ID   : ").append(Core.SERVER_ID)
+                .append("\r\n\tRuntime     : ").append(Util.humanTime(  time  ))
+                .append("\r\n\tObjects     : ").append(core.keySet().toString())
+                .toString());
         }
 
         try {
@@ -124,46 +143,98 @@ implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
     throws ServletException, IOException {
-        try {
-            this .doFilter(request, response);
-            chain.doFilter(request, response);
-
-            // 将返回数据转换成JSON格式
-            if (((HttpServletResponse)response).getStatus() == HttpServletResponse.SC_OK) {
-                ActionHelper helper = (ActionHelper)
-                      Core.getInstance(ActionHelper.class);
-                Map data  = helper.getResponseData();
-                if (data != null) {
-                    helper.print(data);
-                }
-            }
-        } finally {
-            this .doDestroy();
-        }
-    }
-
-    private void doFilter(ServletRequest request, ServletResponse response)
-    throws ServletException {
         HttpServletRequest  req = (HttpServletRequest ) request ;
         HttpServletResponse rsp = (HttpServletResponse) response;
 
+        if (!Core.getInstance().containsKey(ActionHelper.class.getName())
+        ||  req.getAttribute(DONT_INIT) == null) {
+            req.setAttribute(DONT_INIT  ,  true);
+            doIniter(req, rsp, chain);
+        } else {
+            doReinit(req, rsp, chain);
+        }
+    }
+
+    private void doFilter(HttpServletRequest req, HttpServletResponse rsp, FilterChain chain, ActionHelper helper)
+    throws ServletException, IOException {
+        /**
+         * Include 不会改变 Request 里的 URL
+         */
+        String uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+        String act =  Core.ACTION_NAME.get/**/(  );
+        if (uri == null) uri= req.getServletPath();
+        uri = uri.substring(1);
+
+        /**/rsp.setStatus(/**/ HttpServletResponse.SC_OK);
+
+        try {
+            Core.ACTION_NAME.set(uri);
+            chain.doFilter((ServletRequest)req, (ServletResponse)rsp);
+        } finally {
+            Core.ACTION_NAME.set(act);
+        }
+
+        if (rsp.getStatus() == HttpServletResponse.SC_OK) {
+        if (req.getAttribute(DONT_SEND) == null) {
+            req.setAttribute(DONT_SEND  ,  true);
+            Map rd  = helper.getResponseData();
+            if (rd != null) helper.print( rd );
+        } else
+        if (req.getAttribute(SEND_DATA) == null) {
+            Map rd  = helper.getResponseData();
+            req.setAttribute(SEND_DATA  , rd );
+        }
+        }
+    }
+
+    private void doReinit(HttpServletRequest req, HttpServletResponse rsp, FilterChain chain)
+    throws ServletException, IOException {
+        ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
+        HttpServletResponse rzp = helper.getResponse();
+        try {
+            helper.reset (req, rsp);
+            this.doFilter(req, rsp, chain, helper);
+        } finally {
+            helper.reset (req, rzp);
+        }
+    }
+
+    private void doIniter(HttpServletRequest req, HttpServletResponse rsp, FilterChain chain)
+    throws ServletException, IOException {
         ActionHelper helper = new ActionHelper(req, rsp);
         Core.getInstance().put(ActionHelper.class.getName(), helper);
-        CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+        try {
+            this.doIniter(req, helper);
+            this.doFilter(req, rsp, chain, helper);
+        } finally {
+            this.doFinish();
+        }
+    }
 
+    private void doIniter(HttpServletRequest req, ActionHelper helper)
+    throws ServletException {
         Core.ACTION_TIME.set(System.currentTimeMillis());
-        Core.ACTION_LANG.set(conf.getProperty("core.language.default", "zh-cn"));
-        Core.ACTION_PATH.set(req.getRequestURI().substring(req.getContextPath().length() + 1));
+
+        CoreConfig  conf  = ( CoreConfig ) Core.getInstance( CoreConfig.class );
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-cn"));
 
         if (conf.getProperty("core.language.probing", false)) {
             /**
-             * 语言可以记录到Session/Cookie里
+             * 语言可以记录到Session/Cookies里
              */
             String lang;
             String sess = conf.getProperty("core.language.session", "lang");
-            lang = (String) helper.getSession(sess);
+//          lang = (String) req.getSession().getAttribute(sess);
+            lang = (String) helper.getAttribute(sess);
             if (lang == null || lang.length() == 0) {
-                lang = helper.getCookie(sess);
+                // 从 Cookie 里提取语言
+                Cookie[] cookies = req.getCookies();
+                if  (cookies != null)
+                for (Cookie cookie : cookies)
+                if  (cookie.getName().equals(sess)) {
+                    lang = cookie.getValue( );
+                    break;
+                }
             if (lang == null || lang.length() == 0) {
                 lang = req.getHeader("Accept-Language");
             }
@@ -181,26 +252,28 @@ implements Filter {
         }
 
         if (0 < Core.DEBUG) {
-            CoreLogger.debug("...\r\n"
-                + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
-                + "ACTION_TIME     : " + Core.ACTION_TIME.get() + "\r\n"
-                + "ACTION_LANG     : " + Core.ACTION_LANG.get() + "\r\n"
-                + "ACTION_PATH     : " + Core.ACTION_PATH.get() + "\r\n"
-                + "Method          : " + req.getMethod() + "\r\n"
-                + "Client          : " + req.getRemoteAddr() + " "
-                                       + req.getRemotePort() + "\r\n"
-                + "User-Agent      : " + req.getHeader("User-Agent") + "\r\n");
+            CoreLogger.debug(new StringBuilder().append("...")
+                .append("\r\n\tTHREAD_ID   : ").append(Thread.currentThread().getId())
+                .append("\r\n\tACTION_TIME : ").append(Core.ACTION_TIME.get())
+                .append("\r\n\tACTION_LANG : ").append(Core.ACTION_LANG.get())
+                .append("\r\n\tACTION_PATH : ").append(Core.ACTION_NAME.get())
+                .append("\r\n\tMethod      : ").append(req.getMethod())
+                .append("\r\n\tClient      : ").append(req.getRemoteAddr())
+                                  .append("\t").append(req.getRemotePort())
+                .append("\r\n\tUser-Agent  : ").append(req.getHeader( "User-Agent" ) )
+                .toString());
         }
     }
 
-    private void doDestroy() {
+    private void doFinish() {
         if (0 < Core.DEBUG) {
             Core core = Core.THREAD_CORE.get();
             long time = System.currentTimeMillis() - Core.ACTION_TIME.get();
-            CoreLogger.debug("...\r\n"
-                + "THREAD_ID       : " + Thread.currentThread().getId() + "\r\n"
-                + "Runtime         : " + Text.humanTime(time) + "\r\n"
-                + "Objects         : " + core.keySet().toString() + "\r\n");
+            CoreLogger.debug(new StringBuilder("...")
+                .append("\r\n\tTHREAD_ID   : ").append(Thread.currentThread().getId())
+                .append("\r\n\tRuntime     : ").append(Util.humanTime(  time  ))
+                .append("\r\n\tObjects     : ").append(core.keySet().toString())
+                .toString());
         }
 
         try {

@@ -1,8 +1,8 @@
 <h2>${opr}属性</h2>
 <div id="hcim-domain-form">
     <object class="config" name="hsForm" data="">
-        <param name="loadUrl" value="hcim/Domain/Info.act"/>
-        <param name="saveUrl" value="hcim/Domain/Save.act"/>
+        <param name="loadUrl" value="hcim/domain/info.act"/>
+        <param name="saveUrl" value="hcim/domain/save.act"/>
         <param name="loadMode" value="(1|3)"/>
         <param name="_fill__pick" value="(hsFormFillPick)"/>
     </object>
@@ -17,11 +17,11 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label">属性名称</label>
-                    <input type="text" name="name" class="form-control" required="required" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
+                    <input type="text" name="name" class="form-control" required="required" data-unique="hcim/domain/unique.act?id={id}&module_id={module_id}"/>
                 </div>
                 <div class="form-group">
                     <label class="control-label">代码</label>
-                    <input type="text" name="code" class="form-control" data-unique="hcim/Domain/Unique.act?id={id}&module_id={module_id}"/>
+                    <input type="text" name="code" class="form-control" data-unique="hcim/domain/unique.act?id={id}&module_id={module_id}"/>
                 </div>
             </div>
             <div class="col-md-4">

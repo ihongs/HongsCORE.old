@@ -5,7 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -398,7 +398,6 @@ public class DB
     /** 初始化设置 **/
 
     // 自动提交设置
-    if (this.IN_TRANSC_MODE)
     try
     {
       this.connection.setAutoCommit(!this.IN_TRANSC_MODE);
@@ -493,7 +492,7 @@ public class DB
       return DB.getInstance(db).getTable(table);
     }
 
-    if (this.tableObjects.containsKey(table))
+    if ( this.tableObjects.containsKey(table))
     {
       return this.tableObjects.get(table);
     }
@@ -1095,7 +1094,7 @@ public class DB
 
     /** 组织语句 **/
 
-    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
+    String sql = "INSERT INTO `" + Util.escape(table, "`") + "`";
     List params2 = new ArrayList();
     String fs = "", vs = "";
 
@@ -1106,7 +1105,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      fs += "`" + Text.escape(field, "`") + "`, ";
+      fs += "`" + Util.escape(field, "`") + "`, ";
       vs += "?, ";
     }
 
@@ -1139,7 +1138,7 @@ public class DB
 
     /** 组织语言 **/
 
-    String sql = "UPDATE `" + Text.escape(table, "`") + "` SET ";
+    String sql = "UPDATE `" + Util.escape(table, "`") + "` SET ";
     List params2 = new ArrayList();
 
     Iterator it = values.entrySet().iterator();
@@ -1149,7 +1148,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      sql += "`" + Text.escape(field, "`") + "` = ?, ";
+      sql += "`" + Util.escape(field, "`") + "` = ?, ";
     }
 
     sql = sql.substring(0, sql.length()  - 2);
@@ -1183,7 +1182,7 @@ public class DB
   {
     /** 组织语句 **/
 
-    String sql = "DELETE FROM `" + Text.escape(table, "`") + "`";
+    String sql = "DELETE FROM `" + Util.escape(table, "`") + "`";
 
     if (where != null && where.length() != 0)
     {
@@ -1204,7 +1203,7 @@ public class DB
    */
   public static String quoteField(String field)
   {
-    return "`" + Text.escape(field, "`") + "`";
+    return "`" + Util.escape(field, "`") + "`";
   }
 
   /**
@@ -1214,7 +1213,7 @@ public class DB
    */
   public static String quoteValue(String value)
   {
-    return "'" + Text.escape(value, "'") + "'";
+    return "'" + Util.escape(value, "'") + "'";
   }
 
   /**
@@ -1417,7 +1416,7 @@ public class DB
   public static DB getInstance(String dbName)
     throws HongsException
   {
-    String key = "__DB__." + dbName;
+    String key = DB.class.getName() + ":" + dbName;
 
     Core core = Core.THREAD_CORE.get();
     if ( core.containsKey(key))

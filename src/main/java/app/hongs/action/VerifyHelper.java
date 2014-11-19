@@ -5,7 +5,7 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.db.AbstractBaseModel;
 import app.hongs.db.FetchCase;
-import app.hongs.util.Text;
+import app.hongs.util.Util;
 import app.hongs.util.Tree;
 
 import java.lang.reflect.InvocationTargetException;
@@ -242,7 +242,7 @@ public class VerifyHelper {
                 throw new HongsException(0x1117, ex);
             }
             catch (InvocationTargetException ex) {
-                throw new HongsException(0x1117, ex);
+                throw new HongsException(0x1117, ex.getCause());
             }
         }
     }
@@ -272,7 +272,7 @@ public class VerifyHelper {
     }
 
     private static List<String> getNames(String name, Map<String, List<String>> values) {
-        name = "^"+Text.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
+        name = "^"+Util.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
         Pattern pa = Pattern.compile(name);
         List<String> names = new ArrayList();
         for (String  namc  : values.keySet()) {

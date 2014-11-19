@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>app.hongs</groupId>
     <artifactId>HongsCORE</artifactId>
-    <version>0.3.4-SNAPSHOT</version>
+    <version>0.3.4</version>
     <packaging>war</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -70,6 +70,9 @@
                 <configuration>
                     <warSourceDirectory>web</warSourceDirectory>
                     <packagingExcludes>WEB-INF/classes/app/**</packagingExcludes>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
@@ -93,10 +96,16 @@
                             <includes>
                                 <include>app/hongs/**</include>
                             </includes>
+                            <excludes>
+                                <exclude>app/hongs/serv/**</exclude>
+                            </excludes>
+                            <archive>
+                                <addMavenDescriptor>false</addMavenDescriptor>
+                            </archive>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>hongs.apps</id>
+                        <id>hongs.serv</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>jar</goal>
@@ -104,13 +113,13 @@
                         <configuration>
                             <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
                             <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
-                            <finalName>hongs-apps-${project.version}</finalName>
+                            <finalName>hongs-serv-${project.version}</finalName>
                             <includes>
-                                <include>app/common/**</include>
-                                <include>app/haim/**</include>
-                                <include>app/hcim/**</include>
-                                <include>app/hcum/**</include>
+                                <include>app/hongs/serv/**</include>
                             </includes>
+                            <archive>
+                                <addMavenDescriptor>false</addMavenDescriptor>
+                            </archive>
                         </configuration>
                     </execution>
                 </executions>
@@ -132,16 +141,16 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>  
-                <groupId>org.apache.maven.plugins</groupId>  
+            <!--plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>  
-                <configuration>  
-                    <source>1.6</source>  
-                    <target>1.6</target>  
-                    <encoding>UTF-8</encoding>  
-                </configuration>  
-            </plugin>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

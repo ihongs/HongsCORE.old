@@ -13,6 +13,21 @@ package app.hongs;
  */
 public class HongsException extends Exception {
 
+    /**
+     * 通用异常(不确定异常号)
+     */
+    public static final int COMMON = 0x1000;
+
+    /**
+     * 通知异常(消息作为翻译)
+     */
+    public static final int NOTICE = 0x1001;
+
+    /**
+     * 动作异常
+     */
+    public static final int ACTION = 0x1100;
+
     private HongsLocalized that;
 
     public HongsException(int code, String desc, Throwable cause) {
@@ -65,7 +80,7 @@ public class HongsException extends Exception {
         return that.getLocalizedSection();
     }
 
-    public void setLocalizedOptions(String lang) {
+    public void setLocalizedSection(String lang) {
         that.setLocalizedSection(lang);
     }
 
