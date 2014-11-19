@@ -97,33 +97,29 @@ common/lang/name.js 读取 WEB-INF/conf/name.xx-xx.properties 中 fore.xxxx. 开
 框架结构:
 app.hongs           核心
 app.hongs.action    动作支持
-app.hongs.action.annotation     动作注解
+app.hongs.annotation    注解
 app.hongs.cmdlet    命令支持
-app.hongs.cmdlet.annotation     命令注解
 app.hongs.db        数据模型
-app.hongs.tag       JSP标签
+app.hongs.serv      内置服务库
+app.hongs.tags      JSP标签
 app.hongs.util      工具
-app.xxxx            用户模块
-app.xxxx.action     用户动作
-app.xxxx.cmdlet     用户命令
-app.xxxx.model      用户模型
 注: 以上仅列举了主要的包, 更多框架信息请参考API文档; xxxx为用户模块名称.
 
 [通用请求参数解释]
 
-find    搜索字词
-sort    排序字段
-page    当前页码
-rows    额定行数
-cols[]  限定列名
+wd      搜索字词
+ob      排序字段
+pn      当前页码
+rs      额定行数
+cs[]    限定列名
 
 [特定请求参数规则]
 
 字段等于        field=value, assoc_table.field=value
 字段不等于      -field=value, -assoc_table.field=value
-查找匹配的行    find=word1+word2, find.name=word1+word2
-查找不匹配的行  -find=word1+word2, -find.name=word1+word2
-排序(-表示逆序) sort=-field1+field2, sort=sub_table.field
+查找匹配的行    wd=word1+word2, wd.name=word1+word2
+查找不匹配的行  -wd=word1+word2, -wd.name=word1+word2
+排序(-表示逆序) ob=-field1+field2, ob=sub_table.field
 
 注: "+" 在 URL 中为空格; 框架未提供 >,>=,<,<= 等条件, 因这些需求并不多, 请自行实现, 推荐使用 gt-,ge-,lt-,le- 作为参数前缀. 之所以不使用后缀(如 field!=value 更直观), 是因为 field,find 均可以作为数组传递(如 field[]=value 表示 IN 语句), 框架的解析器需要通过"."和"[]"来构建 Map 和 List, 用前缀方便解析(不用特殊处理[]的逻辑), 也方便过滤时做判断, 且"-"在 URL 中不需要转义.
 
