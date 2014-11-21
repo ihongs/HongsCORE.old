@@ -58,8 +58,8 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    String       act    =  ActionWarder.getCurrentServletPath(req).substring(1);
-    ActionHelper helper = (ActionHelper) Core.getInstance( ActionHelper.class );
+    ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
+    String act = ActionWarder.getCurrentActionPath(req );
 
     if (act == null || act.length() == 0) {
         helper.error404("Action path can not be empty.");
@@ -102,18 +102,6 @@ public class ActsAction
     }
   }
 
-  private void sendout(HttpServletRequest req, ActionHelper helper) {
-      if (req.getAttribute(PRINTED) == null ) {
-          req.setAttribute(PRINTED  ,  true );
-          Map data = helper.getResponseData();
-          if (data!= null)helper.print(data );
-      } else
-      if (req.getAttribute(REPLIED) == null ) {
-          Map data = helper.getResponseData();
-          req.setAttribute(REPLIED  ,  data );
-      }
-  }
-
   private void senderr(int sym, Throwable err, ActionHelper helper)
     throws ServletException
   {
@@ -141,6 +129,18 @@ public class ActsAction
         CoreLogger.error( err );
 //      throw new ServletException(error, err);
     }
+  }
+
+  private void sendout(HttpServletRequest req, ActionHelper helper) {
+      if (req.getAttribute(PRINTED) == null ) {
+          req.setAttribute(PRINTED  ,  true );
+          Map data = helper.getResponseData();
+          if (data!= null)helper.print(data );
+      } else
+      if (req.getAttribute(REPLIED) == null ) {
+          Map data = helper.getResponseData();
+          req.setAttribute(REPLIED  ,  data );
+      }
   }
 
 }

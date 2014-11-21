@@ -186,7 +186,7 @@ implements Filter {
     throws ServletException {
         Core.ACTION_TIME.set(System.currentTimeMillis());
 
-        Core.ACTION_NAME.set(getCurrentServletPath(req).substring(1));
+        Core.ACTION_NAME.set(getRealityActionPath(req ));
 
         CoreConfig  conf  = (CoreConfig) Core.getInstance(  CoreConfig.class  );
         Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-cn"));
@@ -260,10 +260,14 @@ implements Filter {
      * @param req
      * @return
      */
-    public static String getCurrentServletPath(HttpServletRequest req) {
-        String uri = (String)req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-        if (uri == null) uri=req.getServletPath();
-        return uri;
+    public static String getCurrentActionPath(HttpServletRequest req) {
+        String uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI );
+        String ctx = (String) req.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+        if (uri == null) {
+            uri =  req.getRequestURI( );
+            ctx =  req.getContextPath();
+        }
+        return uri.substring(ctx.length() + 1);
     }
 
     /**
@@ -271,10 +275,14 @@ implements Filter {
      * @param req
      * @return
      */
-    public static String getRealityServletPath(HttpServletRequest req) {
-        String uri = (String)req.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
-        if (uri == null) uri=req.getServletPath();
-        return uri;
+    public static String getRealityActionPath(HttpServletRequest req) {
+        String uri = (String) req.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI );
+        String ctx = (String) req.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH);
+        if (uri == null) {
+            uri =  req.getRequestURI( );
+            ctx =  req.getContextPath();
+        }
+        return uri.substring(ctx.length() + 1);
     }
 
 }

@@ -75,7 +75,7 @@ public class ApisAction
      */
     private void doForward(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
-        String act = ActionWarder.getCurrentServletPath(req).substring(1);
+        String act = ActionWarder.getCurrentActionPath(req);
 
         if (act == null || act.length() == 0) {
             rsp.sendError(HttpServletResponse.SC_NOT_FOUND, "API URI can not be empty.");

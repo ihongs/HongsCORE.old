@@ -6,6 +6,7 @@ import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
 import app.hongs.annotation.CommitSuccess;
 import app.hongs.db.AbstractBaseModel;
+import app.hongs.serv.HaimBottom;
 import static app.hongs.serv.action.HaimAccessFilter.CONFIG;
 import static app.hongs.serv.action.HaimAccessFilter.ENTITY;
 import java.util.Map;
@@ -76,7 +77,7 @@ public class HaimBottomAction {
 
     protected AbstractBaseModel getModel(String conf, String name) throws HongsException {
         if (_model == null) {
-            _model = new app.hongs.serv.HaimBottom(conf, name);
+            _model = new HaimBottom(conf, name);
         }
         return _model;
     }
