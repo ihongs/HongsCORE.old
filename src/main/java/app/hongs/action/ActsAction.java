@@ -5,6 +5,8 @@ import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
+import static app.hongs.action.ActionWarder.PRINTED;
+import static app.hongs.action.ActionWarder.REPLIED;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -56,92 +58,65 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    ActionHelper helper = (ActionHelper)
-          Core.getInstance(ActionHelper.class);
-    String act = Core.ACTION_NAME.get();
-    String acp;
-    String mtd;
-    int    pos;
+    String       act    =  ActionWarder.getCurrentServletPath(req).substring(1);
+    ActionHelper helper = (ActionHelper) Core.getInstance( ActionHelper.class );
 
     if (act == null || act.length() == 0) {
-        helper.error404("Action uri can not be empty.");
+        helper.error404("Action path can not be empty.");
         return;
     }
 
+    // 去扩展名
     try {
-        // 去掉扩展名
+        int pos;
         pos = act.lastIndexOf('.');
-        acp = act.substring(0,pos);
-
-        // 提取方法名
-        pos = acp.lastIndexOf('/');
-        mtd = acp.substring(pos+1);
-        acp = acp.substring(0,pos);
+        act = act.substring(0,pos);
     }
-    catch (StringIndexOutOfBoundsException ex ) {
-        helper.error404("Wrong action '" + act + "'.");
-        return;
-    }
-    if (act.length() == 0 || mtd.length() == 0) {
-        helper.error404("Wrong action '" + act + "'.");
+    catch (StringIndexOutOfBoundsException ex) {
+        helper.error404("Action path '"+act +"' error.");
         return;
     }
 
-    doAction(acp, mtd, helper);
-  }
+    ActionRunner caller;
 
-  /**
-   * 执行动作
-   *
-   * 获取相应动作类及方法对象, 并执行该方法;
-   * 如果找不到或不可执行, 则输出404代码;
-   * 如果执行失败, 则输出500代码.
-   * 
-   * @param act
-   * @param mtd
-   * @param helper
-   * @throws javax.servlet.ServletException
-   */
-  private void doAction(String act, String mtd, ActionHelper helper)
-    throws ServletException
-  {
     // 获取动作
-    ActionCaller caller;
     try
     {
-      caller = ActionCaller.getInstance(act, mtd, helper);
+      caller = new ActionRunner(act, helper);
     }
     catch (HongsException ex )
     {
-      doThrown(400,ex, helper);
+      senderr(404, ex, helper);
       return;
     }
 
     // 执行动作
     try
     {
-      caller.doAction();
+      caller.doAction();sendout(req, helper);
     }
     catch (HongsException ex )
     {
-      // 0x1100为方法内部错误
-      if (ex.getCode() != 0x1100)
-      {
-        doThrown(500, ex.getCause(), helper);
-      }
-      else
-      {
-        doThrown(500, ex, helper);
-      }
+      senderr(500, ex, helper);
+      return;
     }
   }
 
-  private void doThrown(int sym, Throwable err, ActionHelper helper)
+  private void sendout(HttpServletRequest req, ActionHelper helper) {
+      if (req.getAttribute(PRINTED) == null ) {
+          req.setAttribute(PRINTED  ,  true );
+          Map data = helper.getResponseData();
+          if (data!= null)helper.print(data );
+      } else
+      if (req.getAttribute(REPLIED) == null ) {
+          Map data = helper.getResponseData();
+          req.setAttribute(REPLIED  ,  data );
+      }
+  }
+
+  private void senderr(int sym, Throwable err, ActionHelper helper)
     throws ServletException
   {
-    /**
-     * 构建错误消息
-     */
     String error = err.getLocalizedMessage();
     if (! (err instanceof HongsException)
     &&  ! (err instanceof HongsError  ) )
@@ -152,20 +127,20 @@ public class ActsAction
       {
         error = lang.translate("core.error.unkwn");
       }
-        error = lang.translate("core.error.label",
-                err.getClass().getName( ))
-                + ": " + error;
+        error = lang.translate("core.error.label" ,
+        err.getClass().getName()) + ": " + error  ;
     }
 
     switch (sym)
     {
       case 404:
-        helper.error404(error);
+        helper.error404 (error);
         break;
       default :
-        helper.error500(error);
-        CoreLogger.error(err );
+        helper.error500 (error);
+        CoreLogger.error( err );
 //      throw new ServletException(error, err);
     }
   }
+
 }

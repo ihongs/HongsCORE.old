@@ -79,13 +79,13 @@ abstract public class AbstractBaseModel
    * 排序参数名
    * 影响getPage/getList/reqFilter
    */
-  protected String sortKey = "sort";
+  protected String sortKey = "ob";
 
   /**
    * 搜索参数名
    * 影响getPage/getList/reqFilter
    */
-  protected String findKey = "find";
+  protected String findKey = "wd";
 
   /**
    * 被搜索的字段
@@ -108,6 +108,7 @@ abstract public class AbstractBaseModel
    * 请指定被搜索的字段.
    *
    * @param table
+   * @throws app.hongs.HongsException
    */
   public AbstractBaseModel(Table table)
     throws HongsException
@@ -117,11 +118,11 @@ abstract public class AbstractBaseModel
 
     // 配置
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    this.pageKey = conf.getProperty("fore.model.page.key", "page");
-    this.rowsKey = conf.getProperty("fore.model.rows.key", "rows");
-    this.colsKey = conf.getProperty("fore.model.cols.key", "cols");
-    this.sortKey = conf.getProperty("fore.model.sort.key", "sort");
-    this.findKey = conf.getProperty("fore.model.find.key", "find");
+    this.pageKey = conf.getProperty("fore.model.page.key", "pn");
+    this.rowsKey = conf.getProperty("fore.model.rows.key", "rn");
+    this.colsKey = conf.getProperty("fore.model.cols.key", "cs");
+    this.sortKey = conf.getProperty("fore.model.sort.key", "ob");
+    this.findKey = conf.getProperty("fore.model.find.key", "wd");
   }
   public AbstractBaseModel(String tableName)
     throws HongsException
@@ -443,20 +444,43 @@ abstract public class AbstractBaseModel
     return this.remove(req, null);
   }
 
-  public String create(Map req) throws HongsException {
-    String id = (String)req.get(this.table.primaryKey);
-    if (id != null && id.length() != 0)
+  /**
+   * 更新记录
+   *
+   * @param req
+   * @param caze
+   * @return 更新条数
+   * @throws app.hongs.HongsException
+   */
+  public int update(Map req, FetchCase caze)
+    throws HongsException
+  {
+    List<String> ids = this.getOperableFlags(req, caze, null);
+    if (ids.isEmpty()) this.put("", null);
+
+    Map  dat  =  new  HashMap  (   req  );
+    req.remove(  this.table.primaryKey  );
+
+    for (String id : ids )
     {
-      throw new HongsException(0x10aa, "create cant have id");
+      this.put( id , dat );
     }
 
-    id = this.add(     req );
+    this.affectedIds = ids;
+    return ids.size();
+  }
 
-    // 记录为受影响的ID
-    this.affectedIds = new ArrayList( );
-    this.affectedIds.add(id);
-
-    return id;
+  /**
+   * 更新记录
+   *
+   * @param req
+   * @return 更新条数
+   * @throws app.hongs.HongsException
+   */
+  public int update(Map req)
+    throws HongsException
+  {
+    return this.update(req, null);
   }
 
   public String modify(Map req) throws HongsException {
@@ -467,6 +491,22 @@ abstract public class AbstractBaseModel
     }
 
     id = this.put( id, req );
+
+    // 记录为受影响的ID
+    this.affectedIds = new ArrayList( );
+    this.affectedIds.add(id);
+
+    return id;
+  }
+
+  public String create(Map req) throws HongsException {
+    String id = (String)req.get(this.table.primaryKey);
+    if (id != null && id.length() != 0)
+    {
+      throw new HongsException(0x10aa, "create cant have id");
+    }
+
+    id = this.add(     req );
 
     // 记录为受影响的ID
     this.affectedIds = new ArrayList( );

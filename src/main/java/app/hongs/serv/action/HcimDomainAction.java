@@ -28,22 +28,25 @@ public class HcimDomainAction {
         lang.load("hcim");
     }
 
+    @Action("list")
     @InList(conf="hcim", keys={"type=DOMAIN_TYPES"})
-    public void action_list(ActionHelper helper)
+    public void getList(ActionHelper helper)
     throws HongsException {
         Map data = model.getPage(helper.getRequestData());
         helper.reply(data);
     }
 
+    @Action("info")
     @InForm(conf="hcim", keys={"type=DOMAIN_TYPES"})
-    public void action_info(ActionHelper helper)
+    public void getInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
         helper.reply(data);
     }
 
+    @Action("save")
     @CommitSuccess
-    public void action_save(ActionHelper helper)
+    public void doSave(ActionHelper helper)
     throws HongsException {
         Map data = helper.getRequestData();
         
@@ -82,8 +85,9 @@ public class HcimDomainAction {
         helper.reply(msg, id, nms);
     }
 
+    @Action("remove")
     @CommitSuccess
-    public void action_remove(ActionHelper helper)
+    public void doRemove(ActionHelper helper)
     throws HongsException {
         model.remove(helper.getRequestData());
 
@@ -93,7 +97,8 @@ public class HcimDomainAction {
         helper.reply(msg);
     }
 
-    public void action_unique(ActionHelper helper)
+    @Action("unique")
+    public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean rst = model.unique(helper.getRequestData());
         helper.reply(rst);

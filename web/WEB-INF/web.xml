@@ -8,7 +8,7 @@
     <!-- Action Filter -->
     <filter>
         <filter-name>Loader</filter-name>
-        <filter-class>app.hongs.action.ActionLoader</filter-class>
+        <filter-class>app.hongs.action.ActionWarder</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>Loader</filter-name>

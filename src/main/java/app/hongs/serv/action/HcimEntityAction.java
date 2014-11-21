@@ -28,20 +28,23 @@ public class HcimEntityAction {
         lang.load("hcim");
     }
 
-    public void action_list(ActionHelper helper)
+    @Action("list")
+    public void getList(ActionHelper helper)
     throws HongsException {
         Map data = model.getPage(helper.getRequestData());
         helper.reply(data);
     }
 
-    public void action_info(ActionHelper helper)
+    @Action("info")
+    public void getInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
         helper.reply(data);
     }
 
+    @Action("save")
     @CommitSuccess
-    public void action_save(ActionHelper helper)
+    public void doSave(ActionHelper helper)
     throws HongsException {
         Map data = helper.getRequestData();
         if (data.containsKey("a_hcim_entity_cols")) {
@@ -69,8 +72,9 @@ public class HcimEntityAction {
         helper.reply(msg, id, nms);
     }
 
+    @Action("remove")
     @CommitSuccess
-    public void action_remove(ActionHelper helper)
+    public void doRemove(ActionHelper helper)
     throws HongsException {
         model.remove(helper.getRequestData());
 
@@ -80,7 +84,8 @@ public class HcimEntityAction {
         helper.reply(msg);
     }
 
-    public void action_unique(ActionHelper helper)
+    @Action("unique")
+    public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean rst = model.unique(helper.getRequestData());
         helper.reply(rst);

@@ -6,6 +6,8 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Util;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -438,6 +440,89 @@ public class CmdletHelper
     String left3 = String.format("ok(%d) error(%d) Time left: %s",
                                ok, err, left2);
     printERate(scale, left3);
+  }
+
+  /**
+   * Parses an URL query string and returns a map with the parameter values.
+   * The URL query string is the part in the URL after the first '?' character up
+   * to an optional '#' character. It has the format "name=value&name=value&...".
+   * The map has the same structure as the one returned by
+   * javax.servlet.ServletRequest.getParameterMap().
+   * A parameter name may occur multiple times within the query string.
+   * For each parameter name, the map contains a string array with the parameter values.
+   * @param   s an URL query string.
+   * @return  a map containing parameter names as keys and parameter values as map values.
+   * @author  Christian d'Heureuse, Inventec Informatik AG, Switzerland, www.source-code.biz.
+   */
+  public static Map<String, String[]> parseQuery(String s) {
+    if (s == null) {
+      return new HashMap<String, String[]>(0);
+    }
+    // In map1 we use strings and ArrayLists to collect the parameter values.
+    HashMap<String, Object> map1 = new HashMap<String, Object>();
+    int p = 0;
+    while (p < s.length()) {
+      int p0 = p;
+      while (p < s.length() && s.charAt(p) != '=' && s.charAt(p) != '&') {
+        p++;
+      }
+      String name;
+      try {
+        name = s.substring(p0, p);
+        name = URLDecoder.decode(name, "UTF-8");
+      } catch (UnsupportedEncodingException ex) {
+        throw new HongsError(0x10, ex);
+      }
+      if (p < s.length() && s.charAt(p) == '=') {
+        p++;
+      }
+      p0 = p;
+      while (p < s.length() && s.charAt(p) != '&') {
+        p++;
+      }
+      String value;
+      try {
+        value = s.substring(p0, p);
+        value = URLDecoder.decode(value, "UTF-8");
+      } catch (UnsupportedEncodingException ex) {
+        throw new HongsError(0x10, ex);
+      }
+      if (p < s.length() && s.charAt(p) == '&') {
+        p++;
+      }
+      Object x = map1.get(name);
+      if (x == null) {
+        // The first value of each name is added directly as a string to the map.
+        map1.put(name, value);
+      } else if (x instanceof String) {
+        // For multiple values, we use an ArrayList.
+        ArrayList<String> a = new ArrayList<String>();
+        a.add((String) x);
+        a.add(value);
+        map1.put(name, a);
+      } else {
+        @SuppressWarnings("unchecked")
+        ArrayList<String> a = (ArrayList<String>) x;
+        a.add(value);
+      }
+    }
+    // Copy map1 to map2. Map2 uses string arrays to store the parameter values.
+    HashMap<String, String[]> map2 = new HashMap<String, String[]>(map1.size());
+    for (Map.Entry<String, Object> e : map1.entrySet()) {
+      String name = e.getKey();
+      Object x = e.getValue();
+      String[] v;
+      if (x instanceof String) {
+        v = new String[]{(String) x};
+      } else {
+        @SuppressWarnings("unchecked")
+        ArrayList<String> a = (ArrayList<String>) x;
+        v = new String[a.size()];
+        v = a.toArray(v);
+      }
+      map2.put(name, v);
+    }
+    return map2;
   }
 
 }

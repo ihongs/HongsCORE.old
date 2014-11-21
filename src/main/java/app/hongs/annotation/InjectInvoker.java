@@ -1,6 +1,6 @@
 package app.hongs.annotation;
 
-import app.hongs.action.ActionCaller;
+import app.hongs.action.ActionRunner;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.CollConfig;
@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class InjectInvoker implements ActionInvoker {
     @Override
-    public void invoke(ActionHelper helper, ActionCaller chains, Annotation anno)
+    public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
         Inject       ann  = (Inject) anno;
         Inject.TYPES type = ann.type();

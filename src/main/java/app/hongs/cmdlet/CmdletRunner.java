@@ -7,6 +7,7 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.annotation.Action;
 import app.hongs.annotation.Cmdlet;
 import app.hongs.util.ClassNames;
 import app.hongs.util.Util;
@@ -46,36 +47,17 @@ public class CmdletRunner
     Core  core = Core.getInstance();
     String act = Core.ACTION_NAME.get(  );
 
-    if (act == null || act.length() == 0)
+    if (null == act || act.length() == 0)
     {
-      CmdletHelper.println("ERROR: Command name can not be empty.");
+      CmdletHelper.println("ERROR: Cmdlet name can not be empty.");
       return;
     }
-
-    Map<String, Class> cmdlets = getCmdlets();
-    Class classo = cmdlets.get(act);
-    if (classo == null)
-    {
-      CmdletHelper.println("ERROR: Can not find cmdlet '"+act+"'.");
-      return;
-    }
-
-    /** 执行指定程序 **/
 
     // 获取方法
-    Method method;
-    try
+    Method method = CMDLETS.get(act);
+    if (null == method)
     {
-      method = classo.getMethod("cmdlet", new Class[] {String[].class});
-    }
-    catch (NoSuchMethodException ex)
-    {
-      CmdletHelper.println("ERROR: Can not find method '"+classo.getName()+".cmdlet(String[])' for action '"+act+"'.");
-      return;
-    }
-    catch (    SecurityException ex)
-    {
-      CmdletHelper.println("ERROR: Can not call method '"+classo.getName()+".cmdlet(String[])' for action '"+act+"'.");
+      CmdletHelper.println("ERROR: Cmdlet "+act+" is not exists.");
       return;
     }
 
@@ -84,23 +66,23 @@ public class CmdletRunner
     {
       if (0 < Core.DEBUG)
       {
-        CoreLogger.debug(Core.ACTION_NAME.get() + " Starting...");
+        CoreLogger.debug(Core.ACTION_NAME.get()+" Starting...");
       }
 
-      method.invoke(null, new Object[] {args});
+      method.invoke(null, new Object[] {args} );
 
       if (0 < Core.DEBUG)
       {
-        CoreLogger.debug(Core.ACTION_NAME.get() + " Finished!!!");
+        CoreLogger.debug(Core.ACTION_NAME.get()+" Finished!!!");
       }
     }
     catch (   IllegalAccessException ex)
     {
-      CmdletHelper.println("ERROR: Illegal access for method '"+classo.getName()+".cmdlet(String[])' for action '"+act+"'.");
+      CmdletHelper.println("ERROR: Illegal access for method '"+method.getClass().getName()+"."+method.getName()+"(ActionHelper).");
     }
     catch ( IllegalArgumentException ex)
     {
-      CmdletHelper.println("ERROR: Illegal params for method '"+classo.getName()+".cmdlet(String[])' for action '"+act+"'.");
+      CmdletHelper.println("ERROR: Illegal params for method '"+method.getClass().getName()+"."+method.getName()+"(ActionHelper).");
     }
     catch (InvocationTargetException ex)
     {
@@ -292,16 +274,16 @@ public class CmdletRunner
 
     str = (String)opts.get("request");
     Map<String, String[]>  req = null;
-    if (str != null && str.length( ) > 0)
+    if (str != null && str.length() > 0)
     {
-        req  = parseQueryString(str);
+        req  = CmdletHelper.parseQuery(str);
     }
 
     str = (String)opts.get("session");
     Map<String, String[]>  ses = null;
-    if (str != null && str.length( ) > 0)
+    if (str != null && str.length() > 0)
     {
-        ses  = parseQueryString(str);
+        ses  = CmdletHelper.parseQuery(str);
     }
 
     ActionHelper helper = new ActionHelper(  req , ses , null  );
@@ -310,8 +292,7 @@ public class CmdletRunner
     return args;
   }
 
-    private static Map<String, Class> CMDLETS = null;
-
+    static public final Map<String, Method> CMDLETS;
     static {
         CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
         String [ ] pkgs = conf.getProperty("core.cmdlet.packages").split(";");
@@ -322,14 +303,11 @@ public class CmdletRunner
         }
     }
 
-    public  static Map<String, Class> getCmdlets() {
-        return CMDLETS;
-    }
+    private static Map<String, Method> getCmdlets(String... pkgs) throws HongsException {
+        Map<String, Method> acts = new HashMap();
 
-    private static Map<String, Class> getCmdlets(String... pkgs) throws HongsException {
-        Map <String,Class> acts = new HashMap();
-        for (String pkgn : pkgs) {
-            Set<String> clss;
+        for(String pkgn : pkgs) {
+            Set< String > clss;
             try {
                 clss = ClassNames.getClassNames(pkgn);
             } catch (IOException ex) {
@@ -338,108 +316,51 @@ public class CmdletRunner
             if (clss == null) {
                 throw new HongsException( 0x1106 , "Can not find package '" + pkgn + "'.");
             }
-            for (String clsn : clss) {
-                Class clso;
+
+            for(String clsn : clss) {
+                Class  clso;
                 try {
                     clso = Class.forName(clsn);
                 } catch (ClassNotFoundException ex) {
                     throw new HongsException(0x1106, "Can not find class '" + clsn + "'.");
                 }
-                Cmdlet anno = (Cmdlet) clso.getAnnotation(Cmdlet.class);
+
+                // 从注解提取动作名
+                Action anno = (Action) clso.getAnnotation(Action.class);
                 if (anno == null) {
                     continue;
                 }
                 String actn = anno.value();
-                if (actn == null  ||  actn.length( ) == 0 ) {
-                    actn = clso.getName().replace('.', '/');
+                if (actn == null || actn.length() == 0) {
+                    actn = clsn.replace('.', '/');
                 }
-                acts.put(actn, clso);
+
+                Method[] mtds = clso.getMethods();
+                for(Method mtdo : mtds) {
+                    String mtdn = mtdo.getName( );
+
+                    // 从注解提取动作名
+                    Cmdlet annx = (Cmdlet) mtdo.getAnnotation(Cmdlet.class);
+                    if (annx == null) {
+                        continue;
+                    }
+                    String actx = annx.value();
+                    if (actx == null || actx.length() == 0) {
+                        actx = mtdn;
+                    }
+
+                    // 检查方法是否合法
+                    Class[] prms = mtdo.getParameterTypes();
+                    if (prms == null || prms.length   != 1 || !prms[0].isAssignableFrom(String[].class)) {
+                        throw new HongsException(0x1106, "Can not find cmdlet method '"+clsn+"."+mtdn+"(String[])'.");
+                    }
+
+                    acts.put(actn + "/" + actx, mtdo);
+                }
             }
         }
-        return  acts;
-    }
 
-  /**
-   * Parses an URL query string and returns a map with the parameter values.
-   * The URL query string is the part in the URL after the first '?' character up
-   * to an optional '#' character. It has the format "name=value&name=value&...".
-   * The map has the same structure as the one returned by
-   * javax.servlet.ServletRequest.getParameterMap().
-   * A parameter name may occur multiple times within the query string.
-   * For each parameter name, the map contains a string array with the parameter values.
-   * @param   s an URL query string.
-   * @return  a map containing parameter names as keys and parameter values as map values.
-   * @author  Christian d'Heureuse, Inventec Informatik AG, Switzerland, www.source-code.biz.
-   */
-  public static Map<String, String[]> parseQueryString(String s) {
-    if (s == null) {
-      return new HashMap<String, String[]>(0);
+        return acts;
     }
-    // In map1 we use strings and ArrayLists to collect the parameter values.
-    HashMap<String, Object> map1 = new HashMap<String, Object>();
-    int p = 0;
-    while (p < s.length()) {
-      int p0 = p;
-      while (p < s.length() && s.charAt(p) != '=' && s.charAt(p) != '&') {
-        p++;
-      }
-      String name;
-      try {
-        name = s.substring(p0, p);
-        name = URLDecoder.decode(name, "UTF-8");
-      } catch (UnsupportedEncodingException ex) {
-        throw new HongsError(0x10, ex);
-      }
-      if (p < s.length() && s.charAt(p) == '=') {
-        p++;
-      }
-      p0 = p;
-      while (p < s.length() && s.charAt(p) != '&') {
-        p++;
-      }
-      String value;
-      try {
-        value = s.substring(p0, p);
-        value = URLDecoder.decode(value, "UTF-8");
-      } catch (UnsupportedEncodingException ex) {
-        throw new HongsError(0x10, ex);
-      }
-      if (p < s.length() && s.charAt(p) == '&') {
-        p++;
-      }
-      Object x = map1.get(name);
-      if (x == null) {
-        // The first value of each name is added directly as a string to the map.
-        map1.put(name, value);
-      } else if (x instanceof String) {
-        // For multiple values, we use an ArrayList.
-        ArrayList<String> a = new ArrayList<String>();
-        a.add((String) x);
-        a.add(value);
-        map1.put(name, a);
-      } else {
-        @SuppressWarnings("unchecked")
-        ArrayList<String> a = (ArrayList<String>) x;
-        a.add(value);
-      }
-    }
-    // Copy map1 to map2. Map2 uses string arrays to store the parameter values.
-    HashMap<String, String[]> map2 = new HashMap<String, String[]>(map1.size());
-    for (Map.Entry<String, Object> e : map1.entrySet()) {
-      String name = e.getKey();
-      Object x = e.getValue();
-      String[] v;
-      if (x instanceof String) {
-        v = new String[]{(String) x};
-      } else {
-        @SuppressWarnings("unchecked")
-        ArrayList<String> a = (ArrayList<String>) x;
-        v = new String[a.size()];
-        v = a.toArray(v);
-      }
-      map2.put(name, v);
-    }
-    return map2;
-  }
 
 }

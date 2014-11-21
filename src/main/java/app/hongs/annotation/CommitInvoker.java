@@ -1,6 +1,6 @@
 package app.hongs.annotation;
 
-import app.hongs.action.ActionCaller;
+import app.hongs.action.ActionRunner;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
@@ -17,7 +17,7 @@ import java.lang.annotation.Annotation;
  */
 public class CommitInvoker implements ActionInvoker {
     @Override
-    public void invoke(ActionHelper helper, ActionCaller chains, Annotation anno)
+    public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
         Core core = Core.getInstance();
         core.put("__IN_TRANSC_MODE__", true);

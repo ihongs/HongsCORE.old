@@ -1,10 +1,10 @@
 <div id="hcum_dept_tree">
     <object class="config" name="hsTree" data="">
-        <param name="loadUrl" value="hcum/dept/tree.act"/>
+        <param name="loadUrl" value="hcum/dept/list.act"/>
         <param name="linkUrls:0" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
         <param name="openUrls:0" value="['.create','hcum/dept/form.html?pid={ID}','{TABSBOX}']"/>
         <param name="openUrls:1" value="['.modify','hcum/dept/form.html?id={ID}','{TABSBOX}']"/>
-        <param name="sendUrls:0" value="['.remove','hcum/Dept/Remove.act','您确定要删除此部门?']"/>
+        <param name="sendUrls:0" value="['.remove','hcum/dept/remove.act','您确定要删除此部门?']"/>
     </object>
     <div class="toolbox btn-group">
         <button  type="button" class="create btn btn-default">添加部门</button>

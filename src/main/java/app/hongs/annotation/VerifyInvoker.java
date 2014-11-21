@@ -1,6 +1,6 @@
 package app.hongs.annotation;
 
-import app.hongs.action.ActionCaller;
+import app.hongs.action.ActionRunner;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class VerifyInvoker implements ActionInvoker {
     @Override
-    public void invoke(ActionHelper helper, ActionCaller chains, Annotation anno)
+    public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
         Verify ann  = (Verify) anno;
         String lang = ann.lang();

@@ -1,0 +1,97 @@
+<!--
+Hong's Common User Module
+用户模块
+//-->
+<!doctype html>
+<html>
+    <head>
+        <title>API 测试</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+        <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="../css/hongscore.min.css"/>
+        <script type="text/javascript" src="../jquery.min.js"></script>
+        <!--[if glt IE8.0]>
+        <script type="text/javascript" src="../compon/respond/respond.min.js"></script>
+        <![endif]-->
+        <script type="text/javascript" src="../bootstrap.min.js"></script>
+        <script type="text/javascript" src="../hongscore.min.js"></script>
+        <script type="text/javascript" src="../conf/default.js"></script>
+        <script type="text/javascript" src="../lang/default.js"></script>
+        <script type="text/javascript" src="../auth/default.js"></script>
+    </head>
+    <body>
+        <div id="notebox"></div>
+        <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="row" data-load="head.jsp"></div>
+            </div>
+        </nav>
+        <div id="bodybox">
+            <div class="container tabsbox" id="main-context">
+                <h2></h2>
+                <div id="hcum_user_form">
+                    <object class="config" name="hsForm" data="">
+                        <param name="saveUrl" value="hcum/user/save.act"/>
+                    </object>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form action="" method="POST">
+                                <div>
+                                    <div class="form-group">
+                                        <label class="control-label">URL</label>
+                                        <input type="text" name="url" class="form-control" required="required" data-unique="hcum/user/unique.act?id={id}"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">方法</label>
+                                        <select class="form-control" name="type">
+                                            <option value="GET">查(GET)</option>
+                                            <option value="POST">增(POST)</option>
+                                            <option value="PUT">改(PUT)</option>
+                                            <option value="DELETE">删(DELETE)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">数据</label>
+                                        <textarea name="data"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">数据类型</label>
+                                        <select class="form-control" name="type">
+                                            <option value="base">任意数据</option>
+                                            <option value="form">表单数据</option>
+                                            <option value="json">JSON数据</option>
+                                            <option value="list2form">列表转表单</option>
+                                            <option value="json2form">JSON转表单</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">返回类型</label>
+                                        <select class="form-control" name="type">
+                                            <option value="base">任意数据</option>
+                                            <option value="form">表单数据</option>
+                                            <option value="json">JSON数据</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="submit" class="ensure btn btn-primary">发送</button>
+                                    <button type="reset" class="cancel btn btn-link">重置</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <pre id="show-box"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
+            <div class="container">
+                <div class="row" data-load="foot.jsp"></div>
+            </div>
+        </nav>
+    </body>
+</html>

@@ -44,19 +44,19 @@ public class ApisAction
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "list", "tree");
+        doForward(req, rsp, "list"  );
     }
 
     @Override
     public void doPut(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "modify", "save");
+        doForward(req, rsp, "update", "modify", "save"  );
     }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "create", "save");
+        doForward(req, rsp, "create", "save"  );
     }
 
     @Override
@@ -75,10 +75,10 @@ public class ApisAction
      */
     private void doForward(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
-        String act = req.getServletPath().substring(1);
+        String act = ActionWarder.getCurrentServletPath(req).substring(1);
 
         if (act == null || act.length() == 0) {
-            rsp.sendError(HttpServletResponse.SC_NOT_FOUND, "API uri can not be empty.");
+            rsp.sendError(HttpServletResponse.SC_NOT_FOUND, "API URI can not be empty.");
             return;
         }
 
@@ -109,10 +109,16 @@ public class ApisAction
                 mtd  = mtz.substring( 2 );
                 mts  = new String[] {mtd};
             } else
-            if (mtd.equals("list")
-            &&  vaz != null && vaz.length() != 0) {
-                mtd  =     "info";
-                mts  = new String[] {mtd};
+            if (vaz != null && vaz.length() != 0) {
+                if (mtd.equals( "list" )) {
+                    mtd  =      "info"  ;
+                    mts  = new String[] {mtd};
+                } else
+                if (vaz.length( )  >  1
+                &&  mtd.equals("modify")) {
+                    mtd  =     "update" ;
+                    mts  = new String[] {mtd};
+                }
             }
 
             // 限定主键
@@ -148,39 +154,28 @@ public class ApisAction
             }
         }
 
-        do {
-            // 获取动作类
-            Class cls = ActionCaller.getActions().get(act);
-            if (cls == null) {
-                break;
-            }
-
-            // 获取动作方法
-            for (String mtn : mts) {
-                try {
-                    cls.getMethod("action_"+mtn, new Class[] {ActionHelper.class});
-                    mtd = mtn;
-                    break;
-                } catch (NoSuchMethodException ex) {
-                } catch (    SecurityException ex) {
-                }
-            }
-        } while (false);
+        for(String mtn : mts) {
+        if (ActionRunner.ACTIONS.containsKey(act+"/"+mtn) ) {
+            mtd  = mtn ;
+            break;
+        }
+        }
 
         boolean send = false;
-        if (req.getAttribute(ActionLoader.DONT_SEND) == null) {
-            req.setAttribute(ActionLoader.DONT_SEND  ,  true);
+        if (req.getAttribute(ActionWarder.PRINTED) == null) {
+            req.setAttribute(ActionWarder.PRINTED  ,  true);
             send = true;
         }
+        rsp.setStatus(HttpServletResponse.SC_OK  );
 
         // 将请求转发到动作处理器
         req.getRequestDispatcher("/"+act+"/"+mtd + ".act" + pms).include(req, rsp);
 
-        if (rsp.getStatus( ) == HttpServletResponse.SC_OK && send) {
-            Map data  = (Map) req.getAttribute(ActionLoader.SEND_DATA);
-            if (data != null) {
-                rsp.setContentType("application/json");
-                rsp.getWriter( ).print(Data.toString(data , true));
+        // 将应答数据格式化后输出
+        if (rsp.getStatus() == HttpServletResponse.SC_OK && send) {
+            Map data  = (Map) req.getAttribute(ActionWarder.REPLIED);
+            if (data != null) {  rsp.setContentType( "application/json" );
+                rsp.getWriter().print(Data.toString(data , true));
             }
         }
     }

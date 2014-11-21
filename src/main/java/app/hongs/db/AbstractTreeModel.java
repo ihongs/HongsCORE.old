@@ -614,12 +614,12 @@ public class AbstractTreeModel extends AbstractBaseModel
 
   //** 子数目相关 **/
 
-  public int getChildsNum(String id, List excludeIds)
+  public int getChildsNum(String id)
     throws HongsException
   {
     if (this.cnumKey == null)
     {
-      return this.getRealChildsNum(id, excludeIds);
+      return this.getRealChildsNum(id, null);
     }
 
     String sql = "SELECT `"
@@ -632,12 +632,6 @@ public class AbstractTreeModel extends AbstractBaseModel
     List params = new ArrayList();
     params.add(id);
 
-    if (excludeIds != null)
-    {
-      sql += " `" + this.table.primaryKey + "` NOT IN (?)";
-      params.add(excludeIds);
-    }
-
     Map info = this.db.fetchOne(sql, params.toArray());
     if (info.isEmpty())
     {
@@ -646,12 +640,6 @@ public class AbstractTreeModel extends AbstractBaseModel
 
     Object cn = info.get(this.cnumKey);
     return Integer.parseInt(cn.toString());
-  }
-
-  public int getChildsNum(String id)
-    throws HongsException
-  {
-    return this.getChildsNum(id, null);
   }
 
   public int getRealChildsNum(String id, List excludeIds)
@@ -773,7 +761,7 @@ public class AbstractTreeModel extends AbstractBaseModel
   {
     if (this.snumKey == null)
     {
-      return this.getChildsNum(pid, excludeIds);
+      return this.getRealChildsNum(pid, excludeIds);
     }
 
     String sql = "SELECT `"

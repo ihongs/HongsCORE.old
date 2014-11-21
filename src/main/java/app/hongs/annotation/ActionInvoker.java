@@ -1,6 +1,6 @@
 package app.hongs.annotation;
 
-import app.hongs.action.ActionCaller;
+import app.hongs.action.ActionRunner;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import java.lang.annotation.Annotation;
@@ -13,5 +13,5 @@ import java.lang.annotation.Annotation;
  * @author Hongs
  */
 public interface ActionInvoker {
-    public void invoke(ActionHelper helper, ActionCaller chains, Annotation anno) throws HongsException;
+    public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno) throws HongsException;
 }

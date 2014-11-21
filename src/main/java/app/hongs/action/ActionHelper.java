@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
@@ -64,31 +65,6 @@ public class ActionHelper
   private PrintWriter responseWrtr;
 
   /**
-   * 初始化助手(用于action)
-   *
-   * @param req
-   * @param rsp
-   */
-  public ActionHelper(HttpServletRequest req, HttpServletResponse rsp)
-  {
-    this.request  = req;
-    this.response = rsp;
-
-    this.requestData  = null;
-    this.responseData = null;
-
-    try
-    {
-      this.request .setCharacterEncoding("UTF-8");
-      this.response.setCharacterEncoding("UTF-8");
-    }
-    catch (UnsupportedEncodingException ex)
-    {
-      throw new HongsError(0x21, "Can not set rs encoding.", ex);
-    }
-  }
-
-  /**
    * 初始化助手(用于cmdlet)
    *
    * @param req
@@ -112,36 +88,57 @@ public class ActionHelper
     }
   }
 
-  public HttpServletRequest getRequest()
+  /**
+   * 初始化助手(用于action)
+   *
+   * @param req
+   * @param rsp
+   */
+  public ActionHelper(HttpServletRequest req, HttpServletResponse rsp)
   {
-    return this.request;
+    this.request  = req;
+    this.response = rsp;
+    this.requestData  = null;
+    this.responseData = null;
+
+    try
+    {
+      this.request .setCharacterEncoding("UTF-8");
+      this.response.setCharacterEncoding("UTF-8");
+    }
+    catch (UnsupportedEncodingException ex)
+    {
+      throw new HongsError(0x21, "Can not set rs encoding.", ex);
+    }
   }
 
   /**
-   * 获取请求文本
-   * @return 请求文本
+   * 重置请求响应对象
+   *
+   * 供 ActionLoader 调用, 因 forward 后 response 会变
+   *
+   * @param req
+   * @param rsp
    */
-  public String getRequestText()
+  protected void setInstance(HttpServletRequest req, HttpServletResponse rsp)
+  throws IOException
   {
-    try
-    {
-      BufferedReader reader = this.request.getReader();
-      String text = "";
-      char[] buf = new char[1024];
-      int i = 0, j = 0;
-
-      while ((i =reader.read(buf, j, 1024)) != -1)
-      {
-        text += new String(buf);
-        j += i * 1024;
-      }
-
-      return text;
+    request  = req;
+    response = rsp;
+    if (responseWrtr != null) {
+        responseWrtr  = rsp.getWriter();
     }
-    catch (IOException ex)
-    {
-      return "";
-    }
+  }
+
+  public ActionHelper getInstance()
+  throws HongsException
+  {
+    throw new HongsException(0x1100, "Please use the ActionHelper in the coverage of the ActionLoader or CmdletRunner inside");
+  }
+
+  public HttpServletRequest getRequest()
+  {
+    return this.request;
   }
 
   /**
@@ -170,6 +167,33 @@ public class ActionHelper
       }
     }
     return this.requestData;
+  }
+
+  /**
+   * 获取请求文本
+   * @return 请求文本
+   */
+  public String getRequestText()
+  {
+    try
+    {
+      BufferedReader reader = this.request.getReader();
+      String text = "";
+      char[] buf = new char[1024];
+      int i = 0, j = 0;
+
+      while ((i =reader.read(buf, j, 1024)) != -1)
+      {
+        text += new String(buf);
+        j += i * 1024;
+      }
+
+      return text;
+    }
+    catch (IOException ex)
+    {
+      return "";
+    }
   }
 
   public HttpServletResponse getResponse()
@@ -458,20 +482,6 @@ public class ActionHelper
   }
 
   //** 工具方法 **/
-
-  /**
-   * 重置请求响应对象
-   * 
-   * 供 ActionLoader 调用, 因 forward 后 response 会变
-   *
-   * @param req
-   * @param rsp 
-   */
-  protected void reset(HttpServletRequest req, HttpServletResponse rsp)
-  {
-    this.request  = req;
-    this.response = rsp;
-  }
 
   /**
    * 解析参数

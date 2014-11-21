@@ -1,7 +1,8 @@
 package app.hongs.serv.action;
 
 import app.hongs.Core;
-import app.hongs.action.ActionCaller;
+import app.hongs.action.ActionRunner;
+import app.hongs.action.ActionWarder;
 import java.io.File;
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -16,13 +17,16 @@ import javax.servlet.http.HttpServletRequest;
  * 自动请求过滤
  * @author Hongs
  */
-public class HaimAutoFilter implements Filter {
+public class HaimEntityFilter implements Filter {
 
     private String config = "haim";         // 配置名称
     private String prefix = "haim/";        // 过滤前缀
     private String action = "haim/auto";  // 处理动作
     private int    prelen = prefix.length();
 
+    public static final String CONFIG = "app.hongs.serv.haim.config";
+    public static final String ENTITY = "app.hongs.serv.haim.entity";
+    
     @Override
     public void init(FilterConfig cnf) {
         String x;
@@ -54,37 +58,22 @@ public class HaimAutoFilter implements Filter {
             throws IOException, ServletException {
         String uri, act, ext;
         int pos;
-        uri = ((HttpServletRequest) req).getServletPath().substring(1);
+        uri = ActionWarder.getCurrentServletPath((HttpServletRequest)req);
         act = uri.substring(prelen);
         pos = act.lastIndexOf('.');
         ext = act.substring(pos+1);
         act = act.substring(0,pos);
 
-        if ("act".equals(ext)) {
-            String clz, mtd;
-            pos = act.lastIndexOf('/');
-            mtd = act.substring(pos+1);
-            clz = act.substring(0,pos);
-
-            Class cls =  ActionCaller.getActions( ).get( clz );
-            if  ( cls == null) {
-                doAction( req, rsp, act, ext );
-                return;
-            }
-            try {
-                cls.getMethod("action_"+mtd);
-            } catch ( NoSuchMethodException e) {
-                doAction( req, rsp, act, ext );
-                return;
-            } catch (     SecurityException e) {
-                doAction( req, rsp, act, ext );
-                return;
-            }
-        } else
         if ("jsp".equals(ext)) {
             String  web = new File(Core.BASE_PATH).getParent();
             File    jsp = new File(web + File.separator + uri);
             if (!jsp.exists()) {
+                doAction( req, rsp, act, ext );
+                return;
+            }
+        } else
+        if ("act".equals(ext)) {
+            if (ActionRunner.ACTIONS.containsKey(act)) {
                 doAction( req, rsp, act, ext );
                 return;
             }
@@ -101,8 +90,8 @@ public class HaimAutoFilter implements Filter {
         uri = act.substring(0,pos);
         act = act.substring(pos+1);
         act = Core.BASE_HREF+"/"+action+"/"+act+"."+ext;
-        req.setAttribute("app.hongs.serv.haim.config", config);
-        req.setAttribute("app.hongs.serv.haim.uri"   , uri   );
+        req.setAttribute(CONFIG, config);
+        req.setAttribute(ENTITY, uri   );
         req.getRequestDispatcher(act).forward(req, rsp);
     }
 

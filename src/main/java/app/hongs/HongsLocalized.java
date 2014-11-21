@@ -10,10 +10,12 @@ public class HongsLocalized {
     private String desc;
     private String lang;
     private String[] opts;
+    private Throwable that;
 
-    public HongsLocalized(int code, String desc) {
+    public HongsLocalized(int code, String desc, Throwable that) {
         this.code = code;
         this.desc = desc;
+        this.that = that;
     }
 
     /**
@@ -46,6 +48,12 @@ public class HongsLocalized {
                 .replaceFirst("\\.error$","")
               + "." + codx;
         }
+        if (null  ==  desc) {
+            Throwable cause = that.getCause();
+            if (null != cause && cause instanceof HongsCause) {
+                desx  = cause.getMessage(   );
+            }
+        }
         return codx + ": " + desx;
     }
 
@@ -61,7 +69,7 @@ public class HongsLocalized {
 
         trns = new CoreLanguage("_error_");
         codx = "Ex" + Integer.toHexString(  code  );
-        desx = desc != null ? desc : "";
+        desx = desc != null ? desc :  ""  ;
         optx = opts != null ? opts : new String[]{};
 
         // 0x10,0x11,0x1000,0x1001 为保留的代号
@@ -94,6 +102,11 @@ public class HongsLocalized {
         }
         if (trns.containsKey(dkey)) {
             desx = trns.translate(dkey, optx);
+        } else {
+            Throwable cause = that.getCause();
+            if (null != cause && cause instanceof HongsCause) {
+                desx  = cause.getLocalizedMessage();
+            }
         }
 
         return codx + ' ' + desx;

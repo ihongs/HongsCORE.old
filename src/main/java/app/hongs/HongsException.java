@@ -11,7 +11,7 @@ package app.hongs;
  *
  * @author Hongs
  */
-public class HongsException extends Exception {
+public class HongsException extends Exception implements HongsCause {
 
     /**
      * 通用异常(不确定异常号)
@@ -33,7 +33,7 @@ public class HongsException extends Exception {
     public HongsException(int code, String desc, Throwable cause) {
         super(cause);
 
-        that = new HongsLocalized(code, desc);
+        that = new HongsLocalized(code, desc, this);
 
         if (code < 0x1000 || code > 0xFFFFF) {
             throw new HongsError(0x13,
@@ -45,8 +45,8 @@ public class HongsException extends Exception {
         this(code, cause.getMessage(), cause);
     }
 
-    public HongsException(int code, String error) {
-        this(code, error, null);
+    public HongsException(int code, String desc) {
+        this(code, desc, null);
     }
 
     public HongsException(int code) {

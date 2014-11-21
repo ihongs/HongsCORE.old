@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  * 动作承载器
  *
  * <p>
- 映射到 *.act *.api *.jsp /common/auth/* /common/conf/* /common/lang/*<br/>
+ 映射到 *.csp *.api *.jsp /common/auth/* /common/conf/* /common/lang/*<br/>
  * 必须作为第一个 filter
  * </p>
  *
@@ -37,23 +37,23 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class ActionLoader
+public class ActionWarder
 implements Filter {
 
     /**
-     * Request 属性: 不要初始设置
+     * Request Attribute: 已经启动
      */
-    public static final String DONT_INIT = "app.hongs.action.loader.dont.init";
+    public static final String STARTED = "app.hongs.action.started";
 
     /**
-     * Request 属性: 不要发送数据
+     * Request Attribute: 已经输出
      */
-    public static final String DONT_SEND = "app.hongs.action.loader.dont.send";
+    public static final String PRINTED = "app.hongs.action.printed";
 
     /**
-     * Request 属性: 待发送的数据
+     * Request Attribute: 应答数据
      */
-    public static final String SEND_DATA = "app.hongs.action.loader.send.data";
+    public static final String REPLIED = "app.hongs.action.replted";
 
     @Override
     public void init(FilterConfig config)
@@ -89,6 +89,9 @@ implements Filter {
         Core.LOGS_PATH = conf.getProperty("core.logs.path", Core.LOGS_PATH);
         Core.SERS_PATH = conf.getProperty("core.tmps.path", Core.SERS_PATH);
         Core.SERVER_ID = conf.getProperty("core.server.id", "" );
+
+        // 调一下 ActionRunner 来加载 ACTIONS
+        ActionRunner.ACTIONS.size();
 
             // 启动系统属性
             for (Map.Entry et : conf.entrySet()) {
@@ -147,43 +150,11 @@ implements Filter {
         HttpServletResponse rsp = (HttpServletResponse) response;
 
         if (!Core.getInstance().containsKey(ActionHelper.class.getName())
-        ||  req.getAttribute(DONT_INIT) == null) {
-            req.setAttribute(DONT_INIT  ,  true);
+        ||  req.getAttribute(STARTED) == null) {
+            req.setAttribute(STARTED  ,  true);
             doIniter(req, rsp, chain);
         } else {
             doReinit(req, rsp, chain);
-        }
-    }
-
-    private void doFilter(HttpServletRequest req, HttpServletResponse rsp, FilterChain chain, ActionHelper helper)
-    throws ServletException, IOException {
-        /**
-         * Include 不会改变 Request 里的 URL
-         */
-        String uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-        String act =  Core.ACTION_NAME.get/**/(  );
-        if (uri == null) uri= req.getServletPath();
-        uri = uri.substring(1);
-
-        /**/rsp.setStatus(/**/ HttpServletResponse.SC_OK);
-
-        try {
-            Core.ACTION_NAME.set(uri);
-            chain.doFilter((ServletRequest)req, (ServletResponse)rsp);
-        } finally {
-            Core.ACTION_NAME.set(act);
-        }
-
-        if (rsp.getStatus() == HttpServletResponse.SC_OK) {
-        if (req.getAttribute(DONT_SEND) == null) {
-            req.setAttribute(DONT_SEND  ,  true);
-            Map rd  = helper.getResponseData();
-            if (rd != null) helper.print( rd );
-        } else
-        if (req.getAttribute(SEND_DATA) == null) {
-            Map rd  = helper.getResponseData();
-            req.setAttribute(SEND_DATA  , rd );
-        }
         }
     }
 
@@ -192,22 +163,22 @@ implements Filter {
         ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
         HttpServletResponse rzp = helper.getResponse();
         try {
-            helper.reset (req, rsp);
-            this.doFilter(req, rsp, chain, helper);
+            helper.setInstance(req, rsp);
+            chain.doFilter((ServletRequest)req, (ServletResponse)rsp);
         } finally {
-            helper.reset (req, rzp);
+            helper.setInstance(req, rzp);
         }
     }
 
     private void doIniter(HttpServletRequest req, HttpServletResponse rsp, FilterChain chain)
     throws ServletException, IOException {
-        ActionHelper helper = new ActionHelper(req, rsp);
-        Core.getInstance().put(ActionHelper.class.getName(), helper);
+        ActionHelper helper = new ActionHelper( req , rsp );
+        Core.getInstance().put(ActionHelper.class.getName(), helper );
         try {
-            this.doIniter(req, helper);
-            this.doFilter(req, rsp, chain, helper);
+            this .doIniter( req, helper);
+            chain.doFilter((ServletRequest)req, (ServletResponse)rsp);
         } finally {
-            this.doFinish();
+            this .doFinish();
         }
     }
 
@@ -215,9 +186,10 @@ implements Filter {
     throws ServletException {
         Core.ACTION_TIME.set(System.currentTimeMillis());
 
-        CoreConfig  conf  = ( CoreConfig ) Core.getInstance( CoreConfig.class );
-        Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-cn"));
+        Core.ACTION_NAME.set(getCurrentServletPath(req).substring(1));
 
+        CoreConfig  conf  = (CoreConfig) Core.getInstance(  CoreConfig.class  );
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-cn"));
         if (conf.getProperty("core.language.probing", false)) {
             /**
              * 语言可以记录到Session/Cookies里
@@ -281,6 +253,28 @@ implements Filter {
         } catch ( Throwable  e) {
             CoreLogger.error(e);
         }
+    }
+
+    /**
+     * 获得当前的ServletPath
+     * @param req
+     * @return
+     */
+    public static String getCurrentServletPath(HttpServletRequest req) {
+        String uri = (String)req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+        if (uri == null) uri=req.getServletPath();
+        return uri;
+    }
+
+    /**
+     * 获得真实的ServletPath
+     * @param req
+     * @return
+     */
+    public static String getRealityServletPath(HttpServletRequest req) {
+        String uri = (String)req.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
+        if (uri == null) uri=req.getServletPath();
+        return uri;
     }
 
 }

@@ -11,7 +11,7 @@ package app.hongs;
  *
  * @author Hongs
  */
-public class HongsError extends Error {
+public class HongsError extends Error implements HongsCause {
 
     /**
      * 通用错误
@@ -28,7 +28,7 @@ public class HongsError extends Error {
     public HongsError(int code, String desc, Throwable cause) {
         super(cause);
 
-        that = new HongsLocalized(code, desc);
+        that = new HongsLocalized(code, desc, this);
 
         if (code < 0x10 || code > 0xFFF) {
             throw new HongsError(0x12,

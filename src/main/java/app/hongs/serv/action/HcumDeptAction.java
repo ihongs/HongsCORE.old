@@ -30,20 +30,23 @@ public class HcumDeptAction {
         lang.load("hcum");
     }
 
-    public void action_tree(ActionHelper helper)
+    @Action("list")
+    public void getList(ActionHelper helper)
     throws HongsException {
         Map data = model.getTree(helper.getRequestData());
         helper.reply(data);
     }
 
-    public void action_info(ActionHelper helper)
+    @Action("info")
+    public void getInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
         helper.reply(data);
     }
 
+    @Action("save")
     @CommitSuccess
-    public void action_save(ActionHelper helper)
+    public void doSave(ActionHelper helper)
     throws HongsException {
         String id = model.save(helper.getRequestData());
 
@@ -53,8 +56,9 @@ public class HcumDeptAction {
         helper.reply(msg, id, nms);
     }
 
+    @Action("remove")
     @CommitSuccess
-    public void action_remove(ActionHelper helper)
+    public void doRemove(ActionHelper helper)
     throws HongsException {
         int num = model.remove(helper.getRequestData());
 
@@ -64,13 +68,15 @@ public class HcumDeptAction {
         helper.reply(msg);
     }
 
-    public void action_exists(ActionHelper helper)
+    @Action("exists")
+    public void isExists(ActionHelper helper)
     throws HongsException {
         boolean rst = model.exists(helper.getRequestData());
         helper.reply(rst);
     }
 
-    public void action_groups(ActionHelper helper)
+    @Action("groups")
+    public void getGroups(ActionHelper helper)
     throws HongsException {
         Map data = new HashMap();
 

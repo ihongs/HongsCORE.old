@@ -12,7 +12,7 @@ import java.util.Map;
  * @author Hongs
  */
 @Action("haim/auto")
-public class HaimAutoAction {
+public class HaimEntityAction {
     public void action_list(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
