@@ -17,11 +17,11 @@ import javax.servlet.http.HttpServletRequest;
  * 自动请求过滤
  * @author Hongs
  */
-public class HaimEntityFilter implements Filter {
+public class HaimAccessFilter implements Filter {
 
     private String config = "haim";         // 配置名称
     private String prefix = "haim/";        // 过滤前缀
-    private String action = "haim/auto";  // 处理动作
+    private String action = "haim/bottom";  // 处理动作
     private int    prelen = prefix.length();
 
     public static final String CONFIG = "app.hongs.serv.haim.config";

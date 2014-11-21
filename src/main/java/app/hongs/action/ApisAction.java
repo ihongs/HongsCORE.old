@@ -44,19 +44,19 @@ public class ApisAction
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "list"  );
+        doForward(req, rsp, "list");
     }
 
     @Override
     public void doPut(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "update", "modify", "save"  );
+        doForward(req, rsp, "update", "modify", "save");
     }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "create", "save"  );
+        doForward(req, rsp, "create", "save");
     }
 
     @Override
@@ -112,11 +112,6 @@ public class ApisAction
             if (vaz != null && vaz.length() != 0) {
                 if (mtd.equals( "list" )) {
                     mtd  =      "info"  ;
-                    mts  = new String[] {mtd};
-                } else
-                if (vaz.length( )  >  1
-                &&  mtd.equals("modify")) {
-                    mtd  =     "update" ;
                     mts  = new String[] {mtd};
                 }
             }

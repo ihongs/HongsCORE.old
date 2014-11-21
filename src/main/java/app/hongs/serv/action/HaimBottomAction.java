@@ -4,6 +4,7 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
+import app.hongs.annotation.CommitSuccess;
 import app.hongs.db.AbstractBaseModel;
 import java.util.Map;
 
@@ -11,9 +12,10 @@ import java.util.Map;
  * 自动动作处理
  * @author Hongs
  */
-@Action("haim/auto")
-public class HaimEntityAction {
-    public void action_list(ActionHelper helper) throws HongsException {
+@Action("haim/bottom")
+public class HaimBottomAction {
+    @Action("list")
+    public void getList(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
         AbstractBaseModel model = getModel(conf, name);
@@ -21,7 +23,8 @@ public class HaimEntityAction {
         helper.reply(data);
     }
 
-    public void action_info(ActionHelper helper) throws HongsException {
+    @Action("info")
+    public void getInfo(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
         AbstractBaseModel model = getModel(conf, name);
@@ -29,7 +32,9 @@ public class HaimEntityAction {
         helper.reply(data);
     }
 
-    public void action_create(ActionHelper helper) throws HongsException {
+    @Action("create")
+    @CommitSuccess
+    public void doCreate(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
         AbstractBaseModel model = getModel(conf, name);
@@ -39,7 +44,9 @@ public class HaimEntityAction {
         helper.reply(msg, id, nms);
     }
 
-    public void action_modify(ActionHelper helper) throws HongsException {
+    @Action("modify")
+    @CommitSuccess
+    public void doModify(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
         AbstractBaseModel model = getModel(conf, name);
@@ -49,7 +56,21 @@ public class HaimEntityAction {
         helper.reply(msg, id, nms);
     }
 
-    public void action_remove(ActionHelper helper) throws HongsException {
+    @Action("update")
+    @CommitSuccess
+    public void doUpdate(ActionHelper helper) throws HongsException {
+        String conf = helper.getRequest().getAttribute("conf").toString();
+        String name = helper.getRequest().getAttribute("name").toString();
+        AbstractBaseModel model = getModel(conf, name);
+        model.update(helper.getRequestData());
+        String nms = model.getAffectedNames();
+        String msg = getMsg(conf, name, "remove", nms);
+        helper.reply(msg);
+    }
+    
+    @Action("remove")
+    @CommitSuccess
+    public void doRemove(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
         AbstractBaseModel model = getModel(conf, name);
