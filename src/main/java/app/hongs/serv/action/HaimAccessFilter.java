@@ -47,7 +47,7 @@ public class HaimAccessFilter implements Filter {
         if (x != null) {
             action = x;
         } else {
-            action = prefix + "common";
+            action = prefix + "bottom";
         }
 
         prelen = prefix.length();
