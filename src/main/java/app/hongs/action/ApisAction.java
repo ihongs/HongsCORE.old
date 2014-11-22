@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
  *   &lt;servlet-name&gt;ApisAction&lt;/servlet-name&gt;
  *   &lt;url-pattern&gt;*.api&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
- * <pre>
+ * </pre>
  *
  * @author Hongs
  */
@@ -50,7 +50,7 @@ public class ApisAction
     @Override
     public void doPut(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "update", "modify", "save");
+        doForward(req, rsp, "modify", "save", "update");
     }
 
     @Override
@@ -112,6 +112,11 @@ public class ApisAction
             if (vaz != null && vaz.length() != 0) {
                 if (mtd.equals( "list" )) {
                     mtd  =      "info"  ;
+                    mts  = new String[] {mtd};
+                } else
+                if (vaz.length( )  >  1
+                &&  mtd.equals("modify")) {
+                    mtd  =     "update";
                     mts  = new String[] {mtd};
                 }
             }

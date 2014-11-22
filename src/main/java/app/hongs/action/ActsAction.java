@@ -7,7 +7,6 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import static app.hongs.action.ActionWarder.PRINTED;
 import static app.hongs.action.ActionWarder.REPLIED;
-import java.io.IOException;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,13 +16,12 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 动作启动器
  *
+ * <h3>处理器编程:</h3>
  * <p>
- * 在 app.xxx.action 中建立一个类, 指定多个
- * <code>
- * public void actionXxx(app.hongs.action.ActionHelper helper)
- * </core>
- 方法接收来自 Web 的请求, 可使用 helper.reply() 返回数据
- </p>
+ * 添加一个包, 将包名加到 default.properties 里的 core.action.pacakges 值中;
+ * 添加一个类, 给类加上注解 @Action(action/path), 不添加或提供一个无参构造方法;
+ * 添加一个方法, 给方法加上 @Action(action_name), 提供一个 ActionHelper 参数;
+ * </p>
  *
  * <h3>web.xml配置:</h3>
  * <pre>
@@ -35,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
  *   &lt;servlet-name&gt;ActsAction&lt;/servlet-name&gt;
  *   &lt;url-pattern&gt;***.act&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
- * <pre>
+ * </pre>
  *
  * @author Hongs
  */
@@ -51,12 +49,11 @@ public class ActsAction
    *
    * @param req
    * @param rsp
-   * @throws java.io.IOException
    * @throws javax.servlet.ServletException
    */
   @Override
   public void service(HttpServletRequest req, HttpServletResponse rsp)
-    throws IOException, ServletException
+    throws ServletException
   {
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
     String act = ActionWarder.getCurrentActionPath(req );
@@ -102,6 +99,20 @@ public class ActsAction
     }
   }
 
+  private void sendout(HttpServletRequest req, ActionHelper helper) {
+    if (req.getAttribute(PRINTED) == null )
+    {
+        req.setAttribute(PRINTED  ,  true );
+        Map data = helper.getResponseData();
+        if (data!= null)helper.print(data );
+    } else
+    if (req.getAttribute(REPLIED) == null )
+    {
+        Map data = helper.getResponseData();
+        req.setAttribute(REPLIED  ,  data );
+    }
+  }
+
   private void senderr(int sym, Throwable err, ActionHelper helper)
     throws ServletException
   {
@@ -129,18 +140,6 @@ public class ActsAction
         CoreLogger.error( err );
 //      throw new ServletException(error, err);
     }
-  }
-
-  private void sendout(HttpServletRequest req, ActionHelper helper) {
-      if (req.getAttribute(PRINTED) == null ) {
-          req.setAttribute(PRINTED  ,  true );
-          Map data = helper.getResponseData();
-          if (data!= null)helper.print(data );
-      } else
-      if (req.getAttribute(REPLIED) == null ) {
-          Map data = helper.getResponseData();
-          req.setAttribute(REPLIED  ,  data );
-      }
   }
 
 }
