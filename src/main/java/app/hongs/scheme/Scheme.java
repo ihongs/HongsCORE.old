@@ -3,7 +3,7 @@ package app.hongs.scheme;
 import java.util.Map;
 
 /**
- *
+ * 规划模型
  * @author Hongs
  */
 public interface Scheme {
