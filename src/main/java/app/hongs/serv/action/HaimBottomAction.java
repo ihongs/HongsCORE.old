@@ -5,7 +5,7 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
 import app.hongs.annotation.CommitSuccess;
-import app.hongs.db.Model4Crud;
+import app.hongs.db.Model;
 import app.hongs.serv.HaimBottom;
 import static app.hongs.serv.action.HaimAccessFilter.CONFIG;
 import static app.hongs.serv.action.HaimAccessFilter.ENTITY;
@@ -21,7 +21,7 @@ public class HaimBottomAction {
     public void getList(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute(CONFIG).toString();
         String name = helper.getRequest().getAttribute(ENTITY).toString();
-        Model4Crud model = getModel(conf, name);
+        Model model = getModel(conf, name);
         Map     req = helper.getRequestData();
         Map     rst = model.getPage(req);
         helper.reply(rst);
@@ -31,7 +31,7 @@ public class HaimBottomAction {
     public void getInfo(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute(CONFIG).toString();
         String name = helper.getRequest().getAttribute(ENTITY).toString();
-        Model4Crud model = getModel(conf, name);
+        Model model = getModel(conf, name);
         Map     req = helper.getRequestData();
         Map     rst = model.getPage(req);
         helper.reply(rst);
@@ -42,7 +42,7 @@ public class HaimBottomAction {
     public void doCreate(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute(CONFIG).toString();
         String name = helper.getRequest().getAttribute(ENTITY).toString();
-        Model4Crud model = getModel(conf, name);
+        Model model = getModel(conf, name);
         Map     req = helper.getRequestData();
         String  id  = model.create(req);
         String  msg = getMsg(conf, name, "create", 1 );
@@ -54,7 +54,7 @@ public class HaimBottomAction {
     public void doUpdate(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute(CONFIG).toString();
         String name = helper.getRequest().getAttribute(ENTITY).toString();
-        Model4Crud model = getModel(conf, name);
+        Model model = getModel(conf, name);
         Map     req = helper.getRequestData();
         int     rd  = model.update(req);
         String  msg = getMsg(conf, name, "update", rd);
@@ -66,7 +66,7 @@ public class HaimBottomAction {
     public void doDelete(ActionHelper helper) throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
-        Model4Crud model = getModel(conf, name);
+        Model model = getModel(conf, name);
         Map     req = helper.getRequestData();
         int     rd  = model.delete(req);
         String  msg = getMsg(conf, name, "delete", rd);
@@ -78,15 +78,15 @@ public class HaimBottomAction {
     throws HongsException {
         String conf = helper.getRequest().getAttribute("conf").toString();
         String name = helper.getRequest().getAttribute("name").toString();
-        Model4Crud model = getModel(conf, name);
+        Model model = getModel(conf, name);
         boolean rst = model.exists(helper.getRequestData());
         helper.reply(rst);
     }
 
-    private Model4Crud _model;
+    private Model _model;
     private CoreLanguage _lang;
 
-    protected Model4Crud getModel(String conf, String name) throws HongsException {
+    protected Model getModel(String conf, String name) throws HongsException {
         if (_model == null) {
             _model = new HaimBottom(conf, name);
         }

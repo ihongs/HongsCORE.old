@@ -3,7 +3,7 @@ package app.hongs.serv;
 import app.hongs.HongsException;
 import app.hongs.action.AuthConfig;
 import app.hongs.db.DB;
-import app.hongs.db.Model4Crud;
+import app.hongs.db.Model;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.Set;
  * @author Hongs
  */
 public class HcumUser
-extends Model4Crud {
+extends Model {
 
     public HcumUser()
     throws HongsException {

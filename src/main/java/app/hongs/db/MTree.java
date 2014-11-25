@@ -37,7 +37,7 @@ import java.util.Set;
  *
  * @author Hong
  */
-public class Model4Tree extends Model4Crud
+public class MTree extends Model
 {
 
   /**
@@ -95,7 +95,7 @@ public class Model4Tree extends Model4Crud
    * @param table
    * @throws app.hongs.HongsException
    */
-  public Model4Tree(Table table)
+  public MTree(Table table)
     throws HongsException
   {
     super(table);

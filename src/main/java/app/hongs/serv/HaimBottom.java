@@ -3,7 +3,7 @@ package app.hongs.serv;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
-import app.hongs.db.Model4Crud;
+import app.hongs.db.Model;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +15,7 @@ import java.util.Map;
  * 自动打底模型
  * @author Hongs
  */
-public class HaimBottom extends Model4Crud {
+public class HaimBottom extends Model {
     public HaimBottom(String dbName, String tableName) throws HongsException {
         super(DB.getInstance(dbName).getTable(tableName));
     }

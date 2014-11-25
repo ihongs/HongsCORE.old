@@ -46,7 +46,7 @@ import java.util.Set;
  *
  * @author Hongs
  */
-public class Model4Crud
+public class Model
 {
 
   /**
@@ -106,7 +106,7 @@ public class Model4Crud
    * @param table
    * @throws app.hongs.HongsException
    */
-  public Model4Crud(Table table)
+  public Model(Table table)
     throws HongsException
   {
     this.db = table.db;

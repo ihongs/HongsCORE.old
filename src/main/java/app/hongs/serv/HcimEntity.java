@@ -3,7 +3,7 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.CollConfig;
-import app.hongs.db.Model4Crud;
+import app.hongs.db.Model;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
  * 通用信息模型处理类
  * @author Hongs
  */
-public class HcimEntity extends Model4Crud {
+public class HcimEntity extends Model {
 
     public HcimEntity() throws HongsException {
         super(DB.getInstance("hcim").getTable("a_hcim_entity"));
