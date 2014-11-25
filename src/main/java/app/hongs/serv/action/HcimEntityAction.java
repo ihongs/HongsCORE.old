@@ -6,8 +6,6 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
 import app.hongs.annotation.CommitSuccess;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,48 +44,24 @@ public class HcimEntityAction {
     @CommitSuccess
     public void doSave(ActionHelper helper)
     throws HongsException {
-        Map data = helper.getRequestData();
-        if (data.containsKey("a_hcim_entity_cols")) {
-            List<Map<String, String>> cols = (List<Map<String, String>>)
-                new ArrayList(((Map)data.get("a_hcim_entity_cols")).values());
-            int i = 0;
-            for (Map col : cols) {
-                col.put("serialno", i++);
-            }
-        }
-        if (data.containsKey("a_hcim_entity_rels")) {
-            List<Map<String, String>> cols = (List<Map<String, String>>)
-                new ArrayList(((Map)data.get("a_hcim_entity_rels")).values());
-            int i = 0;
-            for (Map col : cols) {
-                col.put("serialno", i++);
-            }
-        }
-        
-        String id = model.save(data);
-        
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.save.entity.success", nms);
-
-        helper.reply(msg, id, nms);
+        String  id  = model.save(helper.getRequestData());
+        String  msg = lang.translate("core.save.entity.success");
+        helper.reply(msg, id);
     }
 
-    @Action("remove")
+    @Action("delete")
     @CommitSuccess
     public void doRemove(ActionHelper helper)
     throws HongsException {
-        model.remove(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.remove.entity.success", nms);
-
+        int     rd  = model.delete(helper.getRequestData());
+        String  msg = lang.translate("core.remove.entity.success", Integer.toString(rd));
         helper.reply(msg);
     }
 
     @Action("unique")
     public void isUnique(ActionHelper helper)
     throws HongsException {
-        boolean rst = model.unique(helper.getRequestData());
+        boolean rst = model.exists(helper.getRequestData());
         helper.reply(rst);
     }
 

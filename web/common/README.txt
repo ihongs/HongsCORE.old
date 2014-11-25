@@ -30,16 +30,16 @@
 
 <div id="hcum-dept-tree">
     <object class="config" name="hsTree" data="">
-        <param name="loadUrl" value="hcum/Dept/Tree.act"/>
+        <param name="loadUrl" value="hcum/dept/tree.act"/>
         <param name="linkUrls[]" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
         <param name="openUrls[]" value="['.create','hcum/dept/form.html?pid={ID}','#hcum-user-pane']"/>
         <param name="openUrls[]" value="['.modify','hcum/dept/form.html?id={ID}','.#hcum-user-pane']"/>
-        <param name="sendUrls[]" value="['.remove','hcum/Dept/Remove.act']"/>
+        <param name="sendUrls[]" value="['.delete','hcum/dept/delete.act']"/>
     </object>
     <div class="tool-box btn-group">
         <button  type="button" class="create btn btn-default">添加部门</button>
         <button  type="button" class="modify for-select btn btn-default">修改</button>
-        <button  type="button" class="remove for-select btn btn-danger" >删除</button>
+        <button  type="button" class="delete for-select btn btn-danger" >删除</button>
     </div>
     <div class="tree-box"></div>
 </div>
@@ -51,13 +51,13 @@
         <param name="loadUrl" value="('hcum/User/List.act?dept_id='+H$('&dept_id',this))"/><!-- 列表数据加载动作地址 -->
         <param name="openUrls[]" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'#hcum-user-pane']"/><!-- 点击第1个参数的按钮, 打开第2参数的URL, 在第3个参数的区域中, 如果没有第3个参数则在浮窗中打开  -->
         <param name="openUrls[]" value="['.modify','hcum/user/form.html?id={ID}','#hcum-user-pane']"/><!-- 同上, 此为修改, 故传递了 ID 参数, ID 参数会从列表选中的行中提取 -->
-        <param name="sendUrls[]" value="['.remove','hcum/User/Remove.act']"/><!-- 点击第1个参数的按钮, 将选中的行 ID 发送到第2个参数的URL -->
+        <param name="sendUrls[]" value="['.delete','hcum/User/Remove.act']"/><!-- 点击第1个参数的按钮, 将选中的行 ID 发送到第2个参数的URL -->
     </object>
     <div class="clearfix">
         <form class="toolbox btn-group pull-left">
             <button type="button" class="create btn btn-default">创建用户</button>
             <button type="button" class="modify for-select btn btn-default">修改</button>
-            <button type="button" class="remove for-checks btn btn-danger" >删除</button>
+            <button type="button" class="delete for-checks btn btn-danger" >删除</button>
         </form>
         <form class="findbox btn-group pull-right" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>

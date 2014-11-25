@@ -51,7 +51,7 @@ public class HongsLocalized {
         if (null  ==  desc) {
             Throwable cause = that.getCause();
             if (null != cause && cause instanceof HongsCause) {
-                desx  = cause.getMessage(   );
+                return  cause.getMessage(   );
             }
         }
         return codx + ": " + desx;
@@ -105,7 +105,7 @@ public class HongsLocalized {
         } else {
             Throwable cause = that.getCause();
             if (null != cause && cause instanceof HongsCause) {
-                desx  = cause.getLocalizedMessage();
+                return  cause.getLocalizedMessage();
             }
         }
 

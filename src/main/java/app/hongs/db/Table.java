@@ -80,23 +80,13 @@ public class Table
   /**
    * 主键名
    */
-  public String primaryKey;
+  public String primaryKey = "";
 
-  /**
-   * 表前缀(用于生成tableName, 构造后设置无效)
-   */
-  protected String tablePrefix;
-
-  /**
-   * 表后缀(用于生成tableName, 构造后设置无效)
-   */
-  protected String tableSuffix;
-
-  private Map columns;
   private Map assocs;
   private Map scossa;
+  private Map columns;
 
-  public Table(DB db, Map tableConfig)
+  public Table(DB db, Map tableConf)
     throws HongsException
   {
     if (db == null)
@@ -105,64 +95,39 @@ public class Table
     }
     this.db = db;
 
-    if (tableConfig == null)
+    if (tableConf == null)
     {
       throw new HongsException(0x1072, "Param tableConfig can not be null");
     }
 
-    if (!tableConfig.containsKey("name"))
+    if (!tableConf.containsKey("name"))
     {
       throw new HongsException(0x1074, "table name in tableConfig can not be empty");
     }
-    this.name = (String)tableConfig.get("name");
+    this.name = (String)tableConf.get("name");
 
-    if (tableConfig.containsKey("prefix"))
+    String tablePrefix = "";
+    if (tableConf.containsKey("prefix"))
     {
-      this.tablePrefix = (String)tableConfig.get("prefix");
+      tablePrefix = (String)tableConf.get("prefix");
     }
-    else if (this.tablePrefix == null)
+    String tableSuffix = "";
+    if (tableConf.containsKey("suffix"))
     {
-      this.tablePrefix = "";
+      tableSuffix = (String)tableConf.get("suffix");
     }
+    this.tableName = tablePrefix + this.name + tableSuffix;
 
-    if (tableConfig.containsKey("suffix"))
+    if (tableConf.containsKey("primaryKey"))
     {
-      this.tableSuffix = (String)tableConfig.get("suffix");
-    }
-    else if (this.tableSuffix == null)
-    {
-      this.tableSuffix = "";
-    }
-
-    this.tableName = this.tablePrefix + this.name + this.tableSuffix;
-
-    if (tableConfig.containsKey("primaryKey"))
-    {
-      this.primaryKey = (String)tableConfig.get("primaryKey");
-    }
-    else if (this.primaryKey == null)
-    {
-      this.primaryKey = "";
+      this.primaryKey = (String)tableConf.get("primaryKey");
     }
 
-    if (tableConfig.containsKey("assocs"))
+    if (tableConf.containsKey("assocs"))
     {
-      this.assocs = (Map)tableConfig.get("assocs");
-      this.scossa = (Map)tableConfig.get("scossa");
+      this.assocs = (Map)tableConf.get("assocs");
+      this.scossa = (Map)tableConf.get("scossa");
     }
-  }
-
-  public Table (DB db, String tableName)
-    throws HongsException
-  {
-    this(db, _buildTableConfig(tableName));
-  }
-
-  private static Map _buildTableConfig(String name)
-  {
-    Map tableConfig = new HashMap();
-    tableConfig.put( "name", name );
-    return tableConfig;
   }
 
   /**
@@ -304,7 +269,7 @@ public class Table
     Map mainValues = this.checkMainValues(values, true);
 
     // 插入数据
-    return this.db.insert(this.tableName, mainValues);
+    return  this.db.insert(this.tableName , mainValues);
   }
 
   /**
@@ -393,21 +358,6 @@ public class Table
     return this.columns;
   }
 
-  protected String getField(String field)
-    throws HongsException
-  {
-    Map        cols = getColumns();
-    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
-    field = conf.getProperty("core.table." + field + ".field", field);
-    return  cols.containsKey(field) ? field : null;
-  }
-
-  protected String getState(String state)
-  {
-    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
-    return  conf.getProperty("core.table." + state + ".state", null );
-  }
-
   /**
    * 获取日期(时间)格式
    * <p>
@@ -453,6 +403,21 @@ public class Table
 
     CoreLanguage conf = (CoreLanguage) Core.getInstance(CoreLanguage.class);
     return conf.getProperty("core.default."+type+".format", fmt);
+  }
+
+  protected String getField(String field)
+    throws HongsException
+  {
+    Map        cols = getColumns();
+    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    field = conf.getProperty("core.table." + field + ".field", field);
+    return  cols.containsKey(field) ? field : null;
+  }
+
+  protected String getState(String state)
+  {
+    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    return  conf.getProperty("core.table." + state + ".state", null );
   }
 
   /**
@@ -930,4 +895,44 @@ public class Table
     ex.setLocalizedOptions(trans.toArray(new String[] {}));
     return ex;
   }
+  
+  private Table()
+  {
+    this.name = "";
+    this.tableName  = "";
+    this.primaryKey = "";
+    this.assocs = new HashMap();
+    this.scossa = new HashMap();
+  }
+  
+  /**
+   * 改方法不同于 DB.getTable(String) 方法, 不会获取 table 配置
+   * @param db
+   * @param tableName
+   * @param primaryKey
+   * @return 
+   */
+  public static Table getInstanceByTableName(DB db, String tableName, String primaryKey)
+  {
+    Table inst = new Table();
+    inst.db = db;
+    inst.tableName  = tableName ;
+    inst.primaryKey = primaryKey;
+    return  inst;
+  }
+  
+  /**
+   * 改方法不同于 DB.getTable(String) 方法, 不会获取 table 配置
+   * @param db
+   * @param tableName
+   * @return 
+   */
+  public static Table getInstanceByTableName(DB db, String tableName)
+  {
+    Table inst = new Table();
+    inst.db = db;
+    inst.tableName  = tableName ;
+    return  inst;
+  }
+  
 }

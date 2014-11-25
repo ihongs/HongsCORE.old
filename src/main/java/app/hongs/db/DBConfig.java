@@ -3,31 +3,29 @@ package app.hongs.db;
 import app.hongs.Core;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Properties;
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
-
-import org.xml.sax.SAXException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * 数据库配置信息解析类
@@ -74,7 +72,13 @@ public class DBConfig
   protected void imports()
     throws HongsException
   {
-    DBConfig cp = DBConfig.parseByName(name);
+    File dbConfFile = new File(Core.CONF_PATH + File.separator + name + ".db.xml");
+    if (!dbConfFile.exists())
+    {
+      throw new app.hongs.HongsException(0x1061, "Can not find DB config file '"+name+".db.xml'");
+    }
+
+    DBConfig cp = parseByFile(dbConfFile);
 
     this.source       = cp.source;
     this.origin       = cp.origin;
@@ -110,104 +114,6 @@ public class DBConfig
     "type","join","name","tableName","primaryKey","foreignKey",
     "select","where","groupBy","having","orderBy"
   }));
-
-  /**
-   * 根据名称解析配置
-   *
-   * @param dn
-   * @return 配置对象
-   * @throws app.hongs.HongsException
-   */
-  public static DBConfig parseByName(String dn)
-    throws HongsException
-  {
-    File dbConfFile = new File(Core.CONF_PATH + File.separator + dn + ".db.xml");
-    if (!dbConfFile.exists())
-    {
-      throw new app.hongs.HongsException(0x1061, "Can not find DB config file '"+dn+".db.xml'");
-    }
-
-    return DBConfig.parseByFile(dbConfFile);
-  }
-
-  /**
-   * 根据文件解析配置
-   *
-   * @param df
-   * @return 配置对象
-   * @throws app.hongs.HongsException
-   */
-  public static DBConfig parseByFile(File df)
-    throws HongsException
-  {
-    Document doc;
-    try
-    {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      DocumentBuilder dbn = dbf.newDocumentBuilder();
-      doc = dbn.parse(df);
-    }
-    catch (ParserConfigurationException ex)
-    {
-      throw new app.hongs.HongsException(0x1063, ex);
-    }
-    catch (SAXException ex)
-    {
-      throw new app.hongs.HongsException(0x1063, ex);
-    }
-    catch (IOException ex)
-    {
-      throw new app.hongs.HongsException(0x1067, ex);
-    }
-
-    return DBConfig.parseByDocument(doc);
-  }
-
-  /**
-   * 根据输入流解析配置
-   *
-   * @param ds
-   * @return 配置对象
-   * @throws app.hongs.HongsException
-   */
-  public static DBConfig parseByStream(InputStream ds)
-    throws HongsException
-  {
-    Document doc;
-    try
-    {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      DocumentBuilder dbn = dbf.newDocumentBuilder();
-      doc = dbn.parse(ds);
-    }
-    catch (ParserConfigurationException ex)
-    {
-      throw new app.hongs.HongsException(0x1063, ex);
-    }
-    catch (SAXException ex)
-    {
-      throw new app.hongs.HongsException(0x1063, ex);
-    }
-    catch (IOException ex)
-    {
-      throw new app.hongs.HongsException(0x1069, ex);
-    }
-
-    return DBConfig.parseByDocument(doc);
-  }
-
-  /**
-   * 根据文档对象解析配置
-   *
-   * @param doc
-   * @return 配置对象
-   * @throws app.hongs.HongsException
-   */
-  public static DBConfig parseByDocument(Document doc)
-    throws HongsException
-  {
-    return new DBConfig(doc);
-  }
 
   public DBConfig(Document doc)
     throws HongsException
@@ -301,6 +207,105 @@ public class DBConfig
     }
 
     //app.hongs.util.JSON.dump(this.tableConfigs);
+  }
+
+  /**
+   * 根据文件解析配置
+   *
+   * @param df
+   * @return 配置对象
+   * @throws app.hongs.HongsException
+   */
+  public static DBConfig parseByFile(File df)
+    throws HongsException
+  {
+    Document doc;
+    try
+    {
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      DocumentBuilder dbn = dbf.newDocumentBuilder();
+      doc = dbn.parse(df);
+    }
+    catch (ParserConfigurationException ex)
+    {
+      throw new app.hongs.HongsException(0x1063, ex);
+    }
+    catch (SAXException ex)
+    {
+      throw new app.hongs.HongsException(0x1063, ex);
+    }
+    catch (IOException ex)
+    {
+      throw new app.hongs.HongsException(0x1067, ex);
+    }
+
+    return new DBConfig(doc);
+  }
+
+  /**
+   * 根据输入流解析配置
+   *
+   * @param ds
+   * @return 配置对象
+   * @throws app.hongs.HongsException
+   */
+  public static DBConfig parseByStream(InputStream ds)
+    throws HongsException
+  {
+    Document doc;
+    try
+    {
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      DocumentBuilder dbn = dbf.newDocumentBuilder();
+      doc = dbn.parse(ds);
+    }
+    catch (ParserConfigurationException ex)
+    {
+      throw new app.hongs.HongsException(0x1063, ex);
+    }
+    catch (SAXException ex)
+    {
+      throw new app.hongs.HongsException(0x1063, ex);
+    }
+    catch (IOException ex)
+    {
+      throw new app.hongs.HongsException(0x1069, ex);
+    }
+
+    return new DBConfig(doc);
+  }
+
+  /**
+   * 根据输入流解析配置
+   *
+   * @param ds
+   * @return 配置对象
+   * @throws app.hongs.HongsException
+   */
+  public static DBConfig parseBySource(InputSource ds)
+    throws HongsException
+  {
+    Document doc;
+    try
+    {
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      DocumentBuilder dbn = dbf.newDocumentBuilder();
+      doc = dbn.parse(ds);
+    }
+    catch (ParserConfigurationException ex)
+    {
+      throw new app.hongs.HongsException(0x1063, ex);
+    }
+    catch (SAXException ex)
+    {
+      throw new app.hongs.HongsException(0x1063, ex);
+    }
+    catch (IOException ex)
+    {
+      throw new app.hongs.HongsException(0x1069, ex);
+    }
+
+    return new DBConfig(doc);
   }
 
   private static Map getSource(Element element)
@@ -487,4 +492,24 @@ public class DBConfig
     return text != null && text.length() != 0 ? text : def;
   }
 
+  /** 源 **/
+  
+  public static class DBSource {
+      
+  }
+  
+  public static class DBOrigin {
+      
+  }
+  
+  /** 表 **/
+  
+  public static class TableConfig {
+      
+  }
+  
+  public static class AssocConfig {
+      
+  }
+  
 }

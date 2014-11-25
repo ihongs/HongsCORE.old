@@ -4,13 +4,13 @@
         <param name="loadUrl" value="('hcim/entity/list.act?ob=-ctime')"/>
         <param name="openUrls:0" value="['.create','hcim/entity/form.html','{TABSBOX}']"/>
         <param name="openUrls:1" value="['.modify','hcim/entity/form.html?id={ID}','{TABSBOX}']"/>
-        <param name="sendUrls:0" value="['.remove','hcim/entity/remove.act']"/>
+        <param name="sendUrls:0" value="['.delete','hcim/entity/delete.act']"/>
     </object>
     <div>
         <div class="toolbox col-md-9 btn-group">
             <button type="button" class="create btn btn-default">创建实体</button>
             <button type="button" class="modify for-select btn btn-default">修改</button>
-            <button type="button" class="remove for-checks btn btn-danger" >删除</button>
+            <button type="button" class="delete for-checks btn btn-danger" >删除</button>
         </div>
         <form class="findbox col-md-3 input-group" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>

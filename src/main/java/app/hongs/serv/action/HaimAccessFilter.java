@@ -1,8 +1,8 @@
 package app.hongs.serv.action;
 
 import app.hongs.Core;
+import app.hongs.HongsException;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.ActionWarder;
 import java.io.File;
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -48,22 +48,26 @@ public class HaimAccessFilter implements Filter {
             throws IOException, ServletException {
         String pre, act, ext;
         int    pos;
-        
+
         pre = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
         act = (String) req.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
         if (pre == null) {
             pre = ((HttpServletRequest)req).getServletPath();
             act = ((HttpServletRequest)req).getPathInfo();
         }
-        
+
         pos = act.lastIndexOf('.');
         ext = act.substring(pos+1);
         act = act.substring(0,pos);
 
         if ("act".equals(ext)) {
-            if (!ActionRunner.ACTIONS.containsKey(pre + act)) {
-                doBottom(req, rsp, act, ext);
-                return;
+            try {
+                if (!ActionRunner.getActions().containsKey(pre + act)) {
+                    doBottom(req, rsp, act, ext);
+                    return;
+                }
+            } catch (HongsException ex) {
+                throw new ServletException( ex );
             }
         } else
         if ("htm".equals(ext)) {
@@ -77,7 +81,7 @@ public class HaimAccessFilter implements Filter {
             }
             jsp = new File(web+".htm");
             if (!jsp.exists()) {
-                doBottom(req, rsp, act, ext);
+                doBottom(req, rsp, act, "jsp");
                 return;
             }
         }

@@ -13,10 +13,8 @@ import app.hongs.util.ClassNames;
 import app.hongs.util.Util;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,7 +52,7 @@ public class CmdletRunner
     }
 
     // 获取方法
-    Method method = CMDLETS.get(act);
+    Method method = getCmdlets().get(act);
     if (null == method)
     {
       CmdletHelper.println("ERROR: Cmdlet "+act+" is not exists.");
@@ -292,17 +290,23 @@ public class CmdletRunner
     return args;
   }
 
-    static public final Map<String, Method> CMDLETS;
-    static {
+    private static Map<String, Method> CMDLETS = null;
+
+    public  static Map<String, Method> getCmdlets() throws HongsException {
+        if (CMDLETS != null) {
+            return CMDLETS;
+        }
+
         CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
         String [ ] pkgs = conf.getProperty("core.cmdlet.packages").split(";");
         try {
             CMDLETS = getCmdlets(pkgs);
+            return CMDLETS;
         } catch (HongsException ex) {
             throw new Error(ex);
         }
     }
-
+    
     private static Map<String, Method> getCmdlets(String... pkgs) throws HongsException {
         Map<String, Method> acts = new HashMap();
 

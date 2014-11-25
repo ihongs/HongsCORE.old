@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * <h3>静态属性:</h3>
  * <pre>
- DEBUG            标识不同调试模式(0 无 , 1 输出, 2 日志, 3 复合)
+ DEBUG            标识不同调试模式(0 无 , 1 输出, 2 日志, 4 禁止了调试 8 禁止了错误; 可使用位运算, 比如 3 表示既输出又记录)
  ENVIR            标识不同运行环境(0 cmd, 1 web)
  BASE_HREF        应用访问路径(WEB应用中为ContextPath)
  BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
@@ -36,8 +36,8 @@ import java.util.Map;
  VARS_PATH        临时文件存放目录
  LOGS_PATH        日志文件存放目录
  SERS_PATH        缓存文件存放目录
- SERVER_ID        服务器ID
- 注: 以上属性需要在 Servlet/Filter 等初始化时进行设置.
+ SERVER_ID        服务器ID(会附在 Core.getUniqueId() 的左侧)
+ 注: 以上属性需要在 Servlet/Filter/Cmdlet 等初始化时进行设置.
  </pre>
  *
  * <h3>错误代码:</h3>

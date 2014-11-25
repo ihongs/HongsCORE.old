@@ -66,7 +66,7 @@
   <xs:element name="table">
     <xs:complexType>
       <xs:attribute ref="name" use="required"/>
-      <xs:attribute ref="alias"/>
+      <xs:attribute ref="tableName"/>
       <xs:attribute ref="class"/>
       <xs:attribute ref="prefix"/>
       <xs:attribute ref="suffix"/>

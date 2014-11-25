@@ -4,6 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
+import app.hongs.HongsException;
 import app.hongs.util.Util;
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +54,7 @@ implements Filter {
     /**
      * Request Attribute: 应答数据
      */
-    public static final String REPLIED = "app.hongs.action.replted";
+    public static final String REPLIED = "app.hongs.action.replied";
 
     @Override
     public void init(FilterConfig config)
@@ -90,8 +91,12 @@ implements Filter {
         Core.SERS_PATH = conf.getProperty("core.tmps.path", Core.SERS_PATH);
         Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
-        // 调一下 ActionRunner 来加载 ACTIONS
-        ActionRunner.ACTIONS.size();
+        // 调一下 ActionRunner 来加载来加载动作
+        try {
+            ActionRunner.getActions();
+        } catch ( HongsException ex ) {
+            throw new ServletException(ex);
+        }
 
             // 启动系统属性
             for (Map.Entry et : conf.entrySet()) {
@@ -125,8 +130,8 @@ implements Filter {
     }
 
     @Override
-    public void destroy() {
-        if (1 == (1 & Core.DEBUG)) {
+    public void destroy( ) {
+        if (0 < Core.DEBUG) {
             Core core = Core.GLOBAL_CORE;
             long time = System.currentTimeMillis() - Core.STARTS_TIME;
             CoreLogger.debug(new StringBuilder("...")
@@ -186,7 +191,7 @@ implements Filter {
     throws ServletException {
         Core.ACTION_TIME.set(System.currentTimeMillis());
 
-        Core.ACTION_NAME.set(getRealityActionPath(req ));
+        Core.ACTION_NAME.set(getRealityServletPath(req).substring(1));
 
         CoreConfig  conf  = (CoreConfig) Core.getInstance(  CoreConfig.class  );
         Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-cn"));
@@ -224,7 +229,7 @@ implements Filter {
         }
 
         if (0 < Core.DEBUG) {
-            CoreLogger.debug(new StringBuilder().append("...")
+            CoreLogger.debug(new StringBuilder("...")
                 .append("\r\n\tTHREAD_ID   : ").append(Thread.currentThread().getId())
                 .append("\r\n\tACTION_TIME : ").append(Core.ACTION_TIME.get())
                 .append("\r\n\tACTION_LANG : ").append(Core.ACTION_LANG.get())
@@ -260,14 +265,12 @@ implements Filter {
      * @param req
      * @return
      */
-    public static String getCurrentActionPath(HttpServletRequest req) {
-        String uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI );
-        String ctx = (String) req.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+    public static String getCurrentServletPath(HttpServletRequest req) {
+        String uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
         if (uri == null) {
-            uri =  req.getRequestURI( );
-            ctx =  req.getContextPath();
+            uri =  req.getServletPath();
         }
-        return uri.substring(ctx.length() + 1);
+        return uri;
     }
 
     /**
@@ -275,14 +278,12 @@ implements Filter {
      * @param req
      * @return
      */
-    public static String getRealityActionPath(HttpServletRequest req) {
-        String uri = (String) req.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI );
-        String ctx = (String) req.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH);
+    public static String getRealityServletPath(HttpServletRequest req) {
+        String uri = (String) req.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
         if (uri == null) {
-            uri =  req.getRequestURI( );
-            ctx =  req.getContextPath();
+            uri =  req.getServletPath();
         }
-        return uri.substring(ctx.length() + 1);
+        return uri;
     }
 
 }

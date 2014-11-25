@@ -141,56 +141,17 @@ public class DB
   private static Map<String, ComboPooledDataSource> sourcePool = new HashMap();
   private static ReadWriteLock  sourceLock  =  new  ReentrantReadWriteLock(  );
 
-  private DB(Map cf)
+  public DB(DBConfig dbConf)
     throws HongsException
   {
-    if (cf == null) cf = new HashMap();
-
-    this.name         = "";
-    this.source       = (Map) cf.get("source");
-    this.origin       = (Map) cf.get("origin");
-    this.tableClass   = "";
-    this.tablePrefix  = "";
-    this.tableSuffix  = "";
-    this.tableConfigs = new  HashMap( );
-    this.tableObjects = new  HashMap( );
-  }
-
-  public DB(DBConfig cf)
-    throws HongsException
-  {
-    this.name         = cf.name;
-    this.source       = cf.source;
-    this.origin       = cf.origin;
-    this.tableClass   = cf.tableClass;
-    this.tablePrefix  = cf.tablePrefix;
-    this.tableSuffix  = cf.tableSuffix;
-    this.tableConfigs = cf.tableConfigs;
-    this.tableObjects = new  HashMap( );
-  }
-
-  public DB (String db)
-    throws HongsException
-  {
-    this(new DBConfig(db)); //this(DBConfig.parseByName(db));
-  }
-
-  public DB (java.io.File db)
-    throws HongsException
-  {
-    this(DBConfig.parseByFile(db));
-  }
-
-  public DB (java.io.InputStream db)
-    throws HongsException
-  {
-    this(DBConfig.parseByStream(db));
-  }
-
-  public DB (org.w3c.dom.Document db)
-    throws HongsException
-  {
-    this(DBConfig.parseByDocument(db));
+    this.name         = dbConf.name;
+    this.source       = dbConf.source;
+    this.origin       = dbConf.origin;
+    this.tableClass   = dbConf.tableClass;
+    this.tablePrefix  = dbConf.tablePrefix;
+    this.tableSuffix  = dbConf.tableSuffix;
+    this.tableConfigs = dbConf.tableConfigs;
+    this.tableObjects = new HashMap();
   }
 
   public Connection connect()
@@ -470,44 +431,49 @@ public class DB
     }
   }
 
+  public Set<String> getTableNames()
+  {
+    return this.tableConfigs.keySet();
+  }
+
   /**
    * 通过表名获取表对象
    * 表名可以为"库名.表名"
-   * @param table
+   * @param tableName
    * @return 指定表对象
    * @throws app.hongs.HongsException
    */
-  public Table getTable(String table)
+  public Table getTable(String tableName)
     throws HongsException
   {
     /**
      * 表名可以是"数据库.表名"
      * 用于引用另一个库中的表
      */
-    int pos = table.indexOf('.');
+    int pos = tableName.indexOf('.');
     if (pos > 0)
     {
-      String db = table.substring(0,  pos);
-          table = table.substring(pos + 1);
-      return DB.getInstance(db).getTable(table);
+      String db = tableName.substring(0,  pos);
+          tableName = tableName.substring(pos + 1);
+      return DB.getInstance(db).getTable(tableName);
     }
 
-    if ( this.tableObjects.containsKey(table))
+    if ( this.tableObjects.containsKey(tableName))
     {
-      return this.tableObjects.get(table);
+      return this.tableObjects.get(tableName);
     }
 
-    if (!this.tableConfigs.containsKey(table))
+    if (!this.tableConfigs.containsKey(tableName))
     {
-      throw new app.hongs.HongsException(0x103a, "Can not find config for table '"+table+"'.");
+      throw new app.hongs.HongsException(0x103a, "Can not find config for table '"+tableName+"'.");
     }
 
     /**
      * 读取库指定的tableClass
      * 读取表对应的tableConfig
      */
-    Map<String, String> tcfg = this.tableConfigs.get(table);
-    this.tableConfigs.remove(table);
+    Map<String, String> tcfg = this.tableConfigs.get(tableName);
+    this.tableConfigs.remove(tableName);
     String tcls = this.tableClass;
     String tpfx = this.tablePrefix;
     String tsfx = this.tableSuffix;
@@ -537,14 +503,14 @@ public class DB
     if (tcls == null || tcls.length() == 0)
     {
       Table tobj = new Table(this, tcfg);
-      this.tableObjects.put(table, tobj);
+      this.tableObjects.put(tableName, tobj);
       return tobj;
     }
 
     if (0 < Core.DEBUG)
     {
       app.hongs.CoreLogger.debug(
-          "INFO(DB): tableClass("+tcls+") for table("+table+") has been defined, try to get it");
+          "INFO(DB): tableClass("+tcls+") for table("+tableName+") has been defined, try to get it");
     }
 
     /**
@@ -602,13 +568,8 @@ public class DB
       throw new app.hongs.HongsException(0x103d, ex);
     }
 
-    this.tableObjects.put(table, tobj);
+    this.tableObjects.put(tableName, tobj);
     return tobj;
-  }
-
-  public Set<String> getTableNames()
-  {
-    return this.tableConfigs.keySet();
   }
 
   /** 查询辅助 **/
@@ -703,7 +664,7 @@ public class DB
    * @return Statement对象
    * @throws HongsException
    */
-  public Statement createStatemenet()
+  public Statement createStatement()
     throws HongsException
   {
     Statement ps;
@@ -845,6 +806,17 @@ public class DB
 
   //** 查询语句 **/
 
+  /**
+   * 分页方法
+   * 已改为使用 JDBC 的 setFetchSize,setMaxRows,absolute 等方法;
+   * 另, 请不要在 update,delete 中使用 limit 至少 MySQL 是可以的,
+   * 您要更新/删除的记录应该是明确的, 应该能够通过 where 做出限定的.
+   * @deprecated 
+   * @param sql
+   * @param start
+   * @param limit
+   * @return 
+   */
   public String limit(String sql, int start, int limit) {
       try {
           Connection con = connect();
@@ -855,8 +827,8 @@ public class DB
               sql += " LIMIT " + limit + " OFFSET " + start;
           } else if ("Oracle".equals(nam)) {
               sql = "SELECT * FROM (" + sql + ") WHERE rno>" + (start - 1) + " AND rno<" + (start + limit);
-//          } else if ("SQLServer".equals(nam)) {
-//              sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum>" + (start - 1) + " AND rno<" + (start + limit);
+//        } else if ("SQLServer".equals(nam)) {
+//            sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum>" + (start - 1) + " AND rno<" + (start + limit);
           } else {
               throw new HongsError(0x10, "Limit not support " + nam);
           }
@@ -868,18 +840,16 @@ public class DB
       return sql;
   }
 
-  public String limit(String sql, int limit) {
-      return limit(sql, 0, limit);
-  }
-
   /**
    * 查询方法
    * @param sql
+   * @param start
+   * @param limit
    * @param params
    * @return 查询结果
    * @throws HongsException
    */
-  public FetchNext query(String sql, Object... params)
+  public FetchNext query(String sql, int start, int limit, Object... params)
     throws HongsException
   {
     this.connect();
@@ -898,7 +868,16 @@ public class DB
 
     try
     {
+      if (limit > 0)
+      {
+        ps.setFetchSize   (   limit);
+        ps.setMaxRows(start + limit);
+      }
       rs = ps.executeQuery();
+      if (start > 0)
+      {
+        rs. absolute (start);
+      }
     }
     catch (SQLException ex )
     {
@@ -912,6 +891,31 @@ public class DB
    * 获取查询的全部数据
    * <p>会自动执行closeStatement和closeResultSet</p>
    * @param sql
+   * @param start
+   * @param limit
+   * @param params
+   * @return 全部数据
+   * @throws app.hongs.HongsException
+   */
+  public List<Map<String, Object>> fetch(String sql, int start, int limit, Object... params)
+    throws HongsException
+  {
+    List<Map<String, Object>> rows = new ArrayList();
+         Map<String, Object>  row;
+
+    FetchNext rs = this.query(sql, start, limit, params);
+    while (( row = rs.fetch() ) != null)
+    {
+      rows.add(row);
+    }
+
+    return rows;
+  }
+  
+  /**
+   * 获取查询的全部数据
+   * <p>注: 调fetch实现</p>
+   * @param sql
    * @param params
    * @return 全部数据
    * @throws app.hongs.HongsException
@@ -919,21 +923,12 @@ public class DB
   public List<Map<String, Object>> fetchAll(String sql, Object... params)
     throws HongsException
   {
-    List<Map<String, Object>> rows = new ArrayList();
-         Map<String, Object>  row;
-
-    FetchNext rs  = this.query(sql, params);
-    while ( ( row = rs.fetch( ) ) != null )
-    {
-      rows.add(row);
-    }
-
-    return rows;
+    return this.fetch(sql, 0, 0, params);
   }
 
   /**
    * 获取查询的单条数据
-   * <p>注: 调fetchAll实现</p>
+   * <p>注: 调fetch实现</p>
    * @param sql
    * @param params
    * @return 单条数据
@@ -942,13 +937,10 @@ public class DB
   public Map<String, Object> fetchOne(String sql, Object... params)
     throws HongsException
   {
-    sql = limit(sql, 1 );
-
-    List<Map<String, Object>> rows = this.fetchAll(sql, params);
-
-    if (!rows.isEmpty())
+    List< Map<String, Object> > rows = this.fetch(sql, 0, 1, params);
+    if (! rows.isEmpty( ))
     {
-      return rows.get(0);
+      return rows.get( 0 );
     }
     else
     {
@@ -958,7 +950,7 @@ public class DB
 
   /**
    * 采用查询体获取全部数据
-   * <p>注: 调fetchAll实现</p>
+   * <p>注: 调fetch实现</p>
    * @param caze
    * @return 全部数据
    * @throws app.hongs.HongsException
@@ -966,18 +958,12 @@ public class DB
   public List fetchMore(FetchCase caze)
     throws HongsException
   {
-    String sql = caze.getSQL  ();
-    int[]  lmt = caze.getLimit();
-    if (lmt.length > 0)
-    {
-      sql = limit(sql, lmt[0], lmt[1]);
-    }
-    return this.fetchAll(sql, caze.getParams());
+    return this.fetch(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
   }
 
   /**
    * 采用查询体获取单条数据
-   * <p>注: 调fetchMore实现</p>
+   * <p>注: 调fetch实现</p>
    * @param caze
    * @return 单条数据
    * @throws app.hongs.HongsException
@@ -985,11 +971,10 @@ public class DB
   public Map fetchLess(FetchCase caze)
     throws HongsException
   {
-    List<Map<String, Object>> rows = this.fetchMore(caze.limit(1));
-
-    if (!rows.isEmpty())
+    List< Map<String, Object> > rows = this.fetch(caze.getSQL(), 0, 1, caze.getParams());
+    if (! rows.isEmpty() )
     {
-      return rows.get(0);
+      return rows.get( 0 );
     }
     else
     {
@@ -1027,7 +1012,7 @@ public class DB
 
     try
     {
-      return ps.execute();
+      return ps.execute(  );
     }
     catch (SQLException ex)
     {
@@ -1043,7 +1028,7 @@ public class DB
    * 更新方法
    * @param sql
    * @param params
-   * @return 更新条数
+   * @return 更新的条数
    * @throws HongsException
    */
   public int perform(String sql, Object... params)
@@ -1470,39 +1455,46 @@ public class DB
     return db;
   }
 
-  public static DB getInstanceBySource(String drv, String url, Properties info)
-  throws HongsException {
-      Map config = new HashMap();
-      Map source = new HashMap();
-
-      config.put("source", source);
-      source.put("drv" , drv );
-      source.put("url" , url );
-      source.put("info", info);
-
-      return new DB(config);
-  }
-
-  public static DB getInstanceBySource(String drv, String url)
-  throws HongsException {
-      return getInstanceBySource(drv, url, new Properties());
+  private DB()
+    throws HongsException
+  {
+    this.name         = "";
+    this.source       = new HashMap();
+    this.origin       = new HashMap();
+    this.tableClass   = Table.class.getName();
+    this.tablePrefix  = "";
+    this.tableSuffix  = "";
+    this.tableConfigs = new HashMap();
+    this.tableObjects = new HashMap();
   }
 
   public static DB getInstanceByOrigin(String name, Properties info)
   throws HongsException {
-      Map config = new HashMap();
-      Map origin = new HashMap();
-
-      config.put("origin", origin);
-      origin.put("name", name);
-      origin.put("info", info);
-
-      return new DB(config);
+      DB db = new DB();
+      db.origin = new HashMap();
+      db.origin.put("name", name);
+      db.origin.put("info", info);
+      return db;
   }
 
   public static DB getInstanceByOrigin(String name)
   throws HongsException {
       return DB.getInstanceByOrigin(name, new Properties());
+  }
+
+  public static DB getInstanceBySource(String drv, String url, Properties info)
+  throws HongsException {
+      DB db = new DB();
+      db.source = new HashMap();
+      db.source.put("drv", drv);
+      db.source.put("url", url);
+      db.source.put("info", info);
+      return db;
+  }
+
+  public static DB getInstanceBySource(String drv, String url)
+  throws HongsException {
+      return getInstanceBySource(drv, url, new Properties());
   }
 
 }

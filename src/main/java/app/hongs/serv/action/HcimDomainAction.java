@@ -48,59 +48,24 @@ public class HcimDomainAction {
     @CommitSuccess
     public void doSave(ActionHelper helper)
     throws HongsException {
-        Map data = helper.getRequestData();
-        
-        String type = data.get("type").toString();
-        if ("2".equals(type)) {
-            // 数字取值范围
-            String min = data.get("min").toString();
-            String max = data.get("max").toString();
-            String rule = min + "," + max;
-            data.put("rule", rule);
-        }
-        else if ("1".equals(type)) {
-            // 字符
-            data.put("scale", "0");
-            data.put("signed","0");
-        }
-        else if ("6".equals(type)) {
-            // 文本
-            data.put("rule" , "" );
-            data.put("scale", "0");
-            data.put("signed","0");
-        }
-        else {
-            // 其他
-            data.put("rule" , "" );
-            data.put("size" , "0");
-            data.put("scale", "0");
-            data.put("signed","0");
-        }
-        
-        String id = model.save(data);
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.save.domain.success", nms);
-
-        helper.reply(msg, id, nms);
+        String  id  = model.save(helper.getRequestData());
+        String  msg = lang.translate("core.save.domain.success");
+        helper.reply(msg, id);
     }
 
-    @Action("remove")
+    @Action("delete")
     @CommitSuccess
-    public void doRemove(ActionHelper helper)
+    public void doDelete(ActionHelper helper)
     throws HongsException {
-        model.remove(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.remove.domain.success", nms);
-
+        int     rd  = model.delete(helper.getRequestData());
+        String  msg = lang.translate("core.delete.domain.success", Integer.toString(rd));
         helper.reply(msg);
     }
 
     @Action("unique")
     public void isUnique(ActionHelper helper)
     throws HongsException {
-        boolean rst = model.unique(helper.getRequestData());
+        boolean rst = model.exists(helper.getRequestData());
         helper.reply(rst);
     }
 

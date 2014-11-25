@@ -281,8 +281,12 @@ public class FetchCase
     return this;
   }
 
-  public int[] getLimit() {
-      return this.limits;
+  public int getStart() {
+    return this.limits.length > 0 ? this.limits[0] : 0;
+  }
+
+  public int getLimit() {
+    return this.limits.length > 1 ? this.limits[1] : 0;
   }
 
   //** 关联 **/

@@ -44,7 +44,7 @@ public class HcumUserAction {
     }
 
     @Action("info")
-    public void info(ActionHelper helper)
+    public void getInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
 
@@ -57,24 +57,18 @@ public class HcumUserAction {
 
     @Action("save")
     public void doSave(ActionHelper helper)
-    throws HongsException {app.hongs.util.Data.dumps(helper.getRequestData());
-        String id = model.save(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.save.user.success", nms);
-
-        helper.reply(msg, id, nms);
+    throws HongsException {
+        String  id  = model.save(helper.getRequestData());
+        String  msg = lang.translate("core.save.user.success");
+        helper.reply(msg, id);
     }
 
-    @Action("remove")
+    @Action("delete")
     @CommitSuccess
-    public void doRemove(ActionHelper helper)
+    public void doDelete(ActionHelper helper)
     throws HongsException {
-        int num = model.remove(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.remove.user.success", nms);
-
+        int     rd  = model.delete(helper.getRequestData());
+        String  msg = lang.translate("core.remove.user.success", Integer.toString(rd));
         helper.reply(msg);
     }
 

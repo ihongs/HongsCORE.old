@@ -56,23 +56,19 @@ public class ActsAction
     throws ServletException
   {
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String act = ActionWarder.getCurrentActionPath(req );
+    String act = ActionWarder.getCurrentServletPath(req);
 
     if (act == null || act.length() == 0) {
-        helper.error404("Action path can not be empty.");
+        helper.error404("Action URI can not be empty.");
         return;
     }
 
     // 去扩展名
-    try {
-        int pos;
+    act = act.substring(1);
+    int pos;
         pos = act.lastIndexOf('.');
+    if (pos > -1)
         act = act.substring(0,pos);
-    }
-    catch (StringIndexOutOfBoundsException ex) {
-        helper.error404("Action path '"+act +"' error.");
-        return;
-    }
 
     ActionRunner caller;
 

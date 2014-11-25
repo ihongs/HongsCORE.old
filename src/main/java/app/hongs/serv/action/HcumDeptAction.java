@@ -48,28 +48,22 @@ public class HcumDeptAction {
     @CommitSuccess
     public void doSave(ActionHelper helper)
     throws HongsException {
-        String id = model.save(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.svae.dept.success", nms);
-
-        helper.reply(msg, id, nms);
+        String  id  = model.save(helper.getRequestData());
+        String  msg = lang.translate("core.save.dept.success");
+        helper.reply(msg, id);
     }
 
-    @Action("remove")
+    @Action("delete")
     @CommitSuccess
-    public void doRemove(ActionHelper helper)
+    public void doDelete(ActionHelper helper)
     throws HongsException {
-        int num = model.remove(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.remove.dept.success", nms);
-
+        int     rd  = model.delete(helper.getRequestData());
+        String  msg = lang.translate("core.delete.dept.success", Integer.toString(rd));
         helper.reply(msg);
     }
 
-    @Action("exists")
-    public void isExists(ActionHelper helper)
+    @Action("unique")
+    public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean rst = model.exists(helper.getRequestData());
         helper.reply(rst);

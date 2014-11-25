@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.HongsException;
 import app.hongs.util.Data;
 import java.io.IOException;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class ApisAction
     @Override
     public void doPut(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "modify", "save", "update");
+        doForward(req, rsp, "update", "save");
     }
 
     @Override
@@ -62,7 +63,7 @@ public class ApisAction
     @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "remove");
+        doForward(req, rsp, "delete");
     }
 
     /**
@@ -75,7 +76,8 @@ public class ApisAction
      */
     private void doForward(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
-        String act = ActionWarder.getCurrentActionPath(req);
+        String act = ActionWarder.getCurrentServletPath(req);
+        String mtd = mts[0];
 
         if (act == null || act.length() == 0) {
             rsp.sendError(HttpServletResponse.SC_NOT_FOUND, "API URI can not be empty.");
@@ -83,8 +85,11 @@ public class ApisAction
         }
 
         // 去掉扩展名
-        act  = act.substring(0 , act.lastIndexOf('.'));
-        String mtd = mts[0];
+        act = act.substring(1);
+        int pos;
+            pos = act.lastIndexOf('.');
+        if (pos > -1)
+            act = act.substring(0,pos);
 
         /**
          * 映射规则:
@@ -112,11 +117,6 @@ public class ApisAction
             if (vaz != null && vaz.length() != 0) {
                 if (mtd.equals( "list" )) {
                     mtd  =      "info"  ;
-                    mts  = new String[] {mtd};
-                } else
-                if (vaz.length( )  >  1
-                &&  mtd.equals("modify")) {
-                    mtd  =     "update";
                     mts  = new String[] {mtd};
                 }
             }
@@ -154,11 +154,15 @@ public class ApisAction
             }
         }
 
-        for(String mtn : mts) {
-        if (ActionRunner.ACTIONS.containsKey(act+"/"+mtn) ) {
-            mtd  = mtn ;
-            break;
-        }
+        for (String mtn : mts) {
+            try {
+                if (ActionRunner.getActions().containsKey(act+"/"+mtn)) {
+                    mtd  = mtn ;
+                    break;
+                }
+            } catch (HongsException ex) {
+                throw new ServletException(ex);
+            }
         }
 
         boolean send = false;

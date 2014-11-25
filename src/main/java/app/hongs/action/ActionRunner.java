@@ -14,6 +14,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 动作注解链
@@ -38,7 +41,7 @@ public class ActionRunner {
     private final Annotation[] annarr;
 
     public ActionRunner(String action, ActionHelper helper) throws HongsException {
-        method = ACTIONS.get(action);
+        method = getActions().get(action);
         if ( method == null ) {
             throw new HongsException(0x1102, "Can not find action '"+action+"'");
         }
@@ -93,14 +96,29 @@ public class ActionRunner {
         }
     }
 
-    static public final Map<String, Method> ACTIONS;
-    static {
-        CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
-        String [ ] pkgs = conf.getProperty("core.action.packages").split(";");
+    private static final ReadWriteLock ACTLOCK = new ReentrantReadWriteLock();
+    private static Map<String, Method> ACTIONS = null;
+
+    public  static Map<String, Method> getActions() throws HongsException {
+        Lock rlock = ACTLOCK. readLock();
+        rlock.lock();
         try {
-            ACTIONS = getActions(pkgs);
-        } catch (HongsException ex) {
-            throw new Error(ex);
+            if (ACTIONS != null) {
+                return  ACTIONS;
+            }
+        } finally {
+            rlock.unlock();
+        }
+
+        Lock wlock = ACTLOCK.writeLock();
+        wlock.lock();
+        try {
+            CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
+            String [ ] pkgs = conf.getProperty("core.action.packages").split(";");
+            ACTIONS = getActions( pkgs );
+            return ACTIONS;
+        } finally {
+            wlock.unlock();
         }
     }
 

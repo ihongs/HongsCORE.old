@@ -1,7 +1,8 @@
 package app.hongs.serv;
 
 import app.hongs.HongsException;
-import app.hongs.db.AbstractTreeModel;
+import app.hongs.db.DB;
+import app.hongs.db.Model4Tree;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
 import java.util.HashSet;
@@ -14,10 +15,10 @@ import java.util.Set;
  * @author Hongs
  */
 public class HcumDept
-extends AbstractTreeModel {
+extends Model4Tree {
 
   public HcumDept() throws HongsException {
-      super("hcum", "a_hcum_dept");
+      super(DB.getInstance("hcum").getTable("a_hcum_dept"));
   }
 
     public Set<String> getGroups(String deptId)
@@ -39,9 +40,9 @@ extends AbstractTreeModel {
     }
 
     @Override
-    protected void reqFilter(Map req, FetchCase caze)
+    protected void getFilter(Map req, FetchCase caze)
     throws HongsException {
-        super.reqFilter(req, caze);
+        super.getFilter(req, caze);
 
         /**
          * 如果有指定user_id

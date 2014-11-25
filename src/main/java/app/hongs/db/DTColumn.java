@@ -49,7 +49,7 @@ public class DTColumn
     this.columns = new HashMap();
 
     FetchNext rs = this.table.db.query("SELECT * FROM "
-                 + this.table.tableName + " LIMIT 1" );
+                 + this.table.tableName, 0, 1);
     try
     {
       ResultSetMetaData md = rs.getReusltSet().getMetaData();

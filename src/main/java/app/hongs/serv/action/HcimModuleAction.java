@@ -43,31 +43,25 @@ public class HcimModuleAction {
     @Action("save")
     @CommitSuccess
     public void doSave(ActionHelper helper)
-    throws HongsException {app.hongs.util.Data.dumps(helper.getRequestData());
-        String id = model.save(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.save.module.success", nms);
-
-        helper.reply(msg, id, nms);
+    throws HongsException {
+        String  id  = model.save(helper.getRequestData());
+        String  msg = lang.translate("core.save.module.success");
+        helper.reply(msg, id);
     }
 
-    @Action("remove")
+    @Action("delete")
     @CommitSuccess
     public void doRemove(ActionHelper helper)
     throws HongsException {
-        model.remove(helper.getRequestData());
-
-        String nms = model.getAffectedNames();
-        String msg = lang.translate("core.remove.module.success", nms);
-
+        int     rd  = model.delete(helper.getRequestData());
+        String  msg = lang.translate("core.delete.module.success", Integer.toString(rd));
         helper.reply(msg);
     }
 
-    @Action("uniuqe")
+    @Action("unique")
     public void isUnique(ActionHelper helper)
     throws HongsException {
-        boolean rst = model.unique(helper.getRequestData());
+        boolean rst = model.exists(helper.getRequestData());
         helper.reply(rst);
     }
 

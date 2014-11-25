@@ -21,11 +21,11 @@ import java.util.Set;
  *
  * <h3>URL参数说明:</h3>
  * <pre>
-   pid          获取pid 指定的一组节点
-   id[]         获取id[]指定的全部节点
-   get_id       仅获取节点的id
-   get_path     附带节点的路径
- </pre>
+ * pid          获取pid 指定的一组节点
+ * id[]         获取id[]指定的全部节点
+ * get_id       仅获取节点的id
+ * get_path     附带节点的路径
+ * </pre>
  *
  * <h3>JS请求参数组合:</h3>
  * <pre>
@@ -37,7 +37,7 @@ import java.util.Set;
  *
  * @author Hong
  */
-public class AbstractTreeModel extends AbstractBaseModel
+public class Model4Tree extends Model4Crud
 {
 
   /**
@@ -87,14 +87,15 @@ public class AbstractTreeModel extends AbstractBaseModel
    *
    * 需指定该模型对应的表对象.
    * 如传递的newPid,bid参数名不同,
- 或newPid,name等字段名不同,
- 或rootId不同,
- 可在构造时分别指定;
- 请指定被搜索的字段.
+   * 或newPid,name等字段名不同,
+   * 或rootId不同,
+   * 可在构造时分别指定;
+   * 请指定被搜索的字段.
    *
    * @param table
+   * @throws app.hongs.HongsException
    */
-  public AbstractTreeModel(Table table)
+  public Model4Tree(Table table)
     throws HongsException
   {
     super(table);
@@ -102,16 +103,6 @@ public class AbstractTreeModel extends AbstractBaseModel
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
     this.bidKey = conf.getProperty("fore.tree.bid.key", "bid");
     this.rootId = conf.getProperty("fore.tree.root.id", "0");
-  }
-  public AbstractTreeModel(String tableName)
-    throws HongsException
-  {
-    this("default", tableName);
-  }
-  public AbstractTreeModel(String dbName, String tableName)
-    throws HongsException
-  {
-    this(DB.getInstance(dbName).getTable(tableName));
   }
 
   //** 标准动作方法 **/
@@ -192,8 +183,8 @@ public class AbstractTreeModel extends AbstractBaseModel
       }
     }
 
-    Map  data = this.getList(req , caze);
-    List list = (List)data.get("list");
+    Map  data = this.getList(req, caze);
+    List list = (List) data.get("list");
 
     if (getPath)
     {
@@ -284,12 +275,12 @@ public class AbstractTreeModel extends AbstractBaseModel
       data.put(this.cnumKey, "0");
     }
 
-    String id = super.add(data);
+    String  id = super.add(data);
 
     // 将父节点的子节点数量加1
     this.setChildsOffset(pid, 1);
 
-    return id;
+    return  id;
   }
 
   /**
@@ -301,7 +292,7 @@ public class AbstractTreeModel extends AbstractBaseModel
    * @throws app.hongs.HongsException
    */
   @Override
-  public String put(String id, Map data)
+  public int put(String id, FetchCase caze, Map data)
     throws HongsException
   {
     if (data == null)
@@ -323,7 +314,7 @@ public class AbstractTreeModel extends AbstractBaseModel
     String oldPid = this.getParentId (id);
     int    ordNum = this.getSerialNum(id);
 
-    id = super.put(id, data);
+    int i = super.put(id, caze, data);
 
     /**
      * 如果有指定新的pid且不同于旧的pid, 则
@@ -372,7 +363,7 @@ public class AbstractTreeModel extends AbstractBaseModel
       }
     }
 
-    return id;
+    return i;
   }
 
   /**
@@ -408,10 +399,10 @@ public class AbstractTreeModel extends AbstractBaseModel
   }
 
   @Override
-  protected void reqFilter(Map req, FetchCase caze)
+  protected void getFilter(Map req, FetchCase caze)
     throws HongsException
   {
-    super.reqFilter(req, caze);
+    super.getFilter(req, caze);
 
     if (!req.containsKey(this.sortKey))
     {
@@ -576,7 +567,7 @@ public class AbstractTreeModel extends AbstractBaseModel
             "` WHERE `"
             + this.pidKey +
             "` = ?";
-    List list = this.db.fetchAll(sql, id);
+    List list = this.db.fetchAll(sql,id);
 
     if (all)
     {

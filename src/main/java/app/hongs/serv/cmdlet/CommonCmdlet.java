@@ -106,8 +106,8 @@ public class CommonCmdlet {
       String srcTableName = ts[0];
       String dstTableName = ts[1];
       DB db = (DB)Core.getInstance(app.hongs.db.DB.class);
-      Table srcTable = new Table(db, srcTableName);
-      Table dstTable = new Table(db, dstTableName);
+      Table srcTable = Table.getInstanceByTableName(db, srcTableName);
+      Table dstTable = Table.getInstanceByTableName(db, dstTableName);
       TableSync sync = new TableSync(srcTable);
       List<String> sqls = sync.syncSlaverSqls(dstTable, true);
       for (String sql : sqls) {

@@ -3,7 +3,7 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.CollConfig;
-import app.hongs.db.AbstractBaseModel;
+import app.hongs.db.Model4Crud;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,26 +39,28 @@ import org.xml.sax.SAXException;
  * 通用信息模型处理类
  * @author Hongs
  */
-public class HcimEntity extends AbstractBaseModel {
+public class HcimEntity extends Model4Crud {
 
     public HcimEntity() throws HongsException {
-        super("hcim", "a_hcim_entity");
+        super(DB.getInstance("hcim").getTable("a_hcim_entity"));
     }
 
     @Override
     public String add(Map<String, Object> info)
     throws HongsException {
+        cleanData(info);
         String id = super.add (info);
         this.updateEntityTable( id );
         return id;
     }
 
     @Override
-    public String put(String id, Map<String, Object> info)
+    public int put(String id, FetchCase caze, Map<String, Object> info)
     throws HongsException {
-        id = super.put ( id , info );
+        cleanData(info);
+        int rn = super.put(id, caze, info);
         this.updateEntityTable( id );
-        return id;
+        return rn;
     }
 
     @Override
@@ -68,16 +71,37 @@ public class HcimEntity extends AbstractBaseModel {
         return rn;
     }
 
+    private void cleanData(Map<String, Object> data) {
+        if (data.containsKey("a_hcim_entity_cols")) {
+            List<Map<String, String>> cols = (List<Map<String, String>>)
+                new ArrayList(((Map)data.get("a_hcim_entity_cols")).values());
+            int i = 0;
+            for (Map col : cols) {
+                col.put("serialno", i++);
+            }
+        }
+        if (data.containsKey("a_hcim_entity_rels")) {
+            List<Map<String, String>> cols = (List<Map<String, String>>)
+                new ArrayList(((Map)data.get("a_hcim_entity_rels")).values());
+            int i = 0;
+            for (Map col : cols) {
+                col.put("serialno", i++);
+            }
+        }
+    }
+    
     public void updateEntityTable(String tn)
     throws HongsException {
         // 属性类型
         Map domainTypes = getFieldTypes();
 
         // 实体信息
-        Map    tableInfo = this.get(tn);
+        FetchCase caze  = new FetchCase();
+                  caze.where(".`id` = ?", tn);
+        Map    tableInfo = this.table.fetchLess(caze);
         String tableName = "a_haim_"+tn;
         String tc = tableInfo.get("name").toString();
-        String xn = Core.getUniqueId( );
+        String xn = Core.getUniqueId();
 
         // 实体配置
         File file = new File(Core.CONF_PATH + "/haim.db.xml");
@@ -160,8 +184,8 @@ public class HcimEntity extends AbstractBaseModel {
             String a = "a_haim_" + tn + s;
             String b = "x_haim_" + xn + s;
             tb.execute(tableSql.toString());
-            ts = new TableSync(new Table(tb, b) );
-            ts.syncSlaver(new Table(tb, a), true);
+            ts = new TableSync(Table.getInstanceByTableName(tb, b) );
+            ts.syncSlaver(Table.getInstanceByTableName(tb, a), true);
         }
 
         saveDbConfig(file, doc);
@@ -176,7 +200,8 @@ public class HcimEntity extends AbstractBaseModel {
 
         caze = new FetchCase(   );
         caze.select(".module_id");
-        info = this.get(id, caze);
+        caze.where (".id = ?",id);
+        info = this.table.fetchLess(caze);
         dn   =   "hcxm/" + info.get("module_id").toString();
         tn   = "a_hcxm_" + id;
         dd   = DB.getInstance(dn);

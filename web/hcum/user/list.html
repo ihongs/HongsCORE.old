@@ -3,13 +3,13 @@
         <param name="loadUrl" value="('hcum/user/list.act?dept_id='+H$('&dept_id',this))"/>
         <param name="openUrls:0" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'{TABSBOX}']"/>
         <param name="openUrls:1" value="['.modify','hcum/user/form.html?id={ID}','{TABSBOX}']"/>
-        <param name="sendUrls:0" value="['.remove','hcum/user/remove.act','您确定要删除此用户?']"/>
+        <param name="sendUrls:0" value="['.delete','hcum/user/delete.act','您确定要删除此用户?']"/>
     </object>
     <div>
         <div class="toolbox col-md-9 btn-group">
             <button type="button" class="create btn btn-default">创建用户</button>
             <button type="button" class="modify for-select btn btn-default">修改</button>
-            <button type="button" class="remove for-checks btn btn-danger" >删除</button>
+            <button type="button" class="delete for-checks btn btn-danger" >删除</button>
         </div>
         <form class="findbox col-md-3 input-group" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>

@@ -2,7 +2,8 @@ package app.hongs.serv;
 
 import app.hongs.HongsException;
 import app.hongs.action.AuthConfig;
-import app.hongs.db.AbstractBaseModel;
+import app.hongs.db.DB;
+import app.hongs.db.Model4Crud;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
 import java.util.ArrayList;
@@ -17,11 +18,11 @@ import java.util.Set;
  * @author Hongs
  */
 public class HcumUser
-extends AbstractBaseModel {
+extends Model4Crud {
 
     public HcumUser()
     throws HongsException {
-        super("hcum", "a_hcum_user");
+        super(DB.getInstance("hcum").getTable("a_hcum_user"));
     }
 
     public Set<String> getGroups(String userId)
@@ -105,9 +106,9 @@ extends AbstractBaseModel {
     }
 
     @Override
-    protected void reqFilter(Map req, FetchCase caze)
+    protected void getFilter(Map req, FetchCase caze)
     throws HongsException {
-        super.reqFilter(req, caze);
+        super.getFilter(req, caze);
 
         /**
          * 如果有指定dept_id

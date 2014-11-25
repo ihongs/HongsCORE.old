@@ -3,7 +3,7 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
-import app.hongs.db.AbstractBaseModel;
+import app.hongs.db.Model4Crud;
 import app.hongs.db.FetchCase;
 import app.hongs.util.Util;
 import app.hongs.util.Tree;
@@ -370,7 +370,7 @@ public class VerifyHelper {
 
     private String isUnique(String value, Map<String, List<String>> values, String model,
             String field, String... fields) throws HongsException {
-        AbstractBaseModel mode = (AbstractBaseModel) Core.getInstance(model);
+        Model4Crud mode = (Model4Crud) Core.getInstance(model);
         FetchCase caze = new FetchCase();
         caze.where(".`"+field+"` = ?", value);
 

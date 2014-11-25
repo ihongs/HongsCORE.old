@@ -110,11 +110,16 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
            .addClass("pickbox")
         .toggleClass("pickmul", mul)
         .on("saveBack", function(evt, rst) {
-            if (! rst || ! rst.back
-            ||  ! pickItem.apply(self, rst.back )
-            ||  ! pickBack())
+            if (! rst || ! rst.back || ! rst.back.length) {
                 return false;
-
+            }
+            if (rst.back.length == 1) {
+                rst.back[1] = $(this).find(".pick-name,[name]").val();
+            }
+            if (! pickItem(rst.back[0], rst.back[1]) || ! pickBack()) {
+                return false;
+            }
+            
             tip.hsClose();
             return false;
         })

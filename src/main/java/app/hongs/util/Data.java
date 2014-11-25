@@ -76,7 +76,7 @@ public class Data
    */
   public static String toString(Object obj, boolean bnn2Str)
   {
-    String xx = 1 == (1 & Core.DEBUG) ? "": null;
+    String xx = (0 < Core.DEBUG)? "": null;
     StringBuilder sb = new StringBuilder();
     Data.dumps(sb, xx, null, obj, 0, 0, bnn2Str);
     return sb.toString().trim();
