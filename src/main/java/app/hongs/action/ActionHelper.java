@@ -18,16 +18,9 @@ import javax.servlet.http.HttpServletResponse;
  * 动作助手
  *
  * <p>
- 通过 getRequestData,getParameter,getAttribute,getCookie
- 来获取请求/会话/Cookie数据; 通过 reply 来通知前端动作的成功或失败
+ * 通过 getRequestData,getParameter,getAttribute,getCookie
+ * 来获取请求/会话/Cookie数据; 通过 reply 来通知前端动作的成功或失败
  </p>
- *
- * <h3>异常代码</h3>
- * <pre>
- * 代码区间: 0x1120~0x112f
- * 0x1120 转发'%0'失败
- * 0x1122 引用'%0'失败
- * </pre>
  *
  * @author Hongs
  */

@@ -1,4 +1,4 @@
-package app.hongs.serv.action;
+package app.hongs.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;

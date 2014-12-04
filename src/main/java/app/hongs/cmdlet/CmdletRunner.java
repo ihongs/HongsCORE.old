@@ -298,7 +298,7 @@ public class CmdletRunner
         }
 
         CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
-        String [ ] pkgs = conf.getProperty("core.cmdlet.packages").split(";");
+        String [ ] pkgs = conf.getProperty("core.serv.path").split(";");
         try {
             CMDLETS = getCmdlets(pkgs);
             return CMDLETS;

@@ -84,6 +84,7 @@ public class DBConfig
     this.origin       = cp.origin;
     this.dbClass      = cp.dbClass;
     this.tableClass   = cp.tableClass;
+    this.modelClass   = cp.modelClass;
     this.tablePrefix  = cp.tablePrefix;
     this.tableSuffix  = cp.tableSuffix;
     this.tableConfigs = cp.tableConfigs;
@@ -94,6 +95,8 @@ public class DBConfig
   public String dbClass;
 
   public String tableClass;
+  
+  public String modelClass;
 
   public String tablePrefix;
 
@@ -107,7 +110,7 @@ public class DBConfig
 
   private static Set<String> tableAttrs = new HashSet(
   Arrays.asList( new String[] {
-    "name","class","prefix","suffix","primaryKey"
+    "name","class","model","prefix","suffix","primaryKey"
   }));
   private static Set<String> assocAttrs = new HashSet(
   Arrays.asList( new String[] {
@@ -134,6 +137,7 @@ public class DBConfig
     String link;
     this.dbClass = "";
     this.tableClass = "";
+    this.modelClass = "";
     this.tablePrefix = "";
     this.tableSuffix = "";
     this.source = new HashMap<String, String>();
@@ -160,6 +164,7 @@ public class DBConfig
           DBConfig conf = new DBConfig(link);
           dbClass = conf.dbClass;
           tableClass = conf.tableClass;
+          modelClass = conf.modelClass;
           tablePrefix = conf.tablePrefix;
           tableSuffix = conf.tableSuffix;
         }
@@ -167,6 +172,7 @@ public class DBConfig
         {
           dbClass = getAttribute(element, "dbClass", "");
           tableClass = getAttribute(element, "tableClass", "");
+          modelClass = getAttribute(element, "modelClass", "");
           tablePrefix = getAttribute(element, "tablePrefix", "");
           tableSuffix = getAttribute(element, "tableSuffix", "");
         }

@@ -170,10 +170,10 @@ public class LangAction
     // 公共语言
     if ("default".equals(confName))
     {
-      sb.append("\t\"error.err\":\"")
+      sb.append("\t\"error.label\":\"")
         .append(mk.lang.getProperty("core.error.label", "ERROR"))
         .append("\",\n")
-        .append("\t\"error.ukw\":\"")
+        .append("\t\"error.unkwn\":\"")
         .append(mk.lang.getProperty("core.error.unkwn", "UNKWN"))
         .append("\",\n")
         .append("\t\"date.format\":\"")

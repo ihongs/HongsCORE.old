@@ -1,17 +1,17 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.regex.Pattern;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 查询结构体
@@ -85,9 +85,9 @@ public class FetchCase
   public static final short     CROSS = 5;
 
   private static final Pattern p1 = Pattern
-          .compile("(^|[^`\\w])\\.([`\\w\\*])");
+          .compile("(^|[^`\\w])\\.((\\*)|(\\w+)|`(.+?)`)");
   private static final Pattern p2 = Pattern
-          .compile("(^|[^`\\w])\\:([`\\w\\*])");
+          .compile("(^|[^`\\w])\\:((\\*)|(\\w+)|`(.+?)`)");
   private static final Pattern pf = Pattern
           .compile("^\\s*,\\s*", Pattern.CASE_INSENSITIVE);
   private static final Pattern pw = Pattern
@@ -605,7 +605,7 @@ public class FetchCase
   private void getSQLDeep(StringBuilder t, StringBuilder f,
                           StringBuilder g, StringBuilder o,
                           StringBuilder w, StringBuilder h,
-                          String rp2)
+                          String pn)
   {
     if (this.tableName == null
     ||  this.tableName.length() == 0)
@@ -614,7 +614,7 @@ public class FetchCase
     }
 
     // 表名/替换
-    String rp;
+    String tn;
     StringBuilder b = new StringBuilder();
     b.append("`").append(this.tableName ).append("`");
     if (this.name != null
@@ -622,15 +622,15 @@ public class FetchCase
     && !this.name.equals(this.tableName))
     {
       b.append(" AS `").append(this.name).append("`");
-      rp = "$1`"+this.name+"`.$2";
+      tn = this.name;
     }
     else
     {
-      rp = "$1`"+this.tableName+"`.$2";
+      tn = this.tableName;
     }
 
     // 关联
-    if (rp2 != null)
+    if (pn != null)
     {
       switch (this.joinType)
       {
@@ -644,8 +644,7 @@ public class FetchCase
       if (this.joinExpr != null && this.joinExpr.length() != 0)
       {
         String s  =  this.joinExpr;
-        s = p1.matcher(s).replaceAll(rp );
-        s = p2.matcher(s).replaceAll(rp2);
+        s = repSqlTabs( s, tn, pn);
         b.append(" ON ").append(s);
       }
     }
@@ -656,11 +655,10 @@ public class FetchCase
     if (this.fields.length() != 0)
     {
       String s = this.fields.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      f.append(" ").append(s);
+      s = repSqlTabs(s, tn, pn);
+      f.append(" ").append( s );
     }
-    else if (rp2 == null)
+    else if (pn == null)
     {
       f.append(" ,`").append(this.name).append("`.*");
     }
@@ -669,36 +667,32 @@ public class FetchCase
     if (this.groups.length() != 0)
     {
       String s = this.groups.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      g.append(" ").append(s);
+      s = repSqlTabs(s, tn, pn);
+      g.append(" ").append( s );
     }
 
     // 排序
     if (this.orders.length() != 0)
     {
       String s = this.orders.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      o.append(" ").append(s);
+      s = repSqlTabs(s, tn, pn);
+      o.append(" ").append( s );
     }
 
     // 条件
     if (this.wheres.length() != 0)
     {
       String s = this.wheres.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      w.append(" ").append(s);
+      s = repSqlTabs(s, tn, pn);
+      w.append(" ").append( s );
     }
 
     // 过滤
     if (this.havins.length() != 0)
     {
       String s = this.havins.toString().trim();
-                       s = p1.matcher(s).replaceAll(rp);
-      if (rp2 != null) s = p2.matcher(s).replaceAll(rp2);
-      h.append(" ").append(s);
+      s = repSqlTabs(s, tn, pn);
+      h.append(" ").append( s );
     }
 
     // 追加子级查询片段
@@ -708,9 +702,57 @@ public class FetchCase
       FetchCase caze = (FetchCase)it.next();
       if (0  != caze.joinType)
       {
-        caze.getSQLDeep(t, f, g,o, w,h, rp);
+        caze.getSQLDeep(t, f, g,o, w,h, tn);
       }
     }
+  }
+
+  /**
+   * 替换SQL表名
+   * @param s
+   * @param tn
+   * @param pn
+   * @return
+   */
+  private String repSqlTabs(String s, String tn, String pn)
+  {
+      Matcher      m;
+      StringBuffer b;
+      StringBuffer c = new StringBuffer(s);
+
+      m = p1.matcher(c);
+      b = new StringBuffer();
+      while (m.find()) {
+          String x;
+          x = m.group(3);
+          if (x == null) {
+              x = m.group(4);
+              if (x == null) {
+                  x = m.group(5);
+              }
+          }
+          m.appendReplacement(b, "$1`"+tn+"`.`"+x+"`");
+      }
+      c = m.appendTail(b);
+
+      if (pn == null) return c.toString();
+
+      m = p2.matcher(c);
+      b = new StringBuffer();
+      while (m.find()) {
+          String x;
+          x = m.group(3);
+          if (x == null) {
+              x = m.group(4);
+              if (x == null) {
+                  x = m.group(5);
+              }
+          }
+          m.appendReplacement(b, "$1`"+pn+"`.`"+x+"`");
+      }
+      c = m.appendTail(b);
+
+      return c.toString();
   }
 
   /**

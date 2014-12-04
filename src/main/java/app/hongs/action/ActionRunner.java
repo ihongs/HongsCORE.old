@@ -114,7 +114,7 @@ public class ActionRunner {
         wlock.lock();
         try {
             CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
-            String [ ] pkgs = conf.getProperty("core.action.packages").split(";");
+            String [ ] pkgs = conf.getProperty("core.serv.path").split(";");
             ACTIONS = getActions( pkgs );
             return ACTIONS;
         } finally {

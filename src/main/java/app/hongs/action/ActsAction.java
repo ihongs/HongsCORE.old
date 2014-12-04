@@ -79,7 +79,10 @@ public class ActsAction
     }
     catch (HongsException ex )
     {
-      senderr(404, ex, helper);
+      if (ex.getCode()== 0x1102)
+        senderr(404, ex, helper);
+      else
+        senderr(500, ex, helper);
       return;
     }
 
@@ -91,7 +94,6 @@ public class ActsAction
     catch (HongsException ex )
     {
       senderr(500, ex, helper);
-      return;
     }
   }
 

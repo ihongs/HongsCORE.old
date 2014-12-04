@@ -1,4 +1,4 @@
-package app.hongs.serv.action;
+package app.hongs.db.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
@@ -6,6 +6,7 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
 import app.hongs.annotation.CommitSuccess;
+import app.hongs.db.DB;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +19,13 @@ import java.util.Set;
 @Action("hcum/user")
 public class HcumUserAction {
 
-    private app.hongs.serv.HcumUser model;
+    private app.hongs.db.Model model;
     private CoreLanguage lang;
 
-    public HcumUserAction() {
-        model = (app.hongs.serv.HcumUser)
-                Core.getInstance(app.hongs.serv.HcumUser.class);
-        lang  = (CoreLanguage)
-                Core.getInstance(CoreLanguage.class);
+    public HcumUserAction()
+    throws HongsException {
+        model = DB.getInstance("hcum").getModel("a_hcum_user");
+        lang = (CoreLanguage) Core.getInstance(CoreLanguage.class);
         lang.load("hcum");
     }
 
@@ -85,13 +85,15 @@ public class HcumUserAction {
         Map data = new HashMap();
 
         // 全部权限分组
-        List pageGroups = app.hongs.serv.HcumUser.getPageGroups("default");
+        List pageGroups = app.hongs.db.serv.HcumUser.getPageGroups("default");
         data.put("pageGroups", pageGroups);
 
         // 用户动作分组
         String id = helper.getParameter("id");
         if (id != null) {
-            Set userGroups = model.getGroups(id);
+            app.hongs.db.serv.HcumUser model2 = (app.hongs.db.serv.HcumUser)
+                Core.getInstance(app.hongs.db.serv.HcumUser.class);
+            Set userGroups = model2.getGroups(id);
             data.put("userGroups", userGroups);
         }
 

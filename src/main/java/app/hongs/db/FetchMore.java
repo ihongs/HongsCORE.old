@@ -2,16 +2,16 @@ package app.hongs.db;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
-
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.regex.Pattern;
+import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 关联查询及更新
@@ -64,9 +64,8 @@ public class FetchMore
   public void join(List<Map> rows, String col, String key, String name,
                         Boolean multiAssoc, Boolean unityAssoc)
   {
-    // 获取id及行号
-    Map<String, List> map = new HashMap();
-    this.fetchMap(key,map);
+    // 获取id及行
+    Map<String, List> map = this.getMap(key);
 
     Iterator rs = rows.iterator(  );
 
@@ -182,8 +181,7 @@ public class FetchMore
     }
 
     // 获取id及行号
-    Map<String, List> map = new HashMap();
-    this.fetchMap(key,map);
+    Map<String, List> map = this.getMap(key);
     Set<String> ids = map.keySet();
 
     if (ids.isEmpty() || map.isEmpty())
@@ -295,11 +293,13 @@ public class FetchMore
    * @param key 使用"."分割的键
    * @param ids
    */
-  public void fetchIds(String key, Set<String> ids)
+  public Set<String> getIds(String key)
   {
+    Set ids = new HashSet( );
     Map map = new HashMap( );
-    this.fetchMap(key.split("\\."), map);
+    this.getMap(key.split("\\."), map);
     ids.addAll(map.keySet());
+    return ids;
   }
 
   /**
@@ -308,13 +308,15 @@ public class FetchMore
    * @param key 使用"."分割的键
    * @param map
    */
-  public void fetchMap(String key, Map<String, List> map)
+  public Map<String, List> getMap(String key)
   {
+    Map<String, List> map = new HashMap();
     if (key.startsWith( ":" ))
     {
         key = key.substring(1);
     }
-    this.fetchMap(key.split("\\."), map);
+    this.getMap(key.split("\\."), map);
+    return map;
   }
 
   /**
@@ -323,7 +325,7 @@ public class FetchMore
    * @param key
    * @param map
    */
-  private void fetchMap(String[] key, Map<String, List> map)
+  private void getMap(String[] key, Map<String, List> map)
   {
     Iterator it = this.rows.iterator();
     W:while (it.hasNext())
@@ -350,7 +352,7 @@ public class FetchMore
           System.arraycopy(key, i, keyz, 0, j);
 
           // 往下递归一层
-          this.fetchMap(keyz, map);
+          this.getMap(keyz, map);
 
           this.rows = rowz;
 

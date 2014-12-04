@@ -5,41 +5,7 @@
         <param-name>debug</param-name>
         <param-value>3</param-value>
     </context-param>
-    <!-- Action Filter -->
-    <filter>
-        <filter-name>Loader</filter-name>
-        <filter-class>app.hongs.action.ActionWarder</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>Loader</filter-name>
-        <url-pattern>*.act</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <!--
-    <filter-mapping>
-        <filter-name>Loader</filter-name>
-        <url-pattern>*.api</url-pattern>
-    </filter-mapping>
-    //-->
-    <filter-mapping>
-        <filter-name>Loader</filter-name>
-        <url-pattern>*.jsp</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Loader</filter-name>
-        <url-pattern>/common/auth/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Loader</filter-name>
-        <url-pattern>/common/conf/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Loader</filter-name>
-        <url-pattern>/common/lang/*</url-pattern>
-    </filter-mapping>
-    <!-- Action Servlet -->
+    <!-- Act Servlet -->
     <servlet>
         <servlet-name>Acts</servlet-name>
         <servlet-class>app.hongs.action.ActsAction</servlet-class>
@@ -48,7 +14,7 @@
         <servlet-name>Acts</servlet-name>
         <url-pattern>*.act</url-pattern>
     </servlet-mapping>
-    <!-- Apilet Servlet -->
+    <!-- Api Servlet -->
     <servlet>
         <servlet-name>Apis</servlet-name>
         <servlet-class>app.hongs.action.ApisAction</servlet-class>
@@ -84,6 +50,49 @@
         <servlet-name>Lang</servlet-name>
         <url-pattern>/common/lang/*</url-pattern>
     </servlet-mapping>
+    <!-- Action Warder Filter -->
+    <filter>
+        <filter-name>Warder</filter-name>
+        <filter-class>app.hongs.action.ActionWarder</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>Warder</filter-name>
+        <url-pattern>*.act</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <!--
+    <filter-mapping>
+        <filter-name>Warder</filter-name>
+        <url-pattern>*.api</url-pattern>
+    </filter-mapping>
+    //-->
+    <filter-mapping>
+        <filter-name>Warder</filter-name>
+        <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Warder</filter-name>
+        <url-pattern>/common/auth/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Warder</filter-name>
+        <url-pattern>/common/conf/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Warder</filter-name>
+        <url-pattern>/common/lang/*</url-pattern>
+    </filter-mapping>
+    <!-- Hcim Rigger Filter -->
+    <filter>
+        <filter-name>HcimRigger</filter-name>
+        <filter-class>app.hongs.serv.RiggerFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>HcimRigger</filter-name>
+        <url-pattern>/hcim/*</url-pattern>
+    </filter-mapping>
     <!-- Default Tags -->
     <jsp-config>
         <taglib>

@@ -1,4 +1,4 @@
-package app.hongs.serv;
+package app.hongs.db.serv;
 
 import app.hongs.HongsException;
 import app.hongs.action.AuthConfig;
@@ -22,7 +22,12 @@ extends Model {
 
     public HcumUser()
     throws HongsException {
-        super(DB.getInstance("hcum").getTable("a_hcum_user"));
+        this(DB.getInstance("hcum").getTable("a_hcum_user"));
+    }
+    
+    public HcumUser(Table table)
+    throws HongsException {
+        super(table);
     }
 
     public Set<String> getGroups(String userId)
@@ -106,9 +111,9 @@ extends Model {
     }
 
     @Override
-    protected void getFilter(Map req, FetchCase caze)
+    protected void filter(FetchCase caze, Map req)
     throws HongsException {
-        super.getFilter(req, caze);
+        super.filter(caze, req);
 
         /**
          * 如果有指定dept_id

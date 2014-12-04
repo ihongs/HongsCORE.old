@@ -1,21 +1,19 @@
-package app.hongs.scheme;
+package app.hongs.dl;
 
 import java.util.Map;
 
 /**
- * 规划模型
+ * CRUD 实体
  * @author Hongs
  */
-public interface Scheme {
+public interface CrudEntity {
     
-    public Scheme getEntity(String entity );
+    public Map  retrieve(Map req);
     
     public String create(Map req);
     
     public int update(Map req);
     
     public int delete(Map req);
-    
-    public Map retrieve(Map req);
     
 }

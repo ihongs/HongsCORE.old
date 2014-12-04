@@ -137,23 +137,28 @@ public class CollConfig
 
       if ("data".equals(tagName2))
       {
+        String key  = element2.getAttribute("key" );
         String type = element2.getAttribute("type");
-        String key = element2.getAttribute("key");
 
         Object data2;
-        if ("map".equals(type))
+        if ("list".equals(type))
+        {
+          data2 = new ArrayList();
+        }
+        else
+        if ("dict".equals(type))
         {
           data2 = new LinkedHashMap();
         }
         else
-        if ("set".equals(type))
+        if ( "map".equals(type))
         {
-          data2 = new LinkedHashSet();
+          data2 = new LinkedHashMap();
         }
         else
-        if ("list".equals(type))
+        if ( "set".equals(type))
         {
-          data2 = new ArrayList();
+          data2 = new LinkedHashSet();
         }
         else
         {
@@ -180,7 +185,7 @@ public class CollConfig
       else
       if ("link".equals(tagName2))
       {
-        String key  = element2.getAttribute("key");
+        String key  = element2.getAttribute("key" );
         String link = element2.getAttribute("data");
 
         links.add(new String[] {key, link});

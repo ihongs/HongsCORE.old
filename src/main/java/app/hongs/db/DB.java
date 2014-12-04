@@ -65,10 +65,13 @@ import javax.sql.DataSource;
  * 0x1034  关闭Statement失败
  * 0x1035  关闭ResultSet失败
  *
- * 0x103a  找不到表配置
- * 0x103b  找不到表对应的类
- * 0x103c  无法获取表构造器
- * 0x103d  无法获取表实例
+ * 0x1039  找不到表配置
+ * 0x103a  找不到表对应的类
+ * 0x103b  无法获取表构造器
+ * 0x103c  无法获取表实例
+ * 0x103d  找不到模型对应的类
+ * 0x103e  无法获取模型构造器
+ * 0x103f  无法获取模型实例
  *
  * 0x1041  构建语句失败
  * 0x1042  绑定参数失败
@@ -115,6 +118,11 @@ public class DB
   protected String tableClass;
 
   /**
+   * 模型类
+   */
+  protected String modelClass;
+  
+  /**
    * 表前缀
    */
   protected String tablePrefix;
@@ -134,6 +142,11 @@ public class DB
    */
   protected Map<String, Table> tableObjects;
 
+  /**
+   * 模型对象
+   */
+  protected Map<String, Model> modelObjects;
+
   private Map           source;
   private Map           origin;
   private Connection    connection;
@@ -148,10 +161,12 @@ public class DB
     this.source       = dbConf.source;
     this.origin       = dbConf.origin;
     this.tableClass   = dbConf.tableClass;
+    this.modelClass   = dbConf.modelClass;
     this.tablePrefix  = dbConf.tablePrefix;
     this.tableSuffix  = dbConf.tableSuffix;
     this.tableConfigs = dbConf.tableConfigs;
     this.tableObjects = new HashMap();
+    this.modelObjects = new HashMap();
   }
 
   public Connection connect()
@@ -465,7 +480,7 @@ public class DB
 
     if (!this.tableConfigs.containsKey(tableName))
     {
-      throw new app.hongs.HongsException(0x103a, "Can not find config for table '"+tableName+"'.");
+      throw new app.hongs.HongsException(0x1039, "Can not find config for table '"+tableName+"'.");
     }
 
     /**
@@ -473,7 +488,7 @@ public class DB
      * 读取表对应的tableConfig
      */
     Map<String, String> tcfg = this.tableConfigs.get(tableName);
-    this.tableConfigs.remove(tableName);
+    //this.tableConfigs.remove(tableName);
     String tcls = this.tableClass;
     String tpfx = this.tablePrefix;
     String tsfx = this.tableSuffix;
@@ -523,7 +538,7 @@ public class DB
     }
     catch (ClassNotFoundException ex)
     {
-      throw new app.hongs.HongsException(0x103b, ex);
+      throw new app.hongs.HongsException(0x103a, ex);
     }
 
     /**
@@ -536,11 +551,11 @@ public class DB
     }
     catch (NoSuchMethodException ex)
     {
-      throw new app.hongs.HongsException(0x103c, ex);
+      throw new app.hongs.HongsException(0x103b, ex);
     }
     catch (SecurityException ex)
     {
-      throw new app.hongs.HongsException(0x103c, ex);
+      throw new app.hongs.HongsException(0x103b, ex);
     }
 
     /**
@@ -553,25 +568,141 @@ public class DB
     }
     catch (InstantiationException ex)
     {
-      throw new app.hongs.HongsException(0x103d, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
     catch (IllegalAccessException ex)
     {
-      throw new app.hongs.HongsException(0x103d, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
     catch (IllegalArgumentException ex)
     {
-      throw new app.hongs.HongsException(0x103d, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
     catch (InvocationTargetException ex)
     {
-      throw new app.hongs.HongsException(0x103d, ex);
+      throw new app.hongs.HongsException(0x103c, ex);
     }
 
     this.tableObjects.put(tableName, tobj);
     return tobj;
   }
 
+  public Model getModel(String tableName)
+    throws HongsException
+  {
+    /**
+     * 表名可以是"数据库.表名"
+     * 用于引用另一个库中的表
+     */
+    int pos = tableName.indexOf('.');
+    if (pos > 0)
+    {
+      String db = tableName.substring(0,  pos);
+          tableName = tableName.substring(pos + 1);
+      return DB.getInstance(db).getModel(tableName);
+    }
+
+    if ( this.modelObjects.containsKey(tableName))
+    {
+      return this.modelObjects.get(tableName);
+    }
+
+    if (!this.tableConfigs.containsKey(tableName))
+    {
+      throw new app.hongs.HongsException(0x1039, "Can not find config for table '"+tableName+"'.");
+    }
+
+    /**
+     * 读取库指定的modelClass
+     */
+    Map<String, String> tcfg = this.tableConfigs.get(tableName);
+    //this.tableConfigs.remove(tableName);
+    String mcls = this.modelClass;
+
+    /**
+     * 就近原则:
+     * 如果表配置中有设置model则采用表配置中的
+     */
+    if (tcfg.containsKey("model"))
+    {
+      mcls = tcfg.get("model");
+    }
+
+    /**
+     * 如果class为空则直接使用默认的Table
+     */
+    if (mcls == null || mcls.length() == 0)
+    {
+      Model mobj = new Model(this.getTable(tableName));
+      this.modelObjects.put(tableName, mobj);
+      return mobj;
+    }
+
+    if (0 < Core.DEBUG)
+    {
+      app.hongs.CoreLogger.debug(
+          "INFO(DB): modelClass("+mcls+") for table("+tableName+") has been defined, try to get it");
+    }
+
+    /**
+     * 获取指定的Table类
+     */
+    Class cls;
+    try
+    {
+      cls = Class.forName(mcls);
+    }
+    catch (ClassNotFoundException ex)
+    {
+      throw new app.hongs.HongsException(0x103d, ex);
+    }
+
+    /**
+     * 获取构造器
+     */
+    Constructor cst;
+    try
+    {
+      cst = cls.getConstructor(new Class[]{Table.class});
+    }
+    catch (NoSuchMethodException ex)
+    {
+      throw new app.hongs.HongsException(0x103e, ex);
+    }
+    catch (SecurityException ex)
+    {
+      throw new app.hongs.HongsException(0x103e, ex);
+    }
+
+    /**
+     * 获取表实例
+     */
+    Model mobj;
+    try
+    {
+      mobj = (Model)cst.newInstance(new Object[]{this.getTable(tableName)});
+    }
+    catch (InstantiationException ex)
+    {
+      throw new app.hongs.HongsException(0x103f, ex);
+    }
+    catch (IllegalAccessException ex)
+    {
+      throw new app.hongs.HongsException(0x103f, ex);
+    }
+    catch (IllegalArgumentException ex)
+    {
+      throw new app.hongs.HongsException(0x103f, ex);
+    }
+    catch (InvocationTargetException ex)
+    {
+      throw new app.hongs.HongsException(0x103f, ex);
+    }
+
+    this.modelObjects.put(tableName, mobj);
+    return mobj;
+  }
+  
   /** 查询辅助 **/
 
   /**
@@ -1466,6 +1597,7 @@ public class DB
     this.tableSuffix  = "";
     this.tableConfigs = new HashMap();
     this.tableObjects = new HashMap();
+    this.modelObjects = new HashMap();
   }
 
   public static DB getInstanceByOrigin(String name, Properties info)

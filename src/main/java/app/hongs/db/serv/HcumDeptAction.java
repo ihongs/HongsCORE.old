@@ -1,4 +1,4 @@
-package app.hongs.serv.action;
+package app.hongs.db.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
@@ -6,7 +6,8 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
 import app.hongs.annotation.CommitSuccess;
-import app.hongs.serv.HcumUser;
+import app.hongs.db.DB;
+import app.hongs.db.Mtree;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +20,12 @@ import java.util.Set;
 @Action("hcum/dept")
 public class HcumDeptAction {
 
-    private app.hongs.serv.HcumDept model;
+    private app.hongs.db.Mtree model;
     private CoreLanguage lang;
 
-    public HcumDeptAction() {
-        model = (app.hongs.serv.HcumDept)
-                Core.getInstance(app.hongs.serv.HcumDept.class);
+    public HcumDeptAction()
+    throws HongsException {
+        model = (Mtree) DB.getInstance("hcum").getModel("a_hcum_dept");
         lang  = (CoreLanguage)
                 Core.getInstance(CoreLanguage.class);
         lang.load("hcum");
@@ -81,8 +82,8 @@ public class HcumDeptAction {
         // 用户动作分组
         String id = helper.getParameter("id");
         if (id != null) {
-            app.hongs.serv.HcumDept model2 = (app.hongs.serv.HcumDept)
-                Core.getInstance(app.hongs.serv.HcumDept.class);
+            app.hongs.db.serv.HcumDept model2 = (app.hongs.db.serv.HcumDept)
+                Core.getInstance(app.hongs.db.serv.HcumDept.class);
             Set deptGroups = model2.getGroups(id);
             data.put("userGroups", deptGroups);
         }

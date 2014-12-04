@@ -1,47 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+
 <root>
-  <data key="__FORE_DATA__" type="set">
-      <data>DOMAIN_TYPES</data>
-  </data>
-  <data key="DOMAIN_TYPES" type="json">
-    <![CDATA[
-      [
-        [ 1, "字符"    , "VARCHAR(255)"],
-        [ 2, "数字"    , "DECIMAL"],
-        [31, "日期"    , "DATE"],
-        [32, "时间"    , "TIME"],
-        [ 3, "日期时间", "DATETIME"],
-        [11, "邮箱"    , "VARCHAR(255)"],
-        [12, "链接"    , "VARCHAR(510)"],
-        [13, "电话"    , "VARCHAR(20)"],
-        [14, "手机"    , "VARCHAR(20)"],
-        [15, "颜色"    , "VARCHAR(10)"],
-        [21, "滑块"    , "DECIMAL"],
-        [61, "单选"    , "CHAR(20)"],
-        [62, "多选"    , "CHAR(20)"],
-        [ 4, "文本"    , "TEXT"],
-        [ 5, "文件"    , "VARCHAR(100)"],
-        [51, "图片"    , "VARCHAR(100)"],
-        [52, "音频"    , "VARCHAR(100)"],
-        [53, "视频"    , "VARCHAR(100)"]
-      ]
-    ]]>
-  </data>
-  <data key="entity_form" type="json">
-    <![CDATA[
-      [
-      ]
-    ]]>
-  </data>
-  <data key="module_form" type="json">
-    <![CDATA[
-      [
-      ]
-    ]]>
-  </data>
-  <data key="domain_form" type="json">
-    <![CDATA[
-      [
-      ]
-    ]]>
-  </data>
+    
 </root>

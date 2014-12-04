@@ -49,15 +49,15 @@ public class ApisAction
     }
 
     @Override
-    public void doPut(HttpServletRequest req, HttpServletResponse rsp)
-            throws IOException, ServletException {
-        doForward(req, rsp, "update", "save");
-    }
-
-    @Override
     public void doPost(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
         doForward(req, rsp, "create", "save");
+    }
+
+    @Override
+    public void doPut(HttpServletRequest req, HttpServletResponse rsp)
+            throws IOException, ServletException {
+        doForward(req, rsp, "update", "save");
     }
 
     @Override
@@ -107,26 +107,24 @@ public class ApisAction
             String mtz = mat.group(4);
 
             // 指定资源
-            act = act.substring(0, mat.start() - 1) + acn;
+            act = act.substring(0, mat.start()-1) + acn;
 
             // 指定方法
             if (mtz != null && mtz.length() != 0) {
                 mtd  = mtz.substring( 2 );
                 mts  = new String[] {mtd};
-            } else
-            if (vaz != null && vaz.length() != 0) {
-                if (mtd.equals( "list" )) {
-                    mtd  =      "info"  ;
-                    mts  = new String[] {mtd};
-                }
             }
 
             // 限定主键
             if (vaz != null && vaz.length() != 0) {
                 String   key = "id";
-                String[] vas = vaz.substring(2).split ("_");
-                if (vas.length >  1 ) {
-                    key += "[]";
+                String[] vas = vaz.substring(2).split("_");
+                if (vas.length == 1 ) {
+                    if ( mtd.equals("list")) {
+                         mts = new String[]{"info","list"};
+                    }
+                } else {
+                    key += "." ;
                 }
                 for(String val : vas) {
                     pms.append("&").append(key).append("=").append(val);
@@ -184,6 +182,6 @@ public class ApisAction
         }
     }
 
-    private static final Pattern _API_PMS = Pattern.compile("((?:/[^0]\\w+/0\\w+)*)?(/[^0]\\w+)(/0\\w+)?(/_\\w+)?$");
+    private static final Pattern _API_PMS = Pattern.compile("((?:/[^_]\\w+/0\\w+)*)?(/[^_]\\w+)(/_\\w+)?(/\\.\\w+)?$");
 
 }

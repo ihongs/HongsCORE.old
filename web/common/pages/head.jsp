@@ -25,7 +25,7 @@
             }
             if (realHref) {
                 hash = Core.BASE_HREF + "/" + href; // User Menu
-            } else if (hash.endsWith(".jsp")) {
+            } else if (hash.endsWith(".jsp" )) {
                 hash = hash.substring(0, hash.length() - 4);
             } else if (hash.endsWith(".html")) {
                 hash = hash.substring(0, hash.length() - 5);
@@ -78,8 +78,8 @@
     }
 
     AuthConfig euth = AuthConfig.getInstance("default");
-    AuthConfig auth = AuthConfig.getInstance( name );
-    CoreLanguage lang = CoreLanguage.getInstance(  );
+    AuthConfig auth = AuthConfig.getInstance(name);
+    CoreLanguage lang = CoreLanguage.getInstance();
 
     List<Map> mainMenu = auth.getNavList(lang, l, d);
     List<Map> userMenu = euth.getNavList(lang, 1, 1);
@@ -93,10 +93,10 @@
         <span class="icon-bar"></span>
     </button>
     <a class="navbar-brand" href="#" style="font-weight:bold;">
-        <span style="color:#f00" class="glyphicon glyphicon-fire"></span>
-        <span style="color:#f22">H</span>
-        <span style="color:#f33">o</span>
-        <span style="color:#f55">n</span>
+        <span style="color:#f08" class="glyphicon glyphicon-fire"></span>
+        <span style="color:#f00">H</span>
+        <span style="color:#f22">o</span>
+        <span style="color:#f44">n</span>
         <span style="color:#f66">g</span>
         <span style="color:#f88">s</span>
         <span style="color:#faa">C</span>

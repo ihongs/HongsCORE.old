@@ -1,8 +1,8 @@
-package app.hongs.serv;
+package app.hongs.db.serv;
 
 import app.hongs.HongsException;
 import app.hongs.db.DB;
-import app.hongs.db.MTree;
+import app.hongs.db.Mtree;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
 import java.util.HashSet;
@@ -15,11 +15,17 @@ import java.util.Set;
  * @author Hongs
  */
 public class HcumDept
-extends MTree {
+extends Mtree {
 
-  public HcumDept() throws HongsException {
-      super(DB.getInstance("hcum").getTable("a_hcum_dept"));
-  }
+    public HcumDept()
+    throws HongsException {
+        this(DB.getInstance("hcum").getTable("a_hcum_dept"));
+    }
+
+    public HcumDept(Table table)
+    throws HongsException {
+        super(table);
+    }
 
     public Set<String> getGroups(String deptId)
     throws HongsException {
@@ -40,9 +46,9 @@ extends MTree {
     }
 
     @Override
-    protected void getFilter(Map req, FetchCase caze)
+    protected void filter(FetchCase caze, Map req)
     throws HongsException {
-        super.getFilter(req, caze);
+        super.filter(caze, req);
 
         /**
          * 如果有指定user_id
