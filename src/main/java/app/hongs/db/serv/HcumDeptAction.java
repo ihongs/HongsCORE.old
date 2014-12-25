@@ -20,21 +20,20 @@ import java.util.Set;
 @Action("hcum/dept")
 public class HcumDeptAction {
 
-    private app.hongs.db.Mtree model;
+    private app.hongs.db.serv.HcumDept model;
     private CoreLanguage lang;
 
     public HcumDeptAction()
     throws HongsException {
-        model = (Mtree) DB.getInstance("hcum").getModel("a_hcum_dept");
-        lang  = (CoreLanguage)
-                Core.getInstance(CoreLanguage.class);
+        model = (HcumDept) DB.getInstance("hcum").getModel("a_hcum_dept");
+        lang  = CoreLanguage.getInstance().clone();
         lang.load("hcum");
     }
 
     @Action("list")
     public void getList(ActionHelper helper)
     throws HongsException {
-        Map data = model.getTree(helper.getRequestData());
+        Map data = model.getList(helper.getRequestData());
         helper.reply(data);
     }
 
@@ -67,7 +66,7 @@ public class HcumDeptAction {
     public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean rst = model.exists(helper.getRequestData());
-        helper.reply(rst);
+        helper.reply(null, rst);
     }
 
     @Action("groups")

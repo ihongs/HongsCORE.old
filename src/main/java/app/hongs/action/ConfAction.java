@@ -94,7 +94,7 @@ public class ConfAction
     if (!ConfAction.caches.containsKey(name))
     {
       try {
-        s = this.makeConfig(name);
+        s = this.makeConf(name);
       }
       catch (HongsError ex) {
         helper.error500(ex.getMessage());
@@ -149,7 +149,7 @@ public class ConfAction
    * .C 代码
    * 无后缀及其他为字符串
    */
-  private String makeConfig(String confName)
+  private String makeConf(String confName)
   {
     Maker         mk = new Maker(confName);
     StringBuilder sb = new StringBuilder();

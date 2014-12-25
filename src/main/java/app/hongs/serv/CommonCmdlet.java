@@ -1,18 +1,17 @@
 package app.hongs.serv;
 
-import app.hongs.Core;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-import app.hongs.action.ActionHelper;
-import app.hongs.cmdlet.CmdletHelper;
+import app.hongs.action.ActionRunner;
 import app.hongs.annotation.Cmdlet;
-import app.hongs.db.DB;
-import app.hongs.db.Table;
-import app.hongs.db.sync.TableSync;
-import app.hongs.util.Data;
+import app.hongs.cmdlet.CmdletHelper;
+import app.hongs.cmdlet.CmdletRunner;
 import app.hongs.util.Util;
-import java.util.List;
+import java.lang.reflect.Method;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * 测试
@@ -21,100 +20,133 @@ import java.util.Map;
 @Cmdlet("common")
 public class CommonCmdlet {
 
-  public void action(ActionHelper helper)
-          throws HongsException {
-    helper.print("HELLO!!!");
-  }
-
-  public static void cmdlet(String[] args)
+  @Cmdlet("__main__")
+  public static void exec(String[] args)
           throws app.hongs.HongsException {
-
-    /*
-    Map vars = new java.util.HashMap();
-    vars.put("var",  "var1");
-    vars.put("var.2", "var2");
-    System.out.println(app.hongs.util.Util.inject("This is $var and that is ${var.2}.", vars));
-    System.out.println(app.hongs.util.Util.inject("This is $0 and that is ${1}2.", "name", "var"));
-    */
-      
-    //app.hongs.util.Data.dumps(args);
     Map<String, Object> opts = CmdletHelper.getOpts(args,
       "show-env:b",
       "show-properties:b",
-      "test-text:b",
-      "test-rate:b",
-      "test-left:b",
+      "show-actions:b",
+      "show-cmdlets:b",
+      "to-16hex:i",
+      "to-26hex:i",
+      "to-36hex:i",
+      "as-16hex:s",
+      "as-26hex:s",
+      "as-36hex:s",
       "test-opts:b",
-      "test-radix:i",
-      "test-inject:b",
+      "test-text:b",
+      "test-left:b",
+      "test-rate:b",
       "test-serially:b",
-      "sync-table:s",
-      "?Usage: --test-rate --tset-left");
-    //app.hongs.util.Data.dumps(opts);
+      "?Usage: --show-env --show-properties --show-actions --show-cmdlets");
 
+    // 查看环境
     if (opts.containsKey("show-env")
     && (Boolean)opts.get("show-env")) {
-      Data.dumps(System.getenv());
+      Map<String, String> env = new TreeMap(new MapKeyComparator());
+      env.putAll(new HashMap(System.getenv()));
+      System.err.println("ENV:");
+      for (Map.Entry<String, String> et : env.entrySet()) {
+        String k = et.getKey(  );
+        String v = et.getValue();
+        System.err.println("  "+k+"\t"+v);
+      }
     }
-
     if (opts.containsKey("show-properties")
     && (Boolean)opts.get("show-properties")) {
-      Data.dumps(System.getProperties());
+      Map<String, String> env = new TreeMap(new MapKeyComparator());
+      env.putAll(new HashMap(System.getProperties()));
+      System.err.println("Properties:");
+      for (Map.Entry<String, String> et : env.entrySet()) {
+        String k = et.getKey(  );
+        String v = et.getValue();
+        System.err.println("  "+k+"\t"+v);
+      }
+    }
+    
+    // 查看动作
+    if (opts.containsKey("show-actions")
+    && (Boolean)opts.get("show-actions")) {
+      Map<String, Method> actions = new TreeMap(new MapKeyComparator());
+      actions.putAll(ActionRunner.getActions());
+      System.err.println("Actions:");
+      for (Map.Entry<String, Method> et : actions.entrySet()) {
+        String a = et.getKey(  );
+        Method m = et.getValue();
+        System.err.println("  "+a+"\t"+m.getDeclaringClass().getName()+"."+m.getName());
+      }
+    }
+    if (opts.containsKey("show-cmdlets")
+    && (Boolean)opts.get("show-cmdlets")) {
+      Map<String, Method> actions = new TreeMap(new MapKeyComparator());
+      actions.putAll(CmdletRunner.getCmdlets());
+      System.err.println("Cmdlets:");
+      for (Map.Entry<String, Method> et : actions.entrySet()) {
+        String a = et.getKey(  );
+        Method m = et.getValue();
+        System.err.println("  "+a+"\t"+m.getDeclaringClass().getName()+"."+m.getName());
+      }
     }
 
-    if (opts.containsKey("test-text")
-    && (Boolean)opts.get("test-text")) {
-      testText();
+    // 进制转换
+    if (opts.containsKey("to-16hex")) {
+        CmdletHelper.println(opts.get("to-16hex") + " to 16 Hex: "+Long.toHexString((Long) opts.get("to-16hex")));
+    }
+    if (opts.containsKey("to-26hex")) {
+        CmdletHelper.println(opts.get("to-26hex") + " to 26 Hex: "+app.hongs.util.Util.to26Hex((Long) opts.get("to-26hex")));
+    }
+    if (opts.containsKey("to-36hex")) {
+        CmdletHelper.println(opts.get("to-36hex") + " to 36 Hex: "+app.hongs.util.Util.to36Hex((Long) opts.get("to-36hex")));
+    }
+    if (opts.containsKey("as-16hex")) {
+        CmdletHelper.println(opts.get("as-16hex") + " as 16 Hex: "+Long.parseLong((String) opts.get("as-16hex"), 16));
+    }
+    if (opts.containsKey("as-26hex")) {
+        CmdletHelper.println(opts.get("as-36hex") + " as 26 Hex: "+app.hongs.util.Util.as26Hex((String) opts.get("as-26hex")));
+    }
+    if (opts.containsKey("as-36hex")) {
+        CmdletHelper.println(opts.get("as-36hex") + " as 36 Hex: "+app.hongs.util.Util.as36Hex((String) opts.get("as-36hex")));
     }
 
-    if (opts.containsKey("test-rate")
-    && (Boolean)opts.get("test-rate")) {
-      testRate();
-    }
-
-    if (opts.containsKey("test-left")
-    && (Boolean)opts.get("test-left")) {
-      testLeft();
-    }
-
+    // 参数测试
     if (opts.containsKey("test-opts")
     && (Boolean)opts.get("test-opts")) {
       testOpts(args);
     }
 
-    if (opts.containsKey("test-radix")) {
-      testRadix((Long)opts.get("test-radix"));
+    // 文本测试
+    if (opts.containsKey("test-text")
+    && (Boolean)opts.get("test-text")) {
+      testText();
     }
-    
+
+    // 进度演示
+    if (opts.containsKey("test-rate")
+    && (Boolean)opts.get("test-rate")) {
+      testRate();
+    }
+    if (opts.containsKey("test-left")
+    && (Boolean)opts.get("test-left")) {
+      testLeft();
+    }
+
     if (opts.containsKey("test-serially")
     && (Boolean)opts.get("test-serially")) {
       new TestSerially();
     }
-    
-    if (opts.containsKey("sync-table")) {
-      diffTable((String)opts.get("sync-table"));
-    }
-
-    if (opts.containsKey("make-demo-data")
-    && (Boolean)opts.get("make-demo-data")) {
-      makeDemoData();
-    }
   }
 
-  private static void diffTable(String tables) throws HongsException {
-      String[] ts = tables.split(":");
-      String srcTableName = ts[0];
-      String dstTableName = ts[1];
-      DB db = (DB)Core.getInstance(app.hongs.db.DB.class);
-      Table srcTable = Table.getInstanceByTableName(db, srcTableName);
-      Table dstTable = Table.getInstanceByTableName(db, dstTableName);
-      TableSync sync = new TableSync(srcTable);
-      List<String> sqls = sync.syncSlaverSqls(dstTable, true);
-      for (String sql : sqls) {
-          System.out.println(sql);
-      }
+  private static void testOpts(String[] args) throws HongsException {
+    app.hongs.util.Data.dumps(args);
+    Map opts = CmdletHelper.getOpts(args,
+      "opt_s|opt-s:s", "opt_i|opt-i:i", "opt_f|opt-f:f", "opt_b|opt-b:b",
+      "opt_o|opt-o=s", "opt_m|opt-m+s", "opt_n|opt-n*s", "opt_r|opt-r=/(a|b)/i",
+      "!U", "!V", "?Useage:\ncmd opt-o xxx opt-m xxx... [opt-n xxx...]"
+    );
+    app.hongs.util.Data.dumps(opts);
   }
-  
+
   private static void testText() {
     String s = "This is Hong's Framework. Ask: \\\"Who ar you?\"\r\n"
              + "这是弘的框架, 问: \\\"你是谁?\"\r\n"
@@ -159,25 +191,12 @@ public class CommonCmdlet {
     }
   }
 
-  private static void testOpts(String[] args) throws HongsException {
-    app.hongs.util.Data.dumps(args);
-    Map opts = CmdletHelper.getOpts(args,
-      "opt_s|opt-s:s", "opt_i|opt-i:i", "opt_f|opt-f:f", "opt_b|opt-b:b",
-      "opt_o|opt-o=s", "opt_m|opt-m+s", "opt_n|opt-n*s", "opt_r|opt-r=/(a|b)/i",
-      "!U", "!V", "?Useage:\ncmd opt-o xxx opt-m xxx... [opt-n xxx...]"
-    );
-    app.hongs.util.Data.dumps(opts);
-  }
+  private static class MapKeyComparator implements Comparator<String>{  
+    public int compare(String str1, String str2) {  
+        return str1.compareTo(str2);  
+    }  
+  } 
   
-  private static void testRadix(long num) {
-    CmdletHelper.println("36 Radix: "+app.hongs.util.Util.as36Hex(num));
-    CmdletHelper.println("26 Radix: "+app.hongs.util.Util.as26Hex(num));
-  }
-
-  private static void makeDemoData() {
-    
-  }
-
   private static class TestSerially extends CoreSerially {
     java.util.List a;
     java.util.Set b;

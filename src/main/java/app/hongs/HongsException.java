@@ -26,7 +26,7 @@ public class HongsException extends Exception implements HongsCause {
     /**
      * 动作异常
      */
-    public static final int ACTION = 0x1100;
+    public static final int ACTION = 0x1002;
 
     private HongsLocalized that;
 

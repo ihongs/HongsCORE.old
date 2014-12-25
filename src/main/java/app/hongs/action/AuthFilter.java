@@ -23,9 +23,9 @@ import javax.servlet.ServletResponse;
  *
  * <h3>初始化参数(init-param):</h3>
  * <pre>
- * index-path   首页地址(为空则不跳转)
- * login-path   登录地址(为空则不跳转)
- * config-name  动作配置(默认为default)
+ * auth-conf    动作配置(默认为default)
+ * index-uri    首页地址(为空则不跳转)
+ * login-uri    登录地址(为空则不跳转)
  * exclude-uris 不包含的URL, 可用","分割多个, 可用"*"为前后缀
  * </pre>
  *
@@ -36,6 +36,11 @@ public class AuthFilter
 {
 
   /**
+   * 动作配置
+   */
+  private String authConf;
+
+  /**
    * 首页路径
    */
   private String indexPage;
@@ -44,11 +49,6 @@ public class AuthFilter
    * 登录路径
    */
   private String loginPage;
-
-  /**
-   * 动作配置
-   */
-  private String configName;
 
   /**
    * 不包含的URL
@@ -62,9 +62,19 @@ public class AuthFilter
     String xp;
       
     /**
+     * 获取权限配置名
+     */
+    xp = config.getInitParameter("auth-conf");
+    if (xp == null)
+    {
+      xp = "default";
+    }
+    this.authConf = xp;
+
+    /**
      * 获取首页URL
      */
-    xp = config.getInitParameter("index-page");
+    xp = config.getInitParameter("index-uri");
     if (xp != null)
     {
       this.indexPage = Core.BASE_HREF +"/"+ xp;
@@ -73,21 +83,11 @@ public class AuthFilter
     /**
      * 获取登录URL
      */
-    xp = config.getInitParameter("login-page");
+    xp = config.getInitParameter("login-uri");
     if (xp != null)
     {
       this.loginPage = Core.BASE_HREF +"/"+ xp;
     }
-
-    /**
-     * 获取权限配置名
-     */
-    xp = config.getInitParameter("config-name");
-    if (xp == null)
-    {
-      xp = "default";
-    }
-    this.configName = xp;
 
     /**
      * 获取不包含的URL
@@ -122,7 +122,7 @@ public class AuthFilter
      */
     AuthConfig conf;
     try {
-        conf = AuthConfig.getInstance(configName);
+        conf = AuthConfig.getInstance(authConf);
     }
     catch (HongsException ex) {
         throw new ServletException(ex);
@@ -138,9 +138,9 @@ public class AuthFilter
   @Override
   public void destroy()
   {
+    authConf    = null;
     indexPage   = null;
     loginPage   = null;
-    configName  = null;
     excludeUris = null;
   }
 
@@ -175,7 +175,7 @@ public class AuthFilter
 
     AuthConfig conf;
     try {
-        conf = AuthConfig.getInstance(configName);
+        conf = AuthConfig.getInstance(authConf);
     }
     catch (HongsException ex) {
         throw new ServletException(ex);
@@ -257,11 +257,12 @@ public class AuthFilter
      * 否则使用HTTP错误代码
      */
     if (helper.getRequest().getRequestURI().endsWith(".act")) {
-        Map rsp = new HashMap();
-            rsp.put("__success__", false);
-            rsp.put("__message__", msg);
+        Map rsp = new HashMap( );
+            rsp.put("ok", false);
+            rsp.put("oh", "403");
+            rsp.put("ah",  msg );
         if (uri != null && uri.length() != 0) {
-            rsp.put("__refresh__", uri);
+            rsp.put("to",  uri );
         }
         helper.reply(rsp);
     }

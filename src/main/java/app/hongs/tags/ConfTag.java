@@ -30,7 +30,7 @@ public class ConfTag extends TagSupport {
   public int doStartTag() throws JspException {
     JspWriter out = this.pageContext.getOut();
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = CoreConfig.getInstance().clone();
 
     if (this.load != null)
     {

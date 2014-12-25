@@ -95,7 +95,7 @@ public class DBConfig
   public String dbClass;
 
   public String tableClass;
-  
+
   public String modelClass;
 
   public String tablePrefix;
@@ -110,7 +110,7 @@ public class DBConfig
 
   private static Set<String> tableAttrs = new HashSet(
   Arrays.asList( new String[] {
-    "name","class","model","prefix","suffix","primaryKey"
+    "name","tableName","primaryKey","class","model"
   }));
   private static Set<String> assocAttrs = new HashSet(
   Arrays.asList( new String[] {
@@ -414,12 +414,12 @@ public class DBConfig
         tables.put(table.get("name"), table);
 
         // 放入关联配置
-        Map scossa2 = new LinkedHashMap();
-        Map assocs2 = getAssocs(element2, scossa2);
+        Map relats2 = new LinkedHashMap();
+        Map assocs2 = getAssocs(element2, relats2);
         if (assocs2.isEmpty( ) == false )
         {
             table.put("assocs" , assocs2);
-            table.put("scossa" , scossa2);
+            table.put("relats" , relats2);
         }
       }
     }
@@ -427,15 +427,15 @@ public class DBConfig
     return tables;
   }
 
-  private static Map getAssocs(Element element, Map scossa)
+  private static Map getAssocs(Element element, Map relats)
   {
-    return getAssocs(element, scossa, new ArrayList());
+    return getAssocs(element, relats, new ArrayList());
   }
 
-  private static Map getAssocs(Element element, Map scossa, List tns)
+  private static Map getAssocs(Element element, Map relats, List tns)
   {
     Map assocs = new LinkedHashMap();
-    
+
     NodeList childs2 = element.getChildNodes();
     for (int j = 0; j < childs2.getLength(); j ++ )
     {
@@ -474,21 +474,21 @@ public class DBConfig
         List tns2 = new ArrayList(tns);
              tns2.add(tn2);
         assocs.put(tn2, assoc);
-        scossa.put(tn2, assoc);
+        relats.put(tn2, assoc);
         if (! tns.isEmpty( ) )
         {
             assoc.put("path" , tns);
         }
 
         // 递归关联配置
-        Map assocs2 = getAssocs(element2, scossa, tns2);
+        Map assocs2 = getAssocs(element2, relats, tns2);
         if (assocs2.isEmpty( ) == false )
         {
             assoc.put("assocs" , assocs2);
         }
       }
     }
-    
+
     return assocs;
   }
 
@@ -499,23 +499,23 @@ public class DBConfig
   }
 
   /** 源 **/
-  
+
   public static class DBSource {
-      
+
   }
-  
+
   public static class DBOrigin {
-      
+
   }
-  
+
   /** 表 **/
-  
+
   public static class TableConfig {
-      
+
   }
-  
+
   public static class AssocConfig {
-      
+
   }
-  
+
 }

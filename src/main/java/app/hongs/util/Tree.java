@@ -1,6 +1,6 @@
 package app.hongs.util;
 
-import app.hongs.HongsException;
+import app.hongs.HongsError;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -31,7 +31,6 @@ public class Tree
    * @throws app.hongs.HongsException
    */
   public static Object getValue(Map map, String path)
-  throws HongsException
   {
     return Tree.getValue(map, path, null);
   }
@@ -41,10 +40,8 @@ public class Tree
    * @param map
    * @param keys
    * @return 键对应的值
-   * @throws app.hongs.HongsException
    */
   public static Object getByArr(Map map, Object[] keys)
-  throws HongsException
   {
     return Tree.getByArr(map, keys, null);
   }
@@ -55,10 +52,8 @@ public class Tree
    * @param path
    * @param def
    * @return 键对应的值
-   * @throws app.hongs.HongsException
    */
-  public static Object getValue(Map map, String path, Object def)
-  throws HongsException
+  public static <T> T getValue(Map map, String path, T def)
   {
     path = path.replaceAll("\\]\\[", ".")
                .replace("[", ".")
@@ -74,14 +69,12 @@ public class Tree
    * @param keys
    * @param def
    * @return 键对应的值
-   * @throws app.hongs.HongsException
    */
-  public static Object getByArr(Map map, Object[] keys, Object def)
-  throws HongsException
+  public static <T> T getByArr(Map map, Object[] keys, T def)
   {
     if (map == null)
     {
-      throw new HongsException(0x100c, "`map` can not be null");
+      throw new HongsError(0x37, "`map` can not be null");
     }
     Object val = map;
     for (int i = 0; i < keys.length; i ++)
@@ -111,7 +104,31 @@ public class Tree
       }
       return def;
     }
-    return val;
+
+    // 常规类型转换
+    if (def instanceof String) {
+      val = val.toString();
+    } else
+    if (val instanceof String) {
+      if (def instanceof Integer) {
+        val = Integer.parseInt((String) val);
+      } else
+      if (def instanceof Long) {
+        val = Long.parseLong((String) val);
+      } else
+      if (def instanceof Float) {
+        val = Float.parseFloat((String) val);
+      } else
+      if (def instanceof Number) {
+        val = Double.parseDouble((String) val);
+      }
+    }
+
+    try {
+      return (T) val;
+    } catch (ClassCastException ex) {
+      throw new HongsError(0x36, "Wrong type for key '"+keys+"'", ex);
+    }
   }
 
   /**
@@ -119,10 +136,8 @@ public class Tree
    * @param map
    * @param path
    * @param val
-   * @throws app.hongs.HongsException
    */
   public static void setValue(Map map, String path, Object val)
-  throws HongsException
   {
     path = path.replaceAll("\\]\\[", ".")
              .replace("[", ".")
@@ -136,14 +151,12 @@ public class Tree
    * @param map
    * @param keys
    * @param val
-   * @throws app.hongs.HongsException
    */
   public static void setByArr(Map map, Object[] keys, Object val)
-  throws HongsException
   {
     if (map == null)
     {
-      throw new HongsException(0x100c, "`map` can not be null");
+      throw new HongsError(0x38, "`map` can not be null");
     }
     if (keys.length  !=  0)
     {
@@ -157,7 +170,7 @@ public class Tree
     }
     else
     {
-      throw new HongsException(0x10, "`val` is not a map AND `keys` is empty");
+      throw new HongsError(0x39, "`val` is not a map AND `keys` is empty");
     }
   }
 

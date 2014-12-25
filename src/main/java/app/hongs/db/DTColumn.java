@@ -74,9 +74,9 @@ public class DTColumn
         column.put("typeName",        md.getColumnTypeName(i));
         column.put("className",       md.getColumnClassName(i));
         column.put("displaySize",     md.getColumnDisplaySize(i));
-        column.put("readOnly",        md.isReadOnly(i));
-        column.put("writable",        md.isWritable(i));
         column.put("currency",        md.isCurrency(i));
+        column.put("writable",        md.isWritable(i));
+        column.put("readOnly",        md.isReadOnly(i));
         column.put("searchable",      md.isSearchable(i));
         */
 
@@ -86,7 +86,7 @@ public class DTColumn
     catch (SQLException ex)
     {
       // 抛出Table的异常代号
-      throw new HongsException(0x1080, ex);
+      throw new HongsException(0x106a, ex);
     }
     finally
     {

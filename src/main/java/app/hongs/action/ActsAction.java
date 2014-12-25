@@ -2,11 +2,11 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
-import app.hongs.CoreLogger;
-import app.hongs.HongsError;
+import app.hongs.HongsCause;
 import app.hongs.HongsException;
 import static app.hongs.action.ActionWarder.PRINTED;
 import static app.hongs.action.ActionWarder.REPLIED;
+import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -58,9 +58,10 @@ public class ActsAction
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
     String act = ActionWarder.getCurrentServletPath(req);
 
-    if (act == null || act.length() == 0) {
-        helper.error404("Action URI can not be empty.");
-        return;
+    if (act == null || act.length() == 0)
+    {
+      senderr(req, helper, "Er404", "Action URI can not be empty.");
+      return;
     }
 
     // 去扩展名
@@ -77,12 +78,9 @@ public class ActsAction
     {
       caller = new ActionRunner(act, helper);
     }
-    catch (HongsException ex )
+    catch (HongsException  ex)
     {
-      if (ex.getCode()== 0x1102)
-        senderr(404, ex, helper);
-      else
-        senderr(500, ex, helper);
+      senderr(req, helper, ex);
       return;
     }
 
@@ -91,9 +89,9 @@ public class ActsAction
     {
       caller.doAction();sendout(req, helper);
     }
-    catch (HongsException ex )
+    catch (HongsException  ex)
     {
-      senderr(500, ex, helper);
+      senderr(req, helper, ex);
     }
   }
 
@@ -102,7 +100,7 @@ public class ActsAction
     {
         req.setAttribute(PRINTED  ,  true );
         Map data = helper.getResponseData();
-        if (data!= null)helper.print(data );
+        if (data!=null) helper.print(data );
     } else
     if (req.getAttribute(REPLIED) == null )
     {
@@ -111,13 +109,18 @@ public class ActsAction
     }
   }
 
-  private void senderr(int sym, Throwable err, ActionHelper helper)
+  private void senderr(HttpServletRequest req, ActionHelper helper, Throwable ex)
     throws ServletException
   {
-    String error = err.getLocalizedMessage();
-    if (! (err instanceof HongsException)
-    &&  ! (err instanceof HongsError  ) )
+    String errno;
+    String error = ex.getLocalizedMessage();
+    if (ex instanceof  HongsCause)
     {
+      HongsCause hc = (HongsCause) ex;
+      errno = "Ex"+Integer.toHexString(hc.getCode());
+    } else
+    {
+      errno = "500";
       CoreLanguage lang = (CoreLanguage)
           Core.getInstance(CoreLanguage.class );
       if (error == null || error.length() == 0)
@@ -125,18 +128,38 @@ public class ActsAction
         error = lang.translate("core.error.unkwn");
       }
         error = lang.translate("core.error.label" ,
-        err.getClass().getName()) + ": " + error  ;
+        ex.getClass( ).getName()) + ": " + error  ;
     }
 
-    switch (sym)
+    senderr(req, helper, errno, error);
+  }
+
+  private void senderr(HttpServletRequest req, ActionHelper helper, String errno, String error)
+    throws ServletException
+  {
+    if (req.getAttribute(PRINTED) == null)
     {
-      case 404:
-        helper.error404 (error);
-        break;
-      default :
-        helper.error500 (error);
-        CoreLogger.error( err );
-//      throw new ServletException(error, err);
+        req.setAttribute(PRINTED  ,  true);
+        Map data = new HashMap();
+        data.put( "ok" , false );
+        data.put( "oh" , errno );
+        data.put( "ah" , error );
+        helper.print  (  data  );
+    } else
+    if (req.getAttribute(REPLIED) == null)
+    {
+        Map data = new HashMap();
+        data.put( "ok" , false );
+        data.put( "oh" , errno );
+        data.put( "ah" , error );
+        req.setAttribute(REPLIED  ,  data );
+    } else
+    if (   "404".equals( errno ))
+    {
+        helper.error404( error );
+    } else
+    {
+        helper.error500( error );
     }
   }
 

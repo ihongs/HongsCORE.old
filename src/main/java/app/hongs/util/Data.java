@@ -1,10 +1,7 @@
 package app.hongs.util;
 
 import app.hongs.Core;
-import app.hongs.HongsException;
-
-import org.json.simple.JSONValue;
-import org.json.simple.parser.ParseException;
+import app.hongs.HongsError;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -13,6 +10,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 
 /**
  * 简单JSON格式工具
@@ -31,9 +30,9 @@ import java.util.Map;
  另, 最近听闻有些移动端编程对 null 不方便处理, 加了一个参数来用于全部转为字符串.
  </p>
  *
- * <h3>异常代码</h3>
+ * <h3>错误代码</h3>
  * <pre>
- * 0x1121 解析JSON数据错误
+ * 0x30 解析JSON数据失败
  * </pre>
  *
  * @author Hongs
@@ -46,7 +45,7 @@ public class Data
    * @param str JSON字符串
    * @return 数组,集合框架,基础类型
    */
-  public static Object toObject(String str) throws HongsException
+  public static Object toObject(String str)
   {
     try
     {
@@ -54,7 +53,7 @@ public class Data
     }
     catch (ParseException ex)
     {
-      throw new HongsException(0x100a, "Can not parse data by json", ex);
+      throw new HongsError(0x30, "Can not parse data by json", ex);
     }
   }
 

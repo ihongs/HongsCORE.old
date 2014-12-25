@@ -62,15 +62,12 @@
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
-    <!--
-    <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>*.api</url-pattern>
-    </filter-mapping>
-    //-->
     <filter-mapping>
         <filter-name>Warder</filter-name>
         <url-pattern>*.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
         <filter-name>Warder</filter-name>
@@ -84,14 +81,18 @@
         <filter-name>Warder</filter-name>
         <url-pattern>/common/lang/*</url-pattern>
     </filter-mapping>
-    <!-- Hcim Rigger Filter -->
+    <!-- DB Rigger -->
     <filter>
-        <filter-name>HcimRigger</filter-name>
-        <filter-class>app.hongs.serv.RiggerFilter</filter-class>
+        <filter-name>HaimDBRigger</filter-name>
+        <filter-class>app.hongs.action.CowlFilter</filter-class>
+        <init-param>
+            <param-name>action</param-name>
+            <param-value>haim/db</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>HcimRigger</filter-name>
-        <url-pattern>/hcim/*</url-pattern>
+        <filter-name>HaimDBRigger</filter-name>
+        <url-pattern>/haim/db/*</url-pattern>
     </filter-mapping>
     <!-- Default Tags -->
     <jsp-config>
@@ -107,5 +108,7 @@
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
         <welcome-file>index.html</welcome-file>
+        <welcome-file>default.jsp</welcome-file>
+        <welcome-file>default.html</welcome-file>
     </welcome-file-list>
 </web-app>

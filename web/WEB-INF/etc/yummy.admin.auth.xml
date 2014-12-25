@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="http://hongs-core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://hongs-core ac.xsd">
+    <page href="yummy/admin/index.html">
+        <page href="yummy/admin/order/list.html"/>
+        <page href="yummy/admin/product/list.html"/>
+    </page>
+</root>

@@ -45,7 +45,7 @@ public class ApisAction
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
-        doForward(req, rsp, "list");
+        doForward(req, rsp, "retrieve", "list");
     }
 
     @Override
@@ -93,10 +93,10 @@ public class ApisAction
 
         /**
          * 映射规则:
-         * /module/assoc/0{assocId}/model/0{modelId}/_{action}.api
+         * /module/assoc/_{assocId}/model/_{modelId}/.{action}.api
          * /module/model/action.act?assoc_id={assocId}&id={modelId}
-         * 其中 /assoc/0{assocId} 可以有零或多组; 0{modelId} 可以有零或多个;
-         * _{action} 可以省略, 默认以 Http 的 Method 来判断
+         * 其中 /assoc/_{assocId} 可以有零或多组; _{modelId} 可以有零或多个;
+         * .{action} 可以省略, 默认以 Http 的 Method 来判断
          */
         StringBuilder pms = new StringBuilder();
         Matcher mat = _API_PMS.matcher("/"+act);
@@ -120,8 +120,8 @@ public class ApisAction
                 String   key = "id";
                 String[] vas = vaz.substring(2).split("_");
                 if (vas.length == 1 ) {
-                    if ( mtd.equals("list")) {
-                         mts = new String[]{"info","list"};
+                    if ( mtd.equals("retrieve")) {
+                         mts = new String[]{"info", "retrieve", "list"};
                     }
                 } else {
                     key += "." ;
@@ -153,13 +153,9 @@ public class ApisAction
         }
 
         for (String mtn : mts) {
-            try {
-                if (ActionRunner.getActions().containsKey(act+"/"+mtn)) {
-                    mtd  = mtn ;
-                    break;
-                }
-            } catch (HongsException ex) {
-                throw new ServletException(ex);
+            if (ActionRunner.getActions().containsKey(act+"/"+mtn)) {
+                mtd  = mtn ;
+                break;
             }
         }
 
@@ -174,14 +170,27 @@ public class ApisAction
         req.getRequestDispatcher("/"+act+"/"+mtd + ".act" + pms).include(req, rsp);
 
         // 将应答数据格式化后输出
-        if (rsp.getStatus() == HttpServletResponse.SC_OK && send) {
+        if (rsp.getStatus( ) == HttpServletResponse.SC_OK  &&  send) {
             Map data  = (Map) req.getAttribute(ActionWarder.REPLIED);
-            if (data != null) {  rsp.setContentType( "application/json" );
+            if (data != null) {
+                if (!data.containsKey("ok")) {
+                    data.put("ok", "1");
+                }
+                if (!data.containsKey("oh")) {
+                    data.put("oh", "" );
+                }
+                if (!data.containsKey("ah")) {
+                    data.put("ah", "" );
+                }
+                if (!data.containsKey("to")) {
+                    data.put("to", "" );
+                }
+                rsp.setContentType("application/json");
                 rsp.getWriter().print(Data.toString(data , true));
             }
         }
     }
 
-    private static final Pattern _API_PMS = Pattern.compile("((?:/[^_]\\w+/0\\w+)*)?(/[^_]\\w+)(/_\\w+)?(/\\.\\w+)?$");
+    private static final Pattern _API_PMS = Pattern.compile("((?:/[^_]\\w+/_\\w+)*)?(/[^_]\\w+)(/_\\w+)?(/\\.\\w+)?$");
 
 }

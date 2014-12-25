@@ -137,11 +137,10 @@ cs[]    限定列名
   xx_id     外键, CHAR(20), xx为关联表缩写
   ctime     创建时间, DATETIME或TIMESTAMP
   mtime     修改时间, DATETIME或TIMESTAMP
-  btime     开始时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
   dflag     删除标识, TINYINT, 0为正常, 1为删除, 可用其他数字表示其他状态
 
-注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: page,rows,cols,sort,find. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
+注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,cs,ob,wd,jd. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 << HongsCORE Framework for Javascript >>
 

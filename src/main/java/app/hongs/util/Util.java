@@ -50,7 +50,7 @@ public final class Util
    * @param arr 转换序列
    * @return 指定进制的数字字符串
    */
-  public static String asXHex(long num, char[] arr)
+  public static String toXHex(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
@@ -75,7 +75,7 @@ public final class Util
    * @param arr 转换序列
    * @return 指定进制的数字字符串
    */
-  public static String asYHex(long num, char[] arr)
+  public static String toYHex(long num, char[] arr)
   {
     StringBuilder str = new StringBuilder();
     int x = arr.length;
@@ -96,9 +96,9 @@ public final class Util
    * @param num 0~MAX
    * @return 36进制串
    */
-  public static String as36Hex(long num)
+  public static String to36Hex(long num)
   {
-    return Util.asXHex(num, _36Hex);
+    return Util.toXHex(num, _36Hex);
   }
 
   /**
@@ -106,9 +106,9 @@ public final class Util
    * @param num 1~MAX
    * @return 26进制串
    */
-  public static String as26Hex(long num)
+  public static String to26Hex(long num)
   {
-    return Util.asYHex(num, _26Hex);
+    return Util.toYHex(num, _26Hex);
   }
 
   public static long asXHex(String str, char[] arr) {
@@ -122,7 +122,7 @@ public final class Util
           map.put( arr[i], i );
       }
       for (i = 0; i < y; i ++) {
-          num += Math.pow(y-i+1, x) * map.get(chs[i]);
+          num += Math.pow(x, y-i-1) * map.get(chs[i]);
       }
       return num;
   }

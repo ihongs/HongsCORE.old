@@ -3,8 +3,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <!-- 基础属性 -->
-  <xs:attribute name="key" type="xs:string"/>
-  <xs:attribute name="uri" type="xs:string"/>
+  <xs:attribute name="href" type="xs:string"/>
   <xs:attribute name="name" type="xs:string"/>
 
   <!-- 动作 -->
@@ -14,15 +13,14 @@
   <xs:element name="depend" type="xs:string"/>
 
   <!-- 包含 -->
-  <xs:element name="include" type="xs:string"/>
+  <xs:element name="import" type="xs:string"/>
 
   <!-- 会话 -->
-  <xs:element name="session" type="xs:string"/>
+  <xs:element name="ssname" type="xs:string"/>
 
-  <!-- 分组 -->
-  <xs:element name="group">
+  <!-- 单元 -->
+  <xs:element name="unit">
     <xs:complexType>
-      <xs:attribute ref="key" use="required"/>
       <xs:attribute ref="name" use="required"/>
       <xs:all>
         <xs:element ref="action" maxOccurs="unbounded"/>
@@ -34,11 +32,10 @@
   <!-- 页面 -->
   <xs:element name="page">
     <xs:complexType>
-      <xs:attribute ref="uri" use="required"/>
-      <xs:attribute ref="name" use="required"/>
+      <xs:attribute ref="href" use="required"/>
       <xs:all>
         <xs:element ref="page" maxOccurs="unbounded"/>
-        <xs:element ref="group" maxOccurs="unbounded"/>
+        <xs:element ref="unit" maxOccurs="unbounded"/>
         <xs:element ref="include" maxOccurs="unbounded"/>
       </xs:all>
     </xs:complexType>
@@ -49,7 +46,7 @@
     <xs:complexType>
       <xs:all>
         <xs:element ref="page" maxOccurs="unbounded"/>
-        <xs:element ref="group" maxOccurs="unbounded"/>
+        <xs:element ref="unit" maxOccurs="unbounded"/>
         <xs:element ref="include" maxOccurs="unbounded"/>
         <xs:element ref="session" minOccurs="0" maxOccurs="1"/>
       </xs:all>

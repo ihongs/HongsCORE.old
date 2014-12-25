@@ -8,6 +8,7 @@
 <%@page import="app.hongs.action.ActionHelper"%>
 <%!
     StringBuilder makeMenu(List<Map> menus, boolean realHref) {
+        app.hongs.util.Data.dumps(menus);
         StringBuilder menuz = new StringBuilder();
         if (menus.isEmpty()) {
             return menuz;
@@ -18,7 +19,7 @@
             String claz = !subMenus.isEmpty() ? "dropdown-toggle" : "";
             String cart = !subMenus.isEmpty() ? "<b class=\"caret\"></b>" : "";
             String name = (String) menu.get("name");
-            String href = (String) menu.get("uri" );
+            String href = (String) menu.get("href");
             String hash = "#" + href.substring(href.indexOf("/") + 1);
             if (name.indexOf("${opr}") != -1) {
                 continue; // 操作类的内页不要
@@ -29,7 +30,7 @@
                 hash = hash.substring(0, hash.length() - 4);
             } else if (hash.endsWith(".html")) {
                 hash = hash.substring(0, hash.length() - 5);
-            } else if (hash.startsWith("common/Menu/Goto.act")) {
+            } else if (hash.startsWith("common/goto.act")) {
                 hash = hash.substring(19).replaceAll("=", ".");
             }
             menuz.append("<li>")
@@ -77,12 +78,11 @@
         d = Integer.parseInt(depth);
     }
 
-    AuthConfig euth = AuthConfig.getInstance("default");
-    AuthConfig auth = AuthConfig.getInstance(name);
-    CoreLanguage lang = CoreLanguage.getInstance();
+    AuthConfig userAuth = AuthConfig.getInstance();
+    AuthConfig currAuth = AuthConfig.getInstance(name);
 
-    List<Map> mainMenu = auth.getNavList(lang, l, d);
-    List<Map> userMenu = euth.getNavList(lang, 1, 1);
+    List<Map> userMenu = userAuth.getMenu(1, 1);
+    List<Map> currMenu = currAuth.getMenu(l, d);
 %>
 
 <div class="navbar-header">
@@ -108,7 +108,7 @@
 
 <div class="collapse navbar-collapse" id="main-collapse">
     <ul class="nav navbar-nav navbar-left " id="main-menubar">
-        <%=makeMenu(mainMenu, false)%>
+        <%=makeMenu(currMenu, false)%>
     </ul>
     <ul class="nav navbar-nav navbar-right" id="user-menubar">
         <li class="dropdown">

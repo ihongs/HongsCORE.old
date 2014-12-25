@@ -84,58 +84,54 @@ function hsResponObj(rst, qut) {
             else {
                 rst  = eval('('+rst+')');
             }
-        }
-        else
+        } else
         if (rst.charAt(0) === '<') {
             // 某些时候服务器可能出错, 返回错误消息的页面
             // 需要清理其中的html代码, 以供输出简洁的消息
             rst = {
-                "__success__" : false,
-                "__message__" :  rst
+                "ok" : false,
+                "ah" :  rst
                     .replace(/<script.*?>.*?<\/script>/img, "")
                     .replace(/<style.*?>.*?<\/style>/img, "")
                     .replace(/<[^>]*?>/g, "")
                     .replace(/&[^&;]*;/g, "")
                     .replace(/^\s*(\r\n|\r|\n)/mg, "")
             };
-        }
-        else {
+        } else {
             rst = {
-                "__success__" : false,
-                "__message__" :  rst
+                "ok" : false,
+                "ah" :  rst
             };
         }
     }
     if (typeof(rst) === "object") {
-        if (typeof(rst.__success__) === "undefined") {
-            rst.__success__ = true;
+        if (typeof(rst.ok) === "undefined") {
+            rst.ok = true;
         }
-        if (typeof(rst.__message__) === "undefined") {
-            rst.__message__ =  "" ;
+        if (typeof(rst.ah) === "undefined") {
+            rst.ah =  "" ;
         }
         if (! qut) {
-            if (rst.__success__) {
-                if (rst.__message__) {
-                    jQuery.hsNote(rst.__message__, 'alert-success');
+            if (rst.ok) {
+                if (rst.ah) {
+                    jQuery.hsNote(rst.ah, 'alert-success');
                 }
             }
             else {
-                if (rst.__message__) {
-                    alert (rst.__message__);
-                }
-                else {
-                    alert (hsGetLang("error.unkwn"));
+                if (rst.ah) {
+                    alert(rst.ah);
+                } else {
+                    alert(hsGetLang("error.unkwn"));
                 }
             }
         }
-        if (typeof(rst.__refresh__) !== "undefined") {
-            if (rst.__refresh__) {
-                location.assign(  rst.__refresh__  );
+        if (typeof(rst.to) !== "undefined") {
+            if (rst.to) {
+                location.assign(rst.to);
+            } else {
+                location.reload();
             }
-            else {
-                location.reload(  );
-            }
-            delete rst.__refersh__ ;
+            delete rst.to;
         }
     }
     return rst;

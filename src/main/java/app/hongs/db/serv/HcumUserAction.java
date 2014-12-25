@@ -19,20 +19,20 @@ import java.util.Set;
 @Action("hcum/user")
 public class HcumUserAction {
 
-    private app.hongs.db.Model model;
+    private app.hongs.db.serv.HcumUser model;
     private CoreLanguage lang;
 
     public HcumUserAction()
     throws HongsException {
-        model = DB.getInstance("hcum").getModel("a_hcum_user");
-        lang = (CoreLanguage) Core.getInstance(CoreLanguage.class);
+        model = (HcumUser) DB.getInstance("hcum").getModel("a_hcum_user");
+        lang  = CoreLanguage.getInstance().clone();
         lang.load("hcum");
     }
 
     @Action("list")
     public void getList(ActionHelper helper)
     throws HongsException {
-        Map data = model.getPage(helper.getRequestData());
+        Map data = model.getList(helper.getRequestData());
 
         // Remove the password field, don't show password in page
         List<Map> list = (List)data.get("list");
@@ -76,7 +76,7 @@ public class HcumUserAction {
     public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean rst = model.unique(helper.getRequestData());
-        helper.reply(rst);
+        helper.reply(null, rst);
     }
 
     @Action("groups")

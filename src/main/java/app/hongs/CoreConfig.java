@@ -66,6 +66,13 @@ public class CoreConfig
     this(Core.CONF_PATH, "default");
   }
 
+  @Override
+  public CoreConfig clone()
+  {
+    Object conf = super.clone();
+    return (CoreConfig) conf;
+  }
+
   /**
    * 根据配置名称加载配置
    * @param name

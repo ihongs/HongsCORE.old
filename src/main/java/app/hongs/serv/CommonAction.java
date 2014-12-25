@@ -1,7 +1,6 @@
 package app.hongs.serv;
 
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.AuthConfig;
@@ -9,7 +8,7 @@ import app.hongs.annotation.Action;
 import java.util.Map;
 
 /**
- * 菜单
+ * 通用动作
  * @author Hong
  */
 @Action("common")
@@ -20,8 +19,6 @@ public class CommonAction {
         String name  = helper.getParameter("c");
         String level = helper.getParameter("l");
         String depth = helper.getParameter("d");
-        String langName = helper.getParameter("ln");
-        String langType = helper.getParameter("lt");
 
         int l , d;
         if (level == null || level.length() == 0) {
@@ -40,18 +37,7 @@ public class CommonAction {
         }
         AuthConfig conf = AuthConfig.getInstance(name);
 
-        if (langType != null && langType.length() != 0) {
-            langType = CoreLanguage.getAcceptLanguage(langType);
-        }
-        if (langType == null || langType.length() == 0) {
-            langType = Core.ACTION_LANG.get();
-        }
-        if (langName == null || langName.length() == 0) {
-            langName = "default";
-        }
-        CoreLanguage lang = new CoreLanguage(langName,langType);
-
-        helper.print(conf.getNavList(lang, l, d));
+        helper.print(conf.getMenu(l, d));
     }
 
     public void action_goto(ActionHelper helper)

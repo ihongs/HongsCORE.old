@@ -162,12 +162,11 @@ object.config,
     font-weight: bold;
 }
 
+.listbox ._admin,
 .listbox ._check,
-.listbox ._radio,
-.listbox ._admin {
+.listbox ._radio {
     width: 1.5em;
 }
-.listbox ._htime,
 .listbox .datetime {
     width: 12em;
 }

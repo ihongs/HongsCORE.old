@@ -39,7 +39,7 @@ public class LangTag extends TagSupport implements DynamicAttributes {
   public int doStartTag() throws JspException {
     JspWriter out = this.pageContext.getOut();
 
-    CoreLanguage lang = (CoreLanguage)Core.getInstance(CoreLanguage.class);
+    CoreLanguage lang = CoreLanguage.getInstance().clone();
 
     if (this.load != null) {
       if (this.load.endsWith(".xml")) {

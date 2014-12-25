@@ -1,18 +1,23 @@
 package app.hongs.annotation;
 
-import app.hongs.action.ActionRunner;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.ActionRunner;
+import static app.hongs.action.CowlFilter.ENTITY;
+import static app.hongs.action.CowlFilter.MODULE;
 import app.hongs.action.VerifyHelper;
-import app.hongs.util.Tree;
+import app.hongs.action.VerifyHelper.Wrongs;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * 数据追加处理器
+ * 数据校验处理器
+ * <pre>
+ * 如果 action 不是 create/update, 则需要通过参数 id 来判断是创建还是更新
+ * 参数 jd 为 1 则将错误数据为复杂的层级结构
+ * </pre>
  * @author Hong
  */
 public class VerifyInvoker implements ActionInvoker {
@@ -20,32 +25,48 @@ public class VerifyInvoker implements ActionInvoker {
     public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
         Verify ann  = (Verify) anno;
-        String lang = ann.lang();
-        String conf = ann.conf();
-        String form = ann.rule();
-        String data = ann.data();
+        String form = ann.form();
+        String coll = ann.coll();
+        boolean clear = ann.clear();
+
+        if (form.length() == 0 ) {
+            form = (String) helper.getAttribute(ENTITY);
+            coll = (String) helper.getAttribute(MODULE);
+        }
 
         // 准备数据
         Map<String, Object> dat = helper.getRequestData();
-        if (data.length() > 0) {
-            dat = (Map<String, Object>) Tree.getValue(dat, data);
+        Object  id  = dat.get("id");
+        Object  jd  = dat.get("jd");
+        String  act = chains.getAction();
+        int     pos = act.lastIndexOf( ".");
+        boolean upd = act.substring(0, pos).endsWith("action")
+          || (null != id && !"".equals(id));
+
+        // 执行校验
+        VerifyHelper ver  =  new VerifyHelper();
+        if (null != coll &&  null != form) {
+            ver.addRulesByForm(coll, form);
         }
+        try {
+            Map vls = ver.verify(dat, upd);
+            if (clear) dat.clear();
+            dat.putAll( vls );
+            chains.doAction();
+        } catch (Wrongs ex) {
+            Map ers;
+            if ("1".equals(jd)) {
+                ers = ex.getErtree();
+            } else {
+                ers = ex.getErrors();
+            }
 
-        // 开始校验
-        CoreLanguage lng = CoreLanguage.getInstance(lang);
-        VerifyHelper ver = new VerifyHelper(lng).setRule(conf, form);
-        Map<String, List<String>> errors = ver.verify4RD(dat);
-
-        // 返回错误
-        if (! errors.isEmpty()) {
             dat = new HashMap();
-            dat.put("__message__", lng.translate("fore.form.invalid"));
-            dat.put("__success__", false);
-            dat.put("errors", errors);
-            helper.reply(dat);
-            return;
+            dat.put("ok",false);
+            CoreLanguage  lng  =  CoreLanguage.getInstance( );
+            dat.put("ah", lng.translate("fore.form.invalid"));
+            dat.put("errors" , ers );
+            helper.reply( dat );
         }
-
-        chains.doAction();
     }
 }

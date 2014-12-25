@@ -11,10 +11,9 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ActionWrapper(InjectInvoker.class)
+@ActionWrapper(ActionInvoker.class)
 public @interface Verify {
-    String   rule();
-    String   conf() default "default";
-    String   lang() default "default";
-    String   data() default "";
+    String form() default "";
+    String coll() default "default";
+    boolean clear() default false;
 }

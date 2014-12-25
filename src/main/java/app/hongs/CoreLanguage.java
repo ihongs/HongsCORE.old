@@ -29,6 +29,8 @@ public class CoreLanguage
 
   public String lang;
 
+  private CoreLanguage that = null;
+  
   /**
    * 加载指定路径\语言和名称的配置
    * @param path
@@ -44,6 +46,22 @@ public class CoreLanguage
     if (name != null)
     {
       this.load(name);
+    }
+    
+    String defn = getAcceptLanguage(CoreConfig.getInstance().getProperty("core.language.default", "zh"));
+    if ( ! lang.equals(defn) )
+    {
+      try
+      {
+        that = new CoreLanguage(path, name, defn);
+      }
+      catch (app.hongs.HongsError e)
+      {
+        if  ( e.getCode( ) == 0x1a )
+        {
+          throw e;
+        }
+      }
     }
   }
 
@@ -74,6 +92,13 @@ public class CoreLanguage
     this(Core.CONF_PATH, "default", Core.ACTION_LANG.get());
   }
 
+  @Override
+  public CoreLanguage clone()
+  {
+    Object conf = super.clone();
+    return (CoreLanguage) conf;
+  }
+
   /**
    * 加载指定属性文件
    * @param name
@@ -82,6 +107,17 @@ public class CoreLanguage
   public void load(String name)
   {
     super.load(name + "." + this.lang);
+    if (that != null)
+    {
+      try {
+     that.load(name + "." + this.lang);
+      }
+      catch (app.hongs.HongsError e) {
+        if  ( e.getCode( ) != 0x1a ) {
+          throw e;
+        }
+      }
+    }
   }
 
   /**
@@ -92,6 +128,17 @@ public class CoreLanguage
   public void loadFromXML(String name)
   {
     super.loadFromXML(name + "." + this.lang);
+    if (that != null)
+    {
+      try {
+     that.loadFromXML(name + "." + this.lang);
+      }
+      catch (app.hongs.HongsError e) {
+        if  ( e.getCode( ) != 0x1a ) {
+          throw e;
+        }
+      }
+    }
   }
 
   /**
@@ -99,27 +146,30 @@ public class CoreLanguage
    * @param key
    * @return 翻译后的语句
    */
-  public String translate(String key)
+  @Override
+  public String getProperty(String key)
   {
-    String str  = this.getProperty(key, null);
-    return str != null  ?  str  :  key;
+    String str = super.getProperty(key);
+    if  (  str == null && that != null) {
+           str =  that.getProperty(key);
+    }
+    return str != null  ?  str  :  key ;
   }
 
   /**
    * 翻译指定键对应的语句并替换参数
-   * 参数名为$xxx或${xxx}($one,${two}...)
+   * 参数名为$n($0,$1...)
    * @param key
    * @param rep
    * @return 翻译后的语句, 会替换特定标识
    */
-  public String translate(String key, Map<String, String> rep)
+  public String translate(String key, String... rep)
   {
-    String str = this.translate(key);
-    if (  rep == null  ) return str ;
+    String str =  this.getProperty(key);
+    if  (  rep == null  )  return  str ;
 
     /**
-     * 将语句中的$xxx或${xxx}替换成指定文字
-     * 如果指定的替换文字不存在, 则替换为空
+     * 将语句中替换$n或${n}为指定的文字, n从0开始
      */
     return Util.inject(str, rep);
   }
@@ -133,8 +183,8 @@ public class CoreLanguage
    */
   public String translate(String key, List<String> rep)
   {
-    String str = this.translate(key);
-    if (  rep == null  ) return str ;
+    String str =  this.getProperty(key);
+    if  (  rep == null  )  return  str ;
 
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
@@ -144,18 +194,19 @@ public class CoreLanguage
 
   /**
    * 翻译指定键对应的语句并替换参数
-   * 参数名为$n($0,$1...)
+   * 参数名为$xxx或${xxx}($one,${two}...)
    * @param key
    * @param rep
    * @return 翻译后的语句, 会替换特定标识
    */
-  public String translate(String key, String... rep)
+  public String translate(String key, Map<String, String> rep)
   {
-    String str = this.translate(key);
-    if (  rep == null  ) return str ;
+    String str =  this.getProperty(key);
+    if  (  rep == null  )  return  str ;
 
     /**
-     * 将语句中替换$n或${n}为指定的文字, n从0开始
+     * 将语句中的$xxx或${xxx}替换成指定文字
+     * 如果指定的替换文字不存在, 则替换为空
      */
     return Util.inject(str, rep);
   }
@@ -180,7 +231,18 @@ public class CoreLanguage
    */
   public static CoreLanguage getInstance(String name)
   {
-    String ck = CoreLanguage.class.getName() + ":" + name + "." + Core.ACTION_LANG.get();
+    return getInstance(name, Core.ACTION_LANG.get());
+  }
+
+  /**
+   * 按配置名和语言名获取唯一语言对象
+   * 如果配置core.load.language.once为true则仅加载一次
+   * @param name 配置名
+   * @return 唯一语言实例
+   */
+  public static CoreLanguage getInstance(String name, String lang)
+  {
+    String ck = CoreLanguage.class.getName() + ":" + name + ":" + lang;
 
     Core core = Core.getInstance();
     if (core.containsKey(ck))
@@ -194,18 +256,18 @@ public class CoreLanguage
       return (CoreLanguage)gore.get(ck);
     }
 
-    CoreLanguage lang = new CoreLanguage(name);
+    CoreLanguage inst = new CoreLanguage(name, lang);
     CoreConfig conf = CoreConfig.getInstance();
     if (conf.getProperty("core.load.language.once", false))
     {
-      gore.put(ck, lang);
+      gore.put(ck, inst);
     }
     else
     {
-      core.put(ck, lang);
+      core.put(ck, inst);
     }
 
-    return lang;
+    return inst;
   }
 
   /**

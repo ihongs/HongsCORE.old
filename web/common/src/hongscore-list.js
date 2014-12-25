@@ -18,10 +18,9 @@ function HsList(opts, context) {
     var sendUrls = hsGetValue(opts, "sendUrls");
     var loadMode = hsGetValue(opts, "loadMode", 1); // 加载模式, 0无 1附带上层数据
 
-    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("model.page.key", "page"));
-    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("model.sort.key", "sort"));
-    this.rowsPerPage = hsGetConf("rows.per.page", 25);
-    this.firstOfPage = hsGetConf("first.of.page", 1 );
+    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
+    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
+    this.rowsPerPage = hsGetConf("rows.per.page", 20);
 
     this.context = context;
     this.loadBox = loadBox;
@@ -217,7 +216,7 @@ HsList.prototype = {
     },
     loadBack : function(rst) {
         rst = hsResponObj(rst);
-        if (rst.__success__ === false) return;
+        if (rst.ok === false) return;
         if (rst.list) this.fillList( rst.list );
         if (rst.page) this.fillPage( rst.page );
         this.listBox.trigger("loadBack", [rst]);
@@ -314,7 +313,7 @@ HsList.prototype = {
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
-        p  = page.page || this.firstOfPage;
+        p  = page.page || 1;
         t  = page.pagecount || 1;
         pn = this.pageBox.attr("data-pn" );
         pn = pn ? parseInt(pn) : 10;
@@ -381,7 +380,7 @@ HsList.prototype = {
     },
     sendBack : function(btn, rst, data) {
         rst = hsResponObj(rst);
-        if (rst.__success__ === false) return;
+        if (rst.ok === false) return;
         var evt = new jQuery.Event("sendBack");
         btn.trigger(evt, [rst, data]);
         if (evt.isDefaultPrevented()) return;
@@ -438,6 +437,11 @@ HsList.prototype = {
 
     // /** 填充函数 **/
 
+    _fill__admin : function(td, v, n) {
+        var th = this.listBox.find('thead [data-fn="'+n+'"]');
+        td.append(th.find(".invisible").clone().removeClass("invisible")).hsInit();
+        return false;
+    },
     _fill__check : function(td, v, n) {
         jQuery('<input type="checkbox" class="input-checkbox checkone"/>')
             .attr("name", n).val(v)
@@ -450,24 +454,7 @@ HsList.prototype = {
             .appendTo(td);
         return false;
     },
-    _fill__admin : function(td, v, n) {
-        var th = this.listBox.find('thead [data-fn="'+n+'"]');
-        td.append(th.find(".invisible").clone().removeClass("invisible")).hsInit();
-        return false;
-    },
-    _fill__hdate : function(td, v, n) {
-        var d1  =  new Date ();
-        var d2  =  hsPrsDate(v, hsGetLang("date.format"));
-        if (d1.getYear()  == d2.getYear()
-        &&  d1.getMonth() == d2.getMonth()
-        &&  d1.getDate()  == d2.getDate()) {
-            return hsGetLang("date.today");
-        }
-        else {
-            return hsFmtDate(v, hsGetLang("date.format"));
-        }
-    },
-    _fill__htime : function(td, v, n) {
+    _fill__datetime : function(td, v, n) {
         var d1  =  new Date ();
         var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
         if (d1.getYear()  == d2.getYear()
@@ -479,6 +466,21 @@ HsList.prototype = {
         else {
             return hsFmtDate(v, hsGetLang("datetime.format"));
         }
+    },
+    _fill__date : function(td, v, n) {
+        var d1  =  new Date ();
+        var d2  =  hsPrsDate(v, hsGetLang("date.format"));
+        if (d1.getYear()  == d2.getYear()
+        &&  d1.getMonth() == d2.getMonth()
+        &&  d1.getDate()  == d2.getDate()) {
+            return hsGetLang("date.today");
+        }
+        else {
+            return hsFmtDate(v, hsGetLang("date.format"));
+        }
+    },
+    _fill__time : function(td, v, n) {
+            return hsFmtDate(v, hsGetLang("time.format"));
     }
 };
 

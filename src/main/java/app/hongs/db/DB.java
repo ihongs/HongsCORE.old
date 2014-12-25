@@ -1551,7 +1551,7 @@ public class DB
      */
 
     DB       db ;
-    DBConfig cf = (new DBConfig(dbName));
+    DBConfig cf = new DBConfig (dbName);
 
     if (cf.dbClass != null && cf.dbClass.length() != 0)
     {

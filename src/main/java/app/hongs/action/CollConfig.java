@@ -1,24 +1,21 @@
 package app.hongs.action;
 
 import app.hongs.Core;
+import app.hongs.CoreLanguage;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,15 +23,49 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * 集合配置
+ * 表单配置.
  *
  * <p>
- 在 Java 7 之前写 List,Set,Map 很麻烦, 不能像写 Data 那样方便;<br/>
- * 有些数据需要方便修改, 而修改代码比较麻烦;<br/>
- * 需要统一管理一些数据, 如状态/类型/选项等.<br/>
- 故编写此类用于解决以上问题, 可从 XML 中读取结构数据或 Data 数据.<br/>
- * XML 的结构请参考 WEB-INF/conf 中的 coll.xsd 和 default.coll.xml
+ * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;
+ * 但无法确保其对象在反复使用中会自动重载,
+ * 最好在修改配置后删除临时文件并重启应用.
  * </p>
+ *
+ * <h3>数据结构:</h3>
+ * <pre>
+ datas = {
+   "data_name" : Object
+ }
+ enums = {
+   "enum_name" : {
+     "option_name" : OptionStr
+     ...
+   }
+   ...
+ }
+ forms = {
+   "form_name" : {
+     _extr : "recode_engine",
+     "item_name" : {
+       _extr : "verify_method",
+       _type : "string|bigstr|number|slider|switch|date|time|datetime|password|file|enum|form|exists|unique",
+       _required : 0|1|2,
+       _repeated : 0|1,
+       "attrib_name" : AttribStr
+       ...
+     }
+     ...
+   }
+   ...
+ }
+ </pre>
+ *
+ * <h3>异常代码:</h3>
+ * <pre>
+ * 区间: 0x10e0~0x10ef
+ * 0x10e0 配置文件不存在
+ * 0x10e2 解析文件失败
+ * </pre>
  *
  * @author Hongs
  */
@@ -44,15 +75,26 @@ public class CollConfig
 
   private String name;
 
-  public Map<String, Object> datas;
-//  public Map<String, Set<String[]>> reqDatas;
-//  public Map<String, Set<String[]>> rspDatas;
+  /**
+   * 数据集合
+   */
+  public Map<String, Map> datas;
+  
+  /**
+   * 枚举集合
+   */
+  public Map<String, Map> enums;
+
+  /**
+   * 表单集合
+   */
+  public Map<String, Map> forms;
 
   public CollConfig(String name)
     throws HongsException
   {
     this.name = name;
-    this.init("coll." + name);
+    this.init("form." + name);
   }
 
   @Override
@@ -62,7 +104,7 @@ public class CollConfig
                 + File.separator + name + ".coll.xml");
     File serFile = new File(Core.SERS_PATH
                 + File.separator + name + ".coll.ser");
-    return xmlFile.lastModified() > serFile.lastModified( );
+    return xmlFile.lastModified() > serFile.lastModified();
   }
 
   @Override
@@ -73,48 +115,40 @@ public class CollConfig
                 + File.separator + name + ".coll.xml");
     if (!df.exists())
     {
-      throw new HongsException(0x10e4, "Coll config file '"
+      throw new HongsException(0x10e8, "Form config file '"
                 + Core.CONF_PATH
                 + File.separator + name + ".coll.xml"
                 + "' is not exists");
     }
 
-    this.datas = new LinkedHashMap();
-//    this.reqDatas = new HashMap();
-//    this.rspDatas = new HashMap();
+    this.datas = new HashMap();
+    this.enums = new HashMap();
+    this.forms = new HashMap();
 
     try
     {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder dbn = dbf.newDocumentBuilder();
       Document doc = dbn.parse(df);
+      Element root = doc.getDocumentElement();
 
-      this.parseData(doc.getDocumentElement(),
-        this.datas, /*this.reqDatas, this.rspDatas,*/ null);
-
-      // 测试
-      /*
-      app.hongs.util.Data.dumps(datas);
-      app.hongs.util.Data.dumps(reqDatas);
-      app.hongs.util.Data.dumps(refDatas);
-      */
+      this.parse(root, this.datas, this.enums, this.forms, null);
     }
-    catch (IOException ex)
+    catch ( IOException ex)
     {
-      throw new HongsException(0x10e6, ex);
+      throw new HongsException(0x10e9 , ex);
     }
     catch (SAXException ex)
     {
-      throw new HongsException(0x10e6, ex);
+      throw new HongsException(0x10e9 , ex);
     }
     catch (ParserConfigurationException ex)
     {
-      throw new HongsException(0x10e6, ex);
+      throw new HongsException(0x10e9 , ex);
     }
   }
 
-  private void parseData(Element element, Object datas,
-    /*Map reqDatas, Map rspDatas,*/ Set links)
+  private void parse(Element element, Map datas, Map enums, Map forms, Map optns)
     throws HongsException
   {
     if (!element.hasChildNodes())
@@ -137,213 +171,159 @@ public class CollConfig
 
       if ("data".equals(tagName2))
       {
-        String key  = element2.getAttribute("key" );
-        String type = element2.getAttribute("type");
-
-        Object data2;
-        if ("list".equals(type))
-        {
-          data2 = new ArrayList();
-        }
-        else
-        if ("dict".equals(type))
-        {
-          data2 = new LinkedHashMap();
-        }
-        else
-        if ( "map".equals(type))
-        {
-          data2 = new LinkedHashMap();
-        }
-        else
-        if ( "set".equals(type))
-        {
-          data2 = new LinkedHashSet();
-        }
-        else
-        {
-          data2 = this.parseData(element2.getTextContent(), type);
-        }
-
-        if (datas instanceof List)
-        {
-          ((List)datas).add(data2);
-        }
-        else
-        if (datas instanceof Set)
-        {
-          ((Set)datas).add(data2);
-        }
-        else
-        if (datas instanceof Map)
-        {
-          ((Map)datas).put(key, data2);
-        }
-
-        this.parseData(element2, data2, /*null, null,*/ null);
+        String namz = element2.getAttribute("name");
+        if (namz == null) namz = "";
+        Object data2 = Data.toObject(element2.getTextContent());
+        datas.put(namz, data2);
       }
       else
-      if ("link".equals(tagName2))
+      if ("enum".equals(tagName2))
       {
-        String key  = element2.getAttribute("key" );
-        String link = element2.getAttribute("data");
-
-        links.add(new String[] {key, link});
+        String namz = element2.getAttribute("name");
+        if (namz == null) namz = "";
+        Map optns2 = new LinkedHashMap();
+        this.parse(element2, null, null, null, optns2);
+        enums.put(namz, optns2);
       }
-//      else
-//      if ("req".equals(tagName2)
-//      ||  "rsp".equals(tagName2))
-//      {
-//        Map data2 = new HashMap();
-//        Set link2 = new HashSet();
-//
-//        this.parseData(element2, data2, /*null, null,*/ link2);
-//
-//        String uri = element2.getAttribute("uri");
-//
-//        Iterator it = data2.entrySet().iterator();
-//        while (it.hasNext())
-//        {
-//          Map.Entry et = (Map.Entry)it.next();
-//          String key = (String)et.getKey();
-//          Object value = et.getValue();
-//
-//          String uriKey = uri+"."+key;
-//          ((Map) datas).put(uriKey, value);
-//          link2.add(new String[] {key, uriKey});
-//        }
-//
-//        if ("rsp".equals(tagName2))
-//        {
-//          rspDatas.put(uri, link2);
-//        }
-//        else
-//        {
-//          reqDatas.put(uri, link2);
-//        }
-//      }
+      else
+      if ("form".equals(tagName2))
+      {
+        String namz = element2.getAttribute("name");
+        if (namz == null) namz = "";
+        Map items2 = new LinkedHashMap();
+        this.parse(element2, null, items2, null, null);
+        forms.put(namz, items2);
+        
+        namz = element2.getAttribute("extr");
+        if (namz != null) {
+            items2.put("_extr", namz);
+        } else {
+            items2.put("_extr",  "" );
+        }
+      }
+      else
+      if ("item".equals(tagName2))
+      {
+        String namz = element2.getAttribute("name");
+        if (namz == null) namz = "";
+        Map optns2 = new LinkedHashMap();
+        this.parse(element2, null, null, null, optns2);
+        enums.put(namz, optns2);
+
+        namz = element2.getAttribute("extr");
+        if (namz != null) {
+            optns2.put("_extr", namz);
+        } else {
+            optns2.put("_extr",  "" );
+        }
+
+        namz = element2.getAttribute("type");
+        if (namz != null) {
+            optns2.put("_type",  namz );
+        } else {
+            optns2.put("_type", "text");
+        }
+
+        namz = element2.getAttribute("required");
+        if (namz != null && !"".equals(namz) && !"0".equals(namz)) {
+            optns2.put("_required", namz);
+        } else {
+            optns2.put("_required", "0" );
+        }
+
+        namz = element2.getAttribute("repeated");
+        if (namz != null && !"".equals(namz) && !"0".equals(namz)) {
+            optns2.put("_repeated", namz);
+        } else {
+            optns2.put("_repeated", "0" );
+        }
+      }
+      else
+      if ("option".equals(tagName2) || "attrib".equals(tagName2))
+      {
+        String namz = element2.getAttribute("name");
+        String data = element2.getTextContent();
+        optns.put(namz, data);
+      }
     }
   }
 
-  private Object parseData(String text, String type)
+  public Map getEnum(String name)
+  {
+    return enums.get(name);
+  }
+
+  public Map getForm(String name)
+  {
+    return forms.get(name);
+  }
+
+  public Map getForm(String name, boolean withReadonlyItem, boolean withRepeatedForm)
     throws HongsException
   {
-    Object data = text;
+    return CollConfig.this.getForm(name, withReadonlyItem, withRepeatedForm, "");
+  }
 
-    if ("json".equals(type))
-    {
-      data = Data.toObject(text);
-    }
-    else
-    if ("number".equals(type))
-    {
-      data = Double.valueOf(text);
-    }
-    else
-    if ("boolean".equals(type))
-    {
-      data = Boolean.valueOf(text);
-    }
-    else
-    if ("instance".equals(type))
-    {
-        try {
-            data = Class.forName(text);
-        } catch (ClassNotFoundException ex) {
-            throw new HongsException(0x10e8, "Can not found class: "+text);
+  private Map getForm(String name, boolean withReadonlyItem, boolean withRepeatedForm, String pref)
+    throws HongsException
+  {
+    CoreLanguage lang = CoreLanguage.getInstance(this.name);
+    Map  form = CollConfig.this.getForm( name );
+    Map  dict = new HashMap(  );
+    List list = new ArrayList();
+
+    Iterator it = form.entrySet().iterator();
+    while (it.hasNext()) {
+        Map.Entry et = (Map.Entry) it.next();
+        String n = (String) et.getKey();
+        Map    m = (Map)  et.getValue();
+        String t = (String) m.get("type");
+        Integer rq = (Integer) m.get("required");
+        Integer rp = (Integer) m.get("repeated");
+
+        if (!withReadonlyItem && 2 == rq) {
+            continue;
+        }
+        if (!withRepeatedForm && 0 != rp && "form".equals(t)) {
+            continue;
+        }
+
+        Map item = new HashMap();
+        list.add(item);
+        item.putAll(m);
+
+        if ("form".equals(t)) {
+            String  n2 = (String) m.get("form");
+            String[] a = n2.split ( "\\." , 2 );
+            CollConfig c2;
+            if (a.length > 1) {
+                c2 = getInstance(a[0]);
+                n2 = a[1];
+            } else {
+                c2 = this;
+            }
+            String  p2 = pref + n2 +  ".";
+            if ( 0 != rp ) p2 = p2 + "#.";
+            item.putAll(c2.getForm(n2, withRepeatedForm, withReadonlyItem, p2));
+            continue;
+        }
+
+        item.put("code", pref + n);
+        item.put("name", lang.translate("core.item." + this.name + name + "." + n));
+        item.put("help", lang.translate("core.help." + this.name + name + "." + n));
+
+        if ("enum".equals(t)) {
+            String n2 = (String) m.get("enum");
+            Map enum2 = getEnum(n2);
+            item.put("enum", enum2);
         }
     }
 
-    return data;
+    name = lang.translate("core.form."+this.name+"."+name);
+    dict.put("list", list);
+    dict.put("name", name);
+    return dict;
   }
-
-  private void checkData(Object data) {
-      if (data instanceof List) {
-          checkData((List)data);
-      }
-      else if (data instanceof Set) {
-          checkData((Set)data);
-      }
-      else if (data instanceof Map) {
-          checkData((Map)data);
-      }
-  }
-  private void checkData(List data) {
-      int      i = 0;
-      Iterator e = data.iterator();
-      while (e.hasNext()) {
-          Object o = e.next();
-          if (o instanceof Class) {
-              o = Core.getInstance((Class)o);
-              data.set(i, o);
-          }
-          else {
-              checkData(o);
-          }
-          i ++;
-      }
-  }
-  private void checkData(Set data) {
-      Iterator e = data.iterator();
-      while (e.hasNext()) {
-          Object o = e.next();
-          if (o instanceof Class) {
-              o = Core.getInstance((Class)o);
-              e.remove( );
-              data.add(o);
-          }
-          else {
-              checkData(o);
-          }
-      }
-  }
-  private void checkData(Map<Object, Object> data) {
-      for (Map.Entry<Object, Object> e : data.entrySet()) {
-          Object o = e.getValue();
-          if (o instanceof Class) {
-              o = Core.getInstance((Class)o);
-              e.setValue(o);
-          }
-          else {
-              checkData(o);
-          }
-      }
-  }
-
-  public Object getDataByKey(String key)
-  {
-    Object data = this.datas.get(key);
-    checkData(data);
-    return data;
-  }
-
-//  public Map getDataByReq(String uri)
-//  {
-//    Map map = new HashMap();
-//    if (this.reqDatas.containsKey(uri))
-//    {
-//      Set <String[]> data = this.reqDatas.get(uri);
-//      for (String[] key : data)
-//      {
-//        map.put(key[0], this.getDataByKey(key[1]));
-//      }
-//    }
-//    return map;
-//  }
-
-//  public Map getDataByRsp(String uri)
-//  {
-//    Map map = new HashMap();
-//    if (this.rspDatas.containsKey(uri))
-//    {
-//      Set <String[]> data = this.rspDatas.get(uri);
-//      for (String[] key : data)
-//      {
-//        map.put(key[0], this.getDataByKey(key[1]));
-//      }
-//    }
-//    return map;
-//  }
 
   //** 工厂方法 **/
 

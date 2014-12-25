@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,7 +30,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 
 /**
- * 动作配置
+ * 结构配置.
  *
  * <p>
  * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;
@@ -36,57 +38,43 @@ import org.w3c.dom.Node;
  * 最好在修改配置后删除临时文件并重启应用.
  * </p>
  *
- * <h3>配置规范:</h3>
- * <pre>
- * page(页面)   有uri和name(名称)两个属性, 相同的uri可以对应不同的name,
- *              可包含多个group(分组), 可包含下级page(页面);
- * group(分组)  有key和name(名称)两个属性, 相同的key只能对应相同的name,
- *              可包含多个action(动作), 可包含下级group(分组);
- * actoin(动作) 仅能包含一个动作串(为动作uri);
- * depend(依赖) 仅能包含一个分组键(为分组key).
- * </pre>
- *
  * <h3>数据结构:</h3>
  * <pre>
- * pages = Map{
- *   "uri" : Map{
- *     uri : "uri",
- *     name : "name",
- *     pages : Map{
- *       子级页面...
- *     },
- *     groups : Set[
- *       "group.key1",
- *       "group.key2",
- *       ...
- *     ]
- *   }
- *   ...
- * }
- * groups = Map{
- *   "key" : Map{
- *     key : "key",
- *     name : "name",
- *     depends : Set[
- *       "group.key1",
- *       "group.key2",
- *       ...
- *     ],
- *     actions : Set[
- *       "action.uri1",
- *       "action.uri2",
- *       ...
- *     ]
- *   }
- *   ...
- * }
- * </pre>
+ pages = {
+   "href" : {
+     pages : {
+       子级页面...
+     },
+     units : [
+       "unit.name1",
+       "unit.name2",
+       ...
+     ]
+   }
+   ...
+ }
+ units = {
+   "name" : {
+     depends : [
+       "unit.name1",
+       "unit.name2",
+       ...
+     ],
+     actions : [
+       "auth.name1",
+       "auth.name2",
+       ...
+     ]
+   }
+   ...
+ }
+ </pre>
  *
  * <h3>异常代码:</h3>
  * <pre>
  * 区间: 0x10e0~0x10ef
- * 0x10e0 动作配置文件不存在
- * 0x10e2 解析配置文件失败
+ * 0x10e0 配置文件不存在
+ * 0x10e2 解析文件失败
  * </pre>
  *
  * @author Hongs
@@ -110,23 +98,28 @@ public class AuthConfig
   /**
    * 全部分组信息
    */
-  public Map<String, Map> groups;
+  public Map<String, Map>  units;
 
   /**
    * 全部动作
    */
-  public Set<String>     actions;
+  public Set<String> actions;
+
+  /**
+   * 全部导入
+   */
+  public Set<String> imports;
 
   /**
    * 权限名称(会话键或会话类)
    */
-  public     String      session;
+  public     String  session;
 
   public AuthConfig(String name)
     throws HongsException
   {
     this.name = name;
-    this.init("auth." + name);
+    this.init("site." + name);
   }
 
   @Override
@@ -155,8 +148,9 @@ public class AuthConfig
 
     this.paths = new HashMap();
     this.pages = new LinkedHashMap();
-    this.groups = new LinkedHashMap();
+    this.units = new LinkedHashMap();
     this.actions = new HashSet();
+    this.imports = new HashSet();
 
     try
     {
@@ -165,45 +159,34 @@ public class AuthConfig
       Document doc = dbn.parse(df);
       Element root = doc.getDocumentElement();
 
-      this.parseActionTree(root,
-        new ArrayList(), this.paths, this.pages, this.groups, this.actions, new HashSet());
+      this.parse(root, this.paths, this.pages, this.units, this.imports, this.actions, new HashSet(), new ArrayList());
 
-      /**
-       * 提取会话名(类)
-       * Add by Hongs, 2013/12/25
-       */
-      CoreConfig c = CoreConfig.getInstance();
-      this.session = c.getProperty("core.default.auth.session", "actions");
-      NodeList nodes = root.getElementsByTagName("config");
-      if (nodes.getLength( ) > 0) {
-          Element e = ( Element ) nodes.item(0);
-          String  s = e.getAttribute("session");
-          if (s != null && !"".equals(s)) this.session = s;
+      NodeList nodes = root.getElementsByTagName("session");
+      if (nodes.getLength() > 0)
+      {
+        this.session = nodes.item(0).getTextContent();
       }
-
-      // 测试
-      /*
-      app.hongs.util.Dump.dump("Paths", paths);
-      app.hongs.util.Dump.dump("Pages", pages);
-      app.hongs.util.Dump.dump("Groups", groups);
-      app.hongs.util.Dump.dump("Actions", actions);
-      */
+      else
+      {
+        CoreConfig c = CoreConfig.getInstance();
+        this.session = c.getProperty("core.default.auth.session", "actions");
+      }
     }
     catch (IOException ex)
     {
-      throw new HongsException(0x10e2, ex);
+      throw new HongsException(0x10e1, ex);
     }
     catch (SAXException ex)
     {
-      throw new HongsException(0x10e2, ex);
+      throw new HongsException(0x10e1, ex);
     }
     catch (ParserConfigurationException ex)
     {
-      throw new HongsException(0x10e2, ex);
+      throw new HongsException(0x10e1, ex);
     }
   }
 
-  private void parseActionTree(Element element, List path, Map paths, Map pages, Map groups, Set actions, Set depends)
+  private void parse(Element element, Map paths, Map pages, Map units, Set imports, Set actions, Set depends, List path)
     throws HongsException
   {
     if (!element.hasChildNodes())
@@ -234,61 +217,77 @@ public class AuthConfig
 
       if ("page".equals(tagName2))
       {
-        String uri = element2.getAttribute("uri");
-        String namz = element2.getAttribute("name");
-        if (uri == null) uri = "";
-        if (namz == null) namz = "";
+        String href = element2.getAttribute("href");
+        if (href == null) href = "";
         Map page2 = new HashMap();
-        page2.put("uri", uri);
-        page2.put("name", namz);
-        pages.put(uri, page2);
+        pages.put( href , page2);
+
+        String data = element2.getAttribute("data");
+        if (data == null) data = "";
+        Map data2 = new HashMap();
+        page2.put("data", data2);
+
+        for(String s : data.split(";")) {
+            s = s.trim();
+            if (s.length() == 0) {
+                continue;
+            }
+            String[] a  = s.split(":", 2);
+            String   v;
+            if (a.length   == 1) {
+                v = a[0].trim();
+            } else {
+                v = a[1].trim();
+            }
+            try {
+                data2.put(a[1] , URLDecoder.decode( v , "UTF-8" ) );
+            } catch (UnsupportedEncodingException ex) {
+                throw new HongsException(HongsException.COMMON, ex);
+            }
+        }
 
         List path2 = new ArrayList(path);
         path2.add(page2);
-        paths.put(uri, path2);
+        paths.put(href, path2);
 
         Map pages2 = new LinkedHashMap();
-        Map groups2 = new LinkedHashMap();
+        Map units2 = new LinkedHashMap();
 
         // 获取下级页面和分组
-        this.parseActionTree(element2, path2, paths, pages2, groups2, actions, depends);
+        this.parse(element2, paths, pages2, units2, imports, actions, depends, path2);
 
         if (!pages2.isEmpty())
         {
           page2.put("pages", pages2);
         }
-        if (!groups2.isEmpty())
+        if (!units2.isEmpty())
         {
-          page2.put("groups", new LinkedHashSet(groups2.keySet()));
-          groups.putAll(groups2);
+          page2.put("units", new LinkedHashSet(units2.keySet()));
+          units.putAll(units2);
         }
       }
       else
-      if ("group".equals(tagName2))
+      if ("unit".equals(tagName2))
       {
-        String key = element2.getAttribute("key");
         String namz = element2.getAttribute("name");
-        if (key == null) key = "";
         if (namz == null) namz = "";
-        Map group2 = new HashMap();
-        group2.put("key", key);
-        group2.put("name", namz);
-        groups.put(key, group2);
+        Map unit2 = new HashMap();
+        units.put(namz, unit2);
 
         Set actions2 = new HashSet();
         Set depends2 = new HashSet();
 
         // 获取下级动作
-        this.parseActionTree(element2, null, null, null, null, actions2, depends2);
+        this.parse(element2, null, null, null, null, actions2, depends2, null);
 
         if (!actions2.isEmpty())
         {
-          group2.put("actions", actions2);
+          unit2.put("actions", actions2);
           actions.addAll(actions2);
         }
         if (!depends2.isEmpty())
         {
-          group2.put("depends", depends2);
+          unit2.put("depends", depends2);
           depends.addAll(depends2);
         }
       }
@@ -305,159 +304,169 @@ public class AuthConfig
         depends.add(depend);
       }
       else
-      if ("include".equals(tagName2))
+      if ("import".equals(tagName2))
       {
-        String    include = element2.getTextContent();
-        AuthConfig conf = new AuthConfig(include);
+        String impart = element2.getTextContent();
+        AuthConfig conf = new AuthConfig(impart );
         paths.putAll(conf.paths);
         pages.putAll(conf.pages);
-        groups.putAll(conf.groups);
+        units.putAll(conf.units);
         actions.addAll(conf.actions);
+        imports.addAll(conf.imports);
       }
     }
   }
 
   /**
    * 获取页面信息
-   * @param uri
+   * @param href
    * @return 找不到则返回null
    */
-  public Map getPage(String uri)
+  public Map getPage(String href)
   {
-    if (this.paths.containsKey(uri))
-    {
-      List path = this.paths.get(uri);
-      int last = path.size() - 1;
-      return (Map)path.get(last);
-    }
-    else
-    {
-      return null;
-    }
+    List path  = this.paths.get(href);
+    if ( path == null) return null;
+    int  last  = path.size() - 1;
+    return (Map) path.get (last);
   }
 
   /**
-   * 获取页面路径
-   * @param uri
-   * @return 找不到则返回null
+   * 获取页面单元
+   * @param hrefs
+   * @return 单元字典
    */
-  public List getPath(String uri)
+  public Map<String, Map> getPageUnits(String... hrefs)
   {
-    return this.paths.get(uri);
-  }
+    Map<String, Map> unitz = new HashMap();
 
-  /**
-   * 获取分组信息
-   * @param key
-   * @return 找不到则返回null
-   */
-  public Map getGroup(String key)
-  {
-    return this.groups.get(key);
-  }
+    for (String herf : hrefs) {
+        Map page = getPage(herf);
+        Map dict;
 
-  /**
-   * 获取页面分组
-   * @param urls
-   * @return 页面分组信息
-   */
-  public Map<String, Map> getPageGroups(String... urls)
-  {
-    Map<String, Map> groupz = new HashMap();
-
-    for (String url : urls) {
-        Map page = getPage(url);
-
-        Map gs = (Map)page.get("groups");
-        if (gs != null && !gs.isEmpty()) {
-            gs = getTotalGroups((String[])gs.keySet().toArray(new String[0]));
-            groupz.putAll(gs);
+        dict = (Map)page.get("units");
+        if (dict != null && !dict.isEmpty()) {
+            unitz.putAll(getUnits((String[])dict.keySet().toArray(new String[0])));
         }
 
-        Map ps = (Map)page.get( "pages");
-        if (ps != null && !ps.isEmpty()) {
-            gs =  getPageGroups((String[])ps.keySet().toArray(new String[0]));
-            groupz.putAll(gs);
+        dict = (Map)page.get("pages");
+        if (dict != null && !dict.isEmpty()) {
+            unitz.putAll(getUnits((String[])dict.keySet().toArray(new String[0])));
         }
     }
 
-    return groupz;
+    return unitz;
   }
 
   /**
-   * 获取全部分组
-   * @param keys
-   * @return 全部分组信息
+   * 获取页面权限
+   * @param hrefs
+   * @return 单元字典
    */
-  public Map<String, Map> getTotalGroups(String... keys)
+  public Set<String> getPageAuths(String... hrefs)
   {
-    Map<String, Map> gs = new HashMap();
-    this.getGroupsActions(gs, new HashSet(), keys);
-    return gs;
+    Set<String> authz = new HashSet();
+
+    for (String herf : hrefs) {
+        Map page = getPage(herf);
+        Map dict;
+
+        dict = (Map)page.get("units");
+        if (dict != null && !dict.isEmpty()) {
+            authz.addAll(getAuths((String[])dict.keySet().toArray(new String[0])));
+        }
+
+        dict = (Map)page.get("pages");
+        if (dict != null && !dict.isEmpty()) {
+            authz.addAll(getAuths((String[])dict.keySet().toArray(new String[0])));
+        }
+    }
+
+    return authz;
   }
 
   /**
-   * 获取全部动作
-   * @param keys
+   * 获取单元信息
+   * @param name
+   * @return 找不到则返回null
+   */
+  public Map getUnit(String name)
+  {
+    return this.units.get(name);
+  }
+
+  /**
+   * 获取更多单元
+   * @param names
+   * @return 单元字典
+   */
+  public Map<String, Map> getUnits(String... names)
+  {
+    Map<String, Map> ds = new HashMap();
+    this.getUnitAuths(ds, new HashSet(), names);
+    return ds;
+  }
+
+  /**
+   * 获取单元动作
+   * @param names
    * @return 全部动作名
    */
-  public Set<String> getGroupActions(String... keys)
+  public Set<String> getAuths(String... names)
   {
     Set<String> as = new HashSet();
-    this.getGroupsActions(new HashMap(), as, keys);
+    this.getUnitAuths(new HashMap(), as, names);
     return as;
   }
 
   /**
-   * 获取全部分组和动作
-   * @param grps
-   * @param acts
-   * @param keys
+   * 获取单元和动作
+   * @param units
+   * @param auths
+   * @param names
    */
-  public void getGroupsActions(Map grps, Set acts, String... keys)
+  public void getUnitAuths(Map units, Set auths, String... names)
   {
-    for (String key : keys)
+    for (String key : names)
     {
-      Map group = this.groups.get(key);
-      if (group == null || grps.containsKey(key))
+      Map unit = this.units.get(key);
+      if (unit == null || units.containsKey(key))
       {
         continue;
       }
 
-      grps.put(key, group);
+      units.put(key, unit);
 
-      if (group.containsKey("actions"))
+      if (unit.containsKey("actions"))
       {
-        Set<String> actionsSet = (Set<String>)group.get("actions");
-        acts.addAll(actionsSet);
+        Set<String> actionsSet = (Set<String>)unit.get("actions");
+        auths.addAll(actionsSet);
       }
-      if (group.containsKey("depends"))
+      if (unit.containsKey("depends"))
       {
-        Set<String> dependsSet = (Set<String>)group.get("depends");
+        Set<String> dependsSet = (Set<String>)unit.get("depends");
         String[]    dependsArr = dependsSet.toArray(new String[0]);
-        this.getGroupsActions(grps, acts, dependsArr);
+        this.getUnitAuths(units, auths, dependsArr);
       }
     }
   }
 
   /**
    * 获取动作权限集合表
-   * @return 
+   * @return
    */
   public Set<String> getAuthSet() {
-      if (! session.contains(".")) {
+      if (session.contains(".")) {
+          return (Set)Core.getInstance (session);
+      } else {
           ActionHelper help = (ActionHelper)
-            Core.getInstance(ActionHelper.class );
-          return (Set) help.getAttribute(session);
-      }
-      else {
-          return (Set) Core.getInstance (session);
+            Core.getInstance(ActionHelper.class);
+          return (Set)help.getSessValue(session);
       }
   }
 
   /**
    * 获取动作权限对照表
-   * @return 
+   * @return
    */
   public Map<String, Boolean> getAuthMap() {
       Set<String> authset = getAuthSet();
@@ -476,18 +485,18 @@ public class AuthConfig
 
   /**
    * 检查动作权限
-   * @param url
+   * @param href
    * @return 可访问则为true
    */
-  public Boolean chkAuth(String url) {
+  public Boolean chkAuth(String href) {
       Set<String> authset = getAuthSet();
       if (authset == null) {
           return false;
       }
-      if (authset.size(  ) == 1 && authset.contains(null)) {
+      if (authset.size(  ) == 1  &&  authset.contains(null)) {
           return false;
       }
-      if (actions.contains(url) && !authset.contains(url)) {
+      if (actions.contains(href) && !authset.contains(href)) {
           return false;
       }
       return true;
@@ -495,61 +504,54 @@ public class AuthConfig
 
   /**
    * 检查页面权限
-   * @param url
+   * @param href
    * @return 有一个动作可访问即返回true
    */
-  public Boolean chkPage(String url) {
-      Map<String, Map> grps = getPageGroups(url);
-      if (grps == null || grps.isEmpty()) {
-          return  true;
-      }
-      Set<String> acts = getGroupActions((String[])grps.keySet().toArray(new String[0]));
-      if (acts == null || acts.isEmpty()) {
-          return  true;
-      }
-      for (String act : acts) {
-          if (! chkAuth(act)) {
-              continue;
+  public Boolean chkPage(String href) {
+      Set<String> authz = getPageAuths(href);
+      for(String  auth  : authz) {
+          if (chkAuth(auth)) {
+              return  true;
           }
-          return  true;
       }
       return false;
   }
 
-    public List getNavList(CoreLanguage lang, int level, int depth)
-    throws HongsException
-    {
-        return getNavList(lang, pages, level, depth, 0);
-    }
+  public List getMenu(int level, int depth) {
+      CoreLanguage lang = CoreLanguage.getInstance(this.name).clone();
+      for ( String namz : imports) {
+          lang.load( namz);
+      }
+      return getMenu(level, depth, 0, pages, lang);
+  }
 
-    private List getNavList(CoreLanguage lang, Map<String, Map> pages, int level, int depth, int i) {
-        List list = new ArrayList();
+  private List getMenu(int level, int depth, int i, Map<String, Map> pages, CoreLanguage lang) {
+      List list = new ArrayList();
 
-        if (i >= level + depth || pages == null) {
-            return list;
-        }
+      if (i >= level + depth || pages == null) {
+          return list;
+      }
 
-        for (Map.Entry item : pages.entrySet( )) {
-            Map  v = (Map)item.getValue();
-            Map  p = (Map) v.get("pages");
-            List a = getNavList(lang, p, level, depth, i + 1);
-            if (i >= level) {
-                String u = (String)item.getKey();
-                String n = (String)v.get("name");
-                Map page = new HashMap();
-                n = lang.translate(n);
-                page.put("uri" , u);
-                page.put("name", n);
-                page.put("list", a);
-                page.put("auth", chkPage(u));
-                list.add(page);
-            } else {
-                list.addAll(a);
-            }
-        }
+      for(Map.Entry item : pages.entrySet( ) ) {
+          Map  v = (Map) item.getValue();
+          Map  p = (Map) v.get( "pages");
+          List a = getMenu(level, depth, i + 1, p, lang);
+          if (i >= level) {
+              String u = (String) item.getKey();
+              String n = lang.translate("core.page."+ u);
+              Map page = new HashMap();
+              page.put("href", u);
+              page.put("name", n);
+              page.put("list", a);
+              page.put("auth", chkPage(u));
+              list.add(page);
+          } else {
+              list.addAll(a);
+          }
+      }
 
-        return list;
-    }
+      return list;
+  }
 
   //** 工厂方法 **/
 

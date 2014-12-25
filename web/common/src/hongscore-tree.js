@@ -237,7 +237,7 @@ HsTree.prototype = {
     loadBack : function(rst, pid) {
         rst = hsResponObj(rst );
         var sid = this.getSid();
-        if (rst.__success__ === false) return;
+        if (rst.ok === false) return;
         if (rst.list) this.fillList( rst.list, pid );
         this.treeBox.trigger("loadBack", [rst, pid]);
         if (this.treeBox.find("#tree-node-"+sid).length == 0) {
@@ -362,7 +362,7 @@ HsTree.prototype = {
     },
     sendBack : function(btn, rst, data) {
         rst = hsResponObj(rst);
-        if (rst.__success__ === false) return;
+        if (rst.ok === false) return;
         var evt = new jQuery.Event("sendBack");
         btn.trigger(evt, [rst, data]);
         if (evt.isDefaultPrevented()) return;

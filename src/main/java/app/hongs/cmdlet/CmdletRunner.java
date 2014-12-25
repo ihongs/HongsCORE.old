@@ -7,7 +7,6 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotation.Action;
 import app.hongs.annotation.Cmdlet;
 import app.hongs.util.ClassNames;
 import app.hongs.util.Util;
@@ -214,6 +213,17 @@ public class CmdletRunner
     }
     Core.ACTION_NAME.set(act);
 
+    String zone = null;
+    if (opts.containsKey("timezone"))
+    {
+      zone = (String)opts.get("timezone");
+    }
+    if (zone == null || zone.length() == 0)
+    {
+      zone = conf.getProperty("core.timezone.default");
+    }
+    Core.ACTION_ZONE.set(zone);
+
     String lang = null;
     if (opts.containsKey("language"))
     {
@@ -270,21 +280,28 @@ public class CmdletRunner
 
     String str;
 
-    str = (String)opts.get("request");
-    Map<String, String[]>  req = null;
+    str = (String) opts.get("request--");
+    Map req  = null;
     if (str != null && str.length() > 0)
     {
-        req  = CmdletHelper.parseQuery(str);
+        req = ActionHelper.parseParam(CmdletHelper.parseQuery(str));
     }
 
-    str = (String)opts.get("session");
-    Map<String, String[]>  ses = null;
+    str = (String) opts.get("context--");
+    Map con  = null;
     if (str != null && str.length() > 0)
     {
-        ses  = CmdletHelper.parseQuery(str);
+        con = ActionHelper.parseParam(CmdletHelper.parseQuery(str));
     }
 
-    ActionHelper helper = new ActionHelper(  req , ses , null  );
+    str = (String) opts.get("session--");
+    Map ses  = null;
+    if (str != null && str.length() > 0)
+    {
+        ses = ActionHelper.parseParam(CmdletHelper.parseQuery(str));
+    }
+
+    ActionHelper helper = new ActionHelper(req, con, ses, null );
     Core.getInstance().put(ActionHelper.class.getName(), helper);
 
     return args;
@@ -292,22 +309,17 @@ public class CmdletRunner
 
     private static Map<String, Method> CMDLETS = null;
 
-    public  static Map<String, Method> getCmdlets() throws HongsException {
+    public  static Map<String, Method> getCmdlets() {
         if (CMDLETS != null) {
-            return CMDLETS;
+            return  CMDLETS;
         }
-
-        CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
-        String [ ] pkgs = conf.getProperty("core.serv.path").split(";");
-        try {
-            CMDLETS = getCmdlets(pkgs);
-            return CMDLETS;
-        } catch (HongsException ex) {
-            throw new Error(ex);
-        }
+        
+        String[] pkgs = CoreConfig.getInstance().getProperty("core.serv.path").split(";");
+        CMDLETS = getCmdlets( pkgs );
+        return CMDLETS;
     }
     
-    private static Map<String, Method> getCmdlets(String... pkgs) throws HongsException {
+    private static Map<String, Method> getCmdlets(String... pkgs) {
         Map<String, Method> acts = new HashMap();
 
         for(String pkgn : pkgs) {
@@ -315,10 +327,10 @@ public class CmdletRunner
             try {
                 clss = ClassNames.getClassNames(pkgn);
             } catch (IOException ex) {
-                throw new HongsException( 0x1106 , "Can not load package '" + pkgn + "'.", ex);
+                throw new HongsError( 0x3b , "Can not load package '" + pkgn + "'.", ex);
             }
             if (clss == null) {
-                throw new HongsException( 0x1106 , "Can not find package '" + pkgn + "'.");
+                throw new HongsError( 0x3b , "Can not find package '" + pkgn + "'.");
             }
 
             for(String clsn : clss) {
@@ -326,17 +338,17 @@ public class CmdletRunner
                 try {
                     clso = Class.forName(clsn);
                 } catch (ClassNotFoundException ex) {
-                    throw new HongsException(0x1106, "Can not find class '" + clsn + "'.");
+                    throw new HongsError(0x3b, "Can not find class '" + clsn + "'.");
                 }
 
                 // 从注解提取动作名
-                Action anno = (Action) clso.getAnnotation(Action.class);
+                Cmdlet anno = (Cmdlet) clso.getAnnotation(Cmdlet.class);
                 if (anno == null) {
                     continue;
                 }
                 String actn = anno.value();
                 if (actn == null || actn.length() == 0) {
-                    actn = clsn.replace('.', '/');
+                    actn =  clsn;
                 }
 
                 Method[] mtds = clso.getMethods();
@@ -350,16 +362,20 @@ public class CmdletRunner
                     }
                     String actx = annx.value();
                     if (actx == null || actx.length() == 0) {
-                        actx = mtdn;
+                        actx =  mtdn;
                     }
 
                     // 检查方法是否合法
                     Class[] prms = mtdo.getParameterTypes();
-                    if (prms == null || prms.length   != 1 || !prms[0].isAssignableFrom(String[].class)) {
-                        throw new HongsException(0x1106, "Can not find cmdlet method '"+clsn+"."+mtdn+"(String[])'.");
+                    if (prms == null || prms.length != 1 || !prms[0].isAssignableFrom(String[].class)) {
+                        throw new HongsError(0x3b, "Can not find cmdlet method '"+clsn+"."+mtdn+"(String[])'.");
                     }
 
-                    acts.put(actn + "/" + actx, mtdo);
+                    if ("__main__".equals(actx)) {
+                        acts.put(actn /*__main__*/ , mtdo );
+                    } else {
+                        acts.put(actn + ":" + actx , mtdo );
+                    }
                 }
             }
         }

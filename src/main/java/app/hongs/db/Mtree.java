@@ -110,16 +110,17 @@ public class Mtree extends Model
   /**
    * <b>获取树</p>
    *
-   * @param req
+   * @param rd
    * @param caze
    * @return 树列表
    */
-  public Map getTree(Map req, FetchCase caze)
+  @Override
+  public Map getList(Map rd, FetchCase caze)
     throws HongsException
   {
-    if (req == null)
+    if (rd == null)
     {
-      req = new HashMap();
+      rd = new HashMap();
     }
     if (caze == null)
     {
@@ -133,19 +134,19 @@ public class Mtree extends Model
       caze.setOption("ASSOC_TABLES", new HashSet());
     }
 
-    String pid = (String)req.get(this.pidKey);
+    String pid = (String)rd.get(this.pidKey);
     if (pid == null || pid.length() == 0)
     {
       pid =  this.rootId;
     }
 
     // 这些参数为约定参数
-    boolean getId   = req.containsKey("get_id"  )
-                    && req.get("get_id"  ).equals("1");
-    boolean getPath = req.containsKey("get_path")
-                    && req.get("get_path").equals("1");
-    req.remove("get_id"  );
-    req.remove("get_path");
+    boolean getId   = rd.containsKey("get_id"  )
+                    && rd.get("get_id"  ).equals("1");
+    boolean getPath = rd.containsKey("get_path")
+                    && rd.get("get_path").equals("1");
+    rd.remove("get_id"  );
+    rd.remove("get_path");
 
     if (getId)
     {
@@ -183,8 +184,7 @@ public class Mtree extends Model
       }
     }
 
-    Map  data = this.getList(req, caze);
-    List list = (List) data.get("list");
+    List list = this.getAll(rd, caze);
 
     if (getPath)
     {
@@ -220,19 +220,22 @@ public class Mtree extends Model
       }
     }
 
+    Map data = new HashMap();
+    data.put( "list", list );
     return data;
   }
 
   /**
    * 获取树
    *
-   * @param req
+   * @param rd
    * @return 树列表
    */
-  public Map getTree(Map req)
+  @Override
+  public Map getList(Map rd)
     throws HongsException
   {
-    return this.getTree(req, null);
+    return this.getList(rd, null);
   }
 
   //** 标准模型方法 **/
@@ -399,12 +402,12 @@ public class Mtree extends Model
   }
 
   @Override
-  protected void filter(FetchCase caze, Map req)
+  protected void filter(FetchCase caze, Map rd)
     throws HongsException
   {
-    super.filter(caze, req);
+    super.filter(caze, rd);
 
-    if (!req.containsKey(this.sortKey))
+    if (!rd.containsKey(this.sortKey))
     {
       if (this.snumKey != null)
       {

@@ -30,6 +30,24 @@ extends Model {
         super(table);
     }
 
+  /**
+   * 添加/修改记录
+   *
+   * @param rd
+   * @return 记录ID
+   * @throws app.hongs.HongsException
+   */
+  public String save(Map rd)
+    throws HongsException
+  {
+    String id = (String)rd.get(this.table.primaryKey);
+    if (id == null || id.length() == 0)
+      id = this.add(rd);
+    else
+      this.put(id , rd);
+    return id;
+  }
+
     public Set<String> getGroups(String userId)
     throws HongsException {
         if (userId == null) throw new HongsException(0x10000, "User Id required!");
@@ -95,12 +113,12 @@ extends Model {
             page_d.put("groups",  groups);
             Set<String> groupz = (Set)page_c.get("groups");
             for (String k : groupz) {
-                Map group1 = ac.getGroup(k);
+                Map group1 = ac.getUnit(k);
                 Map group2 = new HashMap( );
                 groups.add( group2 );
                 group2.put("key" , group1.get("key" ));
                 group2.put("name", group1.get("name"));
-                group2.put("groups", ac.getTotalGroups(k).keySet());
+                group2.put("groups", ac.getUnits(k).keySet());
             }
 
                 }

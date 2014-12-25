@@ -2,6 +2,7 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.annotation.Action;
 import app.hongs.annotation.ActionInvoker;
@@ -23,37 +24,41 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * <h3>异常代码</h3>
  * <pre>
- * 区间: 0x1100~0x110f
- * 0x1100 动作内异常
- * 0x1102 找不到动作
- * 0x1104 注解链溢出
- * 0x1106 无法执行动作方法，无法访问或参数错误
- * 0x1108 无法获取包、类或方法
+ * 区间: 0x10f0~0x10ff
+ * 0x10f0 找不到动作
+ * 0x10f1 注解链溢出
+ * 0x10f2 无法执行动作方法，无法访问或参数错误
  * </pre>
  *
  * @author Hong
  */
 public class ActionRunner {
     private int idx = 0;
+    private final String action;
     private final Object object;
     private final Method method;
     private final ActionHelper helper;
     private final Annotation[] annarr;
 
     public ActionRunner(String action, ActionHelper helper) throws HongsException {
-        method = getActions().get(action);
+        this.action = action;
+        this.method = getActions().get(action);
         if ( method == null ) {
-            throw new HongsException(0x1102, "Can not find action '"+action+"'");
+            throw new HongsException(0x11f0, "Can not find action '"+action+"'");
         }
         this.object = Core.getInstance(method.getDeclaringClass());
-        this.annarr = method.getAnnotations();
+        this.annarr = method.getAnnotations( );
         this.helper = helper;
+    }
+
+    public String getAction() {
+        return action;
     }
 
     public void doAction() throws HongsException {
         // 如果超出链长度, 则终止执行
         if ( idx  >  annarr.length) {
-            throw new HongsException(0x1104, "Action annotation out of index: "
+            throw new HongsException(0x11f1, "Action annotation out of index: "
             +idx+">"+annarr.length);
         }
 
@@ -88,18 +93,18 @@ public class ActionRunner {
         try {
             method.invoke(object, helper);
         } catch (   IllegalAccessException e) {
-            throw new HongsException(0x1106, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x10f2, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch ( IllegalArgumentException e) {
-            throw new HongsException(0x1106, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x10f2, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch (InvocationTargetException e) {
-            throw new HongsException(0x1100, e.getCause());
+            throw new HongsException(0x10f2, e.getCause());
         }
     }
 
     private static final ReadWriteLock ACTLOCK = new ReentrantReadWriteLock();
     private static Map<String, Method> ACTIONS = null;
 
-    public  static Map<String, Method> getActions() throws HongsException {
+    public  static Map<String, Method> getActions() {
         Lock rlock = ACTLOCK. readLock();
         rlock.lock();
         try {
@@ -113,8 +118,7 @@ public class ActionRunner {
         Lock wlock = ACTLOCK.writeLock();
         wlock.lock();
         try {
-            CoreConfig conf = (CoreConfig) Core.GLOBAL_CORE.get(CoreConfig.class);
-            String [ ] pkgs = conf.getProperty("core.serv.path").split(";");
+            String[] pkgs = CoreConfig.getInstance().getProperty("core.serv.path").split(";");
             ACTIONS = getActions( pkgs );
             return ACTIONS;
         } finally {
@@ -122,7 +126,7 @@ public class ActionRunner {
         }
     }
 
-    private static Map<String, Method> getActions(String... pkgs) throws HongsException {
+    private static Map<String, Method> getActions(String... pkgs) {
         Map<String, Method> acts = new HashMap();
 
         for(String pkgn : pkgs) {
@@ -130,10 +134,10 @@ public class ActionRunner {
             try {
                 clss = ClassNames.getClassNames(pkgn);
             } catch (IOException ex) {
-                throw new HongsException( 0x1108 , "Can not load package '" + pkgn + "'.", ex);
+                throw new HongsError( 0x3a , "Can not load package '" + pkgn + "'.", ex);
             }
             if (clss == null) {
-                throw new HongsException( 0x1108 , "Can not find package '" + pkgn + "'.");
+                throw new HongsError( 0x3a , "Can not find package '" + pkgn + "'.");
             }
 
             for(String clsn : clss) {
@@ -141,7 +145,7 @@ public class ActionRunner {
                 try {
                     clso = Class.forName(clsn);
                 } catch (ClassNotFoundException ex) {
-                    throw new HongsException(0x1108, "Can not find class '" + clsn + "'.");
+                    throw new HongsError(0x3a, "Can not find class '" + clsn + "'.");
                 }
 
                 // 从注解提取动作名
@@ -151,7 +155,7 @@ public class ActionRunner {
                 }
                 String actn = anno.value();
                 if (actn == null || actn.length() == 0) {
-                    actn = clsn.replace('.', '/');
+                    actn =  clsn.replace('.','/');
                 }
 
                 Method[] mtds = clso.getMethods();
@@ -165,13 +169,13 @@ public class ActionRunner {
                     }
                     String actx = annx.value();
                     if (actx == null || actx.length() == 0) {
-                        actx = mtdn;
+                        actx =  mtdn;
                     }
 
                     // 检查方法是否合法
                     Class[] prms = mtdo.getParameterTypes();
-                    if (prms == null || prms.length   != 1 || !prms[0].isAssignableFrom(ActionHelper.class)) {
-                        throw new HongsException(0x1108, "Can not find action method '"+clsn+"."+mtdn+"(ActionHelper)'.");
+                    if (prms == null || prms.length != 1 || !prms[0].isAssignableFrom(ActionHelper.class)) {
+                        throw new HongsError(0x3a, "Can not find action method '"+clsn+"."+mtdn+"(ActionHelper)'.");
                     }
 
                     acts.put(actn + "/" + actx, mtdo);

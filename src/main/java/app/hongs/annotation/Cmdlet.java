@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  *
  * @author Hong
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cmdlet {
     String value() default "";

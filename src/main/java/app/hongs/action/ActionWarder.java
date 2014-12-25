@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
  * 动作承载器
  *
  * <p>
- 映射到 *.csp *.api *.jsp /common/auth/* /common/conf/* /common/lang/*<br/>
+ 映射到 *.csp *.api *.jsp /common/auth/* /common/conf/* /common/zone/*<br/>
  * 必须作为第一个 filter
  * </p>
  *
@@ -92,11 +92,7 @@ implements Filter {
         Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
         // 调一下 ActionRunner 来加载来加载动作
-        try {
-            ActionRunner.getActions();
-        } catch ( HongsException ex ) {
-            throw new ServletException(ex);
-        }
+        ActionRunner.getActions();
 
             // 启动系统属性
             for (Map.Entry et : conf.entrySet()) {
@@ -168,10 +164,10 @@ implements Filter {
         ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
         HttpServletResponse rzp = helper.getResponse();
         try {
-            helper.setInstance(req, rsp);
+            helper.reinitHelper(req, rsp);
             chain.doFilter((ServletRequest)req, (ServletResponse)rsp);
         } finally {
-            helper.setInstance(req, rzp);
+            helper.reinitHelper(req, rzp);
         }
     }
 
@@ -189,32 +185,50 @@ implements Filter {
 
     private void doIniter(HttpServletRequest req, ActionHelper helper)
     throws ServletException {
-        Core.ACTION_TIME.set(System.currentTimeMillis());
+        Core.ACTION_TIME.set(System.currentTimeMillis( ));
 
-        Core.ACTION_NAME.set(getRealityServletPath(req).substring(1));
+        Core.ACTION_NAME.set(getRealityServletPath( req ).substring( 1 ));
 
-        CoreConfig  conf  = (CoreConfig) Core.getInstance(  CoreConfig.class  );
+        CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+
+        Core.ACTION_ZONE.set(conf.getProperty("core.timezone.default","GMT-8"));
+        if (conf.getProperty("core.language.probing", false)) {
+            /**
+             * 时区可以记录到Session/Cookies里
+             */
+            String sess = conf.getProperty("core.timezone.session", "zone");
+            String zone = (String) helper.getSessValue(sess);
+            if (zone == null || zone.length() == 0) {
+                // 从 Cookie 里提取时区
+                Cookie[] cookies = req.getCookies();
+                if (cookies != null) for (Cookie cookie : cookies) {
+                    if (cookie.getName( ).equals(sess)) {
+                        zone = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+        }
+
         Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-cn"));
         if (conf.getProperty("core.language.probing", false)) {
             /**
              * 语言可以记录到Session/Cookies里
              */
-            String lang;
             String sess = conf.getProperty("core.language.session", "lang");
-//          lang = (String) req.getSession().getAttribute(sess);
-            lang = (String) helper.getAttribute(sess);
+            String lang = (String) helper.getSessValue(sess);
             if (lang == null || lang.length() == 0) {
                 // 从 Cookie 里提取语言
                 Cookie[] cookies = req.getCookies();
-                if  (cookies != null)
-                for (Cookie cookie : cookies)
-                if  (cookie.getName().equals(sess)) {
-                    lang = cookie.getValue( );
-                    break;
+                if (cookies != null) for (Cookie cookie : cookies) {
+                    if (cookie.getName( ).equals(sess)) {
+                        lang = cookie.getValue();
+                        break;
+                    }
                 }
-            if (lang == null || lang.length() == 0) {
-                lang = req.getHeader("Accept-Language");
-            }
+                if (lang == null || lang.length() == 0) {
+                    lang = req.getHeader("Accept-Language");
+                }
             }
 
             /**

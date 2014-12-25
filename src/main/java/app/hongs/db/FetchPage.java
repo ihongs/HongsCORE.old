@@ -1,25 +1,12 @@
 package app.hongs.db;
 
-import app.hongs.Core;
-import app.hongs.CoreConfig;
 import app.hongs.HongsException;
-
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 /**
  * 分页查询
- *
- * <p>
- * 注意: 必须先调 getList 然后调 getPage
- * </p>
- *
- * <h3>配置选项:</h3>
- * <pre>
- * core.first.of.page 首页序号, 0或1
- * core.rows.per.page 每页多少条记录
- * </pre>
  *
  * @author Hongs
  */
@@ -32,13 +19,13 @@ public class FetchPage
 
   private FetchCase caze;
 
-  private int page;
+  private int page = 1 ;
 
-  private int rows;
+  private int rows = 10;
 
-  private Map info = null;
+  private Map info = new HashMap();
 
-  public FetchPage(DB db, FetchCase caze)
+  public FetchPage(DB db, FetchCase caze) throws HongsException
   {
     this.db    = db;
     this.caze  = caze;
@@ -47,17 +34,17 @@ public class FetchPage
     Object page2 = caze.getOption("page");
     if (page2 != null && page2.equals(""))
     {
-      this.page = Integer.parseInt(page2.toString());
+      this.setPage(Integer.parseInt(page2.toString()));
     }
 
     Object rows2 = caze.getOption("rows");
-    if (rows2 != null && page2.equals(""))
+    if (rows2 != null && rows2.equals(""))
     {
-      this.rows = Integer.parseInt(rows2.toString());
+      this.setRows(Integer.parseInt(rows2.toString()));
     }
   }
 
-  public FetchPage(Table table, FetchCase caze)
+  public FetchPage(Table table, FetchCase caze) throws HongsException
   {
     this(table.db, caze);
     this.table  =  table;
@@ -65,73 +52,39 @@ public class FetchPage
     this.caze.from(table.tableName, table.name);
   }
 
-  private void init()
+  public void setPage(int page) throws HongsException
   {
-    if (this.info == null)
+    if (page <  0)
     {
-      this.info = new HashMap();
-    }
-    if (this.page == 0)
+      this.getPage( );
+      int pc = (Integer) this.info.get("pagecount");
+      int pn = page + 1;
+      while (pn <  0)
+      {
+        pn = pn + pc;
+      }
+      page = pn;
+    } else
+    if (page == 0)
     {
-      CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-      this.page = conf.getProperty("core.first.of.page", 1 );
+      page = 1 ;
     }
-    if (this.rows == 0)
-    {
-      CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-      this.rows = conf.getProperty("core.rows.per.page", 20);
-    }
-    this.info.put("page", this.page);
-    this.info.put("rows", this.rows);
-  }
-
-  public void setPage(int page)
-  {
     this.page = page;
   }
 
-  public void setRows(int rows)
+  public void setRows(int rows) throws HongsException
   {
+    if (rows == 0)
+    {
+      rows = 10;
+    }
     this.rows = rows;
   }
 
   public List getList()
     throws HongsException
   {
-    this.init();
-
-    /**
-     * 如果页码等于0, 则将其设为1
-     * 如果页码小于0, 则逆向计算其真实页码
-     */
-    if (this.page == 0)
-    {
-      this.page = 1 ;
-    }
-    else
-    if (this.page <  0)
-    {
-      this.getPage();
-      int pc = (Integer)this.info.get("pagecount");
-      int pn = this.page + 1;
-      while (pn < 0)
-      {
-        pn = pn + pc;
-      }
-      this.page = pn;
-    }
-
-    /**
-     * 如果行数小于0, 则不使用分页
-     */
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    int pn = this.page - conf.getProperty( "core.first.of.page", 1 );
-    int rn = this.rows ;
-    if (this.rows <  0)
-    {
-      rn = Math.abs(rn);
-    }
-    caze.limit(pn * rn, rn);
+    caze.limit((this.page - 1) * this.rows, this.rows);
 
     // 查询列表
     List list;
@@ -145,27 +98,19 @@ public class FetchPage
     }
 
     // 获取行数
-    if (! list.isEmpty())
+    if (!list.isEmpty())
     {
-      this.info.put("errno", 0);
-      if (this.rows <  0) // 不要分页
-      {
-        this.info.put("rowscount", list.size());
-        this.info.put("pagecount", 1);
-      } 
+      this.info.put("errno", 0); // 没有异常
+    } else
+    if (this.page == 1 )
+    {
+      this.info.put("errno", 1); // 列表为空
+      this.info.put("pagecount", 0);
+      this.info.put("rowscount", 0);
     }
     else
     {
-      if (this.page == 1)
-      {
-        this.info.put("errno", 1); // 列表为空
-        this.info.put("pagecount", 0);
-        this.info.put("rowscount", 0);
-      }
-      else
-      {
-        this.info.put("errno", 2); // 页码超出
-      }
+      this.info.put("errno", 2); // 页码超出
     }
 
     return list;
@@ -174,13 +119,15 @@ public class FetchPage
   public Map getPage()
     throws HongsException
   {
-    this.init();
+    this.info.put("page", this.page);
+    this.info.put("rows", this.rows);
 
+    // 列表为空则不用计算了
     if (this.info.containsKey("pagecount"))
     {
       return this.info;
     }
-
+    
     // 查询总行数
     String   sql;
     Object[] params;

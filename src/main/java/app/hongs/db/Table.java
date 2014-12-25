@@ -4,20 +4,20 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
-
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.sql.Types;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 //import java.sql.ResultSet;
 //import java.sql.SQLException;
 
@@ -35,8 +35,6 @@ import java.sql.Timestamp;
  * 0x1070 缺少数据库对象
  * 0x1072 配置不能为空
  * 0x1074 缺少表名
- *
- * 0x107a 获取字段信息失败
  *
  * 0x1080 不能为空
  * 0x1082 精度超出
@@ -82,11 +80,12 @@ public class Table
    */
   public String primaryKey = "";
 
-  private Map assocs;
-  private Map scossa;
+  protected Map assocs;
+  protected Map relats;
+  
   private Map columns;
 
-  public Table(DB db, Map tableConf)
+  public Table(DB db, Map tblConf)
     throws HongsException
   {
     if (db == null)
@@ -95,38 +94,44 @@ public class Table
     }
     this.db = db;
 
-    if (tableConf == null)
+    if (tblConf == null)
     {
       throw new HongsException(0x1072, "Param tableConfig can not be null");
     }
 
-    if (!tableConf.containsKey("name"))
+    if (!tblConf.containsKey("name"))
     {
-      throw new HongsException(0x1074, "table name in tableConfig can not be empty");
+      throw new HongsException(0x1074, "Table name in tableConfig can not be empty");
     }
-    this.name = (String)tableConf.get("name");
+    this.name = (String)tblConf.get("name");
 
-    String tablePrefix = "";
-    if (tableConf.containsKey("prefix"))
+    if (tblConf.containsKey("tableName"))
     {
-      tablePrefix = (String)tableConf.get("prefix");
+      this.tableName = (String)tblConf.get("tableName");
     }
-    String tableSuffix = "";
-    if (tableConf.containsKey("suffix"))
+    else
     {
-      tableSuffix = (String)tableConf.get("suffix");
-    }
-    this.tableName = tablePrefix + this.name + tableSuffix;
-
-    if (tableConf.containsKey("primaryKey"))
-    {
-      this.primaryKey = (String)tableConf.get("primaryKey");
+      this.tableName = name;
     }
 
-    if (tableConf.containsKey("assocs"))
+    if (db.tablePrefix != null)
     {
-      this.assocs = (Map)tableConf.get("assocs");
-      this.scossa = (Map)tableConf.get("scossa");
+      this.tableName = db.tablePrefix + this.tableName;
+    }
+    if (db.tableSuffix != null)
+    {
+      this.tableName = this.tableName + db.tableSuffix;
+    }
+
+    if (tblConf.containsKey("primaryKey"))
+    {
+      this.primaryKey = (String)tblConf.get("primaryKey");
+    }
+
+    if (tblConf.containsKey("assocs"))
+    {
+      this.assocs = (Map)tblConf.get("assocs");
+      this.relats = (Map)tblConf.get("relats");
     }
   }
 
@@ -367,7 +372,7 @@ public class Table
    * @param type
    * @param name
    * @param values
-   * @return 
+   * @return
    */
   protected String getFormat(String type, String name, Map values)
   {
@@ -388,7 +393,7 @@ public class Table
         return (String) values.remove( key );
       }
     }
-    
+
     String fmt;
     if ("time".equals(type)) {
       fmt = "HH:mm:ss";
@@ -427,8 +432,8 @@ public class Table
    */
   protected Map getAssoc(String name)
   {
-    if (this.scossa.containsKey(name))
-    return (Map)this.scossa.get(name);
+    if (this.relats.containsKey(name))
+    return (Map)this.relats.get(name);
     return null;
   }
 
@@ -895,44 +900,36 @@ public class Table
     ex.setLocalizedOptions(trans.toArray(new String[] {}));
     return ex;
   }
-  
-  private Table()
-  {
-    this.name = "";
-    this.tableName  = "";
-    this.primaryKey = "";
-    this.assocs = new HashMap();
-    this.scossa = new HashMap();
-  }
-  
+
   /**
-   * 改方法不同于 DB.getTable(String) 方法, 不会获取 table 配置
+   * 与 DB.getTable(String) 方法不同, 不会获取 table 配置
    * @param db
-   * @param tableName
-   * @param primaryKey
-   * @return 
+   * @param name
+   * @param pkey
+   * @return
+   * @throws HongsException
    */
-  public static Table getInstanceByTableName(DB db, String tableName, String primaryKey)
+  public static Table getInstanceByName(DB db, String name, String pkey)
+    throws HongsException
   {
-    Table inst = new Table();
-    inst.db = db;
-    inst.tableName  = tableName ;
-    inst.primaryKey = primaryKey;
-    return  inst;
+    Map map = new HashMap();
+    map.put("name" , name );
+    map.put("primaryKey", pkey);
+    Table inst = new Table(db, map);
+    return inst;
   }
-  
+
   /**
-   * 改方法不同于 DB.getTable(String) 方法, 不会获取 table 配置
+   * 与 DB.getTable(String) 方法不同, 不会获取 table 配置
    * @param db
-   * @param tableName
-   * @return 
+   * @param name
+   * @return
+   * @throws HongsException
    */
-  public static Table getInstanceByTableName(DB db, String tableName)
+  public static Table getInstanceByName(DB db, String name)
+    throws HongsException
   {
-    Table inst = new Table();
-    inst.db = db;
-    inst.tableName  = tableName ;
-    return  inst;
+    return getInstanceByName(db, name);
   }
-  
+
 }

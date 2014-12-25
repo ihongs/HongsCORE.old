@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>app.hongs</groupId>
     <artifactId>HongsCORE</artifactId>
-    <version>0.3.4</version>
+    <version>0.3.5</version>
     <packaging>war</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,7 +60,7 @@
         </plugins>
     </reporting>
     <build>
-        <directory>bin</directory>
+        <!--directory>bin</directory-->
         <finalName>Hongs-CORE-${project.version}</finalName>
         <plugins>
             <plugin>
@@ -90,15 +90,15 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
-                            <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
+                            <classesDirectory>${basedir}/target/classes</classesDirectory>
+                            <outputDirectory>web/WEB-INF/lib</outputDirectory>
                             <finalName>hongs-core-${project.version}</finalName>
-                            <includes>
+                            <!--includes>
                                 <include>app/hongs/**</include>
                             </includes>
                             <excludes>
                                 <exclude>app/hongs/serv/**</exclude>
-                            </excludes>
+                            </excludes-->
                             <archive>
                                 <addMavenDescriptor>false</addMavenDescriptor>
                             </archive>
@@ -111,8 +111,8 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classesDirectory>${project.basedir}/web/WEB-INF/classes</classesDirectory>
-                            <outputDirectory>${project.basedir}/web/WEB-INF/lib</outputDirectory>
+                            <classesDirectory>bin/classes</classesDirectory>
+                            <outputDirectory>web/WEB-INF/lib</outputDirectory>
                             <finalName>hongs-serv-${project.version}</finalName>
                             <includes>
                                 <include>app/hongs/serv/**</include>

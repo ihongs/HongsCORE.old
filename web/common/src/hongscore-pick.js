@@ -34,7 +34,7 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
     var v    = { };
     var n    = box.attr("name")||box.attr("data-fn");
     var form = box.closest(".HsForm").data("HsForm");
-    var mul  = /(\[\]|\.)$/.test( n );
+    var mul  = /(\[\]|\.\.|\.$)/.test(n);
     var btn  = jQuery(this);
 
     if (! fil) {
@@ -337,7 +337,7 @@ function hsListFillPick(cel, v, n) {
     $(document)
     .on("click", "[data-toggle=hsPick]",
     function() {
-        var url = $(this).attr("href");
+        var url = $(this).attr("data-href") || $(this).attr("href");
         var box = $(this).attr("data-target");
         if (box) {
             box = $(this)._hsTarget(box);

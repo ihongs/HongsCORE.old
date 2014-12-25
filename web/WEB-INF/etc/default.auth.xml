@@ -12,42 +12,42 @@
 <root xmlns="http://hongs-core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://hongs-core ac.xsd">
-    <page name="首页" uri="">
-        <include>hcim</include>
-        <page name="信息管理" uri="hcim/index.html"></page>
-        <page name="用户管理" uri="hcum/index.html"></page>
+    <page name="首页" href="index.html">
+        <import>hcim</import>
+        <page name="数据管理" href="hcdm/default.html"></page>
+        <page name="用户管理" href="hcum/default.html"></page>
         <!--
-        <page name="首页" uri="/"/>
-        <page name="广告中心" uri="/hongs/util/Jump/To.act/ad">
-            <page name="订单管理" uri="/adms/order_list.jsp">
-                <page name="{opr}广告主" uri="/adms/owner_form.jsp"/>
-                <page name="{opr}订单" uri="/adms/order_form.jsp"/>
-                <page name="广告管理" uri="/adms/ad_list.jsp">
-                    <page name="{opr}广告" uri="/adms/ad_form.jsp"/>
+        <page name="首页" href="/"/>
+        <page name="广告中心" href="/hongs/util/Jump/To.act/ad">
+            <page name="订单管理" href="/adms/order_list.jsp">
+                <page name="{opr}广告主" href="/adms/owner_form.jsp"/>
+                <page name="{opr}订单" href="/adms/order_form.jsp"/>
+                <page name="广告管理" href="/adms/ad_list.jsp">
+                    <page name="{opr}广告" href="/adms/ad_form.jsp"/>
                 </page>
             </page>
-            <page name="素材管理" uri="/adms/stuff_list.jsp">
-                <page name="{opr}广告主" uri="/adms/owner_form.jsp"/>
-                <page name="{opr}素材" uri="/adms/stuff_form.jsp"/>
+            <page name="素材管理" href="/adms/stuff_list.jsp">
+                <page name="{opr}广告主" href="/adms/owner_form.jsp"/>
+                <page name="{opr}素材" href="/adms/stuff_form.jsp"/>
             </page>
-            <page name="广告位管理" uri="/adms/place_list.jsp">
-                <page name="{opr}分类" uri="/adms/class_form.jsp"/>
-                <page name="{opr}广告位" uri="/adms/place_form.jsp"/>
+            <page name="广告位管理" href="/adms/place_list.jsp">
+                <page name="{opr}分类" href="/adms/class_form.jsp"/>
+                <page name="{opr}广告位" href="/adms/place_form.jsp"/>
             </page>
-            <page name="广告形式管理" uri="/adms/style_list.jsp">
-                <page name="{opr}广告形式" uri="/adms/style_form.jsp"/>
-            </page>
-        </page>
-        <page name="报表中心" uri="/hongs/util/Jump/To.act/report">
-            <page name="数据概览" uri="/crms/ad_index">
-            </page>
-            <page name="自由报表" uri="/crms/ad_report">
+            <page name="广告形式管理" href="/adms/style_list.jsp">
+                <page name="{opr}广告形式" href="/adms/style_form.jsp"/>
             </page>
         </page>
-        <page name="控制中心" uri="/hongs/util/Jump/To.act/system">
-            <page name="用户管理" uri="/hcum/user_list.jsp">
-                <page name="{opr}部门" uri="/hcum/dept_form.jsp"/>
-                <page name="{opr}用户" uri="/hcum/user_form.jsp"/>
+        <page name="报表中心" href="/hongs/util/Jump/To.act/report">
+            <page name="数据概览" href="/crms/ad_index">
+            </page>
+            <page name="自由报表" href="/crms/ad_report">
+            </page>
+        </page>
+        <page name="控制中心" href="/hongs/util/Jump/To.act/system">
+            <page name="用户管理" href="/hcum/user_list.jsp">
+                <page name="{opr}部门" href="/hcum/dept_form.jsp"/>
+                <page name="{opr}用户" href="/hcum/user_form.jsp"/>
                 <group name="部门管理" key="hcum.dept.manage">
                     <action>/action/hcum/Dept/Tree</action>
                     <action>/action/hcum/Dept/Info</action>
@@ -61,7 +61,7 @@
                     <action>/action/hcum/Dept/Remove</action>
                 </group>
             </page>
-            <page name="系统设置" uri="/"/>
+            <page name="系统设置" href="/"/>
         </page>
         //-->
     </page>

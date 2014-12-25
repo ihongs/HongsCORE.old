@@ -365,6 +365,12 @@ extends HashMap<String, Object>
          =  new InheritableThreadLocal();
 
   /**
+   * 动作时区标识
+   */
+  public static InheritableThreadLocal<String> ACTION_ZONE
+         =  new InheritableThreadLocal();
+
+  /**
    * 获取核心对象
    * @return 核心对象
    */
@@ -419,13 +425,13 @@ extends HashMap<String, Object>
     long n;
 
     n = System.currentTimeMillis();
-    String s1 = String.format("%8s", Util.as36Hex(n));
+    String s1 = String.format("%8s", Util.to36Hex(n));
 
     n = Thread.currentThread().getId();
-    String s2 = String.format("%4s", Util.as36Hex(n));
+    String s2 = String.format("%4s", Util.to36Hex(n));
 
     n = (long) ( Math.random() * 1679615 ); //36^4-1
-    String s3 = String.format("%4s", Util.as36Hex(n));
+    String s3 = String.format("%4s", Util.to36Hex(n));
 
     if (s1.length() > 8) s1 = s1.substring(s1.length() - 8);
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);

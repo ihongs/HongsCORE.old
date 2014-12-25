@@ -3,49 +3,56 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <!-- 基础属性 -->
-  <!-- type:map,set,list,json,string,number,boolean,instance -->
-  <xs:attribute name="key" type="xs:string"/>
+  <xs:attribute name="name" type="xs:string"/>
+  <xs:attribute name="extr" type="xs:string"/>
   <xs:attribute name="type" type="xs:string"/>
-  <xs:attribute name="uri" type="xs:string"/>
-  <xs:attribute name="link" type="xs:string"/>
+  <xs:attribute name="required" type="xs:string"/>
+  <xs:attribute name="repeated" type="xs:string"/>
+
+  <!-- 枚举选项 -->
+  <xs:element name="option" type="xs:string"/>
+
+  <!-- 验证参数 -->
+  <xs:element name="attrib" type="xs:string"/>
 
   <!-- 数据 -->
   <xs:element name="data">
     <xs:complexType>
-      <xs:attribute ref="key"/>
-      <xs:attribute ref="type"/>
+      <xs:attribute ref="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- 枚举 -->
+  <xs:element name="enum">
+    <xs:complexType>
+      <xs:attribute ref="name" use="required"/>
       <xs:all>
-        <xs:element ref="data" maxOccurs="unbounded"/>
+        <xs:element ref="option" maxOccurs="unbounded"/>
       </xs:all>
     </xs:complexType>
   </xs:element>
 
-  <!-- 链接 -->
-  <xs:element name="link">
+  <!-- 规则 -->
+  <xs:element name="item">
     <xs:complexType>
-      <xs:attribute ref="key"/>
-      <xs:attribute ref="link"/>
-    </xs:complexType>
-  </xs:element>
-
-  <!-- 请求 -->
-  <xs:element name="req">
-    <xs:complexType>
-      <xs:attribute ref="uri"/>
+      <xs:attribute ref="name" use="required"/>
+      <xs:attribute ref="datatype"/>
+      <xs:attribute ref="verifier"/>
+      <xs:attribute ref="required"/>
+      <xs:attribute ref="repeated"/>
       <xs:all>
-        <xs:element ref="link" maxOccurs="unbounded"/>
-        <xs:element ref="data" maxOccurs="unbounded"/>
+        <xs:element ref="attrib" maxOccurs="unbounded"/>
       </xs:all>
     </xs:complexType>
   </xs:element>
 
-  <!-- 响应 -->
-  <xs:element name="rsp">
+  <!-- 表单 -->
+  <xs:element name="form">
     <xs:complexType>
-      <xs:attribute ref="uri"/>
+      <xs:attribute ref="name" use="required"/>
+      <xs:attribute ref="extr"/>
       <xs:all>
-        <xs:element ref="link" maxOccurs="unbounded"/>
-        <xs:element ref="data" maxOccurs="unbounded"/>
+        <xs:element ref="item" maxOccurs="unbounded"/>
       </xs:all>
     </xs:complexType>
   </xs:element>
@@ -55,8 +62,8 @@
     <xs:complexType>
       <xs:all>
         <xs:element ref="data" maxOccurs="unbounded"/>
-        <xs:element ref="req" maxOccurs="unbounded"/>
-        <xs:element ref="rsp" maxOccurs="unbounded"/>
+        <xs:element ref="enum" maxOccurs="unbounded"/>
+        <xs:element ref="form" maxOccurs="unbounded"/>
       </xs:all>
     </xs:complexType>
   </xs:element>

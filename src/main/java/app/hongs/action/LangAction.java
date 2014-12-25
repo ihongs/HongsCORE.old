@@ -74,17 +74,6 @@ public class LangAction
       return;
     }
 
-    String conf, lang;
-    p = name.lastIndexOf('.');
-    if (p != -1) {
-      lang = name.substring( p+ 1 );
-      conf = name.substring( 0, p );
-    }
-    else {
-      lang = Core.ACTION_LANG.get();
-      conf = name;
-    }
-
     /**
      * 如果指定语言的数据并没有改变
      * 则直接返回 304 Not modified
@@ -104,8 +93,9 @@ public class LangAction
     String s;
     if (!LangAction.caches.containsKey(name))
     {
-      try {
-        s = this.makeLanguage(conf, lang);
+      try
+      {
+        s = this.makeLang(name);
       }
       catch (HongsError ex) {
         helper.error500(ex.getMessage());
@@ -159,13 +149,14 @@ public class LangAction
    * 无后缀及其他为字符串
    * @param lang
    */
-  private String makeLanguage(String confName, String langName)
+  private String makeLang(String confName)
   {
-    Maker mk = new Maker(confName, langName);
-    StringBuilder sb = new StringBuilder(  );
-    sb.append("{\r\n");
+    Maker         mk = new Maker(confName);
+    StringBuilder sb = new StringBuilder();
 
     /** 配置代码 **/
+    
+    sb.append("{\r\n");
 
     // 公共语言
     if ("default".equals(confName))
@@ -207,9 +198,9 @@ public class LangAction
   {
     private CoreLanguage lang;
 
-    public Maker(String name, String lang)
+    public Maker(String name)
     {
-      this.lang = new CoreLanguage(name, lang);
+      this.lang = new CoreLanguage(name);
     }
 
     public String make(String key)

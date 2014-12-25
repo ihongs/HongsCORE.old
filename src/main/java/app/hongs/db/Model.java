@@ -19,10 +19,10 @@ import java.util.Set;
  *
  * <p>
  * 当要使用 save(add,put),create(add),update(put),delete(del) 时请确保表有配置主键.<br/>
- 扩展动作方法: getPage,save,exists,unique 基础动作方法: getList,getInfo,create,update,delete
- 通常它们被动作类直接调用; 基础模型方法: get,add,put,del 一般改写只需覆盖它们即可;
- filter,permit 分别用于获取和更改数据等常规操作进行过滤,
- permit 默认调用 filter 来实现的, 可覆盖它来做资源过滤操作.<br/>
+ * 基础动作方法: getList,getInfo,create,update,delete 扩展动作方法: exists,unique
+ * 通常它们被动作类直接调用; 基础模型方法: get,add,put,del 一般改写只需覆盖它们即可;
+ * filter, permit 分别用于获取和更改数据等常规操作时进行过滤,
+ * permit 默认调用 filter 来实现的, 可覆盖它来做资源过滤操作.<br/>
  * 可使用查询参数:
  * <code>
  * ?f1=123&f2.-gt=456&wd=a+b&ob=-f1+f2&pn=1&rs=10&cs=id+f1+f2
@@ -62,39 +62,39 @@ public class Model
 
   /**
    * 页码参数名
- 影响getPage/getList/filter
+   * 影响getPage
    */
-  protected String pageKey = "page";
+  protected String pageKey = "pn";
 
   /**
    * 行数参数名
- 影响getPage/getList/filter
+   * 影响getPage
    */
-  protected String rowsKey = "rows";
+  protected String rowsKey = "rn";
 
   /**
    * 字段参数名
- 影响getPage/getList/filter
+   * 影响getPage/getList/filter
    */
-  protected String colsKey = "cols";
+  protected String colsKey = "cs";
 
   /**
    * 排序参数名
- 影响getPage/getList/filter
+   * 影响getPage/getList/filter
    */
   protected String sortKey = "ob";
 
   /**
    * 搜索参数名
- 影响getPage/getList/filter
+   * 影响getPage/getList/filter
    */
   protected String findKey = "wd";
 
   /**
    * 被搜索的字段
- 影响getPage/getList/filter
+   * 影响getPage/getList/filter
    */
-  protected String[] findCols = new String[] {"name"};
+  public String[] findCols = new String[] {"name"};
 
   /**
    * 构造方法
@@ -115,65 +115,90 @@ public class Model
 
     // 配置
     CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
-    this.pageKey = conf.getProperty("fore.model.page.key", "pn");
-    this.rowsKey = conf.getProperty("fore.model.rows.key", "rn");
-    this.colsKey = conf.getProperty("fore.model.cols.key", "cs");
-    this.sortKey = conf.getProperty("fore.model.sort.key", "ob");
-    this.findKey = conf.getProperty("fore.model.find.key", "wd");
+    this.pageKey = conf.getProperty("fore.page.key", "pn");
+    this.rowsKey = conf.getProperty("fore.rows.key", "rn");
+    this.colsKey = conf.getProperty("fore.cols.key", "cs");
+    this.sortKey = conf.getProperty("fore.sort.key", "ob");
+    this.findKey = conf.getProperty("fore.find.key", "wd");
   }
 
-  //** 扩展动作方法 **/
+  //** 标准动作方法 **/
 
   /**
    * 获取分页
    *
    * 为空则page.errno为1, 页码超出则page.errno为2
+   * 页码等于 0 则不要列表数据
+   * 行数小于 0 则不要分页信息
+   * 行数等于 0 则不要使用分页
+   * 页码小于 0 则逆向倒数获取
    *
-   * @param req
+   * @param rd
    * @param caze
    * @return 单页列表
    * @throws app.hongs.HongsException
    */
-  public Map getPage(Map req, FetchCase caze)
+  public Map getList(Map rd, FetchCase caze)
     throws HongsException
   {
-    if (req == null)
+    if (rd == null)
     {
-      req = new HashMap();
+      rd = new HashMap();
     }
     if (caze == null)
     {
       caze = new FetchCase();
     }
 
-    caze.setOption("MODEL_METHOD", "getPage");
-    this.filter(caze, req);
+    caze.setOption("MODEL_METHOD", "getList");
+    this.filter(caze, rd);
 
     // 获取页码, 默认为第一页
-    int page = 0;
-    if (req.containsKey(this.pageKey))
+    int page = 1;
+    if (rd.containsKey(this.pageKey))
     {
-      page = Integer.parseInt((String)req.get(this.pageKey));
+      page = Integer.parseInt((String)rd.get(this.pageKey));
     }
 
-    // 获取行数, 默认从配置读取
-    int rows = 0;
-    if (req.containsKey(this.rowsKey))
+    // 获取行数, 默认依从配置
+    int rows;
+    if (rd.containsKey(this.rowsKey))
     {
-      rows = Integer.parseInt((String)req.get(this.rowsKey));
+      rows = Integer.parseInt((String)rd.get(this.rowsKey));
+    }
+    else
+    {
+      rows = CoreConfig.getInstance().getProperty("fore.rows.per.page", 10);
     }
 
-    // 构建分页对象
-    FetchPage fp = new FetchPage(this.table, caze);
-    fp.setPage(page);
-    fp.setRows(rows);
-    List list = fp.getList();
-    Map  info = fp.getPage();
-
-    // 组织返回数据
     Map data = new HashMap();
-    data.put("list" , list );
-    data.put("page" , info );
+
+    if (rows != 0)
+    {
+      FetchPage fp = new FetchPage ( table , caze );
+      fp.setRows(rows >  0 ? rows : Math.abs(rows));
+      fp.setPage(page != 0 ? page : 1);
+
+      // 页码等于 0 则不要列表数据
+      if (page != 0 )
+      {
+        List list = fp.getList();
+        data.put( "list", list );
+      }
+
+      // 行数小于 0 则不要分页信息
+      if (rows >  0 )
+      {
+        Map  info = fp.getPage();
+        data.put( "page", info );
+      }
+    }
+    else
+    {
+      // 行数等于 0 则不要使用分页
+        List list = table.fetchMore(caze);
+        data.put( "list", list );
+    }
 
     return data;
   }
@@ -185,30 +210,167 @@ public class Model
    *
    * 含分页信息
    *
-   * @param req
+   * @param rd
    * @return 单页列表
    * @throws app.hongs.HongsException
    */
-  public Map getPage(Map req)
+  public Map getList(Map rd)
     throws HongsException
   {
-    return this.getPage(req, null);
+    return this.getList(rd, null);
   }
+
+  /**
+   * 获取信息(调用get)
+   *
+   * @param rd
+   * @param caze
+   * @return 记录信息
+   * @throws app.hongs.HongsException
+   */
+  public Map getInfo(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    Object id = rd.get(this.table.primaryKey);
+    Map info = this.get(( String ) id , caze );
+    Map data = new HashMap();
+    data.put( "info", info );
+    return data;
+  }
+
+  /**
+   * 获取信息(无查询结构)
+   *
+   * @param rd
+   * @return 记录信息
+   * @throws app.hongs.HongsException
+   */
+  public Map getInfo(Map rd)
+    throws HongsException
+  {
+    return this.getInfo(rd, null);
+  }
+
+  /**
+   * 创建记录
+   *
+   * @param rd
+   * @return 记录ID
+   * @throws HongsException
+   */
+  public String create(Map rd)
+    throws HongsException
+  {
+    return this.add(rd);
+  }
+
+  /**
+   * 更新记录
+   *
+   * @param rd
+   * @param caze
+   * @return 更新条数
+   * @throws app.hongs.HongsException
+   */
+  public int update(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    Object idz = rd.get(this.table.primaryKey);
+    if (idz == null) {
+        return this.put(null, null);
+    }
+
+    Set<String> ids = new LinkedHashSet();
+    if (idz instanceof Collection ) {
+        ids.addAll((Collection)idz);
+    } else {
+        ids.add   ( idz.toString());
+    }
+
+    Map  dat  =  new  HashMap  (   rd  );
+    rd.remove(  this.table.primaryKey  );
+
+    for (String id : ids )
+    {
+      this.put( id , dat );
+    }
+
+    return ids.size();
+  }
+
+  /**
+   * 更新记录
+   *
+   * @param rd
+   * @return 更新条数
+   * @throws app.hongs.HongsException
+   */
+  public int update(Map rd)
+    throws HongsException
+  {
+    return this.update(rd, null);
+  }
+
+  /**
+   * 删除记录
+   *
+   * @param rd
+   * @param caze
+   * @return 删除条数
+   * @throws app.hongs.HongsException
+   */
+  public int delete(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    Object idz = rd.get(this.table.primaryKey);
+    if (idz == null) {
+        return this.del(null, null);
+    }
+
+    Set<String> ids = new LinkedHashSet();
+    if (idz instanceof Collection ) {
+        ids.addAll((Collection)idz);
+    } else {
+        ids.add   ( idz.toString());
+    }
+
+    for (String id : ids )
+    {
+      this.del( id  );
+    }
+
+    return ids.size();
+  }
+
+  /**
+   * 删除记录
+   *
+   * @param rd
+   * @return 删除条数
+   * @throws app.hongs.HongsException
+   */
+  public int delete(Map rd)
+    throws HongsException
+  {
+    return this.delete(rd, null);
+  }
+
+  //** 扩展动作方法 **/
 
   /**
    * 检查是否存在
    *
-   * @param req
+   * @param rd
    * @param caze
    * @return 存在为true, 反之为false
    * @throws app.hongs.HongsException
    */
-  public boolean exists(Map req, FetchCase caze)
+  public boolean exists(Map rd, FetchCase caze)
     throws HongsException
   {
-    if (req == null)
+    if (rd == null)
     {
-      req = new HashMap();
+      rd = new HashMap();
     }
     if (caze == null)
     {
@@ -224,13 +386,13 @@ public class Model
     }
 
     // 是否缺少n或v参数
-    if (!req.containsKey("n") || !req.containsKey("v"))
+    if (!rd.containsKey("n") || !rd.containsKey("v"))
     {
       throw new HongsException(0x10aa, "Param n or v can not be empty");
     }
 
-    String n = (String) req.get("n");
-    String v = (String) req.get("v");
+    String n = (String) rd.get("n");
+    String v = (String) rd.get("v");
 
     Map columns = this.table.getColumns();
 
@@ -242,7 +404,7 @@ public class Model
 
     caze.where(".`"+n+"` = ?", v);
 
-    Iterator it = req.entrySet( ).iterator();
+    Iterator it = rd.entrySet( ).iterator();
     while (it.hasNext())
     {
       Map.Entry entry = (Map.Entry)it.next();
@@ -269,234 +431,26 @@ public class Model
   /**
    * 检查是否存在
    *
-   * @param req
+   * @param rd
    * @return 存在为true, 反之为false
    * @throws app.hongs.HongsException
    */
-  public boolean exists(Map req)
+  public boolean exists(Map rd)
     throws HongsException
   {
-    return  exists(req, null);
+    return  exists(rd, null);
   }
 
-  public boolean unique(Map req, FetchCase caze)
+  public boolean unique(Map rd, FetchCase caze)
     throws HongsException
   {
-    return !exists(req, caze);
+    return !exists(rd, caze);
   }
 
-  public boolean unique(Map req)
+  public boolean unique(Map rd)
     throws HongsException
   {
-    return !exists(req);
-  }
-
-  /**
-   * 添加/修改记录
-   *
-   * @param req
-   * @return 记录ID
-   * @throws app.hongs.HongsException
-   */
-  public String save(Map req)
-    throws HongsException
-  {
-    String id = (String)req.get(this.table.primaryKey);
-    if (id == null || id.length() == 0)
-      id = this.add(req);
-    else
-      this.put(id , req);
-    return id;
-  }
-
-  //** 标准动作方法 **/
-
-  /**
-   * 获取列表
-   *
-   * @param req
-   * @param caze
-   * @return 全部列表
-   * @throws app.hongs.HongsException
-   */
-  public Map getList(Map req, FetchCase caze)
-    throws HongsException
-  {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (caze == null)
-    {
-      caze = new FetchCase();
-    }
-
-    caze.setOption("MODEL_METHOD", "getList");
-    this.filter(caze, req);
-
-    List list = this.table.fetchMore(caze);
-    Map  data = new HashMap();
-    data.put( "list" , list );
-    return data;
-  }
-
-  /**
-   * 获取列表(无查询结构)
-   *
-   * @param req
-   * @return 全部列表
-   * @throws app.hongs.HongsException
-   */
-  public Map getList(Map req)
-    throws HongsException
-  {
-    return this.getList(req, null);
-  }
-
-  /**
-   * 获取信息(调用get)
-   *
-   * @param req
-   * @param caze
-   * @return 记录信息
-   * @throws app.hongs.HongsException
-   */
-  public Map getInfo(Map req, FetchCase caze)
-    throws HongsException
-  {
-    if (req == null)
-    {
-      req = new HashMap();
-    }
-    if (caze == null)
-    {
-      caze = new FetchCase();
-    }
-
-    caze.setOption("MODEL_METHOD", "getInfo");
-    this.filter(caze, req);
-
-    Map  info = this.table.fetchLess(caze);
-    Map  data = new HashMap();
-    data.put( "info" , info );
-    return data;
-  }
-
-  /**
-   * 获取信息(无查询结构)
-   *
-   * @param req
-   * @return 记录信息
-   * @throws app.hongs.HongsException
-   */
-  public Map getInfo(Map req)
-    throws HongsException
-  {
-    return this.getInfo(req, null);
-  }
-
-  /**
-   * 创建记录
-   *
-   * @param req
-   * @return 记录ID
-   * @throws HongsException
-   */
-  public String create(Map req)
-    throws HongsException
-  {
-    return this.add(req);
-  }
-
-  /**
-   * 更新记录
-   *
-   * @param req
-   * @param caze
-   * @return 更新条数
-   * @throws app.hongs.HongsException
-   */
-  public int update(Map req, FetchCase caze)
-    throws HongsException
-  {
-    Object idz = req.get(this.table.primaryKey);
-    if (idz == null) {
-        return this.put(null, null);
-    }
-
-    Set<String> ids = new LinkedHashSet();
-    if (idz instanceof Collection ) {
-        ids.addAll((Collection)idz);
-    } else {
-        ids.add   ( idz.toString());
-    }
-
-    Map  dat  =  new  HashMap  (   req  );
-    req.remove(  this.table.primaryKey  );
-
-    for (String id : ids )
-    {
-      this.put( id , dat );
-    }
-
-    return ids.size();
-  }
-
-  /**
-   * 更新记录
-   *
-   * @param req
-   * @return 更新条数
-   * @throws app.hongs.HongsException
-   */
-  public int update(Map req)
-    throws HongsException
-  {
-    return this.update(req, null);
-  }
-
-  /**
-   * 删除记录
-   *
-   * @param req
-   * @param caze
-   * @return 删除条数
-   * @throws app.hongs.HongsException
-   */
-  public int delete(Map req, FetchCase caze)
-    throws HongsException
-  {
-    Object idz = req.get(this.table.primaryKey);
-    if (idz == null) {
-        return this.del(null, null);
-    }
-
-    Set<String> ids = new LinkedHashSet();
-    if (idz instanceof Collection ) {
-        ids.addAll((Collection)idz);
-    } else {
-        ids.add   ( idz.toString());
-    }
-
-    for (String id : ids )
-    {
-      this.del( id  );
-    }
-
-    return ids.size();
-  }
-
-  /**
-   * 删除记录
-   *
-   * @param req
-   * @return 删除条数
-   * @throws app.hongs.HongsException
-   */
-  public int delete(Map req)
-    throws HongsException
-  {
-    return this.delete(req, null);
+    return !exists(rd);
   }
 
   //** 标准模型方法 **/
@@ -629,6 +583,47 @@ public class Model
     return this.del(id, null);
   }
 
+  public Map get(String id, FetchCase caze)
+    throws HongsException
+  {
+    if (id == null || id.length() == 0)
+    {
+      throw new HongsException(0x10a3, "ID can not be empty for del");
+    }
+
+    // 调用filter进行过滤
+    caze = caze != null ? caze.clone() : new FetchCase();
+    caze.setOption("MODEL_METHOD", "get");
+    Map rd = new HashMap();
+        rd.put(table.primaryKey  ,  id  );
+    this.filter(caze , rd);
+
+    return this.table.fetchLess(caze);
+  }
+
+  public Map get(String id)
+    throws HongsException
+  {
+    return this.get(id, null);
+  }
+
+  public List getAll(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    // 调用filter进行过滤
+    caze = caze != null ? caze.clone() : new FetchCase();
+    caze.setOption("MODEL_METHOD", "getAll");
+    this.filter(caze , rd);
+
+    return this.table.fetchMore(caze);
+  }
+
+  public List getAll(Map rd)
+    throws HongsException
+  {
+    return this.getAll(rd, null);
+  }
+
   //** 辅助过滤方法 **/
 
   /**
@@ -660,10 +655,10 @@ public class Model
    * </pre>
    *
    * @param caze
-   * @param req
+   * @param rd
    * @throws app.hongs.HongsException
    */
-  protected void filter(FetchCase caze, Map req)
+  protected void filter(FetchCase caze, Map rd)
     throws HongsException
   {
     /**
@@ -671,7 +666,7 @@ public class Model
      * 默认只关联 BLS_TO,HAS_ONE 的表(仅能关联一个)
      * 默认只连接 LEFT  ,INNER   的表(必须满足左表)
      */
-    if (!"getInfo".equals(caze.getOption("MODEL_METHOD")))
+    if (!"get".equals(caze.getOption("MODEL_METHOD")))
     {
       if (caze.getOption("ASSOC_TYPES") == null)
       {
@@ -690,7 +685,7 @@ public class Model
       }
     }
 
-    if (req.isEmpty())
+    if (rd.isEmpty())
     {
       return;
     }
@@ -698,7 +693,7 @@ public class Model
     /**
      * 依据设计规则, 解析请求参数, 转为查询结构
      */
-    Iterator it = req.entrySet().iterator();
+    Iterator it = rd.entrySet().iterator();
     Map columns = this.table.getColumns();
     while (it.hasNext())
     {
@@ -859,7 +854,8 @@ public class Model
         cols2 =  tb.getColumns (  );
         tns.addAll(ts); tns.add(tn);
         caze2 = caze.join(ts).join(tn);
-      } else
+      }
+      else
       {
         cols2 = columns;
         caze2 = caze;
@@ -884,7 +880,8 @@ public class Model
             cols.addAll(cols2.keySet());
           }
           cols.remove(col);
-        } else
+        }
+        else
         {
           cols.add   (col);
         }

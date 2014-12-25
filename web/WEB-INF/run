@@ -2,9 +2,9 @@
 
 BASE_PATH=`dirname $0`
 JAVA_HOME="$JAVA_HOME"
-CLASSPATH="$CLASSPATH:$BASE_PATH/lib/*:$BASE_PATH/classes"
+KLASSPATH="$CLASSPATH:$BASE_PATH/lib/*:$BASE_PATH/classes"
 
 "$JAVA_HOME/bin/java" \
--classpath "$CLASSPATH" \
-app.hongs.apilet.ApiletRunner $@ \
+-classpath "$KLASSPATH" \
+app.hongs.cmdlet.CmdletRunner $@ \
 --basepath "$BASE_PATH"
