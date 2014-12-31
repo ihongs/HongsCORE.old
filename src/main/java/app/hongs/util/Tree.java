@@ -28,39 +28,15 @@ public class Tree
    * @param map
    * @param path
    * @return 键对应的值
-   * @throws app.hongs.HongsException
    */
-  public static Object getValue(Map map, String path)
-  {
-    return Tree.getValue(map, path, null);
-  }
-
-  /**
-   * 获取树纵深值
-   * @param map
-   * @param keys
-   * @return 键对应的值
-   */
-  public static Object getByArr(Map map, Object[] keys)
-  {
-    return Tree.getByArr(map, keys, null);
-  }
-
-  /**
-   * 获取树纵深值(以属性或键方式"a.b[c]"获取)
-   * @param map
-   * @param path
-   * @param def
-   * @return 键对应的值
-   */
-  public static <T> T getValue(Map map, String path, T def)
+  public static Object getValue2(Map map, String path)
   {
     path = path.replaceAll("\\]\\[", ".")
                .replace("[", ".")
                .replace("]", "" )
                .replaceFirst("\\.+$", ""); // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
     String[] keys = path.split("\\.", -1);
-    return Tree.getByArr(map, keys, def);
+    return Tree.getDepth2(map, keys);
   }
 
   /**
@@ -70,7 +46,7 @@ public class Tree
    * @param def
    * @return 键对应的值
    */
-  public static <T> T getByArr(Map map, Object[] keys, T def)
+  public static Object getDepth2(Map map, Object... keys)
   {
     if (map == null)
     {
@@ -102,8 +78,39 @@ public class Tree
           continue;
         }
       }
-      return def;
+
+      return  null;
     }
+
+    return val;
+  }
+
+  /**
+   * 获取树纵深值(以属性或键方式"a.b[c]"获取)
+   * @param map
+   * @param path
+   * @param def
+   * @return 键对应的值
+   */
+  public static <T> T getValue(Map map, T def, String path)
+  {
+    path = path.replaceAll("\\]\\[", ".")
+               .replace("[", ".")
+               .replace("]", "" )
+               .replaceFirst("\\.+$", ""); // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
+    String[] keys = path.split("\\.", -1);
+    return Tree.getDepth(map, def, keys);
+  }
+
+  /**
+   * 获取树纵深值
+   * @param map
+   * @param keys
+   * @return 键对应的值
+   */
+  public static <T> T getDepth(Map map, T def, Object... keys)
+  {
+    Object val = Tree.getDepth2(map, keys);
 
     // 常规类型转换
     if (def instanceof String) {
@@ -112,6 +119,12 @@ public class Tree
     if (val instanceof String) {
       if (def instanceof Integer) {
         val = Integer.parseInt((String) val);
+      } else
+      if (def instanceof Byte) {
+        val = Byte.parseByte((String) val);
+      } else
+      if (def instanceof Short) {
+        val = Short.parseShort((String) val);
       } else
       if (def instanceof Long) {
         val = Long.parseLong((String) val);
@@ -137,13 +150,13 @@ public class Tree
    * @param path
    * @param val
    */
-  public static void setValue(Map map, String path, Object val)
+  public static void setValue(Map map, Object val, String path)
   {
     path = path.replaceAll("\\]\\[", ".")
              .replace("[", ".")
              .replace("]", "" );
     String[] keys = path.split("\\.", -1);
-    Tree.setByArr(map, keys, val);
+    Tree.setDepth(map, val, keys);
   }
 
   /**
@@ -152,7 +165,7 @@ public class Tree
    * @param keys
    * @param val
    */
-  public static void setByArr(Map map, Object[] keys, Object val)
+  public static void setDepth(Map map, Object val, Object... keys)
   {
     if (map == null)
     {
@@ -160,7 +173,7 @@ public class Tree
     }
     if (keys.length  !=  0)
     {
-      setValue(map, keys, val, 0);
+      setDepth(map, val, 0, keys);
     }
     else
     if (val instanceof Map)
@@ -181,7 +194,7 @@ public class Tree
    * @param val
    * @param idx
    */
-  private static void setValue(Object obj, Object[] keys, Object val, int idx)
+  private static void setDepth(Object obj, Object val, int idx, Object[] keys)
   {
     Object key = keys[idx];
 
@@ -208,7 +221,7 @@ public class Tree
         }
         col.add(subNode);
 
-        setValue(subNode, keys, val, idx + 1);
+        setDepth(subNode, val, idx + 1, keys);
       }
     }
     else
@@ -241,7 +254,7 @@ public class Tree
           map.put(key, subNode);
         }
 
-        setValue(subNode, keys, val, idx + 1);
+        setDepth(subNode, val, idx + 1, keys);
       }
     }
   }
@@ -267,6 +280,26 @@ public class Tree
             map.put(k2, v2);
         }
     }
+  }
+
+  public static void putValue(Map map, Map oth, String path) {
+      Object sub = getValue2(map, path);
+      if (sub == null || !(sub instanceof Map)) {
+          sub =  new LinkedHashMap();
+          setValue( map, oth, path );
+      } else {
+          putDepth((Map) sub, oth  );
+      }
+  }
+
+  public static void putDepth(Map map, Map oth, Object... keys) {
+      Object sub = getDepth2(map, keys);
+      if (sub == null || !(sub instanceof Map)) {
+          sub =  new LinkedHashMap();
+          setDepth( map, oth, keys );
+      } else {
+          putDepth((Map) sub, oth  );
+      }
   }
 
   /** 遍历工具 **/

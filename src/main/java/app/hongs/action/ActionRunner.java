@@ -97,7 +97,15 @@ public class ActionRunner {
         } catch ( IllegalArgumentException e) {
             throw new HongsException(0x10f2, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch (InvocationTargetException e) {
-            throw new HongsException(0x10f2, e.getCause());
+            Throwable ex = e.getCause();
+            if (ex instanceof HongsException) {
+                throw (HongsException) ex;
+            } else
+            if (ex instanceof HongsError    ) {
+                throw (HongsError    ) ex;
+            } else {
+                throw new HongsException(0x10f2, ex);
+            }
         }
     }
 

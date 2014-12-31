@@ -23,12 +23,12 @@ public class FetchNext {
         this.rs = rs;
     }
 
-    public ResultSet getReusltSet() {
-        return rs;
-    }
-
     public Statement getStatement() {
         return ps;
+    }
+
+    public ResultSet getReusltSet() {
+        return rs;
     }
 
     public String[ ] getLabels() throws HongsException {

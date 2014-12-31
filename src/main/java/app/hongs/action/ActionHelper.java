@@ -243,7 +243,7 @@ public class ActionHelper
    */
   public String getParameter(String name) throws HongsException
   {
-    Object o = Tree.getValue(getRequestData(), name);
+    Object o = Tree.getValue2(getRequestData(), name);
     if (o == null)
     {
       return null;
@@ -353,11 +353,14 @@ public class ActionHelper
   public void reply(Map<String, Object> map)
   {
     // 默认为成功
-    if(!map.containsKey("ok")) {
+    if(!map.containsKey("ok" )) {
         map.put( "ok" , true );
     }
-    if(!map.containsKey( "" )) {
-        map.put( "ah" ,  ""  );
+    if(!map.containsKey("err")) {
+        map.put( "err",  ""  );
+    }
+    if(!map.containsKey("msg")) {
+        map.put( "msg",  ""  );
     }
     this.responseData = map;
   }
@@ -370,9 +373,10 @@ public class ActionHelper
    */
   public void reply(String msg, Object... o)
   {
+    if (msg == null) msg = "";
     Map data = new LinkedHashMap();
-    data.put("ok", true);
-    data.put("ah", msg );
+    data.put("ok" ,true);
+    data.put("msg", msg);
     if (o != null && o.length > 0) {
         data.put("back", o);
     }
@@ -387,9 +391,10 @@ public class ActionHelper
    */
   public void reply(String msg, boolean ok)
   {
+    if (msg == null) msg = "";
     Map data = new LinkedHashMap();
-    data.put("ok", ok );
-    data.put("ah", msg );
+    data.put("ok" , ok );
+    data.put("msg", msg);
     reply(data);
   }
 
@@ -478,7 +483,7 @@ public class ActionHelper
    */
   public void error500(Throwable ex)
   {
-    ActionHelper.this.error500(ex.getLocalizedMessage());
+    this.error500(ex.getLocalizedMessage());
   }
 
   //** 工具方法 **/
@@ -499,7 +504,7 @@ public class ActionHelper
       String[] value = (String[])et.getValue();
       for (int i = 0; i < value.length; i ++ )
       {
-        Tree.setValue(paramz, key, value[i]);
+        Tree.setValue(paramz, value[i], key);
       }
     }
     return paramz;

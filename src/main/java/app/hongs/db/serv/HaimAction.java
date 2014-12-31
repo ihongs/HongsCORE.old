@@ -4,14 +4,14 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
-import app.hongs.annotation.CommitSuccess;
 import app.hongs.annotation.Supply;
 import app.hongs.annotation.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
 import app.hongs.dl.IAction;
-import static app.hongs.action.CowlFilter.ENTITY;
-import static app.hongs.action.CowlFilter.MODULE;
+import static app.hongs.serv.CommonFilter.ENTITY;
+import static app.hongs.serv.CommonFilter.MODULE;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -29,12 +29,13 @@ implements IAction {
         String  module = (String) helper.getAttribute(MODULE);
         String  entity = (String) helper.getAttribute(ENTITY);
         Model   mod = DB.getInstance(module).getModel(entity);
-        Map     req = getMyReq(helper, mod);
+        Map     req = getMyReq( helper, mod);
+        Object  pkv = req.get ( mod.table.primaryKey);
         Map     rst;
-        if (req.containsKey(mod.table.primaryKey)) {
-            rst = mod.getList(req);
+        if (pkv == null || pkv instanceof Collection) {
+            rst  = mod.getList(req);
         } else {
-            rst = mod.getList(req);
+            rst  = mod.getInfo(req);
         }
         helper.reply(rst);
     }

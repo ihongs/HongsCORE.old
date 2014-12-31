@@ -142,16 +142,16 @@ public class ActsAction
         req.setAttribute(PRINTED  ,  true);
         Map data = new HashMap();
         data.put( "ok" , false );
-        data.put( "oh" , errno );
-        data.put( "ah" , error );
+        data.put( "err", errno );
+        data.put( "msg", error );
         helper.print  (  data  );
     } else
     if (req.getAttribute(REPLIED) == null)
     {
         Map data = new HashMap();
         data.put( "ok" , false );
-        data.put( "oh" , errno );
-        data.put( "ah" , error );
+        data.put( "err", errno );
+        data.put( "msg", error );
         req.setAttribute(REPLIED  ,  data );
     } else
     if (   "404".equals( errno ))

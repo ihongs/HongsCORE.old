@@ -1,4 +1,4 @@
-<%@page import="app.hongs.serv.RiggerFilter"%>
+<%@page import="app.hongs.serv.CommonFilter"%>
 <%@page contentType="text/html;charset=utf-8"%>
 <!--
 Hong's Common User Module
@@ -24,13 +24,15 @@ Hong's Common User Module
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/hongscore-pick.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/conf/default.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/lang/default.js"></script>
-        <script type="text/javascript" src="<%=request.getContextPath()%>/common/auth/default.js"></script>
+        <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/common/src/bootstrap-datetimepicker.css"/>
+        <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/bootstrap-datetimepicker.js"></script>
+        <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/bootstrap-datetimetoggle.js"></script>
     </head>
     <body>
         <div id="notebox"></div>
         <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="row" data-load="<%=request.getContextPath()%>/common/pages/head.jsp?c=<%=request.getAttribute(RiggerFilter.MODULE)%>"></div>
+                <div class="row" data-load="<%=request.getContextPath()%>/common/pages/head.jsp?m=<%=request.getAttribute(CommonFilter.MODULE)%>"></div>
             </div>
         </nav>
         <div id="bodybox">
@@ -38,7 +40,7 @@ Hong's Common User Module
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
-                <div class="row" data-load="<%=request.getContextPath()%>/common/pages/foot.jsp"></div>
+                <div class="row" data-load="<%=request.getContextPath()%>/common/pages/foot.jsp?m=<%=request.getAttribute(CommonFilter.MODULE)%>"></div>
             </div>
         </nav>
     </body>

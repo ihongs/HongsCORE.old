@@ -15,13 +15,11 @@ public class FetchPage
 
   private DB db;
 
-  private Table table;
-
   private FetchCase caze;
 
-  private int page = 1 ;
+  private int page =  1 ;
 
-  private int rows = 10;
+  private int rows = 10 ;
 
   private Map info = new HashMap();
 
@@ -29,7 +27,6 @@ public class FetchPage
   {
     this.db    = db;
     this.caze  = caze;
-    this.table = null;
 
     Object page2 = caze.getOption("page");
     if (page2 != null && page2.equals(""))
@@ -42,14 +39,6 @@ public class FetchPage
     {
       this.setRows(Integer.parseInt(rows2.toString()));
     }
-  }
-
-  public FetchPage(Table table, FetchCase caze) throws HongsException
-  {
-    this(table.db, caze);
-    this.table  =  table;
-
-    this.caze.from(table.tableName, table.name);
   }
 
   public void setPage(int page) throws HongsException
@@ -87,30 +76,22 @@ public class FetchPage
     caze.limit((this.page - 1) * this.rows, this.rows);
 
     // 查询列表
-    List list;
-    if (null != this.table)
-    {
-      list = this.table.fetchMore(caze);
-    }
-    else
-    {
-      list = this.db.fetchMore(caze);
-    }
+    List list = this.db.fetchMore(caze);
 
     // 获取行数
     if (!list.isEmpty())
     {
-      this.info.put("errno", 0); // 没有异常
+      this.info.put("err", 0); // 没有异常
     } else
     if (this.page == 1 )
     {
-      this.info.put("errno", 1); // 列表为空
+      this.info.put("err", 1); // 列表为空
       this.info.put("pagecount", 0);
       this.info.put("rowscount", 0);
     }
     else
     {
-      this.info.put("errno", 2); // 页码超出
+      this.info.put("err", 2); // 页码超出
     }
 
     return list;

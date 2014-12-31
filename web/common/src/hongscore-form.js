@@ -66,6 +66,7 @@ function HsForm(opts, context) {
     for(i = 0; i < loadData.length; i ++) {
         n = loadData[i].name ;
         v = loadData[i].value;
+        if ( n === idKey && v === "0" ) continue;
         formBox.find("[name='"   +n+"']").val(v);
         formBox.find("[data-pn='"+n+"']").val(v);
     }
@@ -393,7 +394,7 @@ HsForm.prototype = {
         }
     },
     rules : {
-        "[required,data-required]" : function(val, inp) {
+        "[required],[data-required]" : function(val, inp) {
             if (inp.is("select")) {
                 if (!val) {
                     return hsGetLang("form.requires");
@@ -417,7 +418,7 @@ HsForm.prototype = {
             }
             return true;
         },
-        "[pattern,data-parttern]" : function(val, inp) {
+        "[pattern],[data-parttern]" : function(val, inp) {
             var pn = inp.attr("data-pattern") || inp.attr("pattern");
             var ms = inp.attr("data-message");
             var pm = /^\/(.*)\/([gim])?$/.exec(pn);
@@ -431,28 +432,28 @@ HsForm.prototype = {
             }
             return true;
         },
-        "[maxlength,data-maxlength]" : function(val, inp) {
+        "[maxlength],[data-maxlength]" : function(val, inp) {
             var max = inp.attr("maxlength") || inp.attr("data-maxlength");
             if (val.length > max) {
                 return hsGetLang("form.gt.maxlength", [max]);
             }
             return true;
         },
-        "[minlength,data-minlength]" : function(val, inp) {
+        "[minlength],[data-minlength]" : function(val, inp) {
             var min = inp.attr("minlength") || inp.attr("data-minlength");
             if (val.length < min) {
                 return hsGetLang("form.lt.minlength", [min]);
             }
             return true;
         },
-        "[max,data-max]" : function(val, inp) {
+        "[max],[data-max]" : function(val, inp) {
             var max = inp.attr("max") || inp.attr("data-max");
             if (val > max) {
                 return hsGetLang("form.lt.min", [max]);
             }
             return true;
         },
-        "[min,data-min]" : function(val, inp) {
+        "[min],[data-min]" : function(val, inp) {
             var min = inp.attr("min") || inp.attr("data-min");
             if (val < min) {
                 return hsGetLang("form.lt.min", [min]);
@@ -508,7 +509,14 @@ HsForm.prototype = {
                 "async": false,
                 "cache": false,
                 "success": function(rst) {
-                    ret = rst["ok"] || rst["ah"];
+                    if (rst["info"] && !jQuery.isEmptyObject(rst["info"])) {
+                        ret = true;
+                    } else
+                    if (rst["list"] && rst["list"].length) {
+                        ret = true;
+                    } else {
+                        ret = rst["ok"] || rst["msg"];
+                    }
                 }
             });
             return ret;

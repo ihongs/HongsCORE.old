@@ -173,17 +173,14 @@ public class ApisAction
         if (rsp.getStatus( ) == HttpServletResponse.SC_OK  &&  send) {
             Map data  = (Map) req.getAttribute(ActionWarder.REPLIED);
             if (data != null) {
-                if (!data.containsKey("ok")) {
+                if (!data.containsKey("ok" )) {
                     data.put("ok", "1");
                 }
-                if (!data.containsKey("oh")) {
-                    data.put("oh", "" );
+                if (!data.containsKey("err")) {
+                    data.put("err", "");
                 }
-                if (!data.containsKey("ah")) {
-                    data.put("ah", "" );
-                }
-                if (!data.containsKey("to")) {
-                    data.put("to", "" );
+                if (!data.containsKey("msg")) {
+                    data.put("msg", "");
                 }
                 rsp.setContentType("application/json");
                 rsp.getWriter().print(Data.toString(data , true));

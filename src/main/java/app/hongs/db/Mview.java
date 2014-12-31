@@ -1,6 +1,8 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
+import app.hongs.action.StructConfig;
+import app.hongs.util.Tree;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -19,9 +21,9 @@ public class Mview {
     protected Model model;
 
     public Mview(Model model) {
+        this.db = model.db;
         this.model = model;
         this.table = model.table;
-        this.db = model.db;
     }
 
     public String getIdKey()
@@ -36,18 +38,24 @@ public class Mview {
 
     public String getTitle()
     throws HongsException {
-        return table.name;
+        String sql = "SHOW TABLE STATUS WHERE name = ?";
+        List<Map<String, Object>> rows = db.fetchAll(sql, table.tableName);
+        String dsp = (String)rows.get(0).get("Comment");
+        if (null == dsp || "".equals(dsp)) {
+            dsp = table.name;
+        }
+        return dsp;
     }
 
     public Map<String, Map<String, String>> getFields()
     throws HongsException {
-        String sql = "SHOW FULL FIELDS FROM `"+table.tableName+"`";
-        List<Map<String, Object>> rows = db.fetchAll(sql);
-
         Map<String, Map<String, String>> fields = new LinkedHashMap();
+
+        // 主键
         Map<String, String> field = new HashMap();
         fields.put(table.primaryKey, field);
         field .put("type", "hidden");
+        field .put("disp", "#");
 
         Map assocs2 = table.assocs;
 
@@ -61,9 +69,9 @@ public class Mview {
                 continue;
             }
 
-            String fkey, text, tn, vk, tk, bn;
+            String fkey, disp, tn, vk, tk, bn;
 
-            tn   = (String) vd.get("name");
+            tn   = (String) vd.get("name");app.hongs.util.Data.dumps(vd);
             bn   = (String) vd.get("tableName" );
             vk   = (String) vd.get("foreignKey");
             fkey = vk;
@@ -71,21 +79,23 @@ public class Mview {
             Model hm = db.getModel(bn != null ? bn : tn);
             Mview hb =  new  Mview(hm);
             tk   = hb.getNmKey();
-            text = hb.getTitle();
+            disp = hb.getTitle();
 
             field = new HashMap();
             fields.put(fkey, field);
-            field.put("text", text);
+            field.put("disp", disp);
             field.put("type","pick");
             field.put("data-tn", tn);
             field.put("data-tk", tk);
             field.put("data-vk", vk);
         }
 
-        for (Map<String, Object> row : rows) {
+        String sql = "SHOW FULL FIELDS FROM `"+table.tableName+"`";
+        List<Map<String, Object>> rows = db.fetchAll(sql);
+        for (Map<String, Object>  row  : rows) {
             String fkey     = (String)row.get( "Field" );
             String type     = (String)row.get( "Type"  );
-            String text     = (String)row.get("Comment");
+            String disp     = (String)row.get("Comment");
             String required = "NO" .equals(row.get("Null")) ? "required" : "";
 
             if (table.primaryKey.equals(fkey)) {
@@ -96,14 +106,14 @@ public class Mview {
                 continue;
             }
 
-            if (text == null || "".equals(text)) {
-                text = (String)row.get("Field");
+            if (disp == null || "".equals(disp)) {
+                disp  = fkey;
             }
 
-            if (Pattern.compile("(int|float|double|number|numeric|decimal)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
+            if (Pattern.compile("(decimal|numeric|integer|tinyint|smallint|float|double)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                 type = "number";
             } else
-            if (Pattern.compile("(datetime)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
+            if (Pattern.compile("(datetime|timestamp)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                 type = "datetime";
             } else
             if (Pattern.compile("(date)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
@@ -120,7 +130,7 @@ public class Mview {
 
             field = new HashMap();
             fields.put(fkey, field);
-            field.put("text", text);
+            field.put("disp", disp);
             field.put("type", type);
             field.put("required", required);
         }
@@ -138,7 +148,7 @@ public class Mview {
                 continue;
             }
 
-            String fkey, text, tn, vk, tk, an, bn;
+            String fkey, disp, tn, vk, tk, an, bn;
 
             Map ad = (Map) ((Map) vd.get("assocs")).values().toArray()[0];
             an   = (String) ad.get("name");
@@ -150,15 +160,45 @@ public class Mview {
             Model hm = db.getModel(bn != null ? bn : tn);
             Mview hb =  new  Mview(hm);
             tk   = an + "." + hb.getNmKey();
-            text = /** ** **/ hb.getTitle();
+            disp = /** ** **/ hb.getTitle();
 
             field = new HashMap();
             fields.put(fkey, field);
-            field.put("text", text);
+            field.put("disp", disp);
             field.put("type","pick");
             field.put("data-tn", tn);
             field.put("data-tk", tk);
             field.put("data-vk", vk);
+        }
+
+        Map form  = StructConfig.getInstance(db.name).getForm(table.name);
+        if (form != null)
+        for(Object o : ((Map)form.get("items")).entrySet()) {
+            Map.Entry e = (Map.Entry) o;
+            String n = (String) e.getKey();
+            if (n.startsWith("_")) {
+                continue;
+            }
+            field = new HashMap();
+            String t;
+            Map    m = (Map ) e.getValue();
+            t = (String) m.get("_disp");
+            if (t != null && !"".equals(t)) {
+                field.put("disp",  t  );
+            }
+            t = (String) m.get("_type");
+            if ("enum".equals(t)) {
+                field.put("type", "enum");
+            } else
+            if ("file".equals(t)) {
+                field.put("type", "file");
+            } else
+            if (fields.containsKey(n)) {
+                // Nothing todo
+            } else {
+                continue;
+            }
+            Tree.putDepth(fields, field, n);
         }
 
         return fields;

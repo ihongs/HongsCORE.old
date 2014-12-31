@@ -1,7 +1,7 @@
-package app.hongs.action;
+package app.hongs.serv;
 
 import app.hongs.Core;
-import app.hongs.HongsException;
+import app.hongs.action.ActionRunner;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -17,11 +17,10 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 脚手架过滤器
  * 用于在构建应用前搭建打底处理,
- * 在页面和动作等建成后可以移除;
- * 默认调用通用信息模块(hcim)进行处理.
+ * 在页面和动作等建成后可以移除.
  * @author Hongs
  */
-public class CowlFilter implements Filter {
+public class CommonFilter implements Filter {
 
     public static final String MODULE = "app.hongs.serv.common.module";
     public static final String ENTITY = "app.hongs.serv.common.entity";
@@ -34,10 +33,10 @@ public class CowlFilter implements Filter {
         action = cnf.getInitParameter("action");
         render = cnf.getInitParameter("render");
         if (action == null) {
-            action = "haim";
+            action = "common";
         }
         if (render == null) {
-            render = action;
+            render =  action ;
         }
     }
 

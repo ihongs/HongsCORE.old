@@ -5,6 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
 import app.hongs.HongsException;
+import app.hongs.util.Data;
 import app.hongs.util.Util;
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +33,10 @@ import javax.servlet.http.HttpServletResponse;
  * <h3>配置选项:</h3>
  * <pre>
  * core.server.id         服务ID
- * core.language.probing  自动识别语言
- * core.language.default  默认语言类型
+ * core.language.probing  探测语言
+ * core.language.default  默认语言
+ * core.timezone.probing  探测时区
+ * core.timezone.default  默认时区
  * </pre>
  *
  * @author Hong
@@ -243,6 +246,12 @@ implements Filter {
         }
 
         if (0 < Core.DEBUG) {
+            Map rd;
+            try {
+                rd = helper.getRequestData( );
+            } catch (HongsException e) {
+                throw new ServletException(e);
+            }
             CoreLogger.debug(new StringBuilder("...")
                 .append("\r\n\tTHREAD_ID   : ").append(Thread.currentThread().getId())
                 .append("\r\n\tACTION_TIME : ").append(Core.ACTION_TIME.get())
@@ -250,8 +259,9 @@ implements Filter {
                 .append("\r\n\tACTION_PATH : ").append(Core.ACTION_NAME.get())
                 .append("\r\n\tMethod      : ").append(req.getMethod())
                 .append("\r\n\tClient      : ").append(req.getRemoteAddr())
-                                  .append("\t").append(req.getRemotePort())
+                                   .append("\t").append(req.getRemotePort())
                 .append("\r\n\tUser-Agent  : ").append(req.getHeader( "User-Agent" ) )
+                .append("\r\n\tUser-Query  : ").append(Data.toString(rd))
                 .toString());
         }
     }

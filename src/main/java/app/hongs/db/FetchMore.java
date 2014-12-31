@@ -49,7 +49,7 @@ public class FetchMore
    */
   public void join(List<Map> rows, String col, String key, String name)
   {
-    FetchMore.this.join(rows, name, col, key, false, false);
+    this.join(rows, name, col, key, false, false);
   }
 
   /**
@@ -472,7 +472,7 @@ public class FetchMore
         }   pk = "`"+an+"`.`"+pk+"`";
 
         // 转化关联类型
-        short ji;
+        byte ji;
         if ("INNER".equals(jn)) {
             ji = FetchCase.INNER;
         }
@@ -493,7 +493,7 @@ public class FetchMore
         }
 
         // 设置关联关系
-        caze2.setJoin(pk+"="+fk, ji);
+        caze2.on(pk+"="+fk, ji);
 
         buildCase(caze2, assoc);
 
@@ -504,11 +504,11 @@ public class FetchMore
   }
 
   private static void fetchMore
-    (Table table, FetchCase caze, List rows, List lnks)
+    (Table table, FetchCase caze, List rows2, List lnks)
   throws HongsException {
     Set tps = (Set)caze.getOption("ASSOC_TYPES" );
     Set tns = (Set)caze.getOption("ASSOC_TABLES");
-    FetchMore join = new FetchMore(rows);
+    FetchMore join = new FetchMore(rows2);
 
     while (!lnks.isEmpty()) {
         List lnks2 = new ArrayList();
@@ -585,7 +585,7 @@ public class FetchMore
     }
     str = (String)assoc.get("having");
     if (str != null && str.length() != 0) {
-        caze.having(str);
+        caze.havin(str);
     }
     str = (String)assoc.get("orderBy");
     if (str != null && str.length() != 0) {
@@ -664,15 +664,15 @@ public class FetchMore
 
   /**
    * 关联插入
-
- 关联配置中有指定 updateKeys 的话, 会调用 updateMore 进行更新
+   *
+   * 关联配置中有指定 updateKeys 的话, 会调用 updateMore 进行更新
    *
    * @param table 主表
    * @param assocs 关联配置
    * @param values 要插入的数据
    * @throws app.hongs.HongsException
    */
-  protected static void insertMore(Table table, Map assocs, Map values)
+  public static void insertMore(Table table, Map assocs, Map values)
     throws HongsException
   {
     if ( assocs == null || assocs.isEmpty() ) return;
@@ -742,8 +742,8 @@ public class FetchMore
 
       /**
        * Add by Hong on 2013/6/6
-       * 有时候子数据会被其他数据引用, 如果更新子数据, 子数据的ID就会改变.
-       * 通常这种情况存在以下规则: 如果某些字段值没发生改变则不要重新插入.
+       * 有时候子数据会被其他数据引用, 如果更新子数据, 子数据的ID就会改变;
+       * 通常这种情况存在以下规则: 如果某些字段值没发生改变则不要重新插入;
        * 所以当有指定updateKeys时, 使用assocUpdate方法更新数据, 其原理为:
        * 找出没改变的数据并更新, 然后插入新增数据, 最后删除更新和新增之外的数据.
        */
@@ -789,10 +789,10 @@ public class FetchMore
    *
    * @param table 主表
    * @param assocs 关联配置
-   * @param id 要删除的外键
+   * @param fid 要删除的外键
    * @throws app.hongs.HongsException
    */
-  protected static void deleteMore(Table table, Map assocs, String id)
+  public static void deleteMore(Table table, Map assocs, String fid)
     throws HongsException
   {
     if (assocs.isEmpty())
@@ -822,7 +822,7 @@ public class FetchMore
 
       Table tb = table.db.getTable(realName);
       List  pa = new ArrayList();
-            pa.add(id);
+            pa.add(fid);
 
       // 直接删除数据
       tb.delete("`"+foreignKey+"`=?", pa);

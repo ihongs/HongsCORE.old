@@ -4,85 +4,58 @@
 <%@page import="java.util.List"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.CoreLanguage"%>
-<%@page import="app.hongs.action.AuthConfig"%>
 <%@page import="app.hongs.action.ActionHelper"%>
+<%@page import="app.hongs.action.StructConfig"%>
 <%!
-    StringBuilder makeMenu(List<Map> menus, boolean realHref) {
-        app.hongs.util.Data.dumps(menus);
-        StringBuilder menuz = new StringBuilder();
-        if (menus.isEmpty()) {
-            return menuz;
-        }
+    StringBuilder makeMenu(Map units, boolean realHref) {
+        StringBuilder menus = new StringBuilder();
+        for(Object o : units.entrySet()) {
+            Map.Entry e = (Map.Entry) o;
+            String name = (String) e.getKey();
+            if(name.startsWith("_")) continue;
+            Map    unit = (Map ) e.getValue();
+            String href = (String) unit.get("_href");
+            String disp = (String) unit.get("_disp");
 
-        for (Map menu : menus) {
-            List<Map> subMenus = (List) menu.get("list");
-            String claz = !subMenus.isEmpty() ? "dropdown-toggle" : "";
-            String cart = !subMenus.isEmpty() ? "<b class=\"caret\"></b>" : "";
-            String name = (String) menu.get("name");
-            String href = (String) menu.get("href");
-            String hash = "#" + href.substring(href.indexOf("/") + 1);
-            if (name.indexOf("${opr}") != -1) {
-                continue; // 操作类的内页不要
-            }
             if (realHref) {
-                hash = Core.BASE_HREF + "/" + href; // User Menu
-            } else if (hash.endsWith(".jsp" )) {
-                hash = hash.substring(0, hash.length() - 4);
-            } else if (hash.endsWith(".html")) {
-                hash = hash.substring(0, hash.length() - 5);
-            } else if (hash.startsWith("common/goto.act")) {
-                hash = hash.substring(19).replaceAll("=", ".");
+                String temp = href;
+                href =  Core.BASE_HREF + "/" + href + "#" + name;
+                name = temp;
+            } else {
+                String temp = href;
+                href = "#" + name;
+                name = temp;
             }
-            menuz.append("<li>")
-                 .append("<a class=\"")
-                 .append(claz)
-                 .append("\" href=\"" )
-                 .append(hash)
-                 .append("\" data-href=\"")
-                 .append(href)
-                 .append("\">" )
+            
+            menus.append("<li>" )
+                 .append("<a data-href=\"")
                  .append(name)
-                 .append(cart)
-                 .append("</a>");
-            StringBuilder subMenuz = makeMenu(subMenus, realHref);
-            if (subMenuz.length() > 0) {
-                menuz.append("<ul class=\"dropdown-menu\">")
-                        .append(subMenuz)
-                        .append("</ul>");
-            }
-            menuz.append("</li>");
+                 .append("\" href=\"")
+                 .append(href)
+                 .append("\">"  )
+                 .append(disp)
+                 .append("</a>" )
+                 .append("</li>");
         }
-
-        return menuz;
+        return menus;
     }
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String name  = helper.getParameter("c");
-    String level = helper.getParameter("l");
-    String depth = helper.getParameter("d");
+    String name  = helper.getParameter( "m" );
 
     if (name  == null || name .length() == 0) {
         name  = "default";
     }
 
-    int l , d;
-    if (level == null || level.length() == 0) {
-        l = 1;
-    } else {
-        l = Integer.parseInt(level);
-    }
-    if (depth == null || depth.length() == 0) {
-        d = 1;
-    } else {
-        d = Integer.parseInt(depth);
-    }
+    StructConfig main = StructConfig.getInstance();
+    StructConfig curr = StructConfig.getInstance(name);
 
-    AuthConfig userAuth = AuthConfig.getInstance();
-    AuthConfig currAuth = AuthConfig.getInstance(name);
-
-    List<Map> userMenu = userAuth.getMenu(1, 1);
-    List<Map> currMenu = currAuth.getMenu(l, d);
+    Map mainMenu = main.getUnitsTranslated("__MENU__");
+    Map userMenu = main.getUnitsTranslated("__USER__");
+    Map currMenu = curr.getForm("__MENU__") != null
+                 ? curr.getUnitsTranslated("__MENU__")
+                 : curr.getFormsTranslated();
 %>
 
 <div class="navbar-header">
@@ -107,17 +80,16 @@
 </div>
 
 <div class="collapse navbar-collapse" id="main-collapse">
-    <ul class="nav navbar-nav navbar-left " id="main-menubar">
+    <ul class="nav navbar-nav navbar-left " id="curr-menubar">
         <%=makeMenu(currMenu, false)%>
     </ul>
-    <ul class="nav navbar-nav navbar-right" id="user-menubar">
+    <ul class="nav navbar-nav navbar-right" id="main-menubar">
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">ihongs@live.cn <span class="badge">9+</span> <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-                <%=makeMenu(userMenu, true)%>
+                <%=makeMenu(mainMenu, true)%>
                 <li class="divider"></li>
-                <li><a href="#">消息中心</a></li>
-                <li><a href="#">修改密码</a></li>
+                <%=makeMenu(userMenu, true)%>
             </ul>
         </li>
     </ul>
@@ -125,7 +97,7 @@
 
 <script type="text/javascript">
     (function($) {
-        $("#main-menubar>li>a")
+        $("#curr-menubar>li>a")
             .filter(function() {
                 return $(this).attr( "href" ).substring(0, 1) == "#";
             })
@@ -134,7 +106,7 @@
                 $(this).closest("li").addClass("active")
                        .siblings().removeClass("active");
             });
-        $("#user-menubar>li>a")
+        $("#main-menubar>li>a")
             .click(function() {
                 var that = $(this);
                 setTimeout(function() {

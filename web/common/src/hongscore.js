@@ -90,7 +90,8 @@ function hsResponObj(rst, qut) {
             // 需要清理其中的html代码, 以供输出简洁的消息
             rst = {
                 "ok" : false,
-                "ah" :  rst
+                "err":  "" ,
+                "msg":  rst
                     .replace(/<script.*?>.*?<\/script>/img, "")
                     .replace(/<style.*?>.*?<\/style>/img, "")
                     .replace(/<[^>]*?>/g, "")
@@ -100,26 +101,30 @@ function hsResponObj(rst, qut) {
         } else {
             rst = {
                 "ok" : false,
-                "ah" :  rst
+                "err":  "" ,
+                "msg":  rst
             };
         }
     }
     if (typeof(rst) === "object") {
-        if (typeof(rst.ok) === "undefined") {
-            rst.ok = true;
+        if (typeof(rst.ok ) === "undefined") {
+            rst.ok  = true;
         }
-        if (typeof(rst.ah) === "undefined") {
-            rst.ah =  "" ;
+        if (typeof(rst.err) === "undefined") {
+            rst.err =  "" ;
+        }
+        if (typeof(rst.msg) === "undefined") {
+            rst.msg =  "" ;
         }
         if (! qut) {
             if (rst.ok) {
-                if (rst.ah) {
-                    jQuery.hsNote(rst.ah, 'alert-success');
+                if (rst.msg) {
+                    jQuery.hsNote(rst.msg, 'alert-success');
                 }
             }
             else {
-                if (rst.ah) {
-                    alert(rst.ah);
+                if (rst.msg) {
+                    alert(rst.msg);
                 } else {
                     alert(hsGetLang("error.unkwn"));
                 }
@@ -644,10 +649,10 @@ function hsFmtDate(date, format) {
         }
       case 'M':
         if (len >= 4) {
-          return hsLang("date.format.LM")[M];
+          return hsGetLang("date.format.LM")[M];
         }
         else if (len == 3) {
-          return hsLang("date.format.SM")[M];
+          return hsGetLang("date.format.SM")[M];
         }
         else {
           return _addzero(M + 1, len);
@@ -670,17 +675,17 @@ function hsFmtDate(date, format) {
         return _addzero(S, len);
       case 'E':
         if (len >= 4) {
-          return hsLang("date.format.LE")[E];
+          return hsGetLang("date.format.LE")[E];
         }
         else {
-          return hsLang("date.format.SE")[E];
+          return hsGetLang("date.format.SE")[E];
         }
       case 'a':
         if (len >= 4) {
-          return hsLang("date.format.La")[a];
+          return hsGetLang("date.format.La")[a];
         }
         else {
-          return hsLang("date.format.Sa")[a];
+          return hsGetLang("date.format.Sa")[a];
         }
     }
   }
@@ -710,16 +715,16 @@ function hsPrsDate(text, format) {
     switch (flg) {
       case 'M':
         if (len >= 4) {
-          for (j = 0; j < hsLang("date.format.LM").length; j ++) {
-            if (wrd == hsLang("date.format.LM")[j]) {
+          for (j = 0; j < hsGetLang("date.format.LM").length; j ++) {
+            if (wrd == hsGetLang("date.format.LM")[j]) {
               M = j;
               break;
             }
           }
         }
         else if (len == 3) {
-          for (j = 0; j < hsLang("date.format.SM").length; j ++) {
-            if (wrd == hsLang("date.format.SM")[j]) {
+          for (j = 0; j < hsGetLang("date.format.SM").length; j ++) {
+            if (wrd == hsGetLang("date.format.SM")[j]) {
               M = j;
               break;
             }
@@ -754,16 +759,16 @@ function hsPrsDate(text, format) {
       break;
       case 'a':
         if (len >= 4) {
-          for (j = 0; j < hsLang("date.format.La").length; j ++) {
-            if (wrd == hsLang("date.format.La")[j]) {
+          for (j = 0; j < hsGetLang("date.format.La").length; j ++) {
+            if (wrd == hsGetLang("date.format.La")[j]) {
               A = j;
               break;
             }
           }
         }
         else {
-          for (j = 0; j < hsLang("date.format.Sa").length; j ++) {
-            if (wrd == hsLang("date.format.Sa")[j]) {
+          for (j = 0; j < hsGetLang("date.format.Sa").length; j ++) {
+            if (wrd == hsGetLang("date.format.Sa")[j]) {
               A = j;
               break;
             }

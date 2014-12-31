@@ -17,35 +17,43 @@ public class SupplyHelper {
 
     private Map<String, Map> enums;
 
-    public SupplyHelper addEnum(String name, Map<String, String> opts) {
-        enums.put(name, opts);
+    public SupplyHelper() {
+        enums = new LinkedHashMap();
+    }
+
+    public SupplyHelper addEnum(String code, Map<String, String> opts) {
+        enums.put(code, opts);
         return this;
     }
 
-    public SupplyHelper addEnum(String name, String... args) {
+    public SupplyHelper addEnum(String code, String... args) {
         Map<String,String> opts = new HashMap();
         for(String   arg : args) {
             String[] arr = arg.split( "=" , 2 );
             opts.put(arr[1], arr[0]);
         }
-        return addEnum(name, opts);
+        return addEnum(code, opts);
     }
 
-    public SupplyHelper addEnumsByForm(String coll, String form) throws HongsException {
-        CollConfig cnf = CollConfig.getInstance(coll);
+    public SupplyHelper addEnumsByForm(String conf, String form) throws HongsException {
+        StructConfig cnf = StructConfig.getInstance(conf);
+        Map map  = cnf.getForm(form);
+        if (map == null) return this;
+        map = (Map) map.get("items");
 
-        for(Object it : cnf.getForm(form).entrySet()) {
-            Map.Entry et = (Map.Entry) it;
-            Map    i2 = (Map ) et.getValue();
-            String t2 = (String) i2.get("_type");
-            if (!"enum".equals(t2)) {
+        Iterator it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry et = (Map.Entry)it.next();
+            Map       i2 = (Map ) et.getValue();
+            String t2 = (String)i2.get("_type");
+            if (! "enum".equals(t2)) {
                 continue;
             }
-            String n2 = (String) et.getKey();
-            String e2 = (String) i2.get( "name");
-            String c2 = (String) i2.get( "coll");
-            if (null == c2 || "".equals(c2)) c2 = coll;
-            Map d2  = CollConfig.getInstance(c2).getEnum(e2);
+            String n2 = (String)et.getKey();
+            String e2 = (String)i2.get( "name");
+            String c2 = (String)i2.get( "conf");
+            if (null == c2 || "".equals( c2 )) c2 = conf;
+            Map d2  = StructConfig.getInstance(c2).getEnumTranslated(e2);
             if (d2 != null) {
                 enums.put(n2, d2);
             }
@@ -58,7 +66,7 @@ public class SupplyHelper {
      * 填充
      * @param values 返回数据
      * @param action 1 注入data, 2 添加disp
-     * @throws HongsException 
+     * @throws HongsException
      */
     public void supply(Map values, short action) throws HongsException {
         if (1 == (1 & action)) {
@@ -88,10 +96,10 @@ public class SupplyHelper {
         Iterator it = maps.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry et = (Map.Entry) it.next();
-            String   key = (String) et.getKey();
-            Map      map = (Map)  et.getValue();
+            String   key = (String)  et.getKey();
+            Map      map = (Map)   et.getValue();
             List     lst = new ArrayList();
-            Tree.setValue(data, key, lst );
+            Tree.setValue(data, lst, key );
 
             Iterator i = map.entrySet().iterator();
             while (i.hasNext()) {
@@ -109,12 +117,12 @@ public class SupplyHelper {
     private void injectDisp(Map info, Map maps) throws HongsException {
         Iterator it = maps.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry et = (Map.Entry)it.next();
-            String   key = (String) et.getKey();
-            Map      map = (Map)  et.getValue();
-            String   val = Tree.getValue(info, key).toString();
+            Map.Entry et = (Map.Entry) it.next();
+            String   key = (String)  et.getKey();
+            Map      map = (Map)   et.getValue();
+            Object   val = Tree.getValue2( info , key );
             if (val != null) {
-                Tree.setValue(info, key+"_disp", map.get(val));
+                Tree.setValue(info, map.get(val), key +"_disp");
             }
         }
     }

@@ -3,7 +3,6 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.AuthConfig;
 import app.hongs.annotation.Action;
 import java.util.Map;
 

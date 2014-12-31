@@ -2,8 +2,7 @@
 <root xmlns="http://hongs-core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://hongs-core ac.xsd">
-    <page href="yummy/admin/index.html">
-        <page href="yummy/admin/order/list.html"/>
-        <page href="yummy/admin/product/list.html"/>
-    </page>
+    <form name="__MENU__">
+        <page name="order" disp="订单"  href="yummy/store/order/list.html"/>
+    </form>
 </root>

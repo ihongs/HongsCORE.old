@@ -4,8 +4,8 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import static app.hongs.action.CowlFilter.ENTITY;
-import static app.hongs.action.CowlFilter.MODULE;
+import static app.hongs.serv.CommonFilter.ENTITY;
+import static app.hongs.serv.CommonFilter.MODULE;
 import app.hongs.action.VerifyHelper;
 import app.hongs.action.VerifyHelper.Wrongs;
 import java.lang.annotation.Annotation;
@@ -26,7 +26,7 @@ public class VerifyInvoker implements ActionInvoker {
     throws HongsException {
         Verify ann  = (Verify) anno;
         String form = ann.form();
-        String coll = ann.coll();
+        String coll = ann.conf();
         boolean clear = ann.clear();
 
         if (form.length() == 0 ) {
@@ -39,9 +39,8 @@ public class VerifyInvoker implements ActionInvoker {
         Object  id  = dat.get("id");
         Object  jd  = dat.get("jd");
         String  act = chains.getAction();
-        int     pos = act.lastIndexOf( ".");
-        boolean upd = act.substring(0, pos).endsWith("action")
-          || (null != id && !"".equals(id));
+        boolean upd = act.endsWith("update")
+          || (null != id && ! "".equals(id));
 
         // 执行校验
         VerifyHelper ver  =  new VerifyHelper();
@@ -64,7 +63,7 @@ public class VerifyInvoker implements ActionInvoker {
             dat = new HashMap();
             dat.put("ok",false);
             CoreLanguage  lng  =  CoreLanguage.getInstance( );
-            dat.put("ah", lng.translate("fore.form.invalid"));
+            dat.put("err",lng.translate("fore.form.invalid"));
             dat.put("errors" , ers );
             helper.reply( dat );
         }

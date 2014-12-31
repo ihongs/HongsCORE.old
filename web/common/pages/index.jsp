@@ -20,13 +20,12 @@ Hong's Common User Module
         <script type="text/javascript" src="../hongscore.min.js"></script>
         <script type="text/javascript" src="../conf/default.js"></script>
         <script type="text/javascript" src="../lang/default.js"></script>
-        <script type="text/javascript" src="../auth/default.js"></script>
     </head>
     <body>
         <div id="notebox"></div>
         <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="row" data-load="./head.jsp?c=<%=request.getParameter("c")%>"></div>
+                <div class="row" data-load="./head.jsp?m=<%=request.getParameter("m")%>"></div>
             </div>
         </nav>
         <div id="bodybox">
@@ -34,7 +33,7 @@ Hong's Common User Module
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
-                <div class="row" data-load="./foot.jsp"></div>
+                <div class="row" data-load="./foot.jsp?m=<%=request.getParameter("m")%>"></div>
             </div>
         </nav>
     </body>

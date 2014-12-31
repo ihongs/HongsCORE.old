@@ -19,7 +19,7 @@ extends Mtree {
 
     public HcumDept()
     throws HongsException {
-        this(DB.getInstance("hcum").getTable("a_hcum_dept"));
+        this(DB.getInstance("hcum").getTable("dept"));
     }
 
     public HcumDept(Table table)

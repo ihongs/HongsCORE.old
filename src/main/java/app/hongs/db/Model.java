@@ -175,9 +175,10 @@ public class Model
 
     if (rows != 0)
     {
-      FetchPage fp = new FetchPage ( table , caze );
-      fp.setRows(rows >  0 ? rows : Math.abs(rows));
+      caze.from(table.tableName, table.name);
+      FetchPage fp = new FetchPage(db, caze);
       fp.setPage(page != 0 ? page : 1);
+      fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
       // 页码等于 0 则不要列表数据
       if (page != 0 )
@@ -231,8 +232,8 @@ public class Model
   public Map getInfo(Map rd, FetchCase caze)
     throws HongsException
   {
-    Object id = rd.get(this.table.primaryKey);
-    Map info = this.get(( String ) id , caze );
+    String id = (String)rd.get(this.table.primaryKey);
+    Map info = this.get(id, caze);
     Map data = new HashMap();
     data.put( "info", info );
     return data;
@@ -595,7 +596,7 @@ public class Model
     caze = caze != null ? caze.clone() : new FetchCase();
     caze.setOption("MODEL_METHOD", "get");
     Map rd = new HashMap();
-        rd.put(table.primaryKey  ,  id  );
+        rd.put (table.primaryKey ,  id  );
     this.filter(caze , rd);
 
     return this.table.fetchLess(caze);
@@ -840,7 +841,7 @@ public class Model
         Map          tc;
         Table        tb;
         String       tx;
-        List<String> ts;
+        String[]     ts;
 
         tc =this.table.getAssoc(tn);
         if (tc == null)
@@ -852,8 +853,9 @@ public class Model
         ts = Table.getAssocPath(tc);
         tb =  this.db.getTable (tx);
         cols2 =  tb.getColumns (  );
-        tns.addAll(ts); tns.add(tn);
-        caze2 = caze.join(ts).join(tn);
+        tns.addAll(new HashSet(Arrays.asList(ts)));
+        tns.add(tn);
+        caze2 = caze.gotJoin(ts).join(tn);
       }
       else
       {
@@ -959,7 +961,7 @@ public class Model
         Map          cs;
         Table        tb;
         String       tx;
-        List<String> ts;
+        String[]     ts;
 
         tc =this.table.getAssoc(tn);
         if (tc == null)
@@ -976,10 +978,11 @@ public class Model
         }
 
         ts = Table.getAssocPath(tc);
-        tns.addAll(ts); tns.add(tn);
-        caze.join(ts).join(tn);
+        tns.addAll(new HashSet(Arrays.asList(ts)));
+        tns.add(tn);
+        FetchCase cace = caze.gotJoin(ts).join(tn);
 
-        caze.orderBy("`" + tn + "`.`" + col + "`" + (mnu ? " DESC" : ""));
+        cace.orderBy(".`" + col + "`" + (mnu ? " DESC" : ""));
       }
     }
   }
@@ -1123,31 +1126,31 @@ public class Model
       {
         set.remove("-lt");
         Object vaz = map.get("-lt");
-        Model.this.xkeyFilter(caze, vaz, key, "<" );
+        this.xkeyFilter(caze, vaz, key, "<" );
       }
       if (map.containsKey("-gt"))
       {
         set.remove("-gt");
         Object vaz = map.get("-gt");
-        Model.this.xkeyFilter(caze, vaz, key, ">" );
+        this.xkeyFilter(caze, vaz, key, ">" );
       }
       if (map.containsKey("-le"))
       {
         set.remove("-le");
         Object vaz = map.get("-le");
-        Model.this.xkeyFilter(caze, vaz, key, "<=");
+        this.xkeyFilter(caze, vaz, key, "<=");
       }
       if (map.containsKey("-ge"))
       {
         set.remove("-ge");
         Object vaz = map.get("-ge");
-        Model.this.xkeyFilter(caze, vaz, key, ">=");
+        this.xkeyFilter(caze, vaz, key, ">=");
       }
       if (map.containsKey("-ne"))
       {
         set.remove("-ne");
         Object vaz = map.get("-ne");
-        Model.this.xkeyFilter(caze, vaz, key, "!=");
+        this.xkeyFilter(caze, vaz, key, "!=");
       }
       if (!set.isEmpty())
       {
@@ -1158,7 +1161,7 @@ public class Model
       }
     } else
     {
-        Model.this.xkeyFilter(caze, val, key,  "=");
+        this.xkeyFilter(caze, val, key,  "=");
     }
   }
 
@@ -1180,7 +1183,7 @@ public class Model
 
     Map tc = this.table.getAssoc(key);
     if (tc == null) return;
-    List<String> ts = Table.getAssocPath(tc);
+    String[]     ts = Table.getAssocPath(tc);
     String       tn = Table.getAssocName(tc);
     Table        tb =  this.db.getTable (tn);
     Map cs = tb.getColumns();
@@ -1195,9 +1198,10 @@ public class Model
       {
         if (val2 != null)
         {
-          tns.add(key); tns.addAll(ts);
-          FetchCase caze2 = caze.join(ts).join(key);
-          Model.this.mkeyFilter(caze2, val2, key2 );
+          tns.addAll(new HashSet( Arrays.asList(ts)));
+          tns.add(key);
+          FetchCase cace = caze.gotJoin(ts).join(key);
+          this.mkeyFilter( cace , val2 , key2 );
         }
       }
     }

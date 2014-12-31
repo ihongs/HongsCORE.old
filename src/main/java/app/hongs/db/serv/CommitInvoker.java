@@ -1,10 +1,11 @@
-package app.hongs.annotation;
+package app.hongs.db.serv;
 
 import app.hongs.action.ActionRunner;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.annotation.ActionInvoker;
 import app.hongs.db.DB;
 import java.lang.annotation.Annotation;
 
@@ -20,28 +21,29 @@ public class CommitInvoker implements ActionInvoker {
     public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
         Core core = Core.getInstance();
-        core.put("__IN_TRANSC_MODE__", true);
+        String dc = DB.class.getName();
+        core.put("__IN_TRANSC_MODE__" , true);
         try {
-            for (String k  :  core.keySet()) {
-                if (k.startsWith("__DB__.")) {
-                    DB db = (DB) core.get(k);
-                    db.IN_TRANSC_MODE = true;
+            for (String bc :  core.keySet( )) {
+                if (bc.startsWith(dc)) {
+                    DB  db = (DB)core.get(dc);
+                    db.IN_TRANSC_MODE = true ;
                 }
             }
 
             chains.doAction();
 
             try {
-                for (String k  :  core.keySet()) {
-                    if (k.startsWith("__DB__.")) {
-                        DB  db = (DB)core.get(k);
+                for (String bc :  core.keySet( )) {
+                    if (bc.startsWith(dc)) {
+                        DB  db = (DB)core.get(bc);
                         db.commit(  );
                     }
                 }
             } catch (HongsError ex) {
-                for (String k  :  core.keySet()) {
-                    if (k.startsWith("__DB__.")) {
-                        DB  db = (DB)core.get(k);
+                for (String bc :  core.keySet( )) {
+                    if (bc.startsWith(dc)) {
+                        DB  db = (DB)core.get(bc);
                         db.rollback();
                     }
                 }

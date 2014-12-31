@@ -17,9 +17,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-//import java.sql.ResultSet;
-//import java.sql.SQLException;
 
 /**
  * 数据表基础类
@@ -53,7 +50,9 @@ import java.util.Set;
  core.table.ctime.field     创建时间字段名
  core.table.mtime.field     修改时间字段名
  core.table.etime.field     结束时间字段名
- core.table.state.field     删除状态字段名
+ core.table.state.field     状态字段名
+ core.table.default.state   默认状态   
+ core.table.removed.state   删除状态
  </pre>
  *
  * @author Hongs
@@ -463,7 +462,7 @@ public class Table
   {
     Map tc =  this.getAssoc(name);
     if (tc == null) return  null ;
-    return caze.join(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
+    return caze.gotJoin(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
   }
 
   /**
@@ -484,11 +483,11 @@ public class Table
    * @param assoc 关联信息
    * @return 关联路径
    */
-  protected static List<String> getAssocPath(Map assoc)
+  protected static String[] getAssocPath(Map assoc)
   {
     List<String> ts = (List)assoc.get("path");
     if (   ts == null  ) ts = new ArrayList();
-    return ts;
+    return ts.toArray(new String[0]);
   }
 
   /**
@@ -520,8 +519,8 @@ public class Table
     /**
      * 是否关闭检查
      */
-    CoreConfig conf = ( CoreConfig ) Core.getInstance(CoreConfig.class);
-    boolean disable = conf.getProperty("core.table.donot.check", false);
+    CoreConfig conf = (  CoreConfig  ) Core.getInstance(CoreConfig.class);
+    boolean checked = conf.getProperty("core.table.checked.value", false);
 
     /**
      * 日期时间格式
@@ -579,7 +578,7 @@ public class Table
        * 如果关闭了检查或值不是基础类型, 则跳过数据检查
        * 通常POST或GET过来的总是String, JSON过来的是String/Number/Boolean/Null
        */
-      if (disable || !(value instanceof String || value instanceof Number))
+      if (!checked || !(value instanceof String || value instanceof Number))
       {
         mainValues.put(namc, value);
         continue;
@@ -609,7 +608,7 @@ public class Table
       {
         if (!valueStr.matches("^[\\-+]?[0-9]+$"))
         {
-          throw intException(namc, valueStr);
+          throw intgrException(namc, valueStr);
         }
 
         if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
@@ -699,7 +698,7 @@ public class Table
            */
           if (subLen > scale)
           {
-            throw scaleException(namc, valueStr, size);
+            throw scleException(namc, valueStr, size);
           }
         }
 
@@ -855,19 +854,19 @@ public class Table
     return validateException(0x1082, error, name, value, String.valueOf(size));
   }
 
-  private HongsException scaleException(String name, String value, int scale) {
-    String error = "Scale for column '"+name+"'("+value+") must be a less than "+scale;
-    return validateException(0x1084, error, name, value, String.valueOf(scale));
-  }
-
-  private HongsException intException(String name, String value) {
-    String error = "Value for column '"+name+"'("+value+") is not a int number";
-    return validateException(0x1086, error, name, value);
+  private HongsException scleException(String name, String value, int scle) {
+    String error = "Value for column '"+name+"'("+value+") must be a less than "+scle;
+    return validateException(0x1084, error, name, value, String.valueOf(scle));
   }
 
   private HongsException floatException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") is not a float number";
     return validateException(0x1088, error, name, value);
+  }
+
+  private HongsException intgrException(String name, String value) {
+    String error = "Value for column '"+name+"'("+value+") is not a integer number";
+    return validateException(0x1086, error, name, value);
   }
 
   private HongsException unsignedException(String name, String value) {

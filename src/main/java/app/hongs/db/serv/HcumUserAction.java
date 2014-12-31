@@ -5,7 +5,6 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.annotation.Action;
-import app.hongs.annotation.CommitSuccess;
 import app.hongs.db.DB;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +23,7 @@ public class HcumUserAction {
 
     public HcumUserAction()
     throws HongsException {
-        model = (HcumUser) DB.getInstance("hcum").getModel("a_hcum_user");
+        model = (HcumUser) DB.getInstance("hcum").getModel("user");
         lang  = CoreLanguage.getInstance().clone();
         lang.load("hcum");
     }
@@ -60,7 +59,7 @@ public class HcumUserAction {
     throws HongsException {
         String  id  = model.save(helper.getRequestData());
         String  msg = lang.translate("core.save.user.success");
-        helper.reply(msg, id);
+        helper.reply(msg, id, helper.getRequestData().get("name"));
     }
 
     @Action("delete")

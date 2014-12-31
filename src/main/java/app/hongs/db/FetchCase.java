@@ -78,11 +78,11 @@ public class FetchCase
   private   String              joinExpr;
   protected Set<FetchCase>      joinList;
 
-  public static final short     INNER = 1;
-  public static final short      LEFT = 2;
-  public static final short     RIGHT = 3;
-  public static final short      FULL = 4;
-  public static final short     CROSS = 5;
+  public static final byte      INNER = 1;
+  public static final byte       LEFT = 2;
+  public static final byte      RIGHT = 3;
+  public static final byte       FULL = 4;
+//public static final byte      CROSS = 5;
 
   private static final Pattern p1 = Pattern
           .compile("(^|[^`\\w])\\.((\\*)|(\\w+)|`(.+?)`)");
@@ -96,36 +96,12 @@ public class FetchCase
   //** 构造 **/
 
   /**
-   * 构造表结构对象
-   * @param caze 复制其全部属性
-   */
-  public FetchCase(FetchCase caze)
-  {
-    this.tableName  = caze.tableName;
-    this.name       = caze.name;
-    this.fields     = new StringBuilder(caze.fields);
-    this.wheres     = new StringBuilder(caze.wheres);
-    this.groups     = new StringBuilder(caze.groups);
-    this.havins     = new StringBuilder(caze.havins);
-    this.orders     = new StringBuilder(caze.orders);
-    this.limits     = caze.limits;
-    this.wparams    = new ArrayList(caze.wparams);
-    this.hparams    = new ArrayList(caze.hparams);
-    this.options    = new HashMap(caze.options);
-    this.joinType   = caze.joinType;
-    this.joinExpr   = caze.joinExpr;
-    this.joinList   = new LinkedHashSet(caze.joinList);
-  }
-
-  /**
    * 构建表结构对象
-   * @param name
-   * @param tableName
    */
-  public FetchCase(String tableName, String name)
+  public FetchCase()
   {
-    this.tableName  = tableName;
-    this.name       = name;
+    this.tableName  = null;
+    this.name       = null;
     this.fields     = new StringBuilder();
     this.wheres     = new StringBuilder();
     this.groups     = new StringBuilder();
@@ -141,29 +117,28 @@ public class FetchCase
   }
 
   /**
-   * 构建表结构对象
-   * @param tableName
+   * 克隆
+   * @return 新查询结构对象
    */
-  public FetchCase(String tableName)
+  @Override
+  public FetchCase clone()
   {
-    this(tableName, tableName);
-  }
-
-  /**
-   * 构造表结构对象
-   * @param table 取tableName和name
-   */
-  public FetchCase(Table table)
-  {
-    this(table.tableName, table.name);
-  }
-
-  /**
-   * 构建空结构
-   */
-  public FetchCase()
-  {
-    this(null, null);
+    FetchCase caze  = new FetchCase();
+    caze.tableName  = this.tableName ;
+    caze.name       = this.name ;
+    caze.fields     = new StringBuilder(this.fields);
+    caze.wheres     = new StringBuilder(this.wheres);
+    caze.groups     = new StringBuilder(this.groups);
+    caze.havins     = new StringBuilder(this.havins);
+    caze.orders     = new StringBuilder(this.orders);
+    caze.limits     = this.limits;
+    caze.wparams    = new ArrayList(this.wparams);
+    caze.hparams    = new ArrayList(this.hparams);
+    caze.options    = new  HashMap (this.options);
+    caze.joinType   = this.joinType;
+    caze.joinExpr   = this.joinExpr;
+    caze.joinList   = new LinkedHashSet(this.joinList);
+    return caze;
   }
 
   //** 查询 **/
@@ -239,7 +214,7 @@ public class FetchCase
    * @param params 对应 where 中的 ?
    * @return 当前查询结构对象
    */
-  public FetchCase having(String where, Object... params)
+  public FetchCase havin(String where, Object... params)
   {
     this.havins.append(" AND ").append(where);
     this.hparams.addAll(Arrays.asList(params));
@@ -257,6 +232,8 @@ public class FetchCase
     this.orders.append(", ").append(fields);
     return this;
   }
+
+  //** 限额 **/
 
   /**
    * 设置限额
@@ -281,248 +258,46 @@ public class FetchCase
     return this;
   }
 
-  public int getStart() {
-    return this.limits.length > 0 ? this.limits[0] : 0;
-  }
-
-  public int getLimit() {
-    return this.limits.length > 1 ? this.limits[1] : 0;
-  }
-
   //** 关联 **/
 
-  private FetchCase link(FetchCase caze,
-    String joinExpr, short joinType)
-    throws HongsException
+  public FetchCase join(String tableName, String name)
   {
-    if (joinType < 0 || joinType > 5)
-    {
-      throw new HongsException(0x10b0,
-        "Unrecognized join type '"+joinType+"'");
-    }
-    if ((joinType == FetchCase.INNER
-    ||   joinType == FetchCase.LEFT
-    ||   joinType == FetchCase.RIGHT
-    ||   joinType == FetchCase.FULL)
-    &&  (joinExpr == null || joinExpr.length() == 0))
-    {
-      throw new HongsException(0x10b2,
-        "JoinExpr be required in (FULL|LEFT|RIGHT)");
-    }
+    FetchCase caze = this.join(new FetchCase());
+    caze.from(tableName, name);
+    return caze;
+  }
 
+  public FetchCase join(String tableName)
+  {
+    FetchCase caze = this.join(new FetchCase());
+    caze.from(tableName);
+    return caze;
+  }
+
+  public FetchCase join(FetchCase caze)
+  {
+    caze.options = this.options;
     this.joinList.add(caze);
-    caze.joinExpr  = joinExpr;
-    caze.joinType  = joinType;
-    caze.options   = this.options;
+    caze.joinExpr = null;
+    caze.joinType = 0;
     return caze;
   }
 
-  /**
-   * 关联一个表(采用指定结构的方式)
-   * 注意: 此方法将自动克隆原查询结构,
-   * 需追加查询参数请接收其返回的对象,
-   * 并在该对象上进行相应的操作.
-   * @param caze
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchCase join(FetchCase caze,
-    String joinExpr, short joinType)
-    throws HongsException
+  public FetchCase on(String expr, byte type)
   {
-    return this.link(new FetchCase(caze),
-           joinExpr, joinType);
-  }
-  public FetchCase join(FetchCase caze,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchCase(caze),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 关联一个表(采用指定表名和别名的方式)
-   * @param tableName
-   * @param name
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchCase join(String tableName, String name,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchCase(tableName, name),
-           joinExpr, joinType);
-  }
-  public FetchCase join(String tableName, String name,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchCase(tableName, name),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 关联一个表(采用指定表名或别名的方式)
-   * @param tableName
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchCase join(String tableName,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchCase(tableName),
-           joinExpr, joinType);
-  }
-  public FetchCase join(String tableName,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchCase(tableName),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 关联一个表(采用指定表对象的方式)
-   * @param table
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchCase join(Table  table,
-    String joinExpr, short joinType)
-    throws HongsException
-  {
-    return this.link(new FetchCase(table),
-           joinExpr, joinType);
-  }
-  public FetchCase join(Table  table,
-    String joinExpr)
-    throws HongsException
-  {
-    return this.link(new FetchCase(table),
-           joinExpr, INNER);
-  }
-
-  /**
-   * 设置/获取一个关联表
-   * 注意: 如果之前没设置该别名的关联,
-   * 则会自动创建一个该别名的关联结构,
-   * 最后查询时务必补全表名和关联属性.
-   * @param name
-   * @return 返回该关联的查询结构
-   * @throws HongsException
-   */
-  public FetchCase join(String name)
-    throws HongsException
-  {
-    FetchCase caze = this.getJoin(name);
-    if (caze == null)
-        caze =  this.link(new FetchCase(name), null, (short)0);
-    return caze;
-  }
-  public FetchCase join(String... path)
-    throws HongsException
-  {
-    FetchCase caze = this;
-    for (String n : path) caze = caze.join(n);
-    return caze;
-  }
-  public FetchCase join(List<String> path)
-    throws HongsException
-  {
-    FetchCase caze = this;
-    for (String n : path) caze = caze.join(n);
-    return caze;
-  }
-
-  /**
-   * 获取关联的表查询结构
-   * @param name
-   * @return 指定关联的表查询结构对象
-   */
-  public FetchCase getJoin(String name)
-  {
-    for (FetchCase caze : this.joinList)
-    {
-      if (name.equals(caze.name))
-      {
-        return caze;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * 设置管理的表查询关系
-   * @param joinExpr .被join的表 :执行join的表
-   * @param joinType INNER,LEFT,RIGHT,FULL,CROSS
-   * @return 当前查询结构对象
-   */
-  public FetchCase setJoin(String joinExpr, short joinType)
-  {
-    this.joinExpr = joinExpr;
-    this.joinType = joinType;
+    this.joinExpr = expr;
+    this.joinType = type;
     return this;
   }
 
-  //** 选项 **/
-
-  /**
-   * 是否存在选项
-   * @param key
-   * @return 存在为true, 反之为false
-   */
-  public boolean hasOption(String key)
+  public FetchCase on(String expr)
   {
-    return this.options.containsKey(key);
-  }
-
-  /**
-   * 获取选项
-   * @param key
-   * @return 指定选项
-   */
-  public Object getOption(String key)
-  {
-    return this.options.get(key);
-  }
-
-  /**
-   * 获取选项(可指定类型)
-   * @param <T>
-   * @param key
-   * @param def
-   * @return 指定选项
-   */
-  public <T> T getOption(String key, T def)
-  {
-    Object obj = this.options.get(key);
-    return obj != null ? (T)obj : def;
-  }
-
-  /**
-   * 设置参数(单个)
-   * @param key
-   * @param obj
-   * @return 当前查询结构对象
-   */
-  public FetchCase setOption(String key, Object obj)
-  {
-    this.options.put(key, obj);
+    this.joinExpr = expr;
+    this.joinType = LEFT;
     return this;
   }
 
-  //** 获取构造结果 **/
+  //** 获取结果 **/
 
   /**
    * 获取SQL
@@ -638,7 +413,7 @@ public class FetchCase
         case FetchCase.LEFT : b.insert(0, " LEFT JOIN "); break;
         case FetchCase.RIGHT: b.insert(0," RIGHT JOIN "); break;
         case FetchCase.FULL : b.insert(0, " FULL JOIN "); break;
-        case FetchCase.CROSS: b.insert(0," CROSS JOIN "); break;
+//      case FetchCase.CROSS: b.insert(0," CROSS JOIN "); break;
         default: return;
       }
       if (this.joinExpr != null && this.joinExpr.length() != 0)
@@ -755,6 +530,14 @@ public class FetchCase
       return c.toString();
   }
 
+  public int getStart() {
+    return this.limits.length > 0 ? this.limits[0] : 0;
+  }
+
+  public int getLimit() {
+    return this.limits.length > 1 ? this.limits[1] : 0;
+  }
+
   /**
    * 获取参数
    * @return 参数
@@ -830,14 +613,96 @@ public class FetchCase
     return sb.toString();
   }
 
-  /**
-   * 克隆
-   * @return 新查询结构对象
-   */
-  @Override
-  public FetchCase clone()
+  //** 获取关联 **/
+
+  public FetchCase getJoin(String name)
   {
-    return new FetchCase(this);
+    for (FetchCase caze : this.joinList)
+    {
+      if (name.equals(caze.name))
+      {
+        return caze;
+      }
+    }
+    return null;
+  }
+
+  public FetchCase getJoin(String... name)
+  {
+    FetchCase caze = this;
+    for (String n : name)
+    {
+      FetchCase c = caze.getJoin(n);
+      if (c == null) {
+          return c;
+      } else {
+          caze = c;
+      }
+    }
+    return caze;
+  }
+
+  public FetchCase gotJoin(String... name)
+    throws HongsException
+  {
+    FetchCase caze = this;
+    for (String n : name)
+    {
+      FetchCase c = caze.getJoin(n);
+      if (c == null) {
+          caze = caze.join(n);
+      } else {
+          caze = c;
+      }
+    }
+    return caze;
+  }
+
+  //** 获取选项 **/
+
+  /**
+   * 是否存在选项
+   * @param key
+   * @return 存在为true, 反之为false
+   */
+  public boolean hasOption(String key)
+  {
+    return this.options.containsKey(key);
+  }
+
+  /**
+   * 获取选项
+   * @param key
+   * @return 指定选项
+   */
+  public Object getOption(String key)
+  {
+    return this.options.get(key);
+  }
+
+  /**
+   * 获取选项(可指定类型)
+   * @param <T>
+   * @param key
+   * @param def
+   * @return 指定选项
+   */
+  public <T> T getOption(String key, T def)
+  {
+    Object obj = this.options.get(key);
+    return obj != null ? (T)obj : def;
+  }
+
+  /**
+   * 设置参数(单个)
+   * @param key
+   * @param obj
+   * @return 当前查询结构对象
+   */
+  public FetchCase setOption(String key, Object obj)
+  {
+    this.options.put(key, obj);
+    return this;
   }
 
   //** 不推荐的方法 **/
@@ -914,7 +779,7 @@ public class FetchCase
   /**
    * @deprecated
    */
-  public boolean hasHaving()
+  public boolean hasHavin()
   {
     return this.havins.length() != 0;
   }
@@ -922,7 +787,7 @@ public class FetchCase
   /**
    * @deprecated
    */
-  public FetchCase setHaving(String where, Object... params)
+  public FetchCase setHavin(String where, Object... params)
   {
     this.havins = new StringBuilder(checkWhere(where));
     this.hparams = Arrays.asList(params);

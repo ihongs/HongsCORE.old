@@ -1,36 +1,18 @@
 package app.hongs.action;
 
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Tree;
-import app.hongs.util.Util;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.util.Streams;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 数据校验助手
@@ -73,41 +55,47 @@ public class VerifyHelper {
         return addRule(name, rule, opts);
     }
 
-    public VerifyHelper addRulesByForm(String coll, String form) throws HongsException {
-        CollConfig cnf = CollConfig.getInstance(coll);
+    public VerifyHelper addRulesByForm(String conf, String form) throws HongsException {
+        StructConfig cnf = StructConfig.getInstance(conf);
+        Map map  = cnf.getForm(form);
+        if (map == null) return this;
+        map = (Map) map.get("items");
 
         int i = 0;
         try {
-            Map map = cnf.getForm(form);
             Iterator it = map.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry et = (Map.Entry)it.next();
-                String  name = (String) et.getKey();
+                String  code = (String) et.getKey();
                 Map     opts = (Map)  et.getValue();
 
-                String  type = (String) opts.get("_type");
-                String  extr = (String) opts.get("_extr");
-                String  required = (String) opts.get("_required");
-                String  repeated = (String) opts.get("_repeated");
+                byte required = (Byte) opts.remove("_required");
+                if (required > 0) {
+                    this.addRule(code, "_required");
+                }
 
-                if (!"0".equals(required) && !"2".equals(required)) {
-                    this.addRule(name, "_required");
+                byte repeated = (Byte) opts.remove("_repeated");
+                if (repeated > 0) {
+                    this.addRule(code, "_repeated");
                 }
-                if (!"0".equals(repeated)) {
-                    this.addRule(name, "_repeated");
+
+                String  rule = (String) opts.get("_rule");
+                if (null == rule || "".equals(rule)) {
+                        rule = (String) opts.get("_type");
+                    String c = rule.substring(0, 1);
+                    String n = rule.substring(   1);
+                    rule = "is"+c.toUpperCase( )+n ;
                 }
-                if (! "".equals(extr)) {
-                    this.addRule(name, extr, opts);
-                } else {
-                    this.addRule(name, type, opts);
-                }
+                opts.put("__conf__", conf);
+                opts.put("__form__", form);
+                this.addRule(code, rule, opts);
             }
         }
         catch (ClassCastException ex) {
-            throw new HongsException(0x1101, "Failed to get rule: "+coll+":"+form);
+            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form);
         }
         catch (IndexOutOfBoundsException ex) {
-            throw new HongsException(0x1101, "Failed to get rule: "+coll+":"+form+"#"+i);
+            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form+"#"+i);
         }
 
         return this;
@@ -120,45 +108,39 @@ public class VerifyHelper {
         for(Map.Entry<String, Map<String, Map>> et : rules.entrySet()) {
             Map<String, Map> rulez  =  et.getValue( );
             String name = et.getKey();
-            Object data = Tree.getValue(values, name);
+            Object data = Tree.getValue2(values, name);
 
             Map<String, String> rq = rulez.remove("_required");
             Map<String, String> rp = rulez.remove("_repeated");
 
-            // 注: required 等于 2 表示这是一个只读项
-            if ("2".equals(rq)) {
-                continue;
-            } else
-            if ("0".equals(rq) || rq == null || update) {
-                try {
-                    data = required(data);
-                } catch (Wrong w) {
+            if (rq == null || update) {
+                if ( null == data) {
                     continue;
                 }
             } else {
                 try {
                     data = required(data);
-                } catch (Wrong ex) {
-                    wrongz.put(name , ex);
+                } catch (Wrong  w) {
+                    failed(wrongz, w, name);
                     continue;
                 }
             }
 
-            if ("0".equals(rp) || rp == null) {
+            if (rp == null) {
                 try {
                     data = verify(name, data, values, rulez, update);
                 } catch (Wrong  w) {
-                    wrongz.put(name, w);
+                    failed(wrongz, w, name);
                     continue;
                 } catch (Wrongs w) {
-                    putWrons(wrongz, w.getWrongs(), name);
+                    failed(wrongz, w, name);
                     continue;
                 }
             } else {
                 try {
                     data = repeated(data);
-                } catch (Wrong ex) {
-                    wrongz.put(name, ex);
+                } catch (Wrong  w) {
+                    failed(wrongz, w, name);
                     continue;
                 }
 
@@ -171,10 +153,10 @@ public class VerifyHelper {
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
                         } catch (Wrong  w) {
-                            wrongz.put(name3, w);
+                            failed(wrongz, w, name3);
                             continue;
                         } catch (Wrongs w) {
-                            putWrons(wrongz, w.getWrongs(), name3);
+                            failed(wrongz, w, name3);
                             continue;
                         }
                         data2.add(data3);
@@ -189,19 +171,22 @@ public class VerifyHelper {
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
                         } catch (Wrong  w) {
-                            wrongz.put(name3, w);
+                            failed(wrongz, w, name3);
                             continue;
                         } catch (Wrongs w) {
-                            putWrons(wrongz, w.getWrongs(), name3);
+                            failed(wrongz, w, name3);
                             continue;
                         }
                         data2.add(data3);
                     }
                 }
-                data = data2;
+                
+                if (null != data2) {
+                    data  = data2;
+                }
             }
 
-            Tree.setValue(valuez, name, data);
+            Tree.setValue(valuez, data, name);
         }
 
         if (!wrongz.isEmpty()) {
@@ -211,32 +196,31 @@ public class VerifyHelper {
         return valuez;
     }
 
-    private Object verify(String name, Object value, Map values, Map<String, Map> rules2, boolean update) throws Wrong, HongsException {
+    protected Object verify(String name, Object value, Map values, Map<String, Map> rules2, boolean update) throws Wrong, HongsException {
         for(Map.Entry<String, Map> rule2 : rules2.entrySet()) {
-            String rule = rule2.getKey(  );
             Map  params = rule2.getValue();
+            String rule = rule2.getKey(  );
             value = verify(name, value, values, rule, params, update);
         }
         return value;
     }
 
-    private Object verify(String name, Object value, Map values, String rule, Map params, boolean update) throws Wrong, HongsException {
+    protected Object verify(String name, Object value, Map values, String rule, Map params, boolean update) throws Wrong, HongsException {
         // 放入环境参数
         params.put("__name__"  , name  );
+        params.put("__rule__"  , rule  );
         params.put("__update__", update);
 
         // 调用 rule 指定的静态方法进行校验
         String cls;
         String mtd;
-        int pos = rule.lastIndexOf( "." );
+        int pos = rule.lastIndexOf(".");
         if (pos != -1) {
             cls = rule.substring(0 , pos);
             mtd = rule.substring(1 + pos);
         } else {
             cls = this.getClass().getName();
-            String n = rule.substring(   1);
-            String c = rule.substring(0, 1);
-            mtd = "is" +c.toUpperCase()+ n ;
+            mtd = rule;
         }
 
         try {
@@ -261,28 +245,28 @@ public class VerifyHelper {
             throw new HongsException(0x1105, ex);
         }
         catch (InvocationTargetException ex) {
-            throw new HongsException(0x1106, ex.getCause());
-        }
-    }
-
-    private static void putWrons(Map<String, Wrong > wrongs, Map<String, Wrong > wrongz, String name) {
-        for (Map.Entry<String, Wrong> et : wrongz.entrySet()) {
-            String n = et.getKey  ( );
-            Wrong  e = et.getValue( );
-            wrongs.put(name+"."+n,e);
-        }
-    }
-
-    private static List<String> getNames(Map<String, Object> values, String name) {
-        name = "^"+Util.escapeRegular(name).replace("\\u002a", "[^\\.]+")+"$";
-        Pattern pa = Pattern.compile (name);
-        List<String> names = new ArrayList();
-        for (String  namc  : values.keySet()) {
-            if (pa.matcher( namc ).matches()) {
-                names.add ( namc );
+            Throwable e = ex.getCause();
+            if (e instanceof HongsException) {
+                throw (HongsException) e;
+            } else
+            if (e instanceof HongsError    ) {
+                throw (HongsError    ) e;
+            } else {
+                throw new HongsException(0x1106, e);
             }
         }
-        return names;
+    }
+
+    protected static void failed(Map<String, Wrong> wrongz, Wrong  wrong , String name) {
+        wrongz.put(name, wrong);
+    }
+
+    protected static void failed(Map<String, Wrong> wrongz, Wrongs wrongs, String name) {
+        for (Map.Entry<String, Wrong> et : wrongs.getWrongs().entrySet()) {
+            String n = et.getKey(   );
+            Wrong  e = et.getValue( );
+            wrongz.put(name+"."+n, e);
+        }
     }
 
     public static Object required(Object value) throws Wrong {
@@ -320,128 +304,58 @@ public class VerifyHelper {
         throw new Wrong("fore.form.norepeat");
     }
 
-    public static String isString(Object value, Map values, Map params) throws Wrong, HongsException {
-        norepeat(value);
-        String str = value.toString();
-        int minlen = Tree.getValue(params, "minlength", 0);
-        if (minlen != 0 && minlen > str.length()) {
-            throw new Wrong("fore.form.lt.minlength", Integer.toString(minlen));
-        }
-        int maxlen = Tree.getValue(params, "maxlength", 0);
-        if (maxlen != 0 && maxlen < str.length()) {
-            throw new Wrong("fore.form.lt.maxlength", Integer.toString(maxlen));
-        }
-        String pattern = Tree.getValue(params, "pattern", "");
-        if (!"".equals(pattern)) {
-            if (!Pattern.matches(pattern, str)) {
-                throw new Wrong("fore.form.is.not.match.pattern", pattern);
-            }
-        }
-        String defined = Tree.getValue(params, "defined", "");
-        if (!"".equals(defined)) {
-            pattern = ( String ) CollConfig.getInstance(  ).getEnum("PATTERNS").get(defined);
-            if (!Pattern.matches(pattern, str)) {
-            defined = CoreLanguage.getInstance().translate("fore.defined.patterns."+defined);
-                throw new Wrong("fore.form.is.not.match.defined", defined);
-            }
-        }
-        return str;
-    }
-
-    public static Number isNumber(Object value, Map values, Map params) throws Wrong {
-        norepeat(value);
-        double num;
-        try {
-            num = Double.parseDouble(value.toString());
-        } catch (NumberFormatException ex) {
-            throw new Wrong("fore.form.is.not.number");
-        }
-        double min = Tree.getValue(params, "minlength", 0D);
-        if (min != 0 && min > num) {
-            throw new Wrong("fore.form.lt.minlength", Double.toString(min));
-        }
-        double max = Tree.getValue(params, "maxlength", 0D);
-        if (max != 0 && max < num) {
-            throw new Wrong("fore.form.lt.maxlength", Double.toString(max));
-        }
-        return num;
-    }
-
     public static Object isForm(Object value, Map values, Map params) throws Wrongs, HongsException {
-        String[] formName = ((String) params.get("form")).split("\\.", 2);
-        VerifyHelper veri = new VerifyHelper().addRulesByForm(formName[0],formName[1]);
-        return veri.verify((Map) value, Tree.getValue( params, "__update__", false ) );
+        String conf = Tree.getValue(params, "", "conf");
+        String name = Tree.getValue(params, "", "name");
+        if (conf == null || !"".equals(conf)) {
+            conf = Tree.getValue(params, "","__conf__");
+        }
+        if (name == null || !"".equals(name)) {
+            name = Tree.getValue(params, "","__name__");
+        }
+        
+        boolean upd = Tree.getValue(params,false, "__update__");
+        VerifyHelper veri = new VerifyHelper();
+        veri.addRulesByForm(conf, name);
+        return  veri.verify(values,upd);
     }
-
+    
     public static Object isEnum(Object value, Map values, Map params) throws Wrong , HongsException {
-        String[] enumName = ((String) params.get("enum")).split("\\.", 2);
-        Map      enumData = CollConfig.getInstance( enumName[0] ).getEnum(enumName[1]);
-        if (!enumData.containsValue(value.toString())) {
+        String conf = Tree.getValue(params, "", "conf");
+        String code = Tree.getValue(params, "", "code");
+        if (conf == null || !"".equals(conf)) {
+            conf = Tree.getValue(params, "","__conf__");
+        }
+        if (code == null || !"".equals(code)) {
+            code = Tree.getValue(params, "","__code__");
+        }
+        
+        Map data = StructConfig.getInstance(conf).getEnum(code);
+        if (! data.containsValue(value.toString()) ) {
             throw new Wrong("fore.form.not.in.enum");
         }
         return value;
     }
 
     public static String isFile(Object value, Map values, Map params) throws Wrong {
-        String n = Tree.getValue(params, "__name__", "");
-        Upload u = new Upload();
-        String x;
-        x = (String) params.get("uploadPath");
+        UploadHelper u = new UploadHelper();
+        String x = Tree.getValue(params, "", "__name__");
+        u.setUploadName(x);
+        x = (String) params.get("path");
         if (x != null) u.setUploadPath(x);
-        x = (String) params.get("uploadHref");
+        x = (String) params.get("href");
         if (x != null) u.setUploadHref(x);
-        x = (String) params.get("uploadName");
-        if (x != null) u.setUploadName(x);
-        x = (String) params.get("allowTypes");
+        x = (String) params.get("name");
+        if (x != null) u.setUploadDate(x);
+        x = (String) params.get("type");
         if (x != null) u.setAllowTypes(x.split(","));
-        x = (String) params.get("allowExtns");
+        x = (String) params.get("extn");
         if (x != null) u.setAllowExtns(x.split(","));
 
-        ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-        try {
-            ServletFileUpload upload = new ServletFileUpload();
-            FileItemIterator fit = upload.getItemIterator( helper.getRequest( ) );
-            while (fit.hasNext()) {
-                FileItemStream fis = fit.next(  );
-                String fame  = fis.getFieldName();
-                if (! n.equals(fame)) {
-                    continue;
-                }
-                String name = fis.getName();
-                String type = fis.getContentType( );
-                InputStream strm = fis.openStream();
-                return u.upload(strm, fame, name, type);
-            }
-            return null;
-        } catch (FileUploadException ex) {
-            throw new Wrong(ex, "fore.form.upload.failed");
-        } catch (IOException ex) {
-            throw new Wrong(ex, "fore.form.upload.failed");
-        }
-    }
-
-    public static Date isDate(Object value, Map values, Map params) throws Wrong {
-        return null;
-    }
-
-    public static Time isTime(Object value, Map values, Map params) throws Wrong {
-        return null;
-    }
-
-    public static Date isDatetime(Object value, Map values, Map params) throws Wrong {
-        return null;
-    }
-
-    public static String isPassword(Object value, Map values, Map params) throws Wrong {
-        return null;
-    }
-
-    public static String isExists(Object value, Map values, Map params) throws Wrong {
-        return null;
-    }
-
-    public static String isUnique(Object value, Map values, Map params) throws Wrong {
-        return null;
+        ActionHelper hlp = (ActionHelper) Core.getInstance(ActionHelper.class);
+        HttpServletRequest req = hlp.getRequest();
+        UploadHelper.upload(req, u);
+        return u.getResultHref(   );
     }
 
     /** 内部类 **/
@@ -487,114 +401,9 @@ public class VerifyHelper {
                 Wrong  w = (Wrong )  et.getValue();
                 String n = (String)  et.getKey ( );
                 String e = w.getLocalizedMessage();
-                Tree.setValue(errors, n, e);
+                Tree.setValue(errors, e, n);
             }
             return errors;
-        }
-    }
-
-    public static class Upload {
-        private String uploadPath = Core.VARS_PATH + "/upload";
-        private String uploadHref = null;
-        private String uploadName = null;
-        private Set<String> allowTypes = null;
-        private Set<String> allowExtns = null;
-        private File   resultFile;
-
-        public Upload setUploadPath(String path) {
-            this.uploadPath = path;
-            return this;
-        }
-        public Upload setUploadHref(String href) {
-            this.uploadHref = href;
-            return this;
-        }
-        public Upload setUploadName(String name) {
-            this.uploadName = name;
-            return this;
-        }
-        public Upload setAllowTypes(String... type) {
-            this.allowTypes = new LinkedHashSet(Arrays.asList(type));
-            return this;
-        }
-        public Upload setAllowExtns(String... extn) {
-            this.allowExtns = new LinkedHashSet(Arrays.asList(extn));
-            return this;
-        }
-
-        public String upload(InputStream stream, String fame, String name, String type) throws Wrong {
-            /**
-             * 检查文件类型
-             */
-            if (this.allowTypes != null
-            && !this.allowTypes.contains(type)) {
-                // 文件类型不对
-                throw new Wrong("fore.form.unallowed.types", this.allowTypes.toString());
-            }
-
-            String extn = this.getExtn(name);
-
-            /**
-             * 检查扩展名
-             */
-            if (this.allowExtns != null
-            && !this.allowExtns.contains(extn)) {
-                // 扩展名不对
-                throw new Wrong("fore.form.unallowed.extns", this.allowExtns.toString());
-            }
-
-            /**
-             * 将路径放入数据中
-             */
-            String famc = Core.getUniqueId() + "." + extn;
-            if (this.uploadName != null) {
-                famc = new SimpleDateFormat(this.uploadName).format(new Date()) + famc;
-            }
-            String path = famc;
-            if (this.uploadPath != null) {
-                path = this.uploadPath + "/" + famc;
-            }
-            String href = famc;
-            if (this.uploadHref != null) {
-                href = this.uploadHref + "/" + famc;
-            }
-
-            try {
-                File file = new File(path);
-                BufferedOutputStream bos = new BufferedOutputStream(
-                                           new FileOutputStream(file));
-                BufferedInputStream  bis = new BufferedInputStream(stream);
-                Streams.copy(bis, bos, true);
-            } catch (IOException ex) {
-                throw new Wrong(ex, "fore.form.upload.failed");
-            }
-
-            return href;
-        }
-
-        private String getExtn(String name) {
-            // 如果有指定扩展名就依次去匹配
-            if (this.allowExtns != null) {
-              for (String ext : allowExtns) {
-                if (name.endsWith("." + ext)) {
-                  return  ext;
-                }
-              }
-            }
-
-            // 否则取最后的句点后作为扩展名
-            name = new File(name).getName();
-            int pos = name.lastIndexOf('.');
-            if (pos > 1) {
-              return  name.substring(pos+1);
-            }
-            else {
-              return  "";
-            }
-        }
-
-        public File getFile() {
-            return resultFile;
         }
     }
 

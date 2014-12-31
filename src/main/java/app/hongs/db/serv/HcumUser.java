@@ -1,7 +1,7 @@
 package app.hongs.db.serv;
 
 import app.hongs.HongsException;
-import app.hongs.action.AuthConfig;
+import app.hongs.serv.AuthConfig;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
 import app.hongs.db.FetchCase;
@@ -22,7 +22,7 @@ extends Model {
 
     public HcumUser()
     throws HongsException {
-        this(DB.getInstance("hcum").getTable("a_hcum_user"));
+        this(DB.getInstance("hcum").getTable("user"));
     }
     
     public HcumUser(Table table)
@@ -138,7 +138,8 @@ extends Model {
          * 则关联a_hcum_user_detp来约束范围
          */
         if (req.containsKey("dept_id")) {
-            caze.join ("a_hcum_user_dept", ".user_id = :id")
+            caze.join ("a_hcum_user_dept", "depts")
+                .on   (".user_id = :id")
                 .where("dept_id = ?" , req.get( "dept_id" ));
         }
     }

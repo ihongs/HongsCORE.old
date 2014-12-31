@@ -297,7 +297,7 @@ HsList.prototype = {
             delete this._info;
     },
     fillPage : function(page) {
-        switch (page.errno) {
+        switch (page.err) {
             case 1:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
                 this.listBox.children().hide();
