@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  *
  * <h3>系统已定义的"options":</h3>
  * <pre>
- * ASSOC_TABLES : Set         仅对某些表做关联; 作用域: FetchJoin.assocSelect
+ * ASSOCS       : Set         仅对某些表做关联; 作用域: FetchJoin.assocSelect
  * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchJoin.assocSelect
  * ASSOC_JOINS  : Set         仅对某些类型连接; 作用域: FetchJoin.assocSelect
  * MULTI_ASSOC  : boolean     多行关联(使用IN方式关联); 作用域: FetchJoin
@@ -707,6 +707,26 @@ public class FetchCase
 
   //** 不推荐的方法 **/
 
+  /**
+   * 是否有设置表名
+   * @return 存在未true, 反之为false
+   * @deprecated
+   */
+  public boolean hasFrom()
+  {
+    return this.tableName != null;
+  }
+
+  /**
+   * 是否有关联的表
+   * @return 存在未true, 反之为false
+   * @deprecated
+   */
+  public boolean hasJoin()
+  {
+    return !this.joinList.isEmpty();
+  }
+  
   /**
    * 是否有设置查询字段
    * @return 存在为true, 反之为false

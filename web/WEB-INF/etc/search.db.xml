@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<db xmlns="http://hongs-core"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://hongs-core db.xsd">
+    <source link="default"/>
+    <origin link="default"/>
+    <tables>
+        <!-- 索引文章 -->
+        <table name="article"
+               tableName="a_search_article"
+               primaryKey="id">
+            <assoc type="HAS_MANY"
+                   name="article_keyword"
+                   foreignKey="article_id"/>
+            <assoc type="HAS_MANY"
+                   name="article_subject"
+                   foreignKey="article_id"/>
+            <assoc type="HAS_MANY"
+                   name="article_related"
+                   foreignKey="article_id"/>
+        </table>
+        <!-- 关键字词 -->
+        <table name="keyword"
+               tableName="a_search_keyword"
+               primaryKey="id">
+        </table>
+        <!-- 主题分类 -->
+        <table name="subject"
+               tableName="a_search_subject"
+               primaryKey="id">
+        </table>
+        <!-- 文章的关键字词 -->
+        <table name="article_keyword"
+               tableName="a_search_article_keyword">
+        </table>
+        <!-- 文章的主题分类 -->
+        <table name="article_subject"
+               tableName="a_search_article_subject">
+        </table>
+        <!-- 文章的关联属性 -->
+        <table name="article_related"
+               tableName="a_search_article_related">
+        </table>
+    </tables>
+</db>

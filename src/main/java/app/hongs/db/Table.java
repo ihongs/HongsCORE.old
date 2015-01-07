@@ -405,7 +405,7 @@ public class Table
       fmt = "yyyy/MM/dd HH:mm:ss";
     }
 
-    CoreLanguage conf = (CoreLanguage) Core.getInstance(CoreLanguage.class);
+    CoreLanguage conf = Core.getInstance(CoreLanguage.class);
     return conf.getProperty("core.default."+type+".format", fmt);
   }
 
@@ -413,14 +413,14 @@ public class Table
     throws HongsException
   {
     Map        cols = getColumns();
-    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     field = conf.getProperty("core.table." + field + ".field", field);
     return  cols.containsKey(field) ? field : null;
   }
 
   protected String getState(String state)
   {
-    CoreConfig conf = (CoreConfig) Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     return  conf.getProperty("core.table." + state + ".state", null );
   }
 

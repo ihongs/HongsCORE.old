@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotation.Action;
+import app.hongs.annotaion.Action;
 import app.hongs.db.DB;
 import java.util.HashMap;
 import java.util.List;

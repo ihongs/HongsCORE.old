@@ -97,9 +97,9 @@ public class CoreLogger implements Core.Destroy
      * 记录发生的时间
      */
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.line.time.format",
-                                "yyyy/MM/dd HH:mm:ss");
+                                "yyyy/MM/dd HH:mm:ss"  );
     DateFormat df = new SimpleDateFormat(f);
     String date = df.format(new Date(time));
 
@@ -170,7 +170,7 @@ public class CoreLogger implements Core.Destroy
    */
   private void openlog(long time)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.log.name.date.format", "");
     String p = this.path + File.separator + this.name;
     String x;

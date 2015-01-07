@@ -3,14 +3,15 @@ package app.hongs.db.serv;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotation.Action;
-import app.hongs.annotation.Supply;
-import app.hongs.annotation.Verify;
+import app.hongs.annotaion.Action;
+import app.hongs.annotaion.Supply;
+import app.hongs.annotaion.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
+import app.hongs.db.Mview;
 import app.hongs.dl.IAction;
-import static app.hongs.serv.CommonFilter.ENTITY;
-import static app.hongs.serv.CommonFilter.MODULE;
+import static app.hongs.action.ActionCasual.ENTITY;
+import static app.hongs.action.ActionCasual.MODULE;
 import java.util.Collection;
 import java.util.Map;
 
@@ -43,39 +44,39 @@ implements IAction {
     @Action("create")
     @Verify()
     @CommitSuccess
-    public void doCreate(ActionHelper helper) throws HongsException {
+    public void create(ActionHelper helper) throws HongsException {
         String  module = (String) helper.getAttribute(MODULE);
         String  entity = (String) helper.getAttribute(ENTITY);
         Model   mod = DB.getInstance(module).getModel(entity);
         Map     req = getMyReq(helper, mod);
         String  i   = mod.create(req);
         String  n   = ( String ) req.get( mod.findCols[0] );
-        String  msg = getMyMsg(module, entity, "create", 1);
+        String  msg = getMyMsg(mod, module, "create", 1);
         helper.reply(msg, i, n);
     }
 
     @Action("update")
     @Verify()
     @CommitSuccess
-    public void doUpdate(ActionHelper helper) throws HongsException {
+    public void update(ActionHelper helper) throws HongsException {
         String  module = (String) helper.getAttribute(MODULE);
         String  entity = (String) helper.getAttribute(ENTITY);
         Model   mod = DB.getInstance(module).getModel(entity);
         Map     req = getMyReq(helper, mod);
         int     i  = mod.update(req);
-        String  msg = getMyMsg(module, entity, "update", i);
+        String  msg = getMyMsg(mod, module, "update", i);
         helper.reply(msg, i);
     }
 
     @Action("delete")
     @CommitSuccess
-    public void doDelete(ActionHelper helper) throws HongsException {
+    public void delete(ActionHelper helper) throws HongsException {
         String  module = (String) helper.getAttribute(MODULE);
         String  entity = (String) helper.getAttribute(ENTITY);
         Model   mod = DB.getInstance(module).getModel(entity);
         Map     req = getMyReq(helper, mod);
         int     i   = mod.delete(req);
-        String  msg = getMyMsg(module, entity, "delete", i);
+        String  msg = getMyMsg(mod, module, "delete", i);
         helper.reply(msg, i);
     }
 
@@ -110,11 +111,11 @@ implements IAction {
         return req;
     }
 
-    public String getMyMsg(String module, String entity, String action, int num) {
-        CoreLanguage lang = CoreLanguage.getInstance().clone( ); lang.load(module);
-        String n = (entity.length()==0?module:module+"."+entity).replace("/", ".");
-               n = lang.containsKey(n) ? lang.translate(n) : "";
-        return lang.translate("fore."+action+".success", n, Integer.toString(num));
+    public String getMyMsg(Model mod, String module, String action, int num) throws HongsException {
+        CoreLanguage lang = CoreLanguage.getInstance().clone();
+                     lang.loadIgnrFNF(module);
+        Mview        view = new Mview(mod   );
+        return lang.translate("fore."+action+".success", view.getTitle(), Integer.toString(num));
     }
 
 }

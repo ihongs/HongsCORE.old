@@ -42,15 +42,10 @@ public class LangTag extends TagSupport implements DynamicAttributes {
     CoreLanguage lang = CoreLanguage.getInstance().clone();
 
     if (this.load != null) {
-      if (this.load.endsWith(".xml")) {
-        lang.loadFromXML(this.load.substring(0, this.load.length() - 4));
-      }
-      else {
-        lang.load(this.load);
-      }
+      lang.load(this.load);
     }
 
-    if (this.key != null) {
+    if (this.key  != null) {
       String str;
       if (this.repMap != null) {
         str = lang.translate(this.key, this.repMap);

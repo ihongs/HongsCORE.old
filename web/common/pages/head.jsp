@@ -116,15 +116,14 @@
             });
 
         $(function() {
-            if (location.hash) {
-                $("#main-menubar>li>a[href='" + location.hash + "']").click(  );
-            }
-            else {
-                $("#main-menubar>li>a").first().click();
+            if ( location.hash  ) {
+                $("#curr-menubar>li>a[href='"+location.hash+"']").click();
+            } else {
+                $("#curr-menubar>li>a").first().click();
             }
             setTimeout(function() {
-                $("#user-menubar>li>a").first().click();
-            }, 500);
+                $("#main-menubar>li>a").first().click();
+            }, 1000);
         });
     })(jQuery);
 </script>

@@ -2,7 +2,7 @@ package app.hongs.dl.serv;
 
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotation.Action;
+import app.hongs.annotaion.Action;
 import app.hongs.dl.IAction;
 
 /**
@@ -18,17 +18,17 @@ public class HaimAction implements IAction {
     }
 
     @Action("create")
-    public void doCreate(ActionHelper helper) throws HongsException {
+    public void create(ActionHelper helper) throws HongsException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Action("update")
-    public void doUpdate(ActionHelper helper) throws HongsException {
+    public void update(ActionHelper helper) throws HongsException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Action("delete")
-    public void doDelete(ActionHelper helper) throws HongsException {
+    public void delete(ActionHelper helper) throws HongsException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

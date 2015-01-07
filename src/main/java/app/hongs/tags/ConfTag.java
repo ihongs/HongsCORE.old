@@ -32,23 +32,16 @@ public class ConfTag extends TagSupport {
 
     CoreConfig conf = CoreConfig.getInstance().clone();
 
-    if (this.load != null)
-    {
-      if (this.load.endsWith(".xml")) {
-        conf.loadFromXML(this.load.substring(0 , this.load.length( ) - 4));
-      }
-      else {
-        conf.load(this.load);
-      }
+    if (this.load != null) {
+      conf.load(this.load);
     }
 
-    if (this.key != null)
-    {
-      String str = conf.getProperty(this.key , this.def!=null?this.def:"");
+    if (this.key  != null) {
+      String str = conf.getProperty(this.key , this.def != null ? this.def : "");
 
-      if (this.esc != null
-      &&  ! "".equals(this.esc)
-      &&  ! "no".equals(this.esc)) {
+      if (this.esc  != null
+      &&  !    "".equals(this.esc)
+      &&  !  "no".equals(this.esc)) {
         if ("yes".equals(this.esc)) {
           str = Util.escape(str);
         }

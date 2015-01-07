@@ -100,9 +100,9 @@ public class Mtree extends Model
   {
     super(table);
     
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     this.bidKey = conf.getProperty("fore.tree.bid.key", "bid");
-    this.rootId = conf.getProperty("fore.tree.root.id", "0");
+    this.rootId = conf.getProperty("fore.tree.root.id",  "0" );
   }
 
   //** 标准动作方法 **/
@@ -127,14 +127,14 @@ public class Mtree extends Model
       caze = new FetchCase();
     }
 
-    if (!caze.hasOption("ASSOC_TABLES")
+    if (!caze.hasOption("ASSOCS")
     &&  !caze.hasOption("ASSOC_TYPES")
     &&  !caze.hasOption("ASSOC_JOINS"))
     {
-      caze.setOption("ASSOC_TABLES", new HashSet());
+      caze.setOption("ASSOCS", new HashSet());
     }
 
-    String pid = (String)rd.get(this.pidKey);
+    String pid = (String) rd.get(this.pidKey);
     if (pid == null || pid.length() == 0)
     {
       pid =  this.rootId;

@@ -122,8 +122,8 @@ public class ActionHelper
   {
     request      = req;
     response     = rsp;
-    requestData  = null;
-    responseData = null;
+//  requestData  = null;
+//  responseData = null;
 
     if (responseWrtr != null)
     {

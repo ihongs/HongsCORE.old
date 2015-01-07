@@ -17,7 +17,7 @@ public class HaimCmdlet {
       String[] ts = tables.split(":");
       String srcTableName = ts[0];
       String dstTableName = ts[1];
-      DB db = (DB)Core.getInstance(app.hongs.db.DB.class);
+      DB db = Core.getInstance(app.hongs.db.DB.class);
       Table srcTable = Table.getInstanceByName(db, srcTableName);
       Table dstTable = Table.getInstanceByName(db, dstTableName);
       TableSync sync = new TableSync(srcTable);

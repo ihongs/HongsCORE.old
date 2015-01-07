@@ -32,8 +32,17 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class VerifyHelper {
 
-    private Map<String, Map<String, Map>> rules;
+    private Map<String , Map<String, Map > > rules;
 
+    private static final Map<String, String> alias;
+    static {
+        alias = new HashMap();
+        alias.put("textarea", "text");
+        alias.put("hidden",   "text");
+        alias.put("slider", "number");
+        alias.put("switch", "number");
+    }
+    
     public VerifyHelper() {
         rules = new LinkedHashMap();
     }
@@ -47,10 +56,15 @@ public class VerifyHelper {
     }
 
     public VerifyHelper addRule(String name, String rule, String... args) {
-        Map<String,Object> opts = new HashMap();
+        Map<String, Object> opts = new HashMap();
+        int i = 0;
         for(String   arg : args) {
-            String[] arr = arg.split( "=" , 2 );
-            opts.put(arr[0], arr[1]);
+            String[] arr = arg.split( "::" , 2 );
+            if (arr.length > 1 ) {
+                opts.put(arr[0], arr[1]);
+            } else {
+                opts.put(String.valueOf(++i), arr[0]);
+            }
         }
         return addRule(name, rule, opts);
     }
@@ -82,6 +96,13 @@ public class VerifyHelper {
                 String  rule = (String) opts.get("_rule");
                 if (null == rule || "".equals(rule)) {
                         rule = (String) opts.get("_type");
+                if (null == rule || "".equals(rule)) {
+                    continue;
+                }
+                if (alias.containsKey(rule)) {
+                    rule = alias.get (rule);
+                }
+                    // 将 type 转换为 isType 规则名
                     String c = rule.substring(0, 1);
                     String n = rule.substring(   1);
                     rule = "is"+c.toUpperCase( )+n ;
@@ -95,7 +116,7 @@ public class VerifyHelper {
             throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form);
         }
         catch (IndexOutOfBoundsException ex) {
-            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form+"#"+i);
+            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form+"#"+i, ex);
         }
 
         return this;
@@ -180,7 +201,7 @@ public class VerifyHelper {
                         data2.add(data3);
                     }
                 }
-                
+
                 if (null != data2) {
                     data  = data2;
                 }
@@ -269,6 +290,8 @@ public class VerifyHelper {
         }
     }
 
+    //** 顶级校验器 **/
+
     public static Object required(Object value) throws Wrong {
         if (value  ==  null ) {
             throw new Wrong("fore.form.required");
@@ -304,6 +327,12 @@ public class VerifyHelper {
         throw new Wrong("fore.form.norepeat");
     }
 
+    public static Object ignore(Object value, Map values, Map params) {
+        return null;
+    }
+
+    //** 类型校验器 **/
+
     public static Object isForm(Object value, Map values, Map params) throws Wrongs, HongsException {
         String conf = Tree.getValue(params, "", "conf");
         String name = Tree.getValue(params, "", "name");
@@ -313,13 +342,13 @@ public class VerifyHelper {
         if (name == null || !"".equals(name)) {
             name = Tree.getValue(params, "","__name__");
         }
-        
+
         boolean upd = Tree.getValue(params,false, "__update__");
         VerifyHelper veri = new VerifyHelper();
         veri.addRulesByForm(conf, name);
         return  veri.verify(values,upd);
     }
-    
+
     public static Object isEnum(Object value, Map values, Map params) throws Wrong , HongsException {
         String conf = Tree.getValue(params, "", "conf");
         String code = Tree.getValue(params, "", "code");
@@ -329,7 +358,7 @@ public class VerifyHelper {
         if (code == null || !"".equals(code)) {
             code = Tree.getValue(params, "","__code__");
         }
-        
+
         Map data = StructConfig.getInstance(conf).getEnum(code);
         if (! data.containsValue(value.toString()) ) {
             throw new Wrong("fore.form.not.in.enum");
@@ -352,22 +381,54 @@ public class VerifyHelper {
         x = (String) params.get("extn");
         if (x != null) u.setAllowExtns(x.split(","));
 
-        ActionHelper hlp = (ActionHelper) Core.getInstance(ActionHelper.class);
+        ActionHelper hlp = Core.getInstance(ActionHelper.class);
         HttpServletRequest req = hlp.getRequest();
         UploadHelper.upload(req, u);
         return u.getResultHref(   );
     }
 
-    /** 内部类 **/
+    public static Object isText(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isDate(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isTime(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isDatetime(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isNumber(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isTel(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isUrl(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isEmail(Object value, Map values, Map params) {
+        return value;
+    }
+
+    /** 内部错误类 **/
 
     public static class Wrong  extends HongsException {
-        public Wrong(Throwable cause, String desc, String... prms) {
-            super(HongsException.NOTICE, desc, cause);
+        public Wrong(String desc, String... prms) {
+            super(HongsException.NOTICE, desc);
             this.setLocalizedOptions(prms);
         }
 
-        public Wrong(String desc, String... prms) {
-            super(HongsException.NOTICE, desc);
+        public Wrong(Throwable cause, String desc, String... prms) {
+            super(HongsException.NOTICE, desc, cause);
             this.setLocalizedOptions(prms);
         }
     }

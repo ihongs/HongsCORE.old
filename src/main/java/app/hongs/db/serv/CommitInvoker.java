@@ -1,13 +1,15 @@
 package app.hongs.db.serv;
 
-import app.hongs.action.ActionRunner;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotation.ActionInvoker;
+import app.hongs.action.ActionRunner;
+import app.hongs.annotaion.ActionInvoker;
 import app.hongs.db.DB;
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * 操作成功才提交数据更改
@@ -22,35 +24,49 @@ public class CommitInvoker implements ActionInvoker {
     throws HongsException {
         Core core = Core.getInstance();
         String dc = DB.class.getName();
-        core.put("__IN_TRANSC_MODE__" , true);
+
         try {
-            for (String bc :  core.keySet( )) {
+            core.put("__IN_TRANSC_MODE__", true);
+            for(Object ot : core.entrySet()) {
+                Map.Entry et = ( Map.Entry ) ot ;
+                String bc = (String) et.getKey();
                 if (bc.startsWith(dc)) {
-                    DB  db = (DB)core.get(dc);
+                    DB db = ( DB ) et.getValue();
                     db.IN_TRANSC_MODE = true ;
                 }
             }
 
-            chains.doAction();
-
             try {
-                for (String bc :  core.keySet( )) {
+                chains.doAction();
+
+                for(Object ot : core.entrySet()) {
+                    Map.Entry et = ( Map.Entry ) ot ;
+                    String bc = (String) et.getKey();
                     if (bc.startsWith(dc)) {
-                        DB  db = (DB)core.get(bc);
+                        DB db = ( DB ) et.getValue();
                         db.commit(  );
                     }
                 }
             } catch (HongsError ex) {
-                for (String bc :  core.keySet( )) {
+                for(Object ot : core.entrySet()) {
+                    Map.Entry et = ( Map.Entry ) ot ;
+                    String bc = (String) et.getKey();
                     if (bc.startsWith(dc)) {
-                        DB  db = (DB)core.get(bc);
+                        DB db = ( DB ) et.getValue();
                         db.rollback();
                     }
                 }
-                throw ex;
             }
         } finally {
             core.remove("__IN_TRANSC_MODE__");
+            for(Object ot : core.entrySet()) {
+                Map.Entry et = ( Map.Entry ) ot ;
+                String bc = (String) et.getKey();
+                if (bc.startsWith(dc)) {
+                    DB db = ( DB ) et.getValue();
+                    db.IN_TRANSC_MODE = false;
+                }
+            }
         }
     }
 }

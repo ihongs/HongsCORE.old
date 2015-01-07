@@ -121,7 +121,7 @@ public class DB
    * 模型类
    */
   protected String modelClass;
-  
+
   /**
    * 表前缀
    */
@@ -702,7 +702,7 @@ public class DB
     this.modelObjects.put(tableName, mobj);
     return mobj;
   }
-  
+
   /** 查询辅助 **/
 
   /**
@@ -942,11 +942,11 @@ public class DB
    * 已改为使用 JDBC 的 setFetchSize,setMaxRows,absolute 等方法;
    * 另, 请不要在 update,delete 中使用 limit 至少 MySQL 是可以的,
    * 您要更新/删除的记录应该是明确的, 应该能够通过 where 做出限定的.
-   * @deprecated 
+   * @deprecated
    * @param sql
    * @param start
    * @param limit
-   * @return 
+   * @return
    */
   public String limit(String sql, int start, int limit) {
       try {
@@ -1042,7 +1042,7 @@ public class DB
 
     return rows;
   }
-  
+
   /**
    * 获取查询的全部数据
    * <p>注: 调fetch实现</p>
@@ -1388,10 +1388,11 @@ public class DB
         Set set = (Set)obj;
         int off =      num;
 
-        // 如果为空, 则补一个null
+        // 加一个空参数防止查询失败
         if (set.isEmpty())
         {
-            set.add(null);
+          set = new HashSet();
+          set.add( null );
         }
 
         // 从第二个参数开始补充问号
@@ -1566,7 +1567,7 @@ public class DB
      * 如有设置dbName的单次加载则将其放入静态映射
      */
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     if (conf.getProperty("core.load.db."+dbName+".once", false))
     {
       gore.put(key, db);

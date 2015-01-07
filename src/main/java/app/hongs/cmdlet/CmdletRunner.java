@@ -7,7 +7,7 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotation.Cmdlet;
+import app.hongs.annotaion.Cmdlet;
 import app.hongs.util.ClassNames;
 import app.hongs.util.Util;
 import java.io.File;
@@ -171,7 +171,7 @@ public class CmdletRunner
     Core.CONF_PATH = Core.BASE_PATH + File.separator + "etc";
     Core.VARS_PATH = Core.BASE_PATH + File.separator + "var";
 
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     Core.VARS_PATH = conf.getProperty("core.vars.path", Core.VARS_PATH);
     Core.LOGS_PATH = Core.VARS_PATH + File.separator + "log";
     Core.SERS_PATH = Core.VARS_PATH + File.separator + "ser";
@@ -181,12 +181,21 @@ public class CmdletRunner
 
     /** 系统属性配置 **/
 
+        Map m = new HashMap();
+        m.put("BASE_PATH", Core.BASE_PATH);
+        m.put("CONF_PATH", Core.CONF_PATH);
+        m.put("VARS_PATH", Core.VARS_PATH);
+        m.put("LOGS_PATH", Core.LOGS_PATH);
+        m.put("LOGS_PATH", Core.SERS_PATH);
+        
         // 启动系统属性
         for (Map.Entry et : conf.entrySet()) {
             String k = (String)et.getKey  ();
             String v = (String)et.getValue();
             if (k.startsWith("start.")) {
-                System.setProperty(k.substring(6), v);
+                k = k.substring(6  );
+                v = Util.inject(v,m);
+                System.setProperty(k,v);
             }
         }
 
@@ -196,7 +205,9 @@ public class CmdletRunner
             String k = (String)et.getKey  ();
             String v = (String)et.getValue();
             if (k.startsWith("debug.")) {
-                System.setProperty(k.substring(6), v);
+                k = k.substring(6  );
+                v = Util.inject(v,m);
+                System.setProperty(k,v);
             }
         }
     }

@@ -110,19 +110,19 @@ public class Mview {
                 disp  = fkey;
             }
 
-            if (Pattern.compile("(decimal|numeric|integer|tinyint|smallint|float|double)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
+            if (Pattern.compile("(decimal|numeric|integer|tinyint|smallint|float|double).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                 type = "number";
             } else
-            if (Pattern.compile("(datetime|timestamp)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
+            if (Pattern.compile("(datetime|timestamp).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                 type = "datetime";
             } else
-            if (Pattern.compile("(date)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
+            if (Pattern.compile("(date)"  , Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                 type = "date";
             } else
-            if (Pattern.compile("(time)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
+            if (Pattern.compile("(time)"  , Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                 type = "time";
             } else
-            if (Pattern.compile("(text)", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
+            if (Pattern.compile("(text).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                 type = "textarea";
             } else {
                 type = "text";
@@ -141,7 +141,7 @@ public class Mview {
             Map       vd = (Map)et.getValue();
             String  type = (String)vd.get("type");
 
-            if (!"HAS_ONE".equals(type) || !"HAS_MANY".equals(type)) {
+            if (!"HAS_ONE".equals(type) && !"HAS_MANY".equals(type)) {
                 continue;
             }
             if (!vd.containsKey("assocs")) {
@@ -171,6 +171,8 @@ public class Mview {
             field.put("data-vk", vk);
         }
 
+        //** 从结构配置中追加字段 **/
+
         Map form  = StructConfig.getInstance(db.name).getForm(table.name);
         if (form != null)
         for(Object o : ((Map)form.get("items")).entrySet()) {
@@ -179,25 +181,34 @@ public class Mview {
             if (n.startsWith("_")) {
                 continue;
             }
-            field = new HashMap();
+
             String t;
-            Map    m = (Map ) e.getValue();
+            Map m = (Map ) e.getValue();
+            field = new HashMap();
+
+            t = (String) m.get("_type");
+            if (t != null && !"".equals(t)) {
+                field.put("type",  t  );
+            }
+
             t = (String) m.get("_disp");
             if (t != null && !"".equals(t)) {
                 field.put("disp",  t  );
             }
-            t = (String) m.get("_type");
-            if ("enum".equals(t)) {
-                field.put("type", "enum");
-            } else
-            if ("file".equals(t)) {
-                field.put("type", "file");
-            } else
-            if (fields.containsKey(n)) {
-                // Nothing todo
-            } else {
+
+            // Form 类型暂不处理
+            if ("form".equals(t)) {
                 continue;
             }
+
+            for (Object o2 : m.entrySet( )) {
+                Map.Entry  e2 = (Map.Entry) o2;
+                String     k2 = (String) e2.getKey();
+                if (k2.startsWith("fore.")) {
+                    field.put(k2.substring(5), e2.getValue().toString());
+                }
+            }
+
             Tree.putDepth(fields, field, n);
         }
 

@@ -281,9 +281,9 @@ public class CmdletHelper
    */
   public static void println(String text)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     String f = conf.getProperty("core.cmd.line.time.format",
-                                "yyyy/MM/dd HH:mm:ss");
+                                "yyyy/MM/dd HH:mm:ss"  );
     Date   d = new Date(System.currentTimeMillis());
     String t = new SimpleDateFormat(f).format(d);
     System.err.println(t + " " + text);

@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,7 +37,7 @@ import org.xml.sax.SAXException;
  }
  enums = {
    "enum_name" : {
-     "value" : "Label"
+     "code" : "Label"
      ...
    }
    ...
@@ -64,11 +63,11 @@ import org.xml.sax.SAXException;
      items: {
        "item_name" : {
          _disp : "Label",
-         _type : "form|enum|file|text|number|slider|switch|date|time|datetime|tel|url|email",
+         _type : "form|enum|file|text|textarea|number|slider|switch|date|time|datetime|tel|url|email",
          _rule : "rule_method",
          _required : 0|1,
          _repeated : 0|1,
-         "param" : "Value"
+         "name" : "Value"
          ...
        }
        ...
@@ -307,14 +306,14 @@ public class StructConfig
       else
       if ("option".equals(tagName2))
       {
-        String namz = element2.getAttribute("value");
+        String namz = element2.getAttribute("code");
         String data = element2.getTextContent();
         datas.put(namz, data);
       }
       else
       if ("attrib".equals(tagName2))
       {
-        String namz = element2.getAttribute("param");
+        String namz = element2.getAttribute("name");
         String data = element2.getTextContent();
         datas.put(namz, data);
       }
@@ -377,8 +376,20 @@ public class StructConfig
     return forms.get(name);
   }
 
+  public CoreLanguage getCurrTranslator() {
+    try {
+      return CoreLanguage.getInstance(name);
+    }
+    catch (app.hongs.HongsError e) {
+      if  (  e.getCode( ) != 0x1a) {
+        throw e;
+      }
+      return CoreLanguage.getInstance("default");
+    }
+  }
+
   public Map getEnumTranslated(String namc) {
-    CoreLanguage lang = CoreLanguage.getInstance(name);
+    CoreLanguage lang = getCurrTranslator();
     Map anum = enums.get(  namc  );
     Map data = new LinkedHashMap();
     if (anum == null) return data ;
@@ -397,7 +408,7 @@ public class StructConfig
   public Map getItemsTranslated(String namc)
     throws HongsException
   {
-    CoreLanguage lang = CoreLanguage.getInstance(name);
+    CoreLanguage lang = getCurrTranslator();
     Map itemz =  new LinkedHashMap();
     Map form = (Map) forms.get(namc);
     if (form == null) return itemz;
@@ -420,7 +431,7 @@ public class StructConfig
   public Map getUnitsTranslated(String namc)
     throws HongsException
   {
-    CoreLanguage lang = CoreLanguage.getInstance(name);
+    CoreLanguage lang = getCurrTranslator();
     Map form = (Map) forms.get(namc);
     Map unitz =  new LinkedHashMap();
     if (form == null) return unitz;
@@ -443,7 +454,7 @@ public class StructConfig
   public Map getFormsTranslated()
     throws HongsException
   {
-    CoreLanguage lang = CoreLanguage.getInstance(name);
+    CoreLanguage lang = getCurrTranslator();
     Map formz =  new LinkedHashMap();
     for (Object o : forms.entrySet()) {
       Map.Entry e = (Map.Entry) o ;

@@ -27,10 +27,15 @@ public class SupplyHelper {
     }
 
     public SupplyHelper addEnum(String code, String... args) {
-        Map<String,String> opts = new HashMap();
+        Map<String, String> opts = new HashMap();
+        int i = 0;
         for(String   arg : args) {
-            String[] arr = arg.split( "=" , 2 );
-            opts.put(arr[1], arr[0]);
+            String[] arr = arg.split( "::" , 2 );
+            if (arr.length > 1 ) {
+                opts.put(arr[0], arr[1]);
+            } else {
+                opts.put(String.valueOf(++i), arr[0]);
+            }
         }
         return addEnum(code, opts);
     }

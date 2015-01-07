@@ -58,15 +58,15 @@ extends HashMap<String, Object>
   /**
    * 获取类对应的唯一对象
    *
-   * @param klass [包路径.]类名.class
+   * @param ct [包路径.]类名.class
    * @return 唯一对象
    */
-  public Object get(Class klass)
+  public <T> T get(Class<T> ct)
   {
     Core   core = Core.GLOBAL_CORE ;
-    String name = klass.getName ( );
+    String name = ct.getName ( );
     Object inst = check(core, name);
-    return inst != null ? inst : build(core, name, klass);
+    return (T) (inst != null ? inst : build(core, name, ct));
   }
 
   /**
@@ -293,12 +293,12 @@ extends HashMap<String, Object>
   /**
    * 应用基础链接
    */
-  public static String BASE_HREF;
+  public static String BASE_HREF = null;
 
   /**
    * 应用基础目录
    */
-  public static String BASE_PATH;
+  public static String BASE_PATH = null;
 
   /**
    * 配置文件存放目录
@@ -381,11 +381,11 @@ extends HashMap<String, Object>
   /**
    * 按类获取单例
    *
-   * @param klass
+   * @param ct
    * @return 类的对象
    */
-  public static Object getInstance(Class klass) {
-    return getInstance().get(klass);
+  public static <T> T getInstance(Class<T> ct) {
+    return getInstance().get(ct);
   }
 
   /**
@@ -395,7 +395,7 @@ extends HashMap<String, Object>
    * @return 类的对象
    */
   public static Object getInstance(String name) {
-    return getInstance().get( name);
+    return getInstance().get(name);
   }
 
   /**

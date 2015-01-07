@@ -110,31 +110,10 @@ public class CoreLanguage
     if (that != null)
     {
       try {
-     that.load(name + "." + this.lang);
+        that.load(name);
       }
       catch (app.hongs.HongsError e) {
-        if  ( e.getCode( ) != 0x1a ) {
-          throw e;
-        }
-      }
-    }
-  }
-
-  /**
-   * 加载指定属性文件(XML格式)
-   * @param name
-   */
-  @Override
-  public void loadFromXML(String name)
-  {
-    super.loadFromXML(name + "." + this.lang);
-    if (that != null)
-    {
-      try {
-     that.loadFromXML(name + "." + this.lang);
-      }
-      catch (app.hongs.HongsError e) {
-        if  ( e.getCode( ) != 0x1a ) {
+        if  (  e.getCode( ) != 0x1a) {
           throw e;
         }
       }
@@ -277,7 +256,7 @@ public class CoreLanguage
    */
   public static String getAcceptLanguage(String lang)
   {
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     String[]   arr1 = lang.toLowerCase().split(",");
     String[]   arr2;
 

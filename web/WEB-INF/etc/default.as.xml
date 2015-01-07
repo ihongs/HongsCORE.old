@@ -35,6 +35,7 @@
     <form name="__MENU__">
         <unit name="hcum" disp="用户管理" href="hcum/"/>
         <unit name="demo" disp="演示" href="demo/"/>
+        <unit name="search" disp="搜索" href="search/"/>
     </form>
     <form name="__USER__">
         <unit name="mc" disp="消息中心" href="hcum/"/>

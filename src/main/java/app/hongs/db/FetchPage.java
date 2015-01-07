@@ -14,6 +14,8 @@ public class FetchPage
 {
 
   private DB db;
+  
+  private Table tb = null;
 
   private FetchCase caze;
 
@@ -26,6 +28,25 @@ public class FetchPage
   public FetchPage(DB db, FetchCase caze) throws HongsException
   {
     this.db    = db;
+    this.caze  = caze;
+
+    Object page2 = caze.getOption("page");
+    if (page2 != null && page2.equals(""))
+    {
+      this.setPage(Integer.parseInt(page2.toString()));
+    }
+
+    Object rows2 = caze.getOption("rows");
+    if (rows2 != null && rows2.equals(""))
+    {
+      this.setRows(Integer.parseInt(rows2.toString()));
+    }
+  }
+
+  public FetchPage(Table table, FetchCase caze) throws HongsException
+  {
+    this.db    = table.db;
+    this.tb    = table;
     this.caze  = caze;
 
     Object page2 = caze.getOption("page");
@@ -76,7 +97,15 @@ public class FetchPage
     caze.limit((this.page - 1) * this.rows, this.rows);
 
     // 查询列表
-    List list = this.db.fetchMore(caze);
+    List list;
+    if (this.tb != null)
+    {
+      list = this.tb.fetchMore(caze);
+    }
+    else
+    {
+      list = this.db.fetchMore(caze);
+    }
 
     // 获取行数
     if (!list.isEmpty())
@@ -113,13 +142,16 @@ public class FetchPage
     String   sql;
     Object[] params;
     FetchCase      caze2 = this.caze.clone();
-    for (FetchCase caze3 : caze2.joinList)
+    boolean hasg = caze2.hasGroupBy();
+    for (FetchCase caze3 : caze2.joinList  )
     {
-      caze3.setSelect("");
+      if (! hasg) hasg = caze3.hasGroupBy( );
+      caze3.setSelect ("");
+      caze3.setOrderBy("");
     }
-    caze2.limit(0);
-    caze2.setOrderBy( "");
-    if (caze2.hasGroupBy( ))
+      caze2.setOrderBy("");
+      caze2.limit( 0 );
+    if (hasg)
     {
       sql    =  "SELECT COUNT(*) AS __count__ FROM ("
              + caze2.getSQL()+") AS __table__" ;

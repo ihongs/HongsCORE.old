@@ -3,7 +3,11 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotation.Action;
+import app.hongs.action.StructConfig;
+import app.hongs.annotaion.Action;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,53 +19,54 @@ public class CommonAction {
 
     public void action_menu(ActionHelper helper)
     throws HongsException {
-        String name  = helper.getParameter("c");
-        String level = helper.getParameter("l");
-        String depth = helper.getParameter("d");
+        String m = helper.getParameter("m");
+        if (null == m || "".equals(m)) m = "default";
 
-        int l , d;
-        if (level == null || level.length() == 0) {
-            l = 1;
-        } else {
-            l = Integer.parseInt(level);
-        }
-        if (depth == null || depth.length() == 0) {
-            d = 1;
-        } else {
-            d = Integer.parseInt(depth);
+        StructConfig conf = StructConfig.getInstance(m );
+        Map menu  =  conf.getForm("__MENU__") != null
+                  ?  conf.getUnitsTranslated("__MENU__")
+                  :  conf.getFormsTranslated();
+
+        List list = new ArrayList();
+        for (Object o : menu.entrySet()) {
+            Map.Entry e = (Map.Entry) o;
+            String name = (String) e.getKey();
+            Map    unit = (Map ) e.getValue();
+            Map info = new HashMap();
+            info.put("name", name);
+            info.put("disp", unit.get("_disp"));
+            info.put("href", unit.get("_href"));
         }
 
-        if (name  == null || name .length() == 0) {
-            name  = "default";
-        }
-        AuthConfig conf = AuthConfig.getInstance(name);
-
-        helper.print(conf.getMenu(l, d));
+        Map data = new HashMap();
+        data.put( "list", list );
+        helper.reply(data);
     }
 
     public void action_goto(ActionHelper helper)
     throws HongsException {
-        String c = helper.getParameter("c");
-        if (null == c || "".equals(c)) c = "default";
-        String q = helper.getRequest().getQueryString();
-        if (null == q || "".equals(q)) q = "";
-        else   q = "?"+q;
-        String u = Core.ACTION_NAME.get()+q;
+        String m = helper.getParameter("m");
+        if (null == m || "".equals(m)) m = "default";
+        String n = helper.getParameter("n");
+        if (null == n || "".equals(n)) n = "deafult";
 
-        AuthConfig conf = AuthConfig.getInstance(c);
-        Map<String, Map> page = conf.getPage(u);
-        if (page != null  && page.containsKey("pages")) {
-            Map<String, Map> pages = (Map) page.get("pages");
-            for (Map.Entry et : pages.entrySet()) {
-                String uri2 = (String)et.getKey();
-                if (conf.chkAuth(uri2)) {
-                    helper.redirect(Core.BASE_HREF+"/"+uri2);
-                    return;
-                }
+        StructConfig conf = StructConfig.getInstance(m );
+        Map menu  =  conf.getForm("__MENU__") != null
+                  ?  conf.getUnitsTranslated("__MENU__")
+                  :  conf.getFormsTranslated();
+
+        if (!menu.isEmpty()) {
+            if (menu.containsKey(n)) {
+                menu = (Map) menu.get( n );
+            } else {
+                menu = (Map) new ArrayList(menu.values()).get(0);
             }
+            n = (String) menu.get("_href");
+        } else {
+            n = "";
         }
 
-        helper.redirect(Core.BASE_HREF + "/");
+        helper.redirect(Core.BASE_HREF+"/"+n);
     }
 
 }

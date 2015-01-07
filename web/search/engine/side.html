@@ -1,0 +1,22 @@
+<div id="search-engine-subject">
+    <object class="config" name="hsList" data="">
+        <param name="loadUrl" value="('hcum/user/list.act?dept_id='+H$('&dept_id',this))"/>
+        <param name="openUrls:0" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'{TABSBOX}']"/>
+        <param name="openUrls:1" value="['.modify','hcum/user/form.html?id={ID}','{TABSBOX}']"/>
+        <param name="sendUrls:0" value="['.delete','hcum/user/delete.act','您确定要删除此用户?']"/>
+    </object>
+    <div class="listbox table-responsive">
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th data-fn="id[]" data-ft="_check" class="_check">
+                        <input type="checkbox" class="checkall" name="id[]"/>
+                    </th>
+                    <th data-fn="username" class="sortable">邮箱</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="pagebox"></div>
+</div>

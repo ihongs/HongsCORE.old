@@ -411,9 +411,9 @@ public class FetchMore
   private static void fetchMore
     (Table table, FetchCase caze, Map assocs, List lnks)
   throws HongsException {
-    Set tps = (Set)caze.getOption("ASSOC_TYPES" );
-    Set jns = (Set)caze.getOption("ASSOC_JOINS" );
-    Set tns = (Set)caze.getOption("ASSOC_TABLES");
+    Set tns = (Set)caze.getOption("ASSOCS");
+    Set tps = (Set)caze.getOption("ASSOC_TYPES");
+    Set jns = (Set)caze.getOption("ASSOC_JOINS");
     String tn = caze.name;
     if (tn == null || tn.length() == 0)
            tn = caze.tableName;
@@ -506,8 +506,8 @@ public class FetchMore
   private static void fetchMore
     (Table table, FetchCase caze, List rows2, List lnks)
   throws HongsException {
-    Set tps = (Set)caze.getOption("ASSOC_TYPES" );
-    Set tns = (Set)caze.getOption("ASSOC_TABLES");
+    Set tns = (Set)caze.getOption("ASSOCS");
+    Set tps = (Set)caze.getOption("ASSOC_TYPES");
     FetchMore join = new FetchMore(rows2);
 
     while (!lnks.isEmpty()) {
@@ -529,7 +529,7 @@ public class FetchMore
 
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
-        FetchCase caze2 = caze.join(an).from(table2.tableName);
+        FetchCase caze2 = caze.gotJoin(an).from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
 

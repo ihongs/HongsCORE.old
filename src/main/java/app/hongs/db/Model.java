@@ -114,7 +114,7 @@ public class Model
     this.table = table;
 
     // 配置
-    CoreConfig conf = (CoreConfig)Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     this.pageKey = conf.getProperty("fore.page.key", "pn");
     this.rowsKey = conf.getProperty("fore.rows.key", "rn");
     this.colsKey = conf.getProperty("fore.cols.key", "cs");
@@ -175,8 +175,8 @@ public class Model
 
     if (rows != 0)
     {
-      caze.from(table.tableName, table.name);
-      FetchPage fp = new FetchPage(db, caze);
+      caze.from (table.tableName , table.name);
+      FetchPage fp = new FetchPage(table,caze);
       fp.setPage(page != 0 ? page : 1);
       fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
@@ -379,11 +379,11 @@ public class Model
     }
 
     // 默认不关联
-    if (!caze.hasOption("ASSOC_TABLES")
+    if (!caze.hasOption("ASSOCS")
     &&  !caze.hasOption("ASSOC_TYPES")
     &&  !caze.hasOption("ASSOC_JOINS"))
     {
-      caze.setOption("ASSOC_TABLES", new HashSet());
+      caze.setOption("ASSOCS", new HashSet());
     }
 
     // 是否缺少n或v参数
@@ -636,8 +636,8 @@ public class Model
    * 如需添加过滤条件, 请重写此方法;
    * 注意: 此处需要类似引用参数, 故调用前请务必实例化req和caze;
    * 默认仅关联join类型为LEFT,INNER和link类型为BLS_TO,HAS_ONE的表,
-   * 如需指定关联方式请设置FetchCase的option: ASSOC_JOINS, ASSOC_TYEPS,
-   * 如需指定关联的表请设置FetchCase的option: ASSOC_TABLES
+   * 如需指定关联的表请设置FetchCase的option: ASSOCS,
+   * 如需指定关联方式请设置FetchCase的option: ASSOC_JOINS, ASSOC_TYEPS
    *
    * 设计目标:
    * 1) 按照cols参数设置查询字段;
@@ -667,7 +667,7 @@ public class Model
      * 默认只关联 BLS_TO,HAS_ONE 的表(仅能关联一个)
      * 默认只连接 LEFT  ,INNER   的表(必须满足左表)
      */
-    if (!"get".equals(caze.getOption("MODEL_METHOD")))
+    if (!"get".equals(caze.getOption("MODEL_METHOD")) && !"-".equals(rd.get("cx")))
     {
       if (caze.getOption("ASSOC_TYPES") == null)
       {
@@ -756,9 +756,9 @@ public class Model
   protected boolean permit(FetchCase caze, String id)
     throws HongsException
   {
-    if (!caze.hasOption("ASSOC_TABLES") && caze.joinList.isEmpty())
+    if (!caze.hasOption("ASSOCS") && caze.joinList.isEmpty())
     {
-      caze.setOption("ASSOC_TABLES",new HashSet());
+      caze.setOption("ASSOCS", new HashSet());
     }
     caze.setSelect(".`"+this.table.primaryKey+"`")
             .where(".`"+this.table.primaryKey+"`=?", id);
@@ -799,11 +799,11 @@ public class Model
       return;
     }
 
-    Set<String> tns = (Set<String>)caze.getOption("ASSOC_TABLES");
+    Set<String> tns = (Set<String>)caze.getOption("ASSOCS");
     if (tns == null)
     {
-        tns =  new HashSet();
-        caze.setOption("ASSOC_TABLES", tns);
+        tns  = new HashSet();
+        caze.setOption("ASSOCS", tns);
     }
 
     Map<String, Set<String>> colsBuf = new HashMap();
@@ -929,11 +929,11 @@ public class Model
       return;
     }
 
-    Set<String> tns = (Set<String>)caze.getOption("ASSOC_TABLES");
+    Set<String> tns = (Set<String>)caze.getOption("ASSOCS");
     if (tns == null)
     {
-        tns =  new HashSet();
-        caze.setOption("ASSOC_TABLES", tns);
+        tns  = new HashSet();
+        caze.setOption("ASSOCS", tns);
     }
 
     for (String col : cols)
@@ -1128,23 +1128,29 @@ public class Model
         Object vaz = map.get("-lt");
         this.xkeyFilter(caze, vaz, key, "<" );
       }
-      if (map.containsKey("-gt"))
-      {
-        set.remove("-gt");
-        Object vaz = map.get("-gt");
-        this.xkeyFilter(caze, vaz, key, ">" );
-      }
       if (map.containsKey("-le"))
       {
         set.remove("-le");
         Object vaz = map.get("-le");
         this.xkeyFilter(caze, vaz, key, "<=");
       }
+      if (map.containsKey("-gt"))
+      {
+        set.remove("-gt");
+        Object vaz = map.get("-gt");
+        this.xkeyFilter(caze, vaz, key, ">" );
+      }
       if (map.containsKey("-ge"))
       {
         set.remove("-ge");
         Object vaz = map.get("-ge");
         this.xkeyFilter(caze, vaz, key, ">=");
+      }
+      if (map.containsKey("-eq"))
+      {
+        set.remove("-eq");
+        Object vaz = map.get("-eq");
+        this.xkeyFilter(caze, vaz, key,  "=");
       }
       if (map.containsKey("-ne"))
       {
@@ -1160,8 +1166,20 @@ public class Model
         throw ex;
       }
     } else
+    if (val instanceof Collection)
     {
-        this.xkeyFilter(caze, val, key,  "=");
+        Set nul = new HashSet(  ); nul.add( "" );
+        Set col = new HashSet(( Collection )val);
+        if (!col.equals(nul) && !col.isEmpty( ))
+        {
+            this.xkeyFilter(caze, val, key, "=");
+        }
+    } else
+    {
+        if (! "".equals(val))
+        {
+            this.xkeyFilter(caze, val, key, "=");
+        }
     }
   }
 
@@ -1175,10 +1193,10 @@ public class Model
   protected void skeyFilter(FetchCase caze, Object val, String key)
   throws HongsException
   {
-    Set<String> tns = (Set<String>)caze.getOption("ASSOC_TABLES");
+    Set<String> tns = (Set<String>) caze.getOption("ASSOCS");
     if (tns == null)
     {
-        tns = new HashSet( ); caze.setOption("ASSOC_TABLES", tns);
+        tns  = new HashSet( ); caze.setOption("ASSOCS", tns);
     }
 
     Map tc = this.table.getAssoc(key);

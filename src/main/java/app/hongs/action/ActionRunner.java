@@ -4,9 +4,9 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.annotation.Action;
-import app.hongs.annotation.ActionInvoker;
-import app.hongs.annotation.ActionWrapper;
+import app.hongs.annotaion.Action;
+import app.hongs.annotaion.ActionInvoker;
+import app.hongs.annotaion.ActionWrapper;
 import app.hongs.util.ClassNames;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -84,9 +84,8 @@ public class ActionRunner {
 
         // 执行注解过滤器
         Class<? extends ActionInvoker> classo = actw.value();
-        ActionInvoker filter = (ActionInvoker)
-                      Core.getInstance(classo);
-        filter.invoke(helper, this, anno);
+        ActionInvoker filter = Core.getInstance(classo);
+        filter.invoke(helper , this, anno);
     }
 
     public void doInvoke() throws HongsException {
@@ -186,7 +185,11 @@ public class ActionRunner {
                         throw new HongsError(0x3a, "Can not find action method '"+clsn+"."+mtdn+"(ActionHelper)'.");
                     }
 
-                    acts.put(actn + "/" + actx, mtdo);
+                    if ("__main__".equals(actx)) {
+                        acts.put(actn /*__main__*/ , mtdo );
+                    } else {
+                        acts.put(actn + "/" + actx , mtdo );
+                    }
                 }
             }
         }

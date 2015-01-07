@@ -79,15 +79,31 @@ public class CoreConfig
    */
   public void load(String name)
   {
-    String file = this.path + File.separator + name + ".properties";
+    String file;
+    file = this.path + File.separator + name + ".properties";
 
     try
     {
-      this.load(new FileInputStream(file));
+      this.load(new FileInputStream(file));return;
     }
     catch (FileNotFoundException ex)
     {
-      throw new app.hongs.HongsError(0x1a, "Can not find the properties file '" + file + "'.");
+//    throw new app.hongs.HongsError(0x1a, "Can not find the properties file '" + this.path + File.separator + name + ".properties[.xml]'.");
+    }
+    catch (IOException ex)
+    {
+      throw new app.hongs.HongsError(0x1b, "Can not read the properties file '" + file + "'.");
+    }
+    
+    file = this.path + File.separator + name + ".xml";
+    
+    try
+    {
+      this.loadFromXML(new FileInputStream(file));
+    }
+    catch (FileNotFoundException ex)
+    {
+      throw new app.hongs.HongsError(0x1a, "Can not find the properties file '" + this.path + File.separator + name + ".properties[.xml]'.");
     }
     catch (IOException ex)
     {
@@ -96,24 +112,17 @@ public class CoreConfig
   }
 
   /**
-   * 根据配置名称加载配置(XML格式)
+   * 根据配置名称加载配置(忽略文件不存在)
    * @param name
    */
-  public void loadFromXML(String name)
+  public void loadIgnrFNF(String name)
   {
-    String file = this.path + File.separator + name + ".xml";
-
-    try
-    {
-      this.loadFromXML(new FileInputStream(file));
-    }
-    catch (FileNotFoundException ex)
-    {
-      throw new app.hongs.HongsError(0x1a, "Can not find the xml properties file '" + file + "'.");
-    }
-    catch (IOException ex)
-    {
-      throw new app.hongs.HongsError(0x1b, "Can not read the xml properties file '" + file + "'.");
+    try {
+        this.load(name);
+    } catch (app.hongs.HongsError e) {
+        if  (  e.getCode( ) != 0x1a) {
+            throw e;
+        }
     }
   }
 

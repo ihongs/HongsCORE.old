@@ -5,28 +5,28 @@
         <param-name>debug</param-name>
         <param-value>3</param-value>
     </context-param>
-    <!-- Act Servlet -->
-    <servlet>
-        <servlet-name>Acts</servlet-name>
-        <servlet-class>app.hongs.action.ActsAction</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Acts</servlet-name>
-        <url-pattern>*.act</url-pattern>
-    </servlet-mapping>
     <!-- Api Servlet -->
     <servlet>
         <servlet-name>Apis</servlet-name>
-        <servlet-class>app.hongs.action.ApisAction</servlet-class>
+        <servlet-class>app.hongs.action.ax.ApisAction</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Apis</servlet-name>
         <url-pattern>*.api</url-pattern>
     </servlet-mapping>
+    <!-- Act Servlet -->
+    <servlet>
+        <servlet-name>Acts</servlet-name>
+        <servlet-class>app.hongs.action.ax.ActsAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Acts</servlet-name>
+        <url-pattern>*.act</url-pattern>
+    </servlet-mapping>
     <!-- Conf Servlet -->
     <servlet>
         <servlet-name>Conf</servlet-name>
-        <servlet-class>app.hongs.action.ConfAction</servlet-class>
+        <servlet-class>app.hongs.action.ax.ConfAction</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Conf</servlet-name>
@@ -35,55 +35,101 @@
     <!-- Lang Servlet -->
     <servlet>
         <servlet-name>Lang</servlet-name>
-        <servlet-class>app.hongs.action.LangAction</servlet-class>
+        <servlet-class>app.hongs.action.ax.LangAction</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Lang</servlet-name>
         <url-pattern>/common/lang/*</url-pattern>
     </servlet-mapping>
-    <!-- Action Warder Filter -->
+    <!-- Driver Filter -->
     <filter>
-        <filter-name>Warder</filter-name>
-        <filter-class>app.hongs.action.ActionWarder</filter-class>
+        <filter-name>Driver</filter-name>
+        <filter-class>app.hongs.action.ActionDriver</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>Driver</filter-name>
         <url-pattern>*.act</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>Driver</filter-name>
         <url-pattern>*.jsp</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>/common/auth/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>Driver</filter-name>
         <url-pattern>/common/conf/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>Driver</filter-name>
         <url-pattern>/common/lang/*</url-pattern>
     </filter-mapping>
-    <!-- DB Rigger -->
+    <!-- Search Filter -->
     <filter>
-        <filter-name>HaimDBRigger</filter-name>
-        <filter-class>app.hongs.serv.CommonFilter</filter-class>
+        <filter-name>SearchFilter</filter-name>
+        <filter-class>net.hongs.search.SearchFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SearchFilter</filter-name>
+        <url-pattern>/search/engine/article/retrieve.act</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SearchFilter</filter-name>
+        <url-pattern>/search/engine/subject/retrieve.act</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SearchFilter</filter-name>
+        <url-pattern>/search/engine/article/create.act</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SearchFilter</filter-name>
+        <url-pattern>/search/article/create.act</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SearchFilter</filter-name>
+        <url-pattern>/search/article/update.act</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <!-- Haim DB Casual Filter -->
+    <filter>
+        <filter-name>Casual</filter-name>
+        <filter-class>app.hongs.action.ActionCasual</filter-class>
         <init-param>
             <param-name>action</param-name>
             <param-value>haim/db</param-value>
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>HaimDBRigger</filter-name>
+        <filter-name>Casual</filter-name>
         <url-pattern>/demo/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Casual</filter-name>
+        <url-pattern>/search/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <!-- Default Tags -->
     <jsp-config>
@@ -102,4 +148,8 @@
         <welcome-file>default.jsp</welcome-file>
         <welcome-file>default.html</welcome-file>
     </welcome-file-list>
+    <icon>
+        <small-icon>/favicon.ico</small-icon>
+        <large-icon>/favicon.ico</large-icon>
+    </icon>
 </web-app>
