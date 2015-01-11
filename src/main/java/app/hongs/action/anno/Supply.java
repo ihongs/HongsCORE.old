@@ -1,4 +1,4 @@
-package app.hongs.annotaion;
+package app.hongs.action.anno;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

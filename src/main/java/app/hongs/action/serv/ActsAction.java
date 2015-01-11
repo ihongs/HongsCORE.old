@@ -1,15 +1,11 @@
-package app.hongs.action.ax;
+package app.hongs.action.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
 import app.hongs.HongsCause;
-import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.ActionDriver;
-import static app.hongs.action.ActionDriver.PRINTED;
-import static app.hongs.action.ActionDriver.REPLIED;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -59,9 +55,10 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException
   {
-    String act  = ActionDriver.getCurrentPath(req);
-    Core   core = ActionDriver.getCurrentCore(req);
+    String act  = ActsWarder.getCurrPath(req);
+    Core   core = ActsWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
+    helper.reinitHelper(req, rsp);
 
     if (act == null || act.length() == 0)
     {
@@ -76,14 +73,14 @@ public class ActsAction
     if (pos > -1)
         act = act.substring(0,pos);
 
-    ActionRunner caller;
+    ActionRunner runner;
 
     // 获取动作
     try
     {
-      caller = new ActionRunner(act, helper);
+      runner = new ActionRunner(act, helper);
     }
-    catch (HongsException  ex)
+    catch (Throwable ex)
     {
       senderr(req, helper, ex);
       return;
@@ -92,25 +89,11 @@ public class ActsAction
     // 执行动作
     try
     {
-      caller.doAction();sendout(req, helper);
+      runner.doAction( );
     }
-    catch (HongsException  ex)
+    catch (Throwable ex)
     {
       senderr(req, helper, ex);
-    }
-  }
-
-  private void sendout(HttpServletRequest req, ActionHelper helper) {
-    if (req.getAttribute(PRINTED) == null )
-    {
-        req.setAttribute(PRINTED  ,  true );
-        Map data = helper.getResponseData();
-        if (data!=null) helper.print(data );
-    } else
-    if (req.getAttribute(REPLIED) == null )
-    {
-        Map data = helper.getResponseData();
-        req.setAttribute(REPLIED  ,  data );
     }
   }
 
@@ -118,7 +101,7 @@ public class ActsAction
     throws ServletException
   {
     CoreLogger.error(ex);
-    
+
     String errno;
     String error = ex.getLocalizedMessage();
     if (ex instanceof  HongsCause)
@@ -127,7 +110,7 @@ public class ActsAction
       errno = "Ex"+Integer.toHexString(hc.getCode());
     } else
     {
-      errno = "500";
+      errno = "Er500";
       CoreLanguage lang = (CoreLanguage)
           Core.getInstance(CoreLanguage.class );
       if (error == null || error.length() == 0)
@@ -144,30 +127,20 @@ public class ActsAction
   private void senderr(HttpServletRequest req, ActionHelper helper, String errno, String error)
     throws ServletException
   {
-    if (req.getAttribute(PRINTED) == null)
+    if ("Er404".equals(errno))
     {
-        Map data = new HashMap();
-        data.put( "ok" , false );
-        data.put( "err", errno );
-        data.put( "msg", error );
-        helper.print  (  data  );
-        req.setAttribute(PRINTED  ,  true);
+      helper.getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
     } else
-    if (req.getAttribute(REPLIED) == null)
+    if ("Er500".equals(errno))
     {
-        Map data = new HashMap();
-        data.put( "ok" , false );
-        data.put( "err", errno );
-        data.put( "msg", error );
-        req.setAttribute(REPLIED  ,  data);
-    } else
-    if (   "404".equals( errno ))
-    {
-        helper.error404( error );
-    } else
-    {
-        helper.error500( error );
+      helper.getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
+
+    Map data = new HashMap();
+    data.put( "ok" , false );
+    data.put( "err", errno );
+    data.put( "msg", error );
+    helper.reply(data);
   }
 
 }

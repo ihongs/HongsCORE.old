@@ -3,17 +3,17 @@ package app.hongs.action;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
-import app.hongs.util.Tree;
+import app.hongs.util.Dict;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * 动作助手
@@ -104,30 +104,23 @@ public class ActionHelper
     }
     catch (UnsupportedEncodingException ex)
     {
-      throw new HongsError(0x21, "Can not set encoding.", ex);
+      throw new HongsError(0x31, "Can not set encoding.", ex);
     }
   }
-
-  /**
-   * 重置请求响应对象
-   *
-   * 供 ActionWarder 调用, 因 forward 后 response 会变
-   *
-   * @param req
-   * @param rsp
-   * @throws IOException
-   */
-  protected void reinitHelper(HttpServletRequest req, HttpServletResponse rsp)
-  throws IOException
+  
+  public void reinitHelper(HttpServletRequest req, HttpServletResponse rsp)
   {
-    request      = req;
-    response     = rsp;
-//  requestData  = null;
-//  responseData = null;
+    this.request      = req ;
+    this.response     = rsp ;
 
-    if (responseWrtr != null)
+    try
     {
-        responseWrtr  = rsp.getWriter();
+      this.request .setCharacterEncoding("UTF-8");
+      this.response.setCharacterEncoding("UTF-8");
+    }
+    catch (UnsupportedEncodingException ex)
+    {
+      throw new HongsError(0x31, "Can not set encoding.", ex);
     }
   }
 
@@ -230,7 +223,7 @@ public class ActionHelper
       }
       catch (IOException ex)
       {
-        throw new HongsError(0x22, "Can not send to browser.", ex);
+        throw new HongsError(0x32, "Can not send to browser.", ex);
       }
     }
   }
@@ -243,7 +236,7 @@ public class ActionHelper
    */
   public String getParameter(String name) throws HongsException
   {
-    Object o = Tree.getValue2(getRequestData(), name);
+    Object o = Dict.getValue(getRequestData(), name);
     if (o == null)
     {
       return null;
@@ -352,15 +345,16 @@ public class ActionHelper
    */
   public void reply(Map<String, Object> map)
   {
-    // 默认为成功
-    if(!map.containsKey("ok" )) {
-        map.put( "ok" , true );
-    }
-    if(!map.containsKey("err")) {
-        map.put( "err",  ""  );
-    }
-    if(!map.containsKey("msg")) {
-        map.put( "msg",  ""  );
+    if (null != map) {
+        if(!map.containsKey("ok" )) {
+            map.put( "ok" , true );
+        }
+        if(!map.containsKey("err")) {
+            map.put( "err",  ""  );
+        }
+        if(!map.containsKey("msg")) {
+            map.put( "msg",  ""  );
+        }
     }
     this.responseData = map;
   }
@@ -373,29 +367,27 @@ public class ActionHelper
    */
   public void reply(String msg, Object... o)
   {
-    if (msg == null) msg = "";
-    Map data = new LinkedHashMap();
-    data.put("ok" ,true);
-    data.put("msg", msg);
-    if (o != null && o.length > 0) {
-        data.put("back", o);
+    Map map = new LinkedHashMap();
+    map.put("ok", true);
+    if (null != msg) {
+        map.put("msg", msg);
     }
-    reply(data);
+    if (null != o && o.length > 0) {
+        map.put("back", o );
+    }
+    reply(map);
   }
 
   /**
    * 返回操作结果
    * 针对 exists,unique 等
-   * @param msg
    * @param ok
    */
-  public void reply(String msg, boolean ok)
+  public void reply(boolean ok)
   {
-    if (msg == null) msg = "";
-    Map data = new LinkedHashMap();
-    data.put("ok" , ok );
-    data.put("msg", msg);
-    reply(data);
+    Map map = new LinkedHashMap();
+    map.put("ok", ok);
+    reply(map);
   }
 
   //** 输出内容 **/
@@ -435,6 +427,15 @@ public class ActionHelper
     this.print(Data.toString(dat), "application/json");
   }
 
+  /**
+   * 直接输出数据
+   */
+  public void print()
+  {
+    this.print(responseData);
+    this.responseData = null;
+  }
+
   //** 跳转及错误 **/
 
   /**
@@ -445,6 +446,7 @@ public class ActionHelper
   {
     this.response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
     this.response.setHeader("Location", url);
+    this.responseData = null;
   }
 
   /**
@@ -454,6 +456,7 @@ public class ActionHelper
   public void error403(String msg)
   {
     this.response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    this.responseData = null;
     this.print(msg);
   }
 
@@ -464,6 +467,7 @@ public class ActionHelper
   public void error404(String msg)
   {
     this.response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    this.responseData = null;
     this.print(msg);
   }
 
@@ -474,6 +478,7 @@ public class ActionHelper
   public void error500(String msg)
   {
     this.response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    this.responseData = null;
     this.print(msg);
   }
 
@@ -492,10 +497,8 @@ public class ActionHelper
    * 解析参数
    * @param params
    * @return 解析后的Map
-   * @throws app.hongs.HongsException
    */
   public static Map parseParam(Map<String, String[]> params)
-  throws HongsException
   {
     Map<String, Object> paramz = new HashMap();
     for (Map.Entry et : params.entrySet())
@@ -504,7 +507,7 @@ public class ActionHelper
       String[] value = (String[])et.getValue();
       for (int i = 0; i < value.length; i ++ )
       {
-        Tree.setValue(paramz, value[i], key);
+        Dict.setValue( paramz, value[i], key );
       }
     }
     return paramz;

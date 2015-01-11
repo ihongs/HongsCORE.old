@@ -36,7 +36,7 @@ public class HongsException extends Exception implements HongsCause {
         that = new HongsLocalized(code, desc, this);
 
         if (code < 0x1000 || code > 0xFFFFF) {
-            throw new HongsError(0x13,
+            throw new HongsError(0x22,
                 "Exception code must be from 0x1000(65536) to 0xFFFFF(1048575).");
         }
     }

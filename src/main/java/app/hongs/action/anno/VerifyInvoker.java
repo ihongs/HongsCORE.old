@@ -1,11 +1,11 @@
-package app.hongs.annotaion;
+package app.hongs.action.anno;
 
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import static app.hongs.action.ActionCasual.ENTITY;
-import static app.hongs.action.ActionCasual.MODULE;
+import static app.hongs.action.serv.AutoRigger.ENTITY;
+import static app.hongs.action.serv.AutoRigger.MODULE;
 import app.hongs.action.VerifyHelper;
 import app.hongs.action.VerifyHelper.Wrongs;
 import java.lang.annotation.Annotation;

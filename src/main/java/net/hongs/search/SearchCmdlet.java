@@ -1,18 +1,15 @@
 package net.hongs.search;
 
+import net.hongs.search.record.Writer;
 import app.hongs.HongsException;
-import app.hongs.annotaion.Cmdlet;
+import app.hongs.cmdlet.anno.Cmdlet;
+import app.hongs.db.DB;
+import app.hongs.db.FetchCase;
+import app.hongs.db.FetchNext;
 import java.io.IOException;
-import java.io.StringReader;
-import net.paoding.analysis.analyzer.PaodingAnalyzer;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.cjk.CJKAnalyzer;
-import org.apache.lucene.analysis.cn.ChineseAnalyzer;
-import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.util.Version;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.ServletException;
 
 /**
  * 搜索模型
@@ -21,87 +18,55 @@ import org.apache.lucene.util.Version;
 @Cmdlet("search")
 public class SearchCmdlet {
 
-    @Cmdlet("test")
-    public static void test(String[] args) throws IOException, HongsException {
-        StringReader      sr = new StringReader(args[0]);
-        Analyzer          ar;
-        TokenStream       ts;
-        CharTermAttribute ta;
-        long t;
-        
-        System.out.println("Standard Analyer:");
-        ar = new StandardAnalyzer(Version.LUCENE_46);
-        t  = System.currentTimeMillis();
-        ts = ar.tokenStream("", sr);
-        ta = ts.addAttribute(CharTermAttribute.class);
-        ts.reset();
-        while (ts.incrementToken()) {
-            System.out.print(ta.toString()+"\t");
+    @Cmdlet("index-all")
+    public static void indexAll(String[] args) throws HongsException, IOException, ServletException {
+        DB db = DB.getInstance("zhb");
+        String sql = "SELECT uid, uname, cname, ename, intro, identity, province, trade_id FROM ts_user";
+        if (args.length > 0) {
+            sql += " WHERE " + args[0];
         }
-        ts.end ( );
-        t = System.currentTimeMillis() - t;
-        System.out.println(" : "+t);
-        
-        sr.reset();
-        
-        System.out.println("Chinese Analyzer:");
-        ar = new ChineseAnalyzer( );
-        t  = System.currentTimeMillis();
-        ts = ar.tokenStream("", sr);
-        ta = ts.addAttribute(CharTermAttribute.class);
-        ts.reset();
-        while (ts.incrementToken()) {
-            System.out.print(ta.toString()+"\t");
+        FetchNext next = db.query(sql, 0, 0);
+
+        Writer writer = new Writer();
+
+        Map row;
+        while ((row = next.fetch()) != null) {
+            String uname = (String) row.get("uname");
+            if (uname == null) continue;
+            String cname = (String) row.get("cname");
+            if (cname == null) cname = "";
+            String ename = (String) row.get("ename");
+            if (ename == null) ename = "";
+            String intro = (String) row.get("intro");
+            if (intro == null) intro = "";
+
+            Map rd = new HashMap();
+            Map data = new HashMap();
+            Map prop = new HashMap();
+            rd.put("data", data);
+
+            rd.put("id",  row.get("uid"));
+            rd.put("wd", uname + " " + cname + " " + ename + " "+ intro);
+            data.put("uname", uname);
+            data.put("cname", cname);
+            data.put("ename", ename);
+            data.put("intro", intro);
+
+            String x;
+            x = (String) row.get("identity");
+            if (x != null) prop.put("identity", x);
+            x = (String) row.get("province");
+            if (x != null) prop.put("province", x);
+            x = (String) row.get("trade_id");
+            if (x != null) prop.put("trade_id", x);
+
+            writer.update(rd);
+            writer.commit(  );
+
+            //app.hongs.util.Data.dumps(rd);
         }
-        ts.end ( );
-        t = System.currentTimeMillis() - t;
-        System.out.println(" : "+t);
-        
-        sr.reset();
-        
-        System.out.println("CJK Analyzer:");
-        ar = new CJKAnalyzer(Version.LUCENE_46);
-        t  = System.currentTimeMillis();
-        ts = ar.tokenStream("", sr);
-        ta = ts.addAttribute(CharTermAttribute.class);
-        ts.reset();
-        while (ts.incrementToken()) {
-            int c = ta.toString().hashCode();
-            System.out.print(ta.toString()+"\t");
-        }
-        ts.end ( );
-        t = System.currentTimeMillis() - t;
-        System.out.println(" : "+t);
-        
-        sr.reset();
-        
-        System.out.println("Smartcn Analyzer:");
-        ar = new SmartChineseAnalyzer(Version.LUCENE_46, true);
-        t  = System.currentTimeMillis();
-        ts = ar.tokenStream("", sr);
-        ta = ts.addAttribute(CharTermAttribute.class);
-        ts.reset();
-        while (ts.incrementToken()) {
-            System.out.print(ta.toString()+"\t");
-        }
-        ts.end ( );
-        t = System.currentTimeMillis() - t;
-        System.out.println(" : "+t);
-        
-        sr.reset();
-        
-        System.out.println("Paoding Analyzer:");
-        ar = new PaodingAnalyzer( );
-        t  = System.currentTimeMillis();
-        ts = ar.tokenStream("", sr);
-        ta = ts.addAttribute(CharTermAttribute.class);
-        ts.reset();
-        while (ts.incrementToken()) {
-            System.out.print(ta.toString()+"\t");
-        }
-        ts.end ( );
-        t = System.currentTimeMillis() - t;
-        System.out.println(" : "+t);
+
+        writer.close();
     }
-    
+
 }

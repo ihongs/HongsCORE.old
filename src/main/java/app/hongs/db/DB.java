@@ -5,7 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -1210,7 +1210,7 @@ public class DB
 
     /** 组织语句 **/
 
-    String sql = "INSERT INTO `" + Util.escape(table, "`") + "`";
+    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
     List params2 = new ArrayList();
     String fs = "", vs = "";
 
@@ -1221,7 +1221,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      fs += "`" + Util.escape(field, "`") + "`, ";
+      fs += "`" + Text.escape(field, "`") + "`, ";
       vs += "?, ";
     }
 
@@ -1254,7 +1254,7 @@ public class DB
 
     /** 组织语言 **/
 
-    String sql = "UPDATE `" + Util.escape(table, "`") + "` SET ";
+    String sql = "UPDATE `" + Text.escape(table, "`") + "` SET ";
     List params2 = new ArrayList();
 
     Iterator it = values.entrySet().iterator();
@@ -1264,7 +1264,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      sql += "`" + Util.escape(field, "`") + "` = ?, ";
+      sql += "`" + Text.escape(field, "`") + "` = ?, ";
     }
 
     sql = sql.substring(0, sql.length()  - 2);
@@ -1298,7 +1298,7 @@ public class DB
   {
     /** 组织语句 **/
 
-    String sql = "DELETE FROM `" + Util.escape(table, "`") + "`";
+    String sql = "DELETE FROM `" + Text.escape(table, "`") + "`";
 
     if (where != null && where.length() != 0)
     {
@@ -1319,7 +1319,7 @@ public class DB
    */
   public static String quoteField(String field)
   {
-    return "`" + Util.escape(field, "`") + "`";
+    return "`" + Text.escape(field, "`") + "`";
   }
 
   /**
@@ -1329,7 +1329,7 @@ public class DB
    */
   public static String quoteValue(String value)
   {
-    return "'" + Util.escape(value, "'") + "'";
+    return "'" + Text.escape(value, "'") + "'";
   }
 
   /**

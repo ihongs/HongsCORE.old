@@ -3,15 +3,15 @@ package app.hongs.db.serv;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotaion.Action;
-import app.hongs.annotaion.Supply;
-import app.hongs.annotaion.Verify;
+import app.hongs.action.anno.Action;
+import app.hongs.action.anno.Supply;
+import app.hongs.action.anno.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
 import app.hongs.db.Mview;
 import app.hongs.dl.IAction;
-import static app.hongs.action.ActionCasual.ENTITY;
-import static app.hongs.action.ActionCasual.MODULE;
+import static app.hongs.action.serv.AutoRigger.ENTITY;
+import static app.hongs.action.serv.AutoRigger.MODULE;
 import java.util.Collection;
 import java.util.Map;
 
@@ -88,7 +88,7 @@ implements IAction {
         Model   mod = DB.getInstance(module).getModel(entity);
         Map     req = getMyReq(helper, mod);
         boolean rst = mod.exists(req);
-        helper.reply(null, rst);
+        helper.reply(rst);
     }
 
     @Action("unique")
@@ -99,7 +99,7 @@ implements IAction {
         Model   mod = DB.getInstance(module).getModel(entity);
         Map     req = getMyReq(helper, mod);
         boolean rst = mod.unique(req);
-        helper.reply(null, rst);
+        helper.reply(rst);
     }
 
     public Map getMyReq(ActionHelper helper, Model mod)

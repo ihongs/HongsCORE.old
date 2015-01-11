@@ -1,33 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <form name="__MENU__">
-        <unit disp="搜索" name="engine" href="search/engine/main.html">
-            <action>sdfjsdfs/sdjlfsjdfs.sdfls</action>
-        </unit>
-        <unit disp="索引" name="article" href="search/article/list.html"></unit>
+        <unit disp="搜索" name="engine" href="search/engine/main.html"/>
     </form>
-    <form name="article">
-        <item disp="关键词" name="keywords">
-            <attrib name="fore.hideInForm">1</attrib>
+    <form name="_search">
+        <item disp="ID" name="id" type="string"/>
+        <item disp="检索" name="wd" type="string">
+            <attrib name="field_store">no</attrib>
         </item>
-        <item disp="分类" name="subjects">
-            <attrib name="fore.hideInForm">1</attrib>
+        <item disp="数据" name="data" type="object">
+            <attrib name="field_genre">json</attrib>
         </item>
-        <item disp="关系" name="relateds">
-            <attrib name="fore.hideInForm">1</attrib>
+        <item disp="标识" name="identity" type="number">
+            <attrib name="type">int</attrib>
         </item>
-        <item name="#1" type="form-col-md-4" rule="ignore"/>
-        <item disp="关键词" name="keyword_idx" type="textarea">
-            <attrib name="fore.hideInList">1</attrib>
+        <item disp="省份" name="province" type="number">
+            <attrib name="type">int</attrib>
         </item>
-        <item disp="分类" name="subject_idx" type="textarea">
-            <attrib name="fore.hideInList">1</attrib>
-        </item>
-        <item disp="关系" name="related_idx" type="textarea">
-            <attrib name="fore.hideInList">1</attrib>
-        </item>
-        <item name="data">
-            <attrib name="fore.hideInList">1</attrib>
+        <item disp="行业" name="trade_id" type="number" repeated="1">
+            <attrib name="type">int</attrib>
         </item>
     </form>
 </root>

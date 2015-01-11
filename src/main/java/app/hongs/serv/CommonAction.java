@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.StructConfig;
-import app.hongs.annotaion.Action;
+import app.hongs.action.anno.Action;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

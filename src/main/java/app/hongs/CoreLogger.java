@@ -2,7 +2,7 @@ package app.hongs;
 
 import app.hongs.action.ActionHelper;
 import app.hongs.cmdlet.CmdletHelper;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -148,7 +148,7 @@ public class CoreLogger implements Core.Destroy
      * 去掉空行, 行首缩进
      */
     sb.append("\r\n");
-    sb.append(Util.indent(Util.clearEL(text.trim())));
+    sb.append(Text.indent(Text.clearEL(text.trim())));
     sb.append("\r\n");
 
     this.out.print(sb.toString());
@@ -242,7 +242,7 @@ public class CoreLogger implements Core.Destroy
     }
     catch (IOException ex)
     {
-      throw new HongsError(0x19, ex);
+      throw new HongsError(0x2f, ex);
     }
   }
 

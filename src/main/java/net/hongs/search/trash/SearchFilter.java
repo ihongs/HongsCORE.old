@@ -1,13 +1,12 @@
-package net.hongs.search;
+package net.hongs.search.trash;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import static app.hongs.action.ActionDriver.REQCORE;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.cn.ChineseAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 
 /**
  * 搜索过滤器
@@ -44,15 +44,17 @@ public class SearchFilter implements Filter {
         chineseAnalyzer = new ChineseAnalyzer();
     }
 
+    public void destroy() {
+        paodingAnalyzer.close();
+        chineseAnalyzer.close();
+    }
+
     public void doFilter(ServletRequest sr, ServletResponse sp, FilterChain fc) throws IOException, ServletException {
-        Core core = (Core) sr.getAttribute(REQCORE);
+        Core core = Core.getInstance();
         ActionHelper helper = core.get(ActionHelper.class);
         try {
-            checkWdParam(helper);
-            checkArticle(helper);
-            checkKeyword(helper);
-            checkSubject(helper);
-            checkRelated(helper);
+            Map rd = helper.getRequestData();
+            doFilter(rd);
         } catch (HongsException ex) {
             throw new ServletException(ex);
         }
@@ -60,64 +62,101 @@ public class SearchFilter implements Filter {
         fc.doFilter(sr, sp);
     }
 
-    public void destroy() {
+    public void doFilter(Map rd) throws HongsException, IOException {
+        checkWdParam(rd);
+        checkArticle(rd);
+        checkKeyword(rd);
+        checkSubject(rd);
+        checkRelated(rd);
     }
 
-    private void checkWdParam(ActionHelper helper) throws IOException, HongsException {
-        String wd = helper.getParameter("wd");
+    private void checkWdParam(Map rd) throws HongsException, IOException {
+        String wd = (String) rd.get("wd");
         if (null == wd) return;
 
-        StringReader      sr = new StringReader (wd);
-        Set<String>       ss = new LinkedHashSet(  );
+        Set<String>       ss = new LinkedHashSet();
         TokenStream       ts;
         CharTermAttribute ta;
 
-        ts = paodingAnalyzer.tokenStream("", sr);
+        long t = System.currentTimeMillis();
+        
+        ts = paodingAnalyzer.tokenStream("", new StringReader(wd));
         ta = ts.addAttribute(CharTermAttribute.class);
         ts.reset();
         while (ts.incrementToken()) {
-            int c = ta.toString( ).hashCode();
-            if (c < 0) {
-                c = Math.abs(c);
-                ss.add("0" + Util.to36Hex(c));
-            } else {
-                ss.add(/****/Util.to36Hex(c));
-            }
+            ss.add(getHid(ta.toString()));
         }
         ts.end ( );
+        ts.close();
 
-        sr.reset();
-
-        ts = chineseAnalyzer.tokenStream("", sr);
+        ts = chineseAnalyzer.tokenStream("", new StringReader(wd));
         ta = ts.addAttribute(CharTermAttribute.class);
         ts.reset();
         while (ts.incrementToken()) {
-            int c = ta.toString( ).hashCode();
-            if (c < 0) {
-                c = Math.abs(c);
-                ss.add("0" + Util.to36Hex(c));
-            } else {
-                ss.add(/****/Util.to36Hex(c));
+            ss.add(getHid(ta.toString()));
+        }
+        ts.end ( );
+        ts.close();
+
+        t = System.currentTimeMillis() - t;
+        rd.put("kt", t );
+
+        rd.put("kd", ss);
+    }
+
+    private void checkArticle(Map rd) throws HongsException, IOException {
+        String name = (String) rd.get("name");
+        String note = (String) rd.get("note");
+        if (name == null || note == null) return ;
+
+        Map<String, Integer> ss = new HashMap();
+        TokenStream          ts;
+        CharTermAttribute    ta;
+        String               wd = name + " " + note;
+        int                  wt = 0;
+
+        ts = paodingAnalyzer.tokenStream("", new StringReader(wd));
+        //oa = ts.addAttribute(OffsetAttribute.class);
+        ta = ts.addAttribute(CharTermAttribute.class);
+        ts.reset();
+        while (ts.incrementToken()) {
+            String s = ta.toString();
+            if (!ss.containsKey(s)) {
+                ss.put(s, wt ++ );
             }
         }
         ts.end ( );
+        ts.close();
 
-        helper.getRequestData().put("kd", ss);
+        ts = chineseAnalyzer.tokenStream("", new StringReader(wd));
+        //oa = ts.addAttribute(OffsetAttribute.class);
+        ta = ts.addAttribute(CharTermAttribute.class);
+        ts.reset();
+        while (ts.incrementToken()) {
+            String s = ta.toString();
+            if (!ss.containsKey(s)) {
+                ss.put(s, wt ++);
+            }
+        }
+        ts.end ( );
+        ts.close();
+
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Integer> et : ss.entrySet()) {
+            String s = et.getKey();
+            int  w = et.getValue();
+            w = (int) Math.floor((double) (wt - w - 1) / wt * 100);
+            sb.append(s+"^"+w+"\r\n");
+        }
+
+        rd.put("keyword_idx", sb.toString());
     }
 
-    private void checkArticle(ActionHelper helper) throws HongsException {
-        String caption = helper.getParameter("caption");
-        String article = helper.getParameter("article");
-        if (caption == null || article == null) return ;
-
-
-    }
-
-    private void checkKeyword(ActionHelper helper) throws HongsException {
-        String ki = helper.getParameter("keyword_idx");
+    private void checkKeyword(Map rd) throws HongsException {
+        String ki = (String) rd.get("keyword_idx");
         if (ki == null) return;
 
-        Pattern pe = Pattern.compile("\\^\\d+$");
+        Pattern pe = Pattern.compile("\\^(\\d+)$");
 
         Map<String, Integer> kw = new HashMap();
         String[] ks = ki.split("(\\r|\\n)");
@@ -127,7 +166,11 @@ public class SearchFilter implements Filter {
                 continue;
             }
             Matcher m = pe.matcher(k);
-            int w = m.find() ? Integer.parseInt(m.group(0)) : 0;
+            int     w = 0;
+            if (m.find()) {
+                w = Integer.parseInt(m.group(1));
+                k = k.substring ( 0, m.start( ));
+            }
             kw.put(k, w);
         }
 
@@ -166,18 +209,14 @@ public class SearchFilter implements Filter {
             data.add(info);
         }
 
-        helper.getRequestData().put("article_keyword", data);
-        
-        Map x = helper.getRequestData();
-        
-        int i = 0;
+        rd.put("article_keyword", data);
     }
 
-    private void checkSubject(ActionHelper helper) throws HongsException {
-        String ki = helper.getParameter("subject_idx");
+    private void checkSubject(Map rd) throws HongsException {
+        String ki = (String) rd.get("subject_idx");
         if (ki == null) return;
 
-        Pattern pe = Pattern.compile("\\^\\d+$");
+        Pattern pe = Pattern.compile("\\^(\\d+)$");
 
         Map<String, Integer> kw = new HashMap();
         String[] ks = ki.split("(\\r|\\n)");
@@ -187,7 +226,11 @@ public class SearchFilter implements Filter {
                 continue;
             }
             Matcher m = pe.matcher(k);
-            int w = m.find() ? Integer.parseInt(m.group(0)) : 0;
+            int     w = 0;
+            if (m.find()) {
+                w = Integer.parseInt(m.group(1));
+                k = k.substring ( 0, m.start( ));
+            }
             kw.put(k, w);
         }
 
@@ -210,14 +253,14 @@ public class SearchFilter implements Filter {
             data.add(info);
         }
 
-        helper.getRequestData().put("article_subject", data);
+        rd.put("article_subject", data);
     }
 
-    private void checkRelated(ActionHelper helper) throws HongsException {
-        String ki = helper.getParameter("related_idx");
+    private void checkRelated(Map rd) throws HongsException {
+        String ki = (String) rd.get("related_idx");
         if (ki == null) return;
 
-        Pattern pe = Pattern.compile("\\^\\d+$");
+        Pattern pe = Pattern.compile("\\^(\\d+)$");
 
         Map<String, Integer> kw = new HashMap();
         String[] ks = ki.split("(\\r|\\n)");
@@ -227,7 +270,11 @@ public class SearchFilter implements Filter {
                 continue;
             }
             Matcher m = pe.matcher(k);
-            int w = m.find() ? Integer.parseInt(m.group(0)) : 0;
+            int     w = 0;
+            if (m.find()) {
+                w = Integer.parseInt(m.group(1));
+                k = k.substring ( 0, m.start( ));
+            }
             kw.put(k, w);
         }
 
@@ -242,17 +289,15 @@ public class SearchFilter implements Filter {
             data.add(info);
         }
 
-        helper.getRequestData().put("article_related", data);
+        rd.put("article_related", data);
     }
 
-    private String getHid(String wd) {
-        int c = wd.hashCode();
-        if (c < 0) {
-            c = Math.abs( c );
-            return "0" + Util.to36Hex(c);
-        } else {
-            return /****/Util.to36Hex(c);
-        }
+    public static String getHid(String wd) {
+        int     i = wd.hashCode( );
+        if (i < 0) i = Math.abs(i);
+        byte[]  x = wd.getBytes( );
+        byte    b = x[(x.length-1)%2];
+        return String.format("%x%02x", i, b);
     }
 
 }

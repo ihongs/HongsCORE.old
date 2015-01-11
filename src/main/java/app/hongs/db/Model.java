@@ -3,7 +3,7 @@ package app.hongs.db;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -176,7 +176,7 @@ public class Model
     if (rows != 0)
     {
       caze.from (table.tableName , table.name);
-      FetchPage fp = new FetchPage(table,caze);
+      FetchPage fp = new FetchPage(caze, table);
       fp.setPage(page != 0 ? page : 1);
       fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
@@ -466,7 +466,7 @@ public class Model
   public String add(Map<String, Object> data)
     throws HongsException
   {
-    String id = (String)data.get(this.table.primaryKey);
+    String id = (String) data.get(this.table.primaryKey);
     if (id != null && id.length() != 0)
     {
       throw new HongsException(0x10a1, "Add can not have a id");
@@ -476,7 +476,7 @@ public class Model
     data.put(this.table.primaryKey, id);
 
     // 存入主数据
-    int an = this.table.insert ( data );
+    /**  **/ this.table.insert ( data );
 
     // 存入子数据
     this.table.insertSubValues ( data );
@@ -1056,7 +1056,7 @@ public class Model
        * 需要对这些符号进行转义;
        * 前后加"%"用于模糊匹配.
        */
-      find = Util.escape( find, "%_", "/" );
+      find = Text.escape( find, "%_", "/" );
       find = "%" + find + "%";
 
       for (String key : keys)

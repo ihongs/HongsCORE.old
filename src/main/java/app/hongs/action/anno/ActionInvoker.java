@@ -1,4 +1,4 @@
-package app.hongs.annotaion;
+package app.hongs.action.anno;
 
 import app.hongs.action.ActionRunner;
 import app.hongs.HongsException;

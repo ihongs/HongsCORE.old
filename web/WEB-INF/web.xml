@@ -5,19 +5,19 @@
         <param-name>debug</param-name>
         <param-value>3</param-value>
     </context-param>
-    <!-- Api Servlet -->
+    <!-- Apis Servlet -->
     <servlet>
         <servlet-name>Apis</servlet-name>
-        <servlet-class>app.hongs.action.ax.ApisAction</servlet-class>
+        <servlet-class>app.hongs.action.serv.ApisAction</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Apis</servlet-name>
         <url-pattern>*.api</url-pattern>
     </servlet-mapping>
-    <!-- Act Servlet -->
+    <!-- Acts Servlet -->
     <servlet>
         <servlet-name>Acts</servlet-name>
-        <servlet-class>app.hongs.action.ax.ActsAction</servlet-class>
+        <servlet-class>app.hongs.action.serv.ActsAction</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Acts</servlet-name>
@@ -26,7 +26,7 @@
     <!-- Conf Servlet -->
     <servlet>
         <servlet-name>Conf</servlet-name>
-        <servlet-class>app.hongs.action.ax.ConfAction</servlet-class>
+        <servlet-class>app.hongs.action.serv.ConfAction</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Conf</servlet-name>
@@ -35,97 +35,63 @@
     <!-- Lang Servlet -->
     <servlet>
         <servlet-name>Lang</servlet-name>
-        <servlet-class>app.hongs.action.ax.LangAction</servlet-class>
+        <servlet-class>app.hongs.action.serv.LangAction</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Lang</servlet-name>
         <url-pattern>/common/lang/*</url-pattern>
     </servlet-mapping>
-    <!-- Driver Filter -->
+    <!-- Warder Filter -->
     <filter>
-        <filter-name>Driver</filter-name>
-        <filter-class>app.hongs.action.ActionDriver</filter-class>
+        <filter-name>Warder</filter-name>
+        <filter-class>app.hongs.action.serv.ActsWarder</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>Driver</filter-name>
+        <filter-name>Warder</filter-name>
+        <url-pattern>*.api</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Warder</filter-name>
         <url-pattern>*.act</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Driver</filter-name>
+        <filter-name>Warder</filter-name>
         <url-pattern>*.jsp</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Driver</filter-name>
+        <filter-name>Warder</filter-name>
         <url-pattern>/common/conf/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Driver</filter-name>
+        <filter-name>Warder</filter-name>
         <url-pattern>/common/lang/*</url-pattern>
     </filter-mapping>
-    <!-- Search Filter -->
+    <!-- Haim DB Worker Filter -->
     <filter>
-        <filter-name>SearchFilter</filter-name>
-        <filter-class>net.hongs.search.SearchFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>SearchFilter</filter-name>
-        <url-pattern>/search/engine/article/retrieve.act</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>SearchFilter</filter-name>
-        <url-pattern>/search/engine/subject/retrieve.act</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>SearchFilter</filter-name>
-        <url-pattern>/search/engine/article/create.act</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>SearchFilter</filter-name>
-        <url-pattern>/search/article/create.act</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>SearchFilter</filter-name>
-        <url-pattern>/search/article/update.act</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <!-- Haim DB Casual Filter -->
-    <filter>
-        <filter-name>Casual</filter-name>
-        <filter-class>app.hongs.action.ActionCasual</filter-class>
+        <filter-name>DBWorker</filter-name>
+        <filter-class>app.hongs.action.serv.AutoRigger</filter-class>
         <init-param>
             <param-name>action</param-name>
             <param-value>haim/db</param-value>
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>Casual</filter-name>
+        <filter-name>DBWarder</filter-name>
+        <url-pattern>/demo/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>DBWorker</filter-name>
         <url-pattern>/demo/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Casual</filter-name>
+        <filter-name>DBWarder</filter-name>
+        <url-pattern>/search/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>DBWorker</filter-name>
         <url-pattern>/search/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>

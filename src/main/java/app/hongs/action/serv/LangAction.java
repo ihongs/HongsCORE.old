@@ -1,11 +1,10 @@
-package app.hongs.action.ax;
+package app.hongs.action.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
-import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionHelper;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -56,7 +55,7 @@ public class LangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core core = ActionDriver.getCurrentCore(req);
+    Core core = ActsWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = helper.getRequest().getPathInfo();
@@ -246,7 +245,7 @@ public class LangAction
     private String makeLang(String name, String key, String def)
     {
       String value = this.lang.getProperty(key, def);
-      value = Util.escape(value);
+      value = Text.escape(value);
       return "\t\"" + name + "\":\"" + value + "\",\r\n";
     }
 

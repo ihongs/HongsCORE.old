@@ -345,7 +345,7 @@ HsList.prototype = {
             nums.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
             nums.append(jQuery('<li><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
         }
-        if (t != p) {
+        if (t != p || page.next === true) {
             pn = p + 1;
             btns.append(jQuery('<li><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
         } else {

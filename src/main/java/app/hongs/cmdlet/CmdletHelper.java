@@ -5,7 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -257,7 +257,7 @@ public class CmdletHelper
         trs += pre + hlp.replaceAll("\\n", pre);
       }
       
-      HongsError er = new HongsError(0x25, msg);
+      HongsError er = new HongsError(0x35, msg);
                  er.setLocalizedOptions(trs);
       throw      er;
     }
@@ -316,7 +316,7 @@ public class CmdletHelper
   public static void printETime(String label, long start)
   {
     start = System.currentTimeMillis() - start;
-    String notes = Util.humanTime(start);
+    String notes = Text.humanTime(start);
     System.err.println(new StringBuilder()
                           .append(label)
                           .append( ": ")
@@ -418,7 +418,7 @@ public class CmdletHelper
     float  scale = (float)ok / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Util.humanTime((long) left1);
+    String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) Time left: %s",
                                     ok, left2);
     printERate(scale, left3);
@@ -436,7 +436,7 @@ public class CmdletHelper
     float  scale = (float)(err + ok) / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Util.humanTime((long) left1);
+    String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) error(%d) Time left: %s",
                                ok, err, left2);
     printERate(scale, left3);

@@ -6,7 +6,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 
 /**
  * 配置信息读取标签
@@ -43,10 +43,10 @@ public class ConfTag extends TagSupport {
       &&  !    "".equals(this.esc)
       &&  !  "no".equals(this.esc)) {
         if ("yes".equals(this.esc)) {
-          str = Util.escape(str);
+          str = Text.escape(str);
         }
         else {
-          str = Util.escape(str, this.esc);
+          str = Text.escape(str, this.esc);
         }
       }
 

@@ -1,6 +1,6 @@
 package app.hongs;
 
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 
 import java.util.List;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class CoreLanguage
       }
       catch (app.hongs.HongsError e)
       {
-        if  ( e.getCode( ) == 0x1a )
+        if  ( e.getCode( ) == 0x2a )
         {
           throw e;
         }
@@ -113,7 +113,7 @@ public class CoreLanguage
         that.load(name);
       }
       catch (app.hongs.HongsError e) {
-        if  (  e.getCode( ) != 0x1a) {
+        if  (  e.getCode( ) != 0x2a) {
           throw e;
         }
       }
@@ -150,7 +150,7 @@ public class CoreLanguage
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
      */
-    return Util.inject(str, rep);
+    return Text.inject(str, rep);
   }
 
   /**
@@ -168,7 +168,7 @@ public class CoreLanguage
     /**
      * 将语句中替换$n或${n}为指定的文字, n从0开始
      */
-    return Util.inject(str, rep);
+    return Text.inject(str, rep);
   }
 
   /**
@@ -187,7 +187,7 @@ public class CoreLanguage
      * 将语句中的$xxx或${xxx}替换成指定文字
      * 如果指定的替换文字不存在, 则替换为空
      */
-    return Util.inject(str, rep);
+    return Text.inject(str, rep);
   }
 
   //** 静态属性及方法 **/

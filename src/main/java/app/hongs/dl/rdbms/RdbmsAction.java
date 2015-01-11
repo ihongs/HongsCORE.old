@@ -3,11 +3,11 @@ package app.hongs.dl.rdbms;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.StructConfig;
-import app.hongs.action.ActionCasual;
+import app.hongs.action.serv.AutoRigger;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.dl.IAction;
-import app.hongs.util.Tree;
+import app.hongs.util.Dict;
 import java.util.Map;
 
 /**
@@ -17,10 +17,10 @@ import java.util.Map;
 public class RdbmsAction implements IAction {
 
     public void retrieve(ActionHelper helper) throws HongsException {
-        String module = helper.getParameter(ActionCasual.MODULE);
-        String entity = helper.getParameter(ActionCasual.ENTITY);
+        String module = helper.getParameter(AutoRigger.MODULE);
+        String entity = helper.getParameter(AutoRigger.ENTITY);
         Map form = StructConfig.getInstance(module).getForm(entity);
-        String record = Tree.getValue(form, entity, "_record");
+        String record = Dict.getV4Def(form, entity, "_record");
         DB  db   = DB.getInstance(module);
         FetchCase caze = new FetchCase( );
     }

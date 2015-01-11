@@ -3,10 +3,10 @@ package app.hongs.serv;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 import app.hongs.action.ActionRunner;
-import app.hongs.annotaion.Cmdlet;
+import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.cmdlet.CmdletRunner;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -94,19 +94,19 @@ public class CommonCmdlet {
         CmdletHelper.println(opts.get("to-16hex") + " to 16 Hex: "+Long.toHexString((Long) opts.get("to-16hex")));
     }
     if (opts.containsKey("to-26hex")) {
-        CmdletHelper.println(opts.get("to-26hex") + " to 26 Hex: "+app.hongs.util.Util.to26Hex((Long) opts.get("to-26hex")));
+        CmdletHelper.println(opts.get("to-26hex") + " to 26 Hex: "+app.hongs.util.Text.to26Hex((Long) opts.get("to-26hex")));
     }
     if (opts.containsKey("to-36hex")) {
-        CmdletHelper.println(opts.get("to-36hex") + " to 36 Hex: "+app.hongs.util.Util.to36Hex((Long) opts.get("to-36hex")));
+        CmdletHelper.println(opts.get("to-36hex") + " to 36 Hex: "+app.hongs.util.Text.to36Hex((Long) opts.get("to-36hex")));
     }
     if (opts.containsKey("as-16hex")) {
         CmdletHelper.println(opts.get("as-16hex") + " as 16 Hex: "+Long.parseLong((String) opts.get("as-16hex"), 16));
     }
     if (opts.containsKey("as-26hex")) {
-        CmdletHelper.println(opts.get("as-36hex") + " as 26 Hex: "+app.hongs.util.Util.as26Hex((String) opts.get("as-26hex")));
+        CmdletHelper.println(opts.get("as-36hex") + " as 26 Hex: "+app.hongs.util.Text.as26Hex((String) opts.get("as-26hex")));
     }
     if (opts.containsKey("as-36hex")) {
-        CmdletHelper.println(opts.get("as-36hex") + " as 36 Hex: "+app.hongs.util.Util.as36Hex((String) opts.get("as-36hex")));
+        CmdletHelper.println(opts.get("as-36hex") + " as 36 Hex: "+app.hongs.util.Text.as36Hex((String) opts.get("as-36hex")));
     }
 
     // 参数测试
@@ -152,9 +152,9 @@ public class CommonCmdlet {
              + "这是弘的框架, 问: \\\"你是谁?\"\r\n"
              + "%abc,$def.";
     CmdletHelper.println("actual: " + s);
-    String s1 = Util.escape(s);
+    String s1 = Text.escape(s);
     CmdletHelper.println("escape: " + s1);
-    String s2 = Util.resume(s1);
+    String s2 = Text.resume(s1);
     CmdletHelper.println("resume: " + s2);
   }
 

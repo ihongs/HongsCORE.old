@@ -7,9 +7,9 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotaion.Cmdlet;
+import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.ClassNames;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -115,7 +115,7 @@ public class CmdletRunner
       if (1 < Core.DEBUG)
       {
           CoreLogger.debug("Total exec time: "
-          +(Util.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
+          +(Text.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
       }
 
       try
@@ -194,7 +194,7 @@ public class CmdletRunner
             String v = (String)et.getValue();
             if (k.startsWith("start.")) {
                 k = k.substring(6  );
-                v = Util.inject(v,m);
+                v = Text.inject(v,m);
                 System.setProperty(k,v);
             }
         }
@@ -206,7 +206,7 @@ public class CmdletRunner
             String v = (String)et.getValue();
             if (k.startsWith("debug.")) {
                 k = k.substring(6  );
-                v = Util.inject(v,m);
+                v = Text.inject(v,m);
                 System.setProperty(k,v);
             }
         }
@@ -338,10 +338,10 @@ public class CmdletRunner
             try {
                 clss = ClassNames.getClassNames(pkgn);
             } catch (IOException ex) {
-                throw new HongsError( 0x3b , "Can not load package '" + pkgn + "'.", ex);
+                throw new HongsError( 0x4b , "Can not load package '" + pkgn + "'.", ex);
             }
             if (clss == null) {
-                throw new HongsError( 0x3b , "Can not find package '" + pkgn + "'.");
+                throw new HongsError( 0x4b , "Can not find package '" + pkgn + "'.");
             }
 
             for(String clsn : clss) {
@@ -349,7 +349,7 @@ public class CmdletRunner
                 try {
                     clso = Class.forName(clsn);
                 } catch (ClassNotFoundException ex) {
-                    throw new HongsError(0x3b, "Can not find class '" + clsn + "'.");
+                    throw new HongsError(0x4b, "Can not find class '" + clsn + "'.");
                 }
 
                 // 从注解提取动作名
@@ -379,7 +379,7 @@ public class CmdletRunner
                     // 检查方法是否合法
                     Class[] prms = mtdo.getParameterTypes();
                     if (prms == null || prms.length != 1 || !prms[0].isAssignableFrom(String[].class)) {
-                        throw new HongsError(0x3b, "Can not find cmdlet method '"+clsn+"."+mtdn+"(String[])'.");
+                        throw new HongsError(0x4b, "Can not find cmdlet method '"+clsn+"."+mtdn+"(String[])'.");
                     }
 
                     if ("__main__".equals(actx)) {

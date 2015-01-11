@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
  *
  * @author Hongs
  */
-public final class Util
+public final class Text
 {
 
   //** 进制 **/
@@ -98,7 +98,7 @@ public final class Util
    */
   public static String to36Hex(long num)
   {
-    return Util.toXHex(num, _36Hex);
+    return Text.toXHex(num, _36Hex);
   }
 
   /**
@@ -108,7 +108,7 @@ public final class Util
    */
   public static String to26Hex(long num)
   {
-    return Util.toYHex(num, _26Hex);
+    return Text.toYHex(num, _26Hex);
   }
 
   public static long asXHex(String str, char[] arr) {
@@ -200,8 +200,8 @@ public final class Util
     if (esc.indexOf(sym) == -1)
         esc    +=   sym;
 
-    String esc2 = Util.escapeRegular(esc);
-    String sym2 = Util.escapeReplace(sym);
+    String esc2 = Text.escapeRegular(esc);
+    String sym2 = Text.escapeReplace(sym);
 
     return str.replaceAll("(["+esc2+"])", sym2+"$1");
     /*
@@ -211,11 +211,11 @@ public final class Util
   }
   public static String escape(String str, String esc)
   {
-    return Util.escape(str, esc, "\\");
+    return Text.escape(str, esc, "\\");
   }
   public static String escape(String str)
   {
-    return Util.escape(str, "'\"", "\\");
+    return Text.escape(str, "'\"", "\\");
   }
 
   /**
@@ -235,18 +235,18 @@ public final class Util
     if (esc.indexOf(sym) == -1)
         esc   +=    sym;
 
-    String esc2 = Util.escapeRegular(esc);
-    String sym2 = Util.escapeRegular(sym);
+    String esc2 = Text.escapeRegular(esc);
+    String sym2 = Text.escapeRegular(sym);
 
     return str.replaceAll(sym2 + "(["+esc2+"])", "$1");
   }
   public static String resume(String str, String esc)
   {
-    return Util.resume(str, esc, "\\");
+    return Text.resume(str, esc, "\\");
   }
   public static String resume(String str)
   {
-    return Util.resume(str, "'\"", "\\");
+    return Text.resume(str, "'\"", "\\");
   }
 
   //** 注入 **/

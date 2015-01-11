@@ -1,6 +1,6 @@
 package app.hongs.db.serv;
 
-import app.hongs.annotaion.ActionWrapper;
+import app.hongs.action.anno.ActionWrapper;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,8 +1,8 @@
-package app.hongs.action.ax;
+package app.hongs.action.serv;
 
+import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.ActionDriver;
-import app.hongs.util.Data;
+import app.hongs.util.Dict;
 import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -77,7 +77,7 @@ public class ApisAction
      */
     private void doForward(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
-        String act = ActionDriver.getCurrentPath(req);
+        String act = ActsWarder.getCurrPath(req);
         String mtd = mts[0];
 
         if (act == null || act.length() == 0) {
@@ -161,31 +161,21 @@ public class ApisAction
         }
 
         boolean send = false;
-        if (req.getAttribute(ActionDriver.PRINTED) == null) {
-            req.setAttribute(ActionDriver.PRINTED  ,  true);
+        if (req.getAttribute(ActsWarder.PRINTED) == null) {
+            req.setAttribute(ActsWarder.PRINTED  ,  true);
             send = true;
         }
         rsp.setStatus(HttpServletResponse.SC_OK  );
 
         // 将请求转发到动作处理器
-        req.getRequestDispatcher("/"+act+"/"+mtd + ".act" + pms).include(req, rsp);
+        req.getRequestDispatcher("/"+act+"/"+mtd+".act"+pms).include(req, rsp);
 
-        // 将应答数据格式化后输出
-        if (rsp.getStatus( ) == HttpServletResponse.SC_OK  &&  send) {
-            Map data  = (Map) req.getAttribute(ActionDriver.REPLIED);
-            if (data != null) {
-                if (!data.containsKey("ok" )) {
-                    data.put("ok", "1");
-                }
-                if (!data.containsKey("err")) {
-                    data.put("err", "");
-                }
-                if (!data.containsKey("msg")) {
-                    data.put("msg", "");
-                }
-                rsp.setContentType("application/json");
-                rsp.getWriter().print(Data.toString(data , true));
-            }
+        // 将应答数据格式化后传递
+        ActionHelper hlpr = ActsWarder.getCurrCore(req)
+                          .get(ActionHelper.class);
+        Map  data  = hlpr.getResponseData();
+        if ( data != null ) {
+             hlpr.reply((Map) Dict.convNode(data));
         }
     }
 

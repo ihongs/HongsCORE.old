@@ -20,8 +20,8 @@ import java.io.IOException;
  *
  * <h3>错误代码:</h3>
  * <pre>
- * 0x1a 无法找到配置文件
- * 0x1b 无法读取配置文件
+ * 0x2a 无法找到配置文件
+ * 0x2b 无法读取配置文件
  * </pre>
  *
  * @author Hongs
@@ -88,11 +88,11 @@ public class CoreConfig
     }
     catch (FileNotFoundException ex)
     {
-//    throw new app.hongs.HongsError(0x1a, "Can not find the properties file '" + this.path + File.separator + name + ".properties[.xml]'.");
+//    throw new app.hongs.HongsError(0x2a, "Can not find the properties file '" + this.path + File.separator + name + ".properties[.xml]'.");
     }
     catch (IOException ex)
     {
-      throw new app.hongs.HongsError(0x1b, "Can not read the properties file '" + file + "'.");
+      throw new app.hongs.HongsError(0x2b, "Can not read the properties file '" + file + "'.");
     }
     
     file = this.path + File.separator + name + ".xml";
@@ -103,11 +103,11 @@ public class CoreConfig
     }
     catch (FileNotFoundException ex)
     {
-      throw new app.hongs.HongsError(0x1a, "Can not find the properties file '" + this.path + File.separator + name + ".properties[.xml]'.");
+      throw new app.hongs.HongsError(0x2a, "Can not find the properties file '" + this.path + File.separator + name + ".properties[.xml]'.");
     }
     catch (IOException ex)
     {
-      throw new app.hongs.HongsError(0x1b, "Can not read the properties file '" + file + "'.");
+      throw new app.hongs.HongsError(0x2b, "Can not read the properties file '" + file + "'.");
     }
   }
 
@@ -120,7 +120,7 @@ public class CoreConfig
     try {
         this.load(name);
     } catch (app.hongs.HongsError e) {
-        if  (  e.getCode( ) != 0x1a) {
+        if  (  e.getCode( ) != 0x2a) {
             throw e;
         }
     }

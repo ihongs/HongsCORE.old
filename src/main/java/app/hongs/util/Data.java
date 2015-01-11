@@ -32,7 +32,7 @@ import org.json.simple.parser.ParseException;
  *
  * <h3>错误代码</h3>
  * <pre>
- * 0x30 解析JSON数据失败
+ * 0x40 解析JSON数据失败
  * </pre>
  *
  * @author Hongs
@@ -53,7 +53,7 @@ public class Data
     }
     catch (ParseException ex)
     {
-      throw new HongsError(0x30, "Can not parse data by json", ex);
+      throw new HongsError(0x40, "Can not parse data by json", ex);
     }
   }
 
@@ -64,20 +64,9 @@ public class Data
    */
   public static String toString(Object obj)
   {
-    return toString(obj, false);
-  }
-
-  /**
-   * 将Java对象转换为JSON字符串
-   * @param obj 数组,集合框架,基础类型
-   * @param bnn2Str Boolean,Number,Null 均转换为字符串, false为"0",true为"1",null为""
-   * @return JSON字符串
-   */
-  public static String toString(Object obj, boolean bnn2Str)
-  {
     String xx = (0 < Core.DEBUG)? "": null;
     StringBuilder sb = new StringBuilder();
-    Data.dumps(sb, xx, null, obj, 0, 0, bnn2Str);
+    Data.dumps(sb, xx, null, obj, 0, 0);
     return sb.toString().trim();
   }
 
@@ -88,7 +77,7 @@ public class Data
   public static void dumps(Object obj)
   {
     StringBuilder sb = new StringBuilder();
-    Data.dumps(sb, "", null, obj, 0, 0, true);
+    Data.dumps(sb, "", null, obj, 0, 0);
     System.err.print(sb.toString());
   }
 
@@ -100,7 +89,7 @@ public class Data
   public static void dumps(Object obj, PrintStream out)
   {
     StringBuilder sb = new StringBuilder();
-    Data.dumps(sb, "", null, obj, 0, 0, true);
+    Data.dumps(sb, "", null, obj, 0, 0);
     out.print(sb.toString());
   }
 
@@ -112,13 +101,13 @@ public class Data
   public static void dumps(Object obj, PrintWriter out)
   {
     StringBuilder sb = new StringBuilder();
-    Data.dumps(sb, "", null, obj, 0, 0, true);
+    Data.dumps(sb, "", null, obj, 0, 0);
     out.print(sb.toString());
   }
 
   //** 操作方法 **/
 
-  private static void dumps(StringBuilder sb, String pre, Object key, Object val, int i, int j, boolean s)
+  private static void dumps(StringBuilder sb, String pre, Object key, Object val, int i, int j)
   {
     /** 键 **/
 
@@ -129,49 +118,37 @@ public class Data
 
     if (key != null)
     {
-      if (key instanceof Boolean)
-      {
-        sb.append(!s ? val.toString() : (((Boolean)val) ? "\"1\"" : "\"0\""));
-      }
-      else
-      {
-        sb.append("\"")
-          .append(JSONValue.escape(key.toString()))
-          .append("\"");
-      }
-
-      sb.append(":");
+      sb.append("\"")
+        .append(JSONValue.escape(key.toString()))
+        .append("\"")
+        .append( ":");
     }
 
     /** 值 **/
 
     if (val == null)
     {
-      sb.append(!s ? "null" : "\"\"");
+      sb.append("null");
     }
     else if (val instanceof Object[])
     {
-      Data.dumps(sb, pre, (Object[])val, s);
+      Data.dumps(sb, pre, (Object[])val);
     }
     else if (val instanceof Collection)
     {
-      Data.dumps(sb, pre, (Collection)val, s);
+      Data.dumps(sb, pre, (Collection)val);
     }
     else if (val instanceof Dictionary)
     {
-      Data.dumps(sb, pre, (Dictionary)val, s);
+      Data.dumps(sb, pre, (Dictionary)val);
     }
     else if (val instanceof Map)
     {
-      Data.dumps(sb, pre, (Map)val, s);
+      Data.dumps(sb, pre, (Map)val);
     }
-    else if (val instanceof Number && !s)
+    else if (val instanceof Number || val instanceof Boolean)
     {
       sb.append(val.toString());
-    }
-    else if (val instanceof Boolean)
-    {
-      sb.append(!s ? val.toString() : (((Boolean)val) ? "\"1\"" : "\"0\""));
     }
     else
     {
@@ -190,7 +167,7 @@ public class Data
     }
   }
 
-  private static void dumps(StringBuilder sb, String pre, Object[] arr, boolean s)
+  private static void dumps(StringBuilder sb, String pre, Object[] arr)
   {
     sb.append("[");
     if (pre != null)
@@ -204,7 +181,7 @@ public class Data
     {
       Object obj = arr[i];
 
-      Data.dumps(sb, pre == null ? pre : pre + "\t", null, obj, i, j, s);
+      Data.dumps(sb, pre == null ? pre : pre + "\t", null, obj, i, j);
     }
 
     if (pre != null)
@@ -214,7 +191,7 @@ public class Data
     sb.append("]");
   }
 
-  private static void dumps(StringBuilder sb, String pre, Collection col, boolean s)
+  private static void dumps(StringBuilder sb, String pre, Collection col)
   {
     sb.append("[");
     if (pre != null)
@@ -230,7 +207,7 @@ public class Data
     {
       Object obj = it.next();
 
-      Data.dumps(sb, pre == null ? pre : pre + "\t", null, obj, i, j, s);
+      Data.dumps(sb, pre == null ? pre : pre + "\t", null, obj, i, j);
 
       i ++;
     }
@@ -242,7 +219,7 @@ public class Data
     sb.append("]");
   }
 
-  private static void dumps(StringBuilder sb, String pre, Dictionary dic, boolean s)
+  private static void dumps(StringBuilder sb, String pre, Dictionary dic)
   {
     sb.append("{");
     if (pre != null)
@@ -259,7 +236,7 @@ public class Data
       Object key = en.nextElement();
       Object val = dic.get(key);
 
-      Data.dumps(sb, pre == null ? pre : pre + "\t", key, val, i, j, s);
+      Data.dumps(sb, pre == null ? pre : pre + "\t", key, val, i, j);
 
       i ++;
     }
@@ -271,7 +248,7 @@ public class Data
     sb.append("}");
   }
 
-  private static void dumps(StringBuilder sb, String pre, Map map, boolean s)
+  private static void dumps(StringBuilder sb, String pre, Map map)
   {
     sb.append("{");
     if (pre != null)
@@ -289,7 +266,7 @@ public class Data
       Object key = obj.getKey();
       Object val = obj.getValue();
 
-      Data.dumps(sb, pre == null ? pre : pre + "\t", key, val, i, j, s);
+      Data.dumps(sb, pre == null ? pre : pre + "\t", key, val, i, j);
 
       i ++;
     }

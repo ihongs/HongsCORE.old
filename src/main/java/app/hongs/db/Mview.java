@@ -2,7 +2,7 @@ package app.hongs.db;
 
 import app.hongs.HongsException;
 import app.hongs.action.StructConfig;
-import app.hongs.util.Tree;
+import app.hongs.util.Dict;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -209,7 +209,7 @@ public class Mview {
                 }
             }
 
-            Tree.putDepth(fields, field, n);
+            Dict.putPoint(fields, field, n);
         }
 
         return fields;

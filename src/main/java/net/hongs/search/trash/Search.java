@@ -1,5 +1,8 @@
-package net.hongs.search;
+package net.hongs.search.trash;
 
+
+
+import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
@@ -7,9 +10,28 @@ import app.hongs.db.FetchCase;
 import app.hongs.db.FetchPage;
 import app.hongs.db.Model;
 import app.hongs.db.Table;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
+import org.w3c.dom.Document;
 
 /**
  * 搜索模型
@@ -26,10 +48,34 @@ public class Search extends Model {
         {"related", "rd",   "1"}
     };
 
+    public Search(Table table) throws HongsException {
+        super(table);
+    }
+    
     public Search() throws HongsException {
         super(DB.getInstance("search").getTable("article"));
     }
 
+    @Override
+    public String create(Map rd)
+    throws HongsException
+    {
+        try {
+        String areaId = (String) rd.get("area_id");
+        
+        
+        Directory dir = FSDirectory.open(new File(Core.VARS_PATH+"/lucene"));
+        Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_CURRENT, analyzer);
+        iwc.setOpenMode(OpenMode.CREATE);// 创建模式 OpenMode.CREATE_OR_APPEND 添加模式
+	IndexWriter writer = new IndexWriter(dir, iwc);
+        } catch (IOException ex) {
+            
+        }
+        
+        return null;
+    }
+    
     public Map searchArticle(Map rd) throws HongsException {
         FetchCase caze = new FetchCase();
 
@@ -47,10 +93,15 @@ public class Search extends Model {
                 caze2 = caze.join( t.tableName, t.name )
                         .on(".article_id = :article_id");
             }
-            if ("realted".equals(k)) {
+            if ("related".equals(k)) {
                 caze2.where("(."+k+"_id IN (?) OR ."+k+"_id = NULL)", s);
-            } else {
+            } else
+            if ("keyword".equals(k)) {
                 caze2.where( "."+k+"_id IN (?)", s);
+            } else {
+                int n = ((Collection) s).size( );
+                caze2.where( "."+k+"_id IN (?)", s);
+                caze2.havin( "COUNT(."+k+"_id) = ?", n);
             }
 
             ws[i][0] =  null;
@@ -58,11 +109,7 @@ public class Search extends Model {
             String w = ws[i][2];
             if  (  w == null) continue ;
 
-            if ("1".equals(w)) {
-                caze2.orderBy( "SUM(.weight)");
-            } else {
-                caze2.orderBy("(SUM(.weight) * "+w+")");
-            }
+            //caze2.orderBy("SUM(.weight) DESC");
         }
 
         FetchCase caze3;
@@ -73,8 +120,8 @@ public class Search extends Model {
             caze3 = caze.join(table.tableName, table.name)
                     .on(".id = :article_id");
         }
-        caze3.select(".id, .name, .data")
-          .orderBy("(SUM(.weight) * "+wt+")");
+        caze3.select (".id, .name, .note, .data")
+             .orderBy(".weight DESC");
 
         for (int i = 0; i < ws.length; i ++) {
             String k = ws[i][0];
@@ -88,11 +135,7 @@ public class Search extends Model {
             String w = ws[i][2];
             if  (  w == null) continue ;
 
-            if ("1".equals(w)) {
-                caze2.orderBy( "SUM(.weight)");
-            } else {
-                caze2.orderBy("(SUM(.weight) * "+w+")");
-            }
+            //caze2.orderBy("SUM(.weight) DESC");
         }
 
         //** 查询数据 **/
@@ -117,9 +160,11 @@ public class Search extends Model {
 
         Map data = new HashMap();
 
+        long x = System.currentTimeMillis();
+        
         if (rows != 0)
         {
-          FetchPage fp = new FetchPage(db, caze);
+          FetchPage fp = new FetchPage(caze, db);
           fp.setPage(page != 0 ? page : 1);
           fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
@@ -144,6 +189,10 @@ public class Search extends Model {
             data.put( "list", list );
         }
 
+        x = System.currentTimeMillis() - x;
+        data.put("qt", x);
+        data.put("kt", rd.get("kt"));
+        
         return data;
     }
 
@@ -166,7 +215,9 @@ public class Search extends Model {
             if ("realted".equals(k)) {
                 caze2.where("(."+k+"_id IN (?) OR ."+k+"_id = NULL)", s);
             } else {
+                int n = ((Collection) s).size( );
                 caze2.where( "."+k+"_id IN (?)", s);
+                caze2.havin( "COUNT(."+k+"_id) = ?", n);
             }
 
             ws[i][0] =  null;

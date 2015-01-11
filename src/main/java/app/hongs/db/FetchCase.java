@@ -327,8 +327,14 @@ public class FetchCase
     // 字段
     if (f.length() != 0)
     {
-      sql.append(" ")
+      sql.append( " " )
          .append(pf.matcher(f).replaceFirst(""));
+    }
+    else
+    {
+      sql.append(" `" )
+         .append(this.name)
+         .append("`.*");
     }
 
     // 表名
@@ -337,7 +343,7 @@ public class FetchCase
     // 条件
     if (w.length() != 0)
     {
-      sql.append(" WHERE ")
+      sql.append(" WHERE " )
          .append(pw.matcher(w).replaceFirst(""));
     }
 
@@ -351,7 +357,7 @@ public class FetchCase
     // 过滤
     if (h.length() != 0)
     {
-      sql.append(" WHERE ")
+      sql.append(" HAVING ")
          .append(pw.matcher(h).replaceFirst(""));
     }
 
@@ -368,7 +374,7 @@ public class FetchCase
 //      sql.append(" LIMIT ?, ?");
 //    }
 
-    //sql = DB.formatSQLFields(sql);
+//    sql = DB.formatSQLFields(sql);
 
     return sql;
   }
@@ -432,10 +438,6 @@ public class FetchCase
       String s = this.fields.toString().trim();
       s = repSqlTabs(s, tn, pn);
       f.append(" ").append( s );
-    }
-    else if (pn == null)
-    {
-      f.append(" ,`").append(this.name).append("`.*");
     }
 
     // 分组

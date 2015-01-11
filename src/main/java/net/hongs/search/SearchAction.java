@@ -2,8 +2,10 @@ package net.hongs.search;
 
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotaion.Action;
+import app.hongs.action.anno.Action;
 import java.util.Map;
+import net.hongs.search.record.Reader;
+import net.hongs.search.record.Writer;
 
 /**
  * 搜索动作
@@ -12,36 +14,30 @@ import java.util.Map;
 @Action("search/engine")
 public class SearchAction {
 
-    Search search;
-
-    public SearchAction() throws HongsException {
-        search = new Search();
+    @Action("index/create")
+    public void createIndex(ActionHelper helper) throws HongsException {
+        Writer writer = new Writer();
+        Map rd = helper.getRequestData();
+        writer.update(rd );
+        helper.reply(true);
     }
-
-    @Action("article/create")
-    public void indexArticle(ActionHelper helper) throws HongsException {
-        Map rd = helper.getRequestData( );
-        Object id = rd.get("id");
-        if (id != null) {
-            /***/search.update(rd);
-        } else {
-            id = search.create(rd);
-        }
-        helper.reply("索引成功", id);
-    }
-
+    
     @Action("article/retrieve")
     public void retrieveArticle(ActionHelper helper) throws HongsException {
-        Map rd = helper.getRequestData( );
-        Map sd = search.searchArticle(rd);
-        helper.reply(sd);
+        Reader reader = new Reader();
+        Map rd = helper.getRequestData();
+        Map sd = reader.getList(rd);
+        reader.close(  );
+        helper.reply(sd);        
     }
 
     @Action("subject/retrieve")
     public void retrieveSubject(ActionHelper helper) throws HongsException {
-        Map rd = helper.getRequestData( );
-        Map sd = search.searchSubject(rd);
-        helper.reply(sd);
+        Reader reader = new Reader();
+        Map rd = helper.getRequestData();
+        Map sd = reader.getCnts(rd);
+        reader.close(  );
+        helper.reply(sd);  
     }
 
 }

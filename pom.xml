@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers-smartcn</artifactId>
-            <version>4.6.0</version>
+            <version>4.10.3</version>
         </dependency>
         <dependency>
             <groupId>net.paoding</groupId>
@@ -177,6 +177,13 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
         <resources>

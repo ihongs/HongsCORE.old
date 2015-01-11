@@ -1,12 +1,15 @@
-package app.hongs.action;
+package app.hongs.action.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
+import app.hongs.action.ActionHelper;
+import app.hongs.action.ActionRunner;
 import app.hongs.util.Data;
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,7 +45,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class ActionDriver
+public class ActsWarder
 implements Filter {
 
     /**
@@ -58,7 +61,7 @@ implements Filter {
     /**
      * Request Attribute: 请求核心
      */
-    public static final String REQCORE = "app.hongs.action.reqcore";
+    private static final String CORE = "__CORE__";
 
     @Override
     public void init(FilterConfig config)
@@ -111,7 +114,7 @@ implements Filter {
                 String v = (String)et.getValue();
                 if (k.startsWith("start.")) {
                     k = k.substring(6  );
-                    v = Util.inject(v,m);
+                    v = Text.inject(v,m);
                     System.setProperty(k,v);
                 }
             }
@@ -123,7 +126,7 @@ implements Filter {
                 String v = (String)et.getValue();
                 if (k.startsWith("debug.")) {
                     k = k.substring(6  );
-                    v = Util.inject(v,m);
+                    v = Text.inject(v,m);
                     System.setProperty(k,v);
                 }
             }
@@ -147,7 +150,7 @@ implements Filter {
             long time = System.currentTimeMillis() - Core.STARTS_TIME;
             CoreLogger.debug(new StringBuilder("...")
                 .append("\r\n\tSERVER_ID   : ").append(Core.SERVER_ID)
-                .append("\r\n\tRuntime     : ").append(Util.humanTime(  time  ))
+                .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
                 .append("\r\n\tObjects     : ").append(core.keySet().toString())
                 .toString());
         }
@@ -160,57 +163,60 @@ implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    public void doFilter(ServletRequest rep, ServletResponse resp, FilterChain chain)
     throws ServletException, IOException {
-        HttpServletRequest  req = (HttpServletRequest ) request ;
-        HttpServletResponse rsp = (HttpServletResponse) response;
-        String x = req.getRequestURI();
-        Map m = req.getParameterMap();
+        HttpServletRequest  req  = (HttpServletRequest ) rep ;
+        HttpServletResponse resq = (HttpServletResponse) resp;
 
-        if (req.getAttribute(REQCORE) == null) {
-            doIniter(req, rsp, chain);
+        ActionHelper that ;
+        Core core = (Core ) req.getAttribute(CORE);
+        if ( core != null ) {
+             Core.THREAD_CORE.set(core);
+             that = core.get( ActionHelper.class );
+             that .reinitHelper(req, resq);
+
+             /**/chain.doFilter(rep, resp);
         } else {
-            doReinit(req, rsp, chain);
+             core =  Core.getInstance();
+             that =  new ActionHelper( req, resq );
+             core.put(ActionHelper.class.getName(), that);
+             req.setAttribute (CORE, core);
+
+             try {
+                doIniter(req, core, that);
+                chain.doFilter(rep, resp);
+                 
+                // 输出数据
+                if (!that.getResponse().isCommitted()) {
+                    Map rsp  = that.getResponseData( );
+                    if (rsp != null) {
+                        that.print();
+                    }
+                }
+             } catch (ServletException ex) {
+                // 输出异常
+                Throwable rc = ex.getRootCause();
+                if (rc instanceof HongsError) {
+                    HongsError he = (HongsError) rc;
+                    if (he.getCode() == 0x40) {
+                        that.print();
+                        return;
+                    }
+                }
+                throw ex;
+             } finally {
+                doFinish(req, core, that);
+             }
         }
     }
 
-    private void doReinit(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
-    throws ServletException, IOException {
-        Core core = getCurrentCore(req);
-        ActionHelper helper = ( ActionHelper )
-        core.get(ActionHelper.class.getName());
-
-        HttpServletResponse rzp = helper.getResponse();
-        try {
-            helper.reinitHelper(req, resp);
-            chain.doFilter((ServletRequest)req, (ServletResponse)resp);
-        } finally {
-            helper.reinitHelper(req, rzp);
-        }
-    }
-
-    private void doIniter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
-    throws ServletException, IOException {
-        Core core = Core.getInstance( );
-        ActionHelper helper = new ActionHelper(req, resp);
-        core.put(ActionHelper.class.getName() , helper );
-        req.setAttribute(REQCORE, core);
-
-        try {
-            this .doIniter( req, helper );
-            chain.doFilter((ServletRequest)req, (ServletResponse)resp);
-        } finally {
-            this .doFinish();
-        }
-    }
-
-    private void doIniter(HttpServletRequest req, ActionHelper helper)
+    private void doIniter(HttpServletRequest req, Core core, ActionHelper helper)
     throws ServletException {
-        Core.ACTION_TIME.set(System.currentTimeMillis( ));
+        Core.ACTION_NAME.set(getRealPath(req).substring(1));
 
-        Core.ACTION_NAME.set(getRealityPath( req ).substring( 1 ));
+        Core.ACTION_TIME.set(System.currentTimeMillis());
 
-        CoreConfig conf = Core.getInstance(CoreConfig.class);
+        CoreConfig conf = core.get(CoreConfig.class);
 
         Core.ACTION_ZONE.set(conf.getProperty("core.timezone.default","GMT-8"));
         if (conf.getProperty("core.language.probing", false)) {
@@ -247,9 +253,9 @@ implements Filter {
                         break;
                     }
                 }
-                if (lang == null || lang.length() == 0) {
-                    lang = req.getHeader("Accept-Language");
-                }
+            if (lang == null || lang.length() == 0) {
+                lang = req.getHeader("Accept-Language");
+            }
             }
 
             /**
@@ -262,41 +268,42 @@ implements Filter {
             }
             }
         }
-
-        if (0 < Core.DEBUG) {
-            Map rd;
-            try {
-                rd = helper.getRequestData( );
-            } catch (HongsException e) {
-                throw new ServletException(e);
-            }
-            CoreLogger.debug(new StringBuilder("...")
-                .append("\r\n\tTHREAD_ID   : ").append(Thread.currentThread().getId())
-                .append("\r\n\tACTION_TIME : ").append(Core.ACTION_TIME.get())
-                .append("\r\n\tACTION_LANG : ").append(Core.ACTION_LANG.get())
-                .append("\r\n\tACTION_PATH : ").append(Core.ACTION_NAME.get())
-                .append("\r\n\tMethod      : ").append(req.getMethod())
-                .append("\r\n\tClient      : ").append(req.getRemoteAddr())
-                                   .append("\t").append(req.getRemotePort())
-                .append("\r\n\tUser-Agent  : ").append(req.getHeader( "User-Agent" ) )
-                .append("\r\n\tUser-Query  : ").append(Data.toString(rd))
-                .toString());
-        }
     }
 
-    private void doFinish() {
+    private void doFinish(HttpServletRequest req, Core core, ActionHelper helper) {
         if (0 < Core.DEBUG) {
-            Core core = Core.THREAD_CORE.get();
+            ActionHelper that = Core.getInstance(ActionHelper.class);
+            HttpServletRequest R = that.getRequest();
+            Map rd, xd;
+            try {
+                rd = that.getRequestData( );
+                xd = that.getResponseData();
+            } catch (HongsException e) {
+                throw new HongsError(HongsError.COMMON, e);
+            }
             long time = System.currentTimeMillis() - Core.ACTION_TIME.get();
-            CoreLogger.debug(new StringBuilder("...")
-                .append("\r\n\tTHREAD_ID   : ").append(Thread.currentThread().getId())
-                .append("\r\n\tRuntime     : ").append(Util.humanTime(  time  ))
-                .append("\r\n\tObjects     : ").append(core.keySet().toString())
-                .toString());
+            StringBuilder sb = new StringBuilder("...");
+              sb.append("\r\n\tACTION_NAME : ").append(Core.ACTION_NAME.get())
+                .append("\r\n\tACTION_TIME : ").append(Core.ACTION_TIME.get())
+                .append("\r\n\tACTION_LANG : ").append(Core.ACTION_LANG.get())
+                .append("\r\n\tACTION_ZONE : ").append(Core.ACTION_ZONE.get())
+                .append("\r\n\tMethod      : ").append(R.getMethod())
+                .append("\r\n\tClient      : ").append(R.getRemoteAddr()).append(" ").append(R.getRemotePort())
+                .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
+                .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
+                .append("\r\n\tObjects     : ").append(core.keySet().toString());
+            if (rd != null && !rd.isEmpty()) {
+              sb.append("\r\n\tRequest     : ").append(Data.toString(rd));
+            }
+            if (xd != null && !xd.isEmpty()) {
+              sb.append("\r\n\tResults     : ").append(Data.toString(xd));
+            }
+            CoreLogger.debug(sb.toString( ));
         }
 
         try {
-            Core.THREAD_CORE.get( ).destroy( );
+            req .removeAttribute(  CORE );
+            Core.THREAD_CORE.get().destroy();
         } catch ( Throwable  e) {
             CoreLogger.error(e);
         }
@@ -307,8 +314,8 @@ implements Filter {
      * @param req
      * @return
      */
-    public static  Core  getCurrentCore(HttpServletRequest req) {
-        Core core = (Core) req.getAttribute(REQCORE);
+    public static  Core  getCurrCore(HttpServletRequest req) {
+        Core core = (Core) req.getAttribute(CORE);
         if ( core == null) {
              core =  Core.getInstance();
         } else {
@@ -322,7 +329,7 @@ implements Filter {
      * @param req
      * @return
      */
-    public static String getCurrentPath(HttpServletRequest req) {
+    public static String getCurrPath(HttpServletRequest req) {
         String uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
         if (uri == null) {
             uri =  req.getServletPath();
@@ -335,7 +342,7 @@ implements Filter {
      * @param req
      * @return
      */
-    public static String getRealityPath(HttpServletRequest req) {
+    public static String getRealPath(HttpServletRequest req) {
         String uri = (String) req.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
         if (uri == null) {
             uri =  req.getServletPath();

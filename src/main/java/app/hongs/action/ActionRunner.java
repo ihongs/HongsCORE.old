@@ -4,9 +4,9 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.annotaion.Action;
-import app.hongs.annotaion.ActionInvoker;
-import app.hongs.annotaion.ActionWrapper;
+import app.hongs.action.anno.Action;
+import app.hongs.action.anno.ActionInvoker;
+import app.hongs.action.anno.ActionWrapper;
 import app.hongs.util.ClassNames;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -141,10 +141,10 @@ public class ActionRunner {
             try {
                 clss = ClassNames.getClassNames(pkgn);
             } catch (IOException ex) {
-                throw new HongsError( 0x3a , "Can not load package '" + pkgn + "'.", ex);
+                throw new HongsError( 0x4a , "Can not load package '" + pkgn + "'.", ex);
             }
             if (clss == null) {
-                throw new HongsError( 0x3a , "Can not find package '" + pkgn + "'.");
+                throw new HongsError( 0x4a , "Can not find package '" + pkgn + "'.");
             }
 
             for(String clsn : clss) {
@@ -152,7 +152,7 @@ public class ActionRunner {
                 try {
                     clso = Class.forName(clsn);
                 } catch (ClassNotFoundException ex) {
-                    throw new HongsError(0x3a, "Can not find class '" + clsn + "'.");
+                    throw new HongsError(0x4a, "Can not find class '" + clsn + "'.");
                 }
 
                 // 从注解提取动作名
@@ -182,7 +182,7 @@ public class ActionRunner {
                     // 检查方法是否合法
                     Class[] prms = mtdo.getParameterTypes();
                     if (prms == null || prms.length != 1 || !prms[0].isAssignableFrom(ActionHelper.class)) {
-                        throw new HongsError(0x3a, "Can not find action method '"+clsn+"."+mtdn+"(ActionHelper)'.");
+                        throw new HongsError(0x4a, "Can not find action method '"+clsn+"."+mtdn+"(ActionHelper)'.");
                     }
 
                     if ("__main__".equals(actx)) {

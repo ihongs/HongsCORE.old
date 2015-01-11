@@ -491,6 +491,34 @@ public class Table
   }
 
   /**
+   * 插入子数据
+   *
+   * 用于Model中, Table中不自动删除关联数据
+   *
+   * @param values
+   * @throws app.hongs.HongsException
+   */
+  public void insertSubValues(Map values)
+    throws HongsException
+  {
+    FetchMore.insertMore(this, assocs, values);
+  }
+
+  /**
+   * 删除子数据
+   *
+   * 用于Model中, Table中不自动删除关联数据
+   *
+   * @param id
+   * @throws app.hongs.HongsException
+   */
+  public void deleteSubValues(String id)
+    throws HongsException
+  {
+    FetchMore.deleteMore(this, assocs, id);
+  }
+
+  /**
    * 检验主数据
    *
    * <pre>
@@ -812,34 +840,6 @@ public class Table
     }
 
     return mainValues;
-  }
-
-  /**
-   * 插入子数据
-   *
-   * 用于Model中, Table中不自动删除关联数据
-   *
-   * @param values
-   * @throws app.hongs.HongsException
-   */
-  protected void insertSubValues(Map values)
-    throws HongsException
-  {
-    FetchMore.insertMore(this, assocs, values);
-  }
-
-  /**
-   * 删除子数据
-   *
-   * 用于Model中, Table中不自动删除关联数据
-   *
-   * @param id
-   * @throws app.hongs.HongsException
-   */
-  protected void deleteSubValues(String id)
-    throws HongsException
-  {
-    FetchMore.deleteMore(this, assocs, id);
   }
 
   //** 私有方法 **/

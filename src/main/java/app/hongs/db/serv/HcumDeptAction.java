@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.annotaion.Action;
+import app.hongs.action.anno.Action;
 import app.hongs.db.DB;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +64,7 @@ public class HcumDeptAction {
     public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean rst = model.exists(helper.getRequestData());
-        helper.reply(null, rst);
+        helper.reply(rst);
     }
 
     @Action("groups")

@@ -78,6 +78,10 @@ public class AuthTag extends BodyTagSupport {
     return BodyTagSupport.EVAL_PAGE;
   }
 
+  public void setConf(String cn) {
+    this.cnf = cn;
+  }
+
   public void setAct(String act) {
     this.act = act;
   }
@@ -88,10 +92,6 @@ public class AuthTag extends BodyTagSupport {
 
   public void setEls(Boolean els) {
     this.els = els;
-  }
-
-  public void setConf(String cn) {
-    this.cnf = cn;
   }
 
 }

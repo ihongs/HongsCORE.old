@@ -1,6 +1,7 @@
-package app.hongs.action;
+package app.hongs.action.serv;
 
 import app.hongs.Core;
+import app.hongs.action.ActionRunner;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -19,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * 在页面和动作等建成后可以移除.
  * @author Hongs
  */
-public class ActionCasual implements Filter {
+public class AutoRigger implements Filter {
 
     public static final String MODULE = "app.hongs.serv.common.module";
     public static final String ENTITY = "app.hongs.serv.common.entity";

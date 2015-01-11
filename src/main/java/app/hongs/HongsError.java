@@ -23,6 +23,11 @@ public class HongsError extends Error implements HongsCause {
      */
     public static final int NOTICE = 0x11;
 
+    /**
+     * 动作错误
+     */
+    public static final int ACTION = 0x12;
+
     protected HongsLocalized that;
 
     public HongsError(int code, String desc, Throwable cause) {
@@ -31,7 +36,7 @@ public class HongsError extends Error implements HongsCause {
         that = new HongsLocalized(code, desc, this);
 
         if (code < 0x10 || code > 0xFFF) {
-            throw new HongsError(0x12,
+            throw new HongsError(0x21,
                 "Error code must be from 0x10(16) to 0xFFF(4095).");
         }
     }

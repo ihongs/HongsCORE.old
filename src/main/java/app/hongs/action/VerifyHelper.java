@@ -1,15 +1,17 @@
 package app.hongs.action;
 
 import app.hongs.Core;
+import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.util.Tree;
+import app.hongs.util.Dict;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -32,26 +34,18 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class VerifyHelper {
 
-    private Map<String , Map<String, Map > > rules;
+    private Map<String , Map<String, Map>> rules;
 
-    private static final Map<String, String> alias;
-    static {
-        alias = new HashMap();
-        alias.put("textarea", "text");
-        alias.put("hidden",   "text");
-        alias.put("slider", "number");
-        alias.put("switch", "number");
-    }
-    
     public VerifyHelper() {
         rules = new LinkedHashMap();
     }
 
     public VerifyHelper addRule(String name, String rule, Map<String, Object> opts) {
-        Map rulez  = rules.get(  name  );
-        if (rulez == null) {
-            rulez  = new LinkedHashMap();
-        }   rulez.put  (  rule , opts  );
+        Map ruleo  = rules.get(name);
+        if (ruleo == null) {
+            ruleo  = new LinkedHashMap();
+            rules.put(name, ruleo);
+        }   ruleo.put(rule, opts );
         return this;
     }
 
@@ -71,6 +65,7 @@ public class VerifyHelper {
 
     public VerifyHelper addRulesByForm(String conf, String form) throws HongsException {
         StructConfig cnf = StructConfig.getInstance(conf);
+        CoreConfig cuf = CoreConfig.getInstance();
         Map map  = cnf.getForm(form);
         if (map == null) return this;
         map = (Map) map.get("items");
@@ -85,11 +80,15 @@ public class VerifyHelper {
 
                 byte required = (Byte) opts.remove("_required");
                 if (required > 0) {
+                    Map optz = new HashMap();
+                    optz.put("requreid" , required);
                     this.addRule(code, "_required");
                 }
 
                 byte repeated = (Byte) opts.remove("_repeated");
                 if (repeated > 0) {
+                    Map optz = new HashMap();
+                    optz.put("repeated" , repeated);
                     this.addRule(code, "_repeated");
                 }
 
@@ -99,13 +98,16 @@ public class VerifyHelper {
                 if (null == rule || "".equals(rule)) {
                     continue;
                 }
-                if (alias.containsKey(rule)) {
-                    rule = alias.get (rule);
-                }
+
+                    // 类型别名
+                    if (cuf.containsKey("core.form.type."+rule)) {
+                        rule = cuf.getProperty(rule);
+                    }
+
                     // 将 type 转换为 isType 规则名
                     String c = rule.substring(0, 1);
                     String n = rule.substring(   1);
-                    rule = "is"+c.toUpperCase( )+n ;
+                    rule = "is"+c.toUpperCase()+ n ;
                 }
                 opts.put("__conf__", conf);
                 opts.put("__form__", form);
@@ -113,7 +115,7 @@ public class VerifyHelper {
             }
         }
         catch (ClassCastException ex) {
-            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form);
+            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form, ex);
         }
         catch (IndexOutOfBoundsException ex) {
             throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form+"#"+i, ex);
@@ -129,18 +131,18 @@ public class VerifyHelper {
         for(Map.Entry<String, Map<String, Map>> et : rules.entrySet()) {
             Map<String, Map> rulez  =  et.getValue( );
             String name = et.getKey();
-            Object data = Tree.getValue2(values, name);
+            Object data = Dict.getValue(values, name);
 
             Map<String, String> rq = rulez.remove("_required");
             Map<String, String> rp = rulez.remove("_repeated");
 
             if (rq == null || update) {
-                if ( null == data) {
+                if (  null == data  ) {
                     continue;
                 }
             } else {
                 try {
-                    data = required(data);
+                    data = required ( data);
                 } catch (Wrong  w) {
                     failed(wrongz, w, name);
                     continue;
@@ -150,6 +152,8 @@ public class VerifyHelper {
             if (rp == null) {
                 try {
                     data = verify(name, data, values, rulez, update);
+                } catch (Pass   w) {
+                    continue;
                 } catch (Wrong  w) {
                     failed(wrongz, w, name);
                     continue;
@@ -159,7 +163,7 @@ public class VerifyHelper {
                 }
             } else {
                 try {
-                    data = repeated(data);
+                    data = repeated ( data);
                 } catch (Wrong  w) {
                     failed(wrongz, w, name);
                     continue;
@@ -173,6 +177,8 @@ public class VerifyHelper {
 
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
+                        } catch (Pass   w) {
+                            continue;
                         } catch (Wrong  w) {
                             failed(wrongz, w, name3);
                             continue;
@@ -191,6 +197,8 @@ public class VerifyHelper {
 
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
+                        } catch (Pass   w) {
+                            continue;
                         } catch (Wrong  w) {
                             failed(wrongz, w, name3);
                             continue;
@@ -202,12 +210,15 @@ public class VerifyHelper {
                     }
                 }
 
-                if (null != data2) {
-                    data  = data2;
+                Byte ap = Dict.conv2Cls(rp.get("repeated"), Byte.class);
+                if ( ap == 2 ) {
+                    data = new LinkedHashSet(data2);
+                } else {
+                    data = data2;
                 }
             }
 
-            Tree.setValue(valuez, data, name);
+            Dict.setValue(valuez, data, name);
         }
 
         if (!wrongz.isEmpty()) {
@@ -247,8 +258,8 @@ public class VerifyHelper {
         try {
             Class  kls = Class.forName(cls);
             Method wtd = kls.getMethod(mtd ,
-                   new Class[]{ Object.class, Map.class, Map.class });
-            return wtd.invoke ( value, values, params );
+                         new Class[]{ Object.class, Map.class, Map.class });
+            return wtd.invoke(null , new Object[]{ value, values, params });
         }
         catch (   ClassNotFoundException ex) {
             throw new HongsException(0x1102, "Class '" +cls +"' for '"+rule+"' is not exists");
@@ -257,13 +268,13 @@ public class VerifyHelper {
             throw new HongsException(0x1103, "Method '"+rule+"' for '"+name+"' is not exists");
         }
         catch (        SecurityException ex) {
-            throw new HongsException(0x1104, ex);
+            throw new HongsException(0x1104, "Rule '"+rule+"' for '"+name+"' error", ex);
         }
         catch (   IllegalAccessException ex) {
-            throw new HongsException(0x1104, ex);
+            throw new HongsException(0x1104, "Rule '"+rule+"' for '"+name+"' error", ex);
         }
         catch ( IllegalArgumentException ex) {
-            throw new HongsException(0x1105, ex);
+            throw new HongsException(0x1105, "Rule '"+rule+"' for '"+name+"' error", ex);
         }
         catch (InvocationTargetException ex) {
             Throwable e = ex.getCause();
@@ -327,36 +338,36 @@ public class VerifyHelper {
         throw new Wrong("fore.form.norepeat");
     }
 
-    public static Object ignore(Object value, Map values, Map params) {
-        return null;
-    }
-
     //** 类型校验器 **/
 
+    public static Object isPass(Object value, Map values, Map params) throws Pass {
+        throw new Pass();
+    }
+
     public static Object isForm(Object value, Map values, Map params) throws Wrongs, HongsException {
-        String conf = Tree.getValue(params, "", "conf");
-        String name = Tree.getValue(params, "", "name");
+        String conf = Dict.getV4Def(params, "", "conf");
+        String name = Dict.getV4Def(params, "", "name");
         if (conf == null || !"".equals(conf)) {
-            conf = Tree.getValue(params, "","__conf__");
+            conf = Dict.getV4Def(params, "","__conf__");
         }
         if (name == null || !"".equals(name)) {
-            name = Tree.getValue(params, "","__name__");
+            name = Dict.getV4Def(params, "","__name__");
         }
 
-        boolean upd = Tree.getValue(params,false, "__update__");
+        boolean upd = Dict.getV4Def(params,false, "__update__");
         VerifyHelper veri = new VerifyHelper();
         veri.addRulesByForm(conf, name);
         return  veri.verify(values,upd);
     }
 
     public static Object isEnum(Object value, Map values, Map params) throws Wrong , HongsException {
-        String conf = Tree.getValue(params, "", "conf");
-        String code = Tree.getValue(params, "", "code");
+        String conf = Dict.getV4Def(params, "", "conf");
+        String code = Dict.getV4Def(params, "", "code");
         if (conf == null || !"".equals(conf)) {
-            conf = Tree.getValue(params, "","__conf__");
+            conf = Dict.getV4Def(params, "","__conf__");
         }
         if (code == null || !"".equals(code)) {
-            code = Tree.getValue(params, "","__code__");
+            code = Dict.getV4Def(params, "","__code__");
         }
 
         Map data = StructConfig.getInstance(conf).getEnum(code);
@@ -368,8 +379,9 @@ public class VerifyHelper {
 
     public static String isFile(Object value, Map values, Map params) throws Wrong {
         UploadHelper u = new UploadHelper();
-        String x = Tree.getValue(params, "", "__name__");
+        String x = Dict.getV4Def(params, "", "__name__");
         u.setUploadName(x);
+
         x = (String) params.get("path");
         if (x != null) u.setUploadPath(x);
         x = (String) params.get("href");
@@ -387,7 +399,28 @@ public class VerifyHelper {
         return u.getResultHref(   );
     }
 
-    public static Object isText(Object value, Map values, Map params) {
+    public static Object isObject(Object value, Map values, Map params) {
+        return value;
+    }
+
+    public static Object isString(Object value, Map values, Map params) {
+        return value.toString();
+    }
+
+    public static Object isNumber(Object value, Map values, Map params) {
+        String type = Dict.getP2Cls(params, String.class, "type");
+        if (  "int".equals(type)) {
+            value = Dict.conv4Def(value,   0 );
+        } else
+        if ( "long".equals(type)) {
+            value = Dict.conv4Def(value,   0L);
+        } else
+        if ("short".equals(type)) {
+            value = Dict.conv4Def(value, 0.0 );
+        } else
+        {
+            value = Dict.conv4Def(value, 0.0D);
+        }
         return value;
     }
 
@@ -400,10 +433,6 @@ public class VerifyHelper {
     }
 
     public static Object isDatetime(Object value, Map values, Map params) {
-        return value;
-    }
-
-    public static Object isNumber(Object value, Map values, Map params) {
         return value;
     }
 
@@ -420,6 +449,12 @@ public class VerifyHelper {
     }
 
     /** 内部错误类 **/
+
+    public static class Pass   extends HongsException {
+        public Pass() {
+            super(HongsException.NOTICE);
+        }
+    }
 
     public static class Wrong  extends HongsException {
         public Wrong(String desc, String... prms) {
@@ -462,7 +497,7 @@ public class VerifyHelper {
                 Wrong  w = (Wrong )  et.getValue();
                 String n = (String)  et.getKey ( );
                 String e = w.getLocalizedMessage();
-                Tree.setValue(errors, e, n);
+                Dict.setValue(errors, e, n);
             }
             return errors;
         }

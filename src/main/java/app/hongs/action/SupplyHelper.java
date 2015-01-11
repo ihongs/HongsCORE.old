@@ -1,7 +1,7 @@
 package app.hongs.action;
 
 import app.hongs.HongsException;
-import app.hongs.util.Tree;
+import app.hongs.util.Dict;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -104,7 +104,7 @@ public class SupplyHelper {
             String   key = (String)  et.getKey();
             Map      map = (Map)   et.getValue();
             List     lst = new ArrayList();
-            Tree.setValue(data, lst, key );
+            Dict.setValue(data, lst, key );
 
             Iterator i = map.entrySet().iterator();
             while (i.hasNext()) {
@@ -125,9 +125,9 @@ public class SupplyHelper {
             Map.Entry et = (Map.Entry) it.next();
             String   key = (String)  et.getKey();
             Map      map = (Map)   et.getValue();
-            Object   val = Tree.getValue2( info , key );
+            Object   val = Dict.getValue( info , key );
             if (val != null) {
-                Tree.setValue(info, map.get(val), key +"_disp");
+                Dict.setValue(info, map.get(val), key +"_disp");
             }
         }
     }

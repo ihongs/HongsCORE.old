@@ -1,6 +1,6 @@
 package app.hongs;
 
-import app.hongs.util.Util;
+import app.hongs.util.Text;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,11 +42,11 @@ import java.util.Map;
  *
  * <h3>错误代码:</h3>
  * <pre>
- * 0x14 实例名称不能为空
- * 0x15 无法获取对应的类
- * 0x16 禁止访问工厂方法
- * 0x17 无法执行工厂方法
- * 0x18 执行构造方法失败
+ * 0x24 实例名称不能为空
+ * 0x25 无法获取对应的类
+ * 0x26 禁止访问工厂方法
+ * 0x27 无法执行工厂方法
+ * 0x28 执行构造方法失败
  * </pre>
  *
  * @author Hongs
@@ -170,7 +170,7 @@ extends HashMap<String, Object>
 
     if (name == null || name.length() == 0)
     {
-      throw new HongsError(0x14, "Instance name can not be empty.");
+      throw new HongsError(0x24, "Instance name can not be empty.");
     }
 
     return null;
@@ -187,7 +187,7 @@ extends HashMap<String, Object>
     }
     catch (ClassNotFoundException ex)
     {
-      throw new HongsError(0x15, "Can not find class by name '" + name + "'.");
+      throw new HongsError(0x25, "Can not find class by name '" + name + "'.");
     }
 
     return build( core, name, klass );
@@ -222,11 +222,11 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x17, "Can not build "+name, ex);
+        throw new HongsError(0x27, "Can not build "+name, ex);
       }
       catch (IllegalArgumentException ex)
       {
-        throw new HongsError(0x17, "Can not build "+name, ex);
+        throw new HongsError(0x27, "Can not build "+name, ex);
       }
       catch (InvocationTargetException ex)
       {
@@ -234,7 +234,7 @@ extends HashMap<String, Object>
         if (ta instanceof StackOverflowError)
             throw (Error) ta;
 
-        throw new HongsError(0x17, "Can not build "+name, ta);
+        throw new HongsError(0x27, "Can not build "+name, ta);
       }
     }
     catch (NoSuchMethodException ex2)
@@ -261,7 +261,7 @@ extends HashMap<String, Object>
       }
       catch (IllegalAccessException ex)
       {
-        throw new HongsError(0x18, "Can not build "+name, ex);
+        throw new HongsError(0x28, "Can not build "+name, ex);
       }
       catch (InstantiationException ex)
       {
@@ -269,12 +269,12 @@ extends HashMap<String, Object>
         if (e instanceof StackOverflowError)
             throw (Error) e;
 
-        throw new HongsError(0x18, "Can not build "+name, ex);
+        throw new HongsError(0x28, "Can not build "+name, ex);
       }
     }
     catch (SecurityException ex2)
     {
-        throw new HongsError(0x16, "Can not build "+name, ex2);
+        throw new HongsError(0x26, "Can not build "+name, ex2);
     }
   }
 
@@ -425,13 +425,13 @@ extends HashMap<String, Object>
     long n;
 
     n = System.currentTimeMillis();
-    String s1 = String.format("%8s", Util.to36Hex(n));
+    String s1 = String.format("%8s", Text.to36Hex(n));
 
     n = Thread.currentThread().getId();
-    String s2 = String.format("%4s", Util.to36Hex(n));
+    String s2 = String.format("%4s", Text.to36Hex(n));
 
     n = (long) ( Math.random() * 1679615 ); //36^4-1
-    String s3 = String.format("%4s", Util.to36Hex(n));
+    String s3 = String.format("%4s", Text.to36Hex(n));
 
     if (s1.length() > 8) s1 = s1.substring(s1.length() - 8);
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);

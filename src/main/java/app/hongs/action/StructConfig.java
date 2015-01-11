@@ -5,7 +5,7 @@ import app.hongs.CoreLanguage;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
-import app.hongs.util.Tree;
+import app.hongs.util.Dict;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -291,14 +291,14 @@ public class StructConfig
 
         namz = element2.getAttribute("required");
         if (namz != null && !"".equals(namz) && !"0".equals(namz)) {
-            optns2.put("_required", Short.parseShort(namz));
+            optns2.put("_required", Byte.parseByte(namz));
         } else {
             optns2.put("_required", (byte) 0);
         }
 
         namz = element2.getAttribute("repeated");
         if (namz != null && !"".equals(namz) && !"0".equals(namz)) {
-            optns2.put("_repeated", Short.parseShort(namz));
+            optns2.put("_repeated", Byte.parseByte(namz));
         } else {
             optns2.put("_repeated", (byte) 0);
         }
@@ -353,19 +353,19 @@ public class StructConfig
   }
 
   public Object getData(String name) {
-    return Tree.getDepth2(datas, new String[]{name});
+    return Dict.getPoint(datas, new String[]{name});
   }
 
   public <T>T getData(String name, T data) {
-    return Tree.getDepth(datas, data, new String[]{name});
+    return Dict.getP4Def(datas, data, new String[]{name});
   }
 
   public Object getTree(String path) {
-    return Tree.getValue2(datas, path);
+    return Dict.getValue(datas, path);
   }
 
   public <T>T getTree(String path, T data) {
-    return Tree.getValue(datas, data, path);
+    return Dict.getV4Def(datas, data, path);
   }
 
   public Map getEnum(String name) {
@@ -381,7 +381,7 @@ public class StructConfig
       return CoreLanguage.getInstance(name);
     }
     catch (app.hongs.HongsError e) {
-      if  (  e.getCode( ) != 0x1a) {
+      if  (  e.getCode( ) != 0x2a) {
         throw e;
       }
       return CoreLanguage.getInstance("default");

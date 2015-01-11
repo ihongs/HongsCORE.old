@@ -25,9 +25,10 @@ public class FetchPage
 
   private Map info = new HashMap();
 
-  public FetchPage(DB db, FetchCase caze) throws HongsException
+  public FetchPage(FetchCase caze, Table table) throws HongsException
   {
-    this.db    = db;
+    this.db    = table.db;
+    this.tb    = table;
     this.caze  = caze;
 
     Object page2 = caze.getOption("page");
@@ -43,10 +44,9 @@ public class FetchPage
     }
   }
 
-  public FetchPage(Table table, FetchCase caze) throws HongsException
+  public FetchPage(FetchCase caze, DB db) throws HongsException
   {
-    this.db    = table.db;
-    this.tb    = table;
+    this.db    = db;
     this.caze  = caze;
 
     Object page2 = caze.getOption("page");
@@ -141,16 +141,9 @@ public class FetchPage
     // 查询总行数
     String   sql;
     Object[] params;
-    FetchCase      caze2 = this.caze.clone();
-    boolean hasg = caze2.hasGroupBy();
-    for (FetchCase caze3 : caze2.joinList  )
-    {
-      if (! hasg) hasg = caze3.hasGroupBy( );
-      caze3.setSelect ("");
-      caze3.setOrderBy("");
-    }
-      caze2.setOrderBy("");
-      caze2.limit( 0 );
+    FetchCase caze2 = this.caze.clone();
+    boolean   hasg  =  clnJoin( caze2 );
+              caze2.limit(0);
     if (hasg)
     {
       sql    =  "SELECT COUNT(*) AS __count__ FROM ("
@@ -177,4 +170,18 @@ public class FetchPage
     return this.info;
   }
 
+  private boolean clnJoin(FetchCase caze) {
+    boolean hasg = caze.hasGroupBy();
+    caze.setOrderBy("");
+    caze.setSelect ("");
+    
+    for (FetchCase caze2 : caze.joinList) {
+      if( clnJoin( caze2 )) {
+          hasg  =  true  ;
+      }
+    }
+    
+    return hasg;
+  }
+  
 }
