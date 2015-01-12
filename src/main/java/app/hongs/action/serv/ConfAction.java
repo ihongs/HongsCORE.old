@@ -55,7 +55,7 @@ public class ConfAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    Core core = ActsWarder.getCurrCore(req);
+    Core core = ServWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = helper.getRequest().getPathInfo();

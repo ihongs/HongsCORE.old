@@ -77,7 +77,7 @@ public class ApisAction
      */
     private void doForward(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
-        String act = ActsWarder.getCurrPath(req);
+        String act = ServWarder.getCurrPath(req);
         String mtd = mts[0];
 
         if (act == null || act.length() == 0) {
@@ -108,7 +108,7 @@ public class ApisAction
             String mtz = mat.group(4);
 
             // 指定资源
-            act = act.substring(0, mat.start()-1) + acn;
+            act = act.substring(0, mat.start()) + acn;
 
             // 指定方法
             if (mtz != null && mtz.length() != 0) {
@@ -120,12 +120,12 @@ public class ApisAction
             if (vaz != null && vaz.length() != 0) {
                 String   key = "id";
                 String[] vas = vaz.substring(2).split("_");
-                if (vas.length == 1 ) {
+                if (vas.length > 1  ) {
+                    key += "[]";
+                } else {
                     if ( mtd.equals("retrieve")) {
                          mts = new String[]{"info", "retrieve", "list"};
                     }
-                } else {
-                    key += "." ;
                 }
                 for(String val : vas) {
                     pms.append("&").append(key).append("=").append(val);
@@ -138,7 +138,7 @@ public class ApisAction
                 for(int i = 0; i < pns.length; i += 2) {
                     String   key = pns[i]+"_id";
                     String[] vas = pns[i + 1 ].substring(1).split ("_");
-                    if (vas.length >  1 ) {
+                    if (vas.length > 1  ) {
                         key += "[]";
                     }
                     for(String val : vas) {
@@ -160,22 +160,25 @@ public class ApisAction
             }
         }
 
-        boolean send = false;
-        if (req.getAttribute(ActsWarder.PRINTED) == null) {
-            req.setAttribute(ActsWarder.PRINTED  ,  true);
-            send = true;
-        }
-        rsp.setStatus(HttpServletResponse.SC_OK  );
-
         // 将请求转发到动作处理器
         req.getRequestDispatcher("/"+act+"/"+mtd+".act"+pms).include(req, rsp);
 
         // 将应答数据格式化后传递
-        ActionHelper hlpr = ActsWarder.getCurrCore(req)
-                          .get(ActionHelper.class);
+        ActionHelper hlpr = ServWarder.getCurrCore(req)
+                         .get(ActionHelper.class);
         Map  data  = hlpr.getResponseData();
         if ( data != null ) {
-             hlpr.reply((Map) Dict.convNode(data));
+             hlpr.reply((Map) Dict.convEach(data, new Dict.Conv() {
+                public Object each(Object val) {
+                    if (val == null) {
+                        return "";
+                    } else if (val instanceof Boolean) {
+                        return ((Boolean) val) ? "1" : "0";
+                    } else {
+                        return val.toString( );
+                    }
+                }
+             }));
         }
     }
 

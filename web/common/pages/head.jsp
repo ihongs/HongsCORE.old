@@ -5,7 +5,7 @@
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.StructConfig"%>
+<%@page import="app.hongs.action.SourceConfig"%>
 <%!
     StringBuilder makeMenu(Map units, boolean realHref) {
         StringBuilder menus = new StringBuilder();
@@ -48,14 +48,14 @@
         name  = "default";
     }
 
-    StructConfig main = StructConfig.getInstance();
-    StructConfig curr = StructConfig.getInstance(name);
+    SourceConfig main = SourceConfig.getInstance();
+    SourceConfig curr = SourceConfig.getInstance(name);
 
-    Map mainMenu = main.getUnitsTranslated("__MENU__");
-    Map userMenu = main.getUnitsTranslated("__USER__");
-    Map currMenu = curr.getForm("__MENU__") != null
-                 ? curr.getUnitsTranslated("__MENU__")
-                 : curr.getFormsTranslated();
+    Map mainMenu = main.getRolesTranslated("__MENU__");
+    Map userMenu = main.getRolesTranslated("__USER__");
+    Map currMenu = curr.getUnit("__MENU__") != null
+                 ? curr.getRolesTranslated("__MENU__")
+                 : curr.getUnitsTranslated();
 %>
 
 <div class="navbar-header">

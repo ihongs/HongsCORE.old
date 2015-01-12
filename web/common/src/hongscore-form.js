@@ -93,6 +93,10 @@ HsForm.prototype = {
         if (rst.ok === false) return;
         if (rst.data) this.fillData( rst.data );
         if (rst.info) this.fillInfo( rst.info );
+        else if (rst.list && rst.list[0]) {
+            // retrieve 仅提供 list
+            this.fillInfo (  rst.list[0]);
+        }
         this.formBox.trigger("loadBack", [rst]);
     },
     fillData : function(data) {

@@ -55,8 +55,8 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException
   {
-    String act  = ActsWarder.getCurrPath(req);
-    Core   core = ActsWarder.getCurrCore(req);
+    String act  = ServWarder.getCurrPath(req);
+    Core   core = ServWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
     helper.reinitHelper(req, rsp);
 

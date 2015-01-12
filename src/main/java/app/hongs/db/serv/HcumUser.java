@@ -1,7 +1,7 @@
 package app.hongs.db.serv;
 
 import app.hongs.HongsException;
-import app.hongs.serv.AuthConfig;
+import app.hongs.serv.trash.AuthConfig;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
 import app.hongs.db.FetchCase;
@@ -48,22 +48,22 @@ extends Model {
     return id;
   }
 
-    public Set<String> getGroups(String userId)
+    public Set<String> getRoles(String userId)
     throws HongsException {
         if (userId == null) throw new HongsException(0x10000, "User Id required!");
 
-        Table asoc = this.db.getTable("a_hcum_user_group");
+        Table asoc = this.db.getTable("a_hcum_user_role");
         FetchCase caze = new FetchCase();
-        caze.select(".group_key")
-            .where(".user_id = ?", userId);
+        caze.select(".role")
+            .where (".user_id = ?", userId);
 
-        Set<String> groups = new HashSet();
-        List<Map>   rows   = asoc.fetchMore(caze);
+        Set<String> roles = new HashSet();
+        List<Map>   rows  = asoc.fetchMore(caze);
         for (Map row : rows) {
-            groups.add((String)row.get("group_key"));
+            roles.add((String)row.get("role"));
         }
 
-        return groups;
+        return roles;
     }
 
     public static List getPageGroups(String name)

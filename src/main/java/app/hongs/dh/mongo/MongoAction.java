@@ -1,35 +1,28 @@
-package app.hongs.dl.serv;
+package app.hongs.dh.mongo;
 
 import app.hongs.HongsException;
-import app.hongs.action.ActionHelper;
-import app.hongs.action.anno.Action;
-import app.hongs.dl.IAction;
+import java.util.Map;
 
 /**
- * 通用信息管理动作
+ * MongoDB 记录引擎
  * @author Hongs
  */
-@Action("hcim")
-public class HaimAction implements IAction {
+public class MongoAction {
 
-    @Action("retrieve")
-    public void retrieve(ActionHelper helper) throws HongsException {
+    public Map retrieve(Map rd) throws HongsException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Action("create")
-    public void create(ActionHelper helper) throws HongsException {
+    public String[] create(Map rd) throws HongsException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Action("update")
-    public void update(ActionHelper helper) throws HongsException {
+    public int update(Map rd) throws HongsException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Action("delete")
-    public void delete(ActionHelper helper) throws HongsException {
+    public int delete(Map rd) throws HongsException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
 }

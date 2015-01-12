@@ -1077,42 +1077,10 @@ public class Model
   }
 
   /**
-   * 字段过滤
+   * 当前表字段过滤
    * @param caze
    * @param val
    * @param key
-   * @param sym
-   * @throws HongsException
-   */
-  protected final void xkeyFilter(FetchCase caze, Object val, String key, String sym)
-    throws HongsException
-  {
-    if (val instanceof Collection)
-    {
-      if ( "=".equals(sym))
-      {
-        caze.where(".`"+key+"` IN (?)", val);
-      } else
-      if ("!=".equals(sym))
-      {
-        caze.where(".`"+key+"` NOT IN (?)", val);
-      } else
-      {
-        HongsException ex = new HongsException(0x10ad, "Unsupported symbol "+sym+" for collection value");
-        ex.setLocalizedOptions(sym);
-        throw ex;
-      }
-    } else
-    {
-        caze.where(".`"+key+"` "+sym+" ?" , val);
-    }
-  }
-
-  /**
-   * 当前表字段过滤
-   * @param caze the value of caze
-   * @param val the value of val
-   * @param key the value of key
    * @throws HongsException
    */
   protected void mkeyFilter(FetchCase caze, Object val, String key)
@@ -1120,43 +1088,55 @@ public class Model
   {
     if (val instanceof Map)
     {
-      Map map = (Map)val;
+      Map map = (Map) val;
       Set set = map.keySet();
       if (map.containsKey("-lt"))
       {
         set.remove("-lt");
         Object vaz = map.get("-lt");
-        this.xkeyFilter(caze, vaz, key, "<" );
+        caze.where(".`"+key+"` < ?", vaz);
       }
       if (map.containsKey("-le"))
       {
         set.remove("-le");
         Object vaz = map.get("-le");
-        this.xkeyFilter(caze, vaz, key, "<=");
+        caze.where(".`"+key+"` <= ?", vaz);
       }
       if (map.containsKey("-gt"))
       {
         set.remove("-gt");
         Object vaz = map.get("-gt");
-        this.xkeyFilter(caze, vaz, key, ">" );
+        caze.where(".`"+key+"` > ?", vaz);
       }
       if (map.containsKey("-ge"))
       {
         set.remove("-ge");
         Object vaz = map.get("-ge");
-        this.xkeyFilter(caze, vaz, key, ">=");
+        caze.where(".`"+key+"` >= ?", vaz);
       }
       if (map.containsKey("-eq"))
       {
         set.remove("-eq");
         Object vaz = map.get("-eq");
-        this.xkeyFilter(caze, vaz, key,  "=");
+        caze.where(".`"+key+"` = ?", vaz);
       }
       if (map.containsKey("-ne"))
       {
         set.remove("-ne");
         Object vaz = map.get("-ne");
-        this.xkeyFilter(caze, vaz, key, "!=");
+        caze.where(".`"+key+"` != ?", vaz);
+      }
+      if (map.containsKey("-in"))
+      {
+        set.remove("-eq");
+        Object vaz = map.get("-eq");
+        caze.where(".`"+key+"` IN (?)", vaz);
+      }
+      if (map.containsKey("-ni"))
+      {
+        set.remove("-ne");
+        Object vaz = map.get("-ne");
+        caze.where(".`"+key+"` NOT IN (?)", vaz);
       }
       if (!set.isEmpty())
       {
@@ -1172,13 +1152,13 @@ public class Model
         Set col = new HashSet(( Collection )val);
         if (!col.equals(nul) && !col.isEmpty( ))
         {
-            this.xkeyFilter(caze, val, key, "=");
+            caze.where(".`"+key+"` IN (?)", val);
         }
     } else
     {
-        if (! "".equals(val))
+        if (!"".equals( val )  &&  null  != val)
         {
-            this.xkeyFilter(caze, val, key, "=");
+            caze.where(".`"+key + "` = ?" , val);
         }
     }
   }

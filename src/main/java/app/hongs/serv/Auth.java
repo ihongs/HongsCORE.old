@@ -11,24 +11,28 @@ import java.util.Set;
  */
 public class Auth {
     
-    public Map getAuth(ActionHelper helper, String conf, String sesn) {
+    public Auth(String name) {
+        
+    }
+    
+    public Auth() {
+        
+    }
+    
+    public Set<String> getActions() {
         return null;
     }
     
-    public Map getAuth(ActionHelper helper, String conf) {
-        return getAuth(helper,   conf   , "actions");
+    public boolean checkAuth(String action, Set roles) {
+        return true;
     }
     
-    public Map getAuth(ActionHelper helper) {
-        return getAuth(helper, "default", "actions");
+    public static Auth getInstance() {
+        return new Auth();
     }
     
-    private Map getActs(Map unis, Set sess) {
-        Map acts = new HashMap();
-        for (Object o : unis.entrySet()) {
-            Map.Entry e = (Map.Entry) o;
-        }
-        return null;
+    public static Auth getInstance(String name) {
+        return new Auth(name);
     }
     
 }

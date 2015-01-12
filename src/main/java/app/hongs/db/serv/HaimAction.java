@@ -9,9 +9,9 @@ import app.hongs.action.anno.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
 import app.hongs.db.Mview;
-import app.hongs.dl.IAction;
-import static app.hongs.action.serv.AutoRigger.ENTITY;
-import static app.hongs.action.serv.AutoRigger.MODULE;
+import app.hongs.dh.IAction;
+import static app.hongs.serv.AutoFilter.ENTITY;
+import static app.hongs.serv.AutoFilter.MODULE;
 import java.util.Collection;
 import java.util.Map;
 

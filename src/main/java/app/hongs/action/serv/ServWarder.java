@@ -45,7 +45,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class ActsWarder
+public class ServWarder
 implements Filter {
 
     /**

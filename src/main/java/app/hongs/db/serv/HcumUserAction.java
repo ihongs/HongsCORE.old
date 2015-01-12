@@ -92,7 +92,7 @@ public class HcumUserAction {
         if (id != null) {
             app.hongs.db.serv.HcumUser model2 = (app.hongs.db.serv.HcumUser)
                 Core.getInstance(app.hongs.db.serv.HcumUser.class);
-            Set userGroups = model2.getGroups(id);
+            Set userGroups = model2.getRoles(id);
             data.put("userGroups", userGroups);
         }
 

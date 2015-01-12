@@ -1,6 +1,6 @@
-package net.hongs.search;
+package net.hongs.search.action;
 
-import net.hongs.search.record.Writer;
+import net.hongs.search.Writer;
 import app.hongs.HongsException;
 import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.db.DB;
@@ -41,24 +41,25 @@ public class SearchCmdlet {
             if (intro == null) intro = "";
 
             Map rd = new HashMap();
-            Map data = new HashMap();
-            Map prop = new HashMap();
-            rd.put("data", data);
 
-            rd.put("id",  row.get("uid"));
+            rd.put("id", row.get("uid"));
             rd.put("wd", uname + " " + cname + " " + ename + " "+ intro);
+            rd.put("name", uname + ("".equals(ename)?"":" ("+ename+")"));
+            rd.put("note", intro);
+            
+            Map data = new HashMap();
+            rd.put("data", data );
             data.put("uname", uname);
             data.put("cname", cname);
             data.put("ename", ename);
-            data.put("intro", intro);
 
             String x;
             x = (String) row.get("identity");
-            if (x != null) prop.put("identity", x);
+            if (x != null) rd.put("identity", x);
             x = (String) row.get("province");
-            if (x != null) prop.put("province", x);
+            if (x != null) rd.put("province", x);
             x = (String) row.get("trade_id");
-            if (x != null) prop.put("trade_id", x);
+            if (x != null) rd.put("trade_id", new String[] {x});
 
             writer.update(rd);
             writer.commit(  );

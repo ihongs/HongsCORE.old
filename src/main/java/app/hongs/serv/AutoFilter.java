@@ -1,4 +1,4 @@
-package app.hongs.action.serv;
+package app.hongs.serv;
 
 import app.hongs.Core;
 import app.hongs.action.ActionRunner;
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * 在页面和动作等建成后可以移除.
  * @author Hongs
  */
-public class AutoRigger implements Filter {
+public class AutoFilter implements Filter {
 
     public static final String MODULE = "app.hongs.serv.common.module";
     public static final String ENTITY = "app.hongs.serv.common.entity";

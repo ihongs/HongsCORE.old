@@ -1,7 +1,7 @@
 package app.hongs.tags;
 
 import app.hongs.HongsException;
-import app.hongs.serv.AuthConfig;
+import app.hongs.serv.trash.AuthConfig;
 import java.io.IOException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;

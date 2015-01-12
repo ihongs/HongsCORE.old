@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <form name="__MENU__">
-        <unit disp="用户管理" name="hcum" href="hcum/user/main.html"/>
-    </form>
+    <unit name="__MENU__">
+        <role disp="用户管理" name="hcum" href="hcum/user/main.html"/>
+    </unit>
 </root>

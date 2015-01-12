@@ -4,8 +4,8 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import static app.hongs.action.serv.AutoRigger.ENTITY;
-import static app.hongs.action.serv.AutoRigger.MODULE;
+import static app.hongs.serv.AutoFilter.ENTITY;
+import static app.hongs.serv.AutoFilter.MODULE;
 import app.hongs.action.VerifyHelper;
 import app.hongs.action.VerifyHelper.Wrongs;
 import java.lang.annotation.Annotation;
@@ -55,7 +55,7 @@ public class VerifyInvoker implements ActionInvoker {
         } catch (Wrongs ex) {
             Map ers;
             if ("1".equals(jd)) {
-                ers = ex.getErtree();
+                ers = ex.getErrmap();
             } else {
                 ers = ex.getErrors();
             }

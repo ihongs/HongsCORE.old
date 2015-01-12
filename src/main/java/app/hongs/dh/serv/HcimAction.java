@@ -4,12 +4,12 @@
  * and open the template in the editor.
  */
 
-package app.hongs.dl.lucene;
+package app.hongs.dh.serv;
 
 /**
  *
  * @author Hongs
  */
-public class LuceneAction {
+public class HcimAction {
     
 }

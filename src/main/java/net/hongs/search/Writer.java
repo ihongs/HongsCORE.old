@@ -1,9 +1,9 @@
-package net.hongs.search.record;
+package net.hongs.search;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
-import app.hongs.action.StructConfig;
+import app.hongs.action.SourceConfig;
 import app.hongs.action.VerifyHelper;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
@@ -87,16 +87,17 @@ public class Writer {
         if (verify == null ) {
             verify =  new VerifyHelper();
             verify.addRulesByForm("search", "_search");
-            vitems = (Map) StructConfig.getInstance("search").getForm("_search").get("items");
+            vitems = SourceConfig.getInstance("search").getItems("_search");
         }
 
-        rd = verify.verify(rd, true);app.hongs.util.Data.dumps(rd);
+        rd = verify.verify(rd , true);
+        //app.hongs.util.Data.dumps(rd);
         for(Object o : rd.entrySet()) {
             Map.Entry e = (Map.Entry)o;
             String k = e.getKey().toString();
             Object v = e.getValue();
 
-            String g = Dict.getP2Cls(vitems, String.class, k, "field_genre");
+            String g = Dict.getP4Cls(vitems, String.class, k, "field_genre");
             Field.Store s  =  Dict.getP4Def(vitems, true , k, "field_store")
                 ? Field.Store.YES : Field.Store.NO;
 
@@ -106,9 +107,7 @@ public class Writer {
             for ( Object x : ( Collection ) v) {
                 docadd(doc, s, g, k, x);
             }
-        }
-
-        System.out.println(doc);
+        }System.out.println(doc);
 
         try {
             writer.updateDocument (new Term("id", id), doc);
@@ -129,26 +128,26 @@ public class Writer {
         } else
         if (v instanceof String) {
             if ("stored".equals(g)) {
-                doc.add(new StoredField(k, Dict.conv2Cls(v, String.class)));
+                doc.add(new StoredField(k, Dict.deem4Cls(v, String.class)));
             } else
             if (  "text".equals(g)) {
-                doc.add(new   TextField(k, Dict.conv2Cls(v, String.class), s));
+                doc.add(new   TextField(k, Dict.deem4Cls(v, String.class), s));
             } else
             {
-                doc.add(new StringField(k, Dict.conv2Cls(v, String.class), s));
+                doc.add(new StringField(k, Dict.deem4Cls(v, String.class), s));
             }
         } else
         if (v instanceof Integer) {
-            doc.add(new IntField(k, Dict.conv2Cls(v, Integer.class), s));
+            doc.add(new IntField(k, Dict.deem4Cls(v, Integer.class), s));
         } else
         if (v instanceof String) {
-            doc.add(new LongField(k, Dict.conv2Cls(v, Long.class), s));
+            doc.add(new LongField(k, Dict.deem4Cls(v, Long.class), s));
         } else
         if (v instanceof Float) {
-            doc.add(new FloatField(k, Dict.conv2Cls(v, Float.class), s));
+            doc.add(new FloatField(k, Dict.deem4Cls(v, Float.class), s));
         } else
         if (v instanceof Double) {
-            doc.add(new DoubleField(k, Dict.conv2Cls(v, Double.class), s));
+            doc.add(new DoubleField(k, Dict.deem4Cls(v, Double.class), s));
         } else
         {
             throw new HongsException(HongsException.COMMON, "Not support type '"+v.getClass().getName()+"'");

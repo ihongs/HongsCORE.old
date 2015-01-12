@@ -1,7 +1,7 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
-import app.hongs.action.StructConfig;
+import app.hongs.action.SourceConfig;
 import app.hongs.util.Dict;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -173,9 +173,9 @@ public class Mview {
 
         //** 从结构配置中追加字段 **/
 
-        Map form  = StructConfig.getInstance(db.name).getForm(table.name);
-        if (form != null)
-        for(Object o : ((Map)form.get("items")).entrySet()) {
+        Map items  = SourceConfig.getInstance(db.name).getItems(table.name);
+        if (items != null)
+        for(Object o : items.entrySet( ) ) {
             Map.Entry e = (Map.Entry) o;
             String n = (String) e.getKey();
             if (n.startsWith("_")) {

@@ -1,4 +1,4 @@
-package app.hongs.serv;
+package app.hongs.serv.trash;
 
 import app.hongs.Core;
 import app.hongs.HongsError;

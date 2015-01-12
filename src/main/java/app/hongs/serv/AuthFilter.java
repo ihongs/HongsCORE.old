@@ -2,9 +2,9 @@ package app.hongs.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
-import app.hongs.HongsError;
-import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.serv.ServWarder;
+import app.hongs.util.Dict;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -18,13 +18,15 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 动作过滤器
  *
  * <h3>初始化参数(init-param):</h3>
  * <pre>
- * auth-conf    动作配置(默认为default)
+ * conf-name    配置名称
+ * sess-name    会话名称(默认为roles)
  * index-uri    首页地址(为空则不跳转)
  * login-uri    登录地址(为空则不跳转)
  * exclude-uris 不包含的URL, 可用","分割多个, 可用"*"为前后缀
@@ -39,7 +41,12 @@ public class AuthFilter
   /**
    * 动作配置
    */
-  private String authConf;
+  private Auth auth;
+
+  /**
+   * 角色会话
+   */
+  private String sessName;
 
   /**
    * 首页路径
@@ -61,16 +68,21 @@ public class AuthFilter
     throws ServletException
   {
     String xp;
-      
+
     /**
      * 获取权限配置名
      */
-    xp = config.getInitParameter("auth-conf");
-    if (xp == null)
+    xp = config.getInitParameter("conf-name");
+    this.auth = xp != null ? Auth.getInstance() : Auth.getInstance(xp);
+
+    /**
+     * 获取首页URL
+     */
+    xp = config.getInitParameter("sess-name");
+    if (xp != null)
     {
-      xp = "default";
+      this.sessName = "roles";
     }
-    this.authConf = xp;
 
     /**
      * 获取首页URL
@@ -117,29 +129,11 @@ public class AuthFilter
       };
       this.excludeUris = u3;
     }
-
-    /**
-     * 从配置中提取首页
-     */
-    AuthConfig conf;
-    try {
-        conf = AuthConfig.getInstance(authConf);
-    }
-    catch (HongsException ex) {
-        throw new ServletException(ex);
-    }
-    catch (HongsError ex) {
-        throw new ServletException(ex);
-    }
-    if (conf.pages.size() == 1) {
-        this.indexPage = conf.pages.keySet().toArray(new String[0])[0];
-    }
   }
 
   @Override
   public void destroy()
   {
-    authConf    = null;
     indexPage   = null;
     loginPage   = null;
     excludeUris = null;
@@ -151,47 +145,38 @@ public class AuthFilter
   {
     DO:do {
 
-    String act = Core.ACTION_NAME.get(  );
+    String act = ServWarder.getCurrPath((HttpServletRequest) req);
 
     /**
      * 依次校验是否是需要排除的URL
      */
     if (excludeUris != null) {
-        for (String url : excludeUris[0]) {
-            if (act.equals(url)) {
-                break DO;
-            }
-        }
         for (String url : excludeUris[1]) {
             if (act.startsWith(url)) {
                 break DO;
             }
         }
         for (String url : excludeUris[2]) {
-            if (act.  endsWith(url)) {
+            if (act.endsWith(url)) {
+                break DO;
+            }
+        }
+        for (String url : excludeUris[0]) {
+            if (act.equals(url)) {
                 break DO;
             }
         }
     }
 
-    AuthConfig conf;
-    try {
-        conf = AuthConfig.getInstance(authConf);
-    }
-    catch (HongsException ex) {
-        throw new ServletException(ex);
-    }
-    catch (HongsError ex) {
-        throw new ServletException(ex);
-    }
-
-    Boolean perm  =  conf.chkAuth(act);
-    if (perm == null ) {
-        sayError(0);
+    ActionHelper hlpr = Core.getInstance(ActionHelper.class);
+    Set sess  = Dict.deem4Cls(hlpr.getSessValue(sessName), Set.class);
+    if (sess == null) {
+        doFailed(0);
         return;
     }
-    if (perm == false) {
-        sayError(1);
+    Boolean perm = auth.checkAuth(act, sess);
+    if (perm != true) {
+        doFailed(1);
         return;
     }
 
@@ -200,7 +185,7 @@ public class AuthFilter
     chain.doFilter(req, rsp);
   }
 
-  private void sayError(int type)
+  private void doFailed(int type)
   {
     ActionHelper helper = Core.getInstance(ActionHelper.class);
     CoreLanguage lang   = Core.getInstance(CoreLanguage.class);
@@ -260,15 +245,15 @@ public class AuthFilter
     if (helper.getRequest().getRequestURI().endsWith(".act")) {
         Map rsp = new HashMap( );
             rsp.put("ok", false);
-            rsp.put("oh", "403");
-            rsp.put("ah",  msg );
-        if (uri != null && uri.length() != 0) {
-            rsp.put("to",  uri );
+            rsp.put("err", "Er403");
+            rsp.put("msg",  msg);
+        if (uri != null  && uri.length() != 0) {
+            rsp.put("goto", uri);
         }
         helper.reply(rsp);
     }
     else {
-        if (uri != null && uri.length() != 0) {
+        if (uri != null  && uri.length() != 0) {
             helper.redirect(uri);
         }
         else {

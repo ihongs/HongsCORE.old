@@ -32,51 +32,52 @@ import org.xml.sax.SAXException;
  *
  * <h3>数据结构:</h3>
  * <pre>
- datas = {
-   "data_name" : Object
- }
- enums = {
-   "enum_name" : {
-     "code" : "Label"
-     ...
-   }
-   ...
- }
- forms = {
-   "form_name" : {
-     _disp: "Label",
-     _href: "URI",
-     units: {
-       "unit_name" : {
-         _disp: "Label",
-         _href: "URI",
-         actions: set[
-           "action"
-           ...
-         ],
-         depends: set[
-           ["conf_name", "form_name", "unit_name"]
-           ...
-         ]
-       }
-     },
-     items: {
-       "item_name" : {
-         _disp : "Label",
-         _type : "form|enum|file|text|textarea|number|slider|switch|date|time|datetime|tel|url|email",
-         _rule : "rule_method",
-         _required : 0|1,
-         _repeated : 0|1,
-         "name" : "Value"
-         ...
-       }
-       ...
-     }
-     ...
-   }
-   ...
- }
- </pre>
+    datas = {
+        "data_name" : Object
+    }
+    enums = {
+        "enum_name" : {
+            "code" : "Label"
+            ...
+        }
+        ...
+    }
+    roles = {
+        "role_name" : {
+            _disp: "Label",
+            _href: "URI",
+            roles: {
+                "role_name" : {
+                    _disp: "Label",
+                    _href: "URI",
+                    actions: set[
+                        "action"
+                        ...
+                    ],
+                    depends: set[
+                        ["conf_name", "auth_name", "role_name"]
+                        ...
+                    ]
+                }
+                ...
+            }
+            items: {
+                "item_name" : {
+                    _disp : "Label",
+                    _type : "role|enum|file|string(text|hidden|textarea)|number(slider|switch)|date|time|datetime|tel|url|email",
+                    _rule : "rule_func",
+                    _required : 0|1,
+                    _repeated : 0|1,
+                    "name" : "Value"
+                    ...
+                }
+                ...
+            }
+            ...
+        }
+        ...
+    }
+ * </pre>
  *
  * <h3>异常代码:</h3>
  * <pre>
@@ -87,7 +88,7 @@ import org.xml.sax.SAXException;
  *
  * @author Hongs
  */
-public class StructConfig
+public class SourceConfig
   extends CoreSerially
 {
 
@@ -106,9 +107,9 @@ public class StructConfig
   /**
    * 表单集合
    */
-  public Map<String, Map> forms;
+  public Map<String, Map> units;
 
-  public StructConfig(String name)
+  public SourceConfig(String name)
     throws HongsException
   {
     this.name = name;
@@ -133,7 +134,7 @@ public class StructConfig
                 + File.separator + name + ".as.xml");
     if (!df.exists())
     {
-      throw new HongsException(0x10e8, "Form config file '"
+      throw new HongsException(0x10e8, "Source config file '"
                 + Core.CONF_PATH
                 + File.separator + name + ".as.xml"
                 + "' is not exists");
@@ -141,7 +142,7 @@ public class StructConfig
 
     this.datas = new HashMap();
     this.enums = new HashMap();
-    this.forms = new HashMap();
+    this.units = new HashMap();
 
     try
     {
@@ -150,7 +151,7 @@ public class StructConfig
       Document doc = dbn.parse(df);
       Element root = doc.getDocumentElement();
 
-      this.parse(root, this.datas, this.enums, this.forms);
+      this.parse(root, this.datas, this.enums, this.units);
     }
     catch ( IOException ex)
     {
@@ -204,14 +205,14 @@ public class StructConfig
         enums.put(namz, optns2);
       }
       else
-      if ("form".equals(tagName2))
+      if ("unit".equals(tagName2))
       {
         String namz = element2.getAttribute("name");
         if (namz == null) namz = "";
         Map forms2 = new LinkedHashMap();
-        Map units2 = new LinkedHashMap();
+        Map roles2 = new LinkedHashMap();
         Map items2 = new LinkedHashMap();
-        this.parse(element2, units2, items2, null );
+        this.parse(element2, roles2, items2, null );
         forms.put(namz, forms2);
 
         namz = element2.getAttribute("disp");
@@ -228,36 +229,36 @@ public class StructConfig
             forms2.put("_href",  "" );
         }
 
-        forms2.put("units", units2);
+        forms2.put("roles", roles2);
         forms2.put("items", items2);
       }
       else
-      if ("unit".equals(tagName2))
+      if ("role".equals(tagName2))
       {
         String namz = element2.getAttribute("name");
         if (namz == null) namz = "";
-        Map units2 = new LinkedHashMap();
+        Map roles2 = new LinkedHashMap();
         Map actns2 = new LinkedHashMap();
         Map depns2 = new LinkedHashMap();
         this.parse(element2, actns2, depns2, null );
-        datas.put(namz, units2);
+        datas.put(namz, roles2);
 
         namz = element2.getAttribute("disp");
         if (namz != null) {
-            units2.put("_disp", namz);
+            roles2.put("_disp", namz);
         } else {
-            units2.put("_disp",  "" );
+            roles2.put("_disp",  "" );
         }
 
         namz = element2.getAttribute("href");
         if (namz != null) {
-            units2.put("_href", namz);
+            roles2.put("_href", namz);
         } else {
-            units2.put("_href",  "" );
+            roles2.put("_href",  "" );
         }
 
-        units2.put("actions", new LinkedHashSet(actns2.keySet()));
-        units2.put("depends", new LinkedHashSet(depns2.keySet()));
+        roles2.put("actions", new LinkedHashSet(actns2.keySet()));
+        roles2.put("depends", new LinkedHashSet(depns2.keySet()));
       }
       else
       if ("item".equals(tagName2))
@@ -326,54 +327,47 @@ public class StructConfig
       else
       if ("depend".equals(tagName2))
       {
-        String data = element2.getTextContent();
-        String[ ] a = data.split("::");
-        String conf, form, unit;
-        if (a.length == 1) {
-            String namz = ((Element)element2.getParentNode()).getAttribute("name");
-            unit = a[0];
-            form = namz;
-            conf = name;
+        String[] data = new String[3];
+        data[1] = element2.getAttribute("unit");
+        data[0] = element2.getAttribute("conf");
+        data[2] = element2.getTextContent();
+        if (data[0] == null) {
+            data[0] = name;
         }
-        else
-        if (a.length == 2) {
-            unit = a[1];
-            form = a[0];
-            conf = name;
+        if (data[1] == null) {
+            data[1] = ((Element)element2.getParentNode()).getAttribute("name");
         }
-        else {
-            unit = a[2];
-            form = a[1];
-            conf = a[0];
-        }
-        a = new String[] {conf, form, unit};
-        datas.put( a  , null);
+        datas.put(data, null);
       }
     }
   }
 
   public Object getData(String name) {
-    return Dict.getPoint(datas, new String[]{name});
+    return datas.get(name);
   }
 
-  public <T>T getData(String name, T data) {
-    return Dict.getP4Def(datas, data, new String[]{name});
+  public < T >T getData(String name, T def) {
+    return Dict.deem4Def(getData(name), def);
   }
 
-  public Object getTree(String path) {
-    return Dict.getValue(datas, path);
-  }
-
-  public <T>T getTree(String path, T data) {
-    return Dict.getV4Def(datas, data, path);
+  public < T >T getData(String name, Class<T> cls) {
+    return Dict.deem4Cls(getData(name), cls);
   }
 
   public Map getEnum(String name) {
     return enums.get(name);
   }
 
-  public Map getForm(String name) {
-    return forms.get(name);
+  public Map getUnit(String name) {
+    return units.get(name);
+  }
+
+  public Map getItems(String name) {
+    return Dict.getP4Cls(getUnit(name), Map.class, "items");
+  }
+
+  public Map getRoles(String name) {
+    return Dict.getP4Cls(getUnit(name), Map.class, "roles");
   }
 
   public CoreLanguage getCurrTranslator() {
@@ -405,58 +399,12 @@ public class StructConfig
     return data;
   }
 
-  public Map getItemsTranslated(String namc)
-    throws HongsException
-  {
-    CoreLanguage lang = getCurrTranslator();
-    Map itemz =  new LinkedHashMap();
-    Map form = (Map) forms.get(namc);
-    if (form == null) return itemz;
-    for (Object o :((Map ) form.get("items")).entrySet()) {
-      Map.Entry e = (Map.Entry) o ;
-      Map       m = (Map ) e.getValue();
-      String    k = (String) e.getKey();
-      String    n = (String) m.get("_disp");
-      if (n == null ||  "".equals(n)) {
-          n = "core.item."+name+"."+namc+"."+k;
-      }
-      Map       u = new LinkedHashMap();
-      u.putAll( m );
-      u.put("_disp", lang.translate(n));
-      itemz.put(k, u);
-    }
-    return itemz;
-  }
-
-  public Map getUnitsTranslated(String namc)
-    throws HongsException
-  {
-    CoreLanguage lang = getCurrTranslator();
-    Map form = (Map) forms.get(namc);
-    Map unitz =  new LinkedHashMap();
-    if (form == null) return unitz;
-    for (Object o :((Map ) form.get("units")).entrySet()) {
-      Map.Entry e = (Map.Entry) o ;
-      Map       m = (Map ) e.getValue();
-      String    k = (String) e.getKey();
-      String    n = (String) m.get("_disp");
-      if (n == null ||  "".equals(n)) {
-          n = "core.unit."+name+"."+namc+"."+k;
-      }
-      Map       u = new LinkedHashMap();
-      u.putAll( m );
-      u.put("_disp", lang.translate(n));
-      unitz.put(k, u);
-    }
-    return unitz;
-  }
-
-  public Map getFormsTranslated()
+  public Map getUnitsTranslated()
     throws HongsException
   {
     CoreLanguage lang = getCurrTranslator();
     Map formz =  new LinkedHashMap();
-    for (Object o : forms.entrySet()) {
+    for (Object o : units.entrySet()) {
       Map.Entry e = (Map.Entry) o ;
       Map       m = (Map ) e.getValue();
       String    k = (String) e.getKey();
@@ -472,23 +420,69 @@ public class StructConfig
     return formz;
   }
 
+  public Map getItemsTranslated(String namc)
+    throws HongsException
+  {
+    Map itemz = new LinkedHashMap();
+    Map items = getItems(namc);
+    if (items == null) return itemz;
+    CoreLanguage lang = getCurrTranslator();
+    for(Object o : items.entrySet()) {
+      Map.Entry e = (Map.Entry) o;
+      Map       m = (Map ) e.getValue();
+      String    k = (String) e.getKey();
+      String    n = (String) m.get("_disp");
+      if (n == null || "".equals(n)) {
+          n = "core.item."+name+"."+namc+"."+k;
+      }
+      Map       u = new LinkedHashMap();
+      u.putAll( m );
+      u.put("_disp", lang.translate(n));
+      itemz.put(k, u);
+    }
+    return itemz;
+  }
+
+  public Map getRolesTranslated(String namc)
+    throws HongsException
+  {
+    Map rolez = new LinkedHashMap();
+    Map roles = getRoles(namc);
+    if (roles == null) return rolez;
+    CoreLanguage lang = getCurrTranslator();
+    for(Object o : roles.entrySet()) {
+      Map.Entry e = (Map.Entry) o;
+      Map       m = (Map ) e.getValue();
+      String    k = (String) e.getKey();
+      String    n = (String) m.get("_disp");
+      if (n == null || "".equals(n)) {
+          n = "core.role."+name+"."+namc+"."+k;
+      }
+      Map       u = new LinkedHashMap();
+      u.putAll( m );
+      u.put("_disp", lang.translate(n));
+      rolez.put(k, u);
+    }
+    return rolez;
+  }
+
   //** 工厂方法 **/
 
-  public static StructConfig getInstance(String name) throws HongsException {
-      String key = StructConfig.class.getName() + ":" + name;
+  public static SourceConfig getInstance(String name) throws HongsException {
+      String key = SourceConfig.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      StructConfig inst;
+      SourceConfig inst;
       if (core.containsKey(key)) {
-          inst = (StructConfig)core.get(key);
+          inst = (SourceConfig)core.get(key);
       }
       else {
-          inst = new StructConfig(name);
+          inst = new SourceConfig(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static StructConfig getInstance() throws HongsException {
+  public static SourceConfig getInstance() throws HongsException {
       return getInstance("default");
   }
 }

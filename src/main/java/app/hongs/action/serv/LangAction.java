@@ -55,7 +55,7 @@ public class LangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core core = ActsWarder.getCurrCore(req);
+    Core core = ServWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = helper.getRequest().getPathInfo();

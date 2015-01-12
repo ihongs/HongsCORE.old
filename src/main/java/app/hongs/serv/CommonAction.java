@@ -3,7 +3,7 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.StructConfig;
+import app.hongs.action.SourceConfig;
 import app.hongs.action.anno.Action;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,10 +22,10 @@ public class CommonAction {
         String m = helper.getParameter("m");
         if (null == m || "".equals(m)) m = "default";
 
-        StructConfig conf = StructConfig.getInstance(m );
-        Map menu  =  conf.getForm("__MENU__") != null
-                  ?  conf.getUnitsTranslated("__MENU__")
-                  :  conf.getFormsTranslated();
+        SourceConfig conf = SourceConfig.getInstance(m );
+        Map menu  =  conf.getUnit("__MENU__") != null
+                  ?  conf.getRolesTranslated("__MENU__")
+                  :  conf.getUnitsTranslated();
 
         List list = new ArrayList();
         for (Object o : menu.entrySet()) {
@@ -50,10 +50,10 @@ public class CommonAction {
         String n = helper.getParameter("n");
         if (null == n || "".equals(n)) n = "deafult";
 
-        StructConfig conf = StructConfig.getInstance(m );
-        Map menu  =  conf.getForm("__MENU__") != null
-                  ?  conf.getUnitsTranslated("__MENU__")
-                  :  conf.getFormsTranslated();
+        SourceConfig conf = SourceConfig.getInstance(m );
+        Map menu  =  conf.getUnit("__MENU__") != null
+                  ?  conf.getRolesTranslated("__MENU__")
+                  :  conf.getUnitsTranslated();
 
         if (!menu.isEmpty()) {
             if (menu.containsKey(n)) {

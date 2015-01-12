@@ -133,7 +133,7 @@ public class Dict
    */
   public static void setValue(Map map, Object val, String path)
   {
-    Dict.setPoint(map, val, convPath(path));
+    Dict.setPoint(map, val, slitPath(path));
   }
 
   /**
@@ -233,7 +233,7 @@ public class Dict
    */
   public static Object getValue(Map map, String path)
   {
-    return Dict.getPoint(map, convPath(path));
+    return Dict.getPoint(map, slitPath(path));
   }
 
   /**
@@ -243,10 +243,10 @@ public class Dict
    * @param keys
    * @return 键对应的值
    */
-  public static <T> T getP2Cls(Map map, Class<T> cls, Object... keys)
+  public static <T> T getP4Cls(Map map, Class<T> cls, Object... keys)
   {
     try {
-      return conv2Cls(Dict.getPoint(map, keys), cls);
+      return deem4Cls(Dict.getPoint(map, keys), cls);
     } catch (HongsError er) {
       if (er.getCode()  ==  0x46) {
         er = new HongsError(0x46, "Wrong type for key '"+keys+"'", er.getCause());
@@ -262,9 +262,9 @@ public class Dict
    * @param path
    * @return 键对应的值
    */
-  public static <T> T getV2Cls(Map map, Class<T> cls, String path)
+  public static <T> T getV4Cls(Map map, Class<T> cls, String path)
   {
-    return Dict.getP2Cls(map, cls, convPath(path));
+    return Dict.getP4Cls(map, cls, slitPath(path));
   }
 
   /**
@@ -277,7 +277,7 @@ public class Dict
   public static <T> T getP4Def(Map map, T def, Object... keys)
   {
     try {
-      return conv4Def(Dict.getPoint(map, keys), def);
+      return deem4Def(Dict.getPoint(map, keys), def);
     } catch (HongsError er) {
       if (er.getCode()  ==  0x46) {
         er = new HongsError(0x46, "Wrong type for key '"+keys+"'", er.getCause());
@@ -295,89 +295,91 @@ public class Dict
    */
   public static <T> T getV4Def(Map map, T def, String path)
   {
-    return Dict.getP4Def(map, def, convPath(path));
+    return Dict.getP4Def(map, def, slitPath(path));
   }
 
-  public static <T> T conv2Cls(Object val, Class<T> cls) {
-    if (val == null) {
-        return null;
-    }
+  public static <T> T deem4Cls(Object val, Class<T> cls) {
+      if (val == null) {
+          return null;
+      }
 
-    if (cls.isAssignableFrom(String.class)) {
-      val = val.toString();
-    } else
-    if (cls.isAssignableFrom(List.class)) {
-      if (val instanceof Map) {
-        val = ((Map) val).values();
+      if (String.class.isAssignableFrom(cls)) {
+          val = val.toString();
+      } else if (List.class.isAssignableFrom(cls)) {
+          if (val instanceof List) {
+          } else if (val instanceof Set) {
+              val = new ArrayList(((Set) val));
+          } else if (val instanceof Map) {
+              val = ((Map) val).values();
+          } else {
+              List lst = new ArrayList();
+              lst.add(val);
+              val = lst;
+          }
+      } else if (Set.class.isAssignableFrom(cls)) {
+          if (val instanceof Set) {
+          } else if (val instanceof List) {
+              val = new LinkedHashSet((List) val);
+          } else if (val instanceof Map ) {
+              val = new LinkedHashSet(((Map) val).values());
+          } else {
+              Set set = new LinkedHashSet();
+              set.add(val);
+              val = set;
+          }
+      } else if (Boolean.class.isAssignableFrom(cls)) {
+          if (val instanceof Number) {
+              val = 0 != ((Number) val).shortValue();
+          } else if (val instanceof String) {
+              val = Boolean.parseBoolean((String) val) || ((String) val).trim().equals("^(|0|no|not)$");
+          }
+      } else if (Integer.class.isAssignableFrom(cls)) {
+          if (val instanceof Number) {
+              val = ((Number) val).intValue();
+          } else if (val instanceof String) {
+              val = Integer.parseInt((String) val);
+          }
+      } else if (Byte.class.isAssignableFrom(cls)) {
+          if (val instanceof Number) {
+              val = ((Number) val).byteValue();
+          } else if (val instanceof String) {
+              val = Byte.parseByte((String) val);
+          }
+      } else if (Short.class.isAssignableFrom(cls)) {
+          if (val instanceof Number) {
+              val = ((Number) val).shortValue();
+          } else if (val instanceof String) {
+              val = Short.parseShort((String) val);
+          }
+      } else if (Long.class.isAssignableFrom(cls)) {
+          if (val instanceof Number) {
+              val = ((Number) val).longValue();
+          } else if (val instanceof String) {
+              val = Long.parseLong((String) val);
+          }
+      } else if (Float.class.isAssignableFrom(cls)) {
+          if (val instanceof Number) {
+              val = ((Number) val).floatValue();
+          } else if (val instanceof String) {
+              val = Float.parseFloat((String) val);
+          }
+      } else if (Number.class.isAssignableFrom(cls)) {
+          if (val instanceof Number) {
+              val = ((Number) val).doubleValue();
+          } else if (val instanceof String) {
+              val = Double.parseDouble((String) val);
+          }
       }
-    } else
-    if (cls.isAssignableFrom(Set.class)) {
-      if (val instanceof List) {
-        val = new LinkedHashSet((List) val);
-      } else
-      if (val instanceof Map) {
-        val = new LinkedHashSet(((Map) val).values());
-      }
-    } else
-    if (val instanceof Number) {
-      if (cls.isAssignableFrom(Integer.class)) {
-        val = ((Number) val).intValue();
-      } else
-      if (cls.isAssignableFrom(Byte.class)) {
-        val = ((Number) val).byteValue();
-      } else
-      if (cls.isAssignableFrom(Short.class)) {
-        val = ((Number) val).shortValue();
-      } else
-      if (cls.isAssignableFrom(Long.class)) {
-        val = ((Number) val).longValue();
-      } else
-      if (cls.isAssignableFrom(Float.class)) {
-        val = ((Number) val).floatValue();
-      } else
-      if (cls.isAssignableFrom(Number.class)) {
-        val = ((Number) val).doubleValue();
-      } else
-      if (cls.isAssignableFrom(Boolean.class)) {
-        val = 0 != ((Number) val).shortValue();
-      }
-    } else
-    if (val instanceof String) {
-      if (cls.isAssignableFrom(Integer.class)) {
-        val = Integer.parseInt((String) val);
-      } else
-      if (cls.isAssignableFrom(Byte.class)) {
-        val = Byte.parseByte((String) val);
-      } else
-      if (cls.isAssignableFrom(Short.class)) {
-        val = Short.parseShort((String) val);
-      } else
-      if (cls.isAssignableFrom(Long.class)) {
-        val = Long.parseLong((String) val);
-      } else
-      if (cls.isAssignableFrom(Float.class)) {
-        val = Float.parseFloat((String) val);
-      } else
-      if (cls.isAssignableFrom(Number.class)) {
-        val = Double.parseDouble((String) val);
-      } else
-      if (cls.isAssignableFrom(Boolean.class)) {
-        val = Boolean.parseBoolean((String) val)
-         || (!"0".equals(((String) val).trim( ))
-         && !"no".equalsIgnoreCase(((String)val).trim())
-         &&!"not".equalsIgnoreCase(((String)val).trim()));
-      }
-    }
 
-    try {
-      return (T) val;
-    } catch (ClassCastException  ex) {
-      throw new HongsError(0x46, ex);
-    }
+      try {
+          return (T) val;
+      } catch (ClassCastException ex) {
+          throw new HongsError(0x46, ex);
+      }
   }
 
-  public static <T> T conv4Def(Object val, T def) {
-      T vai = (T) conv2Cls(val, def.getClass());
+  public static <T> T deem4Def(Object val, T def) {
+      T vai = (T) deem4Cls(val, def.getClass());
       if (vai != null) {
           return vai;
       } else {
@@ -385,55 +387,67 @@ public class Dict
       }
   }
 
-  public static Object[] convPath(String path) {
+  public static Object[] slitPath(String path) {
     path = path.replaceAll("\\]\\[", ".")
                .replace("[", ".")
                .replace("]", "" )
                .replaceFirst("\\.+$", ""); // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
-    Object[] keys = path.split("\\.", -1);
-    return keys;
+    return path.split("\\.", -1 );
   }
 
-  public static Object convNode(Object data) {
-    if (data instanceof Map ) {
-      Map data2 = new LinkedHashMap();
-      for (Object o : ((Map) data).entrySet()) {
-          Map.Entry e = (Map.Entry) o;
-          String k = e.getKey(  ).toString(  );
-          Object v = e.getValue();
-          data2.put(k, convNode(v));
-      }
-      data = data2;
-    } else
-    if (data instanceof Set ) {
-      Set data2 = new LinkedHashSet();
-      for (Object v : ((Set) data)) {
-          data2.add(convNode(v));
-      }
-    } else
-    if (data instanceof List) {
-      List data2 = new ArrayList( );
-      for (Object v : ((List)data)) {
-          data2.add(convNode(v));
-      }
-    } else
-    if (data instanceof Object[]) {
-      List data2 = new ArrayList( );
-      for (Object v : ((Object[]) data)) {
-          data2.add(convNode(v));
-      }
-      data = data2.toArray();
-    } else {
-      if (data == null) {
-        data = "";
-      } else
-      if (data instanceof Boolean) {
-        data = (Boolean) data ? "1" : "";
-      } else {
-        data = data.toString();
-      }
+    public static Object convEach(Object data, Conv conv) {
+        if (data instanceof Map ) {
+            Map dat = new LinkedHashMap();
+            for (Object o : ((Map) data).entrySet()) {
+                Map.Entry e = (Map.Entry) o;
+                String k = e.getKey(  ).toString();
+                Object v = e.getValue();
+                v = convEach(v, conv);
+                if ( v != Each.pass ) {
+                    dat.put (k, v);
+                }
+            }
+            data =  dat;
+        } else
+        if (data instanceof Set ) {
+            Set dat = new LinkedHashSet();
+            for (Object v : ((Set ) data)) {
+                v = convEach(v, conv);
+                if ( v != Each.pass ) {
+                    dat.add (v);
+                }
+            }
+            data =  dat;
+        } else
+        if (data instanceof List) {
+            List dat = new ArrayList(   );
+            for (Object v : ((List) data)) {
+                v = convEach(v, conv);
+                if ( v != Each.pass ) {
+                    dat.add (v);
+                }
+            }
+            data =  dat;
+        } else
+        if (data instanceof Object[]) {
+            List dat = new ArrayList( );
+            for (Object v : ((Object[]) data)) {
+                v = convEach(v, conv);
+                if ( v != Each.pass ) {
+                    dat.add (v);
+                }
+            }
+            data =  dat.toArray( );
+        } else {
+            data = conv.each(data);
+        }
+        return data;
     }
-    return data;
-  }
+
+    public static interface Conv {
+        public Object each(Object val);
+    }
+
+    public static enum Each { pass };
 
 }
