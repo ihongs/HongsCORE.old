@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--DOCTYPE ac SYSTEM "db.dtd"-->
+<!--
+    Document   : db.default.xml
+    Created on : March 11, 2010, 10:56 AM
+    Author     : Hongs
+    Description:
+        fields,where,groupBy,orderBy等中,
+        用"."表示当前表, 用":"表示上级表.
+        注意: 仅当有设置join时可使用":".
+-->
+
+<db xmlns="http://hongs-core"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://hongs-core db.xsd">
+  <source drv="com.mysql.jdbc.Driver"
+          url="jdbc:mysql://211.151.58.236:3306/qrjh_zhb?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull"
+          user="qrjh"
+          password="qrjh1000plan"
+          maxPoolSize="5"/>
+</db>
