@@ -136,10 +136,10 @@ public class Synt {
             Object v = e.getValue();
             conv.setKey(k);
             v = conv.each(v);
-            if (v == EACH.NEXT) {
+            if (v == LOOP.NEXT) {
                 continue;
             }
-            if (v == EACH.LAST) {
+            if (v == LOOP.LAST) {
                 break;
             }
             dat.put(k, v);
@@ -160,10 +160,10 @@ public class Synt {
         Set dat = new LinkedHashSet();
         for (Object v : data) {
             v = conv.each(v);
-            if (v == EACH.NEXT) {
+            if (v == LOOP.NEXT) {
                 continue;
             }
-            if (v == EACH.LAST) {
+            if (v == LOOP.LAST) {
                 break;
             }
             dat.add(v);
@@ -185,10 +185,10 @@ public class Synt {
             Object v = data.get(i);
             conv.setIdx(i);
             v = conv.each(v);
-            if (v == EACH.NEXT) {
+            if (v == LOOP.NEXT) {
                 continue;
             }
-            if (v == EACH.LAST) {
+            if (v == LOOP.LAST) {
                 break;
             }
             dat.add(v);
@@ -210,10 +210,10 @@ public class Synt {
             Object v = data[i];
             conv.setIdx(i);
             v = conv.each(v);
-            if (v == EACH.LAST) {
+            if (v == LOOP.LAST) {
                 break;
             }
-            if (v == EACH.NEXT) {
+            if (v == LOOP.NEXT) {
                 continue;
             }
             dat.add(v);
@@ -226,7 +226,7 @@ public class Synt {
      * 返回 EACH.NEXT 则排除此项
      * 返回 EACH.LAST 则跳出循环
      */
-    public static enum EACH { NEXT, LAST };
+    public static enum LOOP { NEXT, LAST };
 
     public static interface Each {
         public Object each(Object v);
@@ -264,16 +264,16 @@ public class Synt {
 
         public Object each(Object v) {
             if (v instanceof Map ) {
-                return Synt.foreach((Map ) v, this);
+                return foreach((Map ) v, this);
             } else
             if (v instanceof Set ) {
-                return Synt.foreach((Set ) v, this);
+                return foreach((Set ) v, this);
             } else
             if (v instanceof List) {
-                return Synt.foreach((List) v, this);
+                return foreach((List) v, this);
             } else
             if (v instanceof Object[]) {
-                return Synt.foreach((Object[]) v, this);
+                return foreach((Object[]) v, this);
             } else {
                 return leaf(v);
             }
