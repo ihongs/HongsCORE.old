@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<root xmlns="http://hongs-core"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://hongs-core ac.xsd">
-    <form name="__MENU__">
-        <unit disp="订单管理" name="order" href="yummy/admin/order/list.html"/>
-        <unit disp="商品管理" name="product" href="yummy/admin/product/list.html"/>
-    </form>
-</root>
