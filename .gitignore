@@ -2,3 +2,12 @@
 /nbproject/
 /nb-configuration.xml
 /build.xml
+/hongs-core/target/classes
+/hongs-core/target/test-classes
+/hongs-core/target/maven-archiver
+/hongs-serv/target/classes
+/hongs-serv/target/test-classes
+/hongs-serv/target/maven-archiver
+/hongs-web/target/classes
+/hongs-web/target/test-classes
+/hongs-web/target/Hongs-CORE-0.3.6
