@@ -97,7 +97,7 @@ public class CoreLanguage
   @Override
   public void load(String name)
   {
-    super.load/** **/(name + "." + this.lang);
+    super.load/** **/(name + "_" + this.lang);
     if (that != null)
     {
         that.loadIgnrFNF(name);
@@ -111,7 +111,7 @@ public class CoreLanguage
   @Override
   public void loadIgnrFNF(String name)
   {
-    super.loadIgnrFNF(name + "." + this.lang);
+    super.loadIgnrFNF(name + "_" + this.lang);
     if (that != null)
     {
         that.loadIgnrFNF(name);
