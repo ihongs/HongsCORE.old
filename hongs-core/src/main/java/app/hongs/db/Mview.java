@@ -3,6 +3,7 @@ package app.hongs.db;
 import app.hongs.HongsException;
 import app.hongs.action.Formset;
 import app.hongs.util.Dict;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -173,7 +174,8 @@ public class Mview {
 
         //** 从结构配置中追加字段 **/
 
-        Map items  = Formset.getInstance(db.name).getFormTranslated(table.name);
+        Formset form = Formset.getInstance(   db.name);
+        Map items = form.getFormTranslated(table.name);
         if (items != null)
         for(Object o : items.entrySet( ) ) {
             Map.Entry e = (Map.Entry) o;
@@ -186,25 +188,36 @@ public class Mview {
             Map m = (Map ) e.getValue();
             field = new HashMap();
 
-            t = (String) m.get("_type");
+            t = (String) m.get("html-type");
             if (t != null && !"".equals(t)) {
                 field.put("type",  t  );
+            } else {
+                t = (String) m.get("__type__");
+                if ("number".equals(t)) {
+                    field.put("type", "number");
+                } else
+                if ("file".equals(t)) {
+                    field.put("type", "file");
+                } else
+                if ("enum".equals(t)) {
+                    field.put("type", "select");
+                } else
+                if ("form".equals(t)) {
+                    continue; // 表单类型暂不处理
+                } else {
+                    field.put("type", "text");
+                }
             }
 
-            t = (String) m.get("_disp");
+            t = (String) m.get("__disp__");
             if (t != null && !"".equals(t)) {
                 field.put("disp",  t  );
-            }
-
-            // 表单类型暂不处理
-            if ("form".equals(t)) {
-                continue;
             }
 
             for (Object o2 : m.entrySet( )) {
                 Map.Entry  e2 = (Map.Entry) o2;
                 String     k2 = (String) e2.getKey();
-                if (k2.startsWith("fore.")) {
+                if (k2.startsWith("fore-")) {
                     field.put(k2.substring(5), e2.getValue().toString());
                 }
             }

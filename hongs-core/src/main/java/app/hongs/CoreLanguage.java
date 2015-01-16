@@ -52,9 +52,9 @@ public class CoreLanguage
       this.load(name);
     }
 
-    // 加载默认语言, 当当前语音没设置时可以使用默认语言来翻译
+    // 加载默认语言, 当前语音没设置时可以使用默认语言来翻译
     String defn = getAcceptLanguage(CoreConfig.getInstance()
-                 .getProperty("core.language.default","zh"));System.err.println(lang+" "+defn);
+                 .getProperty("core.language.default","zh"));
     if ( ! lang.equals(defn))
     {
       that = new CoreLanguage(null, defn);

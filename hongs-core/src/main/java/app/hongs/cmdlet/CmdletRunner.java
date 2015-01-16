@@ -147,8 +147,9 @@ public class CmdletRunner
 
     Core.ENVIR = 0;
     Core.DEBUG = 0;
-    Core.BASE_HREF = "";
     Core.BASE_PATH = System.getProperty("user.dir");
+    Core.WEBS_PATH = Core.BASE_PATH + "/..";
+    Core.BASE_HREF = "";
 
     if (opts.containsKey("debug"))
     {

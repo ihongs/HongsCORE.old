@@ -69,7 +69,7 @@
                             continue;
                         }
                      %>
-                    <%if  ("number".equals(type)) {%>
+                    <%if  ("number".equals(type) || "range".equals(type)) {%>
                     <th data-fn="<%=name%>" class="sortable text-right"><%=disp%></th>
                     <%} else if ("datetime".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_datetime" class="sortable datetime"><%=disp%></th>
@@ -77,7 +77,7 @@
                     <th data-fn="<%=name%>" data-ft="_date" class="sortable date"><%=disp%></th>
                     <%} else if ("time".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_time" class="sortable time"><%=disp%></th>
-                    <%} else if ("enum".equals(type)) {%>
+                    <%} else if ("select".equals(type)) {%>
                     <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
                     <%} else if ("pick".equals(type)) {%>
                     <th data-fn="<%=info.get("data-tn")%>.<%=info.get("data-tk")%>" class="sortable"><%=disp%></th>

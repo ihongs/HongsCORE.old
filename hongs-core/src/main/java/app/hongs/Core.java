@@ -291,11 +291,6 @@ extends HashMap<String, Object>
   public static byte ENVIR;
 
   /**
-   * 应用基础链接
-   */
-  public static String BASE_HREF = null;
-
-  /**
    * 应用基础目录
    */
   public static String BASE_PATH = null;
@@ -319,6 +314,16 @@ extends HashMap<String, Object>
    * 临时文件存放目录
    */
   public static String VARS_PATH;
+
+  /**
+   * 应用顶级目录
+   */
+  public static String WEBS_PATH;
+  
+  /**
+   * 应用基础链接
+   */
+  public static String BASE_HREF = null;
 
   /**
    * 服务器编号

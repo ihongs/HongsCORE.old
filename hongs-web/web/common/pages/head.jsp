@@ -10,8 +10,8 @@
     StringBuilder makeMenu(List<Map> list, String rootName, boolean realHref) {
         StringBuilder menus = new StringBuilder();
         for(Map menu : list) {
-            String href = (String) menu.get("_href");
-            String disp = (String) menu.get("_disp");
+            String href = (String) menu.get("href");
+            String disp = (String) menu.get("disp");
             String name = href.replaceAll("\\.\\w+$", "");
             
             if (name.startsWith(rootName)) {
@@ -43,17 +43,15 @@
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String name  = helper.getParameter("m");
-
-    if (name  == null || name .length() == 0) {
-        name  = "default";
+    String name = helper.getParameter("m");
+    if (name == null || "".equals( name )) {
+        name = "default";
     }
 
     Sitemap main = Sitemap.getInstance();
     Sitemap curr = Sitemap.getInstance(name);
-
-    List<Map> mainMenu = main.getMenu(1, 1);
-    List<Map> currMenu = curr.getMenu(1, 1);
+    List<Map> mainMenu = main.getMenu (1, 1);
+    List<Map> currMenu = curr.getMenu (1, 1);
 %>
 
 <div class="navbar-header">

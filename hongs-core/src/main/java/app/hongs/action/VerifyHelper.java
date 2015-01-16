@@ -84,23 +84,19 @@ public class VerifyHelper {
                 String  code = (String) et.getKey();
                 Map     opts = (Map)  et.getValue();
 
-                byte required = (Byte) opts.remove("_required");
-                if (required > 0) {
-                    Map optz = new HashMap();
-                    optz.put("requreid" , required);
-                    this.addRule(code, "_required");
+                boolean required = Synt.declare(opts.remove("__required__"), false);
+                if (required) {
+                    this.addRule(code, "required");
                 }
 
-                byte repeated = (Byte) opts.remove("_repeated");
-                if (repeated > 0) {
-                    Map optz = new HashMap();
-                    optz.put("repeated" , repeated);
-                    this.addRule(code, "_repeated");
+                boolean repeated = Synt.declare(opts.remove("__repeated__"), false);
+                if (repeated) {
+                    this.addRule(code, "repeated");
                 }
 
-                String  rule = (String) opts.get("_rule");
+                String  rule = (String) opts.get("__rule__");
                 if (null == rule || "".equals(rule)) {
-                        rule = (String) opts.get("_type");
+                        rule = (String) opts.get("__type__");
                 if (null == rule || "".equals(rule)) {
                     continue;
                 }
@@ -139,8 +135,8 @@ public class VerifyHelper {
             String name = et.getKey();
             Object data = Dict.getParam(values, name);
 
-            Map<String, String> rq = rulez.get("_required");
-            Map<String, String> rp = rulez.get("_repeated");
+            Map<String, String> rq = rulez.get("required");
+            Map<String, String> rp = rulez.get("repeated");
 
             if (rq == null || update) {
                 if (  null == data  ) {
@@ -236,9 +232,9 @@ public class VerifyHelper {
 
     protected Object verify(String name, Object value, Map values, Map<String, Map> rules2, boolean update) throws Wrong, HongsException {
         for(Map.Entry<String, Map> rule2 : rules2.entrySet()) {
-            String rule = rule2.getKey(  );
-            if ("_required".equals( rule )
-            ||  "_repeated".equals( rule )) {
+            String rule = rule2.getKey( );
+            if ("__required__".equals(rule)
+            ||  "__repeated__".equals(rule)) {
                 continue;
             }
             Map  params = rule2.getValue();
@@ -456,18 +452,6 @@ public class VerifyHelper {
     }
 
     public static Object isDatetime(Object value, Map values, Map params) {
-        return value;
-    }
-
-    public static Object isTel(Object value, Map values, Map params) {
-        return value;
-    }
-
-    public static Object isUrl(Object value, Map values, Map params) {
-        return value;
-    }
-
-    public static Object isEmail(Object value, Map values, Map params) {
         return value;
     }
 

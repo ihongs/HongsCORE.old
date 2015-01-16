@@ -44,7 +44,7 @@
     <!-- ServWarder -->
     <filter>
         <filter-name>ServWarder</filter-name>
-        <filter-class>app.hongs.action.serv.ServServWarder</filter-class>
+        <filter-class>app.hongs.action.serv.ServWarder</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>ServWarder</filter-name>

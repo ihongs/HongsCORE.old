@@ -461,10 +461,10 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             String k = (String) e.getKey();
             Map    m = (Map ) e.getValue();
 
-            int    r = Synt.declare(m.get("repeated"),  0);
-            String t = Synt.declare(m.get("_type"),  "");
-            String g = Synt.declare(m.get("field_class"),  "" );
-           boolean s = Synt.declare(m.get("field_store"), true);
+            int    r = Synt.declare(m.get("repeated"), 0);
+            String t = Synt.declare(m.get("__type__"),"");
+            String g = Synt.declare(m.get("lucene-field"),  "" );
+           boolean s = Synt.declare(m.get("lucene-store"), true);
             if (!s) {
                 continue;
             }
@@ -612,8 +612,8 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             }
 
             SortField.Type st;
-            if ("number".equals(fm.get("_type"))) {
-                Object   nt  =  fm.get( "type");
+            if ("number".equals(fm.get("__type__"))) {
+                Object   nt  =  fm.get(  "type"  );
                 if ("int".equals(nt)) {
                     st = SortField.Type.INT;
                 } else
@@ -651,13 +651,13 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             }
 
             // 存储类型
-            String g = Synt.declare(m.get("field_class"), "");
+            String g = Synt.declare(m.get("lucene-field"), "");
             if ("stored".equals(g)) {
                 continue;
             }
 
             // 字段类型
-            String t = Synt.declare(m.get("_type"), "");
+            String t = Synt.declare(m.get("__type__"), "");
             if ("number".equals(t)) {
                 // 数字类型
                 String l = Synt.declare(m.get("type"), "");

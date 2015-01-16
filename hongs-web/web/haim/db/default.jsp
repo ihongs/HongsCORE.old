@@ -1,32 +1,18 @@
+<%@page import="app.hongs.action.serv.ServWarder"%>
+<%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.HongsException"%>
-<%@page import="app.hongs.action.ActionCasual"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.StructConfig"%>
+<%@page import="app.hongs.action.Sitemap"%>
 <%@page contentType="text/html;charset=utf-8"%>
 <%!
     String getTitle(String name) throws HongsException {
-        StructConfig conf = StructConfig.getInstance(name);
-        Map unis = conf.getForm( "__MENU__" ) != null
-                 ? conf.getUnitsTranslated("__MENU__")
-                 : conf.getFormsTranslated();
-        String hrel, href = "", titl = "";
-        for (Object o : unis.entrySet()) {
-            Map.Entry e = (Map.Entry) o ;
-            Map unit = (Map)e.getValue();
-                hrel = unit.get("_href").toString();
-            if (Core.ACTION_NAME.get().startsWith(hrel)
-            &&  href.length( )  <  hrel.length( ) ) {
-                titl = unit.get("_disp").toString();
-                href = hrel;
-            }
-        }
-        return titl;
+        return "";
     }
 %>
 <%
-    String _module = (String)request.getAttribute(ActionCasual.MODULE);
+    String _module = (String) request.getAttribute(ServWarder.MODULE);
     String  title  = getTitle( _module );
     if ( "".equals(title)) {
             title  = getTitle("default");

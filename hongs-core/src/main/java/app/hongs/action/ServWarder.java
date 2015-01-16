@@ -1,4 +1,4 @@
-package app.hongs.action.serv;
+package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
@@ -6,8 +6,6 @@ import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.action.ActionHelper;
-import app.hongs.action.ActionRunner;
 import app.hongs.util.Data;
 import app.hongs.util.Text;
 import java.io.File;
@@ -70,7 +68,8 @@ implements Filter {
         Core.ENVIR = 1;
         Core.DEBUG = 0;
         Core.BASE_HREF = context.getContextPath();
-        Core.BASE_PATH = context.getRealPath("" ) + File.separator + "WEB-INF";
+        Core.WEBS_PATH = context.getRealPath("" );
+        Core.BASE_PATH = Core.WEBS_PATH + File.separator + "WEB-INF";
 
         // 调试开关
         str = context.getInitParameter ("debug");

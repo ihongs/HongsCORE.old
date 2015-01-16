@@ -7,7 +7,7 @@ import app.hongs.HongsException;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Filter;
 import app.hongs.action.anno.FilterInvoker;
-import static app.hongs.action.serv.ServWarder.MODULE;
+import static app.hongs.action.ServWarder.MODULE;
 import app.hongs.util.CsNs;
 import java.io.IOException;
 import java.lang.annotation.Annotation;

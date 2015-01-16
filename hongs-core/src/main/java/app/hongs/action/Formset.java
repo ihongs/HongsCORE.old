@@ -279,13 +279,13 @@ public class Formset
       Map.Entry e = (Map.Entry) o;
       Map       m = (Map ) e.getValue();
       String    k = (String) e.getKey();
-      String    n = (String) m.get("_disp");
+      String    n = (String) m.get("__disp__");
       if (n == null || "".equals(n)) {
           n = "core.form."+name+"."+namc+"."+k;
       }
-      Map       u = new LinkedHashMap();
+      Map       u = new LinkedHashMap(  );
       u.putAll( m );
-      u.put("_disp", lang.translate(n));
+      u.put("__disp__",lang.translate(n));
       itemz.put(k, u);
     }
     return itemz;

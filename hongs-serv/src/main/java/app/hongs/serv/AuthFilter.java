@@ -5,7 +5,7 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.Sitemap;
-import app.hongs.action.serv.ServWarder;
+import app.hongs.action.ServWarder;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

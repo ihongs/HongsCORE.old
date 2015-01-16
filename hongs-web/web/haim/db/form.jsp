@@ -77,9 +77,7 @@
                             <textarea class="form-control" name="<%=name%>" <%=rqrd%>></textarea>
                         <%} else if ("number".equals(type)) {%>
                             <input class="form-control" type="number" name="<%=name%>" value="" <%=rqrd%>/>
-                        <%} else if ("slider".equals(type)) {%>
-                            <input class="form-control" type="range" name="<%=name%>" value="" <%=rqrd%>/>
-                        <%} else if ("switch".equals(type)) {%>
+                        <%} else if ("range".equals(type)) {%>
                             <input class="form-control" type="range" name="<%=name%>" value="" <%=rqrd%>/>
                         <%} else if ("datetime".equals(type)) {%>
                             <input class="form-control input-datetime" type="text" name="<%=name%>" value="" <%=rqrd%> data-toggle="datetimepicker"/>
@@ -89,7 +87,7 @@
                             <input class="form-control input-time" type="text" name="<%=name%>" value="" <%=rqrd%> data-toggle="datetimepicker"/>
                         <%} else if ("file".equals(type)) {%>
                             <input class="form-control" type="file" name="<%=name%>" value="" <%=rqrd%>>
-                        <%} else if ("enum".equals(type)) {%>
+                        <%} else if ("select".equals(type)) {%>
                             <select class="form-control" name="<%=name%>"><option value="">--请选择--</option></select>
                         <%} else if ("pick".equals(type)) {%>
                             <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-tn="<%=info.get("data-tn")%>" data-tk="<%=info.get("data-tk")%>" data-vk="<%=info.get("data-vk")%>" <%=rqrd%>></ul>

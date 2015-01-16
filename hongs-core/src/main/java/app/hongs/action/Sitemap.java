@@ -4,16 +4,8 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreSerially;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,16 +13,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * 结构配置.
@@ -569,10 +567,21 @@ public class Sitemap
    * @return
    */
   public  List<Map> getMenu(int level, int depth) {
-      CoreLanguage lang = CoreLanguage.getInstance(this.name).clone();
-      for ( String namz : imports) {
-          lang.load( namz);
+      CoreLanguage lang;
+      try {
+          lang = CoreLanguage.getInstance(this.name).clone();
+      } catch (HongsError er) {
+          // 语言文件不存在则拿一个空的属性对象代替
+          if (er.getCode() == 0x2c) {
+              lang = new CoreLanguage(null);
+          } else {
+              throw er;
+          }
       }
+      for(String namz : imports) {
+          lang.loadIgnrFNF(namz);
+      }
+
       return getMenu(level, depth, 0, pages, lang);
   }
 

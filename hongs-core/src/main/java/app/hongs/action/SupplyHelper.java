@@ -50,7 +50,7 @@ public class SupplyHelper {
         while (it.hasNext()) {
             Map.Entry et = (Map.Entry)it.next();
             Map       i2 = (Map ) et.getValue();
-            String t2 = (String)i2.get("_type");
+            String t2 = (String)i2.get("__type__");
             if (! "enum".equals(t2)) {
                 continue;
             }
@@ -125,7 +125,7 @@ public class SupplyHelper {
             Map.Entry et = (Map.Entry) it.next();
             String   key = (String)  et.getKey();
             Map      map = (Map)   et.getValue();
-            Object   val = Dict.getParam( info , key );
+            Object   val = Dict.getParam(  info , key  );
             if (val != null) {
                 Dict.setParam(info, map.get(val), key +"_disp");
             }

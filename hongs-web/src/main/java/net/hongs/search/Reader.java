@@ -254,7 +254,7 @@ public class Reader {
             }
 
             SortField.Type st;
-            if ("number".equals(fm.get("_type"))) {
+            if ("number".equals(fm.get("__type__"))) {
                 Object nt = fm.get("type");
                 if ("int".equals(nt)) {
                     st = SortField.Type.INT;
@@ -301,7 +301,7 @@ public class Reader {
             }
 
             // 字段类型
-            String t = Synt.declare(m.get("_type"), "");
+            String t = Synt.declare(m.get("__type__"), "");
             if ("number".equals(t)) {
                 // 数字类型
                 String l = Synt.declare(m.get("type"), "");
@@ -339,8 +339,8 @@ public class Reader {
             Map.Entry e = (Map.Entry) o;
             String k = (String) e.getKey();
             Map    m = (Map ) e.getValue();
-            int    r = Dict.getValue(m,  0  , "_repeated");
-            String t = Dict.getValue(m,  "" , "_type");
+            int    r = Dict.getValue(m,  0  , "__repeated__");
+            String t = Dict.getValue(m,  "" , "__type__");
             String g = Dict.getValue(m,  "" , "field_class");
            boolean s = Dict.getValue(m, true, "field_store");
             if (!s) {
