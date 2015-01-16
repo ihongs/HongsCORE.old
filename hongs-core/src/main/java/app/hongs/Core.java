@@ -155,7 +155,7 @@ extends HashMap<String, Object>
   {
     return this.containsKey(klass.getName());
   }
-  
+
   private Object check(Core core, String name)
   {
     if (super.containsKey(name))
@@ -301,6 +301,11 @@ extends HashMap<String, Object>
   public static String CONF_PATH;
 
   /**
+   * 临时文件存放目录
+   */
+  public static String VARS_PATH;
+
+  /**
    * 日志文件存放目录
    */
   public static String LOGS_PATH;
@@ -311,19 +316,14 @@ extends HashMap<String, Object>
   public static String SERS_PATH;
 
   /**
-   * 临时文件存放目录
-   */
-  public static String VARS_PATH;
-
-  /**
    * 应用顶级目录
    */
   public static String WEBS_PATH;
-  
+
   /**
    * 应用基础链接
    */
-  public static String BASE_HREF = null;
+  public static String BASE_HREF;
 
   /**
    * 服务器编号

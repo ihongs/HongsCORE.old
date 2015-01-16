@@ -127,6 +127,7 @@ implements Filter {
             CoreLogger.debug(new StringBuilder("...")
                 .append("\r\n\tSERVER_ID   : ").append(Core.SERVER_ID)
                 .append("\r\n\tBASE_HREF   : ").append(Core.BASE_HREF)
+                .append("\r\n\tWEBS_PATH   : ").append(Core.WEBS_PATH)
                 .append("\r\n\tBASE_PATH   : ").append(Core.BASE_PATH)
                 .append("\r\n\tCONF_PATH   : ").append(Core.CONF_PATH)
                 .append("\r\n\tVARS_PATH   : ").append(Core.VARS_PATH)

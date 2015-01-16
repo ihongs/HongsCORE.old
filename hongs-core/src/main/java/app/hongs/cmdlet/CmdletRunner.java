@@ -148,12 +148,28 @@ public class CmdletRunner
     Core.ENVIR = 0;
     Core.DEBUG = 0;
     Core.BASE_PATH = System.getProperty("user.dir");
-    Core.WEBS_PATH = Core.BASE_PATH + "/..";
-    Core.BASE_HREF = "";
 
     if (opts.containsKey("debug"))
     {
       Core.DEBUG = Byte.parseByte(opts.get("debug").toString());
+    }
+
+    if (opts.containsKey("basepath"))
+    {
+      Core.BASE_PATH = (String)opts.get( "basepath" );
+      Core.BASE_PATH =  Pattern.compile( "[/\\\\]$" )
+          .matcher(Core.BASE_PATH).replaceFirst( "" );
+    }
+
+    if (opts.containsKey("webspath"))
+    {
+      Core.WEBS_PATH = (String)opts.get( "webspath" );
+      Core.WEBS_PATH =  Pattern.compile( "[/\\\\]$" )
+          .matcher(Core.WEBS_PATH).replaceFirst( "" );
+    }
+    else
+    {
+      Core.WEBS_PATH = Core.BASE_PATH + "/..";
     }
 
     if (opts.containsKey("basehref"))
@@ -162,12 +178,9 @@ public class CmdletRunner
       Core.BASE_HREF =  Pattern.compile( "[/\\\\]$" )
           .matcher(Core.BASE_HREF).replaceFirst( "" );
     }
-
-    if (opts.containsKey("basepath"))
+    else
     {
-      Core.BASE_PATH = (String)opts.get( "basepath" );
-      Core.BASE_PATH =  Pattern.compile( "[/\\\\]$" )
-          .matcher(Core.BASE_PATH).replaceFirst( "" );
+      Core.BASE_HREF = "";
     }
 
     Core.CONF_PATH = Core.BASE_PATH + File.separator + "etc";
@@ -216,7 +229,7 @@ public class CmdletRunner
     /** 实例属性配置 **/
 
     conf = CoreConfig.getInstance();
-    
+
     String act = null;
     if (args.length > 0 )
     {
@@ -338,7 +351,7 @@ public class CmdletRunner
 
         for(String pkgn : pkgs) {
             Set< String > clss;
-            
+
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);
                 try {
