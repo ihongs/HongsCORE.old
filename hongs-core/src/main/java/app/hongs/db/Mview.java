@@ -1,7 +1,7 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
-import app.hongs.action.Formset;
+import app.hongs.action.FormSet;
 import app.hongs.util.Dict;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,7 +174,7 @@ public class Mview {
 
         //** 从结构配置中追加字段 **/
 
-        Formset form = Formset.getInstance(   db.name);
+        FormSet form = FormSet.getInstance(   db.name);
         Map items = form.getFormTranslated(table.name);
         if (items != null)
         for(Object o : items.entrySet( ) ) {

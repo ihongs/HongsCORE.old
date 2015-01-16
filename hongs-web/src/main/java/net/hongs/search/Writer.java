@@ -3,7 +3,7 @@ package net.hongs.search;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
-import app.hongs.action.Formset;
+import app.hongs.action.FormSet;
 import app.hongs.action.VerifyHelper;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
@@ -88,7 +88,7 @@ public class Writer {
         if (verify == null ) {
             verify =  new VerifyHelper();
             verify.addRulesByForm("search", "_search");
-            vitems = Formset.getInstance("search").getForm("_search");
+            vitems = FormSet.getInstance("search").getForm("_search");
         }
 
         rd = verify.verify(rd , true);

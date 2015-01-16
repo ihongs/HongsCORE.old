@@ -135,8 +135,7 @@ public class CmdletRunner
   {
     Map<String, Object> opts;
     opts = CmdletHelper.getOpts(args,
-      "basepath:s", "basehref:s", "language:s",
-      "request:s" , "session:s" , "cookie:s" , "debug:i"
+      "debug:i", "basepath:s", "websroot:s", "basehref:s", "timezone:s", "language:s", "request--:s" , "session--:s"
     );
     args = (String[]) opts.get("");
 

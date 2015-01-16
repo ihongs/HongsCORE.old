@@ -306,8 +306,9 @@ public class CoreLanguage
   public static boolean hasAcceptLanguage(String lang)
   {
     CoreConfig conf = CoreConfig.getInstance();
-    String x = conf.getProperty("core.langauge.support");
-    return Arrays.asList(x.split(",") ).contains( lang );
+    String x = conf.getProperty("core.language.support",
+               conf.getProperty("core.language.default", "zh"));
+    return /**/Arrays.asList( x.split( "," ) ).contains( lang );
 
     /**
      * 有时候会单独为某个模块添加语言文件
