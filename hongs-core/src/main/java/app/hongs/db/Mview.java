@@ -1,7 +1,7 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
-import app.hongs.action.SourceConfig;
+import app.hongs.action.Formset;
 import app.hongs.util.Dict;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -173,7 +173,7 @@ public class Mview {
 
         //** 从结构配置中追加字段 **/
 
-        Map items  = SourceConfig.getInstance(db.name).getItems(table.name);
+        Map items  = Formset.getInstance(db.name).getFormTranslated(table.name);
         if (items != null)
         for(Object o : items.entrySet( ) ) {
             Map.Entry e = (Map.Entry) o;
@@ -196,8 +196,8 @@ public class Mview {
                 field.put("disp",  t  );
             }
 
-            // Unit 类型暂不处理
-            if ("unit".equals(t)) {
+            // 表单类型暂不处理
+            if ("form".equals(t)) {
                 continue;
             }
 

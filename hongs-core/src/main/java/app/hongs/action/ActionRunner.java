@@ -5,14 +5,16 @@ import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.anno.Action;
-import app.hongs.action.anno.FilterInvoker;
 import app.hongs.action.anno.Filter;
+import app.hongs.action.anno.FilterInvoker;
+import static app.hongs.action.serv.ServWarder.MODULE;
 import app.hongs.util.CsNs;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -44,7 +46,7 @@ public class ActionRunner {
         this.action = action;
         this.method = getActions().get(action);
         if ( method == null ) {
-            throw new HongsException(0x11f0, "Can not find action '"+action+"'");
+            throw new HongsException(0x10f4, "Can not find action '"+action+"'");
         }
         this.object = Core.getInstance(method.getDeclaringClass());
         this.annarr = method.getAnnotations( );
@@ -55,10 +57,27 @@ public class ActionRunner {
         return action;
     }
 
+    public String getEntity() {
+        String s = (String) helper.getAttribute(MODULE);
+        // module/entity/action; entity/action; action
+        if (s == null) {
+            int i = s.lastIndexOf("/");
+            if (i > 0) {
+                s = s.substring(0 , i);
+                i = s.lastIndexOf("/");
+                if (i > 0) {
+                    s = s.substring(0 , i);
+                    return s;
+                }
+            }
+        }
+        return null;
+    }
+
     public void doAction() throws HongsException {
         // 如果超出链长度, 则终止执行
         if ( idx  >  annarr.length) {
-            throw new HongsException(0x11f1, "Action annotation out of index: "
+            throw new HongsException(0x10f0, "Action annotation out of index: "
             +idx+">"+annarr.length);
         }
 
@@ -92,18 +111,18 @@ public class ActionRunner {
         try {
             method.invoke(object, helper);
         } catch (   IllegalAccessException e) {
-            throw new HongsException(0x10f2, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x10f5, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch ( IllegalArgumentException e) {
-            throw new HongsException(0x10f2, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x10f5, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
             if (ex instanceof HongsException) {
                 throw (HongsException) ex;
             } else
-            if (ex instanceof HongsError    ) {
-                throw (HongsError    ) ex;
+            if (ex instanceof HongsError) {
+                throw (HongsError) ex;
             } else {
-                throw new HongsException(0x10f2, ex);
+                throw new HongsException(0x10f5, ex);
             }
         }
     }
@@ -125,7 +144,7 @@ public class ActionRunner {
         Lock wlock = ACTLOCK.writeLock();
         wlock.lock();
         try {
-            String[] pkgs = CoreConfig.getInstance("_begin_").getProperty("core.serv.path").split(";");
+            String[] pkgs = CoreConfig.getInstance("_begin_").getProperty("core.load.serv").split(";");
             ACTIONS = getActions( pkgs );
             return ACTIONS;
         } finally {
@@ -138,13 +157,20 @@ public class ActionRunner {
 
         for(String pkgn : pkgs) {
             Set< String > clss;
-            try {
-                clss = CsNs.getClassNames(pkgn, false);
-            } catch (IOException ex) {
-                throw new HongsError( 0x4a , "Can not load package '" + pkgn + "'.", ex);
-            }
-            if (clss == null) {
-                throw new HongsError( 0x4a , "Can not find package '" + pkgn + "'.");
+            
+            if (pkgn.endsWith(".*")) {
+                pkgn = pkgn.substring(0, pkgn.length() -2);
+                try {
+                    clss = CsNs.getClassNames(pkgn, false);
+                } catch (IOException ex) {
+                    throw new HongsError( 0x4a , "Can not load package '" + pkgn + "'.", ex);
+                }
+                if (clss == null) {
+                    throw new HongsError( 0x4a , "Can not find package '" + pkgn + "'.");
+                }
+            } else {
+                clss = new HashSet();
+                clss.add(pkgn);
             }
 
             for(String clsn : clss) {

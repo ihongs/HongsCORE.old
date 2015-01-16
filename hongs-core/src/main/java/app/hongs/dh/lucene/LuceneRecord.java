@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.action.SourceConfig;
+import app.hongs.action.Formset;
 import app.hongs.dh.IRecord;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
@@ -61,9 +61,9 @@ import org.apache.lucene.util.Version;
  */
 public class LuceneRecord implements IRecord, Core.Destroy {
 
-    private final String  module;
-    private final String  entity;
-    private final Map     items ;
+    private final String  datapath;
+    private final String  analyzer;
+    private final Map     fields;
 
     private IndexWriter   writer = null;
     private IndexReader   reader = null;
@@ -73,15 +73,34 @@ public class LuceneRecord implements IRecord, Core.Destroy {
     public String   wdCol = "wd";
     public String[] dispCols = new String[] {"name"};
 
+    public LuceneRecord(Map items, String datapath, String analyzer) {
+        if (datapath == null) {
+            datapath = CoreConfig.getInstance().getProperty("core.dh.lucene.datapath", "${VARS_PATH}/lucene") + "/test";
+        } else
+        if (! new File(datapath).isAbsolute( )) {
+            datapath = CoreConfig.getInstance().getProperty("core.dh.lucene.datapath", "${VARS_PATH}/lucene") + "/" + datapath;
+        }
+        if (analyzer == null) {
+            analyzer = CoreConfig.getInstance().getProperty("core.dh.lucene.analyzer", "org.apache.lucene.analysis.cn.ChineseAnalyzer");
+        }
+
+        Map ti = new HashMap();
+        ti.put("BASE_PATH", Core.VARS_PATH);
+        ti.put("VARS_PATH", Core.VARS_PATH);
+        datapath = Text.inject(datapath,ti);
+
+        this.fields = items;
+        this.datapath = datapath;
+        this.analyzer = analyzer;
+    }
+
     public LuceneRecord(String module, String entity) throws HongsException {
-        this.module = module;
-        this.entity = entity;
-        this.items  = SourceConfig.getInstance(module).getItems(entity);
+        this(Formset.getInstance(module).getForm(entity), module + "/" + entity, null);
     }
 
     public Map retrieve(Map rd) throws HongsException {
         initReader();
-        
+
         Object id = rd.get (idCol); // 指定单个 id 则走 get
         if (id != null && !(id instanceof Collection) && !(id instanceof Map)) {
             String jd = id.toString();
@@ -163,7 +182,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
     public Map counts(Map rd) throws HongsException {
         initReader();
-        
+
         Map  resp = new HashMap();
         Map  cnts = new HashMap();
         resp.put("info", cnts);
@@ -174,7 +193,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
         for(String   x : cnt2) {
             String[] a = x.split(":", 2);
-            if (!items.containsKey(a[0])) {
+            if (!fields.containsKey(a[0])) {
                 throw new HongsException(HongsException.COMMON, "Field "+a[0]+" not exists");
             }
             if (a.length > 1) {
@@ -184,7 +203,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
                 cuntx.put(a[0], new HashMap());
             } else
             {
-                for(Object o : items.entrySet()) {
+                for(Object o : fields.entrySet()) {
                     Map.Entry e = (Map.Entry) o;
                     String k = (String) e.getKey();
                     Map    m = (Map ) e.getValue();
@@ -281,8 +300,17 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
         Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
         for (String id  : ids) {
-            rd.remove(idCol);
             put(id, rd);
+        }
+        return ids.size();
+    }
+
+    public int upsert(Map rd) throws HongsException {
+        initWriter();
+
+        Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
+        for (String id  : ids) {
+            set(id, rd);
         }
         return ids.size();
     }
@@ -428,7 +456,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
     public Map doc2Map(Document doc) throws HongsException {
         Map map = new HashMap();
-        for(Object o : items.entrySet()) {
+        for(Object o : fields.entrySet()) {
             Map.Entry e = (Map.Entry) o;
             String k = (String) e.getKey();
             Map    m = (Map ) e.getValue();
@@ -550,8 +578,8 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             String k = e.getKey(  ).toString();
             Object v = e.getValue();
 
-            String g = Dict.getValue(items, String.class, k, "field_class");
-            Field.Store s  =  Dict.getValue(items, true , k, "field_store")
+            String g = Dict.getValue(fields, String.class, k, "field_class");
+            Field.Store s  =  Dict.getValue(fields, true , k, "field_store")
                            ?  Field.Store.YES : Field.Store.NO;
 
             if (!(v instanceof Collection)) {
@@ -578,7 +606,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
                 rv = false;
             }
 
-            Map fm = (Map ) items.get(fn);
+            Map fm = (Map ) fields.get(fn);
             if (fm == null) {
                 continue;
             }
@@ -617,7 +645,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             String k = (String) e.getKey();
             Object v = e.getValue(  );
 
-            Map    m = (Map) items.get("k");
+            Map    m = (Map) fields.get("k");
             if (null == m) {
                 continue;
             }
@@ -761,18 +789,11 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             return;
         }
         try {
-            Map map = new HashMap();
-            map.put("BASE_PATH", Core.VARS_PATH);
-            map.put("VARS_PATH", Core.VARS_PATH);
-
-            String    din = CoreConfig.getInstance().getProperty("core.dh.lucene.datapath", "${VARS_PATH}/lucene") +"/"+module+"/"+entity;
-            Directory dir = FSDirectory.open(new File(Text.inject(din, map)));
-
-            String    anc = CoreConfig.getInstance().getProperty("core.search.analyzer", "org.apache.lucene.analysis.cn.ChineseAnalyzer");
-            Analyzer  ana = ( Analyzer )  Class.forName( anc ).newInstance( );
+            Analyzer  ana = (Analyzer)  Class.forName(analyzer).newInstance();
+            Directory dir = FSDirectory.open(new File(datapath));
 
             IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_CURRENT, ana);
-            iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+            iwc.setOpenMode( IndexWriterConfig.OpenMode.CREATE );
 
             writer = new IndexWriter(dir, iwc);
         } catch (IOException ex) {
@@ -791,12 +812,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             return;
         }
         try {
-            Map map = new HashMap();
-            map.put("BASE_PATH", Core.VARS_PATH);
-            map.put("VARS_PATH", Core.VARS_PATH);
-
-            String    din = CoreConfig.getInstance().getProperty("core.dh.lucene.datapath", "${VARS_PATH}/lucene") +"/"+module+"/"+entity;
-            Directory dir = FSDirectory.open(new File(Text.inject(din, map)));
+            Directory dir = FSDirectory.open(new File(datapath));
 
             reader = DirectoryReader.open(dir);
             finder = new IndexSearcher(reader);
@@ -805,7 +821,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         }
     }
 
-    public void destroy() throws Throwable {
+    public void destroy() throws HongsException {
         try {
             if (writer != null) {
                 writer.close( );

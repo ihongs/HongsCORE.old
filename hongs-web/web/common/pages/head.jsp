@@ -5,17 +5,17 @@
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.SourceConfig"%>
+<%@page import="app.hongs.action.Sitemap"%>
 <%!
-    StringBuilder makeMenu(Map units, boolean realHref) {
+    StringBuilder makeMenu(List<Map> list, String rootName, boolean realHref) {
         StringBuilder menus = new StringBuilder();
-        for(Object o : units.entrySet()) {
-            Map.Entry e = (Map.Entry) o;
-            String name = (String) e.getKey();
-            if(name.startsWith("_")) continue;
-            Map    unit = (Map ) e.getValue();
-            String href = (String) unit.get("_href");
-            String disp = (String) unit.get("_disp");
+        for(Map menu : list) {
+            String href = (String) menu.get("_href");
+            String disp = (String) menu.get("_disp");
+            String name = href.replaceAll("\\.\\w+$", "");
+            if (name.startsWith(rootName)) {
+                name = name.substring(name.length( ) + 1);
+            }
 
             if (realHref) {
                 String temp = href;
@@ -42,20 +42,17 @@
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String name  = helper.getParameter( "m" );
+    String name  = helper.getParameter("m");
 
     if (name  == null || name .length() == 0) {
         name  = "default";
     }
 
-    SourceConfig main = SourceConfig.getInstance();
-    SourceConfig curr = SourceConfig.getInstance(name);
+    Sitemap main = Sitemap.getInstance();
+    Sitemap curr = Sitemap.getInstance(name);
 
-    Map mainMenu = main.getRolesTranslated("__MENU__");
-    Map userMenu = main.getRolesTranslated("__USER__");
-    Map currMenu = curr.getUnit("__MENU__") != null
-                 ? curr.getRolesTranslated("__MENU__")
-                 : curr.getUnitsTranslated();
+    List<Map> mainMenu = main.getMenu(1, 1);
+    List<Map> currMenu = curr.getMenu(1, 1);
 %>
 
 <div class="navbar-header">
@@ -81,15 +78,14 @@
 
 <div class="collapse navbar-collapse" id="main-collapse">
     <ul class="nav navbar-nav navbar-left " id="curr-menubar">
-        <%=makeMenu(currMenu, false)%>
+        <%=makeMenu(currMenu, name, false)%>
     </ul>
     <ul class="nav navbar-nav navbar-right" id="main-menubar">
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">ihongs@live.cn <span class="badge">9+</span> <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-                <%=makeMenu(mainMenu, true)%>
+                <%=makeMenu(mainMenu, name, true)%>
                 <li class="divider"></li>
-                <%=makeMenu(userMenu, true)%>
             </ul>
         </li>
     </ul>

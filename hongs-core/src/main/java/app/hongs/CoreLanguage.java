@@ -18,7 +18,7 @@ import java.io.File;
  * <h3>配置选项:</h3>
  * <pre>
  * core.load.language.once  为true则仅加载一次, 为false由Core控制
- * core.language.link.xx    语言链接, xx为语言, 如: link.zh=zh-cn
+ * core.language.link.xx    语言链接, xx为语言, 如:link.zh=zh-CN
  * </pre>
  *
  * @author Hongs
@@ -27,21 +27,25 @@ public class CoreLanguage
   extends CoreConfig
 {
 
-  private CoreLanguage that = null;
-
   private String lang;
+
+  private CoreLanguage that;
 
   /**
    * 加载指定路径\语言和名称的配置
-   * @param path
    * @param name
    * @param lang
    */
-  public CoreLanguage(String path, String name, String lang)
+  public CoreLanguage(String name, String lang)
   {
     super(null);
 
     this.lang = lang ;
+
+    if (null == lang)
+    {
+      throw new app.hongs.HongsError(0x2c, "Language is not specified for '" + name + "'.");
+    }
 
     if (null != name)
     {
@@ -49,22 +53,18 @@ public class CoreLanguage
     }
 
     // 加载默认语言, 当当前语音没设置时可以使用默认语言来翻译
-    String defn = getAcceptLanguage(CoreConfig.getInstance().getProperty("core.language.default", "zh"));
+    String defn = getAcceptLanguage(CoreConfig.getInstance()
+                 .getProperty("core.language.default","zh"));System.err.println(lang+" "+defn);
     if ( ! lang.equals(defn))
     {
       that = new CoreLanguage(null, defn);
+    if (null != name)
+    {
       that.loadIgnrFNF(name);
+    } } else
+    {
+      that = null;
     }
-  }
-
-  /**
-   * 加载指定语言和名称的配置
-   * @param name
-   * @param lang
-   */
-  public CoreLanguage(String name, String lang)
-  {
-    this(Core.CONF_PATH, name, lang);
   }
 
   /**
@@ -73,7 +73,7 @@ public class CoreLanguage
    */
   public CoreLanguage(String name)
   {
-    this(Core.CONF_PATH, name, Core.ACTION_LANG.get());
+    this(/**/name , Core.ACTION_LANG.get());
   }
 
   /**
@@ -81,14 +81,13 @@ public class CoreLanguage
    */
   public CoreLanguage()
   {
-    this(Core.CONF_PATH, "default", Core.ACTION_LANG.get());
+    this("default", Core.ACTION_LANG.get());
   }
 
   @Override
   public CoreLanguage clone()
   {
-    Object conf = super.clone();
-    return (CoreLanguage) conf;
+    return (CoreLanguage) super.clone();
   }
 
   /**
@@ -251,12 +250,12 @@ public class CoreLanguage
   /**
    * 从HEAD串中获取支持的语言
    * @param lang
-   * @return 语言标识, 如zh,zh-cn(全小写), 不存在为null
+   * @return 语言标识, 如zh,zh-CN, 不存在为null
    */
   public static String getAcceptLanguage(String lang)
   {
     CoreConfig conf = Core.getInstance(CoreConfig.class);
-    String[]   arr1 = lang.toLowerCase().split(",");
+    String[]   arr1 = lang.split(",");
     String[]   arr2;
 
     for (int i = 0; i < arr1.length; i ++)
@@ -307,9 +306,20 @@ public class CoreLanguage
    */
   public static boolean hasAcceptLanguage(String lang)
   {
-    String path = Core.CONF_PATH + File.separator
-          + "default." + lang + ".properties";
-    return (new File(path)).exists();
+    String path = Core.CONF_PATH + File.separator;
+    path = path + /* * * */ "default." + lang + ".properties";
+    if ((new File(path)).exists())
+    {
+      return true;
+    }
+
+    path = "app/hongs/config/default." + lang + ".properties";
+    if (null != CoreConfig.class.getClassLoader().getResourceAsStream(path))
+    {
+      return true;
+    }
+
+    return  false;
   }
 
 }

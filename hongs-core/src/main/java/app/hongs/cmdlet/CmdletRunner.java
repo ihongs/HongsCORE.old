@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -266,12 +267,12 @@ public class CmdletRunner
         }
         if (lang == null)
         {
-          lang = conf.getProperty("core.language.default");
+          lang = conf.getProperty("core.language.default", "zh-CN");
         }
       }
       else
       {
-          lang = conf.getProperty("core.language.default");
+          lang = conf.getProperty("core.language.default", "zh-CN");
       }
     }
     else
@@ -326,7 +327,7 @@ public class CmdletRunner
             return  CMDLETS;
         }
 
-        String[] pkgs = CoreConfig.getInstance("_begin__").getProperty("core.serv.path").split(";");
+        String[] pkgs = CoreConfig.getInstance("_begin_").getProperty("core.load.serv").split(";");
         CMDLETS = getCmdlets( pkgs );
         return CMDLETS;
     }
@@ -336,13 +337,20 @@ public class CmdletRunner
 
         for(String pkgn : pkgs) {
             Set< String > clss;
-            try {
-                clss = CsNs.getClassNames(pkgn, false);
-            } catch (IOException ex) {
-                throw new HongsError( 0x4b , "Can not load package '" + pkgn + "'.", ex);
-            }
-            if (clss == null) {
-                throw new HongsError( 0x4b , "Can not find package '" + pkgn + "'.");
+            
+            if (pkgn.endsWith(".*")) {
+                pkgn = pkgn.substring(0, pkgn.length() -2);
+                try {
+                    clss = CsNs.getClassNames(pkgn, false);
+                } catch (IOException ex) {
+                    throw new HongsError( 0x4b , "Can not load package '" + pkgn + "'.", ex);
+                }
+                if (clss == null) {
+                    throw new HongsError( 0x4b , "Can not find package '" + pkgn + "'.");
+                }
+            } else {
+                clss = new HashSet();
+                clss.add(pkgn);
             }
 
             for(String clsn : clss) {

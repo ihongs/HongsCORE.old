@@ -12,6 +12,11 @@ import java.util.jar.JarFile;
 
 /**
  * 通过包名获取类名集合
+ * <p>
+ * 此类被用于处理 _begin_.properties 中 core.load.serv 下 .* 后缀的包名扩展类名;
+ * 但有个缺陷, 比如 app.demo.action 包存在于两个不同包下, 将只有一个包的类会被找到;
+ * 这是因为 ClassLoader 的 getResource() 并不会把所有不同 jar 中的同名资源都返回;
+ * </p>
  * @author Hongs
  */
 public class CsNs {
@@ -47,13 +52,16 @@ public class CsNs {
      */
     public static Set<String> getClassNames(String pkgn, boolean recu) throws IOException {
         ClassLoader pload = Thread.currentThread().getContextClassLoader();
-        String      ppath = pkgn.replace(".", "/");
-        URL         ppurl = pload.getResource  (  ppath );System.out.println(ppurl);
+        String      ppath = pkgn.replace( ".", "/" );
+        URL         ppurl = pload.getResource(ppath);
+//      System.err.println("[INFO] PPURL: " + ppurl);
         Set<String> names ;
 
         if (ppurl != null) {
-            String  proot = ppurl.getPath();
-            proot = proot.substring(0, proot.length() - ppath.length());System.out.println(proot);
+            String  proot = ppurl.getPath(  ).replaceFirst( "/$" , "" );
+            proot = proot.substring(0, proot.length() - ppath.length());
+//          System.err.println("[INFO] PROOT: " + proot);
+
             if ("file".equals(ppurl.getProtocol())){
                 // 路径格式: /PATH/
                 proot = proot.substring(1);
@@ -61,8 +69,9 @@ public class CsNs {
             } else
             if ( "jar".equals(ppurl.getProtocol())) {
                 // 路径格式: file:/PATH!/
-                int p = proot.indexOf("/") + 1 ;
-                proot = proot.substring(p, proot.length() - 2);
+                int b = proot.indexOf("/") + 1;
+                int e = proot.length (   ) - 2;
+                proot = proot.substring(b , e);
                 names = getClassNamesByJar(proot, ppath, recu);
             } else {
                 names = new HashSet();
@@ -70,18 +79,23 @@ public class CsNs {
         } else {
             names = new HashSet();
             URL[]   paurl = ((URLClassLoader) pload).getURLs();
+
             if (paurl != null) for (URL pourl : paurl) {
                 String proot = pourl.getPath( );
                 // 忽略搜索: classes
                 if (proot.endsWith("/classes/")) {
                     continue;
                 }
+
+                //System.err.println("[INFO] PROOT: " + proot);
+
                 // 路径格式: file:/PATH!/
                 int p = proot.indexOf("/") + 1 ;
                 proot = proot.substring(p, proot.length() - 2);
                 names.addAll(getClassNamesByJar(proot, ppath, recu));
             }
         }
+
         return  names;
     }
 
@@ -110,6 +124,7 @@ public class CsNs {
     private static Set<String> getClassNamesByJar(String root, String path, boolean recu)
             throws IOException {
         Set<String> names = new HashSet<String>();
+        int         pathl = 1 + path.length();
 
         Enumeration<JarEntry> items = new JarFile(root).entries();
         while ( items.hasMoreElements( )) {
@@ -121,7 +136,7 @@ public class CsNs {
                 continue;
             }
             name = name.substring(0, name.length() - 6);
-            if (!recu && name.lastIndexOf( "/" ) > path.length()) {
+            if (!recu && name.indexOf("/", pathl ) > 0) {
                 continue;
             }
             name = name.replace("/", ".");

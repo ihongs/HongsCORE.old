@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Filter(VerifyInvoker.class)
 public @interface Verify {
-    String  unit() default "";
+    String  form() default "";
     String  conf() default "default";
     boolean clean() default false;
 }

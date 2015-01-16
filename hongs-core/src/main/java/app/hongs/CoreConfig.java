@@ -57,8 +57,7 @@ public class CoreConfig
   @Override
   public CoreConfig clone()
   {
-    Object conf = super.clone();
-    return (CoreConfig) conf;
+    return (CoreConfig) super.clone();
   }
 
   /**
@@ -77,13 +76,14 @@ public class CoreConfig
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name : "app/hongs/config/"+ name;
-        is = Object.class.getClassLoader().getResourceAsStream(fn);
-        if ( is  ==  null )
+        fn = name.contains("/") ? name : "app/hongs/config/" + name + ".properties";
+        is = this.getClass().getClassLoader().getResourceAsStream(fn);
+        if (  is  ==  null )
         {
             throw new app.hongs.HongsError(0x2a, "Can not find the properties file '" + fn + "'.");
         }
     }
+    //System.err.println(fn);
 
     try
     {

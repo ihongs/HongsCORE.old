@@ -40,9 +40,9 @@ public class SupplyHelper {
         return addEnum(code, opts);
     }
 
-    public SupplyHelper addEnumsByUnit(String conf, String unit) throws HongsException {
-        SourceConfig cnf = SourceConfig.getInstance(conf);
-        Map map  = cnf.getUnit(unit);
+    public SupplyHelper addEnumsByForm(String conf, String form) throws HongsException {
+        Formset cnf = Formset.getInstance(conf);
+        Map map  = cnf.getForm(form);
         if (map == null) return this;
         map = (Map) map.get("items");
 
@@ -58,7 +58,7 @@ public class SupplyHelper {
             String e2 = (String)i2.get( "name");
             String c2 = (String)i2.get( "conf");
             if (null == c2 || "".equals( c2 )) c2 = conf;
-            Map d2  = SourceConfig.getInstance(c2).getEnumTranslated(e2);
+            Map d2  = Formset.getInstance(c2).getEnumTranslated(e2);
             if (d2 != null) {
                 enums.put(n2, d2);
             }

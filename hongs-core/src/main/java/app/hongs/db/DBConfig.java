@@ -87,14 +87,14 @@ public class DBConfig
 
     try
     {
-        fn = Core.CONF_PATH + File.separator + name + ".hs.xml";
+        fn = Core.CONF_PATH + File.separator + name + ".db.xml";
         is = new FileInputStream(fn);
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name : "app/hongs/config/"+ name;
-        is = Object.class.getClassLoader().getResourceAsStream(fn);
-        if ( is  ==  null )
+        fn = name.contains("/") ? name : "app/hongs/config/" + name + ".db.xml";
+        is = this.getClass().getClassLoader().getResourceAsStream(fn);
+        if (  is  ==  null )
         {
             throw new app.hongs.HongsError(0x2a, "Can not find the source config file '" + fn + "'.");
         }

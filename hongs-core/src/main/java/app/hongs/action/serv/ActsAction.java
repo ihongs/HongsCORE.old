@@ -4,6 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
 import app.hongs.HongsCause;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import java.util.HashMap;
@@ -80,9 +81,9 @@ public class ActsAction
     {
       runner = new ActionRunner(act, helper);
     }
-    catch (Throwable ex)
+    catch (HongsException ex)
     {
-      senderr(req, helper, ex);
+      senderr(req, helper, "Er404", ex.getLocalizedMessage());
       return;
     }
 
@@ -97,6 +98,14 @@ public class ActsAction
     }
   }
 
+  private static final Map<Integer, String> ErrMap;
+  static {
+      ErrMap = new HashMap();
+      ErrMap.put(0x10f3, "Er403");
+      ErrMap.put(0x10f4, "Er404");
+      ErrMap.put(0x10f5, "Er500");
+  }
+  
   private void senderr(HttpServletRequest req, ActionHelper helper, Throwable ex)
     throws ServletException
   {
@@ -106,8 +115,12 @@ public class ActsAction
     String error = ex.getLocalizedMessage();
     if (ex instanceof  HongsCause)
     {
-      HongsCause hc = (HongsCause) ex;
-      errno = "Ex"+Integer.toHexString(hc.getCode());
+      HongsCause hc = (HongsCause) ex ;
+      errno = ErrMap.get(hc.getCode());
+      if (errno == null)
+      {
+        errno = "Ex" + Integer.toHexString(hc.getCode());
+      }
     } else
     {
       errno = "Er500";
@@ -131,7 +144,6 @@ public class ActsAction
     {
       helper.getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
     } else
-    if ("Er500".equals(errno))
     {
       helper.getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }

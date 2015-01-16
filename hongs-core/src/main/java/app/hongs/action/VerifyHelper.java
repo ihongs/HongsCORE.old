@@ -69,10 +69,10 @@ public class VerifyHelper {
         return addRule(name, rule, opts);
     }
 
-    public VerifyHelper addRulesByUnit(String conf, String unit) throws HongsException {
-        SourceConfig cnf = SourceConfig.getInstance(conf);
+    public VerifyHelper addRulesByForm(String conf, String form) throws HongsException {
+        Formset cnf = Formset.getInstance(conf);
         CoreConfig cuf = CoreConfig.getInstance();
-        Map map  = cnf.getUnit(unit);
+        Map map  = cnf.getForm(form);
         if (map == null) return this;
         map = (Map) map.get("items");
 
@@ -116,15 +116,15 @@ public class VerifyHelper {
                     rule = "is"+c.toUpperCase()+ n ;
                 }
                 opts.put("__conf__", conf);
-                opts.put("__unit__", unit);
+                opts.put("__form__", form);
                 this.addRule(code, rule, opts);
             }
         }
         catch (ClassCastException ex) {
-            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+unit, ex);
+            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form, ex);
         }
         catch (IndexOutOfBoundsException ex) {
-            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+unit+"#"+i, ex);
+            throw new HongsException(0x1101, "Failed to get rule: "+conf+":"+form+"#"+i, ex);
         }
 
         return this;
@@ -361,22 +361,6 @@ public class VerifyHelper {
 
     //** 类型校验器 **/
 
-    public static Object isUnit(Object value, Map values, Map params) throws Wrongs, HongsException {
-        String conf = Dict.getValue(params, String.class, "conf");
-        String name = Dict.getValue(params, String.class, "unit");
-        if (conf == null || "".equals(conf)) {
-            conf = Dict.getValue(params, "", "__conf__");
-        }
-        if (name == null || "".equals(name)) {
-            name = Dict.getValue(params, "", "__name__");
-        }
-
-        boolean upd = Dict.getValue(params,false, "__update__");
-        VerifyHelper veri = new VerifyHelper();
-        veri.addRulesByUnit(conf, name);
-        return veri.verify(values, upd);
-    }
-
     public static Object isEnum(Object value, Map values, Map params) throws Wrong , HongsException {
         String conf = Dict.getValue(params, String.class, "conf");
         String name = Dict.getValue(params, String.class, "enum");
@@ -387,11 +371,27 @@ public class VerifyHelper {
             name = Dict.getValue(params, "", "__name__");
         }
 
-        Map data = SourceConfig.getInstance(conf).getEnum(name);
+        Map data = Formset.getInstance(conf).getEnum(name);
         if (! data.containsValue(value.toString()) ) {
             throw new Wrong("fore.form.not.in.enum");
         }
         return value;
+    }
+
+    public static Object isForm(Object value, Map values, Map params) throws Wrongs, HongsException {
+        String conf = Dict.getValue(params, String.class, "conf");
+        String name = Dict.getValue(params, String.class, "form");
+        if (conf == null || "".equals(conf)) {
+            conf = Dict.getValue(params, "", "__conf__");
+        }
+        if (name == null || "".equals(name)) {
+            name = Dict.getValue(params, "", "__name__");
+        }
+
+        boolean upd = Dict.getValue(params,false, "__update__");
+        VerifyHelper veri = new VerifyHelper();
+        veri.addRulesByForm(conf, name);
+        return veri.verify(values, upd);
     }
 
     public static String isFile(Object value, Map values, Map params) throws Wrong {

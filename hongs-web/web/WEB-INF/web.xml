@@ -41,34 +41,34 @@
         <servlet-name>Lang</servlet-name>
         <url-pattern>/common/lang/*</url-pattern>
     </servlet-mapping>
-    <!-- Warder Filter -->
+    <!-- ServWarder -->
     <filter>
-        <filter-name>Warder</filter-name>
-        <filter-class>app.hongs.action.serv.ServWarder</filter-class>
+        <filter-name>ServWarder</filter-name>
+        <filter-class>app.hongs.action.serv.ServServWarder</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>ServWarder</filter-name>
         <url-pattern>*.api</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>ServWarder</filter-name>
         <url-pattern>*.act</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>ServWarder</filter-name>
         <url-pattern>*.jsp</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>ServWarder</filter-name>
         <url-pattern>/common/conf/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>ServWarder</filter-name>
         <url-pattern>/common/lang/*</url-pattern>
     </filter-mapping>
     <!-- Haim DB Worker Filter -->
     <filter>
-        <filter-name>DBWorker</filter-name>
+        <filter-name>AutoFilter_DB</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
@@ -76,22 +76,22 @@
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>ServWarder</filter-name>
         <url-pattern>/demo/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>DBWorker</filter-name>
+        <filter-name>AutoFilter_DB</filter-name>
         <url-pattern>/demo/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
+        <filter-name>ServWarder</filter-name>
         <url-pattern>/search/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>DBWorker</filter-name>
+        <filter-name>AutoFilter_DB</filter-name>
         <url-pattern>/search/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>

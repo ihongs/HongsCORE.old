@@ -2,10 +2,10 @@ package app.hongs.serv;
 
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.Sitemap;
 import app.hongs.action.serv.ServWarder;
-import app.hongs.util.Dict;
-import app.hongs.util.Synt;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -42,12 +42,7 @@ public class AuthFilter
   /**
    * 动作配置
    */
-  private Auth auth;
-
-  /**
-   * 角色会话
-   */
-  private String sessName;
+  private Sitemap auth;
 
   /**
    * 首页路径
@@ -68,51 +63,49 @@ public class AuthFilter
   public void init(FilterConfig config)
     throws ServletException
   {
-    String xp;
+    String s;
 
     /**
      * 获取权限配置名
      */
-    xp = config.getInitParameter("conf-name");
-    this.auth = xp != null ? Auth.getInstance() : Auth.getInstance(xp);
-
-    /**
-     * 获取首页URL
-     */
-    xp = config.getInitParameter("sess-name");
-    if (xp != null)
+    s = config.getInitParameter("conf-name");
+    try
     {
-      this.sessName = "roles";
+      this.auth = s != null ? Sitemap.getInstance() : Sitemap.getInstance(s);
+    }
+    catch (HongsException ex)
+    {
+      throw new ServletException(ex);
     }
 
     /**
      * 获取首页URL
      */
-    xp = config.getInitParameter("index-uri");
-    if (xp != null)
+    s = config.getInitParameter("index-uri");
+    if (s != null)
     {
-      this.indexPage = Core.BASE_HREF +"/"+ xp;
+      this.indexPage = Core.BASE_HREF +"/"+ s;
     }
 
     /**
      * 获取登录URL
      */
-    xp = config.getInitParameter("login-uri");
-    if (xp != null)
+    s = config.getInitParameter("login-uri");
+    if (s != null)
     {
-      this.loginPage = Core.BASE_HREF +"/"+ xp;
+      this.loginPage = Core.BASE_HREF +"/"+ s;
     }
 
     /**
      * 获取不包含的URL
      */
-    xp = config.getInitParameter("exclude-uris");
-    if (xp != null)
+    s = config.getInitParameter("exclude-uris");
+    if (s != null)
     {
       Set<String> cu = new HashSet();
       Set<String> su = new HashSet();
       Set<String> eu = new HashSet();
-      for (String u : xp.split(","))
+      for (String u : s.split(","))
       {
         u = u.trim();
         if (u.endsWith("*")) {
@@ -169,13 +162,12 @@ public class AuthFilter
         }
     }
 
-    ActionHelper hlpr = Core.getInstance(ActionHelper.class);
-    Set sess  = Synt.declare(hlpr.getSessValue(sessName), Set.class);
+    Set sess  = auth.getAuthSet(   );
     if (sess == null) {
         doFailed(0);
         return;
     }
-    Boolean perm = auth.checkAuth(act, sess);
+    Boolean perm = auth.chkAuth(act);
     if (perm != true) {
         doFailed(1);
         return;
@@ -188,8 +180,8 @@ public class AuthFilter
 
   private void doFailed(int type)
   {
-    ActionHelper helper = Core.getInstance(ActionHelper.class);
-    CoreLanguage lang   = Core.getInstance(CoreLanguage.class);
+    ActionHelper hlpr = Core.getInstance(ActionHelper.class);
+    CoreLanguage lang = Core.getInstance(CoreLanguage.class);
 
     /**
      * 根据错误类型获取错误消息及跳转URI
@@ -210,8 +202,8 @@ public class AuthFilter
     /**
      * 追加来源URI
      */
-    String src = helper.getRequest().getRequestURI( );
-    String qry = helper.getRequest().getQueryString();
+    String src = hlpr.getRequest().getRequestURI( );
+    String qry = hlpr.getRequest().getQueryString();
     if (src != null && src.length() != -1)
     {
       if (qry != null && qry.length() != -1)
@@ -243,7 +235,7 @@ public class AuthFilter
      * 如果处于AJAX环境, 则是由JSON传递URL和消息
      * 否则使用HTTP错误代码
      */
-    if (helper.getRequest().getRequestURI().endsWith(".act")) {
+    if (hlpr.getRequest().getRequestURI().endsWith(".act")) {
         Map rsp = new HashMap( );
             rsp.put("ok", false);
             rsp.put("err", "Er403");
@@ -251,14 +243,14 @@ public class AuthFilter
         if (uri != null  && uri.length() != 0) {
             rsp.put("goto", uri);
         }
-        helper.reply(rsp);
+        hlpr.reply(rsp);
     }
     else {
         if (uri != null  && uri.length() != 0) {
-            helper.redirect(uri);
+            hlpr.redirect(uri);
         }
         else {
-            helper.error403(msg);
+            hlpr.error403(msg);
         }
     }
   }

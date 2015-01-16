@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <unit name="__MENU__">
+        <role name="zhb" disp="智汇邦">search/main.html?ss=zhb</role>
+        <role name="hyb" disp="会议邦">search/main.html?ss=hyb</role>
+    </unit>
+    <unit name="zhb">
+        <item disp="ID" name="id" type="hidden"/>
+        <item disp="检索" name="wd" type="hidden">
+            <attrib name="field_class">text</attrib>
+            <attrib name="field_store">no</attrib>
+        </item>
+        <item disp="名称" name="name" type="text"/>
+        <item disp="说明" name="note" type="textarea">
+            <attrib name="field_class">stored</attrib>
+        </item>
+        <item disp="数据" name="data" type="textarea" rule="pass">
+            <attrib name="field_class">json</attrib>
+        </item>
+        <item disp="标识" name="identity" type="number">
+            <attrib name="type">int</attrib>
+        </item>
+        <item disp="省份" name="province" type="number">
+            <attrib name="type">int</attrib>
+        </item>
+        <item disp="行业" name="trade_id" type="number" repeated="2">
+            <attrib name="type">int</attrib>
+        </item>
+    </unit>
+    <unit name="hyb">
+        <item disp="ID" name="id" type="hidden"/>
+        <item disp="检索" name="wd" type="hidden">
+            <attrib name="field_class">text</attrib>
+            <attrib name="field_store">no</attrib>
+        </item>
+        <item disp="名称" name="name" type="text"/>
+        <item disp="说明" name="note" type="textarea">
+            <attrib name="field_class">stored</attrib>
+        </item>
+        <item disp="数据" name="data" type="textarea" rule="pass">
+            <attrib name="field_class">json</attrib>
+        </item>
+        <item disp="标识" name="identity" type="number">
+            <attrib name="type">int</attrib>
+        </item>
+        <item disp="省份" name="province" type="number">
+            <attrib name="type">int</attrib>
+        </item>
+        <item disp="行业" name="trade_id" type="number" repeated="2">
+            <attrib name="type">int</attrib>
+        </item>
+    </unit>
+    <code name="load-base-sql">
+    <![CDATA[
+        SELECT uid, uname, cname, ename, intro, identity, province, trade_id
+        FROM ts_user
+    ]]>
+    </code>
+</root>

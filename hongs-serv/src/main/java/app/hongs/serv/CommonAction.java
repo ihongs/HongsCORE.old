@@ -3,9 +3,8 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.SourceConfig;
+import app.hongs.action.Sitemap;
 import app.hongs.action.anno.Action;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,25 +18,26 @@ public class CommonAction {
 
     public void action_menu(ActionHelper helper)
     throws HongsException {
-        String m = helper.getParameter("m");
-        if (null == m || "".equals(m)) m = "default";
+        String name  = helper.getParameter("m");
+        String level = helper.getParameter("l");
+        String depth = helper.getParameter("d");
 
-        SourceConfig conf = SourceConfig.getInstance(m );
-        Map menu  =  conf.getUnit("__MENU__") != null
-                  ?  conf.getRolesTranslated("__MENU__")
-                  :  conf.getUnitsTranslated();
-
-        List list = new ArrayList();
-        for (Object o : menu.entrySet()) {
-            Map.Entry e = (Map.Entry) o;
-            String name = (String) e.getKey();
-            Map    unit = (Map ) e.getValue();
-            Map info = new HashMap();
-            info.put("name", name);
-            info.put("disp", unit.get("_disp"));
-            info.put("href", unit.get("_href"));
+        int l, d;
+        if (name  == null || name .length() == 0) {
+            name  = "default";
+        }
+        if (level == null || level.length() == 0) {
+            l = 1;
+        } else {
+            l = Integer.parseInt(level);
+        }
+        if (depth == null || depth.length() == 0) {
+            d = 1;
+        } else {
+            d = Integer.parseInt(depth);
         }
 
+        List list = Sitemap.getInstance(name).getMenu(l, d);
         Map data = new HashMap();
         data.put( "list", list );
         helper.reply(data);
@@ -47,26 +47,23 @@ public class CommonAction {
     throws HongsException {
         String m = helper.getParameter("m");
         if (null == m || "".equals(m)) m = "default";
-        String n = helper.getParameter("n");
-        if (null == n || "".equals(n)) n = "deafult";
+        String u = helper.getParameter("u");
+        if (null == u || "".equals(u)) u = "deafult";
 
-        SourceConfig conf = SourceConfig.getInstance(m );
-        Map menu  =  conf.getUnit("__MENU__") != null
-                  ?  conf.getRolesTranslated("__MENU__")
-                  :  conf.getUnitsTranslated();
-
-        if (!menu.isEmpty()) {
-            if (menu.containsKey(n)) {
-                menu = (Map) menu.get( n );
-            } else {
-                menu = (Map) new ArrayList(menu.values()).get(0);
+        Sitemap site  =  Sitemap.getInstance(m);
+        Map<String, Map> page = site.getPage(u);
+        if (page != null  && page.containsKey("pages")) {
+            Map<String, Map> pages = (Map) page.get("pages");
+            for (Map.Entry et : pages.entrySet()) {
+                String uri2 = (String)et.getKey();
+                if (site.chkAuth(uri2)) {
+                    helper.redirect( Core.BASE_HREF + uri2 );
+                    return;
+                }
             }
-            n = (String) menu.get("_href");
-        } else {
-            n = "";
         }
 
-        helper.redirect(Core.BASE_HREF+"/"+n);
+        helper.redirect(Core.BASE_HREF + "/");
     }
 
 }

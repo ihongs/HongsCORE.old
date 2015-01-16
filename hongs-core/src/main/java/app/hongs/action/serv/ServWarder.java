@@ -220,7 +220,7 @@ implements Filter {
             }
         }
 
-        Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-cn"));
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-CN"));
         if (conf.getProperty("core.language.probing", false)) {
             /**
              * 语言可以记录到Session/Cookies里

@@ -1,7 +1,7 @@
 package app.hongs.db.serv;
 
 import app.hongs.HongsException;
-import app.hongs.serv.old.AuthConfig;
+import app.hongs.action.Sitemap;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
 import app.hongs.db.FetchCase;
@@ -69,7 +69,7 @@ extends Model {
     public static List getPageGroups(String name)
     throws HongsException {
         List pageGroups = new ArrayList();
-        AuthConfig ac = new AuthConfig(name);
+        Sitemap ac = new Sitemap(name);
 
         Map<String, Map> pages1 = ac.pages;
         for (Map.Entry et1 : pages1.entrySet()) {
@@ -113,12 +113,12 @@ extends Model {
             page_d.put("groups",  groups);
             Set<String> groupz = (Set)page_c.get("groups");
             for (String k : groupz) {
-                Map group1 = ac.getUnit(k);
+                Map group1 = ac.getRole(k);
                 Map group2 = new HashMap( );
                 groups.add( group2 );
-                group2.put("key" , group1.get("key" ));
-                group2.put("name", group1.get("name"));
-                group2.put("groups", ac.getUnits(k).keySet());
+                group2.put("name", group1.get("name" ));
+                group2.put("disp", group1.get("disp"));
+                group2.put("groups", ac.getMoreRoles(k).keySet());
             }
 
                 }

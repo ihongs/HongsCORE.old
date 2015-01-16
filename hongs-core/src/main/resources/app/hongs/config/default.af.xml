@@ -1,0 +1,49 @@
+<root>
+    <enum name="demo-enum">
+        <value code="1">哇哈哈</value>
+    </enum>
+    <form name="demo-form">
+        <field name="str" disp="文本" type="string" required="yes">
+            <param name="html-type">text,textarea,hidden,search,tel,url,email</param>
+            <param name="minlength">100</param>
+            <param name="maxlength">500</param>
+            <param name="pattern"></param>
+        </field>
+        <field name="num" disp="数字" type="number">
+            <param name="html-type">number,range</param>
+            <param name="html-step">1</step>
+            <param name="type">int,long,float,double</type>
+            <param name="usgd">no,yes</param>
+            <param name="min">0</param>
+            <param name="max">100</param>
+            <param name="format">###.##</param>
+        </field>
+        <field name="date" disp="日期" type="date">
+            <param name="html-type">date,time,datetime,timestamp</param>
+            <param name="min">2014/01/02</param>
+            <param name="max">2014/12/12</param>
+            <param name="format">yyyy/MM/dd</param>
+        </field>
+        <field name="file" disp="文件" type="file">
+            <param name="path"></param>
+            <param name="name"></param>
+            <param name="type"></param>
+            <param name="extn"></param>
+            <param name="minbyte"></param>
+            <param name="maxbyte"></param>
+        </field>
+        <field name="enum" disp="枚举" type="enum">
+            <param name="conf"></param>
+            <param name="enum">demo-enum</param>
+        </field>
+        <field name="form" disp="表单" type="form">
+            <param name="conf"></param>
+            <param name="form">demo-form</param>
+        </field>
+        <field name="more" disp="重复" type="string" repeated="yes">
+            <param name="minsize">0</param>
+            <param name="maxsize">0</param>
+            <param name="diverse">no,yes,set</param>
+        </field>
+    </form>
+</root>

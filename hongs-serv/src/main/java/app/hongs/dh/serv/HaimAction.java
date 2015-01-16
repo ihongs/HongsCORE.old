@@ -9,7 +9,7 @@ import app.hongs.dh.IAction;
  * 通用信息管理动作
  * @author Hongs
  */
-@Action("hcim")
+@Action("haim/dh")
 public class HaimAction implements IAction {
 
     @Action("retrieve")

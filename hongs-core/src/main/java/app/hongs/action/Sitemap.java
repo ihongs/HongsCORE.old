@@ -1,11 +1,10 @@
-package app.hongs.serv.old;
+package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreSerially;
 import app.hongs.HongsException;
-import app.hongs.action.ActionHelper;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -16,7 +15,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -47,20 +49,20 @@ import org.w3c.dom.Node;
      pages : {
        子级页面...
      },
-     units : [
-       "unit.name1",
-       "unit.name2",
+     roles : [
+       "role.name1",
+       "role.name2",
        ...
      ]
    }
    ...
  }
- units = {
+ roles = {
    "code" : {
      name: 名称,
      depends : [
-       "unit.name1",
-       "unit.name2",
+       "fole.name1",
+       "role.name2",
        ...
      ],
      actions : [
@@ -82,7 +84,7 @@ import org.w3c.dom.Node;
  *
  * @author Hongs
  */
-public class AuthConfig
+public class Sitemap
   extends CoreSerially
 {
 
@@ -101,7 +103,7 @@ public class AuthConfig
   /**
    * 全部分组信息
    */
-  public Map<String, Map>  units;
+  public Map<String, Map>  roles;
 
   /**
    * 全部动作
@@ -118,53 +120,61 @@ public class AuthConfig
    */
   public     String  session;
 
-  public AuthConfig(String name)
+  public Sitemap(String name)
     throws HongsException
   {
     this.name = name;
-    this.init("site." + name);
+    this.init(name + ".as");
   }
 
   @Override
   protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + name + ".auth.xml");
+                + File.separator + name + ".as.xml");
     File serFile = new File(Core.SERS_PATH
-                + File.separator + name + ".auth.ser");
-    return xmlFile.lastModified() > serFile.lastModified();
+                + File.separator + name + ".as.ser");
+    if (xmlFile.exists())
+    {
+      return xmlFile.lastModified() > serFile.lastModified();
+    }
+    else
+    {
+      return false;
+    }
   }
 
   @Override
   protected void imports()
     throws HongsException
   {
-    File df = new File(Core.CONF_PATH
-                + File.separator + name + ".auth.xml");
-    if (!df.exists())
+    InputStream is;
+    String      fn;
+
+    try
     {
-      throw new HongsException(0x10e0, "Auth config file '"
-                + Core.CONF_PATH
-                + File.separator + name + ".auth.xml"
-                + "' is not exists");
+        fn = Core.CONF_PATH + File.separator + name + ".as.xml";
+        is = new FileInputStream(fn);
+    }
+    catch (FileNotFoundException ex)
+    {
+        fn = name.contains("/") ? name : "app/hongs/config/" + name + ".as.xml";
+        is = this.getClass().getClassLoader().getResourceAsStream(fn);
+        if (  is  ==  null )
+        {
+            throw new app.hongs.HongsError(0x2a, "Can not find the sitemap config file '" + fn + "'.");
+        }
     }
 
-    this.paths = new HashMap();
-    this.pages = new LinkedHashMap();
-    this.units = new LinkedHashMap();
-    this.actions = new HashSet();
-    this.imports = new HashSet();
-
+    Element root;
     try
     {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder dbn = dbf.newDocumentBuilder();
-      Document doc = dbn.parse(df);
-      Element root = doc.getDocumentElement();
+      Document  doc = dbn.parse( is );
+      root = doc.getDocumentElement();
 
-      this.parse(root, this.paths, this.pages, this.units, this.imports, this.actions, new HashSet(), new ArrayList());
-
-      NodeList nodes = root.getElementsByTagName("session");
+      NodeList nodes = root.getElementsByTagName("ssname");
       if (nodes.getLength() > 0)
       {
         this.session = nodes.item(0).getTextContent();
@@ -172,7 +182,7 @@ public class AuthConfig
       else
       {
         CoreConfig c = CoreConfig.getInstance();
-        this.session = c.getProperty("core.default.auth.session", "actions");
+        this.session = c.getProperty("core.default.auth.session", "roles");
       }
     }
     catch (IOException ex)
@@ -187,9 +197,17 @@ public class AuthConfig
     {
       throw new HongsException(0x10e1, ex);
     }
+
+    this.paths = new HashMap();
+    this.pages = new LinkedHashMap();
+    this.roles = new LinkedHashMap();
+    this.actions = new HashSet();
+    this.imports = new HashSet();
+
+    this.parse(root, this.paths, this.pages, this.roles, this.imports, this.actions, new HashSet(), new ArrayList());
   }
 
-  private void parse(Element element, Map paths, Map pages, Map units, Set imports, Set actions, Set depends, List path)
+  private void parse(Element element, Map paths, Map pages, Map roles, Set imports, Set actions, Set depends, List path)
     throws HongsException
   {
     if (!element.hasChildNodes())
@@ -258,32 +276,32 @@ public class AuthConfig
         paths.put(href, path2);
 
         Map pages2 = new LinkedHashMap();
-        Map units2 = new LinkedHashMap();
+        Map roles2 = new LinkedHashMap();
 
         // 获取下级页面和分组
-        this.parse(element2, paths, pages2, units2, imports, actions, depends, path2);
+        this.parse(element2, paths, pages2, roles2, imports, actions, depends, path2);
 
         if (!pages2.isEmpty())
         {
           page2.put("pages", pages2);
         }
-        if (!units2.isEmpty())
+        if (!roles2.isEmpty())
         {
-          page2.put("units", new LinkedHashSet(units2.keySet()));
-          units.putAll(units2);
+          page2.put("roles", new LinkedHashSet(roles2.keySet()));
+          roles.putAll(roles2);
         }
       }
       else
-      if ("unit".equals(tagName2))
+      if ("role".equals(tagName2))
       {
         String namz = element2.getAttribute("name");
         if (namz == null) namz = "";
-        Map unit2 = new HashMap();
-        units.put(namz, unit2);
+        Map role2 = new HashMap();
+        roles.put(namz, role2);
 
         String disp = element2.getAttribute("disp");
         if (disp == null) disp = "";
-        unit2.put("disp", disp);
+        role2.put("disp", disp);
 
         Set actions2 = new HashSet();
         Set depends2 = new HashSet();
@@ -293,12 +311,12 @@ public class AuthConfig
 
         if (!actions2.isEmpty())
         {
-          unit2.put("actions", actions2);
+          role2.put("actions", actions2);
           actions.addAll(actions2);
         }
         if (!depends2.isEmpty())
         {
-          unit2.put("depends", depends2);
+          role2.put("depends", depends2);
           depends.addAll(depends2);
         }
       }
@@ -318,10 +336,10 @@ public class AuthConfig
       if ("import".equals(tagName2))
       {
         String impart = element2.getTextContent();
-        AuthConfig conf = new AuthConfig(impart );
+        Sitemap conf = new Sitemap(impart );
         paths.putAll(conf.paths);
         pages.putAll(conf.pages);
-        units.putAll(conf.units);
+        roles.putAll(conf.roles);
         actions.addAll(conf.actions);
         imports.addAll(conf.imports);
       }
@@ -346,26 +364,26 @@ public class AuthConfig
    * @param hrefs
    * @return 单元字典
    */
-  public Map<String, Map> getPageUnits(String... hrefs)
+  public Map<String, Map> getPageRoles(String... hrefs)
   {
-    Map<String, Map> unitz = new HashMap();
+    Map<String, Map> rolez = new HashMap();
 
     for (String herf : hrefs) {
         Map page = getPage(herf);
         Map dict;
 
-        dict = (Map)page.get("units");
+        dict = (Map)page.get("roles");
         if (dict != null && !dict.isEmpty()) {
-            unitz.putAll(getUnits((String[])dict.keySet().toArray(new String[0])));
+            rolez.putAll(getMoreRoles((String[])dict.keySet().toArray(new String[0])));
         }
 
         dict = (Map)page.get("pages");
         if (dict != null && !dict.isEmpty()) {
-            unitz.putAll(getUnits((String[])dict.keySet().toArray(new String[0])));
+            rolez.putAll(getMoreRoles((String[])dict.keySet().toArray(new String[0])));
         }
     }
 
-    return unitz;
+    return rolez;
   }
 
   /**
@@ -381,14 +399,14 @@ public class AuthConfig
         Map page = getPage(herf);
         Map dict;
 
-        dict = (Map)page.get("units");
+        dict = (Map)page.get("foles");
         if (dict != null && !dict.isEmpty()) {
-            authz.addAll(getAuths((String[])dict.keySet().toArray(new String[0])));
+            authz.addAll(Sitemap.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
         }
 
         dict = (Map)page.get("pages");
         if (dict != null && !dict.isEmpty()) {
-            authz.addAll(getAuths((String[])dict.keySet().toArray(new String[0])));
+            authz.addAll(Sitemap.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
         }
     }
 
@@ -400,9 +418,9 @@ public class AuthConfig
    * @param name
    * @return 找不到则返回null
    */
-  public Map getUnit(String name)
+  public Map getRole(String name)
   {
-    return this.units.get(name);
+    return this.roles.get(name);
   }
 
   /**
@@ -410,10 +428,10 @@ public class AuthConfig
    * @param names
    * @return 单元字典
    */
-  public Map<String, Map> getUnits(String... names)
+  public Map<String, Map> getMoreRoles(String... names)
   {
     Map<String, Map> ds = new HashMap();
-    this.getUnitAuths(ds, new HashSet(), names);
+    this.getRoleAuths(ds, new HashSet(), names);
     return ds;
   }
 
@@ -422,50 +440,50 @@ public class AuthConfig
    * @param names
    * @return 全部动作名
    */
-  public Set<String> getAuths(String... names)
+  public Set<String> getRoleAuths(String... names)
   {
     Set<String> as = new HashSet();
-    this.getUnitAuths(new HashMap(), as, names);
+    this.getRoleAuths(new HashMap(), as, names);
     return as;
   }
 
   /**
    * 获取单元和动作
-   * @param units
+   * @param roles
    * @param auths
    * @param names
    */
-  public void getUnitAuths(Map units, Set auths, String... names)
+  public void getRoleAuths(Map roles, Set auths, String... names)
   {
     for (String key : names)
     {
-      Map unit = this.units.get(key);
-      if (unit == null || units.containsKey(key))
+      Map role = this.roles.get(key);
+      if (role == null || roles.containsKey(key))
       {
         continue;
       }
 
-      units.put(key, unit);
+      roles.put(key, role);
 
-      if (unit.containsKey("actions"))
+      if (role.containsKey("actions"))
       {
-        Set<String> actionsSet = (Set<String>)unit.get("actions");
+        Set<String> actionsSet = (Set<String>)role.get("actions");
         auths.addAll(actionsSet);
       }
-      if (unit.containsKey("depends"))
+      if (role.containsKey("depends"))
       {
-        Set<String> dependsSet = (Set<String>)unit.get("depends");
+        Set<String> dependsSet = (Set<String>)role.get("depends");
         String[]    dependsArr = dependsSet.toArray(new String[0]);
-        this.getUnitAuths(units, auths, dependsArr);
+        this.getRoleAuths(roles, auths, dependsArr);
       }
     }
   }
 
   /**
-   * 获取动作权限集合表
+   * 获取动作角色集合表(与当前请求相关)
    * @return
    */
-  public Set<String> getAuthSet() {
+  public Set<String> getRoleSet() {
       if (session.contains(".")) {
           return (Set)Core.getInstance (session);
       } else {
@@ -476,7 +494,16 @@ public class AuthConfig
   }
 
   /**
-   * 获取动作权限对照表
+   * 获取动作权限集合表(与当前请求相关)
+   * @return
+   */
+  public Set<String> getAuthSet() {
+      Set<String> roles = getRoleSet();
+      return getRoleAuths(roles.toArray(new String[0]));
+  }
+
+  /**
+   * 获取动作权限对照表(与当前请求相关)
    * @return
    */
   public Map<String, Boolean> getAuthMap() {
@@ -486,16 +513,23 @@ public class AuthConfig
       }
       Map<String, Boolean> map = new HashMap();
       for (String act : actions) {
-          map.put(act , false);
-      }
-      for (String act : authset) {
-          map.put(act , true );
+          map.put(act , authset.contains(act));
       }
       return map;
   }
 
   /**
-   * 检查动作权限
+   * 检查角色权限(与当前请求相关)
+   * @param role
+   * @return 可访问则为true
+   */
+  public Boolean chkRole(String role) {
+      Set<String> authset = getRoleSet();
+      return authset.contains(role) || !roles.containsKey(role);
+  }
+
+  /**
+   * 检查动作权限(与当前请求相关)
    * @param href
    * @return 可访问则为true
    */
@@ -514,7 +548,7 @@ public class AuthConfig
   }
 
   /**
-   * 检查页面权限
+   * 检查页面权限(与当前请求相关)
    * @param href
    * @return 有一个动作可访问即返回true
    */
@@ -528,7 +562,13 @@ public class AuthConfig
       return false;
   }
 
-  public List getMenu(int level, int depth) {
+  /**
+   * 获取菜单列表(与当前请求相关)
+   * @param level
+   * @param depth
+   * @return
+   */
+  public  List<Map> getMenu(int level, int depth) {
       CoreLanguage lang = CoreLanguage.getInstance(this.name).clone();
       for ( String namz : imports) {
           lang.load( namz);
@@ -536,8 +576,8 @@ public class AuthConfig
       return getMenu(level, depth, 0, pages, lang);
   }
 
-  private List getMenu(int level, int depth, int i, Map<String, Map> pages, CoreLanguage lang) {
-      List list = new ArrayList();
+  private List<Map> getMenu(int level, int depth, int i, Map<String, Map> pages, CoreLanguage lang) {
+      List<Map> list = new ArrayList();
 
       if (i >= level + depth || pages == null) {
           return list;
@@ -555,9 +595,9 @@ public class AuthConfig
               }
               Map page = new HashMap();
               page.put("href", u);
-              page.put("list", a);
+              page.put("menu", a);
               page.put("auth", chkPage(u));
-              page.put("name", lang.translate(n));
+              page.put("disp", lang.translate(n));
               list.add(page);
           } else {
               list.addAll(a);
@@ -569,21 +609,21 @@ public class AuthConfig
 
   //** 工厂方法 **/
 
-  public static AuthConfig getInstance(String name) throws HongsException {
-      String key = AuthConfig.class.getName() + ":" + name;
+  public static Sitemap getInstance(String name) throws HongsException {
+      String key = Sitemap.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      AuthConfig inst;
+      Sitemap inst;
       if (core.containsKey(key)) {
-          inst = (AuthConfig)core.get(key);
+          inst = (Sitemap)core.get(key);
       }
       else {
-          inst = new AuthConfig(name);
+          inst = new Sitemap(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static AuthConfig getInstance() throws HongsException {
+  public static Sitemap getInstance() throws HongsException {
       return getInstance("default");
   }
 }

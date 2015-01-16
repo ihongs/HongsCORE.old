@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.action.SourceConfig;
+import app.hongs.action.Formset;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
@@ -66,7 +66,7 @@ public class Reader {
 
             reader = DirectoryReader.open(dir);
             finder = new IndexSearcher(reader);
-            ssform = SourceConfig.getInstance("search").getItems("_search");
+            ssform = Formset.getInstance("search").getForm("_search");
         } catch (IOException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }

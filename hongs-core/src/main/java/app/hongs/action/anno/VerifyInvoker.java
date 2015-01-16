@@ -25,13 +25,13 @@ public class VerifyInvoker implements FilterInvoker {
     public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
         Verify ann  = (Verify) anno;
-        String unit = ann.unit();
+        String form = ann.form();
         String conf = ann.conf();
         boolean clean = ann.clean();
 
-        if (unit.length() == 0 ) {
-            unit = (String) helper.getAttribute(MODULE);
-            conf = (String) helper.getAttribute(ENTITY);
+        if (form.length() == 0 ) {
+            form = (String) helper.getAttribute(ENTITY);
+            conf = (String) helper.getAttribute(MODULE);
         }
 
         // 准备数据
@@ -44,8 +44,8 @@ public class VerifyInvoker implements FilterInvoker {
 
         // 执行校验
         VerifyHelper ver  =  new VerifyHelper();
-        if (null != conf &&  null != unit) {
-            ver.addRulesByUnit(conf, unit);
+        if (null != conf &&  null != form) {
+            ver.addRulesByForm(conf, form);
         }
         try {
             Map vls = ver.verify(dat, upd);

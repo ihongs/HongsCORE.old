@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Filter(SupplyInvoker.class)
-public @interface Supply {
-    String  form() default "";
+public @interface Permsn {
+    String  role() default "";
     String  conf() default "default";
 }

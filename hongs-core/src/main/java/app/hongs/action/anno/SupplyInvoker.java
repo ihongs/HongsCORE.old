@@ -42,18 +42,18 @@ public class SupplyInvoker implements FilterInvoker {
         }
 
         Supply ann  = (Supply) anno;
-        String unit = ann.unit();
+        String form = ann.form();
         String conf = ann.conf();
 
-        if (unit.length() == 0 ) {
-            unit = (String) helper.getAttribute(MODULE);
-            conf = (String) helper.getAttribute(ENTITY);
+        if (form.length() == 0 ) {
+            form = (String) helper.getAttribute(ENTITY);
+            conf = (String) helper.getAttribute(MODULE);
         }
 
         // 填充数据
-        SupplyHelper sup = new SupplyHelper().addEnumsByUnit(conf, unit);
+        SupplyHelper sup = new SupplyHelper().addEnumsByForm(conf, form);
         sup.supply ( rsp, Short.parseShort(jd) );
-        
+
         // 返回数据
         helper.reply(rsp);
     }

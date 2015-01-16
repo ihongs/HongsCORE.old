@@ -1,4 +1,4 @@
-package net.hongs.search.action;
+package net.hongs.search.serv;
 
 import net.hongs.search.Writer;
 import app.hongs.HongsException;
