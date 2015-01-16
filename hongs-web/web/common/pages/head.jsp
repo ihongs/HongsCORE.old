@@ -13,6 +13,7 @@
             String href = (String) menu.get("_href");
             String disp = (String) menu.get("_disp");
             String name = href.replaceAll("\\.\\w+$", "");
+            
             if (name.startsWith(rootName)) {
                 name = name.substring(name.length( ) + 1);
             }

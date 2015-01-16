@@ -1,4 +1,5 @@
 <root>
+    <!--
     <enum name="demo-enum">
         <value code="1">哇哈哈</value>
     </enum>
@@ -46,4 +47,5 @@
             <param name="diverse">no,yes,set</param>
         </field>
     </form>
+    //-->
 </root>
