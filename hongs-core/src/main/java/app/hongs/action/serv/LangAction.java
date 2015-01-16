@@ -1,6 +1,6 @@
 package app.hongs.action.serv;
 
-import app.hongs.action.ServWarder;
+import app.hongs.action.ActionWarder;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
@@ -56,7 +56,7 @@ public class LangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core core = ServWarder.getCurrCore(req);
+    Core core = ActionWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = helper.getRequest().getPathInfo();

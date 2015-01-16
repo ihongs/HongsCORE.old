@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Hong
  */
-public class ServWarder
+public class ActionWarder
 implements Filter {
 
     /**

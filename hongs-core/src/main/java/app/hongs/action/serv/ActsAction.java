@@ -1,6 +1,6 @@
 package app.hongs.action.serv;
 
-import app.hongs.action.ServWarder;
+import app.hongs.action.ActionWarder;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
@@ -57,8 +57,8 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException
   {
-    String act  = ServWarder.getCurrPath(req);
-    Core   core = ServWarder.getCurrCore(req);
+    String act  = ActionWarder.getCurrPath(req);
+    Core   core = ActionWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
     helper.reinitHelper(req, rsp);
 

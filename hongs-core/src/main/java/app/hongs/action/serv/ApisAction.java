@@ -1,6 +1,6 @@
 package app.hongs.action.serv;
 
-import app.hongs.action.ServWarder;
+import app.hongs.action.ActionWarder;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.util.Synt;
@@ -78,7 +78,7 @@ public class ApisAction
      */
     private void doAction(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
-        String act = ServWarder.getCurrPath(req);
+        String act = ActionWarder.getCurrPath(req);
         String mtd = mts[0];
 
         if (act == null || act.length() == 0) {
@@ -165,7 +165,7 @@ public class ApisAction
         req.getRequestDispatcher("/"+act+"/"+mtd+".act"+pms).include(req, rsp);
 
         // 将应答数据格式化后传递
-        ActionHelper hlpr = ServWarder.getCurrCore(req)
+        ActionHelper hlpr = ActionWarder.getCurrCore(req)
                          .get(ActionHelper.class);
         Map  data  = hlpr.getResponseData();
         if ( data != null ) {

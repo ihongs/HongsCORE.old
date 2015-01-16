@@ -1,6 +1,6 @@
 package app.hongs.action.serv;
 
-import app.hongs.action.ServWarder;
+import app.hongs.action.ActionWarder;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
@@ -56,7 +56,7 @@ public class ConfAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    Core core = ServWarder.getCurrCore(req);
+    Core core = ActionWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = helper.getRequest().getPathInfo();

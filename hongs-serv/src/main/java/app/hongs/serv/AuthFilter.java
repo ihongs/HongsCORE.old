@@ -5,7 +5,7 @@ import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.Sitemap;
-import app.hongs.action.ServWarder;
+import app.hongs.action.ActionWarder;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -139,7 +139,7 @@ public class AuthFilter
   {
     DO:do {
 
-    String act = ServWarder.getCurrPath((HttpServletRequest) req);
+    String act = ActionWarder.getCurrPath((HttpServletRequest) req);
 
     /**
      * 依次校验是否是需要排除的URL
