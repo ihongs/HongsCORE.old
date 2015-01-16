@@ -307,13 +307,13 @@ public class CoreLanguage
   public static boolean hasAcceptLanguage(String lang)
   {
     String path = Core.CONF_PATH + File.separator;
-    path = path + /* * * */ "default." + lang + ".properties";
+    path = path + /* * * */ "default_" + lang + ".properties";
     if ((new File(path)).exists())
     {
       return true;
     }
 
-    path = "app/hongs/config/default." + lang + ".properties";
+    path = "app/hongs/config/default_" + lang + ".properties";
     if (null != CoreConfig.class.getClassLoader().getResourceAsStream(path))
     {
       return true;
