@@ -15,7 +15,7 @@
             String name = href.replaceAll("\\.\\w+$", "");
             
             if (name.startsWith(rootName)) {
-                name = name.substring(name.length( ) + 1);
+                name = name.substring(rootName.length() + 1);
             }
 
             if (realHref) {

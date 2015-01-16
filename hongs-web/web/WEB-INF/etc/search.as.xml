@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <page herf="common/goto.act?m=search" disp="用户管理">
+    <page herf="common/goto.act?m=search" disp="搜索引擎">
         <page disp="智汇邦" href="search/zhb/list.html"/>
     </page>
 </root>

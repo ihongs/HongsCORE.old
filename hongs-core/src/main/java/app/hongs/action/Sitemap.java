@@ -571,8 +571,8 @@ public class Sitemap
       try {
           lang = CoreLanguage.getInstance(this.name).clone();
       } catch (HongsError er) {
-          // 语言文件不存在则拿一个空的属性对象代替
-          if (er.getCode() == 0x2c) {
+          // 语言文件不存在则拿一个空对象代替
+          if (er.getCode() == 0x2a) {
               lang = new CoreLanguage(null);
           } else {
               throw er;

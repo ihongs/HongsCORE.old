@@ -1,10 +1,9 @@
 package app.hongs;
 
 import app.hongs.util.Text;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.io.File;
 
 /**
  * 语言资源读取工具
@@ -12,7 +11,7 @@ import java.io.File;
  * <p>
  * 为与配置保持一致, 故从CoreConfig继承.<br/>
  * 放弃使用"ResourceBundle"类加载语言资源.<br/>
- * 资源文件名为"xxx.语言[-国家].properties".<br/>
+ * 资源文件名为"xxx_语言[-国家].properties".<br/>
  * </p>
  *
  * <h3>配置选项:</h3>
@@ -306,20 +305,28 @@ public class CoreLanguage
    */
   public static boolean hasAcceptLanguage(String lang)
   {
-    String path = Core.CONF_PATH + File.separator;
-    path = path + /* * * */ "default_" + lang + ".properties";
-    if ((new File(path)).exists())
-    {
-      return true;
-    }
+    CoreConfig conf = CoreConfig.getInstance();
+    String x = conf.getProperty("core.langauge.support");
+    return Arrays.asList(x.split(",") ).contains( lang );
 
-    path = "app/hongs/config/default_" + lang + ".properties";
-    if (null != CoreConfig.class.getClassLoader().getResourceAsStream(path))
-    {
-      return true;
-    }
-
-    return  false;
+    /**
+     * 有时候会单独为某个模块添加语言文件
+     * 这时候检查默认语言资源就不太妥当了
+     */
+//    String path = Core.CONF_PATH + File.separator;
+//    path = path + /* * * */ "default_" + lang + ".properties";
+//    if ((new File(path)).exists())
+//    {
+//      return true;
+//    }
+//
+//    path = "app/hongs/config/default_" + lang + ".properties";
+//    if (null != CoreConfig.class.getClassLoader().getResourceAsStream(path))
+//    {
+//      return true;
+//    }
+//
+//    return  false;
   }
 
 }

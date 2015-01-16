@@ -91,22 +91,14 @@ public class ActsAction
     // 执行动作
     try
     {
-      runner.doAction( );
+      runner.doAction();
     }
-    catch (Throwable ex)
+    catch (HongsException  ex)
     {
       senderr(req, helper, ex);
     }
   }
 
-  private static final Map<Integer, String> ErrMap;
-  static {
-      ErrMap = new HashMap();
-      ErrMap.put(0x10f3, "Er403");
-      ErrMap.put(0x10f4, "Er404");
-      ErrMap.put(0x10f5, "Er500");
-  }
-  
   private void senderr(HttpServletRequest req, ActionHelper helper, Throwable ex)
     throws ServletException
   {
@@ -154,6 +146,14 @@ public class ActsAction
     data.put( "err", errno );
     data.put( "msg", error );
     helper.reply(data);
+  }
+
+  private static final Map<Integer, String> ErrMap;
+  static {
+      ErrMap = new HashMap();
+      ErrMap.put(0x10f3, "Er403");
+      ErrMap.put(0x10f4, "Er404");
+      ErrMap.put(0x10f5, "Er500");
   }
 
 }
