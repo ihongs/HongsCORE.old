@@ -82,7 +82,7 @@ import org.xml.sax.SAXException;
  *
  * @author Hongs
  */
-public class SiteMap2
+public class SiteMap
   extends CoreSerially
 {
 
@@ -118,7 +118,7 @@ public class SiteMap2
    */
   public     String  session;
 
-  public SiteMap2(String name)
+  public SiteMap(String name)
     throws HongsException
   {
     this.name = name;
@@ -334,7 +334,7 @@ public class SiteMap2
       if ("include".equals(tagName2))
       {
         String impart = element2.getTextContent();
-        SiteMap2  conf = new SiteMap2(impart);
+        SiteMap  conf = new SiteMap(impart);
         paths.putAll(conf.paths);
         pages.putAll(conf.pages);
         roles.putAll(conf.roles);
@@ -399,12 +399,12 @@ public class SiteMap2
 
         dict = (Map)page.get("foles");
         if (dict != null && !dict.isEmpty()) {
-            authz.addAll(SiteMap2.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
+            authz.addAll(SiteMap.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
         }
 
         dict = (Map)page.get("pages");
         if (dict != null && !dict.isEmpty()) {
-            authz.addAll(SiteMap2.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
+            authz.addAll(SiteMap.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
         }
     }
 
@@ -619,21 +619,21 @@ public class SiteMap2
 
   //** 工厂方法 **/
 
-  public static SiteMap2 getInstance(String name) throws HongsException {
-      String key = SiteMap2.class.getName() + ":" + name;
+  public static SiteMap getInstance(String name) throws HongsException {
+      String key = SiteMap.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      SiteMap2 inst;
+      SiteMap inst;
       if (core.containsKey(key)) {
-          inst = (SiteMap2)core.get(key);
+          inst = (SiteMap)core.get(key);
       }
       else {
-          inst = new SiteMap2(name);
+          inst = new SiteMap(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static SiteMap2 getInstance() throws HongsException {
+  public static SiteMap getInstance() throws HongsException {
       return getInstance("default");
   }
 }

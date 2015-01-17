@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.SiteMap2;
+import app.hongs.action.SiteMap;
 import app.hongs.util.Data;
 import java.io.IOException;
 import java.util.HashMap;
@@ -71,7 +71,7 @@ public class AuthAction
 
     String data;
     try {
-      data = Data.toString(SiteMap2.getInstance(name).getAuthMap());
+      data = Data.toString(SiteMap.getInstance(name).getAuthMap());
     }
     catch (HongsException ex) {
       helper.error500(ex.getMessage());

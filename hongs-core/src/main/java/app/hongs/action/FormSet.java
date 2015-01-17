@@ -66,7 +66,7 @@ import org.xml.sax.SAXException;
  *
  * @author Hongs
  */
-public class FormSet2
+public class FormSet
   extends CoreSerially
 {
 
@@ -82,7 +82,7 @@ public class FormSet2
    */
   public Map<String, Map> enums;
 
-  public FormSet2(String name)
+  public FormSet(String name)
     throws HongsException
   {
     this.name = name;
@@ -293,21 +293,21 @@ public class FormSet2
 
   //** 工厂方法 **/
 
-  public static FormSet2 getInstance(String name) throws HongsException {
-      String key = FormSet2.class.getName() + ":" + name;
+  public static FormSet getInstance(String name) throws HongsException {
+      String key = FormSet.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      FormSet2 inst;
+      FormSet inst;
       if (core.containsKey(key)) {
-          inst = (FormSet2)core.get(key);
+          inst = (FormSet)core.get(key);
       }
       else {
-          inst = new FormSet2(name);
+          inst = new FormSet(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static FormSet2 getInstance() throws HongsException {
+  public static FormSet getInstance() throws HongsException {
       return getInstance("default");
   }
 }

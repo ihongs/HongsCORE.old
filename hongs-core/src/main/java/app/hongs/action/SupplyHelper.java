@@ -41,7 +41,7 @@ public class SupplyHelper {
     }
 
     public SupplyHelper addEnumsByForm(String conf, String form) throws HongsException {
-        FormSet2 cnf = FormSet2.getInstance(conf);
+        FormSet cnf = FormSet.getInstance(conf);
         Map map  = cnf.getForm(form);
         if (map == null) return this;
         map = (Map) map.get("items");
@@ -58,7 +58,7 @@ public class SupplyHelper {
             String e2 = (String)i2.get( "name");
             String c2 = (String)i2.get( "conf");
             if (null == c2 || "".equals( c2 )) c2 = conf;
-            Map d2  = FormSet2.getInstance(c2).getEnumTranslated(e2);
+            Map d2  = FormSet.getInstance(c2).getEnumTranslated(e2);
             if (d2 != null) {
                 enums.put(n2, d2);
             }

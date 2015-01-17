@@ -1,7 +1,7 @@
 package app.hongs.db.serv;
 
 import app.hongs.HongsException;
-import app.hongs.action.SiteMap2;
+import app.hongs.action.SiteMap;
 import app.hongs.db.DB;
 import app.hongs.db.Model;
 import app.hongs.db.FetchCase;
@@ -69,7 +69,7 @@ extends Model {
     public static List getPageGroups(String name)
     throws HongsException {
         List pageGroups = new ArrayList();
-        SiteMap2 ac = new SiteMap2(name);
+        SiteMap ac = new SiteMap(name);
 
         Map<String, Map> pages1 = ac.pages;
         for (Map.Entry et1 : pages1.entrySet()) {
