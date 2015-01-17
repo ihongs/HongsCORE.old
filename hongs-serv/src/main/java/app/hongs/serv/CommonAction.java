@@ -3,7 +3,7 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.SiteMap;
+import app.hongs.action.SiteMap2;
 import app.hongs.action.anno.Action;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +28,7 @@ public class CommonAction {
             x  = "common/goto.act?m=" + m;
         }
 
-        SiteMap site  =  SiteMap.getInstance(m);
+        SiteMap2 site  =  SiteMap2.getInstance(m);
         Map<String, Map> page = site.getPage(x);
         if (page != null  && page.containsKey("pages")) {
             Map<String, Map> pages = (Map) page.get("pages");
@@ -66,7 +66,7 @@ public class CommonAction {
             d = Integer.parseInt(depth);
         }
 
-        List list = SiteMap.getInstance(name).getMenu(l, d);
+        List list = SiteMap2.getInstance(name).getMenu(l, d);
         Map data = new HashMap();
         data.put( "list", list );
         helper.reply(data);

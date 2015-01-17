@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.action.FormSet;
+import app.hongs.action.FormSet2;
 import app.hongs.dh.IRecord;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
@@ -95,7 +95,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
     }
 
     public LuceneRecord(String module, String entity) throws HongsException {
-        this(FormSet.getInstance(module).getForm(entity), module + "/" + entity, null);
+        this(FormSet2.getInstance(module).getForm(entity), module + "/" + entity, null);
     }
 
     public Map retrieve(Map rd) throws HongsException {

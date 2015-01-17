@@ -70,7 +70,7 @@ public class VerifyHelper {
     }
 
     public VerifyHelper addRulesByForm(String conf, String form) throws HongsException {
-        FormSet cnf = FormSet.getInstance(conf);
+        FormSet2 cnf = FormSet2.getInstance(conf);
         CoreConfig cuf = CoreConfig.getInstance();
         Map map  = cnf.getForm(form);
         if (map == null) return this;
@@ -367,7 +367,7 @@ public class VerifyHelper {
             name = Dict.getValue(params, "", "__name__");
         }
 
-        Map data = FormSet.getInstance(conf).getEnum(name);
+        Map data = FormSet2.getInstance(conf).getEnum(name);
         if (! data.containsValue(value.toString()) ) {
             throw new Wrong("fore.form.not.in.enum");
         }

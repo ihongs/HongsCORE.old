@@ -1,7 +1,7 @@
 package app.hongs.tags;
 
 import app.hongs.HongsException;
-import app.hongs.action.SiteMap;
+import app.hongs.action.SiteMap2;
 import java.io.IOException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
@@ -30,7 +30,7 @@ public class AuthTag extends BodyTagSupport {
   @Override
   public int doStartTag() throws JspException {
     try {
-      this.ebb = SiteMap.getInstance(this.cnf).chkAuth(this.act);
+      this.ebb = SiteMap2.getInstance(this.cnf).chkAuth(this.act);
     } catch ( HongsException ex) {
       throw new JspException(ex);
     }

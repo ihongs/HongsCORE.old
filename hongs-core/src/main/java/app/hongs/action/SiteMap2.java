@@ -82,7 +82,7 @@ import org.xml.sax.SAXException;
  *
  * @author Hongs
  */
-public class Sitemap
+public class SiteMap2
   extends CoreSerially
 {
 
@@ -118,11 +118,11 @@ public class Sitemap
    */
   public     String  session;
 
-  public Sitemap(String name)
+  public SiteMap2(String name)
     throws HongsException
   {
     this.name = name;
-    this.init(name + ".as");
+    this.init(name + ".as");System.err.println("--------"+name);app.hongs.util.Data.dumps(this.pages);
   }
 
   @Override
@@ -172,7 +172,7 @@ public class Sitemap
       Document  doc = dbn.parse( is );
       root = doc.getDocumentElement();
 
-      NodeList nodes = root.getElementsByTagName("ssname");
+      NodeList nodes = root.getElementsByTagName("session");
       if (nodes.getLength() > 0)
       {
         this.session = nodes.item(0).getTextContent();
@@ -331,10 +331,10 @@ public class Sitemap
         depends.add(depend);
       }
       else
-      if ("import".equals(tagName2))
+      if ("include".equals(tagName2))
       {
         String impart = element2.getTextContent();
-        Sitemap conf = new Sitemap(impart );
+        SiteMap2  conf = new SiteMap2(impart);
         paths.putAll(conf.paths);
         pages.putAll(conf.pages);
         roles.putAll(conf.roles);
@@ -399,12 +399,12 @@ public class Sitemap
 
         dict = (Map)page.get("foles");
         if (dict != null && !dict.isEmpty()) {
-            authz.addAll(Sitemap.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
+            authz.addAll(SiteMap2.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
         }
 
         dict = (Map)page.get("pages");
         if (dict != null && !dict.isEmpty()) {
-            authz.addAll(Sitemap.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
+            authz.addAll(SiteMap2.this.getRoleAuths((String[])dict.keySet().toArray(new String[0])));
         }
     }
 
@@ -478,42 +478,45 @@ public class Sitemap
   }
 
   /**
-   * 获取动作角色集合表(与当前请求相关)
+   * 获取角色集合(与当前请求相关)
    * @return
    */
   public Set<String> getRoleSet() {
+      Set<String> roleset;
       if (session.contains(".")) {
-          return (Set)Core.getInstance (session);
+          roleset = (Set) Core.getInstance (session);
+          if (roleset == null || (roleset.size() == 1 && roleset.contains(null))) {
+              roleset  = null;
+          }
       } else {
-          ActionHelper help = (ActionHelper)
-            Core.getInstance(ActionHelper.class);
-          return (Set)help.getSessValue(session);
+          ActionHelper help = (ActionHelper) Core.getInstance(ActionHelper.class);
+          roleset = (Set) help.getSessValue(session);
       }
+      return roleset;
   }
 
   /**
-   * 获取动作权限集合表(与当前请求相关)
+   * 获取权限集合(与当前请求相关)
    * @return
    */
   public Set<String> getAuthSet() {
-      Set<String> roles = getRoleSet();
-      return getRoleAuths(roles.toArray(new String[0]));
+      Set<String> roleset = getRoleSet();
+      if (null == roleset)  return null ;
+      return getRoleAuths(roleset.toArray(new String[0]));
   }
 
   /**
-   * 获取动作权限对照表(与当前请求相关)
+   * 获取权限许可表(与当前请求相关)
    * @return
    */
   public Map<String, Boolean> getAuthMap() {
       Set<String> authset = getAuthSet();
-      if (authset == null || (authset.size() == 1 && authset.contains(null))) {
-          return null;
-      }
-      Map<String, Boolean> map = new HashMap();
+      if (null == authset) authset = new HashSet();
+      Map<String, Boolean> authmap = new HashMap();
       for (String act : actions) {
-          map.put(act , authset.contains(act));
+          authmap.put(act , authset.contains(act));
       }
-      return map;
+      return authmap;
   }
 
   /**
@@ -522,8 +525,11 @@ public class Sitemap
    * @return 可访问则为true
    */
   public Boolean chkRole(String role) {
-      Set<String> authset = getRoleSet();
-      return authset.contains(role) || !roles.containsKey(role);
+      Set<String> roleset = getRoleSet( );
+      if (null == roleset) {
+          return !roles.containsKey(role);
+      }
+      return roleset.contains(role) || !roles.containsKey(role);
   }
 
   /**
@@ -533,16 +539,10 @@ public class Sitemap
    */
   public Boolean chkAuth(String href) {
       Set<String> authset = getAuthSet();
-      if (authset == null) {
-          return false;
+      if (null == authset) {
+          return !actions.contains(href);
       }
-      if (authset.size(  ) == 1  &&  authset.contains(null)) {
-          return false;
-      }
-      if (actions.contains(href) && !authset.contains(href)) {
-          return false;
-      }
-      return true;
+      return authset.contains(href) || !actions.contains(href);
   }
 
   /**
@@ -551,13 +551,14 @@ public class Sitemap
    * @return 有一个动作可访问即返回true
    */
   public Boolean chkPage(String href) {
+      Set<String> authset = getAuthSet(/**/);
       Set<String> authz = getPageAuths(href);
       for(String  auth  : authz) {
-          if (chkAuth(auth)) {
-              return  true;
+          if(authset.contains(auth) || !actions.contains(auth)) {
+              return true;
           }
       }
-      return false;
+      return  false;
   }
 
   /**
@@ -580,7 +581,7 @@ public class Sitemap
       }
       for(String namz : imports) {
           lang.loadIgnrFNF(namz);
-      }
+      }app.hongs.util.Data.dumps(pages);
 
       return getMenu(level, depth, 0, pages, lang);
   }
@@ -604,7 +605,7 @@ public class Sitemap
               }
               Map page = new HashMap();
               page.put("href", u);
-              page.put("menu", a);
+              page.put("list", a);
               page.put("auth", chkPage(u));
               page.put("disp", lang.translate(n));
               list.add(page);
@@ -618,21 +619,21 @@ public class Sitemap
 
   //** 工厂方法 **/
 
-  public static Sitemap getInstance(String name) throws HongsException {
-      String key = Sitemap.class.getName() + ":" + name;
+  public static SiteMap2 getInstance(String name) throws HongsException {
+      String key = SiteMap2.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      Sitemap inst;
+      SiteMap2 inst;
       if (core.containsKey(key)) {
-          inst = (Sitemap)core.get(key);
+          inst = (SiteMap2)core.get(key);
       }
       else {
-          inst = new Sitemap(name);
+          inst = new SiteMap2(name);
           core.put( key, inst );
       }
       return inst;
   }
 
-  public static Sitemap getInstance() throws HongsException {
+  public static SiteMap2 getInstance() throws HongsException {
       return getInstance("default");
   }
 }
