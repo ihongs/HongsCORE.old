@@ -22,7 +22,7 @@ import java.util.jar.JarFile;
 public class CsNs {
     /**
      * 测试
-     * @param args 包名1 包名2... [-w(包含下级)]
+     * @param args 包名1 包名2... [-r(包含下级)]
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
