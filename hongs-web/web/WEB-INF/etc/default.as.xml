@@ -1,6 +1,6 @@
 <root>
     <page href="/">
-        <import>hcum</import>
-        <import>search</import>
+        <include>hcum</include>
+        <include>search</include>
     </page>
 </root>

@@ -5,7 +5,7 @@
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.Sitemap"%>
+<%@page import="app.hongs.action.SiteMap"%>
 <%!
     StringBuilder makeMenu(List<Map> list, String rootName, boolean realHref) {
         StringBuilder menus = new StringBuilder();
@@ -20,7 +20,7 @@
 
             if (realHref) {
                 String temp = href;
-                href =  Core.BASE_HREF + "/" + href + "#" + name;
+                href =  Core.BASE_HREF + "/" + href;
                 name = temp;
             } else {
                 String temp = href;
@@ -48,8 +48,8 @@
         name = "default";
     }
 
-    Sitemap main = Sitemap.getInstance();
-    Sitemap curr = Sitemap.getInstance(name);
+    SiteMap main = SiteMap.getInstance();
+    SiteMap curr = SiteMap.getInstance(name);
     List<Map> mainMenu = main.getMenu (1, 1);
     List<Map> currMenu = curr.getMenu (1, 1);
 %>

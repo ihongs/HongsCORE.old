@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
 public @interface Verify {
     String  form() default "";
     String  conf() default "default";
-    boolean clean() default false;
+    boolean clear() default false;
 }

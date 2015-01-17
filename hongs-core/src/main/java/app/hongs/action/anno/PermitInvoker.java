@@ -10,10 +10,10 @@ import java.lang.annotation.Annotation;
  * 权限过滤处理器
  * @author Hongs
  */
-public class PermsnInvoker implements FilterInvoker {
+public class PermitInvoker implements FilterInvoker {
 
     public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno) throws HongsException {
-        Permsn ann  = (Permsn) anno;
+        Permit ann  = (Permit) anno;
         String role = ann.role();
         String conf = ann.conf();
 

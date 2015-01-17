@@ -17,7 +17,7 @@ import java.util.Map;
 public class CommonAction {
 
     @Action("goto")
-    public void action_goto(ActionHelper helper)
+    public void jump(ActionHelper helper)
     throws HongsException {
         String m = helper.getParameter("m");
         if (null == m ||  "".equals(m)) m = "default";

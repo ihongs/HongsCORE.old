@@ -27,7 +27,7 @@ public class VerifyInvoker implements FilterInvoker {
         Verify ann  = (Verify) anno;
         String form = ann.form();
         String conf = ann.conf();
-        boolean clean = ann.clean();
+        boolean clean = ann.clear();
 
         if (form.length() == 0 ) {
             form = (String) helper.getAttribute(ENTITY);

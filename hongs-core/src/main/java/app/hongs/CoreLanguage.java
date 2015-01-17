@@ -28,10 +28,12 @@ public class CoreLanguage
 
   private String lang;
 
-  private CoreLanguage that;
+  private CoreLanguage that = null;
 
   /**
    * 加载指定路径\语言和名称的配置
+   * 注意: 与 CoreConfig  不同, 由于语言文件存在多份,
+   * 构造时用 loadIgnrFNF 加载, 故如果没有也不会报错.
    * @param name
    * @param lang
    */
@@ -39,7 +41,7 @@ public class CoreLanguage
   {
     super(null);
 
-    this.lang = lang ;
+    this.lang = lang;
 
     if (null == lang)
     {
@@ -48,21 +50,14 @@ public class CoreLanguage
 
     if (null != name)
     {
-      this.load(name);
+      this.loadIgnrFNF(name);
     }
 
-    // 加载默认语言, 当前语音没设置时可以使用默认语言来翻译
-    String defn = getAcceptLanguage(CoreConfig.getInstance()
+    String dlng = getAcceptLanguage(CoreConfig.getInstance()
                  .getProperty("core.language.default","zh"));
-    if ( ! lang.equals(defn))
+    if ( ! dlng.equals(lang))
     {
-      that = new CoreLanguage(null, defn);
-    if (null != name)
-    {
-      that.loadIgnrFNF(name);
-    } } else
-    {
-      that = null;
+      that = new CoreLanguage(name, dlng);
     }
   }
 
@@ -96,21 +91,7 @@ public class CoreLanguage
   @Override
   public void load(String name)
   {
-    super.load/** **/(name + "_" + this.lang);
-    if (that != null)
-    {
-        that.loadIgnrFNF(name);
-    }
-  }
-
-  /**
-   * 加载指定语言文件(忽略文件不存在)
-   * @param name
-   */
-  @Override
-  public void loadIgnrFNF(String name)
-  {
-    super.loadIgnrFNF(name + "_" + this.lang);
+    super.load(name + "_" + this.lang);
     if (that != null)
     {
         that.loadIgnrFNF(name);

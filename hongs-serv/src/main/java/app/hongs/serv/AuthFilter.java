@@ -42,7 +42,7 @@ public class AuthFilter
   /**
    * 动作配置
    */
-  private SiteMap auth;
+  private SiteMap siteMap;
 
   /**
    * 首页路径
@@ -68,10 +68,10 @@ public class AuthFilter
     /**
      * 获取权限配置名
      */
-    s = config.getInitParameter("conf-name");
+    s = config.getInitParameter("site-map");
     try
     {
-      this.auth = s != null ? SiteMap.getInstance() : SiteMap.getInstance(s);
+      this.siteMap = s != null ? SiteMap.getInstance() : SiteMap.getInstance(s);
     }
     catch (HongsException ex)
     {
@@ -162,13 +162,20 @@ public class AuthFilter
         }
     }
 
-    Set sess  = auth.getAuthSet(   );
-    if (sess == null) {
+    if (!siteMap.actions.contains(act)) {
+        break;
+    }
+
+    // roles 为空则为尚未登录
+    Set<String> roles = siteMap.getRoleSet( );
+    if (null == roles || ( roles.size( ) == 1 && roles.contains( null ) )) {
         doFailed(0);
         return;
     }
-    Boolean perm = auth.chkAuth(act);
-    if (perm != true) {
+
+    // auths 不对则为无权访问
+    Set<String> auths = siteMap.getRoleAuths(roles.toArray(new String[0]));
+    if (!auths.contains(act)) {
         doFailed(1);
         return;
     }

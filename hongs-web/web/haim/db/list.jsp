@@ -1,12 +1,12 @@
 <%@page import="app.hongs.CoreLanguage"%>
-<%@page import="app.hongs.action.ActionCasual"%>
+<%@page import="app.hongs.action.ActionWarder"%>
 <%@page import="app.hongs.db.DB"%>
 <%@page import="app.hongs.db.Mview"%>
 <%@page import="java.util.Map"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    String _module = (String)request.getAttribute(ActionCasual.MODULE);
-    String _entity = (String)request.getAttribute(ActionCasual.ENTITY);
+    String _module = (String)request.getAttribute(ActionWarder.MODULE);
+    String _entity = (String)request.getAttribute(ActionWarder.ENTITY);
     String _action = (String)request.getAttribute("list.action");
 
     String root = _module;
