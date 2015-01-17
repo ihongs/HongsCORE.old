@@ -506,20 +506,6 @@ public class SiteMap
   }
 
   /**
-   * 获取权限许可表(与当前请求相关)
-   * @return
-   */
-  public Map<String, Boolean> getAuthMap() {
-      Set<String> authset = getAuthSet();
-      if (null == authset) authset = new HashSet();
-      Map<String, Boolean> authmap = new HashMap();
-      for (String act : actions) {
-          authmap.put(act , authset.contains(act));
-      }
-      return authmap;
-  }
-
-  /**
    * 检查角色权限(与当前请求相关)
    * @param role
    * @return 可访问则为true
@@ -534,32 +520,41 @@ public class SiteMap
 
   /**
    * 检查动作权限(与当前请求相关)
-   * @param href
+   * @param auth
    * @return 可访问则为true
    */
-  public Boolean chkAuth(String href) {
-      Set<String> authset = getAuthSet();
+  public Boolean chkAuth(String auth) {
+      Set<String> authset = getAuthSet( );
       if (null == authset) {
-          return !actions.contains(href);
+          return !actions.contains (auth);
       }
-      return authset.contains(href) || !actions.contains(href);
+      return authset.contains(auth) || !actions.contains (auth);
   }
-
-  /**
-   * 检查页面权限(与当前请求相关)
-   * @param href
-   * @return 有一个动作可访问即返回true
-   */
-  public Boolean chkPage(String href) {
-      Set<String> authset = getAuthSet(/**/);
-      Set<String> authz = getPageAuths(href);
-      for(String  auth  : authz) {
-          if(authset.contains(auth) || !actions.contains(auth)) {
-              return true;
-          }
-      }
-      return  false;
-  }
+//
+//  /**
+//   * 检查页面权限(与当前请求相关)
+//   * @param href
+//   * @return 有一个动作可访问即返回true
+//   */
+//  public Boolean chkPage(String href) {
+//      Set<String> actions = getPageAuths(href);
+//      if (null == actions || actions.isEmpty()) {
+//          return  true ;
+//      }
+//
+//      Set<String> authset = getAuthSet(/****/);
+//      if (null == authset || authset.isEmpty()) {
+//          return  false;
+//      }
+//
+//      for(String  auth : actions) {
+//      if (authset.contains(auth)) {
+//          return  true ;
+//      }
+//      }
+//
+//          return  false;
+//  }
 
   /**
    * 获取菜单列表(与当前请求相关)
@@ -581,33 +576,50 @@ public class SiteMap
       }
       for(String namz : imports) {
           lang.loadIgnrFNF(namz);
-      }app.hongs.util.Data.dumps(pages);
+      }
 
-      return getMenu(level, depth, 0, pages, lang);
+      Set<String> auths = getAuthSet();
+      if (null == auths) auths = new HashSet();
+
+      return getMenu(level, depth, 0, pages, auths, lang);
   }
 
-  private List<Map> getMenu(int level, int depth, int i, Map<String, Map> pages, CoreLanguage lang) {
+  private List<Map> getMenu(int level, int depth, int i, Map<String, Map> pages, Set<String> auths, CoreLanguage lang) {
       List<Map> list = new ArrayList();
 
-      if (i >= level + depth || pages == null) {
+      if (i >= level+depth || pages == null) {
           return list;
       }
 
-      for(Map.Entry item : pages.entrySet( ) ) {
+      for(Map.Entry item : pages.entrySet()) {
           Map  v = (Map) item.getValue();
-          Map  p = (Map) v.get( "pages");
-          List a = getMenu(level, depth, i + 1, p, lang);
+          Map  p = (Map) v.get ("pages");
+          List a = getMenu(level, depth, i + 1, p, auths, lang);
+
           if (i >= level) {
               String u = (String) item.getKey();
               String n = (String) v.get("disp");
               if (n == null || "".equals(n)) {
                   n = "core.page."+ u ;
               }
+
+              // 页面下的任意一个动作有权限即认为有权限
+              boolean     c = false;
+              Set<String> z = getPageAuths(u);
+              if (z.isEmpty()) {
+                  c = true;
+              } else for (String x : z ) {
+                  if (auths.contains(x)) {
+                      c = true;
+                  }
+              }
+
               Map page = new HashMap();
               page.put("href", u);
               page.put("list", a);
-              page.put("auth", chkPage(u));
+              page.put("auth", c);
               page.put("disp", lang.translate(n));
+
               list.add(page);
           } else {
               list.addAll(a);

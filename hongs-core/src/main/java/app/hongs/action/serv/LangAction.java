@@ -59,19 +59,18 @@ public class LangAction
     Core core = ActionWarder.getCurrCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
-    String name = helper.getRequest().getPathInfo();
+    String name = req.getPathInfo();
     if (name == null || name.length() == 0) {
       helper.error500("Path info required");
       return;
     }
-    int p = name.lastIndexOf('.');
+    int p = name.lastIndexOf( '.' );
     if (p < 0) {
       helper.error500("File type required");
       return;
     }
     String type = name.substring(1 + p);
            name = name.substring(1 , p);
-
     if ( !"js".equals(type) && !"json".equals(type)) {
       helper.error500("Wrong file type: "+type);
       return;

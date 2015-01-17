@@ -4,6 +4,7 @@ import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.ActionWarder;
 import app.hongs.action.SiteMap;
 import app.hongs.util.Data;
 import java.io.IOException;
@@ -49,21 +50,21 @@ public class AuthAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    ActionHelper helper = Core.getInstance(ActionHelper.class);
+    Core core = ActionWarder.getCurrCore(req);
+    ActionHelper helper = core.get(ActionHelper.class);
 
-    String name = helper.getRequest().getPathInfo( );
-    if (   name == null || name.length( ) == 0) {
+    String name = req.getPathInfo();
+    if (name == null || name.length() == 0) {
       helper.error500("Path info required");
       return;
     }
-    int p = name.lastIndexOf('.');
+    int p = name.lastIndexOf( '.' );
     if (p < 0) {
       helper.error500("File type required");
       return;
     }
     String type = name.substring(1 + p);
            name = name.substring(1 , p);
-
     if ( !"js".equals(type) && !"json".equals(type)) {
       helper.error500("Wrong file type: "+type);
       return;
@@ -71,7 +72,15 @@ public class AuthAction
 
     String data;
     try {
-      data = Data.toString(SiteMap.getInstance(name).getAuthMap());
+      SiteMap  sitemap = SiteMap.getInstance(name);
+      Set<String> authset = sitemap.getAuthSet(  );
+      if (null == authset) authset = new HashSet();
+      Map<String, Boolean> datamap = new HashMap();
+      for(String  act : sitemap.actions) {
+        datamap.put( act , authset.contains(act) );
+      }
+
+      data = Data.toString(datamap);
     }
     catch (HongsException ex) {
       helper.error500(ex.getMessage());
