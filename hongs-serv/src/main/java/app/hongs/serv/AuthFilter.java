@@ -137,9 +137,9 @@ public class AuthFilter
   public void doFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
     throws IOException, ServletException
   {
-    DO:do {
-
     String act = ActionWarder.getCurrPath((HttpServletRequest) req);
+
+    DO:do {
 
     /**
      * 依次校验是否是需要排除的URL
@@ -162,25 +162,24 @@ public class AuthFilter
         }
     }
 
-    if (!siteMap.actions.contains(act)) {
-        break;
+    Set<String> authset = siteMap.getAuthSet();
+    if (null == authset) {
+        if (null != loginPage) {
+            doFailed(0);
+            return;
+        }
+        if (siteMap.actions.contains(act)) {
+            doFailed(1);
+            return;
+        }
+    } else {
+        if (siteMap.actions.contains(act) || !authset.contains(act)) {
+            doFailed(1);
+            return;
+        }
     }
 
-    // roles 为空则为尚未登录
-    Set<String> roles = siteMap.getRoleSet( );
-    if (null == roles || ( roles.size( ) == 1 && roles.contains( null ) )) {
-        doFailed(0);
-        return;
-    }
-
-    // auths 不对则为无权访问
-    Set<String> auths = siteMap.getRoleAuths(roles.toArray(new String[0]));
-    if (!auths.contains(act)) {
-        doFailed(1);
-        return;
-    }
-
-    } while (false);
+    } while(false);
 
     chain.doFilter(req, rsp);
   }

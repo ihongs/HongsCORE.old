@@ -479,7 +479,7 @@ public class SiteMap
 
   /**
    * 获取角色集合(与当前请求相关)
-   * @return
+   * @return session 为空则返回 null
    */
   public Set<String> getRoleSet() {
       Set<String> roleset;
@@ -497,7 +497,7 @@ public class SiteMap
 
   /**
    * 获取权限集合(与当前请求相关)
-   * @return
+   * @return session 为空则返回 null
    */
   public Set<String> getAuthSet() {
       Set<String> roleset = getRoleSet();
