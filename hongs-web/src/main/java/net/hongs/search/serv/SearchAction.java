@@ -1,20 +1,14 @@
 package net.hongs.search.serv;
 
-import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
+import static app.hongs.action.ActionWarder.PATH;
 import app.hongs.action.anno.Action;
-import app.hongs.action.anno.Filter;
-import app.hongs.action.anno.FilterInvoker;
 import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
-import static app.hongs.action.ActionWarder.ENTITY;
-import static app.hongs.action.ActionWarder.MODULE;
 import app.hongs.dh.IAction;
-import app.hongs.util.Synt;
-import java.lang.annotation.Annotation;
 import java.util.Map;
 
 /**
@@ -25,10 +19,9 @@ import java.util.Map;
 public class SearchAction implements IAction {
 
     @Action("retrieve")
-    @Filter(MyFilter.class)
     @Supply()
     public void retrieve(ActionHelper helper) throws HongsException {
-        SearchRecord sr = new SearchRecord((String) helper.getAttribute(ENTITY));
+        SearchRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
         Map sd = sr.retrieve(rd);
         sr.destroy();
@@ -36,9 +29,8 @@ public class SearchAction implements IAction {
     }
 
     @Action("counts/retrieve")
-    @Filter(MyFilter.class)
     public void counts(ActionHelper helper) throws HongsException {
-        SearchRecord sr = new SearchRecord((String) helper.getAttribute(ENTITY));
+        SearchRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
         Map sd = sr.counts(rd);
         sr.destroy();
@@ -46,10 +38,9 @@ public class SearchAction implements IAction {
     }
 
     @Action("create")
-    @Filter(MyFilter.class)
     @Verify()
     public void create(ActionHelper helper) throws HongsException {
-        SearchRecord sr = new SearchRecord((String) helper.getAttribute(ENTITY));
+        SearchRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
         int sn = sr.upsert(rd);
         sr.destroy();
@@ -57,9 +48,8 @@ public class SearchAction implements IAction {
     }
 
     @Action("delete")
-    @Filter(MyFilter.class)
     public void delete(ActionHelper helper) throws HongsException {
-        SearchRecord sr = new SearchRecord((String) helper.getAttribute(ENTITY));
+        SearchRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
         int sn = sr.delete(rd);
         sr.destroy();
@@ -70,18 +60,13 @@ public class SearchAction implements IAction {
         throw new HongsException(HongsException.NOTICE, "Not supported yet.");
     }
 
-    public static class MyFilter implements FilterInvoker {
-
-        public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno) throws HongsException {
-            String sc = Synt.declare(helper.getParameter("ss"), String.class);
-            if (sc == null) {
-                sc = CoreConfig.getInstance("search").getProperty("core.search.scheme.default", "base");
-            }
-            helper.setAttribute(MODULE, "search");
-            helper.setAttribute(ENTITY, sc);
-            chains.doAction();
-        }
-
+    public SearchRecord getModel(ActionHelper helper)
+    throws HongsException {
+        ActionRunner runner = (ActionRunner) helper.getAttribute("__RUNNER__");
+        String act = runner.getAction();
+        act  = act.substring(0, act.length() - runner.getMtdAnn().length() -1);
+        act  = act.substring(act.lastIndexOf('/') + 1);
+        return new SearchRecord ( act );
     }
-
+    
 }
