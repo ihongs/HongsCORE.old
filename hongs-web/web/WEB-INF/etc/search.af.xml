@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <form name="zhb">
+    <form name="demo">
         <field disp="ID" name="id" type="string" required="yes">
             <param name="html-type">hidden</param>
         </field>
@@ -19,6 +19,8 @@
         <field disp="数据" name="data" type="string" rule="skip">
             <param name="html-type">textarea</param>
             <param name="lucene-field">json</param>
+        </field>
+        <field disp="类型" name="type" type="string">
         </field>
         <field disp="标识" name="identity" type="number">
             <param name="type">int</param>
