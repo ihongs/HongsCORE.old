@@ -1,18 +1,14 @@
 << HongsCORE Framework for Java >>
 
 文档版本: 14.11.11
-软件版本: 0.3.4-20141111
+软件版本: 0.3.6-20150118
 设计作者: 黄弘(Kevin Hongs)
 技术支持:
   Email: kevin.hongs@gmail.com
 
 [特别说明]
 
-考虑到推广一个框架实在太困难(我也不打算推广), 我正在此框架基础上搭建一个通用的信息管理系统(代码见hcim模块), 类似 Django-Admin 那样的一个玩意, 但不需要编写代码, 仅在系统中通过设置便可搭建起属于自己的信息管理系统, 并自动产生应用接口供移动或 PC 客户端调用. 同时支持编写代码处理和扩展特殊逻辑和界面.
-
-我目前的工作为数据分析, 投入私人项目的时间较少, 此"通用信息管理系统"是对过去工作的一个总结.
-
-敬请期待!
+其实这不是一个框架, 这是一个未完成的应用!
 
 [名称解释]
 
@@ -34,9 +30,11 @@ HongsCORE
 6. 支持统一的服务器端维护程序;
 7. 可与前端应用共享配置及模型;
 8. 与对应的HongsCORE4JS(for Javascript)配合实现高效WEB应用开发方案.
+9. 支持 Lucene 存、取数据
 
 [更新日志]
 
+[2015-01-18] 大规模重构, 重新规划 Maven 模块结构
 [2014-11-20] 实现 REST 风格的 API, 重新规划了 Action 的组织结构
 [2014-11-10] 切换到 Maven
 [2014-08-10] 全面倒向 bootstrap; 大规模的使用 tab, 放弃使用浮层作为选择框
@@ -97,13 +95,13 @@ common/lang/name.js 读取 WEB-INF/conf/name.xx-xx.properties 中 fore.xxxx. 开
 框架结构:
 app.hongs           核心
 app.hongs.action    动作支持
-app.hongs.annotation    注解
 app.hongs.cmdlet    命令支持
-app.hongs.db        数据模型
+app.hongs.db        关系数据模型
+app.hongs.dh        文档仓库模型
 app.hongs.serv      内置服务库
 app.hongs.tags      JSP标签
 app.hongs.util      工具
-注: 以上仅列举了主要的包, 更多框架信息请参考API文档; xxxx为用户模块名称.
+注: 以上仅列举了主要的包, 更多框架信息请参考API文档.
 
 [通用请求参数解释]
 
