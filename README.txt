@@ -142,7 +142,7 @@ cs[]    限定列名
 
 << HongsCORE Framework for Javascript >>
 
-请转至 https://github.com/ihongs/HongsCORE/tree/develop/web/common
+请转至 https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src
 
 << KEEP IT SIMPLE, STUPID! >>
 
