@@ -110,7 +110,7 @@ public class DB
   /**
    * 库名
    */
-  protected String name;
+  public String name;
 
   /**
    * 表类

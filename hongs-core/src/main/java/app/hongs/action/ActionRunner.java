@@ -4,10 +4,10 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
+import static app.hongs.action.ActionWarder.PATH;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Filter;
 import app.hongs.action.anno.FilterInvoker;
-import static app.hongs.action.ActionWarder.MODULE;
 import app.hongs.util.CsNs;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -36,14 +36,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class ActionRunner {
     private int idx = 0;
-    private final String action;
+    private String action;
     private final Object object;
     private final Method method;
     private final ActionHelper helper;
     private final Annotation[] annarr;
 
     public ActionRunner(String action, ActionHelper helper) throws HongsException {
-        this.action = action;
         this.method = getActions().get(action);
         if ( method == null ) {
             throw new HongsException(0x10f4, "Can not find action '"+action+"'");
@@ -51,27 +50,35 @@ public class ActionRunner {
         this.object = Core.getInstance(method.getDeclaringClass());
         this.annarr = method.getAnnotations( );
         this.helper = helper;
+        this.action = action;
+        helper.setAttribute("__RUNNER__",this);
     }
 
-    public String getAction() {
-        return action;
+    public Object getObject() {
+        return object;
     }
 
-    public String getEntity() {
-        String s = (String) helper.getAttribute(MODULE);
-        // module/entity/action; entity/action; action
-        if (s == null) {
-            int i = s.lastIndexOf("/");
-            if (i > 0) {
-                s = s.substring(0 , i);
-                i = s.lastIndexOf("/");
-                if (i > 0) {
-                    s = s.substring(0 , i);
-                    return s;
-                }
-            }
+    public String getMtdAnn() {
+        return method.getAnnotation(Action.class).value();
+    }
+
+    public String getClsAnn() {
+        return object.getClass().getAnnotation(Action.class).value();
+    }
+
+    /**
+     * 获取动作名
+     * 如果有指定工作路径(ActionWarder.PATH)则返回工作动作名
+     * @return
+     * @throws HongsException
+     */
+    public String getAction() throws HongsException {
+        String x = (String) helper.getAttribute(PATH);
+        if (x != null) { // 去除前导"/"和扩展名
+            return x.substring(1, x.lastIndexOf('.'));
+        } else {
+            return action;
         }
-        return null;
     }
 
     public void doAction() throws HongsException {
@@ -156,8 +163,10 @@ public class ActionRunner {
         Map<String, Method> acts = new HashMap();
 
         for(String pkgn : pkgs) {
-            Set< String > clss;
-            
+            pkgn = pkgn.trim( );
+            if (pkgn.length ( ) == 0) continue;
+            Set< String > clss ;
+
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);
                 try {

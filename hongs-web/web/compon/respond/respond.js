@@ -144,7 +144,7 @@
     }
   }, translate = function(styles, href, media) {
     var qs = styles.replace(respond.regex.keyframes, "").match(respond.regex.media), ql = qs && qs.length || 0;
-    href = href.substring(0, href.lastIndexOf("/"));
+    href = href.substring(0, href.lastIndexOf('/'));
     var repUrls = function(css) {
       return css.replace(respond.regex.urls, "$1" + href + "$2$3");
     }, useMedia = !ql && media;

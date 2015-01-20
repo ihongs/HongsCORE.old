@@ -54,13 +54,13 @@ public class CsNs {
         ClassLoader pload = Thread.currentThread().getContextClassLoader();
         String      ppath = pkgn.replace( ".", "/" );
         URL         ppurl = pload.getResource(ppath);
-//      System.err.println("[INFO] PPURL: " + ppurl);
+        System.err.println("[INFO] PPURL: " + ppurl);
         Set<String> names ;
 
         if (ppurl != null) {
             String  proot = ppurl.getPath(  ).replaceFirst( "/$" , "" );
             proot = proot.substring(0, proot.length() - ppath.length());
-//          System.err.println("[INFO] PROOT: " + proot);
+            System.err.println("[INFO] PROOT: " + proot);
 
             if ("file".equals(ppurl.getProtocol())){
                 // 路径格式: /PATH/
@@ -101,14 +101,13 @@ public class CsNs {
 
     private static Set<String> getClassNamesByDir(String root, String path, boolean recu) {
         Set<String> names = new HashSet<String>();
-        File        fileo = new File(root + path);
-        File[]      files = fileo.listFiles();
+        File[]      files = new File(root + path).listFiles();
 
         for (File file : files) {
             if (! file.isDirectory()) {
                 String name = file.getPath().substring(root.length());
                 if (name.endsWith(".class")) {
-                    name = name.substring(0, name.lastIndexOf( "." ));
+                    name = name.substring(0, name.lastIndexOf( '.' ));
                     name = name.replace(File.separator, ".");
                     names.add(name);
                 }

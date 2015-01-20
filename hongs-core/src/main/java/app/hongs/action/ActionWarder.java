@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
  * 动作承载器
  *
  * <p>
- * 映射到 *.act *.jsp /common/conf/* /common/lang/*<br/>
+ * 映射到 *api,*.act,*.jsp,/common/conf/*,/common/lang/*,/common/auth/*<br/>
  * 必须作为第一个 filter
  * </p>
  *
@@ -47,12 +47,14 @@ public class ActionWarder
 implements Filter {
 
     /**
-     * Request Attribute: 当前动作核心(类型: Core)
+     * Request Attribute: 当前核心对象(类型: Core)
      */
-    public static final String CORE = "__hongs_core__";
-    public static final String MODULE = "__hongs_module__";
-    public static final String ENTITY = "__hongs_entity__";
-    public static final String ACTION = "__hongs_action__";
+    public static final String CORE = "__HONGS_CORE__";
+
+    /**
+     * Request Attribute: 当前工作路径(类型: String)
+     */
+    public static final String PATH = "__HONGS_PATH__";
 
     @Override
     public void init(FilterConfig config)
@@ -293,11 +295,11 @@ implements Filter {
     }
 
     /**
-     * 获得当前的Core
+     * 获得当前工作的Core
      * @param req
      * @return
      */
-    public static  Core  getCurrCore(HttpServletRequest req) {
+    public static  Core  getWorkCore(HttpServletRequest req) {
         Core core = (Core) req.getAttribute(CORE);
         if ( core == null) {
              core =  Core. GLOBAL_CORE ;
@@ -305,6 +307,19 @@ implements Filter {
              Core.THREAD_CORE.set(core);
         }
         return core;
+    }
+
+    /**
+     * 获得当前工作的Path
+     * @param req
+     * @return
+     */
+    public static String getWorkPath(HttpServletRequest req) {
+        String uri = (String) req.getAttribute(PATH);
+        if (uri == null) {
+            uri = getCurrPath(req);
+        }
+        return uri;
     }
 
     /**

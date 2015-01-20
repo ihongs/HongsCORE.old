@@ -252,7 +252,7 @@ public class VerifyHelper {
         // 调用 rule 指定的静态方法进行校验
         String cls;
         String mtd;
-        int pos = rule.lastIndexOf(".");
+        int pos = rule.lastIndexOf('.');
         if (pos != -1) {
             cls = rule.substring(0 , pos);
             mtd = rule.substring(1 + pos);

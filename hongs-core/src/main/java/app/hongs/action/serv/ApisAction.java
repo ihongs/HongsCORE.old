@@ -165,7 +165,7 @@ public class ApisAction
         req.getRequestDispatcher("/"+act+"/"+mtd+".act"+pms).include(req, rsp);
 
         // 将应答数据格式化后传递
-        ActionHelper hlpr = ActionWarder.getCurrCore(req)
+        ActionHelper hlpr = ActionWarder.getWorkCore(req)
                          .get(ActionHelper.class);
         Map  data  = hlpr.getResponseData();
         if ( data != null ) {

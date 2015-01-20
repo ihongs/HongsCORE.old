@@ -122,7 +122,7 @@ public class SiteMap
     throws HongsException
   {
     this.name = name;
-    this.init(name + ".as");System.err.println("--------"+name);app.hongs.util.Data.dumps(this.pages);
+    this.init(name + ".as");
   }
 
   @Override

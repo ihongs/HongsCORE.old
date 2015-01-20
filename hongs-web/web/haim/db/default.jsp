@@ -1,10 +1,10 @@
-<%@page import="app.hongs.action.serv.ServWarder"%>
-<%@page import="java.util.List"%>
-<%@page import="java.util.Map"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.HongsException"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.Sitemap"%>
+<%@page import="app.hongs.action.ActionWarder"%>
+<%@page import="app.hongs.action.SiteMap"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.Map"%>
 <%@page contentType="text/html;charset=utf-8"%>
 <%!
     String getTitle(String name) throws HongsException {
@@ -12,7 +12,13 @@
     }
 %>
 <%
-    String _module = (String) request.getAttribute(ServWarder.MODULE);
+    String  _module; int i;
+    _module = ActionWarder.getWorkPath(request);
+    i = _module.lastIndexOf('/');
+    _module = _module.substring(1, i);
+    i = _module.lastIndexOf('/');
+    _module = _module.substring(0, i);
+
     String  title  = getTitle( _module );
     if ( "".equals(title)) {
             title  = getTitle("default");

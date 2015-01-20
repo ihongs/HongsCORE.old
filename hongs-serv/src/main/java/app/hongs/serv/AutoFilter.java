@@ -2,15 +2,18 @@ package app.hongs.serv;
 
 import app.hongs.Core;
 import app.hongs.action.ActionRunner;
-import static app.hongs.action.ActionWarder.ENTITY;
-import static app.hongs.action.ActionWarder.MODULE;
+import app.hongs.action.ActionWarder;
+import static app.hongs.action.ActionWarder.PATH;
+import app.hongs.action.anno.Action;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -26,6 +29,7 @@ public class AutoFilter implements Filter {
 
     private String action;
     private String render;
+    private Set<String  > actset = null;
 
     @Override
     public void init(FilterConfig cnf) {
@@ -42,99 +46,50 @@ public class AutoFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
             throws IOException, ServletException {
-        String url, mod, ent, act, ext;
-        int    pos;
+        String act, url, ext; int pos;
 
-        url = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-        if (url == null) {
-            url = ((HttpServletRequest)req).getServletPath();
-        }
+        // 当前路径
+        url = ActionWarder.getCurrPath((HttpServletRequest) req);
 
-        url = url.substring(1); // 去掉前导'/'
-        if (url.endsWith("/")) {
-            url += "default.html";
-        }
-
-            pos = url.lastIndexOf(".");
-            ext = url.substring(pos+1);
-        try {
-            url = url.substring(0,pos);
-        } catch (IndexOutOfBoundsException ex) {
-            // 如果无法拆分则直接跳过
-            chain.doFilter (req , rsp);
-            return;
-        }
-
-            pos = url.lastIndexOf("/");
-            act = url.substring(pos+1);
-        try {
-            mod = url.substring(0,pos);
-        } catch (IndexOutOfBoundsException ex) {
-            // 如果无法拆分则直接跳过
-            chain.doFilter (req , rsp);
-            return;
-        }
-
-            pos = mod.lastIndexOf("/");
-            ent = mod.substring(pos+1);
-        try {
-            mod = mod.substring(0,pos);
-        } catch (IndexOutOfBoundsException ex) {
-            // 无法拆分则认为没有实体
-            mod = ent;
-            ent = "" ;
-        }
-
-        if ("act".equals(ext)) {
-            Map acts = ActionRunner.getActions();
-            do {
-                if (acts.containsKey(url)) {
-                    break;
-                }
-
-                req.setAttribute(MODULE , mod);
-                req.setAttribute(ENTITY , ent);
-
-                url = action + "/" + act;
-                if (acts.containsKey(url)) {
-                    url= url + "." + ext;
-                    req.getRequestDispatcher("/"+url).include(req, rsp);
-                    return;
-                }
-            } while (false);
+        if (url.endsWith(".api")) {
+            // 接口无需处理
         } else
-        if ("jsp".equals(ext) || "html".equals(ext)) {
-            String dir = new File(Core.BASE_PATH).getParent()+File.separator;
-            File   fil;
-            do {
-                fil = new File(dir + url + "." + ext);
-                if (fil.exists()) {
-                    break;
-                }
+        if (url.endsWith(".act")) {
+            pos  =  url.lastIndexOf( '.' );
+            try {
+                ext = url.substring(  pos);
+                act = url.substring(1,pos);
+            } catch (IndexOutOfBoundsException ex) {
+                // 如果无法拆分则直接跳过
+                chain.doFilter ( req, rsp);
+                return;
+            }
 
-                // 默认的 default 页是无实体的
-                if ("default".equals(act) && !"".equals(ent)) {
-                    mod = mod +"/" + ent;
-                    ent = "" ;
-                }
-
-                req.setAttribute(MODULE , mod);
-                req.setAttribute(ENTITY , ent);
-                
-                url = render + "/" + act + ".jsp" ;
-                fil = new File(dir + url);
-                if (fil.exists()) {
-                    req.getRequestDispatcher("/"+url).include(req, rsp);
+            if(!ActionRunner.getActions().containsKey(act)) {
+                for(String uri : actSet()) {
+                    if(!act.endsWith(uri)) {
+                        continue;
+                    }
+                    // 虚拟路径
+                    req.setAttribute(PATH, url);
+                    // 转发请求
+                    req.getRequestDispatcher("/"+action+uri+ext).include(req, rsp);
                     return;
                 }
-
-                url = render + "/" + act + ".html";
-                fil = new File(dir + url);
-                if (fil.exists()) {
-                    req.getRequestDispatcher("/"+url).include(req, rsp);
+            }
+        } else {
+            File file = new File(Core.WEBS_PATH + url);
+            if (!file.exists()) {
+                String uri = url.substring(url.lastIndexOf('/'));
+                file = new File(Core.WEBS_PATH + "/"+render+uri);
+                if (file.exists()) {
+                    // 虚拟路径
+                    req.setAttribute(PATH, url);
+                    // 转发请求
+                    req.getRequestDispatcher(/**/"/"+render+uri).include(req, rsp);
                     return;
                 }
-            } while (false);
+            }
         }
 
         chain.doFilter(req, rsp);
@@ -143,4 +98,28 @@ public class AutoFilter implements Filter {
     @Override
     public void destroy() {
     }
+
+    private Set<String> actSet() {
+        if (null != actset) {
+            return  actset;
+        }
+
+        actset = new TreeSet(new Comparator<String>() {
+            public int compare(String o1, String o2) {
+                return o1.length() == o2.length() ? 1 : -1;
+            }
+        });
+
+        Class cls = ActionRunner.getActions().get(action+"/retrieve")
+                                             .getDeclaringClass(/**/);
+        for(Method mtd : cls.getMethods()) {
+            Action ann = mtd.getAnnotation(Action.class);
+            if (ann != null ) {
+               actset.add("/"+ann.value());
+            }
+        }
+
+        return  actset;
+    }
+
 }

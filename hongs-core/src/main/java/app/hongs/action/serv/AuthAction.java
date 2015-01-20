@@ -50,7 +50,7 @@ public class AuthAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    Core core = ActionWarder.getCurrCore(req);
+    Core core = ActionWarder.getWorkCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = req.getPathInfo();

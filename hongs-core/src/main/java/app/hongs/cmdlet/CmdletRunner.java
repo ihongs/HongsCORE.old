@@ -349,7 +349,9 @@ public class CmdletRunner
         Map<String, Method> acts = new HashMap();
 
         for(String pkgn : pkgs) {
-            Set< String > clss;
+            pkgn = pkgn.trim( );
+            if (pkgn.length ( ) == 0) continue;
+            Set< String > clss ;
 
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);

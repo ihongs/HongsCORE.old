@@ -1,6 +1,5 @@
 package app.hongs.action.serv;
 
-import app.hongs.action.ActionWarder;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.CoreLogger;
@@ -8,6 +7,8 @@ import app.hongs.HongsCause;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
+import app.hongs.action.ActionWarder;
+import static app.hongs.action.ActionWarder.PATH;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -57,11 +58,11 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException
   {
-    String act  = ActionWarder.getCurrPath(req);
-    Core   core = ActionWarder.getCurrCore(req);
+    Core   core = ActionWarder.getWorkCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
     helper.reinitHelper(req, rsp);
-
+    
+    String act  = ActionWarder.getCurrPath(req);
     if (act == null || act.length() == 0)
     {
       senderr(req, helper, "Er404", "Action URI can not be empty.");
@@ -70,9 +71,8 @@ public class ActsAction
 
     // 去扩展名
     act = act.substring(1);
-    int pos;
-        pos = act.lastIndexOf('.');
-    if (pos > -1)
+    int pos = act.lastIndexOf('.');
+    if (pos != -1)
         act = act.substring(0,pos);
 
     ActionRunner runner;

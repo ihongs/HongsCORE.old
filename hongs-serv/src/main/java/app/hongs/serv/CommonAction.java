@@ -35,13 +35,13 @@ public class CommonAction {
             for (Map.Entry et : pages.entrySet()) {
                 String uri2 = (String)et.getKey();
                 if (site.chkAuth(uri2)) {
-                    helper.redirect( Core.BASE_HREF + uri2 );
+                    helper.redirect(Core.BASE_HREF+"/"+uri2);
                     return;
                 }
             }
         }
 
-        helper.redirect(Core.BASE_HREF + "/");
+        helper.redirect(Core.BASE_HREF+"/");
     }
 
     @Action("menu")

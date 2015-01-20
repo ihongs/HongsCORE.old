@@ -5,8 +5,14 @@
 <%@page import="java.util.Map"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    String _module = (String)request.getAttribute(ActionWarder.MODULE);
-    String _entity = (String)request.getAttribute(ActionWarder.ENTITY);
+    String  _module, _entity; int i;
+    _module = ActionWarder.getWorkPath(request);
+    i = _module.lastIndexOf('/');
+    _module = _module.substring(1, i);
+    i = _module.lastIndexOf('/');
+    _entity = _module.substring(i+ 1);
+    _module = _module.substring(0, i);
+    
     String _action = (String)request.getAttribute("list.action");
 
     String root = _module;

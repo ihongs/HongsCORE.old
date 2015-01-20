@@ -6,8 +6,6 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.VerifyHelper;
 import app.hongs.action.VerifyHelper.Wrongs;
-import static app.hongs.action.ActionWarder.ENTITY;
-import static app.hongs.action.ActionWarder.MODULE;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,9 +27,11 @@ public class VerifyInvoker implements FilterInvoker {
         String conf = ann.conf();
         boolean clean = ann.clear();
 
-        if (form.length() == 0 ) {
-            form = (String) helper.getAttribute(ENTITY);
-            conf = (String) helper.getAttribute(MODULE);
+        if (form.length( ) == 0) {
+            conf = chains.getAction( );
+            int i = conf.lastIndexOf('/');
+            form = conf.substring(0,i);
+            conf = conf.substring(i+1);
         }
 
         // 准备数据

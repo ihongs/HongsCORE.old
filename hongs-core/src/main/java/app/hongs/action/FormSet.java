@@ -151,7 +151,7 @@ public class FormSet
 
     this.forms = new HashMap();
     this.enums = new HashMap();
-    this.parse(root, this.enums, this.forms);
+    this.parse(root, this.forms, this.enums);
   }
 
   private void parse(Element element, Map forms, Map enums)
