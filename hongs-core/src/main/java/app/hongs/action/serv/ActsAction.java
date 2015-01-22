@@ -8,7 +8,6 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.ActionWarder;
-import static app.hongs.action.ActionWarder.PATH;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -58,39 +57,27 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException
   {
+    String act  = ActionWarder.getCurrPath(req);
     Core   core = ActionWarder.getWorkCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
     helper.reinitHelper(req, rsp);
-    
-    String act  = ActionWarder.getCurrPath(req);
+
     if (act == null || act.length() == 0)
     {
       senderr(req, helper, "Er404", "Action URI can not be empty.");
       return;
     }
 
-    // 去扩展名
+    // 去掉根和扩展名
     act = act.substring(1);
     int pos = act.lastIndexOf('.');
     if (pos != -1)
         act = act.substring(0,pos);
 
-    ActionRunner runner;
-
-    // 获取动作
+    // 获取并执行动作
     try
     {
-      runner = new ActionRunner(act, helper);
-    }
-    catch (HongsException ex)
-    {
-      senderr(req, helper, "Er404", ex.getLocalizedMessage());
-      return;
-    }
-
-    // 执行动作
-    try
-    {
+      ActionRunner runner = new ActionRunner(act, helper);
       runner.doAction();
     }
     catch (HongsException  ex)
@@ -113,6 +100,14 @@ public class ActsAction
       if (errno == null)
       {
         errno = "Ex" + Integer.toHexString(hc.getCode());
+      } else
+      {
+        // 把当前请求路径放入翻译选项中
+        String[] ls = hc.getLocalizedOptions( );
+        if (  ls == null  ||  ls.length == 0  )
+        {
+          hc.setLocalizedOptions(ActionWarder.getRealPath(req));
+        }
       }
     } else
     {
@@ -151,6 +146,7 @@ public class ActsAction
   private static final Map<Integer, String> ErrMap;
   static {
       ErrMap = new HashMap();
+      ErrMap.put(0x10f1, "Er401");
       ErrMap.put(0x10f3, "Er403");
       ErrMap.put(0x10f4, "Er404");
       ErrMap.put(0x10f5, "Er500");

@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
  * <pre>
  pages = {
    "href" : {
-     name: 名称,
+     disp: 名称,
      pages : {
        子级页面...
      },
@@ -57,7 +57,7 @@ import org.xml.sax.SAXException;
  }
  roles = {
    "code" : {
-     name: 名称,
+     disp: 名称,
      depends : [
        "fole.name1",
        "role.name2",
@@ -490,7 +490,7 @@ public class SiteMap
           }
       } else {
           ActionHelper help = (ActionHelper) Core.getInstance(ActionHelper.class);
-          roleset = (Set) help.getSessValue(session);
+          roleset = (Set) help.getSessvalue(session);
       }
       return roleset;
   }

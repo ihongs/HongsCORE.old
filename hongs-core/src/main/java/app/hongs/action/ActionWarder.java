@@ -209,7 +209,7 @@ implements Filter {
              * 时区可以记录到Session/Cookies里
              */
             String sess = conf.getProperty("core.timezone.session", "zone");
-            String zone = (String) helper.getSessValue(sess);
+            String zone = (String) helper.getSessvalue(sess);
             if (zone == null || zone.length() == 0) {
                 // 从 Cookie 里提取时区
                 Cookie[] cookies = req.getCookies();
@@ -228,7 +228,7 @@ implements Filter {
              * 语言可以记录到Session/Cookies里
              */
             String sess = conf.getProperty("core.language.session", "lang");
-            String lang = (String) helper.getSessValue(sess);
+            String lang = (String) helper.getSessvalue(sess);
             if (lang == null || lang.length() == 0) {
                 // 从 Cookie 里提取语言
                 Cookie[] cookies = req.getCookies();

@@ -22,14 +22,16 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * 动作注解链
+ * 动作执行器
  *
  * <h3>异常代码</h3>
  * <pre>
  * 区间: 0x10f0~0x10ff
- * 0x10f0 找不到动作
- * 0x10f1 注解链溢出
- * 0x10f2 无法执行动作方法，无法访问或参数错误
+ * 0x10f0 注解链溢出
+ * 0x10f1 尚未登陆
+ * 0x10f3 无权访问
+ * 0x10f4 无此动作
+ * 0x10f5 无法执行, 禁止访问或参数错误
  * </pre>
  *
  * @author Hong
@@ -74,7 +76,7 @@ public class ActionRunner {
      */
     public String getAction() throws HongsException {
         String x = (String) helper.getAttribute(PATH);
-        if (x != null) { // 去除前导"/"和扩展名
+        if (x != null) { // 去除根和扩展名
             return x.substring(1, x.lastIndexOf('.'));
         } else {
             return action;

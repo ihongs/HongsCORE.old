@@ -1,43 +1,35 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionWarder"%>
 <%@page import="app.hongs.db.DB"%>
 <%@page import="app.hongs.db.Mview"%>
 <%@page import="java.util.Map"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    String  _module, _entity; int i;
+    String  _module, _entity, _action; int i;
     _module = ActionWarder.getWorkPath(request);
     i = _module.lastIndexOf('/');
     _module = _module.substring(1, i);
     i = _module.lastIndexOf('/');
     _entity = _module.substring(i+ 1);
     _module = _module.substring(0, i);
-    
-    String _action = (String)request.getAttribute("list.action");
-
-    String root = _module;
-    if (_entity.length() != 0) {
-        root += "/" + _entity;
-    }
-    if (_action == null) {
-        _action = "list" ;
-    }
+    _action = (String)request.getAttribute("list.action");
+    if (_action == null) _action = "list";
 
     Mview view = new Mview(DB.getInstance(_module).getModel(_entity));
     Map<String, Map<String, String>> flds = view.getFields();
     CoreLanguage lang = CoreLanguage.getInstance( ).clone( );
     lang.loadIgnrFNF(_module);
 
-    String idKey = view.getIdKey();
     String title = view.getTitle();
+    String idKey = view.getIdKey();
 %>
 <h2><%=lang.translate("fore."+_action+".title", title)%></h2>
 <div id="<%=_module%>-<%=_entity%>-<%=_action%>">
     <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('<%=root%>/retrieve.act?jd=2')"/>
-        <param name="openUrls:0" value="['.create','<%=root%>/form.html','{TABSBOX}']"/>
-        <param name="openUrls:1" value="['.update','<%=root%>/form4update.html?<%=idKey%>={ID}','{TABSBOX}']"/>
-        <param name="sendUrls:0" value="['.delete','<%=root%>/delete.act','<%=lang.translate("fore.deletre.confirm", title)%>']"/>
+        <param name="loadUrl" value="('<%=_module%>/<%=_entity%>/retrieve.act?jd=2')"/>
+        <param name="openUrls:0" value="['.create','<%=_module%>/<%=_entity%>/form.html','{TABSBOX}']"/>
+        <param name="openUrls:1" value="['.update','<%=_module%>/<%=_entity%>/form4update.html?<%=idKey%>={ID}','{TABSBOX}']"/>
+        <param name="sendUrls:0" value="['.delete','<%=_module%>/<%=_entity%>/delete.act','<%=lang.translate("fore.deletre.confirm", title)%>']"/>
         <param name="_fill__pick" value="(hsListFillPick)"/>
     </object>
     <div>
@@ -68,23 +60,26 @@
                     <%for(Map.Entry et : flds.entrySet()) {
                         Map    info = (Map ) et.getValue();
                         String name = (String) et.getKey();
-                        String type = (String) info.get("type");
-                        String disp = (String) info.get("disp");
-                        if ("1".equals(info.get("hideInList")) || "hidden".equals(type)
-                        || (type != null && type.startsWith("form-"))) {
+                        String type = (String) info.get( "widget" );
+                        String disp = (String) info.get("__disp__");
+                        if ("1".equals(info.get("hideInList")) || "hidden".equals(type)) {
                             continue;
                         }
                      %>
-                    <%if  ("number".equals(type) || "range".equals(type)) {%>
+                    <%if ("number".equals(type) || "range".equals(type)) {%>
                     <th data-fn="<%=name%>" class="sortable text-right"><%=disp%></th>
+                    <%} else if ("switch".equals(type)) {%>
+                    <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
+                    <%} else if ("select".equals(type)) {%>
+                    <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
                     <%} else if ("datetime".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_datetime" class="sortable datetime"><%=disp%></th>
                     <%} else if ("date".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_date" class="sortable date"><%=disp%></th>
                     <%} else if ("time".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_time" class="sortable time"><%=disp%></th>
-                    <%} else if ("select".equals(type)) {%>
-                    <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
+                    <%} else if ("file".equals(type)) {%>
+                    <th data-fn="<%=name%>" data-ft="_file"><%=disp%></th>
                     <%} else if ("pick".equals(type)) {%>
                     <th data-fn="<%=info.get("data-tn")%>.<%=info.get("data-tk")%>" class="sortable"><%=disp%></th>
                     <%} else if (!"primary".equals(info.get("primary")) && !"foreign".equals(info.get("foreign"))) {%>

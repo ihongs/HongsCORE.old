@@ -165,16 +165,16 @@ public class AuthFilter
     Set<String> authset = siteMap.getAuthSet();
     if (null == authset) {
         if (null != loginPage) {
-            doFailed(0);
+            doFailed((short)1);
             return;
         }
         if (siteMap.actions.contains(act)) {
-            doFailed(1);
+            doFailed((short)3);
             return;
         }
     } else {
         if (siteMap.actions.contains(act) || !authset.contains(act)) {
-            doFailed(1);
+            doFailed((short)3);
             return;
         }
     }
@@ -184,7 +184,7 @@ public class AuthFilter
     chain.doFilter(req, rsp);
   }
 
-  private void doFailed(int type)
+  private void doFailed(short type)
   {
     ActionHelper hlpr = Core.getInstance(ActionHelper.class);
     CoreLanguage lang = Core.getInstance(CoreLanguage.class);
@@ -244,9 +244,9 @@ public class AuthFilter
     if (hlpr.getRequest().getRequestURI().endsWith(".act")) {
         Map rsp = new HashMap( );
             rsp.put("ok", false);
-            rsp.put("err", "Er403");
+            rsp.put("err", "Er40" + type);
             rsp.put("msg",  msg);
-        if (uri != null  && uri.length() != 0) {
+        if (uri != null  && uri.length( ) != 0) {
             rsp.put("goto", uri);
         }
         hlpr.reply(rsp);

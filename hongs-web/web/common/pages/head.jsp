@@ -43,8 +43,8 @@
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String name = helper.getParameter("m");
-    if (name == null || "".equals( name )) {
+    String name= helper.getParameter("m");
+    if (name == null || "".equals(name) ) {
         name = "default";
     }
 

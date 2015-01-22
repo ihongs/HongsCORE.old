@@ -1,31 +1,24 @@
+<%@page contentType="text/html;charset=utf-8"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.HongsException"%>
 <%@page import="app.hongs.action.ActionHelper"%>
 <%@page import="app.hongs.action.ActionWarder"%>
 <%@page import="app.hongs.action.SiteMap"%>
+<%@page import="app.hongs.db.DB"%>
+<%@page import="app.hongs.db.Mview"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
-<%@page contentType="text/html;charset=utf-8"%>
-<%!
-    String getTitle(String name) throws HongsException {
-        return "";
-    }
-%>
 <%
-    String  _module; int i;
+    String  _module, _entity; int i;
     _module = ActionWarder.getWorkPath(request);
     i = _module.lastIndexOf('/');
     _module = _module.substring(1, i);
     i = _module.lastIndexOf('/');
+    _entity = _module.substring(i+ 1);
     _module = _module.substring(0, i);
 
-    String  title  = getTitle( _module );
-    if ( "".equals(title)) {
-            title  = getTitle("default");
-    }
-    if (!"".equals(title)) {
-            title = " - " + title;
-    }
+    Mview  view  = new Mview(DB.getInstance(_module).getModel(_entity));
+    String title = view.getTitle();
 %>
 <!--
 Hong's Common User Module
@@ -34,7 +27,7 @@ Hong's Common User Module
 <!doctype html>
 <html>
     <head>
-        <title>HongsCORE<%=title%></title>
+        <title>HongsCORE::<%=title%></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" href="<%=request.getContextPath()%>/favicon.ico" type="image/x-icon"/>

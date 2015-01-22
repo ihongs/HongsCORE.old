@@ -18,8 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -91,7 +89,11 @@ public class VerifyHelper {
 
                 boolean repeated = Synt.declare(opts.remove("__repeated__"), false);
                 if (repeated) {
-                    this.addRule(code, "repeated");
+                    Map m = new HashMap();
+                    m.put("distinct", Synt.declare(opts.remove("distinct"), false));
+                    m.put("mincount", Synt.declare(opts.remove("mincount"), 0));
+                    m.put("maxcount", Synt.declare(opts.remove("maxcount"), 0));
+                    this.addRule(code, "repeated", m);
                 }
 
                 String  rule = (String) opts.get("__rule__");
@@ -171,12 +173,14 @@ public class VerifyHelper {
                     continue;
                 }
 
+                // 值是否需要是不同的
                 Collection data2;
-                if (Synt.declare(rp.get("repeated"), (byte) 0) == 2) {
+                if (Synt.declare(rp.get("distinct"), false)) {
                     data2 = new LinkedHashSet();
                 } else {
                     data2 = new ArrayList();
                 }
+                
                 if (data instanceof Collection) {
                     int i3 = 0;
                     for(Object data3 : ((Collection) data ) ) {
@@ -215,6 +219,17 @@ public class VerifyHelper {
                         }
                         data2.add(data3);
                     }
+                }
+
+                // 多个值的数量限制
+                int n, c = data2.size();
+                n = Synt.declare(rp.get("mincount"), 0);
+                if (n != 0 && c < n) {
+                    failed(wrongz, new Wrong("repeated.count.lt.min", String.valueOf(n), String.valueOf(c)), name);
+                }
+                n = Synt.declare(rp.get("maxcount"), 0);
+                if (n != 0 && c > n) {
+                    failed(wrongz, new Wrong("repeated.count.gt.max", String.valueOf(n), String.valueOf(c)), name);
                 }
 
                 data = data2;
@@ -357,37 +372,37 @@ public class VerifyHelper {
 
     //** 类型校验器 **/
 
-    public static Object isEnum(Object value, Map values, Map params) throws Wrong , HongsException {
-        String conf = Dict.getValue(params, String.class, "conf");
-        String name = Dict.getValue(params, String.class, "enum");
-        if (conf == null || "".equals(conf)) {
-            conf = Dict.getValue(params, "", "__conf__");
-        }
-        if (name == null || "".equals(name)) {
-            name = Dict.getValue(params, "", "__name__");
+    public static Object isString(Object value, Map values, Map params) {
+        return value.toString();
+    }
+
+    public static Object isNumber(Object value, Map values, Map params) {
+        String type = Dict.getValue(params, String.class, "type");
+
+        if ( "byte".equals(type)) {
+            value = Synt.declare(value, (byte ) 0);
+        } else
+        if ("short".equals(type)) {
+            value = Synt.declare(value, (short) 0);
+        } else
+        if (  "int".equals(type)) {
+            value = Synt.declare(value, 0 );
+        } else
+        if ( "long".equals(type)) {
+            value = Synt.declare(value, 0L);
+        } else
+        if ("float".equals(type)) {
+            value = Synt.declare(value, 0.0 );
+        } else
+        {
+            value = Synt.declare(value, 0.0D);
         }
 
-        Map data = FormSet.getInstance(conf).getEnum(name);
-        if (! data.containsValue(value.toString()) ) {
-            throw new Wrong("fore.form.not.in.enum");
-        }
         return value;
     }
 
-    public static Object isForm(Object value, Map values, Map params) throws Wrongs, HongsException {
-        String conf = Dict.getValue(params, String.class, "conf");
-        String name = Dict.getValue(params, String.class, "form");
-        if (conf == null || "".equals(conf)) {
-            conf = Dict.getValue(params, "", "__conf__");
-        }
-        if (name == null || "".equals(name)) {
-            name = Dict.getValue(params, "", "__name__");
-        }
-
-        boolean upd = Dict.getValue(params,false, "__update__");
-        VerifyHelper veri = new VerifyHelper();
-        veri.addRulesByForm(conf, name);
-        return veri.verify(values, upd);
+    public static Object isDate(Object value, Map values, Map params) {
+        return value;
     }
 
     public static String isFile(Object value, Map values, Map params) throws Wrong {
@@ -420,39 +435,37 @@ public class VerifyHelper {
         return u.getResultHref( );
     }
 
-    public static Object isString(Object value, Map values, Map params) {
-        return value.toString();
-    }
-
-    public static Object isNumber(Object value, Map values, Map params) {
-        String type = Dict.getValue(params, String.class, "type");
-
-        if (  "int".equals(type)) {
-            value = Synt.declare(value,   0 );
-        } else
-        if ( "long".equals(type)) {
-            value = Synt.declare(value,   0L);
-        } else
-        if ("short".equals(type)) {
-            value = Synt.declare(value, 0.0 );
-        } else
-        {
-            value = Synt.declare(value, 0.0D);
+    public static Object isEnum(Object value, Map values, Map params) throws Wrong , HongsException {
+        String conf = Dict.getValue(params, String.class, "conf");
+        String name = Dict.getValue(params, String.class, "enum");
+        if (conf == null || "".equals(conf)) {
+            conf = Dict.getValue(params, "", "__conf__");
+        }
+        if (name == null || "".equals(name)) {
+            name = Dict.getValue(params, "", "__name__");
         }
 
+        Map data = FormSet.getInstance(conf).getEnum(name);
+        if (! data.containsValue(value.toString()) ) {
+            throw new Wrong("fore.form.not.in.enum");
+        }
         return value;
     }
 
-    public static Object isDate(Object value, Map values, Map params) {
-        return value;
-    }
+    public static Object isForm(Object value, Map values, Map params) throws Wrongs, HongsException {
+        String conf = Dict.getValue(params, String.class, "conf");
+        String name = Dict.getValue(params, String.class, "form");
+        if (conf == null || "".equals(conf)) {
+            conf = Dict.getValue(params, "", "__conf__");
+        }
+        if (name == null || "".equals(name)) {
+            name = Dict.getValue(params, "", "__name__");
+        }
 
-    public static Object isTime(Object value, Map values, Map params) {
-        return value;
-    }
-
-    public static Object isDatetime(Object value, Map values, Map params) {
-        return value;
+        boolean upd = Dict.getValue(params,false, "__update__");
+        VerifyHelper veri = new VerifyHelper();
+        veri.addRulesByForm(conf, name);
+        return veri.verify(values, upd);
     }
 
     /** 内部错误类 **/

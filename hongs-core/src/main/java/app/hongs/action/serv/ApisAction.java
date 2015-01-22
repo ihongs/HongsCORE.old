@@ -1,11 +1,14 @@
 package app.hongs.action.serv;
 
-import app.hongs.action.ActionWarder;
+import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
+import app.hongs.action.ActionWarder;
 import app.hongs.util.Synt;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -169,20 +172,84 @@ public class ApisAction
                          .get(ActionHelper.class);
         Map  data  = hlpr.getResponseData();
         if ( data != null ) {
-             hlpr.reply(Synt.foreach(data, new Synt.LeafNode() {
-                public Object leaf(Object val) {
-                    if (val == null) {
-                        return "";
-                    } else if (val instanceof Boolean) {
-                        return ((Boolean) val) ? "1" : "0";
-                    } else {
-                        return val.toString( );
-                    }
-                }
-             }));
+            Set conv;
+            try {
+                conv = Synt.declare(hlpr.getParameter("--api-conv"), Set.class);
+            } catch (HongsException ex) {
+                throw new ServletException(ex);
+            }
+            if (conv != null) {
+                Conv cnvr = new Conv();
+                boolean     all =  conv.contains( "all2str");
+                cnvr.all  = all ?  new  Conv2Str( ) : new Conv2Obj( ) ;
+                cnvr.num  = all || conv.contains( "num2str") ? new Conv2Str(/**/) : cnvr.all;
+                cnvr.nnll = all || conv.contains("null2str") ? new ConvNull2Str() : cnvr.all;
+                cnvr.bool = all || conv.contains("bool2str") ? new ConvBool2Str() : cnvr.all;
+                cnvr.date = conv.contains("date2stp") ? new ConvDate2Stp()
+                          :(conv.contains("date2sec") ? new ConvDate2Sec() : new Conv2Obj());
+                hlpr.reply (Synt.foreach(data, cnvr));
+            }
         }
     }
 
     private static final Pattern _API_PMS = Pattern.compile("((?:/[^_]\\w+/_\\w+)*)?(/[^_]\\w+)(/_\\w+)?(/\\.\\w+)?$");
+
+    private static class Conv extends Synt.LeafNode {
+        private Conv2Obj all;
+        private Conv2Obj num;
+        private Conv2Obj nnll;
+        private Conv2Obj bool;
+        private Conv2Obj date;
+        public Object leaf(Object o) {
+            if (o == null) {
+                return nnll.conv(o);
+            }
+            if (o instanceof Number ) {
+                return num .conv(o);
+            }
+            if (o instanceof Boolean) {
+                return bool.conv(o);
+            }
+            if (o instanceof Date) {
+                o = date.conv(o);
+            }
+            return  all .conv(o);
+        }
+    }
+    private static class Conv2Obj {
+        public Object conv(Object o) {
+            return o;
+        }
+    }
+    private static class Conv2Str extends Conv2Obj {
+        @Override
+        public Object conv(Object o) {
+            return o.toString();
+        }
+    }
+    private static class ConvNull2Str extends Conv2Obj {
+        @Override
+        public Object conv(Object o) {
+            return "";
+        }
+    }
+    private static class ConvBool2Str extends Conv2Obj {
+        @Override
+        public Object conv(Object o) {
+            return ((Boolean) o) ? "1" : "";
+        }
+    }
+    private static class ConvDate2Stp extends Conv2Obj {
+        @Override
+        public Object conv(Object o) {
+            return ((Date) o).getTime();
+        }
+    }
+    private static class ConvDate2Sec extends Conv2Obj {
+        @Override
+        public Object conv(Object o) {
+            return ((Date) o).getTime() / 1000;
+        }
+    }
 
 }

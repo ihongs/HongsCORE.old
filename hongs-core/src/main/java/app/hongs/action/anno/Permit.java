@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Filter(SupplyInvoker.class)
+@Filter(PermitInvoker.class)
 public @interface Permit {
     String  role() default "";
     String  conf() default "default";

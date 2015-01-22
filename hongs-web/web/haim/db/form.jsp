@@ -1,3 +1,4 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="app.hongs.CoreConfig"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionWarder"%>
@@ -6,33 +7,24 @@
 <%@page import="java.util.HashSet"%>
 <%@page import="java.util.Set"%>
 <%@page import="java.util.Map"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    String  _module, _entity; int i;
+    String  _module, _entity, _action; int i;
     _module = ActionWarder.getWorkPath(request);
     i = _module.lastIndexOf('/');
     _module = _module.substring(1, i);
     i = _module.lastIndexOf('/');
     _entity = _module.substring(i+ 1);
     _module = _module.substring(0, i);
-    
-    String _action = (String)request.getAttribute("form.action");
-
-    String root = _module ;
-    if (_entity.length() != 0) {
-        root += "/" + _entity;
-    }
-    if (_action == null) {
-        _action = "create";
-    }
+    _action = (String)request.getAttribute("form.action");
+    if (_action == null) _action = "create";
 
     Mview view = new Mview(DB.getInstance(_module).getModel(_entity));
     Map<String, Map<String, String>> flds = view.getFields();
     CoreLanguage lang = CoreLanguage.getInstance( ).clone( );
     lang.loadIgnrFNF(_module);
 
-    String idKey = view.getIdKey();
     String title = view.getTitle();
+    String idKey = view.getIdKey();
 
     Set hide = new HashSet();
     CoreConfig conf = CoreConfig.getInstance();
@@ -55,8 +47,8 @@
 </object>
 <div id="<%=_module%>-<%=_entity%>-<%=_action%>">
     <object class="config" name="hsForm" data="">
-        <param name="loadUrl" value="<%=root%>/retrieve.act?id=<%=data.get("id")[0]%>&jd=1"/>
-        <param name="saveUrl" value="<%=root%>/<%=_action%>.act"/>
+        <param name="loadUrl" value="<%=_module%>/<%=_entity%>/retrieve.act?<%=idKey%>=<%=data.get("id")[0]%>&jd=1"/>
+        <param name="saveUrl" value="<%=_module%>/<%=_entity%>/<%=_action%>.act"/>
         <param name="_fill__pick" value="(hsFormFillPick)"/>
     </object>
     <form action="" method="POST">
@@ -65,8 +57,8 @@
                 <%for(Map.Entry et : flds.entrySet()) {
                     Map    info = (Map ) et.getValue();
                     String name = (String) et.getKey();
-                    String type = (String) info.get("type");
-                    String disp = (String) info.get("disp");
+                    String type = (String) info.get( "widget" );
+                    String disp = (String) info.get("__disp__");
                     String rqrd = "required".equals(info.get("required")) ? "required=\"required\"" : "";
                     if ("1".equals(info.get("hideInForm")) || hide.contains(name)) {
                         continue ;
@@ -83,8 +75,8 @@
                             <textarea class="form-control" name="<%=name%>" <%=rqrd%>></textarea>
                         <%} else if ("number".equals(type)) {%>
                             <input class="form-control" type="number" name="<%=name%>" value="" <%=rqrd%>/>
-                        <%} else if ("range".equals(type)) {%>
-                            <input class="form-control" type="range" name="<%=name%>" value="" <%=rqrd%>/>
+                        <%} else if ("range".equals(type) || "switch".equals(type)) {%>
+                            <input class="form-control" type="range"  name="<%=name%>" value="" <%=rqrd%>/>
                         <%} else if ("datetime".equals(type)) {%>
                             <input class="form-control input-datetime" type="text" name="<%=name%>" value="" <%=rqrd%> data-toggle="datetimepicker"/>
                         <%} else if ("date".equals(type)) {%>

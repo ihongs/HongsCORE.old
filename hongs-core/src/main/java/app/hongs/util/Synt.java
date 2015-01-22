@@ -210,11 +210,11 @@ public class Synt {
             Object v = data[i];
             conv.setIdx(i);
             v = conv.each(v);
-            if (v == LOOP.LAST) {
-                break;
-            }
             if (v == LOOP.NEXT) {
                 continue;
+            }
+            if (v == LOOP.LAST) {
+                break;
             }
             dat.add(v);
         }

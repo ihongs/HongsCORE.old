@@ -489,7 +489,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         if (v instanceof Integer) {
             doc.add(new IntField(k, Synt.declare(v, Integer.class), s));
         } else
-        if (v instanceof String) {
+        if (v instanceof Long) {
             doc.add(new LongField(k, Synt.declare(v, Long.class), s));
         } else
         if (v instanceof Float) {
@@ -510,7 +510,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             Object v = e.getValue();
 
             String g = Dict.getValue(fields, String.class, k, "lucene-field");
-            Field.Store s  =  Dict.getValue(fields, true , k, "lucene-store")
+            Field.Store s  =  Dict.getValue( fields, true, k, "lucene-store")
                            ?  Field.Store.YES : Field.Store.NO;
 
             if (v instanceof Collection) {

@@ -299,7 +299,7 @@ public class ActionHelper
    * @param name
    * @return 当前取值, 没有则为null
    */
-  public Object getSessValue(String name)
+  public Object getSessvalue(String name)
   {
     if (this.sessionData != null) {
       return this.sessionData.get(name);
@@ -317,7 +317,7 @@ public class ActionHelper
    * @param name
    * @param value
    */
-  public void setSessValue(String name, Object value)
+  public void setSessvalue(String name, Object value)
   {
     if (this.sessionData != null) {
       if (value == null) {
