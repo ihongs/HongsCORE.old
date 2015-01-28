@@ -106,7 +106,7 @@ public class Synt {
 
         try {
             return (T) val;
-        } catch (ClassCastException ex) {
+        } catch (ClassCastException  ex) {
             throw new HongsError(70, ex);
         }
     }
