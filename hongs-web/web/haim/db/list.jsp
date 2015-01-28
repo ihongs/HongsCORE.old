@@ -18,7 +18,7 @@
     Mview view = new Mview(DB.getInstance(_module).getModel(_entity));
     Map<String, Map<String, String>> flds = view.getFields();
     CoreLanguage lang = CoreLanguage.getInstance( ).clone( );
-    lang.loadIgnrFNF(_module);
+                 lang.loadIgnrFNF(_module);
 
     String title = view.getTitle();
     String idKey = view.getIdKey();
@@ -61,17 +61,17 @@
                         Map    info = (Map ) et.getValue();
                         String name = (String) et.getKey();
                         String type = (String) info.get( "widget" );
+                        if (null == type) {
+                               type = (String) info.get("__type__");
+                        }
                         String disp = (String) info.get("__disp__");
+
                         if ("1".equals(info.get("hideInList")) || "hidden".equals(type)) {
                             continue;
                         }
                      %>
                     <%if ("number".equals(type) || "range".equals(type)) {%>
                     <th data-fn="<%=name%>" class="sortable text-right"><%=disp%></th>
-                    <%} else if ("switch".equals(type)) {%>
-                    <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
-                    <%} else if ("select".equals(type)) {%>
-                    <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
                     <%} else if ("datetime".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_datetime" class="sortable datetime"><%=disp%></th>
                     <%} else if ("date".equals(type)) {%>
@@ -80,6 +80,8 @@
                     <th data-fn="<%=name%>" data-ft="_time" class="sortable time"><%=disp%></th>
                     <%} else if ("file".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_file"><%=disp%></th>
+                    <%} else if ("enum".equals(type)) {%>
+                    <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
                     <%} else if ("pick".equals(type)) {%>
                     <th data-fn="<%=info.get("data-tn")%>.<%=info.get("data-tk")%>" class="sortable"><%=disp%></th>
                     <%} else if (!"primary".equals(info.get("primary")) && !"foreign".equals(info.get("foreign"))) {%>

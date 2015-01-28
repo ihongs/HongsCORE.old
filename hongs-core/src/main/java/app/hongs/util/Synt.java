@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * 语法补充
@@ -56,7 +57,14 @@ public class Synt {
             if (val instanceof Number) {
                 val = ((Number) val).intValue() != 0;
             } else if (val instanceof String) {
-                val = ((String) val).trim().equalsIgnoreCase("^(|0|no|not|none|false)$");
+                String str = ((String) val).trim(  );
+                if ("".equals(str)) {
+                    val = false;
+                } else if (FALS.matcher(str).matches()) {
+                    val = false;
+                } else if (FALS.matcher(str).matches()) {
+                    val = true ;
+                }
             }
         } else if (Integer.class.isAssignableFrom(cls)) {
             if (val instanceof Number) {
@@ -124,7 +132,7 @@ public class Synt {
      * 遍历 Map
      * @param data
      * @param conv
-     * @return 
+     * @return
      */
     public static Map foreach(Map data, Each conv) {
         conv.setObj(data);
@@ -151,7 +159,7 @@ public class Synt {
      * 遍历 Set
      * @param data
      * @param conv
-     * @return 
+     * @return
      */
     public static Set foreach(Set data, Each conv) {
         conv.setObj(data);
@@ -175,7 +183,7 @@ public class Synt {
      * 遍历 List
      * @param data
      * @param conv
-     * @return 
+     * @return
      */
     public static List foreach(List data, Each conv) {
         conv.setObj(data);
@@ -200,7 +208,7 @@ public class Synt {
      * 遍历数组
      * @param data
      * @param conv
-     * @return 
+     * @return
      */
     public static Object[] foreach(Object[] data, Each conv) {
         conv.setObj(data);
@@ -220,6 +228,9 @@ public class Synt {
         }
         return dat.toArray();
     }
+
+    public static Pattern TRUE = Pattern.compile("^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
+    public static Pattern FALS = Pattern.compile("^(0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
 
     /**
      * 在 Each.each 里

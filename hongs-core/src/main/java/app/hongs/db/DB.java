@@ -154,6 +154,20 @@ public class DB
   private static Map<String, ComboPooledDataSource> sourcePool = new HashMap();
   private static ReadWriteLock  sourceLock  =  new  ReentrantReadWriteLock(  );
 
+  protected DB()
+    throws HongsException
+  {
+    this.name         = "";
+    this.source       = new HashMap();
+    this.origin       = new HashMap();
+    this.tableClass   = Table.class.getName();
+    this.tablePrefix  = "";
+    this.tableSuffix  = "";
+    this.tableConfigs = new HashMap();
+    this.tableObjects = new HashMap();
+    this.modelObjects = new HashMap();
+  }
+
   public DB(DBConfig dbConf)
     throws HongsException
   {
@@ -1492,6 +1506,80 @@ public class DB
   //** 构造工厂 **/
 
   /**
+   * 获取指定数据库对象
+   * <b>注意:</b>
+   * <p>
+   * 如果指定数据库配置中有指定dbClass, 务必添加方法:
+   * </p>
+   * <pre>
+   * public static XxxDB getInstance()
+   *    throws HongsException
+   * {
+   *    return new XxxDB();
+   * }
+   * </pre>
+   * @param name
+   * @return 指定DB对象
+   * @throws app.hongs.HongsException
+   */
+  public static DB getInstance(String name)
+    throws HongsException
+  {
+    String key = DB.class.getName() + ":" + name;
+
+    Core core = Core.THREAD_CORE.get();
+    if ( core.containsKey(key))
+    {
+      return (DB)core.get(key);
+    }
+
+    Core gore = Core.GLOBAL_CORE;
+    if ( gore.containsKey(key))
+    {
+      return (DB)gore.get(key);
+    }
+
+    /**
+     * 如果存在dbClass描述则调用对应类来获取实例
+     */
+
+    DB       db ;
+    DBConfig cf = new DBConfig (name);
+
+    if (cf.dbClass != null && cf.dbClass.length() != 0)
+    {
+      db = (DB)Core.getInstance(cf.dbClass);
+    }
+    else
+    {
+      db = new DB(cf);
+    }
+
+    /**
+     * 如有设置dbName的单次加载则将其放入静态映射
+     */
+
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
+    if (conf.getProperty("core.load.db."+name+".once", false))
+    {
+      gore.put(key, db);
+    }
+    else
+    {
+      core.put(key, db);
+    }
+
+    /**
+     * 自动设定模式和事务
+     */
+
+    db.IN_OBJECT_MODE = conf.getProperty( "core.db.in.object.mode" , false );
+    db.IN_TRANSC_MODE = Core.getInstance().containsKey("__IN_TRANSC_MODE__");
+
+    return db;
+  }
+
+  /**
    * 获取默认数据库对象
    * <b>注意:</b>
    * <p>
@@ -1514,94 +1602,13 @@ public class DB
   }
 
   /**
-   * 获取指定数据库对象
-   * <b>注意:</b>
-   * <p>
-   * 如果指定数据库配置中有指定dbClass, 务必添加方法:
-   * </p>
-   * <pre>
-   * public static XxxDB getInstance()
-   *    throws HongsException
-   * {
-   *    return new XxxDB();
-   * }
-   * </pre>
-   * @param dbName
-   * @return 指定DB对象
-   * @throws app.hongs.HongsException
+   * 以外部数据源的形式构造对象
+   * @param name
+   * @param info
+   * @return
+   * @throws HongsException 
    */
-  public static DB getInstance(String dbName)
-    throws HongsException
-  {
-    String key = DB.class.getName() + ":" + dbName;
-
-    Core core = Core.THREAD_CORE.get();
-    if ( core.containsKey(key))
-    {
-      return (DB)core.get(key);
-    }
-
-    Core gore = Core.GLOBAL_CORE;
-    if ( gore.containsKey(key))
-    {
-      return (DB)gore.get(key);
-    }
-
-    /**
-     * 如果存在dbClass描述则调用对应类来获取实例
-     */
-
-    DB       db ;
-    DBConfig cf = new DBConfig (dbName);
-
-    if (cf.dbClass != null && cf.dbClass.length() != 0)
-    {
-      db = (DB)Core.getInstance(cf.dbClass);
-    }
-    else
-    {
-      db = new DB(cf);
-    }
-
-    /**
-     * 如有设置dbName的单次加载则将其放入静态映射
-     */
-
-    CoreConfig conf = Core.getInstance(CoreConfig.class);
-    if (conf.getProperty("core.load.db."+dbName+".once", false))
-    {
-      gore.put(key, db);
-    }
-    else
-    {
-      core.put(key, db);
-    }
-
-    /**
-     * 自动设定模式和事务
-     */
-
-    db.IN_OBJECT_MODE = conf.getProperty( "core.db.in.object.mode" , false );
-    db.IN_TRANSC_MODE = Core.getInstance().containsKey("__IN_TRANSC_MODE__");
-
-    return db;
-  }
-
-  private DB()
-    throws HongsException
-  {
-    this.name         = "";
-    this.source       = new HashMap();
-    this.origin       = new HashMap();
-    this.tableClass   = Table.class.getName();
-    this.tablePrefix  = "";
-    this.tableSuffix  = "";
-    this.tableConfigs = new HashMap();
-    this.tableObjects = new HashMap();
-    this.modelObjects = new HashMap();
-  }
-
-  public static DB getInstanceByOrigin(String name, Properties info)
+  public static DB newInstance(String name, Properties info)
   throws HongsException {
       DB db = new DB();
       db.origin = new HashMap();
@@ -1610,12 +1617,26 @@ public class DB
       return db;
   }
 
-  public static DB getInstanceByOrigin(String name)
+  /**
+   * 以外部数据源的形式构造对象
+   * @param name
+   * @return
+   * @throws HongsException 
+   */
+  public static DB newInstance(String name)
   throws HongsException {
-      return DB.getInstanceByOrigin(name, new Properties());
+      return DB.newInstance(name, new Properties());
   }
 
-  public static DB getInstanceBySource(String drv, String url, Properties info)
+  /**
+   * 以内部数据源的形式构造对象(c3p0)
+   * @param drv
+   * @param url
+   * @param info
+   * @return
+   * @throws HongsException 
+   */
+  public static DB newInstance(String drv, String url, Properties info)
   throws HongsException {
       DB db = new DB();
       db.source = new HashMap();
@@ -1625,9 +1646,16 @@ public class DB
       return db;
   }
 
-  public static DB getInstanceBySource(String drv, String url)
+  /**
+   * 以内部数据源的形式构造对象
+   * @param drv
+   * @param url
+   * @return
+   * @throws HongsException 
+   */
+  public static DB newInstance(String drv, String url)
   throws HongsException {
-      return getInstanceBySource(drv, url, new Properties());
+      return DB.newInstance(drv, url, new Properties());
   }
 
 }

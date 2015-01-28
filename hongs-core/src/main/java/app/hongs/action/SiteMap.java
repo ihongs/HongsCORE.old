@@ -557,34 +557,42 @@ public class SiteMap
 //  }
 
   /**
+   * 获取菜单翻译(与当前请求相关)
+   * @return 
+   */
+  public CoreLanguage getMenuTranslator() {
+    CoreLanguage lang;
+    try {
+      lang = CoreLanguage.getInstance(name).clone();
+    }
+    catch (app.hongs.HongsError e) {
+      if  (  e.getCode( ) != 0x2a) {
+        throw e;
+      }
+      // 语言文件不存在则拿一个空对象代替
+      lang = new CoreLanguage(null);
+    }
+    for(String namz : imports) {
+        lang.loadIgnrFNF(namz);
+    }
+    return lang;
+  }
+
+  /**
    * 获取菜单列表(与当前请求相关)
    * @param level
    * @param depth
    * @return
    */
-  public  List<Map> getMenu(int level, int depth) {
-      CoreLanguage lang;
-      try {
-          lang = CoreLanguage.getInstance(this.name).clone();
-      } catch (HongsError er) {
-          // 语言文件不存在则拿一个空对象代替
-          if (er.getCode() == 0x2a) {
-              lang = new CoreLanguage(null);
-          } else {
-              throw er;
-          }
-      }
-      for(String namz : imports) {
-          lang.loadIgnrFNF(namz);
-      }
-
+  public  List<Map> getMenuTranslated(int level, int depth) {
       Set<String> auths = getAuthSet();
-      if (null == auths) auths = new HashSet();
+      if (null == auths)auths = new HashSet();
+      CoreLanguage lang = getMenuTranslator();
 
-      return getMenu(level, depth, 0, pages, auths, lang);
+      return getMenuTranslated(level, depth, 0, pages, auths, lang);
   }
 
-  private List<Map> getMenu(int level, int depth, int i, Map<String, Map> pages, Set<String> auths, CoreLanguage lang) {
+  private List<Map> getMenuTranslated(int level, int depth, int i, Map<String, Map> pages, Set<String> auths, CoreLanguage lang) {
       List<Map> list = new ArrayList();
 
       if (i >= level+depth || pages == null) {
@@ -594,7 +602,7 @@ public class SiteMap
       for(Map.Entry item : pages.entrySet()) {
           Map  v = (Map) item.getValue();
           Map  p = (Map) v.get ("pages");
-          List a = getMenu(level, depth, i + 1, p, auths, lang);
+          List a = getMenuTranslated(level, depth, i + 1, p, auths, lang);
 
           if (i >= level) {
               String u = (String) item.getKey();

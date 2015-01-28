@@ -66,7 +66,7 @@ public class CommonAction {
             d = Integer.parseInt(depth);
         }
 
-        List list = SiteMap.getInstance(name).getMenu(l, d);
+        List list = SiteMap.getInstance(name).getMenuTranslated(l, d);
         Map data = new HashMap();
         data.put( "list", list );
         helper.reply(data);

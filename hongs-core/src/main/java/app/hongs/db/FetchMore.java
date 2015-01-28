@@ -5,7 +5,6 @@ import app.hongs.HongsException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,7 @@ import java.util.regex.Pattern;
 public class FetchMore
 {
 
-  private List rows;
+  protected List<Map> rows;
 
   public FetchMore(List<Map> rows)
   {
@@ -41,127 +40,84 @@ public class FetchMore
   }
 
   /**
-   * 追加关联数据
-   * @param rows 要追加的数据
-   * @param col  追加数据的关联键
-   * @param key  目标数据的关联键
-   * @param name 追加到目标的键
+   * 获取关联ID和行
+   *
+   * @param map
+   * @param key
    */
-  public void join(List<Map> rows, String col, String key, String name)
+  private void mapped(Map<Object, List> map, String... key)
   {
-    this.join(rows, name, col, key, false, false);
-  }
-
-  /**
-   * 追加关联数据
-   * @param rows 要追加的数据
-   * @param col  追加数据的关联键
-   * @param key  目标数据的关联键
-   * @param name 追加到目标的键
-   * @param multiAssoc 目标数据与追加数据是一对多的关系
-   * @param unityAssoc 将追加数据放入目标数据的同一层下(name将无效)
-   */
-  public void join(List<Map> rows, String col, String key, String name,
-                        Boolean multiAssoc, Boolean unityAssoc)
-  {
-    // 获取id及行
-    Map<String, List> map = this.getMap(key);
-
-    Iterator rs = rows.iterator(  );
-
-    Map     row, sub;
-    List    lst;
-    String  id;
-
-    if (! multiAssoc)
+    Iterator it = this.rows.iterator();
+    W:while (it.hasNext())
     {
-      while (rs.hasNext())
+      Object row = it.next();
+      Object obj = row;
+
+      // 获取id值
+      for (int i = 0; i < key.length; i ++)
       {
-        sub = ( Map  ) rs.next(   );
-        id  = (String) sub.get(col);
-        lst = ( List ) map.get(id );
-
-        if (lst == null)
+        if (obj instanceof Map)
         {
-          //throw new HongsException(0x10c0, "Line nums is null");
-          continue;
+          obj = ((Map)obj).get(key[i]);
         }
-
-        Iterator it = lst.iterator();
-        while (it.hasNext())
+        else
+        if (obj instanceof List)
         {
-          row = (Map) it.next();
+          List rowz = this.rows;
+          this.rows = (List)obj;
 
-          if (! unityAssoc)
-          {
-            row.put(name, sub);
-          }
-          else
-          {
-            sub.putAll(row);
-            row.putAll(sub);
-          }
+          // 切割子键数组
+          int j = key.length - i ;
+          String[] keyz = new String[j];
+          System.arraycopy(key, i, keyz, 0, j);
+
+          // 往下递归一层
+          this.mapped(map, keyz);
+
+          this.rows = rowz;
+
+          continue W;
+        }
+        else
+        {
+          continue W;
         }
       }
-    }
-    else
-    {
-      while (rs.hasNext())
+      if (obj == null)
       {
-        sub = ( Map  ) rs.next(   );
-        id  = (String) sub.get(col);
-        lst = ( List ) map.get(id );
+          continue W;
+      }
 
-        if (lst == null)
-        {
-          //throw new HongsException(0x10c0, "Line nums is null");
-          continue;
-        }
-
-        Iterator it = lst.iterator();
-        while (it.hasNext())
-        {
-          row = (Map) it.next();
-
-          if (row.containsKey(name))
-          {
-            (( List ) row.get(name)).add(sub);
-          }
-          else
-          {
-            List lzt = new ArrayList();
-            row.put(name, lzt);
-            lzt.add(sub);
-          }
-        }
+      // 登记行
+      if (map.containsKey(obj))
+      {
+        map.get(obj ).add(row);
+      }
+      else
+      {
+        List lst = new ArrayList();
+        map.put(obj , lst);
+        lst.add(row);
       }
     }
   }
 
-  /**
-   * 获取关联数据
-   *
-   * @param table 关联表
-   * @param col   关联字段
-   * @param key   源表关联键
-   * @throws app.hongs.HongsException
-   */
-  public void join(Table table, String col, String key)
-    throws HongsException
-  {
-    this.join(table, col, key, new FetchCase());
+  public Map<Object, List> mapped(String key) {
+    Map<Object, List> map = new HashMap();
+    mapped(map, key.split("\\."));
+    return map;
   }
 
   /**
    * 获取关联数据
-   *
+   * 类似 SQL: JOIN table ON super.key = table.col
    * @param table 关联表
    * @param col   关联字段
    * @param key   源表关联键
    * @param caze  限制查询结构
    * @throws app.hongs.HongsException
    */
-  public void join(Table table, String col, String key, FetchCase caze)
+  public void join(Table table, String key, String col, FetchCase caze)
     throws HongsException
   {
     if (this.rows.isEmpty())
@@ -170,21 +126,20 @@ public class FetchMore
     }
 
     DB db = table.db;
-    String       name   = caze.name;
+    String       name   = table.name;
     String  tableName   = table.tableName;
-    boolean multiAssoc  = caze.getOption("MULTI_ASSOC", false);
-    boolean unityAssoc  = caze.getOption("UNITY_ASSOC", false);
+    boolean multi       = caze.getOption("ASSOC_MULTI", false);
+    boolean merge       = caze.getOption("ASSOC_MERGE", false);
 
-    if (name == null || name.length() == 0)
+    if (null != caze.name && 0 != caze.name.length())
     {
-        name = table.name;
+        name  = caze.name;
     }
 
     // 获取id及行号
-    Map<String, List> map = this.getMap(key);
-    Set<String> ids = map.keySet();
-
-    if (ids.isEmpty() || map.isEmpty())
+    Map<Object, List> map = FetchMore.this.mapped(key);
+    Set ids = map.keySet();
+    if (ids.isEmpty())
     {
       //throw new HongsException(0x10c0, "Ids map is null");
       return;
@@ -192,7 +147,7 @@ public class FetchMore
 
     // 识别字段别名
     String col2 = col;
-    if (!table.getColumns().containsKey(col))
+    if (!table.getFields().containsKey(col))
     {
       Pattern pattern = Pattern.compile(
              "^(.+?)\\s+(?:AS\\s+)?`?(.+?)`?$",
@@ -224,7 +179,7 @@ public class FetchMore
     List    lst;
     String  id;
 
-    if (! multiAssoc)
+    if (! multi)
     {
       while ((sub = rs.fetch()) != null)
       {
@@ -242,7 +197,7 @@ public class FetchMore
         {
           row = (Map) it.next();
 
-          if (! unityAssoc)
+          if (! merge)
           {
             row.put(name, sub);
           }
@@ -288,100 +243,30 @@ public class FetchMore
   }
 
   /**
-   * 获取关联ID
+   * 获取关联数据
    *
-   * @param key 使用"."分割的键
-   * @param ids
+   * @param table 关联表
+   * @param col   关联字段
+   * @param key   源表关联键
+   * @throws app.hongs.HongsException
    */
-  public Set<String> getIds(String key)
+  public void join(Table table, String key, String col)
+    throws HongsException
   {
-    Set ids = new HashSet( );
-    Map map = new HashMap( );
-    this.getMap(key.split("\\."), map);
-    ids.addAll(map.keySet());
-    return ids;
+    this.join(table, key, col, new FetchCase());
   }
 
   /**
-   * 获取关联ID和行
+   * 获取关联数据
    *
-   * @param key 使用"."分割的键
-   * @param map
+   * @param table 关联表
+   * @param key   关联字段
+   * @throws app.hongs.HongsException
    */
-  public Map<String, List> getMap(String key)
+  public void join(Table table, String key)
+    throws HongsException
   {
-    Map<String, List> map = new HashMap();
-    if (key.startsWith( ":" ))
-    {
-        key = key.substring(1);
-    }
-    this.getMap(key.split("\\."), map);
-    return map;
-  }
-
-  /**
-   * 获取关联ID和行
-   *
-   * @param key
-   * @param map
-   */
-  private void getMap(String[] key, Map<String, List> map)
-  {
-    Iterator it = this.rows.iterator();
-    W:while (it.hasNext())
-    {
-      Object row = it.next();
-      Object obj = row;
-
-      // 获取id值
-      for (int i = 0; i < key.length; i ++)
-      {
-        if (obj instanceof Map)
-        {
-          obj = ((Map)obj).get(key[i]);
-        }
-        else
-        if (obj instanceof List)
-        {
-          List rowz = this.rows;
-          this.rows = (List)obj;
-
-          // 切割子键数组
-          int j = key.length - i ;
-          String[] keyz = new String[j];
-          System.arraycopy(key, i, keyz, 0, j);
-
-          // 往下递归一层
-          this.getMap(keyz, map);
-
-          this.rows = rowz;
-
-          continue W;
-        }
-        else
-        {
-          continue W;
-        }
-      }
-      if (obj == null)
-      {
-          continue W;
-      }
-
-      String id = obj.toString();
-
-      // 登记行
-      if (map.containsKey(id))
-      {
-        map.get(id).add(row);
-      }
-      else
-      {
-        List lst = new ArrayList();
-        map.put(id, lst);
-        lst.add(row);
-      }
-    }
+    this.join(table, key, key, new FetchCase());
   }
 
   //** 静态方法 **/
@@ -538,17 +423,17 @@ public class FetchMore
             // 上级外键连接下级主键, 交换主外键
             String xk = fk; fk = pk; pk = xk;
             if (fk == null) fk = table2.primaryKey;
-            caze2.setOption("MULTI_ASSOC", false);
+            caze2.setOption("ASSOC_MULTI" , false);
         }
         else if ("HAS_ONE".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
-            caze2.setOption("MULTI_ASSOC", false);
+            caze2.setOption("ASSOC_MULTI" , false);
         }
         else if ("HAS_MANY".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
-            caze2.setOption("MULTI_ASSOC", true );
+            caze2.setOption("ASSOC_MULTI" , true );
         }
         else {
             throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
@@ -560,10 +445,10 @@ public class FetchMore
         buildCase(caze2, assoc);
 
         if (assocs2 != null) {
-                    FetchMore.fetchMore(table2, caze2, assocs2, lnks2);
+            FetchMore.fetchMore(table2, caze2, assocs2, lnks2);
         }
 
-        join.join (table2, fk , pk, caze2);
+        join.join (table2, pk, fk.startsWith(":") ? fk.substring(1) : fk, caze2);
     }
         lnks = lnks2;
     }
@@ -583,7 +468,7 @@ public class FetchMore
     if (str != null && str.length() != 0) {
         caze.groupBy(str);
     }
-    str = (String)assoc.get("having");
+    str = (String)assoc.get("havin");
     if (str != null && str.length() != 0) {
         caze.havin(str);
     }

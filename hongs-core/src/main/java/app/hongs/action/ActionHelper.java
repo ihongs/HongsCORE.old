@@ -5,15 +5,16 @@ import app.hongs.HongsException;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
 import java.io.BufferedReader;
-import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * 动作助手
@@ -36,17 +37,17 @@ public class ActionHelper
   /**
    * 请求数据
    */
-  private Map<String, Object> requestData;
+  private Map<String, Object> requestData = null;
 
   /**
    * 容器数据
    */
-  private Map<String, Object> contextData;
+  private Map<String, Object> contextData = null;
 
   /**
    * 会话数据
    */
-  private Map<String, Object> sessionData;
+  private Map<String, Object> sessionData = null;
 
   /**
    * HttpServletResponse
@@ -56,12 +57,12 @@ public class ActionHelper
   /**
    * 响应数据
    */
-  private Map<String, Object> responseData;
+  private Map<String, Object> responseData = null;
 
   /**
    * 响应输出
    */
-  private PrintWriter responseWrtr;
+  private PrintWriter /* * */ responseWrtr = null;
 
   public ActionHelper()
   {
@@ -78,10 +79,12 @@ public class ActionHelper
    */
   public ActionHelper(Map req, Map att, Map ses, PrintWriter out)
   {
-    this.requestData  = req != null ? req : new LinkedHashMap( );
-    this.contextData  = att != null ? att : new LinkedHashMap( );
-    this.sessionData  = ses != null ? ses : new LinkedHashMap( );
-    this.responseWrtr = out != null ? out : new PrintWriter(System.err);
+    this.request      = null;
+    this.requestData  = req != null ? req : new HashMap();
+    this.contextData  = att != null ? att : new HashMap();
+    this.sessionData  = ses != null ? ses : new HashMap();
+    this.response     = null;
+    this.responseWrtr = out != null ? out : new PrintWriter(System.out);
   }
 
   /**
@@ -92,10 +95,8 @@ public class ActionHelper
    */
   public ActionHelper(HttpServletRequest req, HttpServletResponse rsp)
   {
-    this.request      = req ;
-    this.response     = rsp ;
-    this.requestData  = null;
-    this.responseData = null;
+    this.request  = req;
+    this.response = rsp;
 
     try
     {
@@ -107,11 +108,11 @@ public class ActionHelper
       throw new HongsError(0x31, "Can not set encoding.", ex);
     }
   }
-  
+
   public void reinitHelper(HttpServletRequest req, HttpServletResponse rsp)
   {
-    this.request      = req ;
-    this.response     = rsp ;
+    this.request  = req;
+    this.response = rsp;
 
     try
     {
@@ -145,13 +146,13 @@ public class ActionHelper
     if (this.requestData == null)
     {
       String ct = this.request.getContentType();
-      if (null != ct && ("text/json".equals(ct) || "application/json".equals(ct) ))
+      if (null != ct && ("text/json".equals(ct) || "application/json".equals(ct)))
       {
-        this.requestData = (Map<String,Object>)Data.toObject(this.getRequestText());
+        this.requestData = (Map<String, Object>) Data.toObject(getRequestText( ) );
       }
       else
       {
-        this.requestData = ActionHelper.parseParam(this.request.getParameterMap());
+        this.requestData = parseParam(request.getParameterMap());
       }
     }
     return this.requestData;
@@ -241,16 +242,16 @@ public class ActionHelper
     {
       return null;
     }
-//    if (o instanceof Map )
-//    {
-//      o = new ArrayList(((Map) o).values());
-//    }
-//    if (o instanceof List)
-//    {
-//      List l = (List) o;
-//      int  i = l.size();
-//      o =  l.get(i + 1);
-//    }
+    if (o instanceof Map )
+    {
+      o = new ArrayList(((Map) o).values());
+    }
+    if (o instanceof List)
+    {
+      List l = (List) o;
+      int  i = l.size();
+      o =  l.get(i + 1);
+    }
     return o.toString();
   }
 
@@ -367,9 +368,9 @@ public class ActionHelper
    */
   public void reply(String msg, Object... o)
   {
-    Map map = new LinkedHashMap();
+    Map map = new HashMap();
     map.put("ok", true);
-    if (null != msg) {
+    if (null !=  msg  ) {
         map.put("msg", msg);
     }
     if (null != o && o.length > 0) {
@@ -385,7 +386,7 @@ public class ActionHelper
    */
   public void reply(boolean ok)
   {
-    Map map = new LinkedHashMap();
+    Map map = new HashMap();
     map.put("ok", ok);
     reply(map);
   }
@@ -395,26 +396,40 @@ public class ActionHelper
   /**
    * 输出内容
    * @param txt
-   * @param ctt Content-Type定义, 如text/html
+   * @param cst Content-Type 编码, 如 utf-8
+   * @param ctt Content-Type 定义, 如 text/html
    */
-  public void print(String txt, String ctt)
+  public void print(String txt, String ctt, String cst)
   {
-    if (this.response != null && ! this.response.isCommitted())
+    if (this.response != null && !this.response.isCommitted())
     {
-      if (!ctt.contains(";")) ctt += "; charset=utf-8";
-      this.response.setContentType(ctt);
+      if (cst != null) {
+          this.response.setCharacterEncoding(cst);
+      }
+      if (ctt != null) {
+          this.response.setContentType(ctt);
+      }
     }
-
-    this.getResponseWrtr(  ).print(txt);
+    this.getResponseWrtr().print(txt);
   }
 
   /**
    * 输出文本内容
    * @param txt
+   * @param ctt
    */
-  public void print(String txt)
+  public void print(String txt, String ctt)
   {
-    this.print(txt, "text/plain");
+    this.print(txt, ctt, "utf-8");
+  }
+
+  /**
+   * 输出文本内容
+   * @param htm
+   */
+  public void print(String htm)
+  {
+    this.print(htm, "text/html");
   }
 
   /**

@@ -44,7 +44,6 @@ public class SupplyHelper {
         FormSet cnf = FormSet.getInstance(conf);
         Map map  = cnf.getForm(form);
         if (map == null) return this;
-        map = (Map) map.get("items");
 
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {

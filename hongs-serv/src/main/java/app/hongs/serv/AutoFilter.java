@@ -86,7 +86,7 @@ public class AutoFilter implements Filter {
                     // 虚拟路径
                     req.setAttribute(PATH, url);
                     // 转发请求
-                    req.getRequestDispatcher(/**/"/"+render+uri).include(req, rsp);
+                    req.getRequestDispatcher(/**/"/"+render+uri).forward(req, rsp);
                     return;
                 }
             }
@@ -106,7 +106,7 @@ public class AutoFilter implements Filter {
 
         actset = new TreeSet(new Comparator<String>() {
             public int compare(String o1, String o2) {
-                return o1.length() == o2.length() ? 1 : -1;
+                return o1.length() < o2.length() ? 1 : -1;
             }
         });
 
@@ -119,7 +119,7 @@ public class AutoFilter implements Filter {
             }
         }
 
-        return  actset;
+        return actset;
     }
 
 }

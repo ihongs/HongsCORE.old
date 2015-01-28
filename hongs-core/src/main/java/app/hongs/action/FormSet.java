@@ -261,7 +261,7 @@ public class FormSet
       Map.Entry e = (Map.Entry) o ;
       String    n = (String) e.getValue();
       if (n == null || "".equals(n)) {
-          n = "core.enum."+name+"."+namc+"."+(String) e.getKey();
+          n = "fore.enum."+name+"."+namc+"."+(String) e.getKey();
       }
       e.setValue( lang.translate(n));
     }
@@ -281,7 +281,7 @@ public class FormSet
       String    k = (String) e.getKey();
       String    n = (String) m.get("__disp__");
       if (n == null || "".equals(n)) {
-          n = "core.form."+name+"."+namc+"."+k;
+          n = "fore.form."+name+"."+namc+"."+k;
       }
       Map       u = new LinkedHashMap(  );
       u.putAll( m );

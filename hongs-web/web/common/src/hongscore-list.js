@@ -21,6 +21,7 @@ function HsList(opts, context) {
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
     this.rowsPerPage = hsGetConf("rows.per.page", 20);
+    this.lnksPerPage = hsGetConf("lnks.per.page", 5 );
 
     this.context = context;
     this.loadBox = loadBox;
@@ -313,12 +314,12 @@ HsList.prototype = {
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
-        p  = page.page || 1;
+        p  = page.page      || 1;
         t  = page.pagecount || 1;
-        pn = this.pageBox.attr("data-pn" );
-        pn = pn ? parseInt(pn) : 10;
-        pmin = Math.floor((p - 1) / pn) * pn + 1;
-        pmax = pmin+pn - 1; if (t<pmax) pmax = t;
+        pmin = Math.floor((p - 1) / this.lnksPerPage);
+        pmin = pmin * this.lnksPerPage + 1;
+        pmax = pmin + this.lnksPerPage - 1;
+        if(t < pmax)  pmax = t;
 
         this.pageBox.empty();
         //this.pageBox.addClass("clearfix");
@@ -328,28 +329,37 @@ HsList.prototype = {
 
         if (1 != p) {
             pn = p - 1;
-            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
+            btns.append(jQuery('<li class="page-prev"><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
         } else {
-            btns.append(jQuery('<li class="disabled"><a href="javascript:;" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
+            btns.append(jQuery('<li class="page-prev disabled"><a href="javascript:;" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
         }
-        if (1 < pmin-1) {
-            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+1+'">'+1+'</a></li>'));
-            nums.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
-            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmin-1)+'">'+(pmin-1)+'</a></li>'));
+
+        if (1 < pmin) {
+            nums.append(jQuery('<li class="page-home"><a href="javascript:;" data-pn="'+1+'">'+1+'</a></li>'));
         }
-        for(i = pmin; i < pmax + 1; i ++) { var cl = i == p ? ' class="active"' : '';
-            nums.append(jQuery('<li'+cl+'><a href="javascript:;" data-pn="'+i+'">'+i+'</a></li>'));
+        if (1 < pmin - 1) {
+            nums.append(jQuery('<li class="unit-prev"><a href="javascript:;" data-pn="'+(pmin-1)+'">&hellip;</a></li>'));
         }
-        if (t > pmax+1) {
-            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+(pmax+1)+'">'+(pmax+1)+'</a></li>'));
-            nums.append(jQuery('<li class="disabled" ><a href="javascript:;">...</a></li>'));
-            nums.append(jQuery('<li><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
+        for(i = pmin; i < pmax + 1; i ++) {
+            nums.append(jQuery('<li class="page-link'+(i == p ? ' active' : '')+'"><a href="javascript:;" data-pn="'+i+'">'+i+'</a></li>'));
         }
-        if (t != p || page.next === true) {
+        if (t > pmax + 1) {
+            nums.append(jQuery('<li class="unit-next"><a href="javascript:;" data-pn="'+(pmax+1)+'">&hellip;</a></li>'));
+        }
+        if (t > pmax) {
+            nums.append(jQuery('<li class="page-last"><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
+        }
+
+        if (t != p) {
             pn = p + 1;
-            btns.append(jQuery('<li><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
+            btns.append(jQuery('<li class="page-next"><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
         } else {
-            btns.append(jQuery('<li class="disabled"><a href="javascript:;" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
+            btns.append(jQuery('<li class="page-next disabled"><a href="javascript:;" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
+        }
+
+        // 页码不确定则不末页显示为更多
+        if (page.uncertain && t == pmax + 1) {
+            nums.find(".page-last").addClass("lnks-next").find("a").html("&hellip;");
         }
 
         this.pageBox.find("[data-pn="+p+"]").addClass("page-curr");

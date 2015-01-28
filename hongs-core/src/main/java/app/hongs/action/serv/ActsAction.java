@@ -43,6 +43,15 @@ public class ActsAction
   extends HttpServlet
 {
 
+  private static final Map<Integer, String> ErrMap;
+  static {
+      ErrMap = new HashMap();
+      ErrMap.put(0x10f1, "Er401");
+      ErrMap.put(0x10f3, "Er403");
+      ErrMap.put(0x10f4, "Er404");
+      ErrMap.put(0x10f5, "Er500");
+  }
+
   /**
    * 服务方法
    * Servlet Mapping: *.act<br/>
@@ -60,7 +69,7 @@ public class ActsAction
     String act  = ActionWarder.getCurrPath(req);
     Core   core = ActionWarder.getWorkCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
-    helper.reinitHelper(req, rsp);
+    Core.THREAD_CORE.set( core );
 
     if (act == null || act.length() == 0)
     {
@@ -141,15 +150,6 @@ public class ActsAction
     data.put( "err", errno );
     data.put( "msg", error );
     helper.reply(data);
-  }
-
-  private static final Map<Integer, String> ErrMap;
-  static {
-      ErrMap = new HashMap();
-      ErrMap.put(0x10f1, "Er401");
-      ErrMap.put(0x10f3, "Er403");
-      ErrMap.put(0x10f4, "Er404");
-      ErrMap.put(0x10f5, "Er500");
   }
 
 }

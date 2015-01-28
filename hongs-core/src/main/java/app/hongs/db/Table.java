@@ -81,8 +81,7 @@ public class Table
 
   protected Map assocs;
   protected Map relats;
-  
-  private Map columns;
+  private   Map fields;
 
   public Table(DB db, Map tblConf)
     throws HongsException
@@ -198,7 +197,7 @@ public class Table
     // 存在 mtime 字段则自动放入当前时间
     if (mtime != null && !values.containsKey(mtime))
     {
-      int type = (Integer)((Map)this.columns.get(mtime)).get("type");
+      int type = (Integer)((Map)this.fields.get(mtime)).get("type");
       switch (type)
       {
         case Types.DATE:
@@ -218,7 +217,7 @@ public class Table
     // 存在 ctime 字段则自动放入当前时间
     if (ctime != null && !values.containsKey(ctime))
     {
-      int type = (Integer)((Map)this.columns.get(ctime)).get("type");
+      int type = (Integer)((Map)this.fields.get(ctime)).get("type");
       switch (type)
       {
         case Types.DATE:
@@ -242,7 +241,7 @@ public class Table
       List<Object> paramz = new ArrayList(  );
       paramz.add(values.get(this.primaryKey));
 
-      int type = (Integer)((Map)this.columns.get(etime)).get("type");
+      int type = (Integer)((Map)this.fields.get(etime)).get("type");
       switch (type)
       {
         case Types.DATE:
@@ -294,7 +293,7 @@ public class Table
     // 存在 mtime 字段则自动放入当前时间
     if (mtime != null && !values.containsKey(mtime))
     {
-      int type = (Integer)((Map)this.columns.get(mtime)).get("type");
+      int type = (Integer)((Map)this.fields.get(mtime)).get("type");
       switch (type)
       {
         case Types.DATE:
@@ -352,14 +351,14 @@ public class Table
    * @return 全部字段信息
    * @throws app.hongs.HongsException
    */
-  protected Map getColumns()
+  protected Map getFields()
     throws HongsException
   {
-    if (this.columns == null)
+    if (this.fields == null)
     {
-        this.columns = (new DTColumn(this)).columns;
+        this.fields = (new DBFields(this)).fields;
     }
-    return this.columns;
+    return this.fields;
   }
 
   /**
@@ -412,7 +411,7 @@ public class Table
   protected String getField(String field)
     throws HongsException
   {
-    Map        cols = getColumns();
+    Map        cols = getFields();
     CoreConfig conf = Core.getInstance(CoreConfig.class);
     field = conf.getProperty("core.table." + field + ".field", field);
     return  cols.containsKey(field) ? field : null;
@@ -560,9 +559,9 @@ public class Table
     /**
      * 获取字段信息
      */
-    this.getColumns();
+    this.getFields();
 
-    Iterator it = this.columns.entrySet().iterator();
+    Iterator it = this.fields.entrySet().iterator();
     while (it.hasNext())
     {
       Map.Entry et = (Map.Entry)it.next();
@@ -908,7 +907,7 @@ public class Table
    * @return
    * @throws HongsException
    */
-  public static Table getInstanceByName(DB db, String name, String pkey)
+  public static Table newInstance(DB db, String name, String pkey)
     throws HongsException
   {
     Map map = new HashMap();
@@ -925,10 +924,10 @@ public class Table
    * @return
    * @throws HongsException
    */
-  public static Table getInstanceByName(DB db, String name)
+  public static Table newInstance(DB db, String name)
     throws HongsException
   {
-    return getInstanceByName(db, name);
+    return Table.newInstance(db, name, null);
   }
 
 }

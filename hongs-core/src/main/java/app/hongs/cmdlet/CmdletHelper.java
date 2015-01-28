@@ -277,6 +277,7 @@ public class CmdletHelper
   /**
    * 输出(到标准错误)
    * 通常, 辅助信息输出标准错误, 结果数据输出标准输出, 方便其他程序/进程处理
+   * 如果需要输出结构化的数据供其它程序处理, 请不要使用此函数
    * @param text
    */
   public static void println(String text)
@@ -304,7 +305,7 @@ public class CmdletHelper
    */
   public static void print4Log(String text) throws HongsException
   {
-    CmdletHelper.println    (text);
+    CmdletHelper.println  (text);
     CmdletHelper.print2Log(text);
   }
 

@@ -45,9 +45,10 @@ public class SupplyInvoker implements FilterInvoker {
 
         if (form.length( ) == 0) {
             conf = chains.getAction( );
-            int i = conf.lastIndexOf('/');
-            form = conf.substring(0,i);
-            conf = conf.substring(i+1);
+            int j = conf.lastIndexOf('/'/**/);
+            int i = conf.lastIndexOf('/',j-1);
+            form = conf.substring(1+i, j);
+            conf = conf.substring(0,i);
         }
 
         // 填充数据

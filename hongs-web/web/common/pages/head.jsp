@@ -50,8 +50,8 @@
 
     SiteMap main = SiteMap.getInstance();
     SiteMap curr = SiteMap.getInstance(name);
-    List<Map> mainMenu = main.getMenu (1, 1);
-    List<Map> currMenu = curr.getMenu (1, 1);
+    List<Map> mainMenu = main.getMenuTranslated(1, 1);
+    List<Map> currMenu = curr.getMenuTranslated(1, 1);
 %>
 
 <div class="navbar-header">

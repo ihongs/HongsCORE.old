@@ -523,8 +523,7 @@ public class Mtree extends Model
     List list = this.db.fetchAll(sql,id);
 
     FetchMore join = new FetchMore(list);
-    Set        ids = join.getIds(this.table.primaryKey);
-    List      cids = new ArrayList( ids);
+    List      cids = new ArrayList(join.mapped(this.table.primaryKey).keySet());
 
     if (all)
     {

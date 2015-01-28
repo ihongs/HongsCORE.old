@@ -395,7 +395,7 @@ public class Model
     String n = (String) rd.get("n");
     String v = (String) rd.get("v");
 
-    Map columns = this.table.getColumns();
+    Map columns = this.table.getFields();
 
     // 是否缺少n对应的字段
     if (!columns.containsKey(n))
@@ -695,7 +695,7 @@ public class Model
      * 依据设计规则, 解析请求参数, 转为查询结构
      */
     Iterator it = rd.entrySet().iterator();
-    Map columns = this.table.getColumns();
+    Map columns = this.table.getFields();
     while (it.hasNext())
     {
       Map.Entry et = (Map.Entry)it.next();
@@ -852,7 +852,7 @@ public class Model
         tx = Table.getAssocName(tc);
         ts = Table.getAssocPath(tc);
         tb =  this.db.getTable (tx);
-        cols2 =  tb.getColumns (  );
+        cols2 =  tb.getFields (  );
         tns.addAll(new HashSet(Arrays.asList(ts)));
         tns.add(tn);
         caze2 = caze.gotJoin(ts).join(tn);
@@ -971,7 +971,7 @@ public class Model
 
         tx = Table.getAssocName(tc);
         tb =  this.db.getTable (tx);
-        cs =  tb.getColumns (  );
+        cs =  tb.getFields (  );
         if (! cs.containsKey(fn))
         {
           continue;
@@ -1184,7 +1184,7 @@ public class Model
     String[]     ts = Table.getAssocPath(tc);
     String       tn = Table.getAssocName(tc);
     Table        tb =  this.db.getTable (tn);
-    Map cs = tb.getColumns();
+    Map cs = tb.getFields();
 
     Map<String, Object>  vs = (Map) val ;
     for (Map.Entry et2 : vs.entrySet( ))

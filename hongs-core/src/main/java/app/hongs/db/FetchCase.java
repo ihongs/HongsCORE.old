@@ -40,8 +40,8 @@ import java.util.regex.Pattern;
  * ASSOCS       : Set         仅对某些表做关联; 作用域: FetchJoin.assocSelect
  * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchJoin.assocSelect
  * ASSOC_JOINS  : Set         仅对某些类型连接; 作用域: FetchJoin.assocSelect
- * MULTI_ASSOC  : boolean     多行关联(使用IN方式关联); 作用域: FetchJoin
- * UNITY_ASSOC  : boolean     单体关联(仅限非多行关联); 作用域: FetchJoin
+ * ASSOC_MULTI  : boolean     多行关联(使用IN方式关联); 作用域: FetchMore
+ * ASSOC_MERGE  : boolean     归并关联(仅限非多行关联); 作用域: FetchMore
  * page         : int|String  分页页码; 作用域: FetchPage
  * rows         : int|String  分页行数; 作用域: FetchPage
  * </pre>

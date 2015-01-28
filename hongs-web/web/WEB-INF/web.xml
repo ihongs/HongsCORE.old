@@ -89,6 +89,14 @@
         </init-param>
     </filter>
     <filter>
+        <filter-name>AutoFilter_Resume</filter-name>
+        <filter-class>app.hongs.serv.AutoFilter</filter-class>
+        <init-param>
+            <param-name>action</param-name>
+            <param-value>resume</param-value>
+        </init-param>
+    </filter>
+    <filter>
         <filter-name>AutoFilter_Search</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
@@ -99,6 +107,13 @@
     <filter-mapping>
         <filter-name>AutoFilter_DB</filter-name>
         <url-pattern>/demo/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>AutoFilter_Resume</filter-name>
+        <url-pattern>/resume/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>

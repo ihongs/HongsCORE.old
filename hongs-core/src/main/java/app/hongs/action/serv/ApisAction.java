@@ -174,7 +174,7 @@ public class ApisAction
         if ( data != null ) {
             Set conv;
             try {
-                conv = Synt.declare(hlpr.getParameter("--api-conv"), Set.class);
+                conv = Synt.declare(hlpr.getRequestData().get("-api-conv"), Set.class);
             } catch (HongsException ex) {
                 throw new ServletException(ex);
             }

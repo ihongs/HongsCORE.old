@@ -2,6 +2,7 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
+import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Dict;
@@ -17,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -72,7 +72,6 @@ public class VerifyHelper {
         CoreConfig cuf = CoreConfig.getInstance();
         Map map  = cnf.getForm(form);
         if (map == null) return this;
-        map = (Map) map.get("items");
 
         int i = 0;
         try {
@@ -156,13 +155,14 @@ public class VerifyHelper {
             if (rp == null) {
                 try {
                     data = verify(name, data, values, rulez, update);
-                } catch (Skip   w) {
-                    continue;
                 } catch (Wrong  w) {
                     failed(wrongz, w, name);
                     continue;
                 } catch (Wrongs w) {
                     failed(wrongz, w, name);
+                    continue;
+                }
+                if (data == SKIP ) {
                     continue;
                 }
             } else {
@@ -178,9 +178,9 @@ public class VerifyHelper {
                 if (Synt.declare(rp.get("distinct"), false)) {
                     data2 = new LinkedHashSet();
                 } else {
-                    data2 = new ArrayList();
+                    data2 = new ArrayList(/**/);
                 }
-                
+
                 if (data instanceof Collection) {
                     int i3 = 0;
                     for(Object data3 : ((Collection) data ) ) {
@@ -188,13 +188,14 @@ public class VerifyHelper {
 
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
-                        } catch (Skip   w) {
-                            continue;
                         } catch (Wrong  w) {
                             failed(wrongz, w, name3);
                             continue;
                         } catch (Wrongs w) {
                             failed(wrongz, w, name3);
+                            continue;
+                        }
+                        if (data == SKIP ) {
                             continue;
                         }
                         data2.add(data3);
@@ -208,13 +209,14 @@ public class VerifyHelper {
 
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
-                        } catch (Skip   w) {
-                            continue;
                         } catch (Wrong  w) {
                             failed(wrongz, w, name3);
                             continue;
                         } catch (Wrongs w) {
                             failed(wrongz, w, name3);
+                            continue;
+                        }
+                        if (data == SKIP ) {
                             continue;
                         }
                         data2.add(data3);
@@ -247,9 +249,9 @@ public class VerifyHelper {
 
     protected Object verify(String name, Object value, Map values, Map<String, Map> rules2, boolean update) throws Wrong, HongsException {
         for(Map.Entry<String, Map> rule2 : rules2.entrySet()) {
-            String rule = rule2.getKey( );
-            if ("__required__".equals(rule)
-            ||  "__repeated__".equals(rule)) {
+            String rule = rule2.getKey();
+            if ("required".equals(rule )
+            ||  "repeated".equals(rule)) {
                 continue;
             }
             Map  params = rule2.getValue();
@@ -362,8 +364,8 @@ public class VerifyHelper {
         throw new Wrong("fore.form.norepeat");
     }
 
-    public static Object skip(Object value, Map values, Map params) throws Skip {
-        throw new Skip();
+    public static Object skip(Object value, Map values, Map params) {
+        return SKIP ;
     }
 
     public static Object pass(Object value, Map values, Map params) {
@@ -470,21 +472,26 @@ public class VerifyHelper {
 
     /** 内部错误类 **/
 
-    public static class Skip   extends HongsException {
-        public Skip() {
-            super(HongsException.NOTICE, "fore.form.skip");
-        }
-    }
+    public static Object SKIP = new Object();
 
     public static class Wrong  extends HongsException {
-        public Wrong(String desc, String... prms) {
-            super(HongsException.NOTICE, desc);
+        public Wrong(Throwable cause, String desc, String... prms) {
+            super(HongsException.NOTICE, desc, cause);
+            this.setLocalizedSection("default");
             this.setLocalizedOptions(prms);
         }
 
-        public Wrong(Throwable cause, String desc, String... prms) {
-            super(HongsException.NOTICE, desc, cause);
+        public Wrong(String desc, String... prms) {
+            super(HongsException.NOTICE, desc );
+            this.setLocalizedSection("default");
             this.setLocalizedOptions(prms);
+        }
+
+        @Override
+        public String getLocalizedMessage() {
+            CoreLanguage trns = CoreLanguage.getInstance(getLocalizedSection());
+            String /***/ desx = trns.translate(getDesc(),getLocalizedOptions());
+            return desx;
         }
     }
 
@@ -493,6 +500,7 @@ public class VerifyHelper {
 
         public Wrongs(Map<String, Wrong> wrongs) {
             super(HongsException.NOTICE, "fore.form.invalid");
+            this.setLocalizedSection("default");
             this.wrongs = wrongs;
         }
 
@@ -528,7 +536,8 @@ public class VerifyHelper {
             sb.append(super.getLocalizedMessage()).append("\r\n");
             try {
                 for (Map.Entry<String, String> et : getErrors().entrySet()) {
-                    sb.append(et.getKey(  ))
+                    sb.append( "\t" )
+                      .append(et.getKey(  ))
                       .append( ": " )
                       .append(et.getValue())
                       .append("\r\n");

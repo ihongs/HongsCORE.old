@@ -164,38 +164,37 @@ implements Filter {
         HttpServletRequest  req  = (HttpServletRequest ) rep ;
         HttpServletResponse resq = (HttpServletResponse) resp;
 
-        ActionHelper that;
-        Core core = (Core) req.getAttribute(CORE);
-        if ( core != null) {
-            Core.THREAD_CORE.set ( core);
-            that = core.get( ActionHelper.class );
-            that.reinitHelper(req, resq);
+//        ActionHelper that;
+//        Core core = (Core)req.getAttribute(CORE);
+//        if ( core != null) {
+//             Core.THREAD_CORE.set ( core);
+//             that = core.get(ActionHelper.class);
+//             that.reinitHelper(req, resq);
+//                chain.doFilter(rep, resp);
+//        } else {
+        Core core = Core.getInstance();
+        req.setAttribute( CORE, core );
+        ActionHelper that = new ActionHelper(req, resq);
+        core.put( ActionHelper.class.getName(  ), that);
 
-               chain.doFilter(rep, resp);
-        } else {
-            core = Core.getInstance();
-            that = new ActionHelper(req, resq);
-             req.setAttribute/**/( CORE, core);
-            core.put(ActionHelper.class.getName(), that);
+        try {
+            doIniter(req, core, that);
+            chain.doFilter(rep, resp);
 
-            try {
-                doIniter(req , core, that);
-                chain.doFilter(rep , resp);
-
-                // 输出数据
-                if (!that.getResponse().isCommitted()) {
-                    Map rsp  = that.getResponseData();
-                    if (rsp != null) {
-                        that.print();
-                    }
+            // 输出数据
+            if (!that.getResponse().isCommitted()) {
+                Map rsp  = that.getResponseData();
+                if (rsp != null) {
+                    that.print();
                 }
-            } finally {
-                doFinish(req, core, that);
             }
+        } finally {
+            doFinish(req, core, that);
         }
+//        }
     }
 
-    private void doIniter(HttpServletRequest req, Core core, ActionHelper helper)
+    protected void doIniter(HttpServletRequest req, Core core, ActionHelper helper)
     throws ServletException {
         Core.ACTION_NAME.set(getRealPath(req).substring(1));
 
@@ -255,7 +254,7 @@ implements Filter {
         }
     }
 
-    private void doFinish(HttpServletRequest req, Core core, ActionHelper helper) {
+    protected void doFinish(HttpServletRequest req, Core core, ActionHelper helper) {
         if (0 < Core.DEBUG) {
             ActionHelper that = Core.getInstance(ActionHelper.class);
             HttpServletRequest R = that.getRequest();
