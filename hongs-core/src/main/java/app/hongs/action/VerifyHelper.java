@@ -79,7 +79,8 @@ public class VerifyHelper {
             while (it.hasNext()) {
                 Map.Entry et = (Map.Entry)it.next();
                 String  code = (String) et.getKey();
-                Map     opts = (Map)  et.getValue();
+                Map     optz = (Map)  et.getValue();
+                Map     opts =  new HashMap( optz );
 
                 boolean required = Synt.declare(opts.remove("__required__"), false);
                 if (required) {
@@ -112,6 +113,7 @@ public class VerifyHelper {
                     String n = rule.substring(   1);
                     rule = "is"+c.toUpperCase()+ n ;
                 }
+
                 opts.put("__conf__", conf);
                 opts.put("__form__", form);
                 this.addRule(code, rule, opts);

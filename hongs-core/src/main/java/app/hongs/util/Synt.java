@@ -60,9 +60,9 @@ public class Synt {
                 String str = ((String) val).trim(  );
                 if ("".equals(str)) {
                     val = false;
-                } else if (FALS.matcher(str).matches()) {
+                } else if (FLSE.matcher(str).matches()) {
                     val = false;
-                } else if (FALS.matcher(str).matches()) {
+                } else if (TRUE.matcher(str).matches()) {
                     val = true ;
                 }
             }
@@ -230,7 +230,7 @@ public class Synt {
     }
 
     public static Pattern TRUE = Pattern.compile("^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
-    public static Pattern FALS = Pattern.compile("^(0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
+    public static Pattern FLSE = Pattern.compile("^(0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
 
     /**
      * 在 Each.each 里
