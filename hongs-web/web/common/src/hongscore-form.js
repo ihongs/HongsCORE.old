@@ -54,7 +54,7 @@ function HsForm(opts, context) {
     if ((2 & loadMode) || a) {
         this.load(loadUrl, loadData);
     } else {
-        this.fillData( { } );
+        this.fillEnum( { } );
     }
 
     /**
@@ -90,27 +90,27 @@ HsForm.prototype = {
     },
     loadBack : function(rst) {
         rst = hsResponObj(rst);
-        if (rst.ok === false) return;
-        if (rst.data) this.fillData( rst.data );
-        if (rst.info) this.fillInfo( rst.info );
+        if (rst["ok"] === false) return;
+        if (rst["enum"]) this.fillEnum(rst["enum"]);
+        if (rst["info"]) this.fillInfo(rst["info"]);
         else if (rst.list && rst.list[0]) {
-            // retrieve 仅提供 list
+            // retrieve 可能仅提供 list
             this.fillInfo (  rst.list[0]);
         }
         this.formBox.trigger("loadBack", [rst]);
     },
-    fillData : function(data) {
+    fillEnum : function(enam) {
         var nodes, datas, i, n, t, v, inp;
         nodes = this.formBox.find("select[name],[data-fn]");
         datas = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr( "name" );
             if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
-            v = hsGetValue(data, n);
+            v = hsGetValue(enam, n);
             datas[n] = v;
         }
 
-        this._data = data;
+        this._enum = enam;
         for(n in datas) {
             v =  datas[n];
             i = 1;
@@ -121,24 +121,24 @@ HsForm.prototype = {
             }
 
             if (typeof(this["_fill_"+n]) !== "undefined") {
-                v = this["_fill_"+n].call(this, inp, v, n, "data");
+                v = this["_fill_"+n].call(this, inp, v, n, "enum");
             }
             // 按类型填充
             else if (inp.attr("data-ft")) {
                 t =  inp.attr("data-ft");
             if (typeof(this["_fill_"+t]) !== "undefined") {
-                v = this["_fill_"+t].call(this, inp, v, n, "data");
+                v = this["_fill_"+t].call(this, inp, v, n, "enum");
             }}
             if (! v) continue;
 
             if (i == 0) {
-                this._fill__review(inp, v, n, "data");
+                this._fill__review(inp, v, n, "enum");
             }
             else if (inp.prop("tagName") == "SELECT") {
-                this._fill__select(inp, v, n, "data");
+                this._fill__select(inp, v, n, "enum");
             }
         }
-        delete this._data;
+        delete this._enum;
     },
     fillInfo : function(info) {
         var nodes, infos, i, n, t, v, inp;
@@ -260,12 +260,12 @@ HsForm.prototype = {
     },
 
     _fill__review : function(inp, v, n, t) {
-        if (t === "data") {
-            inp.data("data", v );
+        if (t === "enum") {
+            inp.data("enum", v );
             return v;
         }
-        var a = inp.data("data");
-          inp.removeData("data");
+        var a = inp.data("enum");
+          inp.removeData("enum");
         if (! a)
             return v;
 
@@ -284,7 +284,7 @@ HsForm.prototype = {
         }
     },
     _fill__select : function(inp, v, n, t) {
-        if (t !== "data")  return v;
+        if (t !== "enum")  return v;
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
         for (var i = 0; i < v.length; i ++) {
@@ -297,7 +297,7 @@ HsForm.prototype = {
         inp.change().click(); // multiple 必须触发 click 才初始化
     },
     _fill__check : function(inp, v, n, t) {
-        if (t !== "data") return v;
+        if (t !== "enum") return v;
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
         for (var i = 0; i < v.length; i ++) {
@@ -311,7 +311,7 @@ HsForm.prototype = {
         inp.find(":checkbox").first().change();
     },
     _fill__radio : function(inp, v, n, t) {
-        if (t !== "data") return v;
+        if (t !== "enum") return v;
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
         for (var i = 0; i < v.length; i ++) {

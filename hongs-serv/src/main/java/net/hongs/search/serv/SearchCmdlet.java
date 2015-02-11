@@ -1,9 +1,7 @@
 package net.hongs.search.serv;
 
 import app.hongs.HongsException;
-import app.hongs.action.FormSet;
 import app.hongs.action.VerifyHelper;
-import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Data;
 import app.hongs.util.Synt;
@@ -16,6 +14,7 @@ import java.util.Map;
 @Cmdlet("search")
 public class SearchCmdlet {
 
+    @Cmdlet("index")
     public void index(String[] args) throws HongsException {
         String sn = args[0];
         String id = args[1];
@@ -24,7 +23,7 @@ public class SearchCmdlet {
         String mod = sn.substring(0,pos);
         String ent = sn.substring(pos+1);
 
-        Search so = new Search(mod, ent);
+        SearchRecord so = new SearchRecord(mod, ent);
 
         // 不给内容即为删除
         if (args.length == 2) {

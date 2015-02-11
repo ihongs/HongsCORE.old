@@ -394,7 +394,7 @@ public class DB
     }
     catch (SQLException ex )
     {
-      throw new app.hongs.HongsException(  0x1026 , ex  );
+      throw  new  app.hongs.HongsException( 0x1026 , ex );
     }
 
     return this.connection;
@@ -1606,7 +1606,7 @@ public class DB
    * @param name
    * @param info
    * @return
-   * @throws HongsException 
+   * @throws HongsException
    */
   public static DB newInstance(String name, Properties info)
   throws HongsException {
@@ -1621,7 +1621,7 @@ public class DB
    * 以外部数据源的形式构造对象
    * @param name
    * @return
-   * @throws HongsException 
+   * @throws HongsException
    */
   public static DB newInstance(String name)
   throws HongsException {
@@ -1634,7 +1634,7 @@ public class DB
    * @param url
    * @param info
    * @return
-   * @throws HongsException 
+   * @throws HongsException
    */
   public static DB newInstance(String drv, String url, Properties info)
   throws HongsException {
@@ -1651,7 +1651,7 @@ public class DB
    * @param drv
    * @param url
    * @return
-   * @throws HongsException 
+   * @throws HongsException
    */
   public static DB newInstance(String drv, String url)
   throws HongsException {

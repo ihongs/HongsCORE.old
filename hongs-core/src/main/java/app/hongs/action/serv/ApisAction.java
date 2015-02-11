@@ -1,12 +1,17 @@
 package app.hongs.action.serv;
 
+import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.ActionWarder;
+import app.hongs.util.Data;
 import app.hongs.util.Synt;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -164,20 +169,56 @@ public class ApisAction
             }
         }
 
+//        // 将请求数据处理之后传递
+//        String send = Synt.declare(data.get("-api-send"), String.class);
+//        if (send != null) {
+//            Object x = data.remove(send);
+//            if (x instanceof Map /****/) {
+//                data.putAll((Map) x/**/);
+//            } else {
+//                try {
+//                    Map m;
+//                    x = Data.toObject(x.toString());
+//                    m = Synt.declare (x, Map.class);
+//                    data.putAll(/****/m);
+//                } catch (HongsError er ) {
+//                    throw new ServletException(er );
+//                }
+//            }
+//        }
+
         // 将请求转发到动作处理器
-        req.getRequestDispatcher("/"+act+"/"+mtd+".act"+pms).include(req, rsp);
+        req.getRequestDispatcher("/"+act+ "/"+mtd+ ".act"+pms ).include(req, rsp);
 
         // 将应答数据格式化后传递
-        ActionHelper hlpr = ActionWarder.getWorkCore(req)
-                         .get(ActionHelper.class);
-        Map  data  = hlpr.getResponseData();
-        if ( data != null ) {
-            Set conv;
+        ActionHelper hlpr = ActionWarder.getWorkCore(req).get(ActionHelper.class);
+        Map resp  = hlpr.getResponseData();
+        if (resp != null) {
+            Map     data;
             try {
-                conv = Synt.declare(hlpr.getRequestData().get("-api-conv"), Set.class);
+                data = hlpr.getRequestData(  );
             } catch (HongsException ex) {
                 throw new ServletException(ex);
             }
+            Set     conv = Synt.declare(data.get("-api-conv"),    Set.class);
+            String  back = Synt.declare(data.get("-api-back"), String.class);
+
+            // 返回节点
+            if (back != null) {
+                Map map = new HashMap();
+                Iterator it = resp.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry et = (Map.Entry) it.next();
+                    Object k = et.getKey();
+                    if (! _API_RSP.contains( k )) {
+                        map.put(k, et.getValue());
+                        it.remove();
+                    }
+                }
+                resp.put(back, map);
+            }
+
+            // 转换策略
             if (conv != null) {
                 Conv cnvr = new Conv();
                 boolean     all =  conv.contains( "all2str");
@@ -187,12 +228,19 @@ public class ApisAction
                 cnvr.bool = all || conv.contains("bool2str") ? new ConvBool2Str() : cnvr.all;
                 cnvr.date = conv.contains("date2stp") ? new ConvDate2Stp()
                           :(conv.contains("date2sec") ? new ConvDate2Sec() : new Conv2Obj());
-                hlpr.reply (Synt.foreach(data, cnvr));
+                hlpr.reply (Synt.foreach(resp, cnvr));
             }
         }
     }
 
     private static final Pattern _API_PMS = Pattern.compile("((?:/[^_]\\w+/_\\w+)*)?(/[^_]\\w+)(/_\\w+)?(/\\.\\w+)?$");
+
+    private static final Set _API_RSP = new HashSet();
+    static {
+        _API_RSP.add("ok" );
+        _API_RSP.add("err");
+        _API_RSP.add("msg");
+    }
 
     private static class Conv extends Synt.LeafNode {
         private Conv2Obj all;

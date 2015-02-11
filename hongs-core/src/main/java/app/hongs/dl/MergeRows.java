@@ -11,12 +11,12 @@ import java.util.Map;
  * 合并列表
  * @author Hongs
  */
-public class MergeList
+public class MergeRows
 {
 
   protected List<Map> rows;
 
-  public MergeList(List<Map> rows)
+  public MergeRows(List<Map> rows)
   {
     this.rows = rows;
   }
@@ -25,38 +25,33 @@ public class MergeList
    * 获取关联ID和行
    *
    * @param map
-   * @param key
+   * @param keys
    */
-  private void mapped(Map<Object, List> map, String... key)
+  private void mapped(Map<Object, List> map, List rows, String... keys)
   {
-    Iterator it = this.rows.iterator();
+    Iterator it = rows.iterator();
     W:while (it.hasNext())
     {
       Object row = it.next();
       Object obj = row;
 
       // 获取id值
-      for (int i = 0; i < key.length; i ++)
+      for (int i = 0; i < keys.length; i ++)
       {
         if (obj instanceof Map)
         {
-          obj = ((Map)obj).get(key[i]);
+          obj = ((Map)obj).get(keys[i]);
         }
         else
         if (obj instanceof List)
         {
-          List rowz = this.rows;
-          this.rows = (List)obj;
-
           // 切割子键数组
-          int j = key.length - i ;
+          int j  = keys.length - i;
           String[] keyz = new String[j];
-          System.arraycopy(key, i, keyz, 0, j);
+          System.arraycopy(keys,i, keyz,0,j);
 
           // 往下递归一层
-          this.mapped(map, keyz);
-
-          this.rows = rowz;
+          this.mapped(map, (List) obj, keyz);
 
           continue W;
         }
@@ -93,7 +88,7 @@ public class MergeList
   public Map<Object, List> mapped(String key)
   {
     Map<Object, List> map = new HashMap();
-    this.mapped( map, key.split("\\."));
+    mapped(map, rows, key.split( "\\." ));
     return map;
   }
 
@@ -136,7 +131,7 @@ public class MergeList
 
   public void extend(List<Map> rows, String key, String col, String sub)
   {
-    extend(rows, MergeList.this.mapped(key), col, sub);
+    extend(rows, mapped(key), col, sub);
   }
 
   public void append(List<Map> rows, Map<Object, List> map, String col, String sub)
@@ -179,7 +174,7 @@ public class MergeList
 
   public void append(List<Map> rows, String key, String col, String sub)
   {
-    append(rows, MergeList.this.mapped(key), col, sub);
+    append(rows, mapped(key), col, sub);
   }
 
 }

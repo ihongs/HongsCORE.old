@@ -185,8 +185,8 @@ public class VerifyHelper {
 
                 if (data instanceof Collection) {
                     int i3 = 0;
-                    for(Object data3 : ((Collection) data ) ) {
-                        String name3 = name+"."+(i3 ++);
+                    for(Object data3 : ((Collection) data )) {
+                        String name3 = name + "." + (i3 ++);
 
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
@@ -207,7 +207,7 @@ public class VerifyHelper {
                     for(Object i3 : ((Map ) data).entrySet()) {
                         Map.Entry e3 = (Map.Entry) i3;
                         Object data3 = e3.getValue( );
-                        String name3 = name+"."+((String) e3.getKey());
+                        String name3 = name +"."+ ((String) e3.getKey());
 
                         try {
                             data3 = verify(name3, data3, values, rulez, update);
@@ -302,15 +302,16 @@ public class VerifyHelper {
             throw new HongsException(0x1105, "Rule '"+rule+"' for '"+name+"' error", ex);
         }
         catch (InvocationTargetException ex) {
-            Throwable e = ex.getCause();
-            if (e instanceof HongsException) {
-                throw (HongsException) e;
-            } else
-            if (e instanceof HongsError    ) {
-                throw (HongsError    ) e;
-            } else {
-                throw new HongsException(0x1106, e);
-            }
+            throw new HongsException(0x1105, "Rule '"+rule+"' for '"+name+"' error", ex);
+//            Throwable e = ex.getCause();
+//            if (e instanceof HongsException) {
+//                throw (HongsException) e;
+//            } else
+//            if (e instanceof HongsError    ) {
+//                throw (HongsError    ) e;
+//            } else {
+//                throw new HongsException(0x1106, e);
+//            }
         }
     }
 

@@ -137,7 +137,7 @@ public class FetchMore
     }
 
     // 获取id及行号
-    Map<Object, List> map = FetchMore.this.mapped(key);
+    Map<Object, List> map = this.mapped(key);
     Set ids = map.keySet();
     if (ids.isEmpty())
     {
@@ -173,7 +173,7 @@ public class FetchMore
      * 并根据之前的 id=>行 关系以表名为键放入列表中
      */
 
-    FetchNext rs = db.query(caze.getSQL(), 0, 0, caze.getParams());
+    FetchNext rs = db.query(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
 
     Map     row, sub;
     List    lst;

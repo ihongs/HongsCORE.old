@@ -2,6 +2,7 @@ package app.hongs.dl.lucene;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
+import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.FormSet;
@@ -12,6 +13,7 @@ import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,14 +56,14 @@ import org.apache.lucene.store.FSDirectory;
 import static org.apache.lucene.util.Version.LUCENE_CURRENT;
 
 /**
- * Lucene 数据模型
+ * Lucene 记录模型
  * @author Hongs
  */
 public class LuceneRecord implements IRecord, Core.Destroy {
 
+    protected final Map     fields;
     protected final String  datapath;
     protected final String  analyzer;
-    protected final Map     fields;
 
     protected IndexWriter   writer = null;
     protected IndexReader   reader = null;
@@ -73,13 +75,13 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
     public LuceneRecord(Map fields, String datapath, String analyzer) {
         if (datapath == null) {
-            datapath = CoreConfig.getInstance().getProperty("core.dh.lucene.datapath", "${VARS_PATH}/lucene") + "/test";
+            datapath = CoreConfig.getInstance().getProperty("core.lucene.datapath", "${VARS_PATH}/lucene") + "/test";
         } else
         if (! new File(datapath).isAbsolute( )) {
-            datapath = CoreConfig.getInstance().getProperty("core.dh.lucene.datapath", "${VARS_PATH}/lucene") + "/" + datapath;
+            datapath = CoreConfig.getInstance().getProperty("core.lucene.datapath", "${VARS_PATH}/lucene") + "/" + datapath;
         }
         if (analyzer == null) {
-            analyzer = CoreConfig.getInstance().getProperty("core.dh.lucene.analyzer", "org.apache.lucene.analysis.cn.ChineseAnalyzer");
+            analyzer = CoreConfig.getInstance().getProperty("core.lucene.analyzer", "org.apache.lucene.analysis.standard.StandardAnalyzer");
         }
 
         Map ti = new HashMap();
@@ -131,15 +133,14 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         int rc, pc;
         List list = new ArrayList();
         try {
-            Query q = getQuery(rd);
+            Query q = getFind(rd);
             Sort  s = getSort (rd);
 
-            TopDocs docz;
-            if (s != null) {
-                docz = finder.search(q, limit, s);
-            } else {
-                docz = finder.search(q, limit   );
+            if (1 == (1 & Core.DEBUG)) {
+                CoreLogger.debug("...\r\n\tQuery: "+q.toString()+"\r\n\tSort : "+s.toString());
             }
+
+            TopDocs docz = finder.search(q, limit, s);
 
             if (maxRn > docz.totalHits) {
                 maxRn = docz.totalHits;
@@ -181,13 +182,14 @@ public class LuceneRecord implements IRecord, Core.Destroy {
     public String[] create(Map rd) throws HongsException {
         initWriter();
 
-        add(rd);
-
-        String[] resp = new String[dispCols.length  +  1];
-                 resp[0] = (String) rd.get(idCol);
-        for (int i = 0; i < dispCols.length; i++) {
+        String[] resp;
+        resp = new String[dispCols.length  +  1];
+        resp[0] = add(rd);
+        for (int i = 0; i<dispCols.length; i ++) {
             resp[i + 1] = Synt.declare(rd.get(dispCols[i]), String.class);
         }
+
+        commit();
         return resp;
     }
 
@@ -198,6 +200,8 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         for (String id  : ids) {
             put(id, rd);
         }
+
+        commit();
         return ids.size();
     }
 
@@ -208,6 +212,8 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         for (String id  : ids) {
             set(id, rd);
         }
+
+        commit();
         return ids.size();
     }
 
@@ -218,32 +224,31 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         for (String id  : ids) {
             del(id);
         }
+
+        commit();
         return ids.size();
     }
 
     /**
      * 添加文档
+     * 单独使用前需要执行 initWriter, commit
      * @param rd
+     * @return ID
      * @throws HongsException
      */
-    public void add(Map rd) throws HongsException {
+    public String add(Map rd) throws HongsException {
+        if (rd.containsKey(idCol)) {
+            throw new HongsException(HongsException.COMMON, "Id can not set in add");
+        }
+        String id = Core.getUniqueId();
+        rd.put(idCol , id );
         addDoc(map2Doc(rd));
-    }
-
-    /**
-     * 设置文档(全量更新)
-     * 单独使用前需要执行 initWriter
-     * @param id
-     * @param rd
-     * @throws HongsException
-     */
-    public void set(String id, Map rd) throws HongsException {
-        setDoc(id, map2Doc(rd));
+        return id;
     }
 
     /**
      * 修改文档(局部更新)
-     * 单独使用前需要执行 initWriter
+     * 单独使用前需要执行 initWriter, commit
      * @param id
      * @param rd
      * @throws HongsException
@@ -253,22 +258,28 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         if (doc == null) {
             throw new HongsException(HongsException.COMMON, "Can not found document for '"+id+"'");
         }
-
         docAdd(doc, rd);
         setDoc(id, doc);
     }
 
     /**
-     * 单独使用前需要执行 initWriter
+     * 设置文档(全量更新)
+     * 单独使用前需要执行 initWriter, commit
+     * @param id
+     * @param rd
+     * @throws HongsException
+     */
+    public void set(String id, Map rd) throws HongsException {
+        setDoc(id, map2Doc(rd));
+    }
+
+    /**
+     * 单独使用前需要执行 initWriter, commit
      * @param id
      * @throws HongsException
      */
     public void del(String id) throws HongsException {
-        try {
-            writer.deleteDocuments(new Term(idCol, id));
-        } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        }
+        delDoc(id);
     }
 
     /**
@@ -290,12 +301,13 @@ public class LuceneRecord implements IRecord, Core.Destroy {
      * 单独使用前需要执行 initReader
      * @param rd
      * @return
+     * @throws HongsException
      */
     public List getAll(Map rd) throws HongsException {
         List list = new ArrayList();
 
         try {
-            Query q = getQuery(rd);
+            Query q = getFind(rd);
             Sort  s = getSort (rd);
 
             TopDocs  docz;
@@ -345,6 +357,14 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         }
     }
 
+    public void delDoc(String id) throws HongsException {
+        try {
+            writer.deleteDocuments(new Term(idCol, id));
+        } catch (IOException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        }
+    }
+
     public Document getDoc(String id) throws HongsException {
         try {
                 Query  q    = new TermQuery(new Term(idCol, id));
@@ -360,151 +380,56 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         }
     }
 
-    private void docAdd(Document doc, String k, Object v, String g, Field.Store s) throws HongsException {
-        if (  "json".equals(g)) {
-            if (  "".equals(v)) {
-                v = "{}";
-            } else
-            if (!(v instanceof String)) {
-                v = Data.toString( v );
-            }
-            doc.add(new StoredField(k, (String) v));
-        } else
-        if (v instanceof String) {
-            if ("stored".equals(g)) {
-                doc.add(new StoredField(k, Synt.declare(v, String.class)));
-            } else
-            if (  "text".equals(g)) {
-                doc.add(new   TextField(k, Synt.declare(v, String.class), s));
-            } else
-            {
-                doc.add(new StringField(k, Synt.declare(v, String.class), s));
-            }
-        } else
-        if (v instanceof Integer) {
-            doc.add(new IntField(k, Synt.declare(v, Integer.class), s));
-        } else
-        if (v instanceof Long) {
-            doc.add(new LongField(k, Synt.declare(v, Long.class), s));
-        } else
-        if (v instanceof Float) {
-            doc.add(new FloatField(k, Synt.declare(v, Float.class), s));
-        } else
-        if (v instanceof Double) {
-            doc.add(new DoubleField(k, Synt.declare(v, Double.class), s));
-        } else
-        {
-            throw new HongsException(HongsException.COMMON, "Not support type '"+v.getClass().getName()+"'");
-        }
-    }
+    public Query getFind(Map rd) throws HongsException {
+        BooleanQuery query = new BooleanQuery();
 
-    private void docAdd(Document doc, Map rd) throws HongsException {
         for(Object o : rd.entrySet()) {
-            Map.Entry e = (Map.Entry)o;
-            String k = e.getKey(  ).toString();
-            Object v = e.getValue();
-
-            String g = Dict.getValue(fields, String.class, k, "lucene-field");
-            Field.Store s  =  Dict.getValue( fields, true, k, "lucene-store")
-                           ?  Field.Store.YES : Field.Store.NO;
-
-            if (v instanceof Collection) {
-                for (Object x : (Collection) v) {
-                    LuceneRecord.this.docAdd(doc, k, x, g, s);
-                }
-            } else
-            if (v instanceof Object[ ] ) {
-                for (Object x : (Object[ ] ) v) {
-                    LuceneRecord.this.docAdd(doc, k, x, g, s);
-                }
-            } else {
-                    LuceneRecord.this.docAdd(doc, k, v, g, s);
-            }
-        }
-    }
-
-    public Map doc2Map(Document doc) throws HongsException {
-        Map map = new HashMap();
-        for(Object o : fields.entrySet()) {
             Map.Entry e = (Map.Entry) o;
-            String k = (String) e.getKey();
-            Map    m = (Map ) e.getValue();
+            Object fv = e.getValue( );
+            String fn = (String)e.getKey();
 
-            int    r = Synt.declare(m.get("repeated"), 0);
-            String t = Synt.declare(m.get("__type__"),"");
-            String g = Synt.declare(m.get("lucene-field"),  "" );
-           boolean s = Synt.declare(m.get("lucene-store"), true);
-            if (!s) {
+            // 字段是否存在
+            Map fm = (Map ) fields.get(fn);
+            if (fm == null) {
                 continue;
             }
 
-            IndexableField[] fs = doc.getFields(k);
-            if ("json".equals(g)) {
-                if (r > 0) {
-                    if (fs.length > 0) {
-                        for (IndexableField f : fs) {
-                            Dict.put(map, Data.toObject(f.stringValue()), k, null);
-                        }
-                    } else
-                    {
-                        map.put(k, new ArrayList());
-                    }
-                } else {
-                    if (fs.length > 0) {
-                        map.put(k, Data.toObject(fs[0].stringValue()));
-                    } else
-                    {
-                        map.put(k, new HashMap());
-                    }
-                }
-            } else
-            if ("number".equals(t)) {
-                if (r > 0) {
-                    if (fs.length > 0) {
-                        for (IndexableField f : fs) {
-                            Dict.put(map, f.numericValue(), k, null);
-                        }
-                    } else
-                    {
-                        map.put(k, new ArrayList());
-                    }
-                } else {
-                    if (fs.length > 0) {
-                        map.put(k, fs[0].numericValue());
-                    } else
-                    {
-                        map.put(k,  0);
-                    }
+            // 存储类型
+            String ft = Synt.declare(fm.get("lucene-field"), "");
+            if ("stored".equals(ft)) {
+                continue;
+            }
+
+            // 值类型
+            if ("number".equals(fm.get("__type__"))) {
+                // 数字类型
+                Object   nt  =  fm.get(  "type"  );
+                if ("int".equals(nt)) {
+                    qryAdd(query, fn, fv, new AddIntQuery());
+                } else
+                if ("long".equals(nt)) {
+                    qryAdd(query, fn, fv, new AddLongQuery());
+                } else
+                if ("float".equals(nt)) {
+                    qryAdd(query, fn, fv, new AddFloatQuery());
+                } else
+                {
+                    qryAdd(query, fn, fv, new AddDoubleQuery());
                 }
             } else
             {
-                if (r > 0) {
-                    if (fs.length > 0) {
-                        for (IndexableField f : fs) {
-                            Dict.put(map, f.stringValue(), k, null);
-                        }
-                    } else
-                    {
-                        map.put(k, new ArrayList());
-                    }
-                } else {
-                    if (fs.length > 0) {
-                        map.put(k, fs[0].stringValue());
-                    } else
-                    {
-                        map.put(k, "");
-                    }
+                if ("text".equals(ft)) {
+                    AddTextQuery q = new AddTextQuery();
+                                 q.ana( getAna() );
+                    qryAdd(query, fn, fv, q);
+                } else
+                {
+                    qryAdd(query, fn, fv, new AddStringQuery());
                 }
             }
         }
 
-        return map;
-    }
-
-    public Document map2Doc(Map rd) throws HongsException {
-        Document doc = new Document();
-        docAdd( doc , rd );
-        return doc;
+        return query.clauses().size() > 0 ? query : new MatchAllDocsQuery();
     }
 
     public Sort getSort(Map rd) throws HongsException {
@@ -547,155 +472,91 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             of.add( new SortField(fn, st, rv));
         }
 
-        return of.isEmpty() ? null : new Sort(of.toArray(new SortField[0]));
+        of.add(SortField.FIELD_SCORE);
+        of.add(SortField.FIELD_DOC  );
+
+        return new Sort(of.toArray(new SortField[0]));
     }
 
-    public Query getQuery(Map rd) throws HongsException {
-        BooleanQuery query = new BooleanQuery();
+    public Document map2Doc(Map rd) throws HongsException {
+        Document doc = new Document();
+        docAdd(doc, rd);
+        return doc;
+    }
 
-        int i = 0;
-        for(Object o : rd.entrySet()) {
+    public Map doc2Map(Document doc) throws HongsException {
+        Map map = new HashMap();
+        for(Object o : fields.entrySet()) {
             Map.Entry e = (Map.Entry) o;
-            Object fv = e.getValue( );
-            String fn = (String)e.getKey();
+            String k = (String) e.getKey();
+            Map    m = (Map ) e.getValue();
 
-            // 字段是否存在
-            Map fm = (Map ) fields.get(fn);
-            if (fm == null) {
-                continue;
-            }
+           boolean s = Synt.declare(m.get("lucene-store"), true); if (!s) continue;
+            String g = Synt.declare(m.get("lucene-field"), ""  );
+           boolean r = Synt.declare(m.get("__repeated__"),false);
+            String t = Synt.declare(m.get("__type__"),"");
 
-            // 存储类型
-            String ft = Synt.declare(fm.get("lucene-field"), "");
-            if ("stored".equals(ft)) {
-                continue;
-            }
-
-            // 值类型
-            if ("number".equals(fm.get("__type__"))) {
-                // 数字类型
-                Object   nt  =  fm.get(  "type"  );
-                if ("int".equals(nt)) {
-                    addQuery(query, fn, fv, new AddIntQuery());
-                } else
-                if ("long".equals(nt)) {
-                    addQuery(query, fn, fv, new AddLongQuery());
-                } else
-                if ("float".equals(nt)) {
-                    addQuery(query, fn, fv, new AddFloatQuery());
-                } else
-                {
-                    addQuery(query, fn, fv, new AddDoubleQuery());
+            IndexableField[] fs = doc.getFields(k);
+            if (  "json".equals(g)) {
+                if (r) {
+                    if (fs.length > 0) {
+                        for (IndexableField f : fs) {
+                            Dict.put(map, Data.toObject(f.stringValue()), k, null);
+                        }
+                    } else
+                    {
+                        map.put(k, new ArrayList());
+                    }
+                } else {
+                    if (fs.length > 0) {
+                        map.put(k, Data.toObject(fs[0].stringValue()));
+                    } else
+                    {
+                        map.put(k, new HashMap());
+                    }
+                }
+            } else
+            if ("number".equals(t)) {
+                if (r) {
+                    if (fs.length > 0) {
+                        for (IndexableField f : fs) {
+                            Dict.put(map, f.numericValue(), k, null);
+                        }
+                    } else
+                    {
+                        map.put(k, new ArrayList());
+                    }
+                } else {
+                    if (fs.length > 0) {
+                        map.put(k, fs[0].numericValue());
+                    } else
+                    {
+                        map.put(k,  0);
+                    }
                 }
             } else
             {
-                if ("text".equals(ft)) {
-                    addQuery(query, fn, fv, new AddTextQuery(analyzer));
-                } else
-                {
-                    addQuery(query, fn, fv, new AddStringQuery());
+                if (r) {
+                    if (fs.length > 0) {
+                        for (IndexableField f : fs) {
+                            Dict.put(map, f.stringValue(), k, null);
+                        }
+                    } else
+                    {
+                        map.put(k, new ArrayList());
+                    }
+                } else {
+                    if (fs.length > 0) {
+                        map.put(k, fs[0].stringValue());
+                    } else
+                    {
+                        map.put(k, "");
+                    }
                 }
             }
-
-            i ++;
         }
 
-        return i > 0 ? query : new MatchAllDocsQuery();
-    }
-
-    private void addQuery(BooleanQuery qs, String k, Object v, AddQuery q) {
-        Map m;
-        if (v instanceof Map) {
-            m = (Map) v;
-        } else {
-            if (null==v || "".equals(v)) {
-                return;
-            }
-            m = new HashMap();
-            if (v instanceof Collection) {
-                m.put("-in", v);
-            } else {
-                m.put("-eq", v);
-            }
-        }
-
-        if (m.containsKey("-eq")) {
-            Object n = m.get("-eq");
-            qs.add(q.add(k, n), BooleanClause.Occur.MUST);
-        }
-
-        if (m.containsKey("-ne")) {
-            Object n = m.get("-ne");
-            qs.add(q.add(k, n), BooleanClause.Occur.MUST_NOT);
-        }
-
-        if (m.containsKey("-or")) {
-            int n = Synt.declare(m.get("-or"), 0);
-            qs.add(q.add(k, n), BooleanClause.Occur.SHOULD);
-        }
-
-        if (m.containsKey("-in")) { // In
-            BooleanQuery qz = new BooleanQuery();
-            Set a = Synt.declare(m.get("-in"), new HashSet());
-            for(Object x : a) {
-                int n = Synt.declare(x, 0);
-                qs.add(q.add(k, n), BooleanClause.Occur.SHOULD);
-            }
-            qs.add(qz, BooleanClause.Occur.MUST);
-        }
-
-        if (m.containsKey("-ai")) { // All In
-            Set a = Synt.declare(m.get("-oi"), new HashSet());
-            for(Object x : a) {
-                int n = Synt.declare(x, 0);
-                qs.add(q.add(k, n), BooleanClause.Occur.MUST);
-            }
-        }
-
-        if (m.containsKey("-ni")) { // Not In
-            Set a = Synt.declare(m.get("-ni"), new HashSet());
-            for(Object x : a) {
-                int n = Synt.declare(x, 0);
-                qs.add(q.add(k, n), BooleanClause.Occur.MUST_NOT);
-            }
-        }
-
-        if (m.containsKey("-oi")) { // Or In
-            Set a = Synt.declare(m.get("-oi"), new HashSet());
-            for(Object x : a) {
-                int n = Synt.declare(x, 0);
-                qs.add(q.add(k, n), BooleanClause.Occur.SHOULD);
-            }
-        }
-
-        //** 区间查询 **/
-
-        Integer n, x;
-        boolean l, r;
-
-        if (m.containsKey("-gt")) {
-            n = Synt.declare(m.get("-gt"), 0); l = false;
-        } else
-        if (m.containsKey("-ge")) {
-            n = Synt.declare(m.get("-ge"), 0); l = true;
-        } else
-        {
-            n = null; l = true;
-        }
-
-        if (m.containsKey("-lt")) {
-            x = Synt.declare(m.get("-lt"), 0); r = false;
-        } else
-        if (m.containsKey("-le")) {
-            x = Synt.declare(m.get("-le"), 0); r = true;
-        } else
-        {
-            x = null; r = true;
-        }
-
-        if (n != null || x != null) {
-            qs.add(q.add(k, n, x, l, r), BooleanClause.Occur.MUST);
-        }
+        return map;
     }
 
     public void initWriter() throws HongsException {
@@ -707,18 +568,12 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 //          if (! dio.exists( ) ) dio.mkdirs();
             Directory dir = FSDirectory.open(dio);
 
-            Analyzer  ana = ( Analyzer ) Class.forName(analyzer).newInstance();
+            Analyzer  ana = getAna();
             IndexWriterConfig iwc = new IndexWriterConfig(LUCENE_CURRENT, ana);
-            iwc.setOpenMode ( IndexWriterConfig.OpenMode.CREATE_OR_APPEND/**/);
+//          iwc.setOpenMode ( IndexWriterConfig.OpenMode.CREATE_OR_APPEND/**/);
 
             writer = new IndexWriter(dir, iwc);
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (ClassNotFoundException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (InstantiationException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (IllegalAccessException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }
     }
@@ -754,95 +609,357 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         }
     }
 
-    private static interface AddQuery {
+    public void commit() throws HongsException {
+        try {
+            writer.commit();
+        } catch (IOException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        }
+    }
+
+    public void rollback() throws HongsException {
+        try {
+            writer.rollback();
+        } catch (IOException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        }
+    }
+
+    private Analyzer getAna() throws HongsException {
+        try {
+            return (Analyzer) Class.forName(analyzer).getConstructor(LUCENE_CURRENT.getClass()).newInstance(LUCENE_CURRENT);
+        } catch ( IllegalArgumentException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (InvocationTargetException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (NoSuchMethodException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (SecurityException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (InstantiationException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (IllegalAccessException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (ClassNotFoundException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        }
+    }
+
+    private void docAdd(Document doc, Map rd) throws HongsException {
+        for(Object o : rd.entrySet()) {
+            Map.Entry e = (Map.Entry)o;
+            String k = e.getKey(  ).toString();
+            Object v = e.getValue();
+
+            String g = Dict.getValue(fields, String.class, k, "lucene-field");
+            Field.Store s  =  Dict.getValue( fields, true, k, "lucene-store")
+                           ?  Field.Store.YES : Field.Store.NO;
+
+            if (v instanceof Collection) {
+                for (Object x : (Collection) v) {
+                    this.docAdd(doc, k, x, g, s);
+                }
+            } else
+            if (v instanceof Object[ ] ) {
+                for (Object x : (Object[ ] ) v) {
+                    this.docAdd(doc, k, x, g, s);
+                }
+            } else
+            {
+                /**/this.docAdd(doc, k, v, g, s);
+            }
+        }
+    }
+
+    private void docAdd(Document doc, String k, Object v, String g, Field.Store s) throws HongsException {
+        if (  "json".equals(g)) {
+            if (  "".equals(v)) {
+                v = "{}";
+            } else
+            if (!(v instanceof String)) {
+                v = Data.toString( v );
+            }
+            doc.add(new StoredField(k, (String) v));
+        } else
+        if (v instanceof String) {
+            if ("stored".equals(g)) {
+                doc.add(new StoredField(k, Synt.declare(v, String.class)));
+            } else
+            if (  "text".equals(g)) {
+                doc.add(new   TextField(k, Synt.declare(v, String.class), s));
+            } else
+            {
+                doc.add(new StringField(k, Synt.declare(v, String.class), s));
+            }
+        } else
+        if (v instanceof Integer) {
+            doc.add(new IntField(k, Synt.declare(v, Integer.class), s));
+        } else
+        if (v instanceof Long) {
+            doc.add(new LongField(k, Synt.declare(v, Long.class), s));
+        } else
+        if (v instanceof Float) {
+            doc.add(new FloatField(k, Synt.declare(v, Float.class), s));
+        } else
+        if (v instanceof Double) {
+            doc.add(new DoubleField(k, Synt.declare(v, Double.class), s));
+        } else
+        {
+            throw new HongsException(HongsException.COMMON, "Not support type '"+v.getClass().getName()+"'");
+        }
+    }
+
+    private void qryAdd(BooleanQuery qry, String k, Object v, AddXxxQuery q) {
+        Map m;
+        if (v instanceof Map) {
+            m = new HashMap();
+            m.putAll((Map) v);
+        } else {
+            if (null==v || "".equals(v)) {
+                return ;
+            }
+            m = new HashMap();
+            if (v instanceof Collection) {
+                Collection c = (Collection) v;
+                    c.remove("");
+                if (c.isEmpty()) {
+                    return;
+                }
+                m.put("-in", c);
+            } else
+            {
+                m.put("-eq", v);
+            }
+        }
+
+        float w = 1F;
+
+        if (m.containsKey("-wt")) {
+            Object n = m.remove("-wt");
+            q.bst( Synt.declare(n, w));
+        }
+
+        if (m.containsKey("-eq")) {
+            Object n = m.remove("-eq");
+            qry.add(q.add(k, n), BooleanClause.Occur.MUST);
+        }
+
+        if (m.containsKey("-ne")) {
+            Object n = m.remove("-ne");
+            qry.add(q.add(k, n), BooleanClause.Occur.MUST_NOT);
+        }
+
+        if (m.containsKey("-or")) {
+            Object n = m.remove("-or");
+            qry.add(q.add(k, n), BooleanClause.Occur.SHOULD);
+        }
+
+        if (m.containsKey("-in")) { // In
+            BooleanQuery qay = new BooleanQuery();
+            Set a = Synt.declare(m.remove("-in"), new HashSet());
+            for(Object x : a) {
+                qay.add(q.add(k, x), BooleanClause.Occur.SHOULD);
+            }
+            qry.add(qay, BooleanClause.Occur.MUST);
+        }
+
+        if (m.containsKey("-ai")) { // All In
+            Set a = Synt.declare(m.remove("-ai"), new HashSet());
+            for(Object x : a) {
+                qry.add(q.add(k, x), BooleanClause.Occur.MUST);
+            }
+        }
+
+        if (m.containsKey("-ni")) { // Not In
+            Set a = Synt.declare(m.remove("-ni"), new HashSet());
+            for(Object x : a) {
+                qry.add(q.add(k, x), BooleanClause.Occur.MUST_NOT);
+            }
+        }
+
+        if (m.containsKey("-oi")) { // Or In
+            Set a = Synt.declare(m.remove("-oi"), new HashSet());
+            for(Object x : a) {
+                qry.add(q.add(k, x), BooleanClause.Occur.SHOULD);
+            }
+        }
+
+        //** 区间查询 **/
+
+        Integer n, x;
+        boolean l, r;
+
+        if (m.containsKey("-gt")) {
+            n = Synt.declare(m.remove("-gt"), 0); l = false;
+        } else
+        if (m.containsKey("-ge")) {
+            n = Synt.declare(m.remove("-ge"), 0); l = true;
+        } else
+        {
+            n = null; l = true;
+        }
+
+        if (m.containsKey("-lt")) {
+            x = Synt.declare(m.remove("-lt"), 0); r = false;
+        } else
+        if (m.containsKey("-le")) {
+            x = Synt.declare(m.remove("-le"), 0); r = true;
+        } else
+        {
+            x = null; r = true;
+        }
+
+        if (n != null || x != null) {
+            qry.add(q.add(k, n, x, l, r), BooleanClause.Occur.MUST);
+        }
+
+        // 其他 IN
+        if (!m.isEmpty()) {
+            Set s = new HashSet();
+            s.addAll(m.values( ));
+            qryAdd(qry, k, s, q );
+        }
+    }
+
+    private static interface AddXxxQuery {
+        public void  bst(float  w);
         public Query add(String k, Object v);
         public Query add(String k, Object n, Object x, boolean l, boolean r);
     }
 
-    private static class AddIntQuery implements AddQuery {
+    private static class AddIntQuery implements AddXxxQuery {
+        private Float w = null;
+        public void  bst(float  w) {
+            this.w  = w;
+        }
         public Query add(String k, Object v) {
-            int n2 = Synt.declare(v, Integer.class);
-            return NumericRangeQuery.newIntRange(k, n2, n2, true, true);
+            Integer n2 = Synt.declare(v, Integer.class);
+            Query   q2 = NumericRangeQuery.newIntRange(k, n2, n2, true, true);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
         public Query add(String k, Object n, Object x, boolean l, boolean r) {
-            int n2 = Synt.declare(n, Integer.class);
-            int x2 = Synt.declare(x, Integer.class);
-            return NumericRangeQuery.newIntRange(k, n2, x2, l, r);
+            Integer n2 = Synt.declare(n, Integer.class);
+            Integer x2 = Synt.declare(x, Integer.class);
+            Query   q2 = NumericRangeQuery.newIntRange(k, n2, x2, l, r);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
     }
 
-    private static class AddLongQuery implements AddQuery {
+    private static class AddLongQuery implements AddXxxQuery {
+        private Float w = null;
+        public void  bst(float  w) {
+            this.w  = w;
+        }
         public Query add(String k, Object v) {
-            long n2 = Synt.declare(v, Long.class);
-            return NumericRangeQuery.newLongRange(k, n2, n2, true, true);
+            Long    n2 = Synt.declare(v, Long.class);
+            Query   q2 = NumericRangeQuery.newLongRange(k, n2, n2, true, true);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
         public Query add(String k, Object n, Object x, boolean l, boolean r) {
-            long n2 = Synt.declare(n, Long.class);
-            long x2 = Synt.declare(x, Long.class);
-            return NumericRangeQuery.newLongRange(k, n2, x2, l, r);
+            Long    n2 = Synt.declare(n, Long.class);
+            Long    x2 = Synt.declare(x, Long.class);
+            Query   q2 = NumericRangeQuery.newLongRange(k, n2, x2, l, r);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
     }
 
-    private static class AddFloatQuery implements AddQuery {
+    private static class AddFloatQuery implements AddXxxQuery {
+        private Float w = null;
+        public void  bst(float  w) {
+            this.w  = w;
+        }
         public Query add(String k, Object v) {
-            float n2 = Synt.declare(v, Float.class);
-            return NumericRangeQuery.newFloatRange(k, n2, n2, true, true);
+            Float   n2 = Synt.declare(v, Float.class);
+            Query   q2 = NumericRangeQuery.newFloatRange(k, n2, n2, true, true);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
         public Query add(String k, Object n, Object x, boolean l, boolean r) {
-            float n2 = Synt.declare(n, Float.class);
-            float x2 = Synt.declare(x, Float.class);
-            return NumericRangeQuery.newFloatRange(k, n2, x2, l, r);
+            Float   n2 = Synt.declare(n, Float.class);
+            Float   x2 = Synt.declare(x, Float.class);
+            Query   q2 = NumericRangeQuery.newFloatRange(k, n2, x2, l, r);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
     }
 
-    private static class AddDoubleQuery implements AddQuery {
+    private static class AddDoubleQuery implements AddXxxQuery {
+        private Float w = null;
+        public void  bst(float  w) {
+            this.w  = w;
+        }
         public Query add(String k, Object v) {
-            double n2 = Synt.declare(v, Double.class);
-            return NumericRangeQuery.newDoubleRange(k, n2, n2, true, true);
+            Double  n2 = Synt.declare(v, Double.class);
+            Query   q2 = NumericRangeQuery.newDoubleRange(k, n2, n2, true, true);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
         public Query add(String k, Object n, Object x, boolean l, boolean r) {
-            double n2 = Synt.declare(n, Double.class);
-            double x2 = Synt.declare(x, Double.class);
-            return NumericRangeQuery.newDoubleRange(k, n2, x2, l, r);
+            Double  n2 = Synt.declare(n, Double.class);
+            Double  x2 = Synt.declare(x, Double.class);
+            Query   q2 = NumericRangeQuery.newDoubleRange(k, n2, x2, l, r);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
     }
 
-    private static class AddStringQuery implements AddQuery {
+    private static class AddStringQuery implements AddXxxQuery {
+        private Float w = null;
+        public void  bst(float  w) {
+            this.w  = w;
+        }
         public Query add(String k, Object v) {
-            String n2 = v.toString();
-            return new TermQuery(new Term(k, n2));
+            String  n2 = v.toString();
+
+            int p = n2.indexOf('^');
+            Float x = null;
+            if (p > 0) {
+                x  = Float.parseFloat(n2.substring(p + 1));
+                n2 = n2.substring(0, p);
+            }
+
+            Query   q2 = new TermQuery(new Term(k, n2));
+            if (w != null) q2.setBoost(w);
+            if (x != null) q2.setBoost(x);
+            return  q2;
         }
         public Query add(String k, Object n, Object x, boolean l, boolean r) {
-            String n2 = n.toString();
-            String x2 = x.toString();
-            return TermRangeQuery.newStringRange(k, n2, x2, l, r);
+            String  n2 = n.toString();
+            String  x2 = x.toString();
+            Query   q2 = TermRangeQuery.newStringRange(k, n2, x2, l, r);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
     }
 
-    private static class AddTextQuery implements AddQuery {
-        String analyzer;
-        public AddTextQuery(String analyzer) {
-            this.analyzer = analyzer;
+    private static class AddTextQuery implements AddXxxQuery {
+        private Analyzer a = null;
+        private Float    w = null;
+        public void  ana(Analyzer a) {
+            this.a  = a;
+        }
+        public void  bst(  float  w) {
+            this.w  = w;
         }
         public Query add(String k, Object v) {
             try {
-                Analyzer a = (Analyzer) Class.forName(analyzer).newInstance();
-                Query  q = new QueryParser(LUCENE_CURRENT, k,a).parse(v.toString());
-                return q;
-            } catch (ClassNotFoundException ex) {
-                throw new HongsError(HongsError.COMMON, ex);
-            } catch (InstantiationException ex) {
-                throw new HongsError(HongsError.COMMON, ex);
-            } catch (IllegalAccessException ex) {
-                throw new HongsError(HongsError.COMMON, ex);
+                Query   q2 = new QueryParser(LUCENE_CURRENT, k, a).parse(QueryParser.escape(v.toString()));
+                if (w != null) q2.setBoost(w);
+                return  q2;
             } catch (ParseException ex) {
                 throw new HongsError(HongsError.COMMON, ex);
             }
         }
         public Query add(String k, Object n, Object x, boolean l, boolean r) {
-            String n2 = n.toString();
-            String x2 = x.toString();
-            return TermRangeQuery.newStringRange(k, n2, x2, l, r);
+            String  n2 = n.toString();
+            String  x2 = x.toString();
+            Query   q2 = TermRangeQuery.newStringRange(k, n2, x2, l, r);
+            if (w != null) q2.setBoost(w);
+            return  q2;
         }
     }
 

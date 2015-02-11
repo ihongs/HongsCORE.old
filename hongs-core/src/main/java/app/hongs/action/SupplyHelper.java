@@ -74,10 +74,10 @@ public class SupplyHelper {
      */
     public void supply(Map values, short action) throws HongsException {
         if (1 == (1 & action)) {
-            Map data = (Map ) values.get("data");
+            Map data = (Map ) values.get("enum");
             if (data == null) {
                 data =  new LinkedHashMap();
-                values.put("data", data);
+                values.put("enum", data);
             }
                 injectData(data , enums);
         }

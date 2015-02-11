@@ -17,8 +17,16 @@ public class Synt {
 
     /**
      * 确保此变量类型为 cls 类型
-     * string,number(int,long...) 类型间可互转
-     * 当 cls 为 List,Set 时: val 为 Map 则取 values; val 为非 List,Set,Map 时将构建 List或Set, 然后将 val 加入其下.
+     * string,number(int,long...) 类型间可互转;
+     * cls 为 Boolean  时:
+     * 非 0 数字为 true,
+     * 空字符串为 false,
+     * 字符串 1,y,t,yes,true 为真,
+     * 字符串 0,n,f,no,false 为假;
+     * cls 为 List,Set 时:
+     * val 非 List,Set,Map 时构建 List,Set 后将 val 加入其下,
+     * val 为 Map 则取 values;
+     * 但其他类型均无法转为 Map.
      * @param <T>
      * @param val
      * @param cls
@@ -58,12 +66,10 @@ public class Synt {
                 val = ((Number) val).intValue() != 0;
             } else if (val instanceof String) {
                 String str = ((String) val).trim(  );
-                if ("".equals(str)) {
-                    val = false;
+                /****/ if (TRUE.matcher(str).matches()) {
+                    val = true ;
                 } else if (FLSE.matcher(str).matches()) {
                     val = false;
-                } else if (TRUE.matcher(str).matches()) {
-                    val = true ;
                 }
             }
         } else if (Integer.class.isAssignableFrom(cls)) {
@@ -229,8 +235,8 @@ public class Synt {
         return dat.toArray();
     }
 
-    public static Pattern TRUE = Pattern.compile("^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
-    public static Pattern FLSE = Pattern.compile("^(0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
+    public static Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
+    public static Pattern FLSE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
 
     /**
      * 在 Each.each 里

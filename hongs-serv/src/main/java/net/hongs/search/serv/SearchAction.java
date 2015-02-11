@@ -26,7 +26,7 @@ public class SearchAction extends LuceneAction {
 
     @Action("counts/retrieve")
     public void counts(ActionHelper helper) throws HongsException {
-        Search sr = getModel(helper);
+        SearchRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
         Map sd = sr.counts(rd);
         sr.destroy();
@@ -37,7 +37,7 @@ public class SearchAction extends LuceneAction {
     @Verify()
     @Override
     public void create(ActionHelper helper) throws HongsException {
-        Search sr = getModel(helper);
+        SearchRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
         int sn = sr.upsert(rd);
         sr.destroy();
@@ -50,7 +50,7 @@ public class SearchAction extends LuceneAction {
     }
 
     @Override
-    public Search getModel(ActionHelper helper)
+    public SearchRecord getModel(ActionHelper helper)
     throws HongsException {
         ActionRunner runner = (ActionRunner) helper.getAttribute("__RUNNER__");
         String ent = runner.getAction();
@@ -58,7 +58,7 @@ public class SearchAction extends LuceneAction {
         int    pos = ent.lastIndexOf('/');
         String mod = ent.substring(0,pos);
                ent = ent.substring(pos+1);
-        return new Search(mod, ent);
+        return new SearchRecord(mod, ent);
     }
-    
+
 }

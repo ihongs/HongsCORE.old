@@ -286,8 +286,13 @@ implements Filter {
         }
 
         try {
-            req .removeAttribute(CORE);
-            Core.THREAD_CORE.get().destroy();
+            core.destroy();
+            req.removeAttribute(CORE);
+            Core.THREAD_CORE.remove();
+            Core.ACTION_TIME.remove();
+            Core.ACTION_ZONE.remove();
+            Core.ACTION_LANG.remove();
+            Core.ACTION_NAME.remove();
         } catch ( Throwable  e) {
             CoreLogger.error(e);
         }

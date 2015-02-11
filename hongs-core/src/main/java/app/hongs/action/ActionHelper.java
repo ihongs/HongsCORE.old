@@ -340,7 +340,7 @@ public class ActionHelper
   //** 返回数据 **/
 
   /**
-   * 返回指定数据
+   * 返回响应数据
    * 针对 retrieve 等
    * @param map
    */
@@ -361,8 +361,8 @@ public class ActionHelper
   }
 
   /**
-   * 返回保操作结果
-   * 针对 create,update,remove
+   * 返回操作结果
+   * 针对 create,update,remove 等
    * @param msg
    * @param o
    */
@@ -380,7 +380,7 @@ public class ActionHelper
   }
 
   /**
-   * 返回操作结果
+   * 返回检查结果
    * 针对 exists,unique 等
    * @param ok
    */

@@ -109,6 +109,15 @@ public class CmdletRunner
     }
     finally
     {
+      try
+      {
+          core.destroy( );
+      }
+      catch (Throwable e)
+      {
+          CoreLogger.error(e);
+      }
+      
       /**
        * 输出总的运行时间
        * 并清除参数及核心
@@ -117,15 +126,6 @@ public class CmdletRunner
       {
           CoreLogger.debug("Total exec time: "
           +(Text.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
-      }
-
-      try
-      {
-          core.destroy( );
-      }
-      catch (Throwable e)
-      {
-          CoreLogger.error(e);
       }
     }
   }
@@ -293,10 +293,11 @@ public class CmdletRunner
       /**
        * 检查语言参数设置
        */
+      String l = lang;
           lang = CoreLanguage.getAcceptLanguage(lang);
-      if (lang == null)
+      if (lang ==null)
       {
-        CmdletHelper.println("ERROR: Unsupported language: "+lang+".");
+        CmdletHelper.println("ERROR: Unsupported language: "+l+".");
         System.exit(1);
       }
     }
