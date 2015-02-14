@@ -2,5 +2,8 @@
 /build.xml
 /nbproject/
 /nb-configuration.xml
+/hongs-core/target/
+/hongs-serv/target/
+/hongs-web/target/
 /hongs-web/web/yummy/
 /hongs-serv/src/main/java/net/hongs/yummy/serv/
