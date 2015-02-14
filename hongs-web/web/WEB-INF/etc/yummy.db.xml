@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<db xmlns="http://hongs-core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hongs-core .db.xsd">
+    <source drv="com.mysql.jdbc.Driver"
+            url="jdbc:mysql://localhost:3306/yummy?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull"
+            user="root"
+            password="123456"
+            maxPoolSize="5"/>
+    <tables>
+        <table name="product"
+               tableName="a_yummy_product"
+               primaryKey="id">
+            <assoc type="HAS_MANY"
+                   name="tag"
+                   tableName="product_tag">
+            </assoc>
+            <assoc type="HAS_MANY"
+                   name="tag"
+                   tableName="product_picture">
+            </assoc>
+            <assoc type="HAS_MANY"
+                   name="tag"
+                   tableName="product_package">
+            </assoc>
+        </table>
+        <table name="product_tag"
+               tableName="a_yummy_product_tag"
+               primaryKey="id">
+            <assoc type="BLS_TO"
+                   name="product"
+                   tableName="product">
+            </assoc>
+        </table>
+        <table name="product_picture"
+               tableName="a_yummy_product_picture"
+               primaryKey="id">
+            <assoc type="BLS_TO"
+                   name="product"
+                   tableName="product">
+            </assoc>
+        </table>
+        <table name="product_package"
+               tableName="a_yummy_product_package"
+               primaryKey="id">
+            <assoc type="BLS_TO"
+                   name="product"
+                   tableName="product">
+            </assoc>
+        </table>
+        <table name="product_comment"
+               tableName="a_yummy_product_comment"
+               primaryKey="id">
+            <assoc type="BLS_TO"
+                   name="product"
+                   tableName="product">
+            </assoc>
+        </table>
+    </tables>
+</db>
