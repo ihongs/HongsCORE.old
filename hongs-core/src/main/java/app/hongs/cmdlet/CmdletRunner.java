@@ -7,7 +7,6 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.CsNs;
 import app.hongs.util.Text;
 import java.io.File;
@@ -62,14 +61,14 @@ public class CmdletRunner
     // 执行方法
     try
     {
-      if (0 < Core.DEBUG)
+      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
       {
         CoreLogger.debug(Core.ACTION_NAME.get()+" Starting...");
       }
 
       method.invoke(null, new Object[] {args} );
 
-      if (0 < Core.DEBUG)
+      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
       {
         CoreLogger.debug(Core.ACTION_NAME.get()+" Finished!!!");
       }
@@ -104,8 +103,8 @@ public class CmdletRunner
                   + ": " + error ;
       }
 
-      CoreLogger  .error  ( ta  );
       CmdletHelper.println(error);
+      CoreLogger.error(ta);
     }
     finally
     {
@@ -122,7 +121,7 @@ public class CmdletRunner
        * 输出总的运行时间
        * 并清除参数及核心
        */
-      if (1 < Core.DEBUG)
+      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
       {
           CoreLogger.debug("Total exec time: "
           +(Text.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
@@ -212,7 +211,7 @@ public class CmdletRunner
         }
     }
 
-    if (0 < Core.DEBUG) {
+    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
     // 调试系统属性
     for (Map.Entry et : conf.entrySet()) {
         String k = (String)et.getKey ( );

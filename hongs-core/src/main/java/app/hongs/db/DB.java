@@ -227,11 +227,11 @@ public class DB
       InitialContext ic;
       try
       {
-        ic = new InitialContext();
+        ic = new InitialContext( );
         ct = (Context)ic.lookup(comp);
         ds = (DataSource)ct.lookup(namc);
       }
-      catch (NamingException ex )
+      catch (NamingException ex)
       {
         ez=ex;
         break;
@@ -251,7 +251,7 @@ public class DB
         }
         this.connection.setAutoCommit( false );
 
-        if (0 < Core.DEBUG)
+        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
         {
           CoreLogger.debug("Connect to database(origin mode): "+name);
         }
@@ -288,6 +288,12 @@ public class DB
       String url = (String)source.get("url");
       Properties info = (Properties)source.get("info");
 
+      // 注入特定路径
+      Map inj = new HashMap(/**/);
+      inj.put("BASE_PATH", Core.VARS_PATH);
+      inj.put("VARS_PATH", Core.VARS_PATH);
+      url = Text.inject(url, inj);
+
       try
       {
         /*
@@ -303,12 +309,12 @@ public class DB
         }
         */
 
-        String name = drv+" "+url;
+        String namc = drv+" "+url;
         ComboPooledDataSource pool;
         sourceLock.readLock( ).lock();
         try
         {
-          pool = sourcePool.get(name);
+          pool = sourcePool.get(namc);
         }
         finally
         {
@@ -321,7 +327,7 @@ public class DB
           try
           {
             pool = new ComboPooledDataSource();
-            sourcePool.put( name, pool );
+            sourcePool.put( namc, pool );
             pool.setDriverClass(drv);
             pool.setJdbcUrl(url);
 
@@ -356,7 +362,7 @@ public class DB
         this.connection = pool.getConnection();
         this.connection.setAutoCommit( false );
 
-        if (0 < Core.DEBUG)
+        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
         {
           CoreLogger.debug("Connect to database(source mode): "+drv+" "+url);
         }
@@ -412,7 +418,7 @@ public class DB
         return;
       }
 
-      if (0 < Core.DEBUG)
+      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
       {
         CoreLogger.debug("Close database connection, URL: "
           + this.connection.getMetaData().getURL());
@@ -536,7 +542,7 @@ public class DB
       return tobj;
     }
 
-    if (0 < Core.DEBUG)
+    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
     {
       app.hongs.CoreLogger.debug(
           "INFO(DB): tableClass("+tcls+") for table("+tableName+") has been defined, try to get it");
@@ -652,7 +658,7 @@ public class DB
       return mobj;
     }
 
-    if (0 < Core.DEBUG)
+    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
     {
       app.hongs.CoreLogger.debug(
           "INFO(DB): modelClass("+mcls+") for table("+tableName+") has been defined, try to get it");
@@ -999,7 +1005,7 @@ public class DB
   {
     this.connect();
 
-    if (0 < Core.DEBUG)
+    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -1141,7 +1147,7 @@ public class DB
   {
     this.connect();
 
-    if (0 < Core.DEBUG)
+    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -1176,18 +1182,18 @@ public class DB
    * @return 更新的条数
    * @throws HongsException
    */
-  public int perform(String sql, Object... params)
+  public int updates(String sql, Object... params)
     throws HongsException
   {
     this.connect();
 
-    if (0 < Core.DEBUG)
+    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
       DB.checkSQLParams(sb, paramz);
       DB.mergeSQLParams(sb, paramz);
-      app.hongs.CoreLogger.debug("INFO(DB.perform): " + sb.toString());
+      app.hongs.CoreLogger.debug("INFO(DB.updates): " + sb.toString());
     }
 
     PreparedStatement ps = this.prepareStatement(sql, params);
@@ -1204,48 +1210,6 @@ public class DB
     {
       this.closeStatement(ps);
     }
-  }
-
-  /**
-   * 添加记录
-   * <p>注: 调用update(sql, params...)实现</p>
-   * @param table
-   * @param values
-   * @return 插入条数
-   * @throws app.hongs.HongsException
-   */
-  public int insert(String table, Map<String, Object> values)
-    throws HongsException
-  {
-    if (values == null || values.isEmpty())
-    {
-      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
-    }
-
-    /** 组织语句 **/
-
-    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
-    List params2 = new ArrayList();
-    String fs = "", vs = "";
-
-    Iterator it = values.entrySet().iterator();
-    while (it.hasNext())
-    {
-      Map.Entry entry = (Map.Entry)it.next();
-      String field = (String)entry.getKey();
-      params2.add((Object)entry.getValue());
-
-      fs += "`" + Text.escape(field, "`") + "`, ";
-      vs += "?, ";
-    }
-
-    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
-    sql += " VALUES";
-    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
-
-    /** 执行更新 **/
-
-    return this.perform(sql, params2.toArray());
   }
 
   /**
@@ -1295,7 +1259,49 @@ public class DB
 
     /** 执行更新 **/
 
-    return this.perform(sql, params2.toArray());
+    return this.updates(sql, params2.toArray());
+  }
+
+  /**
+   * 添加记录
+   * <p>注: 调用update(sql, params...)实现</p>
+   * @param table
+   * @param values
+   * @return 插入条数
+   * @throws app.hongs.HongsException
+   */
+  public int insert(String table, Map<String, Object> values)
+    throws HongsException
+  {
+    if (values == null || values.isEmpty())
+    {
+      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
+    }
+
+    /** 组织语句 **/
+
+    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
+    List params2 = new ArrayList();
+    String fs = "", vs = "";
+
+    Iterator it = values.entrySet().iterator();
+    while (it.hasNext())
+    {
+      Map.Entry entry = (Map.Entry)it.next();
+      String field = (String)entry.getKey();
+      params2.add((Object)entry.getValue());
+
+      fs += "`" + Text.escape(field, "`") + "`, ";
+      vs += "?, ";
+    }
+
+    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
+    sql += " VALUES";
+    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
+
+    /** 执行更新 **/
+
+    return this.updates(sql, params2.toArray());
   }
 
   /**
@@ -1321,7 +1327,7 @@ public class DB
 
     /** 执行更新 **/
 
-    return this.perform(sql, params);
+    return this.updates(sql, params);
   }
 
   //** 静态工具 **/

@@ -1,4 +1,4 @@
-package app.hongs.cmdlet.anno;
+package app.hongs.cmdlet;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

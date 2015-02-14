@@ -8,14 +8,14 @@
     <artifactId>hongs-web</artifactId>
     <version>0.3.6</version>
     <packaging>war</packaging>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <parent>
         <groupId>app.hongs</groupId>
         <artifactId>hongs-all</artifactId>
         <version>0.3-SNAPSHOT</version>
     </parent>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

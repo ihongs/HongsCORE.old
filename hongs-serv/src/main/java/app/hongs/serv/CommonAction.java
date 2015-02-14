@@ -16,34 +16,6 @@ import java.util.Map;
 @Action("common")
 public class CommonAction {
 
-    @Action("goto")
-    public void jump(ActionHelper helper)
-    throws HongsException {
-        String m = helper.getParameter("m");
-        if (null == m ||  "".equals(m)) m = "default";
-        String x = helper.getParameter("x");
-        if (null != x) {
-            x  = "common/goto.act?m=" + m + "&x=" + x;
-        } else {
-            x  = "common/goto.act?m=" + m;
-        }
-
-        SiteMap site  =  SiteMap.getInstance(m);
-        Map<String, Map> page = site.getPage(x);
-        if (page != null  && page.containsKey("pages")) {
-            Map<String, Map> pages = (Map) page.get("pages");
-            for (Map.Entry et : pages.entrySet()) {
-                String uri2 = (String)et.getKey();
-                if (site.chkAuth(uri2)) {
-                    helper.redirect(Core.BASE_HREF+"/"+uri2);
-                    return;
-                }
-            }
-        }
-
-        helper.redirect(Core.BASE_HREF+"/");
-    }
-
     @Action("menu")
     public void menu(ActionHelper helper)
     throws HongsException {
@@ -70,6 +42,36 @@ public class CommonAction {
         Map data = new HashMap();
         data.put( "list", list );
         helper.reply(data);
+    }
+
+    @Action("goto")
+    public void jump(ActionHelper helper)
+    throws HongsException {
+        String m = helper.getParameter("m");
+        String x = helper.getParameter("x");
+        if (null == m ||  "".equals(m)) {
+            m = "default";
+        }
+        if (null == x) {
+            x  = "common/goto.act?m=" + m;
+        } else {
+            x  = "common/goto.act?m=" + m + "&x=" + x;
+        }
+
+        SiteMap site  =  SiteMap.getInstance(m);
+        Map<String, Map> page = site.getPage(x);
+        if (page != null  && page.containsKey("pages")) {
+            Map<String, Map> pages = (Map) page.get("pages");
+            for (Map.Entry et : pages.entrySet()) {
+                String uri2 = (String)et.getKey();
+                if (site.chkAuth(uri2)) {
+                    helper.redirect(Core.BASE_HREF+"/"+uri2);
+                    return;
+                }
+            }
+        }
+
+        helper.redirect(Core.BASE_HREF+"/");
     }
 
 }

@@ -1,11 +1,9 @@
 package app.hongs.action.serv;
 
-import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.ActionWarder;
-import app.hongs.util.Data;
 import app.hongs.util.Synt;
 import java.io.IOException;
 import java.util.Date;
@@ -27,10 +25,10 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * REST 适配器, 可将不同 Method 请求转发到原有的 Action 方法:<br/>
  * <pre>
- * GET      List, Tree or Info
- * PUT      Modify, Save
- * POST     Create, Save
- * DELETE   Remove
+ * GET      retrieve, list or info
+ * POST     create, save
+ * PUT      update, save
+ * DELETE   delete
  * </pre>
  * </p>
  *
@@ -133,7 +131,7 @@ public class ApisAction
                     key += "[]";
                 } else {
                     if ( mtd.equals("retrieve")) {
-                         mts = new String[]{"info", "retrieve", "list"};
+                         mts = new String[]{"retrieve", "info", "list"};
                     }
                 }
                 for(String val : vas) {

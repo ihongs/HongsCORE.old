@@ -1,6 +1,5 @@
 package app.hongs.action;
 
-import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
@@ -18,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 数据校验助手
@@ -383,7 +381,6 @@ public class VerifyHelper {
 
     public static Object isNumber(Object value, Map values, Map params) {
         String type = Dict.getValue(params, String.class, "type");
-
         if ( "byte".equals(type)) {
             value = Synt.declare(value, (byte ) 0);
         } else
@@ -408,36 +405,6 @@ public class VerifyHelper {
 
     public static Object isDate(Object value, Map values, Map params) {
         return value;
-    }
-
-    public static String isFile(Object value, Map values, Map params) throws Wrong {
-        String name = Dict.getValue(params, String.class, "name");
-        if (name == null || "".equals(name)) {
-            name = Dict.getValue(params, "", "__name__");
-        }
-
-        UploadHelper u = new UploadHelper();
-        u.setUploadName(name);
-        String x;
-        x = (String) params.get( "path" );
-        if (x != null) u.setUploadPath(x);
-        x = (String) params.get( "href" );
-        if (x != null) u.setUploadHref(x);
-        x = (String) params.get( "name" );
-        if (x != null) u.setUploadDate(x);
-        x = (String) params.get( "type" );
-        if (x != null) u.setAllowTypes(x.split(","));
-        x = (String) params.get( "extn" );
-        if (x != null) u.setAllowExtns(x.split(","));
-
-        HttpServletRequest r = Dict.getValue(params, HttpServletRequest.class, "__request__");
-        if (r == null) {
-            ActionHelper   h = Core.getInstance(ActionHelper.class);
-            r = h.getRequest();
-        }
-
-        UploadHelper.upload(r, u);
-        return u.getResultHref( );
     }
 
     public static Object isEnum(Object value, Map values, Map params) throws Wrong , HongsException {
@@ -471,6 +438,30 @@ public class VerifyHelper {
         VerifyHelper veri = new VerifyHelper();
         veri.addRulesByForm(conf, name);
         return veri.verify(values, upd);
+    }
+
+    public static String isFile(Object value, Map values, Map params) throws Wrong {
+        String name = Dict.getValue(params, String.class, "name");
+        if (name == null || "".equals(name)) {
+            name = Dict.getValue(params, "", "__name__");
+        }
+
+        UploadHelper u = new UploadHelper();
+        u.setUploadName(name);
+        String x;
+        x = (String) params.get( "href" );
+        if (x != null) u.setUploadHref(x);
+        x = (String) params.get( "path" );
+        if (x != null) u.setUploadPath(x);
+        x = (String) params.get( "name" );
+        if (x != null) u.setUploadDate(x);
+        x = (String) params.get( "type" );
+        if (x != null) u.setAllowTypes(x.split(","));
+        x = (String) params.get( "extn" );
+        if (x != null) u.setAllowExtns(x.split(","));
+
+        u.upload(value.toString());
+        return  u.getResultHref( );
     }
 
     /** 内部错误类 **/

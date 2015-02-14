@@ -136,7 +136,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
             Query q = getFind(rd);
             Sort  s = getSort (rd);
 
-            if (1 == (1 & Core.DEBUG)) {
+            if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
                 CoreLogger.debug("...\r\n\tQuery: "+q.toString()+"\r\n\tSort : "+s.toString());
             }
 

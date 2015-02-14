@@ -5,6 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
+import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -53,6 +54,13 @@ public class CmdletHelper
     "Unupport anonymous options"
   };
 
+  /**
+   * 解析参数
+   * 本函数遵循 Perl 的 Getopt::Long 解析规则
+   * @param args
+   * @param chks
+   * @return
+   */
   public static Map<String, Object> getOpts(String[] args, String... chks)
   {
     Map<String, Object[]>  chkz = new HashMap();
@@ -67,12 +75,12 @@ public class CmdletHelper
     Pattern ip = Pattern.compile("^\\d+$");
     boolean ub = false; // 不支持未知参数
     boolean vb = false; // 不支持匿名参数
-    String hlp = null;  // 用法说明
+    String hlp = null ; // 用法说明
     String pre = "\r\n\t";
 
     for (String chk : chks) {
       Matcher m = p.matcher(chk);
-      
+
       if (!m.find()) {
         if (chk.equals("!U")) {
             ub  = true;
@@ -91,15 +99,15 @@ public class CmdletHelper
         errMsgs.add(getErrs[0].replace("%chk", chk));
         continue;
       }
-      
+
       String name = m.group(1);
       String sign = m.group(2);
       String type = m.group(3);
-      
+
       if ("=".equals(sign) || "+".equals(sign)) {
         reqOpts.add(name);
       }
-      
+
       if (type.startsWith("/")) {
         String  reg = m.group(4);
         String  mod = m.group(5);
@@ -121,13 +129,13 @@ public class CmdletHelper
         chkz.put(name, new Object[] {sign.charAt(0), type.charAt(0)});
       }
     }
-    
+
     F:for (int i = 0; i < args.length; i ++) {
       String name = args[i];
-      
+
       if (name.startsWith("--")) {
         name = name.substring(2);
-        
+
         if (chkz.containsKey(name)) {
           Object[] chk = chkz.get(name);
           char    sign = (Character)chk[0];
@@ -137,13 +145,13 @@ public class CmdletHelper
           String   err = null;
           Object   val = null;
           List    vals = null;
-          
+
           if ('r' == type) {
             rp  = (Pattern)chk[3];
             reg = (String) chk[4];
             err = (String) chk[5];
           }
-          
+
           if ('+' == sign || '*' == sign) {
             vals = (List)newOpts.get(name);
             if (vals == null) {
@@ -151,7 +159,7 @@ public class CmdletHelper
               newOpts.put(name, vals);
             }
           }
-          
+
           W:while (i < args.length-1) {
             String arg = args[i + 1];
             if (arg.startsWith("--")) {
@@ -162,7 +170,7 @@ public class CmdletHelper
               arg = arg.substring(1);
             }
             i ++;
-            
+
             switch (type) {
               case 'i':
                 if (!ip.matcher(arg).matches()) {
@@ -191,9 +199,9 @@ public class CmdletHelper
                   continue W;
                 }
               default:
-                val = arg;  
+                val = arg;
             }
-            
+
             if ('+' == sign || '*' == sign) {
               vals.add(val );
             } else {
@@ -205,7 +213,7 @@ public class CmdletHelper
               continue F;
             }
           }
-          
+
           if ('b' == type) {
             if ('+'== sign || '*' == sign) {
               vals.add(true);
@@ -221,11 +229,11 @@ public class CmdletHelper
           }
         }
         else if (ub) {
-          // 7号错误
-          errMsgs.add(getErrs[8].replace("%opt", name));
+            // 7号错误
+            errMsgs.add(getErrs[8].replace("%opt", name));
         }
         else {
-          newArgs.add(args[i]);
+            newArgs.add(   args[i]);
         }
       }
       else if (vb) {
@@ -233,7 +241,7 @@ public class CmdletHelper
         errMsgs.add(getErrs[9]);
       }
       else {
-        newArgs.add(args[i]);
+        newArgs.add(   args[i]);
       }
     }
 
@@ -245,23 +253,22 @@ public class CmdletHelper
         errMsgs  =  err;
       }
     }
-    
+
     if (!errMsgs.isEmpty()) {
       StringBuilder err = new StringBuilder();
       for ( String  msg : errMsgs ) {
         err.append(pre).append(msg);
       }
-      String msg = err.toString(  ); 
+      String msg = err.toString(  );
       String trs = msg;
       if (null  != hlp) {
         trs += pre + hlp.replaceAll("\\n", pre);
       }
-      
+
       HongsError er = new HongsError(0x35, msg);
-                 er.setLocalizedOptions(trs);
-      throw      er;
-    }
-    else if (null != hlp && newOpts.isEmpty( )) {
+      er.setLocalizedOptions(trs);
+      throw er;
+    } else if (hlp != null && args.length == 0) {
       System.err.println(hlp.replaceAll("\\n",pre));
       System.exit(0);
     }
@@ -296,7 +303,9 @@ public class CmdletHelper
    */
   public static void print2Log(String text) throws HongsException
   {
-    CoreLogger.getInstance(Core.ACTION_NAME.get().replace('.', '_')).println(text);
+    /**/String path = Core.ACTION_NAME.get().replace(':', '!');
+    CoreLogger logr = CoreLogger.getInstance(path);
+    logr.println(text);
   }
 
   /**
@@ -307,21 +316,6 @@ public class CmdletHelper
   {
     CmdletHelper.println  (text);
     CmdletHelper.print2Log(text);
-  }
-
-  /**
-   * 输出执行耗时
-   * @param label
-   * @param start
-   */
-  public static void printETime(String label, long start)
-  {
-    start = System.currentTimeMillis() - start;
-    String notes = Text.humanTime(start);
-    System.err.println(new StringBuilder()
-                          .append(label)
-                          .append( ": ")
-                          .append(notes) );
   }
 
   /**
@@ -399,12 +393,12 @@ public class CmdletHelper
    * 输出执行进度(按完成失败量计算)
    * @param n 总条目数
    * @param ok 完成条目数
-   * @param err 错误条目数
+   * @param er 错误条目数
    */
-  public static void printERate(int n, int ok, int err)
+  public static void printERate(int n, int ok, int er)
   {
-    String notes = String.format("ok(%d) error(%d)", ok, err);
-    float  scale = (float)(err + ok) / n * 100;
+    String notes = String.format("ok(%d) error(%d)", ok, er);
+    float  scale = (float)(er + ok) / n * 100;
     printERate(scale, notes);
   }
 
@@ -421,7 +415,7 @@ public class CmdletHelper
     float  left1 = t / scale * 100 - t;
     String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) Time left: %s",
-                                    ok, left2);
+                                     ok, left2);
     printERate(scale, left3);
   }
 
@@ -430,16 +424,16 @@ public class CmdletHelper
    * @param t 开始时间(毫秒)
    * @param n 总条目数
    * @param ok 完成条目数
-   * @param err 错误条目数
+   * @param er 错误条目数
    */
-  public static void printELeft(long t, int n, int ok, int err)
+  public static void printELeft(long t, int n, int ok, int er)
   {
-    float  scale = (float)(err + ok) / n * 100;
+    float  scale = (float)( er + ok ) / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
     String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) error(%d) Time left: %s",
-                               ok, err, left2);
+                                 ok, er, left2);
     printERate(scale, left3);
   }
 

@@ -93,7 +93,7 @@ implements Filter {
         Core.SERS_PATH = conf.getProperty("core.tmps.path", Core.SERS_PATH);
         Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
-        // 调一下 ActionRunner 来加载来加载动作
+        // 调一下 ActionRunner 来加载动作
         ActionRunner.getActions();
 
         //** 系统属性配置 **/
@@ -114,7 +114,7 @@ implements Filter {
             }
         }
 
-        if (0 < Core.DEBUG) {
+        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
         // 调试系统属性
         for (Map.Entry et : conf.entrySet()) {
             String k = (String)et.getKey ( );
@@ -140,8 +140,8 @@ implements Filter {
     }
 
     @Override
-    public void destroy( ) {
-        if (0 < Core.DEBUG) {
+    public void destroy() {
+        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
             Core core = Core.GLOBAL_CORE;
             long time = System.currentTimeMillis() - Core.STARTS_TIME;
             CoreLogger.debug(new StringBuilder("...")
@@ -255,7 +255,7 @@ implements Filter {
     }
 
     protected void doFinish(HttpServletRequest req, Core core, ActionHelper helper) {
-        if (0 < Core.DEBUG) {
+        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
             ActionHelper that = Core.getInstance(ActionHelper.class);
             HttpServletRequest R = that.getRequest();
             Map rd, xd;
@@ -274,13 +274,13 @@ implements Filter {
                 .append("\r\n\tMethod      : ").append(R.getMethod())
                 .append("\r\n\tClient      : ").append(R.getRemoteAddr()).append(" ").append(R.getRemotePort())
                 .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
-                .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
-                .append("\r\n\tObjects     : ").append(core.keySet().toString());
+                .append("\r\n\tRuntime     : ").append(Text.humanTime( time ))
+                .append("\r\n\tObjects     : ").append(core.keySet().toString( ));
             if (rd != null && !rd.isEmpty()) {
-              sb.append("\r\n\tRequest     : ").append(Data.toString(rd));
+              sb.append("\r\n\tRequest     : ").append(Text.indent(Data.toString(rd)).substring(1));
             }
             if (xd != null && !xd.isEmpty()) {
-              sb.append("\r\n\tResults     : ").append(Data.toString(xd));
+              sb.append("\r\n\tResults     : ").append(Text.indent(Data.toString(xd)).substring(1));
             }
             CoreLogger.debug(sb.toString( ));
         }

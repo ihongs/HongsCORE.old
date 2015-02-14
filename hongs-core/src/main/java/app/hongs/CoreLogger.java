@@ -117,12 +117,18 @@ public class CoreLogger implements Core.Destroy
       {
         ActionHelper helper = (ActionHelper)
           Core.getInstance(app.hongs.action.ActionHelper.class);
-        sb.append(' ')
-          .append('[')
-          .append(helper.getRequest().getRemoteAddr())
-          .append(' ')
-          .append(helper.getRequest().getRemotePort())
-          .append(']');
+        if (null != helper.getRequest()) {
+          sb.append(' ')
+            .append('[')
+            .append(helper.getRequest().getRemoteAddr())
+            .append(' ')
+            .append(helper.getRequest().getRemotePort())
+            .append(']');
+        }
+        else
+        {
+          sb.append(" [IN ACTION]");
+        }
       }
       else
       {
@@ -131,7 +137,7 @@ public class CoreLogger implements Core.Destroy
     }
     else
     {
-        sb.append(" [IN CMDLET]");
+      sb.append(" [IN CMDLET]");
     }
 
     /**
@@ -142,16 +148,18 @@ public class CoreLogger implements Core.Destroy
       .append(Core.ACTION_NAME.get())
       .append(' ')
       .append(Thread.currentThread().getId())
-      .append(']');
+      .append(']')
+      .append(' ');
 
-    /**
-     * 去掉空行, 行首缩进
-     */
-    sb.append("\r\n");
-    sb.append(Text.indent(Text.clearEL(text.trim())));
-    sb.append("\r\n");
+//    /**
+//     * 去掉空行, 行首缩进
+//     */
+//    sb.append("\r\n");
+//    sb.append(Text.indent(Text.clearEL(text.trim())));
+//    sb.append("\r\n");
 
-    this.out.print(sb.toString());
+    sb.append(text.trim());
+    this.out.println( sb );
     this.out.flush();
   }
 
@@ -300,8 +308,7 @@ public class CoreLogger implements Core.Destroy
     if (2 == (2 & Core.DEBUG)) {
         try {
             CoreLogger.getInstance("debug").println(text, 0);
-        }
-        catch (HongsError ex ) {
+        } catch (HongsError e) {
             if (1 != (1 & Core.DEBUG)) {
                 CmdletHelper.println(text);
             }
@@ -325,8 +332,7 @@ public class CoreLogger implements Core.Destroy
     if (2 == (2 & Core.DEBUG)) {
         try {
             CoreLogger.getInstance("error").println(text, 0);
-        }
-        catch (HongsError ex ) {
+        } catch (HongsError e) {
             if (1 != (1 & Core.DEBUG)) {
                 CmdletHelper.println(text);
             }
@@ -337,7 +343,7 @@ public class CoreLogger implements Core.Destroy
 
   /**
    * 记录异常信息
-   * @param t 
+   * @param t
    */
   public static void error(Throwable t)
   {

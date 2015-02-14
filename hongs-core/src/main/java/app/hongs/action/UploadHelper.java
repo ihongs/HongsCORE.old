@@ -1,24 +1,23 @@
 package app.hongs.action;
 
 import app.hongs.Core;
+import app.hongs.util.Dict;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 
 /**
@@ -51,26 +50,15 @@ public class UploadHelper {
         return this;
     }
     public UploadHelper setAllowTypes(String... type) {
-        this.allowTypes = new LinkedHashSet(Arrays.asList(type));
+        this.allowTypes = new HashSet(Arrays.asList(type));
         return this;
     }
     public UploadHelper setAllowExtns(String... extn) {
-        this.allowExtns = new LinkedHashSet(Arrays.asList(extn));
+        this.allowExtns = new HashSet(Arrays.asList(extn));
         return this;
     }
 
     private String getUploadExtn(String name) {
-        // 如果有指定扩展名就依次去匹配
-        if (this.allowExtns != null) {
-          for (String ext : allowExtns) {
-            if (name.endsWith("." + ext)) {
-              return  ext;
-            }
-          }
-        }
-
-        // 否则取最后的句点后作为扩展名
-        name = new File(name).getName();
         int pos = name.lastIndexOf('.');
         if (pos > 1) {
           return  name.substring(pos+1);
@@ -87,7 +75,7 @@ public class UploadHelper {
         }
         return path;
     }
-    
+
     public String getResultHref() {
         String href = this.resultName;
         if (this.uploadHref != null) {
@@ -96,7 +84,7 @@ public class UploadHelper {
         return href;
     }
 
-    public File upload(InputStream stream, String fame, String name, String type) throws VerifyHelper.Wrong {
+    public File upload(InputStream stream, String type, String extn, String fame) throws VerifyHelper.Wrong {
         /**
          * 检查文件类型
          */
@@ -105,8 +93,6 @@ public class UploadHelper {
             // 文件类型不对
             throw new VerifyHelper.Wrong("fore.form.unallowed.types", this.allowTypes.toString());
         }
-
-        String extn = this.getUploadExtn(name);
 
         /**
          * 检查扩展名
@@ -120,7 +106,7 @@ public class UploadHelper {
         /**
          * 将路径放入数据中
          */
-        String famc = Core.getUniqueId() + "." + extn;
+        String famc = fame+"."+extn;
         if (this.uploadDate != null) {
             famc = new SimpleDateFormat(this.uploadDate).format(new Date()) + famc;
         }
@@ -131,46 +117,64 @@ public class UploadHelper {
         }
 
         try {
-            File file = new File(path);
-            BufferedOutputStream bos = new BufferedOutputStream(
-                                       new     FileOutputStream(file));
-            BufferedInputStream  bis = new BufferedInputStream(stream);
-            Streams.copy(bis,bos,true);
+            File   file = new File(path);
+            /**/FileOutputStream fos = new /**/FileOutputStream(file);
+            BufferedOutputStream bos = new BufferedOutputStream(fos );
+            BufferedInputStream  bis = new BufferedInputStream (stream);
+            Streams.copy(bis, bos, true);
             return file;
         } catch (IOException ex) {
             throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");
         }
     }
 
-    public static Map<String, File> upload(HttpServletRequest request, UploadHelper... uploads) throws VerifyHelper.Wrong {
-        Map<String,       File  > uploadm = new LinkedHashMap();
-        Map<String, UploadHelper> uploadz = new LinkedHashMap();
-        for (UploadHelper upload: uploads) {
-            uploadz.put(upload.uploadName, upload);
-        }
+    public File upload(InputStream stream, String type, String extn) throws VerifyHelper.Wrong {
+        return upload(stream, type, extn, Core.getUniqueId());
+    }
 
+    public File upload(String fame) throws VerifyHelper.Wrong {
+        File file = new File(Core.VARS_PATH + "/upload/" + fame + ".tmp");
+        File info = new File(Core.VARS_PATH + "/upload/" + fame + ".inf");
+
+        FileInputStream fs = null;
         try {
-            FileItemIterator fit = new ServletFileUpload().getItemIterator(request);
-            while (fit.hasNext()) {
-                FileItemStream fis = fit.next( );
-                if (fis.isFormField()) {
-                    continue;
-                }
-                String fame = fis.getFieldName();
-                UploadHelper upload = uploadz.get(fame);
-                if ( upload == null  ) {
-                    continue;
-                }
-                String name = fis.getName();
-                String type = fis.getContentType();
-                InputStream ins = fis.openStream();
-                uploadm.put(fame, upload.upload(ins, fame, name, type));
-            }
-            return uploadm;
-        } catch (FileUploadException ex) {
+            fs = new FileInputStream(info);
+            InputStreamReader sr = new InputStreamReader(fs);
+            BufferedReader fr = new BufferedReader(sr);
+            String type = fr.readLine().trim();
+            String extn = fr.readLine().trim();
+            extn = getUploadExtn(extn);
+            fr.close();
+            sr.close();
+            fs.close();
+
+            fs = new FileInputStream(file);
+            return upload(fs , type, extn);
+        } catch (FileNotFoundException ex) {
             throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");
         } catch (IOException ex) {
             throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");
+        } finally {
+            try {
+                if (fs != null) {
+                    fs.close( );
+                }
+            } catch (IOException ex) {
+                throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");
+            }
+        }
+    }
+
+    public static void upload(Map<String, Object> requestData, UploadHelper... uploads) throws VerifyHelper.Wrong {
+        for(UploadHelper upload : uploads) {
+            String v = null;
+            String n = upload.uploadName;
+            v = Dict.getParam(requestData, v, n);
+            if (v != null) {
+                upload.upload(v);
+                v = upload.getResultHref();
+                Dict.setParam(requestData, v, n);
+            }
         }
     }
 

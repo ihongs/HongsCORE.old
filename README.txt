@@ -6,34 +6,36 @@
 技术支持:
   Email: kevin.hongs@gmail.com
 
-[特别说明]
-
-其实这不是一个框架, 这是一个未完成的应用!
+这不是一个框架, 这是一个未完成的应用!
 
 [名称解释]
 
-HongsCORE
-即: Hong's Common Object Requesting Engine, 通用对象请求引擎, 拼凑的有些生硬. 在设计第一个原型框架时(PHP 版 2006 年), 我买了一台 Intel Core CPU 的笔记本电脑, 当时随意的给她取了个名字叫 Core, 后来觉得名字应该更有意义才扩展成了以上缩写.
-另一个理由是: 从最初的 PHP 版一直到现在的 Java 版, 我都有设计一个核心工厂类, 主要作用就是用于请求和管理唯一对象, 实现  Singleton(单例模式), 在需要某个对象时只管请求就是, 无需实例化, 使对象的使用效率更高. 具体到这个 Java 版本中, 利用了 Tomcat 等 Servlet 容器的单实例多线程特性来实现行之有效的单例模式.
+HongsCORE 即 Hong's Common Object Requesting Engine, 通用对象请求引擎, 拼凑的有些生硬. 在设计第一个原型框架时(PHP 版 2006 年), 我买了一台 Intel Core CPU 的笔记本电脑, 当时随意的给她取了个名字叫 Core, 后来觉得名字应该更有意义才扩展成了以上缩写.
+另一个理由是, 从最初的 PHP 版一直到现在的 Java 版, 我都有设计一个核心工厂类, 主要作用就是用于请求和管理唯一对象, 实现  Singleton (单例模式), 在需要某个对象时只管请求, 使对象的使用效率更高. 具体到这个 Java 版本中, 利用了 Tomcat 等 Servlet 容器的单实例多线程特性来实现行之有效的单例模式.
 
-注: 原 PHP 版框架在 上海科捷信息技术有限公司(北京) 的 AFP8 系统(已被其他公司收购)中使用, 其部分模块是在科捷的工作期间开发的, 本人已于2011年离开科捷, 故不再对其更新. 原科捷公司和其 AFP8 系统及其衍生品拥有原 PHP 版框架代码的全部处置权.
+注: 原 PHP 版框架在 上海科捷信息技术有限公司(北京) 的 AFP8 系统(已被其他公司收购)中使用, 其部分模块是在科捷的工作期间开发的, 本人已于 2011 年离开科捷, 故不再对其更新. 原科捷公司和其 AFP8 系统及其衍生品拥有原 PHP 版框架代码的全部处置权.
 
 感谢 林叶,杨林,袁杰,赵征 等朋友过去对我的支持和理解, 谢谢你们!
+
+[使用方法]
+
+下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 WEB-INF/run common:setup 设置数据库, 再执行 WEB-INF/run common:start 启动服务器, 然后打开浏览器在地址栏输入 127.0.0.1:8080 即可进入. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
 
 [特性概叙]
 
 1. 支持库表配置, 支持多数据库;
-2. 支持IN或JOIN的自动关联查询, 可自动处理关联插入;
-3. 支持"隶属/一对一/一对多/多对一/多对多"关联方式;
+2. 支持 IN,JOIN 的自动关联查询, 可自动处理关联插入;
+3. 支持 隶属,一对多,多对多 等关联模式并自动处理关系;
 4. 支持简单存取模型基类(对于常规的列表/增/删/改等操作无需编写大量代码, 只需继承或实现指定方法即可);
 5. 简单有效的动作权限解决方案;
 6. 支持统一的服务器端维护程序;
 7. 可与前端应用共享配置及模型;
-8. 与对应的HongsCORE4JS(for Javascript)配合实现高效WEB应用开发方案.
-9. 支持 Lucene 存、取数据
+8. 与对应的 HongsCORE4JS (for Javascript) 配合实现高效WEB应用开发方案;
+9. 默认内置 jetty,sqlite,lucene 等, 除 Java 外无需安装其他软件即可运行.
 
 [更新日志]
 
+[2015-02-14] 增加 jetty,sqlite, 数据库默认使用 sqlite
 [2015-01-18] 大规模重构, 重新规划 Maven 模块结构
 [2014-11-20] 实现 REST 风格的 API, 重新规划了 Action 的组织结构
 [2014-11-10] 切换到 Maven
@@ -63,7 +65,7 @@ HongsCORE
 
 [文件体系]
 
-物理分层:
+目录结构:
 /
   + WEB-INF
     - etc           配置资源(配置/语言/权限/集合/数据库等)
@@ -71,6 +73,8 @@ HongsCORE
     - var           临时文件(可配置)
       - log         运行日志(可配置)
       - ser         缓存文件(可配置)
+      - sqlite      Sqlite本地数据库目录
+      - lucene      Lucene本地索引库目录
   + common          前端通用库(js)
     - css           前端样式
     - fonts         前端字体
@@ -80,46 +84,52 @@ HongsCORE
     - conf          配置信息(虚拟目录)
     - lang          语言资源(虚拟目录)
   - compon          其他前端组件
-  - xxxx            项目模块页面
-
-文件映射:
-xxxx/Foo/Bar.act    调用 app.xxxx.action.Foo.actionBar
-xxxx/Foo.api        调用 app.xxxx.cmdlet.Foo.action
-xxxx.Foo            调用 app.xxxx.cmdlet.Foo.cmdlet(执行命令 WEB-INF/run xxxx.Foo)
-common/auth/name.js 读取 WBE-INF/conf/act-name.xml 中 actions+session 的组合
-common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
-common/lang/name.js 读取 WEB-INF/conf/name.xx-xx.properties 中 fore.xxxx. 开头的配置
-注: 后3个路径, 将扩展名.js换成.json即可得到json格式的数据; 语言配置可在name后加语言区域标识, 如example.zh-cn.js为获取example的中文大陆简体的语言配置; 可以在 default.properties 中加入 app.xxxx.action=[完整Action类名] 或 app.xxxx.cmdlet=[完整Cmdlet类名] 来定义 action 和 cmdlet 路径对应的包.
-注[2]: action 和 cmdlet 已改为使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用报名作为路径; 请设置配置 core.action.packages 和 core.cmdlet.package 告知哪些包下存在 action 和 cmdlet 类
 
 框架结构:
 app.hongs           核心
 app.hongs.action    动作支持
 app.hongs.cmdlet    命令支持
 app.hongs.db        关系数据模型
-app.hongs.dh        文档仓库模型
+app.hongs.dl        文档仓库模型
 app.hongs.serv      内置服务库
 app.hongs.tags      JSP标签
 app.hongs.util      工具
-注: 以上仅列举了主要的包, 更多框架信息请参考API文档.
+注: 以上仅列举了主要的包, 更多框架信息请参考 API 文档.
+
+文件映射:
+xxx.foo:bar         对应标记 @Cmdlet("xxx.foo") 的类下 @Cmdlet("bar") 的方法
+xxx.foo             对应标记 @Cmdlet("xxx.foo") 的类下 @Cmdlet("__main__") 的方法
+xxx/foo/bar.act     对应标记 @Action("xxx/foo") 的类下 @Action("bar") 的方法
+xxx/foo.api         对应标记 @Action("xxx/foo") 的类下 @Action("retrieve,create,update或delete") 的方法(这四种动作分别对应 HTTP METHOD: GET,POST,PUT,DELETE)
+common/auth/name.js 读取 WBE-INF/conf/name.as.xml 中 actions+session 的组合
+common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
+common/lang/name.js 读取 WEB-INF/conf/name.xx-XX.properties 中 fore.xxxx. 开头的配置
+注[1]: action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 _begin_.properties 中设置 core.load.serv 告知 Action,Cmdlet 类, 或用 xxx.foo.* 告知该包下存在 Action,Cmdlet 类.
+注[2]: 最后3个路径, 将扩展名 .js 换成 .json 即可得到 JSON 格式的数据; 语言配置可在 name 后加语言区域标识, 如 example.zh-CN.js 为获取 example 的中文大陆简体的语言配置.
 
 [通用请求参数解释]
 
 wd      搜索字词
 ob      排序字段
 pn      当前页码
-rs      额定行数
+rn      额定行数
 cs[]    限定列名
 
 [特定请求参数规则]
 
-字段等于        field=value, assoc_table.field=value
-字段不等于      -field=value, -assoc_table.field=value
-查找匹配的行    wd=word1+word2, wd.name=word1+word2
-查找不匹配的行  -wd=word1+word2, -wd.name=word1+word2
-排序(-表示逆序) ob=-field1+field2, ob=sub_table.field
+等于      field=value 注: 如果 value 为空则不理会
+等于      field.-eq=value
+不等于    field.-ne=value
+大于      field.-gt=value
+大于或等于 field.-ge=value
+小于      field.-lt=value
+小于或等于 field.-le=value
+包含      field.-in.=value1&field.-in.=value2
+不包含    field.-ni.=value1&field.-ni.=value2
+匹配      wd=word1+word2, wd.name=word1+word2
+排序      ob=-field1+field2, ob=assoc_table.field 注: "-" 表示逆序
 
-注: "+" 在 URL 中为空格; 框架未提供 >,>=,<,<= 等条件, 因这些需求并不多, 请自行实现, 推荐使用 gt-,ge-,lt-,le- 作为参数前缀. 之所以不使用后缀(如 field!=value 更直观), 是因为 field,find 均可以作为数组传递(如 field[]=value 表示 IN 语句), 框架的解析器需要通过"."和"[]"来构建 Map 和 List, 用前缀方便解析(不用特殊处理[]的逻辑), 也方便过滤时做判断, 且"-"在 URL 中不需要转义.
+注: "+" 在 URL 中为空格. 之所以不使用后缀(如 field!=value 更直观), 是因为 field,find 均可以作为数组传递(如 field[]=value 表示 IN 语句), 框架的解析器需要通过"."和"[]"来构建 Map 和 List, 用前缀方便解析(不用特殊处理[]的逻辑), 也方便过滤时做判断, 且"-"在 URL 中不需要转义.
 
 [数据模型命名规范]
 
@@ -136,9 +146,9 @@ cs[]    限定列名
   ctime     创建时间, DATETIME或TIMESTAMP
   mtime     修改时间, DATETIME或TIMESTAMP
   etime     结束时间, DATETIME或TIMESTAMP
-  dflag     删除标识, TINYINT, 0为正常, 1为删除, 可用其他数字表示其他状态
+  state     状态标识, TINYINT, 1为正常, 0为删除, 可用其他数字表示其他状态
 
-注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,cs,ob,wd,jd. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
+注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,cs,ob,wd. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 << HongsCORE Framework for Javascript >>
 
@@ -148,20 +158,20 @@ cs[]    限定列名
 
 编写只做一件事情，并且要做好的程序；编写可以在一起工作的程序，编写处理文本流的程序，因为这是通用的接口。这就是UNIX哲学。所有的哲学真正的浓缩为一个铁一样的定律，高明的工程师的神圣的“KISS 原则”无处不在。大部分隐式的UNIX哲学不是这些前辈所说的，而是他们所做的和UNIX自身建立的例子。从整体上看，我们能够抽象出下面这些观点：
 
-1、 模块性原则：写简单的，通过干净的接口可被连接的部件。
+1、 模块原则：写简单的，通过干净的接口可被连接的部件。
 2、 清楚原则：清楚要比小聪明好。
 3、 合并原则：设计能被其它程序连接的程序。
 4、 分离原则：从机制分离从策略，从实现分离出接口。
 5、 简单原则：设计要简单；只有当你需要的时候，增加复杂性。
 6、 节俭原则：只有当被证实是清晰，其它什么也不做的时候，才写大的程序。
-7、 透明原则：为使检查和调试明显更容易而设计。
-8、 健壮性原则：健壮性是透明和简单的追随者。
+7、 透明原则：为使检查和调试更容易而设计。
+8、 健壮原则：健壮性是透明和简单的追随者。
 9、 表现原则：把知识整理成资料，于是程序逻辑能变得易理解和精力充沛的。
-10、最小意外原则：在接口设计中，总是做最小意外事情。
-11、沉默原则：当一个程序令人吃惊什么也不说的时候，他应该就是什么也不说。
+10、意外原则：在接口设计中，总是做最小意外事情。
+11、沉默原则：一个程序令人吃惊什么也不说的时候，他应该就是什么也不说。
 12、修补补救：当你必须失败的时候，尽可能快的吵闹地失败。
 13、经济原则：程序员的时间是宝贵的；优先机器时间节约它。
 14、产生原则：避免手工堆砌；当你可能的时候，编写可以写程序的程序。
 15、优化原则：在雕琢之前先有原型；在你优化它之前，先让他可以运行。
 16、差异原则：怀疑所有声称的“唯一真理”。
-17、可扩展原则：为将来做设计，因为它可能比你认为来的要快。
+17、扩展原则：为将来做设计，因为它可能比你认为来的要快。
