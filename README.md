@@ -205,6 +205,8 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,cs,ob,wd. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
+---------------------------------------
+
 # HongsCORE Framework for Javascript
 
 > 请转至: https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src
