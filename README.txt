@@ -19,7 +19,7 @@ HongsCORE 即 Hong's Common Object Requesting Engine, 通用对象请求引擎, 
 
 [使用方法]
 
-下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 WEB-INF/run common:setup 设置数据库, 再执行 WEB-INF/run common:start 启动服务器, 然后打开浏览器在地址栏输入 127.0.0.1:8080 即可进入. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
+下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 WEB-INF/run common:setup 设置数据库, 再执行 WEB-INF/run server:start 启动服务器, 然后打开浏览器在地址栏输入 127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
 
 [特性概叙]
 

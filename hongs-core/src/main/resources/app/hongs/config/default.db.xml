@@ -14,7 +14,7 @@
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://hongs-core db.xsd">
   <source drv="org.sqlite.JDBC"
-          url="jdbc:sqlite:${VARS_PATH}/sqlite/default.db"
+          url="jdbc:sqlite:default.db"
           maxPoolSize="5"/>
   <!-- 正式环境
   <source drv="com.mysql.jdbc.Driver"

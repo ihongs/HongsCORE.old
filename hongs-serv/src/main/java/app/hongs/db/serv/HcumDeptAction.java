@@ -68,22 +68,22 @@ public class HcumDeptAction {
         helper.reply(rst);
     }
 
-    @Action("groups")
-    public void getGroups(ActionHelper helper)
+    @Action("roles")
+    public void getRoles(ActionHelper helper)
     throws HongsException {
         Map data = new HashMap();
 
         // 全部权限分组
-        List pageGroups = HcumUser.getPageGroups("default");
-        data.put("pageGroups", pageGroups);
+        List roles = HcumRole.getRoles("default");
+        data.put("role_list", roles);
 
         // 用户动作分组
         String id = helper.getParameter("id");
         if (id != null) {
             app.hongs.db.serv.HcumDept model2 = (app.hongs.db.serv.HcumDept)
                 Core.getInstance(app.hongs.db.serv.HcumDept.class);
-            Set deptGroups = model2.getGroups(id);
-            data.put("userGroups", deptGroups);
+            Set rolez = model2.getRoles(id);
+            data.put("roles", rolez);
         }
 
         helper.reply(data);

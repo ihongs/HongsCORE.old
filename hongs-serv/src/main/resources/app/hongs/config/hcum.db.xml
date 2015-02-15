@@ -11,8 +11,8 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                primaryKey="id"
                model="app.hongs.db.serv.HcumUser">
             <assoc type="HAS_MANY"
-                   name="groups"
-                   tableName="a_hcum_user_group"
+                   name="roles"
+                   tableName="a_hcum_user_role"
                    foreignKey="user_id"/>
             <assoc type="HAS_MANY"
                    name="depts"
@@ -28,12 +28,12 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                primaryKey="id"
                model="app.hongs.db.serv.HcumDept">
             <assoc type="HAS_MANY"
-                   name="groups"
-                   tableName="a_hcum_dept_group"
+                   name="roles"
+                   tableName="a_hcum_dept_role"
                    foreignKey="dept_id"/>
         </table>
         <table name="a_hcum_user_dept"/>
-        <table name="a_hcum_user_group"/>
-        <table name="a_hcum_dept_group"/>
+        <table name="a_hcum_user_role"/>
+        <table name="a_hcum_dept_role"/>
     </tables>
 </db>
