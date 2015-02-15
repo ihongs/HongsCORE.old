@@ -1,4 +1,4 @@
-# HongsCORE Framework for Java >>
+# HongsCORE Framework for Java
 
 * 文档版本: 15.02.14
 * 软件版本: 0.3.6-20150214
@@ -14,19 +14,19 @@ HongsCORE 即 Hong's Common Object Requesting Engine, 通用对象请求引擎, 
 
 ## 使用方法
 
-下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 WEB-INF/run common:setup 设置数据库, 再执行 WEB-INF/run server:start 启动服务器, 然后打开浏览器在地址栏输入 (http://127.0.0.1:8080) 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
+下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 WEB-INF/run common:setup 设置数据库, 再执行 WEB-INF/run server:start 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
 
-> JDK 下载地址: (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+> JDK 下载地址: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 ## 许可说明
 
 在 MIT License 下发布，作者编写的源码开放使用和修改，依赖的库请参阅对应的许可声明。请在源码中保留作者（黄弘）的署名。
 
-> 被授权人权利：
-> 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。
+> 被授权人权利：  
+> 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。  
 > 被授权人可根据程序的需要修改授权条款为适当的内容。
 
-> 被授权人义务：
+> 被授权人义务：  
 > 在软件和软件的副本中都必须包含版权声明和许可声明。
 
 ## 特性概叙
@@ -73,10 +73,10 @@ HongsCORE 即 Hong's Common Object Requesting Engine, 通用对象请求引擎, 
 
 ## 依赖列表
 
-* Jquery      [JS]
-* Respond     [JS]
-* Bootstrap   [JS, CSS]
-* Glyphicons  [Bootstrap]
+    Jquery      [JS]
+    Respond     [JS]
+    Bootstrap   [JS, CSS]
+    Glyphicons  [Bootstrap]
 
 适用 Java 版本 JDK 1.6 及以上; Java 库请参见 module 中 pom.xml 的依赖部分.
 
@@ -131,11 +131,15 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 ## 请求规则
 
-    `f1=1&f2.-eq=2&f3.-in.=30&f3.-in.=31&t1.f4.-gt=abc&ob=-f5+f6&wd=hello`
+    f1=1&f2.-eq=2&f3.-in.=30&f3.-in.=31&t1.f4.-gt=abc&ob=-f5+f6&wd=hello
+
 或兼容 PHP 的方式
-    `f1=1&f2[-eq]=2&f3[-in][]=30&f3[-in][]=31&t1[f4][-gt]=abc&ob=-f5+f6&wd=hello`
+
+    f1=1&f2[-eq]=2&f3[-in][]=30&f3[-in][]=31&t1[f4][-gt]=abc&ob=-f5+f6&wd=hello
+
 会转成 JSON 结构:
-    `{
+
+    {
         "f1": 1,
         "f2": {
             "-eq": 2
@@ -153,7 +157,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
         },
         "ob": "-f5 f6",
         "wd": "hello"
-    }`
+    }
 
 注: "+" 在 URL 中为空格.
 
@@ -197,11 +201,11 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     etime   结束时间, DATETIME或TIMESTAMP
     state   状态标识, TINYINT, 1为正常, 0为删除, 可用其他数字表示其他状态
 
-注: 因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,cs,ob,wd. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
+因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,cs,ob,wd. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 # HongsCORE Framework for Javascript
 
-> 请转至 (https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src)
+> 请转至 https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src
 
 # KEEP IT SIMPLE, STUPID!
 
