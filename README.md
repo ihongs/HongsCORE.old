@@ -5,22 +5,22 @@
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
-HongsCORE 即 Hong's Common Object Requesting Engine, 通用对象请求引擎, 拼凑的有些生硬. 在设计第一个原型框架时(PHP 版 2006 年), 我买了一台 Intel Core CPU 的笔记本电脑, 当时随意的给她取了个名字叫 Core, 后来觉得名字应该更有意义才扩展成了以上缩写.
+**HongsCORE** 即 **Hong's Common Object Requesting Engine**, 通用对象请求引擎, 拼凑的有些生硬. 在设计第一个原型框架时(PHP 版 2006 年), 我买了一台 Intel Core CPU 的笔记本电脑, 当时随意的给她取了个名字叫 Core, 后来觉得名字应该更有意义才扩展成了以上缩写.
 另一个理由是, 从最初的 PHP 版一直到现在的 Java 版, 我都有设计一个核心工厂类, 主要作用就是用于请求和管理唯一对象, 实现  Singleton (单例模式), 在需要某个对象时只管请求, 使对象的使用效率更高. 具体到这个 Java 版本中, 利用了 Tomcat 等 Servlet 容器的单实例多线程特性来实现行之有效的单例模式.
 
 原 PHP 版框架在 上海科捷信息技术有限公司(北京) 的 AFP8 系统(已被其他公司收购)中使用, 其部分模块是在科捷的工作期间开发的, 本人已于 2011 年离开科捷, 故不再对其更新. 原科捷公司和其 AFP8 系统及其衍生品拥有原 PHP 版框架代码的全部处置权.
 
-感谢 林叶,杨林,袁杰,赵征 等朋友过去对我的支持和理解, 谢谢你们!
+感谢 **林叶,杨林,袁杰,赵征** 等朋友过去对我的支持和理解, 谢谢你们!
 
 ## 使用方法
 
-下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 WEB-INF/run common:setup 设置数据库, 再执行 WEB-INF/run server:start 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
+下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run common:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
 
 > JDK 下载地址: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 ## 许可说明
 
-在 MIT License 下发布，作者编写的源码开放使用和修改，依赖的库请参阅对应的许可声明。请在源码中保留作者（黄弘）的署名。
+本系统在 **MIT License** 下发布，作者编写的源码开放使用和修改，依赖的库请参阅对应的许可声明。请在源码中保留作者（黄弘）的署名。
 
 > 被授权人权利：  
 > 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。  
@@ -78,7 +78,7 @@ HongsCORE 即 Hong's Common Object Requesting Engine, 通用对象请求引擎, 
     Bootstrap   [JS, CSS]
     Glyphicons  [Bootstrap]
 
-适用 Java 版本 JDK 1.6 及以上; Java 库请参见 module 中 pom.xml 的依赖部分.
+适用 Java 版本 JDK 1.6 及以上; Java 库依赖情况请参见各个 module 中 pom.xml 的 dependencies 部分.
 
 ## 文件体系
 
@@ -99,9 +99,9 @@ HongsCORE 即 Hong's Common Object Requesting Engine, 通用对象请求引擎, 
         - img           前端图片
         - pages         通用页面(页头/页尾/组件等jsp,html文件)
         - auth          权限信息(虚拟目录)
-        - conf          配置信息(虚拟目录)
+        - conf          配置资源(虚拟目录)
         - lang          语言资源(虚拟目录)
-      - compon          其他前端组件
+      - compon          其他可选前端组件
 
 ### 类库结构:
 
@@ -131,11 +131,13 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 ## 请求规则
 
-    f1=1&f2.-eq=2&f3.-in.=30&f3.-in.=31&t1.f4.-gt=abc&ob=-f5+f6&wd=hello
+支持 Content-Type 为 application/x-www-form-urlencoded, multipart/form-data 和 application/json 的请求, 数据结构为:
+
+    f1=1&f2.-eq=2&f3.-in.=30&f3.-in.=31&t1.f4.-gt=abc&ob=-f5+f6&wd=Hello+world
 
 或兼容 PHP 的方式
 
-    f1=1&f2[-eq]=2&f3[-in][]=30&f3[-in][]=31&t1[f4][-gt]=abc&ob=-f5+f6&wd=hello
+    f1=1&f2[-eq]=2&f3[-in][]=30&f3[-in][]=31&t1[f4][-gt]=abc&ob=-f5+f6&wd=Hello+world
 
 会转成 JSON 结构:
 
@@ -156,7 +158,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
             }
         },
         "ob": "-f5 f6",
-        "wd": "hello"
+        "wd": "Hello world"
     }
 
 注: "+" 在 URL 中为空格.
@@ -205,7 +207,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 # HongsCORE Framework for Javascript
 
-> 请转至 https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src
+> 请转至: https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src
 
 # KEEP IT SIMPLE, STUPID!
 
