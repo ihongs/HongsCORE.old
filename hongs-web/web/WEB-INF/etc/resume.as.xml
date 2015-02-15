@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <page href="common/goto.act?m=resume" disp="简历演示">
-        <page disp="Demo" href="resume/demo/list.jsp"/>
+    <page href="common/goto.act?m=resume" disp="档案管理">
+        <page disp="Demo" href="resume/demo/list.jsp|resume/#demo"/>
     </page>
 </root>

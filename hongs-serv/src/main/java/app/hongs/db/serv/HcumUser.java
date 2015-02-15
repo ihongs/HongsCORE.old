@@ -21,7 +21,7 @@ extends Model {
     throws HongsException {
         this(DB.getInstance("hcum").getTable("user"));
     }
-    
+
     public HcumUser(Table table)
     throws HongsException {
         super(table);
@@ -49,15 +49,37 @@ extends Model {
     throws HongsException {
         if (userId == null) throw new HongsException(0x10000, "User Id required!");
 
-        Table asoc = this.db.getTable("a_hcum_user_role");
-        FetchCase caze = new FetchCase();
-        caze.select(".role")
-            .where (".user_id = ?", userId);
-
+        Table       asoc;
+        FetchCase   caze;
+        List<Map>   rows;
         Set<String> roles = new HashSet();
-        List<Map>   rows  = asoc.fetchMore(caze);
+        Set<String> depts = new HashSet();
+
+        asoc = this.db.getTable("a_hcum_user_dept");
+        caze = new FetchCase( );
+        caze.select(".dept_id")
+            .where (".user_id = ?", userId);
+        rows = asoc.fetchMore(caze);
         for (Map row : rows) {
-            roles.add((String)row.get("role"));
+            depts.add((String) row.get("dept_id") );
+        }
+
+        asoc = this.db.getTable("a_hcum_dept_role");
+        caze = new FetchCase();
+        caze.select(".role"  )
+            .where (".dept_id = ?", depts );
+        rows = asoc.fetchMore(caze);
+        for (Map row : rows) {
+            roles.add((String) row.get("role"));
+        }
+
+        asoc = this.db.getTable("a_hcum_user_role");
+        caze = new FetchCase();
+        caze.select(".role"  )
+            .where (".user_id = ?", userId);
+        rows = asoc.fetchMore(caze);
+        for (Map row : rows) {
+            roles.add((String) row.get("role"));
         }
 
         return roles;

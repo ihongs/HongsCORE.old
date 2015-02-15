@@ -293,7 +293,7 @@ public class DB
         if (! new File(uri).isAbsolute())
         {
           uri = CoreConfig.getInstance().getProperty("core.sqlite.datapath", "${VARS_PATH}/sqlite") +"/"+ uri;
-        }System.out.println(uri);
+        }
 
         // 注入特定路径
         Map inj = new HashMap();

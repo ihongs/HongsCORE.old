@@ -167,10 +167,16 @@ object.config,
 .listbox ._radio {
     width: 1.5em;
 }
+.listbox ._hdate,
+.listbox ._htime {
+    width: 8em;
+}
 .listbox .datetime {
     width: 12em;
 }
-.listbox .date,
+.listbox .date {
+    width: 8em;
+}
 .listbox .time {
     width: 6em;
 }

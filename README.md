@@ -14,13 +14,13 @@
 
 ## 使用方法
 
-下载 HongsCORE-x.x.x.war 更名为 HongsCORE-x.x.x.zip, 解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run common:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量(如果是在官网下载并使用安装程序安装的则一般已自动设置好了).
+下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 如果是在官网下载并使用安装程序安装的通常已自动设置好了.
 
 > JDK 下载地址: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 ## 许可说明
 
-本系统在 [**MIT License**](LICENSE.txt) 下发布，作者编写的源码开放使用和修改，依赖的库请参阅对应的许可声明。请在源码中保留作者（*黄弘*）的署名。
+本软件在 [**MIT License**](LICENSE.txt) 下发布，源码开放使用和修改，依赖的库请参阅对应的许可声明。请在源码中保留作者（*黄弘*）的署名。
 
 > 被授权人权利：  
 > 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。  
