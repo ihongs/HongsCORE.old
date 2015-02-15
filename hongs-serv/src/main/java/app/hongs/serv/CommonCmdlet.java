@@ -2,31 +2,21 @@ package app.hongs.serv;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
-import app.hongs.action.ActionRunner;
-import app.hongs.cmdlet.Cmdlet;
+import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.cmdlet.CmdletHelper;
-import app.hongs.cmdlet.CmdletRunner;
 import app.hongs.db.DB;
-import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * 通用命令
@@ -40,69 +30,15 @@ public class CommonCmdlet {
           throws app.hongs.HongsException {
     Map<String, Object> opts = CmdletHelper.getOpts(args,
       "make-uid:b",
-      "show-env:b", "show-properties:b",
-      "show-actions:b", "show-cmdlets:b",
       "to-16hex:i", "to-26hex:i", "to-36hex:i",
       "as-16hex:s", "as-26hex:s", "as-36hex:s",
       "test-opts:b", "test-text:b", "test-left:b", "test-rate:b",
-      "?Usage: --show-env --show-properties --show-actions --show-cmdlets");
+      "?Usage: --make-uid to-36hex NUM as-36hex STR --test-rate");
 
     // 唯一ID
     if (opts.containsKey("make-uid")
     && (Boolean)opts.get("make-uid")) {
         System.out.println("UID: "+Core.getUniqueId());
-    }
-
-    // 查看环境
-    if (opts.containsKey("show-env")
-    && (Boolean)opts.get("show-env")) {
-      Map<String, String> env = new TreeMap(new PropComparator());
-      env.putAll(new HashMap(System.getenv()));
-      System.out.println("ENV:");
-      for (Map.Entry<String, String> et : env.entrySet()) {
-        String k = et.getKey(  );
-        String v = et.getValue();
-        System.out.println("  "+k+"\t"+v);
-      }
-    }
-
-    // 查看属性
-    if (opts.containsKey("show-properties")
-    && (Boolean)opts.get("show-properties")) {
-      Map<String, String> env = new TreeMap(new PropComparator());
-      env.putAll(new HashMap(System.getProperties()));
-      System.out.println("Properties:");
-      for (Map.Entry<String, String> et : env.entrySet()) {
-        String k = et.getKey(  );
-        String v = et.getValue();
-        System.out.println("  "+k+"\t"+v);
-      }
-    }
-
-    // 查看动作
-    if (opts.containsKey("show-actions")
-    && (Boolean)opts.get("show-actions")) {
-      Map<String, Method> actions = new TreeMap(new PropComparator());
-      actions.putAll(ActionRunner.getActions());
-      System.out.println("Actions:");
-      for (Map.Entry<String, Method> et : actions.entrySet()) {
-        String a = et.getKey(  );
-        Method m = et.getValue();
-        System.out.println("  "+a+"\t"+m.getDeclaringClass().getName()+"."+m.getName());
-      }
-    }
-
-    // 查看命令
-    if (opts.containsKey("show-cmdlets")
-    && (Boolean)opts.get("show-cmdlets")) {
-      Map<String, Method> actions = new TreeMap(new PropComparator());
-      actions.putAll(CmdletRunner.getCmdlets());
-      System.out.println("Cmdlets:");
-      for (Map.Entry<String, Method> et : actions.entrySet()) {
-        String a = et.getKey(  );
-        Method m = et.getValue();
-        System.out.println("  "+a+"\t"+m.getDeclaringClass().getName()+"."+m.getName());
-      }
     }
 
     // 进制转换
@@ -145,33 +81,6 @@ public class CommonCmdlet {
     if (opts.containsKey("test-left")
     && (Boolean)opts.get("test-left")) {
       testLeft();
-    }
-  }
-
-  @Cmdlet("start")
-  public static void start(String[] args) throws HongsException {
-    Map<String, Object> opts = CmdletHelper.getOpts(args,
-        "port:i", "path:s", "help:b");
-
-    if (Synt.declare(opts.get("help"), false)) {
-        System.err.println("Usage: --port SERVICE_PORT --path CONTEXT_PATH");
-        return;
-    }
-
-    WebAppContext webapp = new WebAppContext();
-    Server server = new Server(Synt.declare(opts.get("port"),8080));
-    webapp.setContextPath (Synt.declare(opts.get("path"),""));
-    webapp.setDescriptor  (Core.BASE_PATH+"/WEB-INF/web.xml");
-    webapp.setResourceBase(Core.WEBS_PATH);
-    webapp.setParentLoaderPriority( true );
-    server.setHandler(webapp);
-
-    try {
-        server.start();
-        server.join( );
-    }
-    catch (Exception ex) {
-        throw new HongsException(HongsException.COMMON, ex);
     }
   }
 
@@ -286,17 +195,9 @@ public class CommonCmdlet {
     }
   }
 
-  private static class FileComparator implements Comparator< File > {
-    public int compare(File f1, File f2) {
-        String s1 = f1.getName();
-        String s2 = f2.getName();
-        return s1.compareTo(s2 );
-    }
-  }
-
-  private static class PropComparator implements Comparator<String> {
-    public int compare(String s1, String s2) {
-        return s1.compareTo(s2 );
+  private static class FileComparator implements Comparator<File> {
+    public int compare(File f1 , File f2) {
+        return f1.getName().compareTo(f2.getName());
     }
   }
 
