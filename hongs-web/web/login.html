@@ -22,10 +22,21 @@ Hong's Common User Module
         <script type="text/javascript" src="common/lang/default.js"></script>
     </head>
     <body>
-        <div class="container">
-            <div class="jumbotron" style="margin-top: 2em;">
+        <div class="jumbotron" style="margin-top: 2em; background-color: #222; color: #ccc;">
+            <div class="container">
                 <h1>您好!</h1>
-                <p>欢迎使用 HongsCORE 信息管理系统, 请登录...</p>
+                <p>欢迎使用
+                    <!--<span style="color:#f08" class="glyphicon glyphicon-fire"></span>-->
+                    <span style="color:#f00">H</span>
+                    <span style="color:#f22">o</span>
+                    <span style="color:#f44">n</span>
+                    <span style="color:#f66">g</span>
+                    <span style="color:#f88">s</span>
+                    <span style="color:#faa">C</span>
+                    <span style="color:#fbb">O</span>
+                    <span style="color:#fcc">R</span>
+                    <span style="color:#fdd">E</span>
+                    信息管理系统, 请登录...</p>
                 <div class="row">
                     <form class="col-lg-6" id="sing-in-form">
                         <object class="config" name="hsForm" data="">
@@ -43,14 +54,27 @@ Hong's Common User Module
                     </form>
                 </div>
             </div>
-            <blockquote>
-                <p>Copyleft &copy; 2015 黄弘. <small class="pull-right">Powered by <a href="https://github.com/ihongs/HongsCORE/">HongsCORE</a>, v15.2.14, Beta.</small></p>
-            </blockquote>
         </div>
+        <nav id="footbox" class="navbar">
+            <div class="container">
+                <blockquote><p>Copyleft &copy; 2015 黄弘. <small class="pull-right">Powered by <a href="https://github.com/ihongs/HongsCORE/">HongsCORE</a>, v15.2.14, Beta.</small></p></blockquote>
+            </div>
+        </nav>
         <script type="text/javascript">
             $("#sign-in-form").on("saveBack", function() {
                 location.href = ""
             });
+            
+//            var colors = ["#dddddd", "#dddddf", "#ddddff", "#dddfff", "#ddffff", "#dfffff",
+//                          "#ffffff", "#fffffd", "#ffffdd", "#fffddd", "#ffdddd", "#fddddd"];
+//            var colori = 1;
+//            setInterval(function() {
+//                $(".jumbotron").css("background-color", colors[colori]);
+//                    colori += 1;
+//                if (colori >= colors.length) {
+//                    colori  = 0;
+//                }
+//            }, 5000);
         </script>
     </body>
 </html>
