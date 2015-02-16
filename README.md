@@ -14,13 +14,24 @@
 
 ## 使用方法
 
-下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可. 注意, 本软件需要 JDK(非JRE,Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 如果是在官网下载并使用安装程序安装的通常已自动设置好了.
+下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; OSX 和 Linux 系统需要先赋予 run 执行权限(`chmod +x WEB-INF/run`).
+
+注意: 需要 JDK 而非 JRE(Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 如果是在官网下载并使用安装程序安装的通常已自动设置好了.
 
 > JDK 下载地址: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
+## 类库依赖
+
+Jquery      [JS]
+Respond     [JS]
+Bootstrap   [JS, CSS]
+Glyphicons  [Bootstrap]
+
+适用 Java 版本 JDK 1.6 及以上, 推荐使用 1.7; Java 库依赖情况请参见各个 module 中 pom.xml 的 dependencies 部分.
+
 ## 许可说明
 
-本软件在 [**MIT License**](LICENSE.txt) 下发布，源码开放使用和修改，依赖的库请参阅对应的许可声明。请在源码中保留作者（*黄弘*）的署名。
+本软件及源码在 [**MIT License**](LICENSE.txt) 下发布，源码开放使用和修改，依赖的库请参阅其对应的许可声明。请在源码中保留作者（*黄弘*）的署名。
 
 > 被授权人权利：  
 > 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。  
@@ -32,35 +43,34 @@
 ## 特性概叙
 
 1. 支持库表配置, 支持多数据库;
-2. 支持 IN,JOIN 的自动关联查询, 可自动处理关联插入;
-3. 支持 隶属,一对多,多对多 等关联模式并自动处理关系;
-4. 支持简单存取模型基类(对于常规的列表/增/删/改等操作无需编写大量代码, 只需继承或实现指定方法即可);
-5. 简单有效的动作权限解决方案;
-6. 支持统一的服务器端维护程序;
-7. 可与前端应用共享配置及模型;
-8. 与对应的 HongsCORE4JS (for Javascript) 配合实现高效WEB应用开发方案;
-9. 默认内置 jetty,sqlite,lucene 等, 除 Java 外无需安装其他软件即可运行.
+2. 支持 JOIN,IN 的自动关联查询, 可自动处理关联插入;
+3. 支持隶属/一对多/多对多等关联模式并能自动处理关系;
+4. 有简单的存取模型基类, 对常规增删改查无需编写代码;
+5. 统一的服务端维护程序, 可与前端应用共享配置及模型;
+6. 简单有效的动作权限解决方案;
+7. 与对应的 HongsCORE4JS(for Javascript) 配合实现高效 WEB 应用开发方案;
+8. 默认嵌入 jetty,sqlite,lucene 等库, 除 JDK 外无需安装其他软件即可运行.
 
 ## 更新日志
 
-* 2015/02/14 增加 jetty,sqlite, 数据库默认使用 sqlite
+* 2015/02/14 增加 jetty,sqlite, 默认使用 jetty 运行, 数据库默认使用 sqlite
 * 2015/01/18 大规模重构, 重新规划 Maven 模块结构
 * 2014/11/20 实现 REST 风格的 API, 重新规划了 Action 的组织结构
 * 2014/11/10 切换到 Maven
-* 2014/08/10 全面倒向 bootstrap; 大规模的使用 tab, 放弃使用浮层作为选择框
+* 2014/08/10 全面倒向 bootstrap, 大规模的使用 tab, 放弃使用浮层作为选择框
 * 2014/08/09 为更好的实现自己的规则, 重写了前端验证程序
 * 2014/05/17 增加后端验证助手类 app.hongs.action.VerifyHelper, 配合 Verify 注解可以更方便的对传递过来的表单数据进行验证
 * 2014/04/04 使用 c3p0 作为数据源组件, 去掉原来的用 jdbc 直接连接的方式, 但保留了使用外部容器的数据源的方式
 * 2014/04/03 引入动作注解链，对常规数据的注入、验证以及存储事务提供更方便的操作
 * 2014/01/27 去掉全部模型属性的外部名称(id,pid等), 统一使用实际的属性名, 避免因名称转换(同一属性不同场合不同名称)导致理解困难
-* 2014/01/25 重写CmdletHelper的args解析程序, 保留原来类似Perl的Getopt::Longs的解析规则, 去掉对短参的支持, 不再转换args的数组类型. cmdlet函数也与main函数参数一致
-* 2013/12/26 使用InitFilter处理框架的初始化, 返回数据在InitFilter结束前不写入response对象, 方便动作注解和其他过滤器对返回数据进行处理
-* 2013/10/20 在样式上统一使用bootstrap(不采取其JS, JS仍然使用jquery.tools)
-* 2013/05/26 将项目托管到GitHub上进行管理
-* 2013/03/08 完成hongs-core-js的jquery-tools的迁移, 前端组件支撑由原来的jquery-ui改为jquery-tools
-* 2012/04/26 将app.hongs.util.Text里的数字操作部分拿出来放到app.hongs.util.Num里
-* 2011/09/25 基本完成hongs-core-js的jquery重写实现, 大部分组件已可以使用(不支持拖拽、树搜索)
-* 2011/03/23 新增UploadHelper上传助手类(使用apache的commons-fileupload)
+* 2014/01/25 重写 CmdletHelper 的 args 解析程序, 保留原来类似 Perl 的 Getopt::Longs 的解析规则, 去掉对短参的支持, 不再转换 args 的数组类型. cmdlet 函数也与 main 函数参数一致
+* 2013/12/26 使用 InitFilter 处理框架的初始化, 返回数据在 InitFilter 结束前不写入 response 对象, 方便动作注解和其他过滤器对返回数据进行处理
+* 2013/10/20 在样式上统一使用 bootstrap(不采取其 JS, JS 仍然使用 jquery.tools)
+* 2013/05/26 将项目托管到 GitHub 上进行管理
+* 2013/03/08 完成 hongs-core-js 的 jquery-tools 的迁移, 前端组件支撑由原来的 jquery-ui 改为 jquery-tools
+* 2012/04/26 将 app.hongs.util.Text 里的数字操作部分拿出来放到 app.hongs.util.Num 里
+* 2011/09/25 基本完成 hongs-core-js 的jquery重写实现, 大部分组件已可以使用(不支持拖拽、树搜索)
+* 2011/03/23 新增 UploadHelper 上传助手类(使用 apache 的 commons-fileupload)
 * 2011/01/25 树模型支持搜索逐个定位(Javascript)
 * 2011/01/01 表格列支持拖拽改变尺寸(Javascript)
 * 2010/11/21 支持多表串联(JOIN模式)
@@ -68,17 +78,8 @@
 * 2010/11/11 更改配置及消息体系(Javascript)
 * 2010/09/20 增加日期选择功能(Javascript)
 * 2010/08/15 增加浮动块功能(Javascript)
-* 2010/06/30 支持JSP扩展标记库, 与Servlet共享配置和语言对象等
-* 2010/05/01 支持动作过滤, 轻松实现权限过滤...
-
-## 依赖列表
-
-    Jquery      [JS]
-    Respond     [JS]
-    Bootstrap   [JS, CSS]
-    Glyphicons  [Bootstrap]
-
-适用 Java 版本 JDK 1.6 及以上; Java 库依赖情况请参见各个 module 中 pom.xml 的 dependencies 部分.
+* 2010/06/30 增加 JSP 扩展标记库, 与 Servlet 共享配置和语言对象等
+* 2010/05/01 增加动作权限过滤
 
 ## 文件体系
 
@@ -184,7 +185,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 ## 模型规范
 
-通常在关系模型(ERM)设计上遵循规范: 表名由 "分区_模块_主题_子主题" 组成, 主题可以有多级, 但推荐最多两级主题, 推荐设计成类似树形拓扑的结构.
+推荐在实体关系模型(ERM)设计上遵循规范: 表名由 "分区_模块_主题_子主题" 组成, 主题可以有多级, 但推荐最多两级, 模块关系设计成类似树形拓扑的结构.
 
 分区分别为:
 
@@ -203,7 +204,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     etime   结束时间, DATETIME或TIMESTAMP
     state   状态标识, TINYINT, 1为正常, 0为删除, 可用其他数字表示其他状态
 
-因字段名可用于URL中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,cs,ob,wd. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
+因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,wd,ob,cs. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 ---------------------------------------
 
