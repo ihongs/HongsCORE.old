@@ -209,8 +209,11 @@ public class Table
         case Types.TIMESTAMP:
           values.put(mtime, new Timestamp(time));
           break;
-        default:
+        case Types.INTEGER:
           values.put(mtime, time / 1000);
+          break;
+        default:
+          values.put(mtime, time);
       }
     }
 
@@ -229,8 +232,11 @@ public class Table
         case Types.TIMESTAMP:
           values.put(ctime, new Timestamp(time));
           break;
-        default:
+        case Types.INTEGER:
           values.put(ctime, time / 1000);
+          break;
+        default:
+          values.put(ctime, time);
       }
     }
 
@@ -259,8 +265,13 @@ public class Table
           values.put(etime, new Timestamp(0));
           paramz.add(new Timestamp(0));
           break;
-        default:
+        case Types.INTEGER:
           valuez.put(etime, time / 1000);
+          values.put(etime, 0);
+          paramz.add(0);
+          break;
+        default:
+          valuez.put(etime, time);
           values.put(etime, 0);
           paramz.add(0);
       }
@@ -305,10 +316,10 @@ public class Table
         case Types.TIMESTAMP:
           values.put(mtime, new Timestamp(time));
           break;
+        case Types.INTEGER:
+          values.put(mtime, time / 1000);
+          break;
         default:
-          if (time > 2147483647) {
-            time = time / 1000;
-          }
           values.put(mtime, time);
       }
     }

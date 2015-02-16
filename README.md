@@ -127,7 +127,7 @@
     common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
     common/lang/name.js 读取 WEB-INF/conf/name.xx-XX.properties 中 fore.xxxx. 开头的配置
 
-action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 _begin_.properties 中设置 core.load.serv 告知 Action,Cmdlet 类, 或用 xxx.foo.* 告知该包下存在 Action,Cmdlet 类.
+action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 \_begin\_.properties 中设置 core.load.serv Action,Cmdlet 类(用";"分隔), 或 xxx.foo.* 告知该包下存在 Action,Cmdlet 类, 多个类,包用";"分隔.
 最后3个路径, 将扩展名 .js 换成 .json 即可得到 JSON 格式的数据; 语言配置可在 name 后加语言区域标识, 如 example.zh-CN.js 为获取 example 的中文大陆简体的语言配置.
 
 ## 请求规则
@@ -183,6 +183,59 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     rn      额定行数
     cs      限定列名
 
+## 响应数据
+
+    {
+        "ok": true成功 false失败,
+        "err": "错误代码",
+        "msg": "响应消息",
+        其他...
+    }
+
+其他数据通常有:
+
+    // 列表数据, 在 retrieve 和 list 动作返回
+    "list": [
+        {
+            "f1": "xxx",
+            "f2": "yyy",
+            ...
+        },
+        ...
+    ]
+
+    // 信息单元, 在 retrieve 和 info 动作返回
+    "info": {
+        "f1": "abc",
+        "f2": "def",
+        ...
+    }
+
+    // 枚举列表, 在 retrieve, list 和 info 动作返回
+    "enum": [
+        ["v1", "Display 1"],
+        ["v2", "Display 2"],
+        ...
+    ]
+
+    // 创建返回, 在 create 和 save 动作返回
+    "back": [
+        "ID",
+        "Display Name",
+        ...
+    ]
+
+在调用 API(REST) 时, 可在 url 后加请求参数 --api-back=包裹其他数据的键名, 可加请求参数 --api-conv.= 来转换基本数据类型, 其取值可以为:
+
+    all2str     全部转为字符串
+    num2str     数字转为字符串
+    null2str    空转为空字符串
+    bool2str    true转为字符串1, false转为空字符串
+    date2stp    转为时间戳(毫秒)
+    date2sec    转为时间戳(秒)
+
+dete2stp 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为字符串; 如果仅指定 all2str 则时间/日期会转为"年-月-日"格式的字符串.
+
 ## 模型规范
 
 推荐在实体关系模型(ERM)设计上遵循规范: 表名由 "分区_模块_主题_子主题" 组成, 主题可以有多级, 但推荐最多两级, 模块关系设计成类似树形拓扑的结构.
@@ -199,9 +252,9 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     id      主键, CHAR(20)
     pid     父键, CHAR(20)
     xx_id   外键, CHAR(20), xx为关联表缩写
-    ctime   创建时间, DATETIME或TIMESTAMP
-    mtime   修改时间, DATETIME或TIMESTAMP
-    etime   结束时间, DATETIME或TIMESTAMP
+    ctime   创建时间, DATETIME,TIMESTAMP,BIGINT,INTEGER
+    mtime   修改时间, DATETIME,TIMESTAMP,BIGINT,INTEGER
+    etime   结束时间, DATETIME,TIMESTAMP,BIGINT,INTEGER
     state   状态标识, TINYINT, 1为正常, 0为删除, 可用其他数字表示其他状态
 
 因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,wd,ob,cs. 另, 在配置文件和Model中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).

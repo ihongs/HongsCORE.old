@@ -246,17 +246,18 @@ public class ApisAction
         private Conv2Obj nnll;
         private Conv2Obj bool;
         private Conv2Obj date;
+        @Override
         public Object leaf(Object o) {
             if (o == null) {
                 return nnll.conv(o);
             }
-            if (o instanceof Number ) {
-                return num .conv(o);
-            }
             if (o instanceof Boolean) {
                 return bool.conv(o);
             }
-            if (o instanceof Date) {
+            if (o instanceof Number ) {
+                return num .conv(o);
+            }
+            if (o instanceof Date ) {
                 o = date.conv(o);
             }
             return  all .conv(o);
