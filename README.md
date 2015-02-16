@@ -194,34 +194,34 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 其他数据通常有:
 
-    // 列表数据, 在 retrieve 和 list 动作返回
+    // 列表数据, 在 retrieve,list 动作返回
     "list": [
         {
-            "f1": "xxx",
-            "f2": "yyy",
+            "字段": "取值",
             ...
         },
         ...
     ]
 
-    // 信息单元, 在 retrieve 和 info 动作返回
+    // 信息单元, 在 retrieve,info 动作返回
     "info": {
-        "f1": "abc",
-        "f2": "def",
+        "字段": "取值",
         ...
     }
 
-    // 枚举列表, 在 retrieve, list 和 info 动作返回
-    "enum": [
-        ["v1", "Display 1"],
-        ["v2", "Display 2"],
+    // 枚举列表, 在 retrieve,list,info 动作返回
+    "enum": {
+        "字段": [
+            ["取值", "名称"],
+            ...
+        ],
         ...
-    ]
+    }
 
-    // 创建返回, 在 create 和 save 动作返回
+    // 创建返回, 在 create,save 动作返回
     "back": [
         "ID",
-        "Display Name",
+        "名称",
         ...
     ]
 
