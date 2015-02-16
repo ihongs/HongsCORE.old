@@ -1,16 +1,80 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
+Hong's Common User Module
+用户模块
+//-->
+<!doctype html>
 <html>
     <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
+        <title>登录</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+        <link rel="stylesheet" type="text/css" href="common/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="common/src/hongscore.css"/>
+        <script type="text/javascript" src="common/jquery.min.js"></script>
+        <!--[if glt IE8.0]>
+        <script type="text/javascript" src="compon/respond/respond.min.js"></script>
+        <![endif]-->
+        <script type="text/javascript" src="common/bootstrap.min.js"></script>
+        <script type="text/javascript" src="common/src/hongscore.js"></script>
+        <script type="text/javascript" src="common/src/hongscore-form.js"></script>
+        <script type="text/javascript" src="common/conf/default.js"></script>
+        <script type="text/javascript" src="common/lang/default.js"></script>
     </head>
     <body>
-        <div>TODO write content</div>
+        <div class="jumbotron" style="margin-top: 2em; background-color: #222; color: #ccc;">
+            <div class="container">
+                <h1>您好!</h1>
+                <p>欢迎使用
+                    <!--<span style="color:#f08" class="glyphicon glyphicon-fire"></span>-->
+                    <span style="color:#f00">H</span>
+                    <span style="color:#f22">o</span>
+                    <span style="color:#f44">n</span>
+                    <span style="color:#f66">g</span>
+                    <span style="color:#f88">s</span>
+                    <span style="color:#faa">C</span>
+                    <span style="color:#fbb">O</span>
+                    <span style="color:#fcc">R</span>
+                    <span style="color:#fdd">E</span>
+                    信息管理系统, 请登录...</p>
+                <div class="row">
+                    <form class="col-lg-6" id="sing-in-form">
+                        <object class="config" name="hsForm" data="">
+                            <param name="saveUrl" value="hcum/sign/in"/>
+                        </object>
+                        <div class="form-group">
+                            <input   type="text"   name="username" value="" placeholder="请输入账号" class="form-control" required="required"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" value="" placeholder="请输入口令" class="form-control" required="required"/>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-lg">立即进入</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <nav id="footbox" class="navbar">
+            <div class="container">
+                <blockquote><p>Copyleft &copy; 2015 黄弘. <small class="pull-right">Powered by <a href="https://github.com/ihongs/HongsCORE/">HongsCORE</a>, v15.2.14, Beta.</small></p></blockquote>
+            </div>
+        </nav>
+        <script type="text/javascript">
+            $("#sign-in-form").on("saveBack", function() {
+                location.href = ""
+            });
+            
+//            var colors = ["#dddddd", "#dddddf", "#ddddff", "#dddfff", "#ddffff", "#dfffff",
+//                          "#ffffff", "#fffffd", "#ffffdd", "#fffddd", "#ffdddd", "#fddddd"];
+//            var colori = 1;
+//            setInterval(function() {
+//                $(".jumbotron").css("background-color", colors[colori]);
+//                    colori += 1;
+//                if (colori >= colors.length) {
+//                    colori  = 0;
+//                }
+//            }, 5000);
+        </script>
     </body>
 </html>

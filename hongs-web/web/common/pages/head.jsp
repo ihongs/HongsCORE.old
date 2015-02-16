@@ -7,30 +7,31 @@
 <%@page import="app.hongs.action.ActionHelper"%>
 <%@page import="app.hongs.action.SiteMap"%>
 <%!
-    StringBuilder makeMenu(List<Map> list, String rootName, boolean realHref) {
+    StringBuilder makeMenu(List<Map> list, String path) {
         StringBuilder menus = new StringBuilder();
         for(Map menu : list) {
-            String href = (String) menu.get("href");
             String disp = (String) menu.get("disp");
-            String name = href.replaceAll("\\.\\w+$", "");
-            
-            if (name.startsWith(rootName)) {
-                name = name.substring(rootName.length() + 1);
+            String href = (String) menu.get("href");
+            String data = "";
+
+            int lpos  = href.indexOf('|');
+            int hpos  = href.indexOf('#');
+            if (lpos != -1 && hpos != -1) {
+                String link;
+                link = href.substring(1+lpos, hpos);
+                data = href.substring(0,lpos);
+                href = href.substring(  hpos);
+                if (!link.startsWith(path + "/")) {
+                    href = link + href; data = "";
+                    href = Core.BASE_HREF + "/" + href;
+                }
+            } else {
+                    href = Core.BASE_HREF + "/" + href;
             }
 
-            if (realHref) {
-                String temp = href;
-                href =  Core.BASE_HREF + "/" + href;
-                name = temp;
-            } else {
-                String temp = href;
-                href = "#" + name;
-                name = temp;
-            }
-            
             menus.append("<li>" )
                  .append("<a data-href=\"")
-                 .append(name)
+                 .append(data)
                  .append("\" href=\"")
                  .append(href)
                  .append("\">"  )
@@ -77,14 +78,15 @@
 
 <div class="collapse navbar-collapse" id="main-collapse">
     <ul class="nav navbar-nav navbar-left " id="curr-menubar">
-        <%=makeMenu(currMenu, name, false)%>
+        <%=makeMenu(currMenu, name)%>
     </ul>
     <ul class="nav navbar-nav navbar-right" id="main-menubar">
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">ihongs@live.cn <span class="badge">9+</span> <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-                <%=makeMenu(mainMenu, name, true)%>
+                <%=makeMenu(mainMenu, name)%>
                 <li class="divider"></li>
+                <li><a href="javascript:;">注销</a></li>
             </ul>
         </li>
     </ul>
@@ -94,12 +96,13 @@
     (function($) {
         $("#curr-menubar>li>a")
             .filter(function() {
-                return $(this).attr( "href" ).substring(0, 1) == "#";
+                return !! $(this).attr("data-href");
             })
             .click(function() {
                 $("#main-context").hsLoad($(this).attr("data-href"));
                 $(this).closest("li").addClass("active")
                        .siblings().removeClass("active");
+
             });
         $("#main-menubar>li>a")
             .click(function() {

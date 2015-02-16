@@ -6,30 +6,28 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Text;
-
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-
 import java.beans.PropertyVetoException;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -288,11 +286,27 @@ public class DB
       String url = (String)source.get("url");
       Properties info = (Properties)source.get("info");
 
-      // 注入特定路径
-      Map inj = new HashMap(/**/);
-      inj.put("BASE_PATH", Core.VARS_PATH);
-      inj.put("VARS_PATH", Core.VARS_PATH);
-      url = Text.inject(url, inj);
+      // SQLite 数据路径处理
+      if (url.startsWith("jdbc:sqlite:"))
+      {
+        String uri  =  url.substring (12);
+        if (! new File(uri).isAbsolute())
+        {
+          uri = CoreConfig.getInstance().getProperty("core.sqlite.datapath", "${VARS_PATH}/sqlite") +"/"+ uri;
+        }
+
+        // 注入特定路径
+        Map inj = new HashMap();
+        inj.put("BASE_PATH", Core.BASE_PATH);
+        inj.put("VARS_PATH", Core.VARS_PATH);
+        uri = Text.inject(uri, inj);
+        url = "jdbc:sqlite:" + uri ;
+
+        if (! new File(uri).getParentFile().exists())
+        {
+          /**/new File(uri).getParentFile().mkdirs();
+        }
+      }
 
       try
       {

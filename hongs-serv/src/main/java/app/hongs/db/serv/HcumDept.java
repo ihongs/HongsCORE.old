@@ -45,22 +45,25 @@ extends Mtree {
     return id;
   }
 
-    public Set<String> getGroups(String deptId)
+    public Set<String> getRoles(String deptId)
     throws HongsException {
         if (deptId == null) throw new HongsException(0x10000, "Dept Id required!");
 
-        Table asoc = this.db.getTable("a_hcum_dept_group");
-        FetchCase caze = new FetchCase();
-        caze.select(".group_key")
-            .where(".dept_id = ?", deptId);
+        Table       asoc;
+        FetchCase   caze;
+        List<Map>   rows;
+        Set<String> roles = new HashSet();
 
-        Set<String> groups = new HashSet();
-        List<Map>   rows   = asoc.fetchMore(caze);
+        asoc = this.db.getTable("a_hcum_dept_role");
+        caze = new FetchCase();
+        caze.select(".role"  )
+            .where (".dept_id = ?", deptId);
+        rows = asoc.fetchMore(caze);
         for (Map row : rows) {
-            groups.add((String)row.get("group_key"));
+            roles.add((String) row.get("role"));
         }
 
-        return groups;
+        return roles;
     }
 
     @Override

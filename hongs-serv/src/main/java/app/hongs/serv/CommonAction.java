@@ -48,24 +48,29 @@ public class CommonAction {
     public void jump(ActionHelper helper)
     throws HongsException {
         String m = helper.getParameter("m");
-        String x = helper.getParameter("x");
+        String n = helper.getParameter("n");
         if (null == m ||  "".equals(m)) {
             m = "default";
         }
-        if (null == x) {
-            x  = "common/goto.act?m=" + m;
+        if (null == n) {
+            n  = "common/goto.act?m=" + m;
         } else {
-            x  = "common/goto.act?m=" + m + "&x=" + x;
+            n  = "common/goto.act?m=" + m + "&n=" + n;
         }
 
         SiteMap site  =  SiteMap.getInstance(m);
-        Map<String, Map> page = site.getPage(x);
-        if (page != null  && page.containsKey("pages")) {
+        Map<String, Map> page = site.getPage(n);
+        if (page != null &&  page.containsKey("pages")) {
             Map<String, Map> pages = (Map) page.get("pages");
             for (Map.Entry et : pages.entrySet()) {
-                String uri2 = (String)et.getKey();
-                if (site.chkAuth(uri2)) {
-                    helper.redirect(Core.BASE_HREF+"/"+uri2);
+                String u = (String) et.getKey();
+                if (site.chkAuth(u)) {
+                    if (u.contains("|")) {
+                        u = u.substring(u.indexOf('|') + 1);
+                        helper.redirect(Core.BASE_HREF + "/" + u);
+                    } else {
+                        helper.redirect(Core.BASE_HREF + "/" + u);
+                    }
                     return;
                 }
             }

@@ -1,6 +1,7 @@
 <root>
     <page href="/">
         <include>hcum</include>
+        <include>resume</include>
         <include>search</include>
     </page>
 </root>

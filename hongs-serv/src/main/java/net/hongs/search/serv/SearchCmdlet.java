@@ -2,7 +2,7 @@ package net.hongs.search.serv;
 
 import app.hongs.HongsException;
 import app.hongs.action.VerifyHelper;
-import app.hongs.cmdlet.Cmdlet;
+import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Data;
 import app.hongs.util.Synt;
 import java.util.Map;

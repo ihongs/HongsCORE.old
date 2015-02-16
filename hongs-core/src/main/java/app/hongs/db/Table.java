@@ -209,8 +209,11 @@ public class Table
         case Types.TIMESTAMP:
           values.put(mtime, new Timestamp(time));
           break;
-        default:
+        case Types.INTEGER:
           values.put(mtime, time / 1000);
+          break;
+        default:
+          values.put(mtime, time);
       }
     }
 
@@ -229,8 +232,11 @@ public class Table
         case Types.TIMESTAMP:
           values.put(ctime, new Timestamp(time));
           break;
-        default:
+        case Types.INTEGER:
           values.put(ctime, time / 1000);
+          break;
+        default:
+          values.put(ctime, time);
       }
     }
 
@@ -259,8 +265,13 @@ public class Table
           values.put(etime, new Timestamp(0));
           paramz.add(new Timestamp(0));
           break;
-        default:
+        case Types.INTEGER:
           valuez.put(etime, time / 1000);
+          values.put(etime, 0);
+          paramz.add(0);
+          break;
+        default:
+          valuez.put(etime, time);
           values.put(etime, 0);
           paramz.add(0);
       }
@@ -305,10 +316,10 @@ public class Table
         case Types.TIMESTAMP:
           values.put(mtime, new Timestamp(time));
           break;
+        case Types.INTEGER:
+          values.put(mtime, time / 1000);
+          break;
         default:
-          if (time > 2147483647) {
-            time = time / 1000;
-          }
           values.put(mtime, time);
       }
     }
@@ -621,7 +632,7 @@ public class Table
       if (type == Types.CHAR  || type == Types.VARCHAR  || type == Types.LONGVARCHAR
        || type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR)
       {
-        // 判断精度
+        // 判断长度
         if (valueStr.length() > size)
         {
           throw sizeException(namc, valueStr, size);
@@ -735,14 +746,14 @@ public class Table
       // 判断日期类型
       else if (type == Types.DATE)
       {
-        if (value instanceof java.sql.Date || value instanceof java.util.Date)
+        if (value instanceof Date || value instanceof java.util.Date)
         {
           mainValues.put(namc, value);
         }
         else if (valueStr.matches("^\\d+$"))
         {
-          long valueNum = Long.parseLong(valueStr);
-          mainValues.put(namc, new Date(valueNum));
+          long valueNum = Long.parseLong(valueStr) ;
+          mainValues.put( namc, new Date(valueNum));
         }
         else
         {
@@ -750,25 +761,23 @@ public class Table
           {
             dateFormat = getFormat("date", namc, values);
           }
-          SimpleDateFormat sdf = new java.text.SimpleDateFormat(dateFormat);
+          SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
 
           try
           {
-            sdf.parse(valueStr);
+            mainValues.put(namc, sdf.parse(valueStr));
           }
           catch (ParseException ex)
           {
-            throw datetimeException(namc, valueStr, dateFormat);
+            throw datetimeException(namc , valueStr , dateFormat);
           }
-
-          mainValues.put(namc, value);
         }
       }
 
       // 判断时间类型
       else if (type == Types.TIME)
       {
-        if (value instanceof java.sql.Time || value instanceof java.util.Date)
+        if (value instanceof Time || value instanceof java.util.Date)
         {
           mainValues.put(namc, value);
         }
@@ -783,25 +792,23 @@ public class Table
           {
             timeFormat = getFormat("time", namc, values);
           }
-          SimpleDateFormat sdf = new java.text.SimpleDateFormat(timeFormat);
+          SimpleDateFormat sdf = new SimpleDateFormat(timeFormat);
 
           try
           {
-            sdf.parse(valueStr);
+            mainValues.put(namc, sdf.parse(valueStr));
           }
           catch (ParseException ex)
           {
-            throw datetimeException(namc, valueStr, timeFormat);
+            throw datetimeException(namc , valueStr , timeFormat);
           }
-
-          mainValues.put(namc, value);
         }
       }
 
       // 判断时间戳或日期时间类型
       else if (type == Types.TIMESTAMP)
       {
-        if (value instanceof java.sql.Timestamp || value instanceof java.util.Date)
+        if (value instanceof Timestamp || value instanceof java.util.Date)
         {
           mainValues.put(namc, value);
         }
@@ -816,18 +823,16 @@ public class Table
           {
             datetimeFormat = getFormat("datetime", namc, values);
           }
-          SimpleDateFormat sdf = new java.text.SimpleDateFormat(datetimeFormat);
+          SimpleDateFormat sdf = new SimpleDateFormat(datetimeFormat);
 
           try
           {
-            sdf.parse(valueStr);
+            mainValues.put(namc, sdf.parse(valueStr));
           }
           catch (ParseException ex)
           {
-            throw datetimeException(namc, valueStr, datetimeFormat);
+            throw datetimeException(namc , valueStr , datetimeFormat);
           }
-
-          mainValues.put(namc, value);
         }
       }
 

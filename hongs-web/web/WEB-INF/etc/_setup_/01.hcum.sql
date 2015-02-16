@@ -23,12 +23,12 @@ CREATE INDEX `IK_a_hcum_dept_mtime` ON `a_hcum_dept` (`mtime`);
 CREATE INDEX `IK_a_hcum_dept_dept` ON `a_hcum_dept` (`pid`);
 CREATE UNIQUE INDEX `UK_a_hcum_dept_name` ON `a_hcum_dept` (`name`,`pid`);
 
-INSERT INTO `a_hcum_dept` VALUES ('0',NULL,'ROOT','ROOT',1,'0000-00-00 00:00:00','0000-00-00 00:00:00');
-INSERT INTO `a_hcum_dept` VALUES ('HXSDROLE001REB0Q01','0','技术部','这是技术部',1,'2014-07-19 11:33:06','2014-07-19 11:33:06');
-INSERT INTO `a_hcum_dept` VALUES ('HYPRZ8Q5006II04J01','0','市场部','这是市场部',1,'2014-08-11 20:27:17','2014-08-11 20:27:17');
-INSERT INTO `a_hcum_dept` VALUES ('HY9XXIS5000T3DD501','HXSDROLE001REB0Q01','研发部','',1,'2014-07-31 18:29:35','2014-08-11 22:17:02');
-INSERT INTO `a_hcum_dept` VALUES ('HYPR7S3N00BWKOZ001','HXSDROLE001REB0Q01','运维部','',1,'2014-08-11 20:05:56','2014-08-11 20:05:56');
-INSERT INTO `a_hcum_dept` VALUES ('HYPS1ROT007T1AG601','HYPRZ8Q5006II04J01','产品部','',1,'2014-08-11 20:29:15','2014-08-11 20:29:15');
+INSERT INTO `a_hcum_dept` VALUES ('0',NULL,'ROOT','ROOT','0000-00-00 00:00:00','0000-00-00 00:00:00',1);
+INSERT INTO `a_hcum_dept` VALUES ('HXSDROLE001REB0Q01','0','技术部','这是技术部','2014-07-19 11:33:06','2014-07-19 11:33:06',1);
+INSERT INTO `a_hcum_dept` VALUES ('HYPRZ8Q5006II04J01','0','市场部','这是市场部','2014-08-11 20:27:17','2014-08-11 20:27:17',1);
+INSERT INTO `a_hcum_dept` VALUES ('HY9XXIS5000T3DD501','HXSDROLE001REB0Q01','研发部','','2014-07-31 18:29:35','2014-08-11 22:17:02',1);
+INSERT INTO `a_hcum_dept` VALUES ('HYPR7S3N00BWKOZ001','HXSDROLE001REB0Q01','运维部','','2014-08-11 20:05:56','2014-08-11 20:05:56',1);
+INSERT INTO `a_hcum_dept` VALUES ('HYPS1ROT007T1AG601','HYPRZ8Q5006II04J01','产品部','','2014-08-11 20:29:15','2014-08-11 20:29:15',1);
 
 --
 -- 部门所属角色
@@ -68,12 +68,13 @@ CREATE INDEX `IK_a_hcum_user_state` ON `a_hcum_user` (`state`);
 CREATE INDEX `IK_a_hcum_user_username` ON `a_hcum_user` (`username`);
 CREATE UNIQUE INDEX `UK_a_hcum_user_username` ON `a_hcum_user` (`username`);
 
-INSERT INTO `a_hcum_user` VALUES ('01I2ODRZHR00KLJOEM','张三 (总经理)',NULL,'a@abc.com',NULL,1,'2014-11-19 15:40:47','2014-11-25 02:14:38');
-INSERT INTO `a_hcum_user` VALUES ('01I2ODSOGC00KGZCQK','李四 (技术总监)',NULL,'b@abc.com',NULL,1,'2014-11-19 15:41:19','2014-12-31 01:39:10');
-INSERT INTO `a_hcum_user` VALUES ('HXNZ0OLR00297H9H01','王五 (市场总监)',NULL,'c@abc.com',NULL,1,'2014-07-16 09:29:07','2014-07-16 09:29:07');
-INSERT INTO `a_hcum_user` VALUES ('HXZGVRBH000XHB0601','赵六 (研发主管)',NULL,'d@abc.com',NULL,1,'2014-07-24 10:34:38','2014-11-25 02:15:33');
-INSERT INTO `a_hcum_user` VALUES ('HXZGWPZV002I1J1601','钱七 (运维主管)',NULL,'e@abc.com',NULL,1,'2014-07-24 10:35:23','2014-11-25 02:25:00');
-INSERT INTO `a_hcum_user` VALUES ('HY9XQN2L000WGH9Q01','孙八 (产品总监)',NULL,'f@abc.com',NULL,1,'2014-07-31 18:24:14','2014-11-25 02:23:31');
+INSERT INTO `a_hcum_user` VALUES ('1','老大 (管理员)',NULL,'admin@xxx.com',NULL,'2014-11-19 15:40:47','2014-11-25 02:14:38',1);
+INSERT INTO `a_hcum_user` VALUES ('01I2ODRZHR00KLJOEM','张三 (总经理)',NULL,'a@abc.com',NULL,'2014-11-19 15:40:47','2014-11-25 02:14:38',1);
+INSERT INTO `a_hcum_user` VALUES ('01I2ODSOGC00KGZCQK','李四 (技术总监)',NULL,'b@abc.com',NULL,'2014-11-19 15:41:19','2014-12-31 01:39:10',1);
+INSERT INTO `a_hcum_user` VALUES ('HXNZ0OLR00297H9H01','王五 (市场总监)',NULL,'c@abc.com',NULL,'2014-07-16 09:29:07','2014-07-16 09:29:07',1);
+INSERT INTO `a_hcum_user` VALUES ('HXZGVRBH000XHB0601','赵六 (研发主管)',NULL,'d@abc.com',NULL,'2014-07-24 10:34:38','2014-11-25 02:15:33',1);
+INSERT INTO `a_hcum_user` VALUES ('HXZGWPZV002I1J1601','钱七 (运维主管)',NULL,'e@abc.com',NULL,'2014-07-24 10:35:23','2014-11-25 02:25:00',1);
+INSERT INTO `a_hcum_user` VALUES ('HY9XQN2L000WGH9Q01','孙八 (产品总监)',NULL,'f@abc.com',NULL,'2014-07-31 18:24:14','2014-11-25 02:23:31',1);
 
 --
 -- 用户所属角色
@@ -106,6 +107,7 @@ CREATE TABLE `a_hcum_user_dept` (
 CREATE INDEX `IK_a_hcum_user_dept_user` ON `a_hcum_user_dept` (`user_id`);
 CREATE INDEX `IK_a_hcum_user_dept_dept` ON `a_hcum_user_dept` (`dept_id`);
 
+INSERT INTO `a_hcum_user_dept` VALUES ('1','0');
 INSERT INTO `a_hcum_user_dept` VALUES ('01I2ODRZHR00KLJOEM','0');
 INSERT INTO `a_hcum_user_dept` VALUES ('01I2ODSOGC00KGZCQK','HXSDROLE001REB0Q01');
 INSERT INTO `a_hcum_user_dept` VALUES ('HXNZ0OLR00297H9H01','HYPRZ8Q5006II04J01');

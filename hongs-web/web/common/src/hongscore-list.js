@@ -464,33 +464,40 @@ HsList.prototype = {
             .appendTo(td);
         return false;
     },
-    _fill__datetime : function(td, v, n) {
+    _fill__htime : function(td, v, n) {
         var d1  =  new Date ();
         var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
-        if (d1.getYear()  == d2.getYear()
+        if (d1.getFullYear() == d2.getFullYear()
         &&  d1.getMonth() == d2.getMonth()
-        &&  d1.getDate()  == d2.getDate()) {
-            return hsGetLang("time.today", {
-            time : hsFmtDate(v, hsGetLang("time.format")) } );
+        &&  d1.getDate( ) == d2.getDate()) {
+            return hsGetLang("time.today", [
+                   hsFmtDate(v, hsGetLang("time.format"))
+            ]);
         }
         else {
-            return hsFmtDate(v, hsGetLang("datetime.format"));
+            return hsFmtDate(v, hsGetLang("date.format"));
         }
     },
-    _fill__date : function(td, v, n) {
+    _fill__hdate : function(td, v, n) {
         var d1  =  new Date ();
         var d2  =  hsPrsDate(v, hsGetLang("date.format"));
-        if (d1.getYear()  == d2.getYear()
+        if (d1.getFullYear() == d2.getFullYear()
         &&  d1.getMonth() == d2.getMonth()
-        &&  d1.getDate()  == d2.getDate()) {
+        &&  d1.getDate( ) == d2.getDate()) {
             return hsGetLang("date.today");
         }
         else {
             return hsFmtDate(v, hsGetLang("date.format"));
         }
     },
+    _fill__datetime : function(td, v, n) {
+        return hsFmtDate(v, hsGetLang("datetime.format"));
+    },
     _fill__time : function(td, v, n) {
-            return hsFmtDate(v, hsGetLang("time.format"));
+        return hsFmtDate(v, hsGetLang("time.format"));
+    },
+    _fill__date : function(td, v, n) {
+        return hsFmtDate(v, hsGetLang("date.format"));
     }
 };
 

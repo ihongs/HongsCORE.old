@@ -1,5 +1,6 @@
 package app.hongs.cmdlet;
 
+import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLanguage;

@@ -37,9 +37,9 @@ import java.util.regex.Pattern;
  *
  * <h3>系统已定义的"options":</h3>
  * <pre>
- * ASSOCS       : Set         仅对某些表做关联; 作用域: FetchJoin.assocSelect
- * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchJoin.assocSelect
- * ASSOC_JOINS  : Set         仅对某些类型连接; 作用域: FetchJoin.assocSelect
+ * ASSOCS       : Set         仅对某些表做关联; 作用域: FetchMore.fetchMore
+ * ASSOC_TYPES  : Set         仅对某些类型关联; 作用域: FetchMore.fetchMore
+ * ASSOC_JOINS  : Set         仅对某些类型连接; 作用域: FetchMore.fetchMore
  * ASSOC_MULTI  : boolean     多行关联(使用IN方式关联); 作用域: FetchMore
  * ASSOC_MERGE  : boolean     归并关联(仅限非多行关联); 作用域: FetchMore
  * page         : int|String  分页页码; 作用域: FetchPage

@@ -602,6 +602,7 @@ function hsFmtDate(date, format) {
       date = Date.parse(date.replace(/-/g, "/").replace(/\.\d+$/, ""));
     }
   }
+
   if (typeof(date) === "number") {
     if (date <= 2147483647) {
       date = date * 1000 ;
@@ -700,6 +701,19 @@ function hsFmtDate(date, format) {
  * @return {Date}
  */
 function hsPrsDate(text, format) {
+  if (typeof(text) === "string") {
+    if ( /^\d+$/.test(text)) {
+      text = parseInt(text);
+    }
+  }
+  
+  if (typeof(text) === "number") {
+    if (text <= 2147483647) {
+      text = text * 1000 ;
+    }
+    return new Date(text);
+  }
+
   var a = text.split(/\W+/);
   var b = format.match(/M+|d+|y+|H+|k+|K+|h+|m+|s+|S+|E+|a+/g);
 
