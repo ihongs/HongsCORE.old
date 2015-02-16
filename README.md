@@ -22,10 +22,10 @@
 
 ## 类库依赖
 
-Jquery      [JS]
-Respond     [JS]
-Bootstrap   [JS, CSS]
-Glyphicons  [Bootstrap]
+    Jquery      [JS]
+    Respond     [JS]
+    Bootstrap   [JS, CSS]
+    Glyphicons  [Bootstrap]
 
 适用 Java 版本 JDK 1.6 及以上, 推荐使用 1.7; Java 库依赖情况请参见各个 module 中 pom.xml 的 dependencies 部分.
 
