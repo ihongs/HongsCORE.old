@@ -84,6 +84,15 @@ public class UploadHelper {
         return href;
     }
 
+    /**
+     * 检查文件流并写入目标目录
+     * @param stream
+     * @param type
+     * @param extn
+     * @param fame 指定文件名
+     * @return
+     * @throws app.hongs.action.VerifyHelper.Wrong 
+     */
     public File upload(InputStream stream, String type, String extn, String fame) throws VerifyHelper.Wrong {
         /**
          * 检查文件类型
@@ -128,24 +137,39 @@ public class UploadHelper {
         }
     }
 
+    /**
+     * 检查文件流并写入目标目录
+     * @param stream
+     * @param type
+     * @param extn
+     * @return
+     * @throws app.hongs.action.VerifyHelper.Wrong 
+     */
     public File upload(InputStream stream, String type, String extn) throws VerifyHelper.Wrong {
         return upload(stream, type, extn, Core.getUniqueId());
     }
 
+    /**
+     * 检查已上传的文件并从临时目录移到目标目录
+     * @param fame
+     * @return
+     * @throws app.hongs.action.VerifyHelper.Wrong 
+     */
     public File upload(String fame) throws VerifyHelper.Wrong {
         File file = new File(Core.VARS_PATH + "/upload/" + fame + ".tmp");
-        File info = new File(Core.VARS_PATH + "/upload/" + fame + ".inf");
+        File info = new File(Core.VARS_PATH + "/upload/" + fame + ".txt");
 
         FileInputStream fs = null;
         try {
+            String type;
+            String extn;
             fs = new FileInputStream(info);
-            InputStreamReader sr = new InputStreamReader(fs);
-            BufferedReader fr = new BufferedReader(sr);
-            String type = fr.readLine().trim();
-            String extn = fr.readLine().trim();
-            extn = getUploadExtn(extn);
-            fr.close();
-            sr.close();
+            try(InputStreamReader sr = new InputStreamReader(fs);
+                BufferedReader fr = new BufferedReader(sr)) {
+                type = fr.readLine().trim();
+                extn = fr.readLine().trim();
+                extn = getUploadExtn(extn);
+            }
             fs.close();
 
             fs = new FileInputStream(file);
@@ -165,6 +189,12 @@ public class UploadHelper {
         }
     }
 
+    /**
+     * 批量处理上传数据
+     * @param requestData
+     * @param uploads
+     * @throws app.hongs.action.VerifyHelper.Wrong 
+     */
     public static void upload(Map<String, Object> requestData, UploadHelper... uploads) throws VerifyHelper.Wrong {
         for(UploadHelper upload : uploads) {
             String v = null;

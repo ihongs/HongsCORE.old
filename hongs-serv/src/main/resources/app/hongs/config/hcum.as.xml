@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <page href="common/goto.act?m=hcum" disp="用户管理">
-        <page disp="用户" href="hcum/user/main.html|hcum/#user"/>
-    </page>
-</root>

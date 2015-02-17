@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <form name="demo">
+        <field name="id" type="string" required="yes">
+            <param name="widget">hidden</param>
+        </field>
+        <field name="name" type="string" required="yes"/>
+        <field name="email" type="string" required="yes"/>
+        <field name="phone" type="string" required="yes"/>
+        <field name="norepeat" type="form">
+            <param name="form">_demo_norepeat</param>
+        </field>
+        <field name="repeated" type="form" repeated="yes">
+            <param name="form">_demo_repeated</param>
+        </field>
+    </form>
+    <form name="_demo_norepate">
+        <field name="id" type="string" required="yes"/>
+        <field name="name" type="string" required="yes"/>
+        <field name="email" type="string" required="yes"/>
+        <field name="phone" type="string" required="yes"/>
+    </form>
+    <form name="_demo_repeated">
+        <field name="id" type="string" required="yes"/>
+        <field name="name" type="string" required="yes"/>
+        <field name="email" type="string" required="yes"/>
+        <field name="phone" type="string" required="yes"/>
+    </form>
+</root>

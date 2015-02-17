@@ -33,13 +33,6 @@ import org.xml.sax.SAXException;
  *
  * <h3>数据结构:</h3>
  * <pre>
-    enums = {
-        "enum_name" : {
-            "code" : "Label"
-            ...
-        }
-        ...
-    }
     forms = {
         "form_name" : {
             "item_name" : {
@@ -51,6 +44,13 @@ import org.xml.sax.SAXException;
                 "name" : "Value"
                 ...
             }
+            ...
+        }
+        ...
+    }
+    enums = {
+        "enum_name" : {
+            "code" : "Label"
             ...
         }
         ...
@@ -86,16 +86,16 @@ public class FormSet
     throws HongsException
   {
     this.name = name;
-    this.init(name + ".af");
+    this.init(name + ".form");
   }
 
   @Override
   protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + name + ".af.xml");
+                + File.separator + name + ".form.xml");
     File serFile = new File(Core.SERS_PATH
-                + File.separator + name + ".af.ser");
+                + File.separator + name + ".form.ser");
     if (xmlFile.exists())
     {
       return xmlFile.lastModified() > serFile.lastModified();
@@ -115,16 +115,16 @@ public class FormSet
 
     try
     {
-        fn = Core.CONF_PATH + File.separator + name + ".af.xml";
+        fn = Core.CONF_PATH + File.separator + name + ".form.xml";
         is = new FileInputStream(fn);
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name : "app/hongs/config/" + name + ".af.xml";
+        fn = name.contains("/") ? name + ".form.xml" : "app/hongs/config/" + name + ".form.xml";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsError(0x2a, "Can not find the formset config file '" + fn + "'.");
+            throw new app.hongs.HongsError(0x2a, "Can not find the formset config file '" + name + ".form.xml'.");
         }
     }
 

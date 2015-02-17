@@ -1,11 +1,11 @@
-<%@page contentType="text/html"%>
-<%@page pageEncoding="utf-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.Map"%>
 <%@page import="java.util.List"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionHelper"%>
 <%@page import="app.hongs.action.SiteMap"%>
+<%@page extends="app.hongs.action.Pagelet"%>
 <%!
     StringBuilder makeMenu(List<Map> list, String path) {
         StringBuilder menus = new StringBuilder();
@@ -82,11 +82,11 @@
     </ul>
     <ul class="nav navbar-nav navbar-right" id="main-menubar">
         <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">ihongs@live.cn <span class="badge">9+</span> <span class="caret"></span></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=helper.getSessvalue("name")%> <span class="badge">9+</span> <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
                 <%=makeMenu(mainMenu, name)%>
                 <li class="divider"></li>
-                <li><a href="javascript:;">注销</a></li>
+                <li><a href="javascript:;" id="sign-out">注销</a></li>
             </ul>
         </li>
     </ul>
@@ -111,6 +111,12 @@
                     that.parent( ).removeClass("active");
                     that.blur  ( );
                 }, 100);
+            });
+        $("#sign-out")
+            .click(function() {
+                $.get(hsFixUri("hcum/sign/out.act"), function() {
+                    location.reload();
+                });  
             });
 
         $(function() {

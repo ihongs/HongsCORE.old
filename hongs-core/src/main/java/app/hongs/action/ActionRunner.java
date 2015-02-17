@@ -4,11 +4,10 @@ import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import static app.hongs.action.ActionWarder.PATH;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Filter;
 import app.hongs.action.anno.FilterInvoker;
-import app.hongs.util.CsNs;
+import app.hongs.util.Cnames;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -75,7 +74,7 @@ public class ActionRunner {
      * @throws HongsException
      */
     public String getAction() throws HongsException {
-        String x = (String) helper.getAttribute(PATH);
+        String x = (String) helper.getAttribute(app.hongs.action.ActionDriver.PATH);
         if (x != null) { // 去除根和扩展名
             return x.substring(1, x.lastIndexOf('.'));
         } else {
@@ -172,7 +171,7 @@ public class ActionRunner {
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);
                 try {
-                    clss = CsNs.getClassNames(pkgn, false);
+                    clss = Cnames.getClassNames(pkgn, false);
                 } catch (IOException ex) {
                     throw new HongsError( 0x4a , "Can not load package '" + pkgn + "'.", ex);
                 }

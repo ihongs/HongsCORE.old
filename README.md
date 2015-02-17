@@ -14,7 +14,7 @@
 
 ## 使用方法
 
-下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; OSX 和 Linux 系统需要先赋予 run 执行权限(`chmod +x WEB-INF/run`).
+下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080/ 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; OSX 和 Linux 系统需要先赋予 run 执行权限(`chmod +x WEB-INF/run`).
 
 注意: 需要 JDK 而非 JRE(Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 如果是在官网下载并使用安装程序安装的通常已自动设置好了.
 
@@ -31,7 +31,7 @@
 
 ## 许可说明
 
-本软件及源码在 [**MIT License**](LICENSE.txt) 下发布，源码开放使用和修改，依赖的库请参阅其对应的许可声明。请在源码中保留作者（*黄弘*）的署名。
+本软件及源码在 [**MIT License**](LICENSE.md) 下发布，源码开放使用和修改，依赖的库请参阅其对应的许可声明。请在源码中保留作者（*黄弘*）的署名。
 
 > 被授权人权利：  
 > 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。  
@@ -53,6 +53,7 @@
 
 ## 更新日志
 
+* 2015/02/18 将 ActionWarder 的 Filter 模式改回 0.3.1 的独立继承模式, 新类为 ActionDriver, 兼容 ActionWarder 的 Filter 初始化模式; 今天是我的公历生日, 祝自己生日快乐, 万事如意!
 * 2015/02/14 增加 jetty,sqlite, 默认使用 jetty 运行, 数据库默认使用 sqlite
 * 2015/01/18 大规模重构, 重新规划 Maven 模块结构
 * 2014/11/20 实现 REST 风格的 API, 重新规划了 Action 的组织结构
@@ -127,7 +128,7 @@
     common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
     common/lang/name.js 读取 WEB-INF/conf/name.xx-XX.properties 中 fore.xxxx. 开头的配置
 
-action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 \_begin\_.properties 中设置 core.load.serv Action,Cmdlet 类(用";"分隔), 或 xxx.foo.* 告知该包下存在 Action,Cmdlet 类, 多个类,包用";"分隔.
+action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 WEB-INF/etc/\_begin\_.properties 中设置 core.load.serv 为 Action,Cmdlet 类, 或 xxx.foo.* 告知该包下存在 Action,Cmdlet 类, 多个类/包用";"分隔.
 最后3个路径, 将扩展名 .js 换成 .json 即可得到 JSON 格式的数据; 语言配置可在 name 后加语言区域标识, 如 example.zh-CN.js 为获取 example 的中文大陆简体的语言配置.
 
 ## 请求规则
@@ -184,6 +185,8 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     cs      限定列名
 
 ## 响应数据
+
+默认返回 JSON 格式的数据:
 
     {
         "ok": true成功 false失败,

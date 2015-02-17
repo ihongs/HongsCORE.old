@@ -159,6 +159,7 @@ public class DB
     this.source       = new HashMap();
     this.origin       = new HashMap();
     this.tableClass   = Table.class.getName();
+    this.modelClass   = Model.class.getName();
     this.tablePrefix  = "";
     this.tableSuffix  = "";
     this.tableConfigs = new HashMap();
@@ -1227,6 +1228,48 @@ public class DB
   }
 
   /**
+   * 添加记录
+   * <p>注: 调用update(sql, params...)实现</p>
+   * @param table
+   * @param values
+   * @return 插入条数
+   * @throws app.hongs.HongsException
+   */
+  public int insert(String table, Map<String, Object> values)
+    throws HongsException
+  {
+    if (values == null || values.isEmpty())
+    {
+      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
+    }
+
+    /** 组织语句 **/
+
+    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
+    List params2 = new ArrayList();
+    String fs = "", vs = "";
+
+    Iterator it = values.entrySet().iterator();
+    while (it.hasNext())
+    {
+      Map.Entry entry = (Map.Entry)it.next();
+      String field = (String)entry.getKey();
+      params2.add((Object)entry.getValue());
+
+      fs += "`" + Text.escape(field, "`") + "`, ";
+      vs += "?, ";
+    }
+
+    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
+    sql += " VALUES";
+    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
+
+    /** 执行更新 **/
+
+    return this.updates(sql, params2.toArray());
+  }
+
+  /**
    * 更新记录
    * <p>注: 调用update(sql, params...)实现</p>
    * @param table
@@ -1270,48 +1313,6 @@ public class DB
     {
       params2.addAll(Arrays.asList(params));
     }
-
-    /** 执行更新 **/
-
-    return this.updates(sql, params2.toArray());
-  }
-
-  /**
-   * 添加记录
-   * <p>注: 调用update(sql, params...)实现</p>
-   * @param table
-   * @param values
-   * @return 插入条数
-   * @throws app.hongs.HongsException
-   */
-  public int insert(String table, Map<String, Object> values)
-    throws HongsException
-  {
-    if (values == null || values.isEmpty())
-    {
-      throw new app.hongs.HongsException(0x104b, "Insert values can not be empty.");
-    }
-
-    /** 组织语句 **/
-
-    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
-    List params2 = new ArrayList();
-    String fs = "", vs = "";
-
-    Iterator it = values.entrySet().iterator();
-    while (it.hasNext())
-    {
-      Map.Entry entry = (Map.Entry)it.next();
-      String field = (String)entry.getKey();
-      params2.add((Object)entry.getValue());
-
-      fs += "`" + Text.escape(field, "`") + "`, ";
-      vs += "?, ";
-    }
-
-    sql += " (" + fs.substring(0, fs.length() - 2) + ")";
-    sql += " VALUES";
-    sql += " (" + vs.substring(0, vs.length() - 2) + ")";
 
     /** 执行更新 **/
 

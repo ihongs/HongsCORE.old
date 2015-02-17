@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <page href="common/goto.act?m=search" disp="搜索服务">
+        <page disp="Demo" href="search/demo/main.jsp|search/#demo"/>
+    </page>
+</root>

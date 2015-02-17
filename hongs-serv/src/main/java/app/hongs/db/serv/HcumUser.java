@@ -1,10 +1,14 @@
 package app.hongs.db.serv;
 
+import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
-import app.hongs.db.Model;
 import app.hongs.db.FetchCase;
+import app.hongs.db.Model;
 import app.hongs.db.Table;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,23 +31,44 @@ extends Model {
         super(table);
     }
 
-  /**
-   * 添加/修改记录
-   *
-   * @param rd
-   * @return 记录ID
-   * @throws app.hongs.HongsException
-   */
-  public String save(Map rd)
-    throws HongsException
-  {
-    String id = (String)rd.get(this.table.primaryKey);
-    if (id == null || id.length() == 0)
-      id = this.add(rd);
-    else
-      this.put(id , rd);
-    return id;
-  }
+    /**
+     * 添加/修改记录
+     *
+     * @param rd
+     * @return 记录ID
+     * @throws app.hongs.HongsException
+     */
+    public String save(Map rd)
+      throws HongsException
+    {
+      String id = (String) rd.get(this.table.primaryKey);
+      if (id == null || id.length() == 0) {
+          id = this.add(rd);
+      } else {
+          this.put(rd , id);
+      }
+      return id;
+    }
+
+    @Override
+    public String add(Map<String, Object> data) throws HongsException {
+        // 加密密码
+        if (data.containsKey("password")) {
+            data.put("password", HcumRole.getCrypt((String) data.get("password")));
+        }
+
+        return super.add(data);
+    }
+
+    @Override
+    public int put(Map<String, Object> data, String id, FetchCase caze) throws HongsException {
+        // 加密密码
+        if (data.containsKey("password")) {
+            data.put("password", HcumRole.getCrypt((String) data.get("password")));
+        }
+
+        return super.put(data, id, caze);
+    }
 
     public Set<String> getRoles(String userId)
     throws HongsException {

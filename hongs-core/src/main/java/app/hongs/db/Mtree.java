@@ -295,7 +295,7 @@ public class Mtree extends Model
    * @throws app.hongs.HongsException
    */
   @Override
-  public int put(String id, FetchCase caze, Map data)
+  public int put(Map data, String id, FetchCase caze)
     throws HongsException
   {
     if (data == null)
@@ -316,8 +316,7 @@ public class Mtree extends Model
     String newPid = (String)data.get(this.pidKey);
     String oldPid = this.getParentId (id);
     int    ordNum = this.getSerialNum(id);
-
-    int i = super.put(id, caze, data);
+    int    i = super.put (data, id, caze);
 
     /**
      * 如果有指定新的pid且不同于旧的pid, 则

@@ -2,8 +2,6 @@ package app.hongs.serv;
 
 import app.hongs.Core;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.ActionWarder;
-import static app.hongs.action.ActionWarder.PATH;
 import app.hongs.action.anno.Action;
 import java.io.File;
 import java.io.IOException;
@@ -36,10 +34,10 @@ public class AutoFilter implements Filter {
         action = cnf.getInitParameter("action");
         render = cnf.getInitParameter("render");
         if (action == null) {
-            action = "common";
+            action = "/common";
         }
         if (render == null) {
-            render =  action ;
+            render =   action ;
         }
     }
 
@@ -49,7 +47,7 @@ public class AutoFilter implements Filter {
         String act, url, ext; int pos;
 
         // 当前路径
-        url = ActionWarder.getCurrPath((HttpServletRequest) req);
+        url = app.hongs.action.ActionDriver.getCurrPath((HttpServletRequest) req);
 
         if (url.endsWith(".api")) {
             // 接口无需处理
@@ -71,22 +69,22 @@ public class AutoFilter implements Filter {
                         continue;
                     }
                     // 虚拟路径
-                    req.setAttribute(PATH, url);
+                    req.setAttribute(app.hongs.action.ActionDriver.PATH , url);
                     // 转发请求
-                    req.getRequestDispatcher("/"+action+uri+ext).include(req, rsp);
+                    req.getRequestDispatcher(action+uri+ext).include(req, rsp);
                     return;
                 }
             }
         } else {
-            File file = new File(Core.WEBS_PATH + url);
+            File file = new File(Core.CONT_PATH + url);
             if (!file.exists()) {
                 String uri = url.substring(url.lastIndexOf('/'));
-                file = new File(Core.WEBS_PATH + "/"+render+uri);
+                file = new File(Core.CONT_PATH + "/"+render+uri);
                 if (file.exists()) {
                     // 虚拟路径
-                    req.setAttribute(PATH, url);
+                    req.setAttribute(app.hongs.action.ActionDriver.PATH , url);
                     // 转发请求
-                    req.getRequestDispatcher(/**/"/"+render+uri).forward(req, rsp);
+                    req.getRequestDispatcher(render+uri/**/).forward(req, rsp);
                     return;
                 }
             }

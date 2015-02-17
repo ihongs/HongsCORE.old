@@ -1,16 +1,17 @@
-<%@page contentType="text/html;charset=utf-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.HongsException"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.ActionWarder"%>
+<%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.SiteMap"%>
 <%@page import="app.hongs.db.DB"%>
 <%@page import="app.hongs.db.Mview"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
+<%@page extends="app.hongs.action.Pagelet"%>
 <%
     String  _module, _entity; int i;
-    _module = ActionWarder.getWorkPath(request);
+    _module = ActionDriver.getWorkPath(request);
     i = _module.lastIndexOf('/');
     _module = _module.substring(1, i);
     i = _module.lastIndexOf('/');

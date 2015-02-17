@@ -240,8 +240,8 @@ HsForm.prototype = {
         }
     },
     saveBack : function(rst) {
-        rst = hsResponObj(rst, !!this.formBox.attr("target"));
-        if (rst.ok === false) {
+        rst = hsResponObj(rst);//, !!this.formBox.attr("target"));
+        if (rst.ok  === false) {
             var evt = new jQuery.Event("saveFail");
             this.formBox.trigger(evt, [rst]);
             if (typeof rst.errors !== "undefined") {

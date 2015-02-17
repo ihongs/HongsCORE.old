@@ -2,7 +2,6 @@ package app.hongs;
 
 import app.hongs.action.ActionHelper;
 import app.hongs.cmdlet.CmdletHelper;
-import app.hongs.util.Text;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -191,17 +190,14 @@ public class CoreLogger implements Core.Destroy
      */
     if (f.length() != 0)
     {
-      DateFormat df = new SimpleDateFormat(f);
-      Date d = new Date(time);
-      x = df.format(d);
-
-      if (this.out != null&&this.ext.equals(x))
+      x = new SimpleDateFormat(f).format(new Date(time));
+      if (this.out != null && this.ext.equals(x))
       {
         return;
       }
 
-      this.ext  = x;
-      p += "." + x + ".log";
+      this.ext = x ;
+      p += x+".log";
     }
     /**
      * 如果配置为空
@@ -254,7 +250,8 @@ public class CoreLogger implements Core.Destroy
     }
   }
 
-  public void destroy()
+  @Override
+  public void destroy( )
     throws Throwable
   {
     if (this.out != null)
@@ -267,8 +264,8 @@ public class CoreLogger implements Core.Destroy
   protected void finalize()
     throws Throwable
   {
+    this .destroy( );
     super.finalize();
-    this .destroy ();
   }
 
   //** 静态属性及方法 **/

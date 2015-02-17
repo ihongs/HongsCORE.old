@@ -8,6 +8,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.sql.ResultSetMetaData;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,7 +52,7 @@ import java.util.Map;
  core.table.mtime.field     修改时间字段名
  core.table.etime.field     结束时间字段名
  core.table.state.field     状态字段名
- core.table.default.state   默认状态   
+ core.table.default.state   默认状态
  core.table.removed.state   删除状态
  </pre>
  *
@@ -188,9 +189,20 @@ public class Table
   public int insert(Map<String, Object> values)
     throws HongsException
   {
+    String state = getField("state");
     String mtime = getField("mtime");
     String ctime = getField("ctime");
     String etime = getField("etime");
+
+    // 存在 state 字段则自动放入默认值
+    if (state != null && !values.containsKey(state))
+    {
+      String s = getState("default");
+      if ( s  != null )
+      {
+        values.put(state, s);
+      }
+    }
 
     long time = System.currentTimeMillis();
 
@@ -483,7 +495,7 @@ public class Table
   protected static String getAssocName(Map assoc)
   {
     String tn = (String) assoc.get("tableName"); // 原名 realName
-    if (   tn == null || tn.length() == 0)
+    if  (  tn == null || tn.length() == 0)
            tn = (String) assoc.get("name");
     return tn;
   }
@@ -496,7 +508,7 @@ public class Table
   protected static String[] getAssocPath(Map assoc)
   {
     List<String> ts = (List)assoc.get("path");
-    if (   ts == null  ) ts = new ArrayList();
+    if  (  ts == null  ) ts = new ArrayList();
     return ts.toArray(new String[0]);
   }
 
@@ -539,7 +551,7 @@ public class Table
    * DATE, TIME, TIMESTAMP
    * 推荐构建数据库时采用以上类型
    * 日期时间格式采用默认配置定义
-   * 通过配置"core.table.donot.check=true"来关闭检查
+   * 通过配置"core.table.checked.value=true"来开启检查
    * 通过语言"core.default.date.format=日期格式串"来设置可识别的日期格式
    * 通过语言"core.defualt.time.format=时间格式串"来设置可识别的时间格式
    * </pre>
@@ -594,8 +606,7 @@ public class Table
             value =  null;
 
         if (value == null
-        && (Integer)column.get("nullable")
-        ==  java.sql.ResultSetMetaData.columnNoNulls)
+        && (Integer)column.get("nullable") == ResultSetMetaData.columnNoNulls)
         {
           throw nullException(namc);
         }
@@ -604,8 +615,7 @@ public class Table
       {
         if (isNew == true
         &&!(Boolean)column.get("autoIncrement")
-        && (Integer)column.get("nullable")
-        ==  java.sql.ResultSetMetaData.columnNoNulls)
+        && (Integer)column.get("nullable") == ResultSetMetaData.columnNoNulls)
         {
           throw nullException(namc);
         }
@@ -651,7 +661,7 @@ public class Table
 
         if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
         {
-          throw unsignedException(namc, valueStr);
+          throw usngdException(namc, valueStr);
         }
 
         /**
@@ -680,7 +690,7 @@ public class Table
 
         if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
         {
-          throw unsignedException(namc, valueStr);
+          throw usngdException(namc, valueStr);
         }
 
         // 判断小数位数, 填充小数位
@@ -873,7 +883,7 @@ public class Table
     return validateException(0x1086, error, name, value);
   }
 
-  private HongsException unsignedException(String name, String value) {
+  private HongsException usngdException(String name, String value) {
     String error = "Value for column '"+name+"'("+value+") must be a unsigned number";
     return validateException(0x108a, error, name, value);
   }
@@ -885,21 +895,12 @@ public class Table
 
   private HongsException validateException(int code, String error, String fieldName, String... otherParams)
   {
-    CoreLanguage lang = (CoreLanguage)
-        Core.getInstance(CoreLanguage.class);
-
-    String tl = lang.getProperty("core.table."+name, name);
-    String fl = lang.getProperty("core.field."+name+"."+fieldName);
-    if (fl == null) {
-        fl =  lang.getProperty("core.field."+fieldName, fieldName);
-    }
-
-    List<String> trans = new ArrayList();
-    trans.add(tl);
-    trans.add(fl);
+    List<String> trans = new ArrayList(/**/);
+    trans.add(db.name + "." + name);
+    trans.add(fieldName);
     trans.addAll(Arrays.asList(otherParams));
 
-    HongsException ex = new HongsException(code, error+" (Table:"+name);
+    HongsException ex = new HongsException(code, error+" (Table:"+name+")");
     ex.setLocalizedOptions(trans.toArray(new String[] {}));
     return ex;
   }

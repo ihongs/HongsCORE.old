@@ -31,7 +31,7 @@ public class ServerCmdlet {
         Server server = new Server(Synt.declare(opts.get("port"),8080));
         webapp.setContextPath (Synt.declare(opts.get("path"),""));
         webapp.setDescriptor  (Core.BASE_PATH+"/WEB-INF/web.xml");
-        webapp.setResourceBase(Core.WEBS_PATH);
+        webapp.setResourceBase(Core.CONT_PATH);
         webapp.setParentLoaderPriority( true );
         server.setHandler(webapp);
 

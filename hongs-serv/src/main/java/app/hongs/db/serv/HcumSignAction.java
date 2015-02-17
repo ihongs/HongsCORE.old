@@ -1,5 +1,6 @@
 package app.hongs.db.serv;
 
+import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.VerifyHelper.Wrong;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.http.HttpSession;
 
 /**
  * 登录动作
@@ -26,29 +28,46 @@ public class HcumSignAction {
         String username = Synt.declare(ah.getParameter("username"), "");
         String password = Synt.declare(ah.getParameter("password"), "");
 
+        password = HcumRole.getCrypt(password);
+        ah.getRequestData().put("password", password);
+
         FetchCase fc = new FetchCase();
-        fc.select(".password, .id");
-        fc.where (".username = ?", ah.getParameter( "username" ));
+        fc.select(".password, .id, .name");
+        fc.where (".username = ?", username );
         fc.setOption("ASSOCS", new HashSet());
 
-        Table um = DB.getInstance("hcum").getTable("a_hcum_user");
+        Table um = DB.getInstance("hcum").getTable("user");
         Map   ud = um.fetchLess(fc);
         if (!password.equals(ud.get("password"))) {
+            CoreLanguage lang = CoreLanguage.getInstance("hcum");
             Map m = new HashMap();
-            m.put("password", new Wrong("用户名或密码错误"));
-            throw new Wrongs( m );
+            Map e = new HashMap();
+            m.put("password", new Wrong(lang.translate("core.username.or.password.invalid")));
+            e.put("errors", new Wrongs(m).getErrors());
+            e.put("msg", lang.translate("core.sign.in.invalid"));
+            e.put("ok", false);
+            ah.reply(e);
+            return;
         }
 
-        Set<String> r = new HcumUser().getRoles((String) ud.get("id"));
+        // 获取用户权限
+        HcumUser user = new  HcumUser();
+        Set<String> r = user.getRoles((String)ud.get("id"));
 
-        ah.getRequest().getSession(true).setAttribute("roles", r);
-        ah.reply(true );
+        // 设置用户会话
+        HttpSession sess = ah.getRequest().getSession(true);
+        sess.setAttribute("user", ud.get( "id" ));
+        sess.setAttribute("name", ud.get("name"));
+        sess.setAttribute("roles", r);
+        ah.reply(true);
     }
 
     @Action("out")
     public void out(ActionHelper ah) {
-        ah.getRequest().getSession(/**/).removeAttribute("roles");
-        ah.reply(true );
+        // 清除用户会话
+        HttpSession sess = ah.getRequest().getSession();
+        sess.invalidate();
+        ah.reply(true);
     }
 
 }

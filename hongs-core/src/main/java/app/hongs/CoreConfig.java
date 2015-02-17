@@ -76,22 +76,22 @@ public class CoreConfig
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name : "app/hongs/config/" + name + ".properties";
+        fn = name.contains("/") ? name + ".properties"
+           :"app/hongs/config/" + name + ".properties";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
-        if (  is  ==  null )
+        if ( null ==  is)
         {
-            throw new app.hongs.HongsError(0x2a, "Can not find the properties file '" + fn + "'.");
+            throw new app.hongs.HongsError(0x2a, "Can not find the properties file '" + name + ".properties'.");
         }
     }
-    //System.err.println(fn);
 
     try
     {
-      this.load(is);
+        /**/this.load(is);
     }
-    catch (IOException ex)
+    catch (IOException e)
     {
-      throw new app.hongs.HongsError(0x2b, "Can not read the properties file '" + fn + "'.");
+        /**/throw new app.hongs.HongsError(0x2b, "Can not read the properties file '" + name + ".properties'.");
     }
   }
 
