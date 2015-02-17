@@ -53,6 +53,7 @@
 
 ## 更新日志
 
+* 2015/02/18 将 ActionWarder 的 Filter 模式改回 0.3.1 的独立继承模式, 新类为 ActionDriver, 兼容 ActionWarder 的 Filter 初始化模式; 今天是我的公历生日, 祝自己生日快乐, 万事如意!
 * 2015/02/14 增加 jetty,sqlite, 默认使用 jetty 运行, 数据库默认使用 sqlite
 * 2015/01/18 大规模重构, 重新规划 Maven 模块结构
 * 2014/11/20 实现 REST 风格的 API, 重新规划了 Action 的组织结构
