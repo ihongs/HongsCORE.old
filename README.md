@@ -14,24 +14,24 @@
 
 ## 使用方法
 
-下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080/ 即可进入; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; OSX 和 Linux 系统需要先赋予 run 执行权限(`chmod +x WEB-INF/run`).
+下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080/ 即可进入; 登录账号 `admin@xxx.com` 口令 `123456`; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; Linux,Mac 系统需要先赋予 run 执行权限(`chmod +x WEB-INF/run`).
 
-注意: 需要 JDK 而非 JRE(Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 如果是在官网下载并使用安装程序安装的通常已自动设置好了.
+注意: 需要 JDK 而非 JRE(Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 系统为 Windows 在官网下载并使用安装程序安装的通常已自动设置好了.
 
 > JDK 下载地址: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 ## 类库依赖
 
-    Jquery      [JS]
+    jQuery      [JS]
     Respond     [JS]
     Bootstrap   [JS, CSS]
     Glyphicons  [Bootstrap]
 
-适用 Java 版本 JDK 1.6 及以上, 推荐使用 1.7; Java 库依赖情况请参见各个 module 中 pom.xml 的 dependencies 部分.
+适用 Java 版本 JDK 1.5 及以上, 推荐使用 1.7; Java 库依赖情况请参见各个 module 中 pom.xml 的 dependencies 部分.
 
 ## 许可说明
 
-本软件及源码在 [**MIT License**](LICENSE.md) 下发布，源码开放使用和修改，依赖的库请参阅其对应的许可声明。请在源码中保留作者（*黄弘*）的署名。
+本软件及源码在 [**MIT License**](LICENSE.md) 下发布，源码开放使用和修改，依赖的库请参阅其对应的许可声明。请在源码中保留作者（**黄弘**）的署名。
 
 > 被授权人权利：  
 > 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。  
@@ -93,9 +93,10 @@
         - var           临时文件(可配置)
           - log         运行日志(可配置)
           - ser         缓存文件(可配置)
+            upload      文件上传临时存放目录
           - sqlite      Sqlite本地数据库目录
           - lucene      Lucene本地索引库目录
-      + common          前端通用库(js)
+      + common          前端通用库(js,css等)
         - css           前端样式
         - fonts         前端字体
         - img           前端图片
