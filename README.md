@@ -1,7 +1,7 @@
 # HongsCORE Framework for Java
 
 * 文档版本: 15.02.14
-* 软件版本: 0.3.6-20150214
+* 软件版本: 0.3.6-20150218
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
