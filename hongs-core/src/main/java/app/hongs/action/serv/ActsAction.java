@@ -7,11 +7,10 @@ import app.hongs.HongsCause;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.ActionWarder;
+import app.hongs.action.ActionDriver;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,16 +39,17 @@ import javax.servlet.http.HttpServletResponse;
  * @author Hongs
  */
 public class ActsAction
-  extends HttpServlet
+  extends  ActionDriver
 {
 
   private static final Map<Integer, String> ErrMap;
-  static {
-      ErrMap = new HashMap();
-      ErrMap.put(0x10f1, "Er401");
-      ErrMap.put(0x10f3, "Er403");
-      ErrMap.put(0x10f4, "Er404");
-      ErrMap.put(0x10f5, "Er500");
+  static
+  {
+    ErrMap = new HashMap();
+    ErrMap.put(0x10f1, "Er401");
+    ErrMap.put(0x10f3, "Er403");
+    ErrMap.put(0x10f4, "Er404");
+    ErrMap.put(0x10f5, "Er500");
   }
 
   /**
@@ -66,8 +66,8 @@ public class ActsAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException
   {
-    String act  = ActionWarder.getCurrPath(req);
-    Core   core = ActionWarder.getWorkCore(req);
+    String act  = ActionDriver.getCurrPath(req);
+    Core   core = ActionDriver.getWorkCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
     Core.THREAD_CORE.set( core );
 
@@ -115,7 +115,7 @@ public class ActsAction
         String[] ls = hc.getLocalizedOptions( );
         if (  ls == null  ||  ls.length == 0  )
         {
-          hc.setLocalizedOptions(ActionWarder.getRealPath(req));
+          hc.setLocalizedOptions(ActionDriver.getRealPath(req));
         }
       }
     } else

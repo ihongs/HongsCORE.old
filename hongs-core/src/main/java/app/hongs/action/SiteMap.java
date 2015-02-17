@@ -40,36 +40,36 @@ import org.xml.sax.SAXException;
  *
  * <h3>数据结构:</h3>
  * <pre>
- pages = {
-   "href" : {
-     disp: 名称,
-     pages : {
-       子级页面...
-     },
-     roles : [
-       "role.name1",
-       "role.name2",
-       ...
-     ]
-   }
-   ...
- }
- roles = {
-   "code" : {
-     disp: 名称,
-     depends : [
-       "fole.name1",
-       "role.name2",
-       ...
-     ],
-     actions : [
-       "auth.name1",
-       "auth.name2",
-       ...
-     ]
-   }
-   ...
- }
+    pages = {
+      "href" : {
+        disp: 名称,
+        pages : {
+          子级页面...
+        },
+        roles : [
+          "role.name1",
+          "role.name2",
+          ...
+        ]
+      }
+      ...
+    }
+    roles = {
+      "code" : {
+        disp: 名称,
+        depends : [
+          "fole.name1",
+          "role.name2",
+          ...
+        ],
+        actions : [
+          "auth.name1",
+          "auth.name2",
+          ...
+        ]
+      }
+      ...
+    }
  </pre>
  *
  * <h3>异常代码:</h3>
@@ -121,16 +121,16 @@ public class SiteMap
     throws HongsException
   {
     this.name = name;
-    this.init(name + ".as");
+    this.init(name + ".page");
   }
 
   @Override
   protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + name + ".as.xml");
+                + File.separator + name + ".page.xml");
     File serFile = new File(Core.SERS_PATH
-                + File.separator + name + ".as.ser");
+                + File.separator + name + ".page.ser");
     if (xmlFile.exists())
     {
       return xmlFile.lastModified() > serFile.lastModified();
@@ -150,16 +150,16 @@ public class SiteMap
 
     try
     {
-        fn = Core.CONF_PATH + File.separator + name + ".as.xml";
+        fn = Core.CONF_PATH + File.separator + name + ".page.xml";
         is = new FileInputStream(fn);
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name : "app/hongs/config/" + name + ".as.xml";
+        fn = name.contains("/") ? name + ".page.xml" : "app/hongs/config/" + name + ".page.xml";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsError(0x2a, "Can not find the sitemap config file '" + fn + "'.");
+            throw new app.hongs.HongsError(0x2a, "Can not find the sitemap config file '" + name + ".page.xml'.");
         }
     }
 

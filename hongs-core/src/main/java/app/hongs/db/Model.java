@@ -125,6 +125,23 @@ public class Model
   //** 标准动作方法 **/
 
   /**
+   * 获取分页(无查询结构)
+   *
+   * 为空则page.errno为1, 页码超出则page.errno为2
+   *
+   * 含分页信息
+   *
+   * @param rd
+   * @return 单页列表
+   * @throws app.hongs.HongsException
+   */
+  public Map getList(Map rd)
+    throws HongsException
+  {
+    return this.getList(rd, null);
+  }
+
+  /**
    * 获取分页
    *
    * 为空则page.errno为1, 页码超出则page.errno为2
@@ -205,20 +222,16 @@ public class Model
   }
 
   /**
-   * 获取分页(无查询结构)
-   *
-   * 为空则page.errno为1, 页码超出则page.errno为2
-   *
-   * 含分页信息
+   * 获取信息(无查询结构)
    *
    * @param rd
-   * @return 单页列表
+   * @return 记录信息
    * @throws app.hongs.HongsException
    */
-  public Map getList(Map rd)
+  public Map getInfo(Map rd)
     throws HongsException
   {
-    return this.getList(rd, null);
+    return this.getInfo(rd, null);
   }
 
   /**
@@ -240,19 +253,6 @@ public class Model
   }
 
   /**
-   * 获取信息(无查询结构)
-   *
-   * @param rd
-   * @return 记录信息
-   * @throws app.hongs.HongsException
-   */
-  public Map getInfo(Map rd)
-    throws HongsException
-  {
-    return this.getInfo(rd, null);
-  }
-
-  /**
    * 创建记录
    *
    * @param rd
@@ -263,6 +263,19 @@ public class Model
     throws HongsException
   {
     return this.add(rd);
+  }
+
+  /**
+   * 更新记录
+   *
+   * @param rd
+   * @return 更新条数
+   * @throws app.hongs.HongsException
+   */
+  public int update(Map rd)
+    throws HongsException
+  {
+    return this.update(rd, null);
   }
 
   /**
@@ -293,23 +306,23 @@ public class Model
 
     for (String id : ids )
     {
-      this.put( id , dat );
+      this.put( dat, id );
     }
 
     return ids.size();
   }
 
   /**
-   * 更新记录
+   * 删除记录
    *
    * @param rd
-   * @return 更新条数
+   * @return 删除条数
    * @throws app.hongs.HongsException
    */
-  public int update(Map rd)
+  public int delete(Map rd)
     throws HongsException
   {
-    return this.update(rd, null);
+    return this.delete(rd, null);
   }
 
   /**
@@ -343,20 +356,20 @@ public class Model
     return ids.size();
   }
 
+  //** 扩展动作方法 **/
+
   /**
-   * 删除记录
+   * 检查是否存在
    *
    * @param rd
-   * @return 删除条数
+   * @return 存在为true, 反之为false
    * @throws app.hongs.HongsException
    */
-  public int delete(Map rd)
+  public boolean exists(Map rd)
     throws HongsException
   {
-    return this.delete(rd, null);
+    return  exists(rd, null);
   }
-
-  //** 扩展动作方法 **/
 
   /**
    * 检查是否存在
@@ -429,29 +442,16 @@ public class Model
     return !row.isEmpty();
   }
 
-  /**
-   * 检查是否存在
-   *
-   * @param rd
-   * @return 存在为true, 反之为false
-   * @throws app.hongs.HongsException
-   */
-  public boolean exists(Map rd)
+  public boolean unique(Map rd)
     throws HongsException
   {
-    return  exists(rd, null);
+    return !exists(rd);
   }
 
   public boolean unique(Map rd, FetchCase caze)
     throws HongsException
   {
     return !exists(rd, caze);
-  }
-
-  public boolean unique(Map rd)
-    throws HongsException
-  {
-    return !exists(rd);
   }
 
   //** 标准模型方法 **/
@@ -488,12 +488,26 @@ public class Model
    * 更新记录
    *
    * @param id
+   * @param data
+   * @return 更新条数
+   * @throws app.hongs.HongsException
+   */
+  public int put(Map<String, Object> data, String id)
+    throws HongsException
+  {
+    return this.put(data, id, null);
+  }
+
+  /**
+   * 更新记录
+   *
+   * @param id
    * @param caze
    * @param data
    * @return 更新条数
    * @throws app.hongs.HongsException
    */
-  public int put(String id, FetchCase caze, Map<String, Object> data)
+  public int put(Map<String, Object> data, String id, FetchCase caze)
     throws HongsException
   {
     if (id == null || id.length() == 0)
@@ -521,17 +535,16 @@ public class Model
   }
 
   /**
-   * 更新记录
+   * 删除指定记录
    *
    * @param id
-   * @param data
-   * @return 更新条数
+   * @return 删除条数
    * @throws app.hongs.HongsException
    */
-  public int put(String id, Map<String, Object> data)
+  public int del(String id)
     throws HongsException
   {
-    return this.put(id, null, data);
+    return this.del(id, null);
   }
 
   /**
@@ -571,17 +584,10 @@ public class Model
     return an;
   }
 
-  /**
-   * 删除指定记录
-   *
-   * @param id
-   * @return 删除条数
-   * @throws app.hongs.HongsException
-   */
-  public int del(String id)
+  public Map get(String id)
     throws HongsException
   {
-    return this.del(id, null);
+    return this.get(id, null);
   }
 
   public Map get(String id, FetchCase caze)
@@ -602,10 +608,10 @@ public class Model
     return this.table.fetchLess(caze);
   }
 
-  public Map get(String id)
+  public List getAll(Map rd)
     throws HongsException
   {
-    return this.get(id, null);
+    return this.getAll(rd, null);
   }
 
   public List getAll(Map rd, FetchCase caze)
@@ -617,12 +623,6 @@ public class Model
     this.filter(caze , rd);
 
     return this.table.fetchMore(caze);
-  }
-
-  public List getAll(Map rd)
-    throws HongsException
-  {
-    return this.getAll(rd, null);
   }
 
   //** 辅助过滤方法 **/

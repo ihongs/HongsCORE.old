@@ -41,7 +41,7 @@ extends Mtree {
     if (id == null || id.length() == 0)
       id = this.add(rd);
     else
-      this.put(id , rd);
+      this.put(rd, id);
     return id;
   }
 

@@ -3,7 +3,7 @@ package app.hongs.action.serv;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.ActionWarder;
+import app.hongs.action.ActionDriver;
 import app.hongs.util.Synt;
 import java.io.IOException;
 import java.util.Date;
@@ -84,7 +84,7 @@ public class ApisAction
      */
     private void doAction(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
-        String act = ActionWarder.getCurrPath(req);
+        String act = ActionDriver.getCurrPath(req);
         String mtd = mts[0];
 
         if (act == null || act.length() == 0) {
@@ -189,7 +189,7 @@ public class ApisAction
         req.getRequestDispatcher("/"+act+ "/"+mtd+ ".act"+pms ).include(req, rsp);
 
         // 将应答数据格式化后传递
-        ActionHelper hlpr = ActionWarder.getWorkCore(req).get(ActionHelper.class);
+        ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
         Map resp  = hlpr.getResponseData();
         if (resp != null) {
             Map     data;

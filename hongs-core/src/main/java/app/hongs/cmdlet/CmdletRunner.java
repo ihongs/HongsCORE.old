@@ -8,7 +8,7 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.util.CsNs;
+import app.hongs.util.Cnames;
 import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
@@ -162,13 +162,13 @@ public class CmdletRunner
 
     if (opts.containsKey("webspath"))
     {
-      Core.WEBS_PATH = (String)opts.get( "webspath" );
-      Core.WEBS_PATH =  Pattern.compile( "[/\\\\]$" )
-          .matcher(Core.WEBS_PATH).replaceFirst( "" );
+      Core.CONT_PATH = (String)opts.get( "webspath" );
+      Core.CONT_PATH =  Pattern.compile( "[/\\\\]$" )
+          .matcher(Core.CONT_PATH).replaceFirst( "" );
     }
     else
     {
-      Core.WEBS_PATH = Core.BASE_PATH + "/..";
+      Core.CONT_PATH = Core.BASE_PATH + "/..";
     }
 
     if (opts.containsKey("basehref"))
@@ -357,7 +357,7 @@ public class CmdletRunner
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);
                 try {
-                    clss = CsNs.getClassNames(pkgn, false);
+                    clss = Cnames.getClassNames(pkgn, false);
                 } catch (IOException ex) {
                     throw new HongsError( 0x4b , "Can not load package '" + pkgn + "'.", ex);
                 }

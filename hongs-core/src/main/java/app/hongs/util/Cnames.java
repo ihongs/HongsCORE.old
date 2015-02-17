@@ -19,7 +19,7 @@ import java.util.jar.JarFile;
  * </p>
  * @author Hongs
  */
-public class CsNs {
+public class Cnames {
     /**
      * 测试
      * @param args 包名1 包名2... [-r(包含下级)]

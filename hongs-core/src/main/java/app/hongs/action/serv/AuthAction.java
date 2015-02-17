@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.ActionWarder;
+import app.hongs.action.ActionDriver;
 import app.hongs.action.SiteMap;
 import app.hongs.util.Data;
 import java.io.IOException;
@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Hongs
  */
 public class AuthAction
-  extends HttpServlet
+  extends  ActionDriver
 {
 
   /**
@@ -50,7 +49,7 @@ public class AuthAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws ServletException, IOException
   {
-    Core core = ActionWarder.getWorkCore(req);
+    Core core = ActionDriver.getWorkCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = req.getPathInfo();

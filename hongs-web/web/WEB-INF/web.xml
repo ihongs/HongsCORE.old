@@ -50,34 +50,29 @@
         <servlet-name>Auth</servlet-name>
         <url-pattern>/common/auth/*</url-pattern>
     </servlet-mapping>
-    <!-- Warder -->
+    <!-- Auth Filter -->
     <filter>
-        <filter-name>Warder</filter-name>
-        <filter-class>app.hongs.action.ActionWarder</filter-class>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>app.hongs.serv.AuthFilter</filter-class>
+        <init-param>
+            <param-name>index-page</param-name>
+            <param-value>/</param-value>
+        </init-param>
+        <init-param>
+            <param-name>login-page</param-name>
+            <param-value>/login.html</param-value>
+        </init-param>
+        <init-param>
+            <param-name>exclude-urls</param-name>
+            <param-value>/hcum/sign/in.act;/hcum/sign/out.act</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>*.api</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>*.act</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>*.jsp</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>/common/conf/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>/common/lang/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>Warder</filter-name>
-        <url-pattern>/common/auth/*</url-pattern>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/hcum/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <!-- Auto Filter -->
     <filter>
@@ -85,7 +80,7 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
-            <param-value>haim/db</param-value>
+            <param-value>/haim/db</param-value>
         </init-param>
     </filter>
     <filter>
@@ -93,7 +88,7 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
-            <param-value>resume</param-value>
+            <param-value>/resume</param-value>
         </init-param>
     </filter>
     <filter>
@@ -101,7 +96,7 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
-            <param-value>search</param-value>
+            <param-value>/search</param-value>
         </init-param>
     </filter>
     <filter-mapping>
@@ -129,7 +124,7 @@
     <jsp-config>
         <taglib>
             <taglib-uri>/hongs.tag</taglib-uri>
-            <taglib-location>/WEB-INF/tag.tld</taglib-location>
+            <taglib-location>/WEB-INF/web.tld</taglib-location>
         </taglib>
     </jsp-config>
     <!-- Other Settings -->

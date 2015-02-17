@@ -6,6 +6,7 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
+import app.hongs.util.Text;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -84,7 +85,7 @@ public class ActionHelper
 
   public ActionHelper()
   {
-    throw new HongsError(HongsError.COMMON, "Please use the ActionHelper in the coverage of the ActionWarder or CmdletRunner inside");
+    throw new HongsError(HongsError.COMMON, "Please use the ActionHelper in the coverage of the ActionDriver or CmdletRunner inside");
   }
 
   /**
@@ -196,7 +197,7 @@ public class ActionHelper
       {
         ct = "text/plan";
       }
-      
+
       if ("application/json".equals(ct) || "text/json".equals(ct))
       {
         this.requestData = (Map<String, Object>) Data.toObject(getRequestText());
@@ -206,9 +207,9 @@ public class ActionHelper
         this.requestData = parseParam(request.getParameterMap(  ));
 
         // 处理上传文件
-        if ( "multipart/form-data".equals(ct))
+        if ("multipart/form-data".equals(ct))
         {
-          setUploadsData(requestData, request);
+          setUploadsData( );
         }
       }
     }
@@ -217,22 +218,22 @@ public class ActionHelper
 
   /**
    * 解析 multipart/form-data 数据, 并将上传的文件放入临时目录
-   * @param requestData
-   * @param request
-   * @throws HongsException 
+   * @throws HongsException
    */
-  protected final void setUploadsData(Map<String, Object> requestData, HttpServletRequest request) throws HongsException {
+  protected final void setUploadsData() throws HongsException {
     CoreConfig conf = CoreConfig.getInstance();
-    String path = Core.VARS_PATH + "/uploads/";
+
+    Map inj = new HashMap();
+    inj.put("BASE_PATH", Core.BASE_PATH);
+    inj.put("VARS_PATH", Core.VARS_PATH);
+    String path = conf.getProperty("core.upload.filepath", "${VARS_PATH}/upload/");
+    path = Text.inject(path, inj);
+
     Set<String> allowTypes = null;
     Set<String>  denyTypes = null;
     Set<String> allowExtns = null;
     Set<String>  denyExtns = null;
-    long fileSizeMax = 0;
-    long fullSizeMax = 0;
-
-    //** 上传配置 **/
-    String x; long m;
+    String x;
     x = conf.getProperty("fore.upload.allow.types", null);
     if (x != null) {
         allowTypes = new HashSet(Arrays.asList(x.split(",")));
@@ -249,14 +250,20 @@ public class ActionHelper
     if (x != null) {
          denyExtns = new HashSet(Arrays.asList(x.split(",")));
     }
-    m = conf.getProperty("fore.upload.file.size.max", 0 );
+
+    long fileSizeMax = 0;
+    long fullSizeMax = 0;
+    long m;
+    m = conf.getProperty("fore.upload.file.size.max", 0);
     if (m != 0) {
         fileSizeMax = m;
     }
-    m = conf.getProperty("fore.upload.full.size.max", 0 );
+    m = conf.getProperty("fore.upload.full.size.max", 0);
     if (m != 0) {
         fullSizeMax = m;
     }
+
+    //** 解析数据 **/
 
     try {
         ServletFileUpload sfu = new ServletFileUpload();
@@ -266,7 +273,7 @@ public class ActionHelper
         if (fullSizeMax > 0) {
             sfu.setSizeMax/**/(fullSizeMax);
         }
-        FileItemIterator  fit = sfu.getItemIterator(request);
+        FileItemIterator fit = sfu.getItemIterator(request);
 
         while (fit.hasNext()) {
             FileItemStream fis = fit.next();
@@ -307,7 +314,7 @@ public class ActionHelper
 
                 v = Core.getUniqueId();
                 String file = path + v + ".tmp";
-                String info = path + v + ".inf";
+                String info = path + v + ".txt";
 
                 /**/FileOutputStream fos = new /**/FileOutputStream(new File( file ));
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -488,7 +495,7 @@ public class ActionHelper
    * 针对 retrieve 等
    * @param map
    */
-  public void reply(Map<String, Object> map)
+  public void reply(Map map)
   {
     if (null != map) {
         if(!map.containsKey("ok" )) {
@@ -505,25 +512,6 @@ public class ActionHelper
   }
 
   /**
-   * 返回操作结果
-   * 针对 create,update,remove 等
-   * @param msg
-   * @param o
-   */
-  public void reply(String msg, Object... o)
-  {
-    Map map = new HashMap();
-    map.put("ok", true);
-    if (null !=  msg  ) {
-        map.put("msg", msg);
-    }
-    if (null != o && o.length > 0) {
-        map.put("back", o );
-    }
-    reply(map);
-  }
-
-  /**
    * 返回检查结果
    * 针对 exists,unique 等
    * @param ok
@@ -532,6 +520,25 @@ public class ActionHelper
   {
     Map map = new HashMap();
     map.put("ok", ok);
+    reply(map);
+  }
+
+  /**
+   * 返回操作结果
+   * 针对 create,update,delete 等
+   * @param msg
+   * @param back
+   */
+  public void reply(String msg, Object... back)
+  {
+    Map map = new HashMap();
+    map.put("ok", true);
+    if (null !=  msg  ) {
+        map.put("msg"  , msg );
+    }
+    if (null !=  back && back.length != 0) {
+        map.put("back" , back);
+    }
     reply(map);
   }
 
@@ -558,7 +565,7 @@ public class ActionHelper
   }
 
   /**
-   * 输出文本内容
+   * 输出内容
    * @param txt
    * @param ctt
    */
@@ -568,7 +575,7 @@ public class ActionHelper
   }
 
   /**
-   * 输出文本内容
+   * 输出内容
    * @param htm
    */
   public void print(String htm)

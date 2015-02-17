@@ -1,9 +1,9 @@
 package app.hongs.action.serv;
 
-import app.hongs.action.ActionWarder;
 import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsError;
+import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.Text;
 
@@ -17,7 +17,6 @@ import java.text.SimpleDateFormat;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Hongs
  */
 public class LangAction
-  extends HttpServlet
+  extends  ActionDriver
 {
   private static final Map<String, String> caches = new HashMap<String, String>();
   private static final Map<String, String> lastModified = new HashMap<String, String>();
@@ -56,7 +55,7 @@ public class LangAction
   public void service(HttpServletRequest req, HttpServletResponse rsp)
     throws IOException, ServletException
   {
-    Core core = ActionWarder.getWorkCore(req);
+    Core core = ActionDriver.getWorkCore(req);
     ActionHelper helper = core.get(ActionHelper.class);
 
     String name = req.getPathInfo();

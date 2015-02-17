@@ -2,6 +2,8 @@ package app.hongs.db.serv;
 
 import app.hongs.HongsException;
 import app.hongs.action.SiteMap;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,12 +59,12 @@ public class HcumRole {
 
                     Set<String> rolez = (Set) page_c.get("roles");
                     for(String k : rolez) {
-                        Map group1 = ac.getRole(k);
-                        Map group2 = new HashMap();
-                        roles.add(group2);
-                        group2.put("name", group1.get("name"));
-                        group2.put("disp", group1.get("disp"));
-                        group2.put("roles", ac.getMoreRoles(k).keySet());
+                        Map role1 = ac.getRole(k);
+                        Map role2 = new HashMap();
+                        roles.add(role2);
+                        role2.put("name", role1.get("name"));
+                        role2.put("disp", role1.get("disp"));
+                        role2.put("roles", ac.getMoreRoles(k).keySet());
                     }
                 }
             }
@@ -70,5 +72,24 @@ public class HcumRole {
         
         return units;
     }
+
+    public static String getCrypt(String pswd) throws HongsException {
+        try {
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            byte[] pzwd = m.digest(pswd.getBytes());
+            byte[] pxwd = new byte[pzwd.length * 2];
+            int i = 0, j = 0;
+            for ( ; i < pzwd.length; i ++) {
+                byte pzbt = pzwd[i];
+                pxwd[j++] = pazz[pzbt >>> 4 & 0xf ];
+                pxwd[j++] = pazz[pzbt /***/ & 0xf ];
+            }
+            return new String(pxwd);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        }
+    }
+
+    private static byte[] pazz = {'8','9','A','B','C','D','E','F','0','1','2','3','4','5','6','7'};
 
 }

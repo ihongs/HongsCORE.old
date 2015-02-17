@@ -1,15 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="app.hongs.CoreConfig"%>
 <%@page import="app.hongs.CoreLanguage"%>
-<%@page import="app.hongs.action.ActionWarder"%>
+<%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.db.DB"%>
 <%@page import="app.hongs.db.Mview"%>
+<%@page import="app.hongs.util.Synt"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="java.util.Set"%>
 <%@page import="java.util.Map"%>
+<%@page extends="app.hongs.action.Pagelet"%>
 <%
     String  _module, _entity, _action; int i;
-    _module = ActionWarder.getWorkPath(request);
+    _module = ActionDriver.getWorkPath(request);
     i = _module.lastIndexOf('/');
     _module = _module.substring(1, i);
     i = _module.lastIndexOf('/');
@@ -53,7 +55,8 @@
     </object>
     <form action="" method="POST">
         <div class="row">
-            <%for(Map.Entry et : flds.entrySet()) {
+            <%
+            for(Map.Entry et : flds.entrySet()) {
                 Map    info = (Map ) et.getValue();
                 String name = (String) et.getKey();
                 String type = (String) info.get( "widget" );

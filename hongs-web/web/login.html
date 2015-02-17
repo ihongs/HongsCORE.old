@@ -38,9 +38,9 @@ Hong's Common User Module
                     <span style="color:#fdd">E</span>
                     信息管理系统, 请登录...</p>
                 <div class="row">
-                    <form class="col-lg-6" id="sing-in-form">
+                    <form class="col-lg-6" id="sign-in-form">
                         <object class="config" name="hsForm" data="">
-                            <param name="saveUrl" value="hcum/sign/in"/>
+                            <param name="saveUrl" value="hcum/sign/in.act"/>
                         </object>
                         <div class="form-group">
                             <input   type="text"   name="username" value="" placeholder="请输入账号" class="form-control" required="required"/>
@@ -62,7 +62,13 @@ Hong's Common User Module
         </nav>
         <script type="text/javascript">
             $("#sign-in-form").on("saveBack", function() {
-                location.href = ""
+                console.log(123);
+                var r = hsGetParam(location.href,"r");
+                if (r) {
+                    location.href =  hsFixUri(r);
+                } else {
+                    location.href = "index.html";
+                }
             });
             
 //            var colors = ["#dddddd", "#dddddf", "#ddddff", "#dddfff", "#ddffff", "#dfffff",

@@ -3,7 +3,7 @@ package app.hongs.db.serv;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import static app.hongs.action.ActionWarder.PATH;
+import static app.hongs.action.ActionDriver.PATH;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
@@ -92,7 +92,7 @@ implements IAction {
 
     public Model getModel(ActionHelper helper)
     throws HongsException {
-        String p = (String) helper.getAttribute(PATH);
+        String p = (String) helper.getAttribute(app.hongs.action.ActionDriver.PATH);
         int i;
         i = p.lastIndexOf('/'); // 去掉动作名
         p = p.substring  (1,i);
