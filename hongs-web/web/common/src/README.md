@@ -7,7 +7,7 @@
 
 本工具集与HongsCORE(Java)配套使用, 使用jQuery作为核心辅助库, 使用jQueryTools作为UI组件库, 使用Bootstrap作为UI主题库. 以hs开头的为普通函数; 以Hs开头的为伪类函数, this指向调用的容器对象.
 
-## 环境设置
+## 环境加载
 
     <link rel="stylesheet" type="text/css" href="../common/css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="../common/css/hongscore.min.css"/>
