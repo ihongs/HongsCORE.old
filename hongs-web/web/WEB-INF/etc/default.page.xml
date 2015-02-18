@@ -3,5 +3,6 @@
         <include>hcum</include>
         <include>resume</include>
         <include>search</include>
+        <include>test</include>
     </page>
 </root>

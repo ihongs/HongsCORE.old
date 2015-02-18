@@ -1,4 +1,4 @@
-# HongsCORE Framework for Java
+# HongsCORE framework for Java
 
 * 文档版本: 15.02.14
 * 软件版本: 0.3.6-20150218
@@ -265,7 +265,7 @@ dete2stp 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
 
 ---------------------------------------
 
-# HongsCORE Framework for Javascript
+# HongsCORE framework for Javascript
 
 > 请转至: https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src
 
