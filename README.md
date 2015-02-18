@@ -267,7 +267,7 @@ dete2stp 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
 
 # HongsCORE framework for Javascript
 
-> 请转至: https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common/src
+> 请转至: https://github.com/ihongs/HongsCORE/tree/develop/hongs-web/web/common
 
 ---------------------------------------
 
