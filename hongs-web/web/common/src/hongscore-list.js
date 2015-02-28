@@ -306,7 +306,7 @@ HsList.prototype = {
             case 2:
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
                 this.listBox.children().hide();
-                hsSetSerial(this._data, "page", -1);
+                hsSetSerial(this._data,"page",1);
                 this.load();
                 return;
             default:

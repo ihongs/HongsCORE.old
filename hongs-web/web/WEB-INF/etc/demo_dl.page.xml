@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <page name="common/goto.act?m=demo_dl" disp="文档库测试">
+        <page disp="测试1" name="demo_dl/demo1/list.jsp" href="demo_dl/#demo1">
+        </page>
+        <page disp="测试2" name="demo_dl/demo2/list.jsp" href="demo_dl/#demo2">
+        </page>
+    </page>
+</root>

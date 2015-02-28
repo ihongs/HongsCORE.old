@@ -1,4 +1,3 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="app.hongs.CoreConfig"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionDriver"%>
@@ -9,6 +8,7 @@
 <%@page import="java.util.Set"%>
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String  _module, _entity, _action; int i;
     _module = ActionDriver.getWorkPath(request);
@@ -42,7 +42,7 @@
     hide.add(conf.getProperty("core.table.etime.field", "etime"));
     hide.add(conf.getProperty("core.table.state.field", "state"));
 %>
-
+<!-- 表单 -->
 <h2><%=lang.translate("fore."+_action+".title", title)%></h2>
 <object class="config" name="hsInit" data="">
     <param name="width" value="600px"/>
@@ -60,8 +60,15 @@
                 Map    info = (Map ) et.getValue();
                 String name = (String) et.getKey();
                 String type = (String) info.get( "widget" );
+                if (null == type) {
+                       type = (String) info.get("__type__");
+                }
                 String disp = (String) info.get("__disp__");
                 String rqrd = Synt.declare(info.get("required"), false) ? "required=\"required\"" : "";
+                String rptd = Synt.declare(info.get("repeated"), false) ? "multiple=\"multiple\"" : "";
+                if (!"".equals(rptd)) {
+                    name += ".";
+                }
 
                 if ("1".equals(info.get("hideInForm")) || hide.contains(name)) {
                     continue ;
@@ -87,8 +94,14 @@
                     <%} else if ("datetime".equals(type)) {%>
                         <input class="form-control input-datetime" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
                     <%} else if ("enum".equals(type)) {%>
-                        <select class="form-control" name="<%=name%>" <%=rqrd%>><option value="">--<%=lang.translate("fore.select.lebel")%>--</option></select>
-                    <%} else if ("pick".equals(type)) {%>
+                        <%  /**/ if ("check".equals(type)) {%>
+                        <div data-fn="<%=name%>" data-ft="_check"></div>
+                        <%} else if ("radio".equals(type)) {%>
+                        <div data-fn="<%=name%>" data-ft="_radio"></div>
+                        <%} else {%>
+                        <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>><option value="">--<%=lang.translate("fore.select.lebel")%>--</option></select>
+                        <%} // End If %>
+                    <%} else if ("pick".equals(type) || "picker".equals(type)) {%>
                         <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-tn="<%=info.get("data-tn")%>" data-tk="<%=info.get("data-tk")%>" data-vk="<%=info.get("data-vk")%>" <%=rqrd%>></ul>
                         <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=info.containsKey("data-ln")?info.get("data-tn"):_module%>/<%=info.get("data-tn")%>/list4select.html"><%=lang.translate("fore.select.lebel", (String)disp)%></button>
                     <%} else {%>

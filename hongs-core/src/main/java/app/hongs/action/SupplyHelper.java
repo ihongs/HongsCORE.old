@@ -3,7 +3,6 @@ package app.hongs.action;
 import app.hongs.HongsException;
 import app.hongs.util.Dict;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,15 +25,30 @@ public class SupplyHelper {
         return this;
     }
 
-    public SupplyHelper addEnum(String code, String... args) {
-        Map<String, String> opts = new HashMap();
+    public SupplyHelper addEnum(String code, String[][] arrs) {
+        Map<String, String> opts = new LinkedHashMap();
+        int i = 0;
+        for(String[] arr : arrs) {
+            if (arr.length == 1) {
+                String j = String.valueOf(++i);
+                opts.put(j /**/, arr[0]);
+            } else {
+                opts.put(arr[0], arr[1]);
+            }
+        }
+        return addEnum(code, opts);
+    }
+
+    public SupplyHelper addEnum(String code, String...  args) {
+        Map<String, String> opts = new LinkedHashMap();
         int i = 0;
         for(String   arg : args) {
-            String[] arr = arg.split( "::" , 2 );
-            if (arr.length > 1 ) {
-                opts.put(arr[0], arr[1]);
+            String[] arr = arg.split("::" , 2); // 拆分
+            if (arr.length == 1) {
+                String j = String.valueOf(++i);
+                opts.put(j /**/, arr[0]);
             } else {
-                opts.put(String.valueOf(++i), arr[0]);
+                opts.put(arr[0], arr[1]);
             }
         }
         return addEnum(code, opts);
@@ -48,18 +62,19 @@ public class SupplyHelper {
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry et = (Map.Entry)it.next();
-            Map       i2 = (Map ) et.getValue();
-            String t2 = (String)i2.get("__type__");
-            if (! "enum".equals(t2)) {
+            Map       mt = (Map ) et.getValue();
+            String  name = (String) et.getKey();
+            String  type = (String) mt.get("__type__");
+            if (! "enum".equals(type)) {
                 continue;
             }
-            String n2 = (String)et.getKey();
-            String e2 = (String)i2.get( "name");
-            String c2 = (String)i2.get( "conf");
-            if (null == c2 || "".equals( c2 )) c2 = conf;
-            Map d2  = FormSet.getInstance(c2).getEnumTranslated(e2);
-            if (d2 != null) {
-                enums.put(n2, d2);
+            String xonf = (String) mt.get("conf");
+            String xame = (String) mt.get("enum");
+            if (null == xonf || "".equals( xonf )) xonf = conf;
+            if (null == xame || "".equals( xame )) xame = name;app.hongs.util.Data.dumps(cnf.enums);
+            Map xnum  = FormSet.getInstance(xonf).getEnumTranslated(xame);
+            if (xnum != null) {
+                enums.put(name, xnum);
             }
         }
 

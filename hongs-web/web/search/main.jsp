@@ -1,8 +1,9 @@
-<%@page import="app.hongs.action.ActionWarder"%>
 <%@page contentType="text/html; charset=UTF-8"%>
+<%@page import="app.hongs.action.ActionDriver"%>
+<%@page extends="app.hongs.action.Pagelet"%>
 <%
     String  _entity; int i;
-    _entity = ActionWarder.getWorkPath(request);
+    _entity = ActionDriver.getWorkPath(request);
     i = _entity.lastIndexOf('/');
     _entity = _entity.substring(1, i);
     i = _entity.lastIndexOf('/');

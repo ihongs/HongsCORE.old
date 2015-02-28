@@ -3,6 +3,7 @@ nbproject
 nb-configuration.xml
 /hongs-core/target/
 /hongs-serv/target/
-/hongs-web/target
-/hongs-serv/src/main/java/net/hongs/yummy/
-/hongs-web/web/yummy/
+/hongs-web/target/
+/hongs-serv-system/target/
+/hongs-serv-server/target/
+/hongs-serv-lucene/target/

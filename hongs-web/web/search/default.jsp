@@ -1,4 +1,5 @@
 <%@page contentType="text/html; charset=UTF-8"%>
+<%@page extends="app.hongs.action.Pagelet"%>
 <!DOCTYPE html>
 <html>
     <head>

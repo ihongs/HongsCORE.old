@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 动作承载器
+ * 动作驱动器
  *
  * <p>
  * 其他 Servlet,Filter 继承此类即可安全的使用 Core 请求对象;
@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletResponse;
 public class ActionDriver extends HttpServlet implements Servlet, Filter {
 
     /**
-     * 初始化标识, 为 true 这表示该对象负责的初始化
+     * 初始化标识, 为 true 表示该对象负责的初始化
      */
     private boolean INIT = false;
 
@@ -193,9 +193,9 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         }
     }
 
-  @Override
-  public void service (ServletRequest rep, ServletResponse rsp)
-  throws ServletException, IOException {
+    @Override
+    public void service (ServletRequest rep, ServletResponse rsp)
+    throws ServletException, IOException {
         HttpServletRequest  req = (HttpServletRequest ) rep;
         HttpServletResponse rsq = (HttpServletResponse) rsp;
 
@@ -252,16 +252,20 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     }
 
     private void doOutput(ActionHelper hlpr, HttpServletRequest req, HttpServletResponse rsp) {
-        if (!hlpr.getResponse().isCommitted()) {
+//        if (!hlpr.getResponse().isCommitted()) {
             Map dat  = hlpr.getResponseData();
             if (dat != null) {
+                if (0< Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
+                    req.setAttribute("__HONGS_DATA__", dat );
+                }
+
 //              HttpServletRequest  raq = hlpr.getRequest( );
 //              HttpServletResponse rzp = hlpr.getResponse();
-                hlpr.reinitHelper ( req, rsp);
+//              hlpr.reinitHelper ( req , rsp );
                 hlpr.print();
-//              hlpr.reinitHelper ( raq, rzp);
+//              hlpr.reinitHelper ( raq , rzp );
             }
-        }
+//        }
     }
 
     private void doIniter(Core core, ActionHelper hlpr, HttpServletRequest req)
@@ -328,13 +332,6 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
             ActionHelper that = Core.getInstance(ActionHelper.class);
             HttpServletRequest R = that.getRequest();
-            Map rd, xd;
-            try {
-                rd = that.getRequestData( );
-                xd = that.getResponseData();
-            } catch (HongsException e) {
-                throw new HongsError(HongsError.COMMON, e);
-            }
             long time = System.currentTimeMillis() - Core.ACTION_TIME.get();
             StringBuilder sb = new StringBuilder("...");
               sb.append("\r\n\tACTION_NAME : ").append(Core.ACTION_NAME.get())
@@ -344,14 +341,27 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tMethod      : ").append(R.getMethod())
                 .append("\r\n\tClient      : ").append(R.getRemoteAddr()).append(" ").append(R.getRemotePort())
                 .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
-                .append("\r\n\tRuntime     : ").append(Text.humanTime( time ))
-                .append("\r\n\tObjects     : ").append(core.keySet().toString( ));
+                .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
+                .append("\r\n\tObjects     : ").append(core.keySet( ).toString());
+
+            // 输入输出数据, 这对调试程序非常有帮助
+            Map rd, xd;
+            try {
+                rd = that.getRequestData( );
+                xd = that.getResponseData();
+            } catch (HongsException ex) {
+                throw new HongsError( HongsError.COMMON , ex );
+            }
+            if (xd == null) {
+                xd = (Map ) req.getAttribute("__HONGS_DATA__");
+            }
             if (rd != null && !rd.isEmpty()) {
               sb.append("\r\n\tRequest     : ").append(Text.indent(Data.toString(rd)).substring(1));
             }
             if (xd != null && !xd.isEmpty()) {
               sb.append("\r\n\tResults     : ").append(Text.indent(Data.toString(xd)).substring(1));
             }
+
             CoreLogger.debug(sb.toString( ));
         }
 

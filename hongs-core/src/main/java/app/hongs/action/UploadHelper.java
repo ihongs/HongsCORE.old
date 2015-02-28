@@ -21,7 +21,7 @@ import java.util.Set;
 import org.apache.commons.fileupload.util.Streams;
 
 /**
- * 上传助手
+ * 文件上传助手
  * @author Hongs
  */
 public class UploadHelper {
@@ -91,7 +91,7 @@ public class UploadHelper {
      * @param extn
      * @param fame 指定文件名
      * @return
-     * @throws app.hongs.action.VerifyHelper.Wrong 
+     * @throws app.hongs.action.VerifyHelper.Wrong
      */
     public File upload(InputStream stream, String type, String extn, String fame) throws VerifyHelper.Wrong {
         /**
@@ -143,7 +143,7 @@ public class UploadHelper {
      * @param type
      * @param extn
      * @return
-     * @throws app.hongs.action.VerifyHelper.Wrong 
+     * @throws app.hongs.action.VerifyHelper.Wrong
      */
     public File upload(InputStream stream, String type, String extn) throws VerifyHelper.Wrong {
         return upload(stream, type, extn, Core.getUniqueId());
@@ -152,12 +152,13 @@ public class UploadHelper {
     /**
      * 检查已上传的文件并从临时目录移到目标目录
      * @param fame
+     * @param path
      * @return
-     * @throws app.hongs.action.VerifyHelper.Wrong 
+     * @throws app.hongs.action.VerifyHelper.Wrong
      */
-    public File upload(String fame) throws VerifyHelper.Wrong {
-        File file = new File(Core.VARS_PATH + "/upload/" + fame + ".tmp");
-        File info = new File(Core.VARS_PATH + "/upload/" + fame + ".txt");
+    public File upload(String fame, String path) throws VerifyHelper.Wrong {
+        File file = new File(path + fame + ".tmp");
+        File info = new File(path + fame + ".txt");
 
         FileInputStream fs = null;
         try {
@@ -190,20 +191,30 @@ public class UploadHelper {
     }
 
     /**
-     * 批量处理上传数据
-     * @param requestData
-     * @param uploads
-     * @throws app.hongs.action.VerifyHelper.Wrong 
+     * 检查已上传的文件并从临时目录移到目标目录
+     * @param fame
+     * @return
+     * @throws app.hongs.action.VerifyHelper.Wrong
      */
-    public static void upload(Map<String, Object> requestData, UploadHelper... uploads) throws VerifyHelper.Wrong {
+    public File upload(String fame) throws VerifyHelper.Wrong {
+        return upload(fame, Core.VARS_PATH + "/upload/");
+    }
+
+    /**
+     * 批量处理上传数据
+     * @param request
+     * @param uploads
+     * @throws app.hongs.action.VerifyHelper.Wrong
+     */
+    public static void upload(Map<String, Object> request, UploadHelper... uploads) throws VerifyHelper.Wrong {
         for(UploadHelper upload : uploads) {
             String v = null;
             String n = upload.uploadName;
-            v = Dict.getParam(requestData, v, n);
-            if (v != null) {
+            v = Dict.getParam(request, v, n);
+            if (v  !=  null) {
                 upload.upload(v);
-                v = upload.getResultHref();
-                Dict.setParam(requestData, v, n);
+                v = upload.getResultHref(  );
+                Dict.setParam(request, v, n);
             }
         }
     }

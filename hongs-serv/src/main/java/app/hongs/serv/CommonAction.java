@@ -63,20 +63,16 @@ public class CommonAction {
         if (page != null &&  page.containsKey("pages")) {
             Map<String, Map> pages = (Map) page.get("pages");
             for (Map.Entry et : pages.entrySet()) {
-                String u = (String) et.getKey();
+                String u = (String ) et.getKey();
                 if (site.chkAuth(u)) {
-                    if (u.contains("|")) {
-                        u = u.substring(u.indexOf('|') + 1);
-                        helper.redirect(Core.BASE_HREF + "/" + u);
-                    } else {
-                        helper.redirect(Core.BASE_HREF + "/" + u);
-                    }
+                    String h = (String) ((Map) et.getValue()).get("href" );
+                    helper.redirect(Core.BASE_HREF+"/"+("".equals(h)?n:h));
                     return;
                 }
             }
         }
 
-        helper.redirect(Core.BASE_HREF+"/");
+        helper.redirect(Core.BASE_HREF + "/");
     }
 
 }

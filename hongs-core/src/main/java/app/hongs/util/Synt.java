@@ -2,6 +2,7 @@ package app.hongs.util;
 
 import app.hongs.HongsError;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,13 +20,13 @@ public class Synt {
      * 确保此变量类型为 cls 类型
      * string,number(int,long...) 类型间可互转;
      * cls 为 Boolean  时:
-     * 非 0 数字为 true,
-     * 空字符串为 false,
-     * 字符串 1,y,t,yes,true 为真,
-     * 字符串 0,n,f,no,false 为假;
+     *      非 0 数字为 true,
+     *      空字符串为 false,
+     *      字符串 1,y,t,yes,true 为真,
+     *      字符串 0,n,f,no,false 为假;
      * cls 为 List,Set 时:
-     * val 非 List,Set,Map 时构建 List,Set 后将 val 加入其下,
-     * val 为 Map 则取 values;
+     *      val 非 List,Set,Map 时构建 List,Set 后将 val 加入其下,
+     *      val 为 Map 则取 values;
      * 但其他类型均无法转为 Map.
      * @param <T>
      * @param val
@@ -42,20 +43,24 @@ public class Synt {
         } else if (List.class.isAssignableFrom(cls)) {
             if (val instanceof List) {
             } else if (val instanceof Set) {
-                val = new ArrayList((Set) val);
+                val = new ArrayList(( Set) val);
             } else if (val instanceof Map) {
                 val = ((Map) val).values();
+            } else if (val instanceof Object[]) {
+                val = Arrays.asList(( Object[]) val);
             } else {
                 List lst = new ArrayList();
                 lst.add(val);
                 val = lst;
             }
         } else if ( Set.class.isAssignableFrom(cls)) {
-            if (val instanceof Set ) {
+            if (val instanceof Set) {
             } else if (val instanceof List) {
                 val = new LinkedHashSet((List) val);
             } else if (val instanceof Map ) {
                 val = new LinkedHashSet(((Map) val).values());
+            } else if (val instanceof Object[]) {
+                val = new LinkedHashSet(Arrays.asList((Object[]) val));
             } else {
                 Set set = new LinkedHashSet( );
                 set.add(val);

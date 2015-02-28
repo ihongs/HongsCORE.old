@@ -1,9 +1,11 @@
 package app.hongs.action.serv;
 
+import app.hongs.HongsError;
 import app.hongs.HongsException;
+import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.ActionDriver;
+import app.hongs.util.Data;
 import app.hongs.util.Synt;
 import java.io.IOException;
 import java.util.Date;
@@ -47,7 +49,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Hongs
  */
 public class ApisAction
-  extends HttpServlet
+  extends  ActionDriver
 {
 
     @Override
@@ -115,7 +117,7 @@ public class ApisAction
             String mtz = mat.group(4);
 
             // 指定资源
-            act = act.substring(0, mat.start()) + acn;
+            act = act.substring(0, mat.start() - 1) + acn;
 
             // 指定方法
             if (mtz != null && mtz.length() != 0) {
@@ -167,39 +169,36 @@ public class ApisAction
             }
         }
 
-//        // 将请求数据处理之后传递
-//        String send = Synt.declare(data.get("-api-send"), String.class);
-//        if (send != null) {
-//            Object x = data.remove(send);
-//            if (x instanceof Map /****/) {
-//                data.putAll((Map) x/**/);
-//            } else {
-//                try {
-//                    Map m;
-//                    x = Data.toObject(x.toString());
-//                    m = Synt.declare (x, Map.class);
-//                    data.putAll(/****/m);
-//                } catch (HongsError er ) {
-//                    throw new ServletException(er );
-//                }
-//            }
-//        }
+        // 将请求数据处理之后传递
+        ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
+        String  json = Synt.declare(req.getParameter("-api-data"),  String.class);
+        if (json != null) {
+            try {
+                Map send = Synt.declare(Data.toObject(json), Map.class);
+                Map data = hlpr.getRequestData();
+                data.putAll( send );
+            } catch (HongsException ex) {
+                throw new ServletException(ex);
+            } catch (HongsError er) {
+                throw new ServletException(er);
+            }
+        }
 
         // 将请求转发到动作处理器
         req.getRequestDispatcher("/"+act+ "/"+mtd+ ".act"+pms ).include(req, rsp);
 
         // 将应答数据格式化后传递
-        ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
         Map resp  = hlpr.getResponseData();
         if (resp != null) {
-            Map     data;
-            try {
-                data = hlpr.getRequestData(  );
-            } catch (HongsException ex) {
-                throw new ServletException(ex);
+            Boolean scok = Synt.declare(req.getParameter("-api-scok"), Boolean.class);
+            String  back = Synt.declare(req.getParameter("-api-back"),  String.class);
+            String  ccnv = Synt.declare(req.getParameter("-api-conv"),  String.class);
+            Set     conv = Synt.declare(ccnv == null ? null : ccnv.split("[\\s\\+]+"), Set.class);
+
+            // 状态总是 200
+            if (scok != null && scok) {
+                hlpr.getResponse().setStatus(javax.servlet.http.HttpServletResponse.SC_OK);
             }
-            Set     conv = Synt.declare(data.get("-api-conv"),    Set.class);
-            String  back = Synt.declare(data.get("-api-back"), String.class);
 
             // 返回节点
             if (back != null) {

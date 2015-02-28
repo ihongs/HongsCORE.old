@@ -6,7 +6,7 @@
     <name>Hong's Web</name>
     <groupId>app.hongs</groupId>
     <artifactId>hongs-web</artifactId>
-    <version>0.3.6</version>
+    <!--version>0.3-SNAPSHOT</version-->
     <packaging>war</packaging>
     <parent>
         <groupId>app.hongs</groupId>
@@ -25,6 +25,21 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>hongs-serv</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hongs-serv-system</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hongs-serv-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hongs-serv-lucene</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

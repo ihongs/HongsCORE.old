@@ -1,4 +1,3 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.Map"%>
 <%@page import="java.util.List"%>
 <%@page import="app.hongs.Core"%>
@@ -6,24 +5,27 @@
 <%@page import="app.hongs.action.ActionHelper"%>
 <%@page import="app.hongs.action.SiteMap"%>
 <%@page extends="app.hongs.action.Pagelet"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%!
     StringBuilder makeMenu(List<Map> list, String path) {
         StringBuilder menus = new StringBuilder();
         for(Map menu : list) {
+            if (! (Boolean) menu.get("auth")) {
+                continue;
+            }
+            
             String disp = (String) menu.get("disp");
-            String href = (String) menu.get("href");
-            String data = "";
+            String href = (String) menu.get("name");
+            String data = (String) menu.get("href");
 
-            int lpos  = href.indexOf('|');
-            int hpos  = href.indexOf('#');
-            if (lpos != -1 && hpos != -1) {
-                String link;
-                link = href.substring(1+lpos, hpos);
-                data = href.substring(0,lpos);
-                href = href.substring(  hpos);
-                if (!link.startsWith(path + "/")) {
-                    href = link + href; data = "";
-                    href = Core.BASE_HREF + "/" + href;
+            if (!"".equals(data)) {
+                if (data.startsWith(path+"/") && data.contains("#")) {
+                    String hash = data.substring(data.indexOf ('#'));
+                    data = Core.BASE_HREF + "/" + href;
+                    href = hash;
+                } else {
+                    href = Core.BASE_HREF + "/" + data;
+                    data =  "" ;
                 }
             } else {
                     href = Core.BASE_HREF + "/" + href;
@@ -53,6 +55,10 @@
     SiteMap curr = SiteMap.getInstance(name);
     List<Map> mainMenu = main.getMenuTranslated(1, 1);
     List<Map> currMenu = curr.getMenuTranslated(1, 1);
+    
+    String  user = (String ) helper.getSessvalue("name");
+    Integer msgc = (Integer) helper.getSessvalue("msgc");
+    String  msgs = msgc == null ? null : (msgc > 9 ? "9+" : Integer.toString(msgc));
 %>
 
 <div class="navbar-header">
@@ -82,11 +88,17 @@
     </ul>
     <ul class="nav navbar-nav navbar-right" id="main-menubar">
         <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=helper.getSessvalue("name")%> <span class="badge">9+</span> <span class="caret"></span></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <%if (user != null) {%><%=user%><%} else {%><span class="glyphicon glyphicon-gift"></span><%}%>
+                <%if (msgs != null) {%><span class="badge"><%=msgs%></span><%}%>
+                <span class="caret"></span>
+            </a>
             <ul class="dropdown-menu" role="menu">
                 <%=makeMenu(mainMenu, name)%>
+                <%if (user != null) {%>
                 <li class="divider"></li>
                 <li><a href="javascript:;" id="sign-out">注销</a></li>
+                <%} // End If%>
             </ul>
         </li>
     </ul>
@@ -116,7 +128,7 @@
             .click(function() {
                 $.get(hsFixUri("hcum/sign/out.act"), function() {
                     location.reload();
-                });  
+                });
             });
 
         $(function() {

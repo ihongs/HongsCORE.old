@@ -74,6 +74,10 @@ textarea.form-control,
 select[multiple].form-control {
     min-height: 126px;
 }
+.radio label,
+.checkbox label {
+    margin-right: 20px;
+}
 
 .dropdown-toggle {
     cursor: pointer;

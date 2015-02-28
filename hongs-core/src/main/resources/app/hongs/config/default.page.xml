@@ -1,7 +1,8 @@
 <root>
     <!--
-    <import></import>
-    <page href="" disp="">
+    <session></session>
+    <include></include>
+    <page name="" disp="" href="">
         <role name="" disp="">
             <action></action>
             <depend></depend>

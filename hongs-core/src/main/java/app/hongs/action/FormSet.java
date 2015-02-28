@@ -23,7 +23,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * 表单配置.
+ * 表单结构配置.
  *
  * <p>
  * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;
@@ -35,10 +35,10 @@ import org.xml.sax.SAXException;
  * <pre>
     forms = {
         "form_name" : {
-            "item_name" : {
+            "field_name" : {
                 __disp__ : "Label",
                 __type__ : "string|number|date|file|enum|form",
-                __rule__ : "Rule Func Name",
+                __rule__ : "rule.class.Name",
                 __required__ : yes|no,
                 __repeated__ : yes}no,
                 "name" : "Value"
@@ -253,7 +253,7 @@ public class FormSet
 
   public Map getEnumTranslated(String namc) {
     CoreLanguage lang = getCurrTranslator();
-    Map anum = getEnum(name);
+    Map anum = getEnum(namc);
     Map data = new LinkedHashMap();
     if (anum == null) return data ;
     data.putAll(anum);

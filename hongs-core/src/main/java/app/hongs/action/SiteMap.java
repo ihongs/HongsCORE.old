@@ -10,8 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,7 +28,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * 结构配置.
+ * 页面导航配置.
  *
  * <p>
  * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;
@@ -41,8 +39,9 @@ import org.xml.sax.SAXException;
  * <h3>数据结构:</h3>
  * <pre>
     pages = {
-      "href" : {
+      "name" : {
         disp: 名称,
+        href: 链接,
         pages : {
           子级页面...
         },
@@ -235,42 +234,48 @@ public class SiteMap
 
       if ("page".equals(tagName2))
       {
+        Map page2 = new HashMap();
+
+        String namz = element2.getAttribute("name");
+        if (namz == null) namz = "";
+        pages.put( namz , page2);
+
         String href = element2.getAttribute("href");
         if (href == null) href = "";
-        Map page2 = new HashMap();
-        pages.put( href , page2);
-
-        String data = element2.getAttribute("data");
-        if (data == null) data = "";
-        Map data2 = new HashMap();
-        page2.put("data", data2);
+        page2.put("href", href );
 
         String disp = element2.getAttribute("disp");
         if (disp == null) disp = "";
-        page2.put("disp", disp);
+        page2.put("disp", disp );
 
-        for(String s : data.split(";")) {
-            s = s.trim();
-            if (s.length() == 0) {
-                continue;
-            }
-            String[] a  = s.split(":", 2);
-            String   v;
-            if (a.length   == 1) {
-                v = a[0].trim();
-            } else {
-                v = a[1].trim();
-            }
-            try {
-                data2.put(a[1] , URLDecoder.decode( v , "UTF-8" ) );
-            } catch (UnsupportedEncodingException ex) {
-                throw new HongsException(HongsException.COMMON, ex);
-            }
-        }
+//        Map data2 = new HashMap();
+//        
+//        String data = element2.getAttribute("data");
+//        if (data == null) data = "";
+//        page2.put("data", data2);
+//
+//        for(String s : data.split(";")) {
+//            s = s.trim();
+//            if (s.length() == 0) {
+//                continue;
+//            }
+//            String[] a  = s.split(":", 2);
+//            String   v;
+//            if (a.length   == 1) {
+//                v = a[0].trim();
+//            } else {
+//                v = a[1].trim();
+//            }
+//            try {
+//                data2.put(a[1] , URLDecoder.decode( v , "UTF-8" ) );
+//            } catch (UnsupportedEncodingException ex) {
+//                throw new HongsException(HongsException.COMMON, ex);
+//            }
+//        }
 
         List path2 = new ArrayList(path);
         path2.add(page2);
-        paths.put(href, path2);
+        paths.put(namz, path2);
 
         Map pages2 = new LinkedHashMap();
         Map roles2 = new LinkedHashMap();
@@ -291,14 +296,15 @@ public class SiteMap
       else
       if ("role".equals(tagName2))
       {
+        Map role2 = new HashMap();
+
         String namz = element2.getAttribute("name");
         if (namz == null) namz = "";
-        Map role2 = new HashMap();
-        roles.put(namz, role2);
+        roles.put( namz , role2);
 
         String disp = element2.getAttribute("disp");
         if (disp == null) disp = "";
-        role2.put("disp", disp);
+        role2.put("disp", disp );
 
         Set actions2 = new HashSet();
         Set depends2 = new HashSet();
@@ -345,12 +351,12 @@ public class SiteMap
 
   /**
    * 获取页面信息
-   * @param href
+   * @param name
    * @return 找不到则返回null
    */
-  public Map getPage(String href)
+  public Map getPage(String name)
   {
-    List path  = this.paths.get(href);
+    List path  = this.paths.get(name);
     if ( path == null) return null;
     int  last  = path.size() - 1;
     return (Map) path.get (last);
@@ -358,15 +364,15 @@ public class SiteMap
 
   /**
    * 获取页面单元
-   * @param hrefs
+   * @param names
    * @return 单元字典
    */
-  public Map<String, Map> getPageRoles(String... hrefs)
+  public Map<String, Map> getPageRoles(String... names)
   {
     Map<String, Map> rolez = new HashMap();
 
-    for (String herf : hrefs) {
-        Map page = getPage(herf);
+    for (String namz : names) {
+        Map page = getPage(namz);
         Map dict;
 
         dict = (Map)page.get("roles");
@@ -385,15 +391,15 @@ public class SiteMap
 
   /**
    * 获取页面权限
-   * @param hrefs
+   * @param names
    * @return 单元字典
    */
-  public Set<String> getPageAuths(String... hrefs)
+  public Set<String> getPageAuths(String... names)
   {
     Set<String> authz = new HashSet();
 
-    for (String herf : hrefs) {
-        Map page = getPage(herf);
+    for (String namz : names) {
+        Map page = getPage(namz);
         Map dict;
 
         dict = (Map)page.get("foles");
@@ -452,15 +458,15 @@ public class SiteMap
    */
   public void getRoleAuths(Map roles, Set auths, String... names)
   {
-    for (String key : names)
+    for (String n : names)
     {
-      Map role = this.roles.get(key);
-      if (role == null || roles.containsKey(key))
+      Map role = this.roles.get(n);
+      if (role == null || roles.containsKey(n))
       {
         continue;
       }
 
-      roles.put(key, role);
+      roles.put(n, role);
 
       if (role.containsKey("actions"))
       {
@@ -532,11 +538,11 @@ public class SiteMap
 //
 //  /**
 //   * 检查页面权限(与当前请求相关)
-//   * @param href
+//   * @param name
 //   * @return 有一个动作可访问即返回true
 //   */
-//  public Boolean chkPage(String href) {
-//      Set<String> actions = getPageAuths(href);
+//  public Boolean chkPage(String name) {
+//      Set<String> actions = getPageAuths(name);
 //      if (null == actions || actions.isEmpty()) {
 //          return  true ;
 //      }
@@ -557,7 +563,7 @@ public class SiteMap
 
   /**
    * 获取菜单翻译(与当前请求相关)
-   * @return 
+   * @return
    */
   public CoreLanguage getMenuTranslator() {
     CoreLanguage lang;
@@ -601,35 +607,40 @@ public class SiteMap
       for(Map.Entry item : pages.entrySet()) {
           Map  v = (Map) item.getValue();
           Map  p = (Map) v.get ("pages");
-          List a = getMenuTranslated(level, depth, i + 1, p, auths, lang);
+          List l = getMenuTranslated(level, depth, i + 1, p, auths, lang);
 
           if (i >= level) {
-              String u = (String) item.getKey();
-              String n = (String) v.get("disp");
-              if (n == null || "".equals(n)) {
-                  n = "core.page."+ u ;
+              String n = (String) item.getKey();
+              String h = (String) v.get("href");
+              String d = (String) v.get("disp");
+              
+              // 没有指定 disp 则用 name 获取
+              if ("".equals(d)) {
+                  d = "core.page." + n ;
               }
+                  d = lang.translate(d);
 
               // 页面下的任意一个动作有权限即认为有权限
-              boolean     c = false;
-              Set<String> z = getPageAuths(u);
+              boolean     a = false;
+              Set<String> z = getPageAuths(n);
               if (z.isEmpty()) {
-                  c = true;
+                  a = true;
               } else for (String x : z ) {
                   if (auths.contains(x)) {
-                      c = true;
+                      a = true;
                   }
               }
 
               Map page = new HashMap();
-              page.put("href", u);
-              page.put("list", a);
-              page.put("auth", c);
-              page.put("disp", lang.translate(n));
+              page.put("name", n);
+              page.put("href", h);
+              page.put("disp", d);
+              page.put("auth", a);
+              page.put("list", l);
 
               list.add(page);
           } else {
-              list.addAll(a);
+              list.addAll(l);
           }
       }
 

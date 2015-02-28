@@ -1,6 +1,7 @@
 package app.hongs.serv;
 
 import app.hongs.Core;
+import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import java.io.File;
@@ -27,7 +28,7 @@ public class AutoFilter implements Filter {
 
     private String action;
     private String render;
-    private Set<String  > actset = null;
+    private Set<String> actset = null;
 
     @Override
     public void init(FilterConfig cnf) {
@@ -69,9 +70,14 @@ public class AutoFilter implements Filter {
                         continue;
                     }
                     // 虚拟路径
-                    req.setAttribute(app.hongs.action.ActionDriver.PATH , url);
+                    req.setAttribute(ActionDriver.PATH, url);
                     // 转发请求
-                    req.getRequestDispatcher(action+uri+ext).include(req, rsp);
+                    // 由于 include 内部无法设置 Header, 而 api 又需要在外层输出, 故采用 include 方式
+                    if (ActionDriver.getRealPath((HttpServletRequest) req).endsWith(".api")) {
+                        req.getRequestDispatcher(action+uri+ext).include(req, rsp);
+                    } else {
+                        req.getRequestDispatcher(action+uri+ext).forward(req, rsp);
+                    }
                     return;
                 }
             }
@@ -82,9 +88,9 @@ public class AutoFilter implements Filter {
                 file = new File(Core.CONT_PATH + "/"+render+uri);
                 if (file.exists()) {
                     // 虚拟路径
-                    req.setAttribute(app.hongs.action.ActionDriver.PATH , url);
+                    req.setAttribute(ActionDriver.PATH, url);
                     // 转发请求
-                    req.getRequestDispatcher(render+uri/**/).forward(req, rsp);
+                    req.getRequestDispatcher(/**/render+uri).forward(req, rsp);
                     return;
                 }
             }
@@ -108,12 +114,20 @@ public class AutoFilter implements Filter {
             }
         });
 
-        Class cls = ActionRunner.getActions().get(action+"/retrieve")
-                                             .getDeclaringClass(/**/);
-        for(Method mtd : cls.getMethods()) {
+        // 使用 retrieve 动作获取 class
+        // 也就是说, 即使不对外提供 retrieve 也要存在 retrieve 方法才行
+        Class cls = ActionRunner.getActions()
+        .get(action.substring(1)+"/retrieve")
+        .getDeclaringClass();
+
+        for(Method mtd : cls.getMethods( ) ) {
             Action ann = mtd.getAnnotation(Action.class);
-            if (ann != null ) {
-               actset.add("/"+ann.value());
+            if (ann != null) {
+                if (!"".equals(ann.value())) {
+                    actset.add("/"+ann.value(  ));
+                } else {
+                    actset.add("/"+mtd.getName());
+                }
             }
         }
 

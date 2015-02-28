@@ -10,20 +10,29 @@
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
 <%
-    String  _module, _entity; int i;
+    int i;
+    String _module, _entity = null;
     _module = ActionDriver.getWorkPath(request);
-    i = _module.lastIndexOf('/');
-    _module = _module.substring(1, i);
-    i = _module.lastIndexOf('/');
-    _entity = _module.substring(i+ 1);
-    _module = _module.substring(0, i);
+    try {
+        i = _module.lastIndexOf('/');
+        _module = _module.substring(1, i);
+    } catch (StringIndexOutOfBoundsException ex) {
+        throw new ServletException("URL Error!");
+    }
+    try {
+        i = _module.lastIndexOf('/');
+        _entity = _module.substring(1+ i);
+        _module = _module.substring(0, i);
+    } catch (StringIndexOutOfBoundsException ex) {
+        _entity = "";
+    }
 
     Mview  view  = new Mview(DB.getInstance(_module).getModel(_entity));
     String title = view.getTitle();
 %>
 <!--
-Hong's Common User Module
-用户模块
+Hong's Auto Info Mange
+自动信息管理
 //-->
 <!doctype html>
 <html>
@@ -34,6 +43,7 @@ Hong's Common User Module
         <link rel="icon" href="<%=request.getContextPath()%>/favicon.ico" type="image/x-icon"/>
         <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/common/css/bootstrap.min.css"/>
         <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/common/css/hongscore.min.css"/>
+        <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/common/src/bootstrap-datetimepicker.css"/>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/jquery.min.js"></script>
         <!--[if glt IE8.0]>
         <script type="text/javascript" src="../compon/respond/respond.min.js"></script>
@@ -45,7 +55,6 @@ Hong's Common User Module
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/hongscore-pick.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/conf/default.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/lang/default.js"></script>
-        <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/common/src/bootstrap-datetimepicker.css"/>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/bootstrap-datetimepicker.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/bootstrap-datetimetoggle.js"></script>
     </head>

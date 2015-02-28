@@ -350,7 +350,7 @@ public class CmdletHelper
 
     ft.format(" %6.2f%% %s", scale, notes);
 
-    // 清除末尾多余的字符, 并将光标返回行首
+    // 清除末尾多余的字符, 并将光标移回行首
     // 每行按最少80个字符来计算
     for (int i = sb.length(); i < 79; i += 1)
     {
@@ -366,15 +366,6 @@ public class CmdletHelper
     {
       System.err.print  (sb.toString());
     }
-  }
-
-  /**
-   * 输出执行进度(无说明)
-   * @param scale
-   */
-  public static void printERate(float scale)
-  {
-    printERate(scale, "");
   }
 
   /**

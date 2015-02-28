@@ -36,7 +36,7 @@ import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 /**
- * 动作助手
+ * 动作助手类
  *
  * <p>
  * 通过 getRequestData,getParameter,getAttribute,getSessValue
@@ -571,7 +571,7 @@ public class ActionHelper
    */
   public void print(String txt, String ctt)
   {
-    this.print(txt, ctt, "utf-8");
+    this.print(txt,ctt,"UTF-8");
   }
 
   /**
@@ -580,7 +580,7 @@ public class ActionHelper
    */
   public void print(String htm)
   {
-    this.print(htm, "text/html");
+    this.print(htm,"text/html");
   }
 
   /**

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <page name="common/goto.act?m=demo_db" disp="数据库测试">
+        <page disp="测试" name="demo_db/demo1/list.jsp" href="demo/#demo1">
+        </page>
+    </page>
+</root>

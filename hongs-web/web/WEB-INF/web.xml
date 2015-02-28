@@ -91,7 +91,7 @@
             <param-value>/haim/dl/lucene</param-value>
         </init-param>
         <init-param>
-            <param-name>action</param-name>
+            <param-name>render</param-name>
             <param-value>/haim/dl</param-value>
         </init-param>
     </filter>
@@ -113,14 +113,14 @@
     </filter>
     <filter-mapping>
         <filter-name>AutoFilter_DB</filter-name>
-        <url-pattern>/demo/*</url-pattern>
+        <url-pattern>/demo_db/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
         <filter-name>AutoFilter_DL</filter-name>
-        <url-pattern>/test/*</url-pattern>
+        <url-pattern>/demo_dl/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>

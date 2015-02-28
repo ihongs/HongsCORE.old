@@ -1,8 +1,4 @@
 <root>
-    <enum name="__string_patterns__">
-        <value code="url"></value>
-        <value code="email"></value>
-    </enum>
     <!--
     <enum name="demo-enum">
         <value code="1">名称1</value>

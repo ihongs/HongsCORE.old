@@ -1,10 +1,10 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.db.DB"%>
 <%@page import="app.hongs.db.Mview"%>
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String  _module, _entity, _action; int i;
     _module = ActionDriver.getWorkPath(request);
@@ -24,6 +24,7 @@
     String title = view.getTitle();
     String idKey = view.getIdKey();
 %>
+<!-- 列表 -->
 <h2><%=lang.translate("fore."+_action+".title", title)%></h2>
 <div id="<%=_module%>-<%=_entity%>-<%=_action%>">
     <object class="config" name="hsList" data="">

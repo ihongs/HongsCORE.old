@@ -173,18 +173,20 @@ HsForm.prototype = {
             if (! v && (v !== 0 || v !== "")) continue;
 
             if (i == 0) {
-                v = this._fill__review( inp, v, n, "info" );
-                inp.text(v );
+                v = this._fill__review(inp, v, n, "info");
+                inp.text(v);
             }
             else if (inp.attr("type") == "checkbox"
                  ||  inp.attr("type") == "radio") {
-                inp.filter("[value='"+v+"']")
-                   .prop("checked", true)
-                   .change();
+                jQuery.each(!jQuery.isArray(v) ? [v] : v,
+                function(i, u) {
+                    inp.filter("[value='"+u+"']")
+                       .prop  ("checked" , true )
+                       .change();
+                });
             }
             else {
-                inp.val (v )
-                   .change();
+                inp.val(v).change();
             }
         }
         delete this._info;
@@ -240,17 +242,31 @@ HsForm.prototype = {
         }
     },
     saveBack : function(rst) {
-        rst = hsResponObj(rst);//, !!this.formBox.attr("target"));
+        rst = hsResponObj(rst, true);
         if (rst.ok  === false) {
             var evt = new jQuery.Event("saveFail");
             this.formBox.trigger(evt, [rst]);
-            if (typeof rst.errors !== "undefined") {
+            this.formBox.find(".form-group").removeClass("has-error");
+            this.formBox.find(".help-block").   addClass("invisible");
+            if (rst.errors) {
                 for(var n in rst.errors) {
-                    var e =  rst.errors[ n ];
+                    var e =  rst.errors[n];
                     this.haserror(n , e);
                 }
             }
+
+            // 错误提示
+            if (rst.msg) {
+                alert(rst.msg);
+            } else {
+                alert(hsGetLang("error.unkwn"));
+            }
         } else {
+            // 完成提示
+            if (rst.msg) {
+                jQuery.hsNote(rst.msg, 'alert-success');
+            }
+
             var evt = new jQuery.Event("saveBack");
             this.formBox.trigger(evt, [rst]);
             if (! evt.isDefaultPrevented( )) {

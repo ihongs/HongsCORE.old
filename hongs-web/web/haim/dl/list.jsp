@@ -1,25 +1,28 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="app.hongs.CoreConfig"%>
+﻿<%@page import="app.hongs.CoreConfig"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.FormSet"%>
 <%@page import="app.hongs.action.SiteMap"%>
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    String  _module, _entity, _action, _page; int i;
+    int i;
+    String  _module, _entity;
     _module = ActionDriver.getWorkPath(request);
     i = _module.lastIndexOf('/');
     _module = _module.substring(1, i);
     i = _module.lastIndexOf('/');
     _entity = _module.substring(i+ 1);
     _module = _module.substring(0, i);
+
+    String _action, _render;
     _action = (String)request.getAttribute("list.action");
     if (_action == null) {
-        _action =  "list" ;
-        _page = "form.jsp";
+        _action = "list";
+        _render = "list.jsp";
     } else {
-        _page = "form4"+_action+".jsp";
+        _render = "list4"+_action+".jsp";
     }
 
     CoreLanguage lang = CoreLanguage.getInstance().clone(/**/);
@@ -28,14 +31,20 @@
     FormSet form = FormSet.getInstance(_module);
     Map<String, Object> flds = form.getFormTranslated(_entity);
 
-    String title = lang.translate(site.getPage(_module+"/"+_entity+"/"+_page).get("disp").toString());
+    Map    pagz  = site.getPage(_module+"/"+_entity+"/list.jsp");
+    String title = pagz == null ? "" : (String) pagz.get("disp");
+           title = lang.translate(title);
 %>
+<!-- 列表 -->
 <h2><%=lang.translate("fore."+_action+".title", title)%></h2>
+<object class="config" name="hsInit" data="">
+    <param name="width" value="600px"/>
+</object>
 <div id="<%=_module%>-<%=_entity%>-<%=_action%>">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('<%=_module%>/<%=_entity%>/retrieve.act?jd=2')"/>
-        <param name="openUrls:0" value="['.create','<%=_module%>/<%=_entity%>/form.html','{TABSBOX}']"/>
-        <param name="openUrls:1" value="['.update','<%=_module%>/<%=_entity%>/form4update.html?id={ID}','{TABSBOX}']"/>
+        <param name="openUrls:0" value="['.create','<%=_module%>/<%=_entity%>/form.jsp','{TABSBOX}']"/>
+        <param name="openUrls:1" value="['.update','<%=_module%>/<%=_entity%>/form4update.jsp?id={ID}','{TABSBOX}']"/>
         <param name="sendUrls:0" value="['.delete','<%=_module%>/<%=_entity%>/delete.act','<%=lang.translate("fore.deletre.confirm", title)%>']"/>
         <param name="_fill__pick" value="(hsListFillPick)"/>
     </object>

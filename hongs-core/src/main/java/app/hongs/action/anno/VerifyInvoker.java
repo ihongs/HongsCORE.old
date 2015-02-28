@@ -64,9 +64,15 @@ public class VerifyInvoker implements FilterInvoker {
             dat = new HashMap();
             dat.put("ok",false);
             CoreLanguage  lng  =  CoreLanguage.getInstance( );
-            dat.put("err",lng.translate("fore.form.invalid"));
+            dat.put("msg",lng.translate("fore.form.invalid"));
+            dat.put("err", "Er400" );
             dat.put("errors" , ers );
             helper.reply( dat );
+
+            // Servlet 环境下设置状态码为 400(错误的请求)
+            if (helper.getResponse() != null) {
+                helper.getResponse().setStatus(javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST);
+            }
         }
     }
 }
