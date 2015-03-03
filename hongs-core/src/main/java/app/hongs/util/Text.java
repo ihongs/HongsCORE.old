@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
- * 常用工具
+ * 常用文本工具
  *
  * <p>
  * 用于引用/编码或清理文本, 转换数值进制等.

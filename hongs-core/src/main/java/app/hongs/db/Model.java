@@ -595,7 +595,7 @@ public class Model
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x10a3, "ID can not be empty for del");
+      throw new HongsException(0x10a4, "ID can not be empty for get");
     }
 
     // 调用filter进行过滤

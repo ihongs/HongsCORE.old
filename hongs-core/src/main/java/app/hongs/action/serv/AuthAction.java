@@ -5,7 +5,7 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionDriver;
-import app.hongs.action.SiteMap;
+import app.hongs.action.MenuSet;
 import app.hongs.util.Data;
 import java.io.IOException;
 import java.util.HashMap;
@@ -71,7 +71,7 @@ public class AuthAction
 
     String data;
     try {
-      SiteMap  sitemap = SiteMap.getInstance(name);
+      MenuSet  sitemap = MenuSet.getInstance(name);
       Set<String> authset = sitemap.getAuthSet(  );
       if (null == authset) authset = new HashSet();
       Map<String, Boolean> datamap = new HashMap();

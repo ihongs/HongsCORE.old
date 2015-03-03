@@ -2,8 +2,10 @@ package app.hongs.db;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
+import app.hongs.util.Synt;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -141,7 +143,7 @@ public class FetchMore
     Set ids = map.keySet();
     if (ids.isEmpty())
     {
-      //throw new HongsException(0x10c0, "Ids map is null");
+      //throw new HongsException(0x10c0, "Ids map is empty");
       return;
     }
 
@@ -282,10 +284,9 @@ public class FetchMore
   public static List fetchMore
     (Table table, FetchCase caze, Map assocs)
   throws HongsException {
-    if ( assocs == null ) assocs = new HashMap();
+    if (assocs == null) assocs = new HashMap();
 
-    List<Map> lnks = new ArrayList();
-
+    List<Map> lnks = new ArrayList(/**/);
     fetchMore(table, caze, assocs, lnks);
     List rows = table.db.fetchMore(caze);
     fetchMore(table, caze,  rows , lnks);
@@ -294,7 +295,7 @@ public class FetchMore
   }
 
   private static void fetchMore
-    (Table table, FetchCase caze, Map assocs, List lnks)
+    (Table table, FetchCase caze, Map assocs, List lnks2)
   throws HongsException {
     Set tns = (Set)caze.getOption("ASSOCS");
     Set tps = (Set)caze.getOption("ASSOC_TYPES");
@@ -324,7 +325,7 @@ public class FetchMore
         }}  else {
             // 非JOIN表先放到一边
             assoc.put("assocName", tn);
-            lnks .add(assoc);
+            lnks2.add( assoc );
             continue;
         }
 
@@ -345,6 +346,9 @@ public class FetchMore
             if (pk == null) pk = table .primaryKey;
         }
         else if ("HAS_MANY".equals(tp)) {
+            throw new HongsException(0x10c2, "Unsupported assoc type '"+tp+"'");
+        }
+        else if ("HAS_MORE".equals(tp)) {
             throw new HongsException(0x10c2, "Unsupported assoc type '"+tp+"'");
         }
         else {
@@ -383,21 +387,21 @@ public class FetchMore
         buildCase(caze2, assoc);
 
         if (assocs2 != null) {
-            FetchMore.fetchMore(table2, caze2, assocs2, lnks);
+            FetchMore.fetchMore(table2, caze2, assocs2, lnks2);
         }
     }
   }
 
   private static void fetchMore
-    (Table table, FetchCase caze, List rows2, List lnks)
+    (Table table, FetchCase caze, List rows2, List lnks2)
   throws HongsException {
     Set tns = (Set)caze.getOption("ASSOCS");
     Set tps = (Set)caze.getOption("ASSOC_TYPES");
-    FetchMore join = new FetchMore(rows2);
+    FetchMore join = new FetchMore( rows2 );
 
-    while (!lnks.isEmpty()) {
-        List lnks2 = new ArrayList();
-    for (Map assoc : ( List<Map> ) lnks) {
+    while (!lnks2.isEmpty()) {
+        List lnkz2 = new ArrayList(  );
+    for(Map assoc : (List<Map>) lnks2) {
         String tp = (String)assoc.get("type");
         String an = (String)assoc.get("name");
         String rn = (String)assoc.get("tableName"); // 原名 realName
@@ -435,6 +439,18 @@ public class FetchMore
             if (pk == null) pk = table .primaryKey;
             caze2.setOption("ASSOC_MULTI" , true );
         }
+        else if ("HAS_MORE".equals(tp)) {
+            // 上级主键连接下级外键
+            if (pk == null) pk = table .primaryKey;
+            caze2.setOption("ASSOC_MULTI" , true );
+
+            // 将下层数据合并到本层
+            if (assocs2 != null) {
+                for(Map ass : ( Collection <Map> ) assocs2.values()) {
+                    ass.put("ASSOC_MERGE" , true );
+                }
+            }
+        }
         else {
             throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
         }
@@ -442,15 +458,22 @@ public class FetchMore
             pk = tn+"."+pk;
         }
 
+        // 合并式关联方式
+        if (Synt.declare(assoc.remove("ASSOC_MERGE"), false)) {
+            caze2.setOption("ASSOC_MERGE" , true );
+        } else {
+            caze2.setOption("ASSOC_MERGE" , false);
+        }
+
         buildCase(caze2, assoc);
 
         if (assocs2 != null) {
-            FetchMore.fetchMore(table2, caze2, assocs2, lnks2);
+            FetchMore.fetchMore(table2, caze2, assocs2, lnkz2);
         }
 
         join.join (table2, pk, fk.startsWith(":") ? fk.substring(1) : fk, caze2);
     }
-        lnks = lnks2;
+        lnks2 = lnkz2;
     }
   }
 
@@ -504,7 +527,7 @@ public class FetchMore
         String        where3;
         for (String k : keys)
         {
-            where2.append(" AND `"+k+"`=?" );
+            where2.append(" AND `").append(k).append("`=?");
         }
         where3 = where2.toString();
 
@@ -519,32 +542,33 @@ public class FetchMore
             }
             params3 = params2.toArray();
 
-            String sql = "SELECT `"+table.primaryKey+"` FROM `"+table.tableName+"` WHERE "+where2;
+            String sql = "SELECT `" + table.primaryKey + "` FROM `" + table.tableName + "` WHERE " + where2;
             Map<String, Object> one = table.db.fetchOne( sql , params3 );
             if (!one.isEmpty())
             {
-                //  有则更新
                 if (!row.containsKey(table.primaryKey) || "".equals(row.get(table.primaryKey)))
+                {
                     row.put(table.primaryKey, one.get(table.primaryKey));
-                table.update(row, where3, params3);
+                }
+                table.update(row, where3, params3); // 有则更新
             }
             else
             {
-                // 没则插入
                 if (!row.containsKey(table.primaryKey) || "".equals(row.get(table.primaryKey)))
+                {
                     row.put(table.primaryKey, Core.getUniqueId());
-                table.insert(row);
+                }
+                table.insert(row); // 没则插入
             }
 
             ids.add(row.get(table.primaryKey));
         }
 
         // 删除多余
-        where2 = new StringBuilder(where);
-        where2.append(" AND `"+table.primaryKey+"` NOT IN (?)");
-        params2 = new ArrayList(params1 );
-        params2.add(ids);
-        table .delete( where2.toString( ), params2.toArray( ) );
+        where2  = new StringBuilder(where);
+        where2.append(" AND `").append(table.primaryKey).append("` NOT IN (?)");
+        params2 = new ArrayList( params1 ); params2.add( ids );
+        table .delete(  where2.toString( ), params2.toArray());
     }
 
   /**
@@ -614,7 +638,7 @@ public class FetchMore
           subValues2.addAll((List)subValues);
         }
         else
-        if (subValues instanceof Map)
+        if (subValues instanceof Map )
         {
           subValues2.addAll(((Map)subValues).values());
         }
@@ -709,7 +733,7 @@ public class FetchMore
       List  pa = new ArrayList();
             pa.add(fid);
 
-      // 直接删除数据
+      // 子表伪删除同样有效
       tb.delete("`"+foreignKey+"`=?", pa);
     }
   }

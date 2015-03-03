@@ -8,13 +8,14 @@ import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
 import app.hongs.dl.IAction;
+import app.hongs.dl.anno.CommitSuccess;
 import java.util.Map;
 
 /**
  * Lucene 动作
  * @author Hongs
  */
-@Action("haim/dl/lucene")
+@Action("hongs/lucene")
 public class LuceneAction implements IAction {
 
     @Action("retrieve")
@@ -30,6 +31,7 @@ public class LuceneAction implements IAction {
 
     @Action("create")
     @Verify()
+    @CommitSuccess
     @Override
     public void create(ActionHelper helper) throws HongsException {
         LuceneRecord sr = getModel(helper);
@@ -42,6 +44,7 @@ public class LuceneAction implements IAction {
 
     @Action("update")
     @Verify()
+    @CommitSuccess
     @Override
     public void update(ActionHelper helper) throws HongsException {
         LuceneRecord sr = getModel(helper);
@@ -49,10 +52,11 @@ public class LuceneAction implements IAction {
         int sn = sr.update(rd);
         sr.destroy();
         CoreLanguage lang = CoreLanguage.getInstance();
-        helper.reply(lang.translate("fore.update.success", lang.translate("fore.record"), Integer.toString(sn)));
+        helper.reply(lang.translate("fore.update.success", lang.translate("fore.record"), String.valueOf(sn)));
     }
 
     @Action("delete")
+    @CommitSuccess
     @Override
     public void delete(ActionHelper helper) throws HongsException {
         LuceneRecord sr = getModel(helper);
@@ -60,7 +64,7 @@ public class LuceneAction implements IAction {
         int sn = sr.delete(rd);
         sr.destroy();
         CoreLanguage lang = CoreLanguage.getInstance();
-        helper.reply(lang.translate("fore.delete.success", lang.translate("fore.record"), Integer.toString(sn)));
+        helper.reply(lang.translate("fore.delete.success", lang.translate("fore.record"), String.valueOf(sn)));
     }
 
     public LuceneRecord getModel(ActionHelper helper)

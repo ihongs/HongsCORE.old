@@ -187,10 +187,10 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
     });
 
     if (tip) {
-        tip = tip.hsOpen(url, undefined, pickOpen );
-        tip.data("rel", btn.closest(".openbox")[0]);
+        tip =    tip.hsOpen(url, undefined, pickOpen);
+        tip.data( "rel", btn.closest(".openbox")[0] );
     } else {
-        tip =   $.hsOpen(url, undefined, pickOpen );
+        tip = jQuery.hsOpen(url, undefined, pickOpen);
     }
 
     return tip;
@@ -209,7 +209,7 @@ function hsFormFillPick(box, v, n, t) {
     box.data("pickFunc", hsFormFillPick);
 
     var btn = box.siblings("[data-toggle=hsPick]");
-    var mul = /(\[\]|\.)$/.test( n );
+    var mul = /(\[\]|\.\.|\.$)/.test(n); // a[b][]|a[][b]|a.b.|a..b 均表示多选
 
     if (t == "info") {
         var tn = box.attr("data-tn") || '';

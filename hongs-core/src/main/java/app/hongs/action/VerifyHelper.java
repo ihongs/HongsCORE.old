@@ -162,28 +162,12 @@ public class VerifyHelper {
     }
 
     private Object verify(Map values, boolean update, Object data, String name, List<Rule> rulez, Map wrongz) throws HongsException {
-        // 当数据不存在时, 更新状态或选填时则跳过
-        if (data == null && update) {
-            return SKIP;
-        }
-        boolean optial = true ;
-        for (Rule rule : rulez) {
-            if (rule instanceof Required) {
-                optial = false;
-                break;
-            }
-        }
-        if (data == null && optial) {
-            return SKIP;
-        }
-
         int i =0;
         for (Rule  rule  :  rulez) {
             i ++;
 
             rule.setValues(values);
-            rule.params.put("__update__", update);
-            rule.params.put("__optial__", optial);
+            rule.setUpdate(update);
 
             try {
                 data = rule.verify(data);
@@ -206,7 +190,6 @@ public class VerifyHelper {
                 break;
             }
         }
-
         return  data ;
     }
 
@@ -274,12 +257,16 @@ public class VerifyHelper {
     public static abstract class Rule {
         protected Map params = null;
         protected Map values = null;
+        protected boolean update;
 
         public void setParams(Map params) {
             this.params = params;
         }
         public void setValues(Map values) {
             this.values = values;
+        }
+        public void setUpdate(boolean update) {
+            this.update = update;
         }
 
         public abstract Object verify(Object value) throws Wrong, Wrongs, HongsException;
@@ -303,6 +290,7 @@ public class VerifyHelper {
         @Override
         public Object verify(Object value) throws Wrong {
             if (value  ==  null ) {
+                if (update) return SKIP;
                 throw new Wrong("fore.form.required");
             }
             if ("".equals(value)) {
@@ -459,11 +447,11 @@ public class VerifyHelper {
                 name = Synt.declare(params.get("__name__"), "");
             }
 
-            Map data = FormSet.getInstance(conf).getEnum(name);app.hongs.util.Data.dumps(value);
+            Map data = FormSet.getInstance(conf).getEnum(name);
             if (! data.containsKey( value.toString() ) ) {
                 throw new Wrong("fore.form.not.in.enum");
             }
-            return value;
+            return  value;
         }
     }
 
@@ -481,8 +469,8 @@ public class VerifyHelper {
             }
 
             VerifyHelper hlpr = new VerifyHelper();
-            hlpr.addRulesByForm(conf, name);
-            return hlpr.verify (values, ud);
+            hlpr.addRulesByForm(conf  , name  );
+            return  hlpr.verify(values, update);
         }
     }
 

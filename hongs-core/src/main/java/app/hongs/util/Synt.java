@@ -11,10 +11,40 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * 语法补充
+ * 常用语法补充
  * @author Hongs
  */
 public class Synt {
+
+    /**
+     * 取默认值
+     * @param <T>
+     * @param vals
+     * @return
+     */
+    public static <T> T defoult(T... vals) {
+        for (T  val  : vals) {
+            if (val != null) {
+                return val ;
+            }
+        }
+        return  null;
+    }
+
+    /**
+     * 取默认值(null,"",0 均视为无值)
+     * @param <T>
+     * @param vals
+     * @return
+     */
+    public static <T> T defxult(T... vals) {
+        for (T  val  : vals) {
+            if (val != null && "".equals(val) && ZERO.equals(val)) {
+                return val ;
+            }
+        }
+        return  null;
+    }
 
     /**
      * 确保此变量类型为 cls 类型
@@ -240,15 +270,17 @@ public class Synt {
         return dat.toArray();
     }
 
-    public static Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
-    public static Pattern FLSE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
+    public static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
+    public static final Pattern FLSE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
+
+    private static final Number ZERO = 0;
 
     /**
      * 在 Each.each 里
      * 返回 EACH.NEXT 则排除此项
      * 返回 EACH.LAST 则跳出循环
      */
-    public static enum LOOP { NEXT, LAST };
+    public static enum LOOP {NEXT, LAST};
 
     public static interface Each {
         public Object each(Object v);
@@ -265,14 +297,17 @@ public class Synt {
         protected Object k;
         protected int i;
 
+        @Override
         public void setObj(Object o) {
             this.o = o;
         }
 
+        @Override
         public void setKey(Object k) {
             this.k = k;
         }
 
+        @Override
         public void setIdx(int i) {
             this.i = i;
         }
@@ -284,6 +319,7 @@ public class Synt {
     public static abstract class LeafNode extends EachNode {
         public abstract Object leaf(Object v);
 
+        @Override
         public Object each(Object v) {
             if (v instanceof Map ) {
                 return foreach((Map ) v, this);

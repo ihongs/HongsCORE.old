@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * HTTP 服务器
+ * 常规服务
  * @author Hongs
  */
 @Cmdlet("common")
@@ -19,62 +19,120 @@ public class Common {
 
     @Cmdlet("make-uid")
     public static void makeUID(String[] args) {
-      System.out.println("UID: "+Core.getUniqueId());
+        System.out.println(Core.getUniqueId());
     }
 
     @Cmdlet("show-env")
     public static void showENV(String[] args) {
-      Map<String, String> env = new TreeMap(new PropComparator());
-      env.putAll(new HashMap(System.getenv()));
-      System.out.println("ENV:");
-      for (Map.Entry<String, String> et : env.entrySet()) {
-        String k = et.getKey(  );
-        String v = et.getValue();
-        System.out.println("  "+k+"\t"+v);
-      }
+        Map<String, String> a = new TreeMap(new PropComparator());
+        Map<String, String> m = new HashMap(    System.getenv ());
+        int i = 0, j;
+
+        for (Map.Entry<String, String> et : m.entrySet()) {
+            String k = et.getKey(  );
+            String v = et.getValue();
+            a.put(k, v);
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
     }
 
     @Cmdlet("show-properties")
     public static void showProperties(String[] args) {
-      Map<String, String> env = new TreeMap(new PropComparator());
-      env.putAll(new HashMap(System.getProperties()));
-      System.out.println("Properties:");
-      for (Map.Entry<String, String> et : env.entrySet()) {
-        String k = et.getKey(  );
-        String v = et.getValue();
-        System.out.println("  "+k+"\t"+v);
-      }
+        Map<String, String> a = new TreeMap( new  PropComparator());
+        Map<String, String> m = new HashMap(System.getProperties());
+        int i = 0, j;
+
+        for (Map.Entry<String, String> et : m.entrySet()) {
+            String k = et.getKey(  );
+            String v = et.getValue();
+            a.put(k, v);
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
     }
 
     @Cmdlet("show-actions")
     public static void showActions(String[] args) {
-      Map<String, Method> actions = new TreeMap(new PropComparator());
-      actions.putAll(ActionRunner.getActions());
-      System.out.println("Actions:");
-      for (Map.Entry<String, Method> et : actions.entrySet()) {
-        String a = et.getKey(  );
-        Method m = et.getValue();
-        System.out.println("  "+a+"\t"+m.getDeclaringClass().getName()+"."+m.getName());
-      }
+        Map<String, String> a = new TreeMap(new PropComparator());
+        int i = 0, j;
+
+        for (Map.Entry<String, Method> et : ActionRunner.getActions().entrySet()) {
+            String k = et.getKey(  );
+            Method v = et.getValue();
+            a.put(k, v.getDeclaringClass().getName()+"."+v.getName());
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
     }
 
     @Cmdlet("show-cmdlets")
     public static void showCmdlets(String[] args) {
-      Map<String, Method> actions = new TreeMap(new PropComparator());
-      actions.putAll(CmdletRunner.getCmdlets());
-      System.out.println("Cmdlets:");
-      for (Map.Entry<String, Method> et : actions.entrySet()) {
-        String a = et.getKey(  );
-        Method m = et.getValue();
-        System.out.println("  "+a+"\t"+m.getDeclaringClass().getName()+"."+m.getName());
-      }
+        Map<String, String> a = new TreeMap(new PropComparator());
+        int i = 0, j;
+
+        for (Map.Entry<String, Method> et : CmdletRunner.getCmdlets().entrySet()) {
+            String k = et.getKey(  );
+            Method v = et.getValue();
+            a.put(k, v.getDeclaringClass().getName()+"."+v.getName());
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
     }
 
     private static class PropComparator implements Comparator<String> {
-      @Override
-      public int compare(String s1, String s2) {
-        return s1.compareTo(s2);
-      }
+        @Override
+        public int compare(String s1, String s2) {
+            return s1.compareTo(s2);
+        }
     }
 
 }

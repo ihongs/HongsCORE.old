@@ -1,39 +1,36 @@
-<%@page import="java.util.Map"%>
-<%@page import="java.util.List"%>
+<%@page import="app.hongs.util.Synt"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.CoreLanguage"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.SiteMap"%>
+<%@page import="app.hongs.action.MenuSet"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%!
     StringBuilder makeMenu(List<Map> list, String path) {
         StringBuilder menus = new StringBuilder();
         for(Map menu : list) {
-            if (! (Boolean) menu.get("auth")) {
-                continue;
-            }
-            
             String disp = (String) menu.get("disp");
-            String href = (String) menu.get("name");
-            String data = (String) menu.get("href");
+            String href = (String) menu.get("href");
+            String page = (String) menu.get("page");
+            String data = (String) menu.get("data");
 
-            if (!"".equals(data)) {
-                if (data.startsWith(path+"/") && data.contains("#")) {
-                    String hash = data.substring(data.indexOf ('#'));
-                    data = Core.BASE_HREF + "/" + href;
-                    href = hash;
-                } else {
-                    href = Core.BASE_HREF + "/" + data;
-                    data =  "" ;
-                }
+            if (! "".equals(data)) {
+                page += "?"+data;
+            }
+
+            if (href.startsWith(path+"/") && href.contains("#")) {
+                href = href.substring(href.indexOf('#'));
+                page = Core.BASE_HREF + "/" + page;
             } else {
-                    href = Core.BASE_HREF + "/" + href;
+                href = Core.BASE_HREF + "/" + href;
+                page = "";
             }
 
             menus.append("<li>" )
                  .append("<a data-href=\"")
-                 .append(data)
+                 .append(page)
                  .append("\" href=\"")
                  .append(href)
                  .append("\">"  )
@@ -50,12 +47,16 @@
     if (name == null || "".equals(name) ) {
         name = "default";
     }
+    String path= helper.getParameter("n");
+    if (path == null || "".equals(path) ) {
+        path =  name ;
+    }
 
-    SiteMap main = SiteMap.getInstance();
-    SiteMap curr = SiteMap.getInstance(name);
+    MenuSet main = MenuSet.getInstance();
+    MenuSet curr = MenuSet.getInstance(name);
     List<Map> mainMenu = main.getMenuTranslated(1, 1);
     List<Map> currMenu = curr.getMenuTranslated(1, 1);
-    
+
     String  user = (String ) helper.getSessvalue("name");
     Integer msgc = (Integer) helper.getSessvalue("msgc");
     String  msgs = msgc == null ? null : (msgc > 9 ? "9+" : Integer.toString(msgc));
@@ -84,7 +85,7 @@
 
 <div class="collapse navbar-collapse" id="main-collapse">
     <ul class="nav navbar-nav navbar-left " id="curr-menubar">
-        <%=makeMenu(currMenu, name)%>
+        <%=makeMenu(currMenu, path)%>
     </ul>
     <ul class="nav navbar-nav navbar-right" id="main-menubar">
         <li class="dropdown">
@@ -94,10 +95,10 @@
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
-                <%=makeMenu(mainMenu, name)%>
+                <%=makeMenu(mainMenu, path)%>
                 <%if (user != null) {%>
                 <li class="divider"></li>
-                <li><a href="javascript:;" id="sign-out">注销</a></li>
+                <li><a href="javascript:;" id="sign-out"><%=CoreLanguage.getInstance().translate("fore.logout")%></a></li>
                 <%} // End If%>
             </ul>
         </li>
@@ -126,17 +127,25 @@
             });
         $("#sign-out")
             .click(function() {
-                $.get(hsFixUri("hcum/sign/out.act"), function() {
+                $.get(hsFixUri("hongs/member/sign/out.act"), function() {
                     location.reload();
                 });
             });
 
         $(function() {
-            if ( location.hash  ) {
-                $("#curr-menubar>li>a[href='"+location.hash+"']").click();
+            // Click the first available menu item
+            var a;
+            if (location.hash) {
+                a = $("#curr-menubar a[href='"+location.hash+"']");
             } else {
-                $("#curr-menubar>li>a").first().click();
+                a = $("#curr-menubar a").first();
             }
+            if (a.size() == 0) {
+                a = $("#main-menubar ul.dropdown-menu a").first( );
+            }
+            a.click();
+
+            // Auto hide the main menu
             setTimeout(function() {
                 $("#main-menubar>li>a").first().click();
             }, 1000);

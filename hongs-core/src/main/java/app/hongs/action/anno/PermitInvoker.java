@@ -3,7 +3,7 @@ package app.hongs.action.anno;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.SiteMap;
+import app.hongs.action.MenuSet;
 import java.lang.annotation.Annotation;
 
 /**
@@ -17,7 +17,7 @@ public class PermitInvoker implements FilterInvoker {
         String role = ann.role();
         String conf = ann.conf();
 
-        SiteMap map = SiteMap.getInstance( conf );
+        MenuSet map = MenuSet.getInstance( conf );
         boolean has;
         if (null == role || "".equals(role)) {
             has = map.chkAuth(chains.getAction());

@@ -14,21 +14,20 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 /**
- * 简单JSON格式工具
+ * JSON格式工具
  *
  * <p>
- * 支持将 <b>数组,集合框架,基础类型</b> 的数据转换为 Data 字符串,
- 反向解析 Data 字符串到 Java 对象; 暂采用 org.json.simple 来完成.
- </p>
+ * 支持将 <b>数组,集合框架,基础类型</b> 的数据转换为 JSON 字符串,
+ * 反向解析 JSON 字符串到 Java 集合框架对象; 采用 org.json.simple 完成.
+ * </p>
  * 
  * <p>
- 顺便说说为什么不采用第3方的 Data 库:
- 最开始用 org.json, 还不错, 可惜在解析 Data 时会解析成他自身的对象而不是 Java 集合框架的对象;
+ 顺便说说为什么不采用第3方的 JSON 库:
+ 最开始用 org.json, 还不错, 可惜在解析 JSON 时会解析成他自身的对象而不是 Java 集合框架对象;
  后来采用 org.json.simple, 也很好, 但是不支持 Set, 需要修改其源码将 List 改成 Collection;
- 考虑到我有一个 Dump 类, 用于调试输出基础类型和集合对象, 其实现与 Data 大同小异,
- 故将其修改成该 JSON类; 但是 Data 的解析太麻烦, 就还是调 org.json.simple 好了.
- 另, 最近听闻有些移动端编程对 null 不方便处理, 加了一个参数来用于全部转为字符串.
- </p>
+ 考虑到我有一个 Dump 类, 用于调试输出基础类型和集合对象, 其实现与 JSON 大同小异,
+ 故将其修改成该 Data 类; 但是 JSON 的解析太麻烦, 就还是调 org.json.simple 好了.
+ * </p>
  *
  * <h3>错误代码</h3>
  * <pre>

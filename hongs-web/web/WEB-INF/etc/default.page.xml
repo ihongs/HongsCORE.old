@@ -1,9 +1,0 @@
-<root>
-    <page name="/" href="/">
-        <include>hcum</include>
-        <include>resume</include>
-        <include>search</include>
-        <include>demo_db</include>
-        <include>demo_dl</include>
-    </page>
-</root>

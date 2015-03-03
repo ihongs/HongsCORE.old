@@ -1,0 +1,16 @@
+<div id="member_dept_tree">
+    <object class="config" name="hsTree" data="">
+        <param name="loadUrl" value="hongs/member/dept/list.act"/>
+        <param name="linkUrls#0" value="['.main-context','hongs/member/user/list.html?dept_id={ID}']"/>
+        <param name="openUrls#0" value="['.create','hongs/member/dept/form.html?pid={ID}','{TABSBOX}']"/>
+        <param name="openUrls#1" value="['.modify','hongs/member/dept/form.html?id={ID}','{TABSBOX}']"/>
+        <param name="sendUrls#0" value="['.delete','hongs/member/dept/delete.act','您确定要删除此部门?']"/>
+        <param name="rootName" value="组织架构"/>
+    </object>
+    <div class="toolbox btn-group">
+        <button  type="button" class="create btn btn-default">添加</button>
+        <button  type="button" class="modify for-select btn btn-default">修改</button>
+        <button  type="button" class="delete for-select btn btn-danger" >删除</button>
+    </div>
+    <div class="treebox"></div>
+</div>

@@ -71,7 +71,7 @@ public class SupplyHelper {
             String xonf = (String) mt.get("conf");
             String xame = (String) mt.get("enum");
             if (null == xonf || "".equals( xonf )) xonf = conf;
-            if (null == xame || "".equals( xame )) xame = name;app.hongs.util.Data.dumps(cnf.enums);
+            if (null == xame || "".equals( xame )) xame = name;
             Map xnum  = FormSet.getInstance(xonf).getEnumTranslated(xame);
             if (xnum != null) {
                 enums.put(name, xnum);
@@ -118,7 +118,8 @@ public class SupplyHelper {
             String   key = (String)  et.getKey();
             Map      map = (Map)   et.getValue();
             List     lst = new ArrayList();
-            Dict.setParam(data, lst, key );
+//          Dict.setParam(data, lst, key );
+            data.put(key, lst); // 不要放太深层级
 
             Iterator i = map.entrySet().iterator();
             while (i.hasNext()) {

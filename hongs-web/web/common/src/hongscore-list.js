@@ -218,6 +218,7 @@ HsList.prototype = {
     loadBack : function(rst) {
         rst = hsResponObj(rst);
         if (rst.ok === false) return;
+        this.listBox.trigger("loadOver", [rst]);
         if (rst.list) this.fillList( rst.list );
         if (rst.page) this.fillPage( rst.page );
         this.listBox.trigger("loadBack", [rst]);
@@ -523,24 +524,24 @@ jQuery.fn.hsList = function(opts) {
     })
     .on("change", ".HsList .checkone",
     function() {
-        var box = $(this).closest(".HsList");
-        var siz = box.find(".checkone" ).length;
+        var box = $(this ).closest(".HsList" );
+        var siz = box.find(".checkone").length;
         var len = box.find(".checkone:checked").length;
         box.find(".for-select").prop("disabled", len != 1);
         box.find(".for-checks").prop("disabled", len == 0);
-        box.find(".checkall"  ).prop("checked" , siz && siz == len );
+        box.find(".checkall"  ).prop("choosed" , siz && siz==len ? true : (len && siz!=len ? null : false));
     })
     .on("change", ".HsList .checkall",
     function() {
-        var ckd = $(this).prop ( "checked" );
-        var box = $(this).closest(".HsList");
+        this.indeterminate = false;
+        var box = $(this ).closest(".HsList" );
+        var ckd = $(this/**/).prop("checked" );
         box.find(".checkone").prop("checked", ckd).trigger("change");
     })
     .on("loadBack", ".HsList .listbox",
     function() {
-        var box = $(this).closest(".HsList");
-        box.find(".for-select,.for-checks" ).prop("disabled", true );
-        box.find(".checkall").prop("checked", false);
-        box.find(".checkone").change();
+        var box = $(this ).closest(".HsList" );
+        box.find(".for-select,.for-checks").prop("disabled" , true );
+        box.find(".checkone" ).change(/**/);
     });
 })(jQuery);

@@ -56,11 +56,11 @@ public class DBSync
       {
         sdb.execute(sql);
       }
-      sdb.commit(  );
+      sdb.commit();
     }
     catch (HongsException ex)
     {
-      sdb.rollback();
+      sdb.revoke();
       throw ex;
     }
   }

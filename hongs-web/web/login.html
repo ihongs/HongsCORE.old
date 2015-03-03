@@ -1,11 +1,7 @@
-<!--
-Hong's Common User Module
-用户模块
-//-->
 <!doctype html>
 <html>
     <head>
-        <title>登录</title>
+        <title>HongsCORE::Login</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" href="favicon.ico" type="image/x-icon"/>
@@ -24,10 +20,10 @@ Hong's Common User Module
     <body>
         <div class="jumbotron" style="margin-top: 2em; background-color: #222; color: #ccc;">
             <div class="container">
-                <h1>您好!</h1>
-                <p>欢迎使用
+                <h1 data-i18n="hello">Hello!</h1>
+                <p> <span data-i18n="welcome1">Welcome to</span>
                     <!--<span style="color:#f08" class="glyphicon glyphicon-fire"></span>-->
-                    <span style="color:#f00">H</span>
+                    <span style="color:#f00">&nbsp;H</span>
                     <span style="color:#f22">o</span>
                     <span style="color:#f44">n</span>
                     <span style="color:#f66">g</span>
@@ -35,21 +31,21 @@ Hong's Common User Module
                     <span style="color:#faa">C</span>
                     <span style="color:#fbb">O</span>
                     <span style="color:#fcc">R</span>
-                    <span style="color:#fdd">E</span>
-                    信息管理系统, 请登录...</p>
+                    <span style="color:#fdd">E&nbsp;</span>
+                    <span data-i18n="welcome2">management information systems. Please login...</span></p>
                 <div class="row">
                     <form class="col-lg-6" id="sign-in-form">
                         <object class="config" name="hsForm" data="">
-                            <param name="saveUrl" value="hcum/sign/in.act"/>
+                            <param name="saveUrl" value="hongs/member/sign/in.act"/>
                         </object>
                         <div class="form-group">
-                            <input   type="text"   name="username" value="" placeholder="请输入账号" class="form-control" required="required"/>
+                            <input name="username" type="text" value="abc@def.cn" placeholder="Please input your Username" data-i18n="input.username" class="form-control" required="required"/>
                         </div>
                         <div class="form-group">
-                            <input type="password" name="password" value="" placeholder="请输入口令" class="form-control" required="required"/>
+                            <input name="password" type="password" value="123456" placeholder="Please input your Password" data-i18n="input.password" class="form-control" required="required"/>
                         </div>
                         <div>
-                            <button type="submit" class="btn btn-primary btn-lg">立即进入</button>
+                            <button type="submit" class="btn btn-primary btn-lg" data-i18n="login">Sign in Now</button>
                         </div>
                     </form>
                 </div>
@@ -62,12 +58,11 @@ Hong's Common User Module
         </nav>
         <script type="text/javascript">
             $("#sign-in-form").on("saveBack", function() {
-                console.log(123);
                 var r = hsGetParam(location.href,"r");
                 if (r) {
-                    location.href =  hsFixUri(r);
+                    location.href = hsFixUri(r);
                 } else {
-                    location.href = "index.html";
+                    location.href = "/";
                 }
             });
             

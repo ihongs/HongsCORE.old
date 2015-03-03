@@ -5,14 +5,13 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
-import app.hongs.dl.lucene.LuceneAction;
 import java.util.Map;
 
 /**
  * 搜索动作
  * @author Hongs
  */
-@Action("search")
+@Action("hongs/search")
 public class SearchAction extends LuceneAction {
 
     @Action("retrieve")
@@ -29,16 +28,6 @@ public class SearchAction extends LuceneAction {
         Map sd = sr.counts(rd);
         sr.destroy();
         helper.reply(sd);
-    }
-
-    @Override
-    public void create(ActionHelper helper) throws HongsException {
-        throw new HongsException(HongsException.NOTICE, "Not supported yet.");
-    }
-
-    @Override
-    public void update(ActionHelper helper) throws HongsException {
-        throw new HongsException(HongsException.NOTICE, "Not supported yet.");
     }
 
     @Override

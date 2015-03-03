@@ -91,11 +91,11 @@ HsForm.prototype = {
     loadBack : function(rst) {
         rst = hsResponObj(rst);
         if (rst["ok"] === false) return;
+        this.formBox.trigger("loadOver", [rst]);
         if (rst["enum"]) this.fillEnum(rst["enum"]);
         if (rst["info"]) this.fillInfo(rst["info"]);
         else if (rst.list && rst.list[0]) {
-            // retrieve 可能仅提供 list
-            this.fillInfo (  rst.list[0]);
+            this.fillInfo (  rst.list[0]); // retrieve 可能仅提供 list
         }
         this.formBox.trigger("loadBack", [rst]);
     },
@@ -104,9 +104,10 @@ HsForm.prototype = {
         nodes = this.formBox.find("select[name],[data-fn]");
         datas = {};
         for(i = 0; i < nodes.length; i ++) {
-            n = jQuery(nodes[i]).attr( "name" );
+            n = jQuery(nodes[i]).attr("name");
             if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
-            v = hsGetValue(enam, n);
+            v = enam [n];
+            if (! v) v = hsGetValue(enam , n);
             datas[n] = v;
         }
 
@@ -142,12 +143,13 @@ HsForm.prototype = {
     },
     fillInfo : function(info) {
         var nodes, infos, i, n, t, v, inp;
-        nodes = this.formBox.find("input[name],textarea[name],select[name],[data-fn]");
+        nodes = this.formBox.find("select[name],[data-fn],input[name],textarea[name]");
         infos = {};
         for(i = 0; i < nodes.length; i ++) {
-            n = jQuery(nodes[i]).attr( "name" );
+            n = jQuery(nodes[i]).attr("name");
             if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
-            v = hsGetValue(info, n);
+            v = info [n];
+            if (! v) v = hsGetValue(info , n);
             infos[n] = v;
         }
 
@@ -312,33 +314,61 @@ HsForm.prototype = {
         }
         inp.change().click(); // multiple 必须触发 click 才初始化
     },
-    _fill__check : function(inp, v, n, t) {
-        if (t !== "enum") return v;
-        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
-        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        for (var i = 0; i < v.length; i ++) {
-            var lab = jQuery('<label><input type="checkbox"/><span></span></label>');
-            lab.find("input").attr("name", n).data(v[i])
-                             .val (hsGetValue(v[i], vk));
-            lab.find("span" ).text(hsGetValue(v[i], tk));
-            lab.data("data", v[i]);
-            inp.append(lab);
-        }
-        inp.find(":checkbox").first().change();
-    },
     _fill__radio : function(inp, v, n, t) {
         if (t !== "enum") return v;
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        for (var i = 0; i < v.length; i ++) {
+        for(var i = 0; i < v.length; i ++) {
             var lab = jQuery('<label><input type="radio"/><span></span></label>');
             lab.find("input").attr("name", n).data(v[i])
                              .val (hsGetValue(v[i], vk));
             lab.find("span" ).text(hsGetValue(v[i], tk));
-            lab.data("data", v[i]);
             inp.append(lab);
         }
         inp.find(":radio").first().change();
+    },
+    _fill__check : function(inp, v, n, t) {
+        if (t !== "enum") return v;
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        for(var i = 0; i < v.length; i ++) {
+            var lab = jQuery('<label><input type="checkbox"/><span></span></label>');
+            lab.find("input").attr("name", n).data(v[i])
+                             .val (hsGetValue(v[i], vk));
+            lab.find("span" ).text(hsGetValue(v[i], tk));
+            inp.append(lab);
+        }
+        inp.find(":checkbox").first().change();
+    },
+    _fill__chack : function(inp, v, n, t) {
+        if (t !== "enum") return v;
+
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        var vl = inp.attr("data-vl"); if(!vl) vl = 0;
+        var tl = inp.attr("data-tl"); if(!tl) tl = 1;
+
+        for(var i = 0; i < v.length; i ++) {
+            var u = v[ i ][vl];
+            var s = v[ i ][tl];
+            var set = jQuery('<fieldset><legend class="dropdown-toggle"><input type="checkbox" class="checkall dropdown-deny"/>'
+                        +'&nbsp;<span></span><b class="caret"></b></legend>'
+                    +'<div class="dropdown-body checkbox"></div></fieldset>');
+            set.find("span").first().text(s);
+            inp.append(set );
+            set = set.find ( "div" );
+
+            for(var j = 0; j < u.length; j ++) {
+                var w = u[ j ];
+                var lab = jQuery('<label class="col-md-2"><input type="checkbox"/><span></span></label>');
+                lab.find("input").attr("name", n).data(w)
+                                 .val (hsGetValue(w, vk));
+                lab.find("span" ).text(hsGetValue(w, tk));
+                set.append(lab);
+            }
+        }
+
+        inp.find(":checkbox").first().change();
     },
 
     valiInit : function() {
@@ -600,5 +630,19 @@ jQuery.fn.hsForm = function(opts) {
         var txt = btn.data( "txt" );
         if (txt)  btn.text(  txt  );
         btn.prop("disabled", false);
+    })
+    .on("change", "fieldset .checkall",
+    function(evt) {
+        this.indeterminate = false;
+        var box = $(this).closest("fieldset");
+        var ckd = $(this).prop   ("checked" );
+        box.find(":checkbox:not(.checkall)").prop("checked", ckd).trigger("change");
+    })
+    .on("change", "fieldset :checkbox:not(.checkall)",
+    function(evt) {
+        var box = $(this).closest("fieldset");
+        var siz = box.find(":checkbox:not(.checkall)").length;
+        var len = box.find(":checkbox:not(.checkall):checked").length;
+        box.find(".checkall").prop("choosed", siz && siz==len ? true : (len && siz!=len ? null : false));
     });
 })(jQuery);

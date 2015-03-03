@@ -22,13 +22,13 @@
 
 ## HsTree 树型组件的用法
 
-    <div id="hcum_dept_tree">
+    <div id="member_dept_tree">
         <object class="config" name="hsTree" data="">
-            <param name="loadUrl" value="hcum/dept/list.act"/>
-            <param name="linkUrls:0" value="['.main-context','hcum/user/list.html?dept_id={ID}']"/>
-            <param name="openUrls:0" value="['.create','hcum/dept/form.html?pid={ID}','{TABSBOX}']"/>
-            <param name="openUrls:1" value="['.modify','hcum/dept/form.html?id={ID}','{TABSBOX}']"/>
-            <param name="sendUrls:0" value="['.delete','hcum/dept/delete.act','您确定要删除此部门?']"/>
+            <param name="loadUrl" value="hongs/member/dept/list.act"/>
+            <param name="linkUrls#0" value="['.main-context','hongs/member/user/list.html?dept_id={ID}']"/>
+            <param name="openUrls#0" value="['.create','hongs/member/dept/form.html?pid={ID}','{TABSBOX}']"/>
+            <param name="openUrls#1" value="['.modify','hongs/member/dept/form.html?id={ID}','{TABSBOX}']"/>
+            <param name="sendUrls#0" value="['.delete','hongs/member/dept/delete.act','您确定要删除此部门?']"/>
             <param name="rootName" value="组织架构"/>
         </object>
         <div class="toolbox btn-group">
@@ -41,12 +41,12 @@
 
 ## HsList 列表组件的用法
 
-    <div id="hcum-user-list">
+    <div id="member_user_list">
         <object class="config" name="hsList" data="">
-            <param name="loadUrl" value="('hcum/user/list.act?dept_id='+H$('&dept_id',this))"/>
-            <param name="openUrls:0" value="['.create','hcum/user/form.html?dept_id='+H$('&dept_id',this),'{TABSBOX}']"/>
-            <param name="openUrls:1" value="['.modify','hcum/user/form.html?id={ID}','{TABSBOX}']"/>
-            <param name="sendUrls:0" value="['.delete','hcum/user/delete.act','您确定要删除此用户?']"/>
+            <param name="loadUrl" value="('hongs/member/user/list.act?dept_id='+H$('&dept_id',this))"/>
+            <param name="openUrls#0" value="['.create','hongs/member/user/form.html?dept_id='+H$('&dept_id',this),'{TABSBOX}']"/>
+            <param name="openUrls#1" value="['.modify','hongs/member/user/form.html?id={ID}','{TABSBOX}']"/>
+            <param name="sendUrls#0" value="['.delete','hongs/member/user/delete.act','您确定要删除此用户?']"/>
         </object>
         <div>
             <div class="toolbox col-md-9 btn-group">
@@ -82,10 +82,10 @@
 
 ## HsForm 表单组件的用法
 
-    <div id="hcum_user_form">
+    <div id="member_user_form">
         <object class="config" name="hsForm" data="">
-            <param name="loadUrl" value="hcum/user/info.act"/>
-            <param name="saveUrl" value="hcum/user/save.act"/>
+            <param name="loadUrl" value="hongs/member/user/info.act"/>
+            <param name="saveUrl" value="hongs/member/user/save.act"/>
         </object>
         <form action="" method="POST">
             <input type="hidden" name="id"/>
@@ -94,7 +94,7 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label class="control-label">邮箱</label>
-                        <input type="email" name="username" class="form-control" required="required" data-unique="hcum/user/unique.act?id={id}"/>
+                        <input type="email" name="username" class="form-control" required="required" data-unique="hongs/member/user/unique.act?id={id}"/>
                     </div>
                     <div class="form-group">
                         <label class="control-label">口令</label>
@@ -108,7 +108,7 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label class="control-label">昵称</label>
-                        <input type="text" name="name" class="form-control" required="required" data-unique="hcum/user/unique.act?id={id}"/>
+                        <input type="text" name="name" class="form-control" required="required" data-unique="hongs/member/user/unique.act?id={id}"/>
                     </div>
                     <div class="form-group">
                         <label class="control-label">备注</label>
@@ -124,7 +124,7 @@
     </div>
     <script type="text/javascript">
         (function($) {
-            $("#hcum_user_form").on("loadBack", function() {
+            $("#member_user_form").on("loadBack", function() {
                 if ($(this).find("[name=id]").val()) {
                     $(this).find(":password").removeAttr("required");
                 }

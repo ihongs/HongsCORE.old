@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLanguage;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.SiteMap;
+import app.hongs.action.MenuSet;
 import app.hongs.action.ActionDriver;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -40,7 +40,7 @@ public class AuthFilter
   /**
    * 动作配置
    */
-  private SiteMap siteMap;
+  private MenuSet siteMap;
 
   /**
    * 首页路径
@@ -71,7 +71,7 @@ public class AuthFilter
     s = config.getInitParameter("config");
     try
     {
-      this.siteMap = s == null ? SiteMap.getInstance() : SiteMap.getInstance(s);
+      this.siteMap = s == null ? MenuSet.getInstance() : MenuSet.getInstance(s);
     }
     catch (HongsException ex)
     {

@@ -92,11 +92,11 @@ public class DBConfig
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name : "app/hongs/config/" + name + ".db.xml";
+        fn = name.contains("/") ? name + ".db.xml" : "app/hongs/config/" + name + ".db.xml";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsError(0x2a, "Can not find the source config file '" + fn + "'.");
+            throw new app.hongs.HongsError(0x2a, "Can not find the source config file '" + name + ".db.xml'.");
         }
     }
 

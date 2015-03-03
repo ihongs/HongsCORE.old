@@ -3,7 +3,6 @@ package app.hongs.dl.lucene;
 import app.hongs.Core;
 import app.hongs.CoreLogger;
 import app.hongs.HongsException;
-import app.hongs.dl.lucene.LuceneRecord;
 import app.hongs.util.Synt;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,28 +24,27 @@ import org.apache.lucene.search.TopDocs;
  */
 public class SearchRecord extends LuceneRecord {
 
+    public SearchRecord( Map fields, String datapath, String analyzer ) {
+        super(fields, datapath, analyzer);
+    }
     public SearchRecord(String conf, String name) throws HongsException {
         super(conf, name);
     }
 
     /**
-     * 有指定 ID 则更新
-     * 未指定 ID 则创建
+     * 添加文档(必须有id)
+     * 单独使用需要执行 initial, commit
      * @param rd
-     * @return
+     * @return ID
      * @throws HongsException
      */
-    public String upsert(Map rd) throws HongsException {
-        connect();
-
+    @Override
+    public String add(Map rd) throws HongsException {
         String id = Synt.declare(rd.get(idCol), String.class);
-        if (id != null && id.length() != 0) {
-            set(id , rd);
-        } else {
-            id = add(rd);
+        if (id == null || id.length() == 0) {
+            throw new HongsException(HongsException.COMMON, "Id mus be set in add");
         }
-
-        commit( );
+        setDoc(id, map2Doc(rd));
         return id;
     }
 

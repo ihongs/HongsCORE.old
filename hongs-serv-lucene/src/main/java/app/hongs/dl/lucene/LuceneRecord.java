@@ -7,6 +7,7 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.FormSet;
 import app.hongs.dl.IRecord;
+import app.hongs.dl.ITransc;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
@@ -59,7 +60,7 @@ import static org.apache.lucene.util.Version.LUCENE_CURRENT;
  * Lucene 记录模型
  * @author Hongs
  */
-public class LuceneRecord implements IRecord, Core.Destroy {
+public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
     protected final Map     fields;
     protected final String  datapath;
@@ -182,49 +183,35 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
     @Override
     public String[] create(Map rd) throws HongsException {
-        connect();
-
         String[] resp;
         resp = new String[dispCols.length  +  1];
         resp[0] = add(rd);
         for (int i = 0; i<dispCols.length; i ++) {
             resp[i + 1] = Synt.declare(rd.get(dispCols[i]), String.class);
         }
-
-        commit( );
         return resp;
     }
 
     @Override
     public int update(Map rd) throws HongsException {
-        connect();
-        initial();
-
         Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
-        for (String id  : ids) {
-            put(id, rd);
+        for(String  id  : ids) {
+            put(id, rd );
         }
-
-        commit( );
         return ids.size();
     }
 
     @Override
     public int delete(Map rd) throws HongsException {
-        connect();
-
         Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
-        for (String id  : ids) {
+        for(String  id  : ids) {
             del(id);
         }
-
-        commit( );
         return ids.size();
     }
 
     /**
      * 添加文档
-     * 单独使用需要执行 initial, commit
      * @param rd
      * @return ID
      * @throws HongsException
@@ -242,7 +229,6 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
     /**
      * 修改文档(局部更新)
-     * 单独使用需要执行 initial, commit
      * @param id
      * @param rd
      * @throws HongsException
@@ -260,22 +246,7 @@ public class LuceneRecord implements IRecord, Core.Destroy {
     }
 
     /**
-     * 设置文档(全量更新)
-     * 单独使前需要执行 initial, commit
-     * @param id
-     * @param rd
-     * @throws HongsException
-     */
-    public void set(String id, Map rd) throws HongsException {
-        if (id == null && id.length() == 0) {
-            throw new HongsException(HongsException.COMMON, "Id must be set in set");
-        }
-        setDoc(id, map2Doc(rd));
-    }
-
-    /**
      * 删除文档
-     * 单独使用需要执行 initial, commit
      * @param id
      * @throws HongsException
      */
@@ -285,7 +256,6 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
     /**
      * 获取文档信息
-     * 单独使用前需要执行 connect
      * @param id
      * @return
      * @throws HongsException
@@ -309,9 +279,10 @@ public class LuceneRecord implements IRecord, Core.Destroy {
     public List getAll(Map rd) throws HongsException {
         List list = new ArrayList();
 
+        initial();
         try {
             Query q = getFind(rd);
-            Sort  s = getSort (rd);
+            Sort  s = getSort(rd);
 
             TopDocs  docz;
             if (s != null) {
@@ -345,30 +316,43 @@ public class LuceneRecord implements IRecord, Core.Destroy {
     }
 
     public void addDoc(Document doc) throws HongsException {
+        connect();
         try {
             writer.addDocument(doc);
         } catch (IOException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }
+        if (!IN_TRANSC_MODE) {
+            commit();
+        }
     }
 
     public void setDoc(String id, Document doc) throws HongsException {
+        connect();
         try {
             writer.updateDocument(new Term(idCol, id), doc);
         } catch (IOException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }
+        if (!IN_TRANSC_MODE) {
+            commit();
+        }
     }
 
     public void delDoc(String id) throws HongsException {
+        connect();
         try {
             writer.deleteDocuments(new Term(idCol, id));
         } catch (IOException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }
+        if (!IN_TRANSC_MODE) {
+            commit();
+        }
     }
 
     public Document getDoc(String id) throws HongsException {
+        initial();
         try {
                 Query  q    = new TermQuery(new Term(idCol, id));
               TopDocs  docs = finder.search(q, 1);
@@ -547,7 +531,16 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         }
     }
 
+    public boolean IN_TRANSC_MODE = false;
+
+    public void transc() {
+        IN_TRANSC_MODE = true;
+    }
+
     public void commit() throws HongsException {
+        if (writer == null) {
+            return;
+        }
         try {
             writer.commit();
         } catch (IOException ex) {
@@ -555,7 +548,10 @@ public class LuceneRecord implements IRecord, Core.Destroy {
         }
     }
 
-    public void rollback() throws HongsException {
+    public void revoke() throws HongsException {
+        if (writer == null) {
+            return;
+        }
         try {
             writer.rollback();
         } catch (IOException ex) {
@@ -565,7 +561,9 @@ public class LuceneRecord implements IRecord, Core.Destroy {
 
     private Analyzer getAna() throws HongsException {
         try {
-            return (Analyzer) Class.forName(analyzer).getConstructor(LUCENE_CURRENT.getClass()).newInstance(LUCENE_CURRENT);
+            return (Analyzer) Class.forName(analyzer)
+                      .getConstructor(LUCENE_CURRENT.getClass())
+                      .newInstance   (LUCENE_CURRENT);
         } catch ( IllegalArgumentException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         } catch (InvocationTargetException ex) {

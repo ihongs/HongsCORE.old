@@ -238,6 +238,7 @@ HsTree.prototype = {
         rst = hsResponObj(rst );
         var sid = this.getSid();
         if (rst.ok === false) return;
+        this.treeBox.trigger("loadOver", [rst, pid]);
         if (rst.list) this.fillList( rst.list, pid );
         this.treeBox.trigger("loadBack", [rst, pid]);
         if (this.treeBox.find("#tree-node-"+sid).length == 0) {

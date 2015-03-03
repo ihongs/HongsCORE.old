@@ -64,12 +64,12 @@
         </init-param>
         <init-param>
             <param-name>exclude-urls</param-name>
-            <param-value>/hcum/sign/in.act;/hcum/sign/out.act</param-value>
+            <param-value>/hongs/member/sign/in.act;/hongs/member/sign/out.act</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
-        <url-pattern>/hcum/*</url-pattern>
+        <url-pattern>/hongs/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
@@ -80,47 +80,55 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
-            <param-value>/haim/db</param-value>
+            <param-value>/hongs/auto/db</param-value>
         </init-param>
     </filter>
     <filter>
         <filter-name>AutoFilter_DL</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
-            <param-name>action</param-name>
-            <param-value>/haim/dl/lucene</param-value>
+            <param-name>render</param-name>
+            <param-value>/hongs/auto/dl</param-value>
         </init-param>
         <init-param>
-            <param-name>render</param-name>
-            <param-value>/haim/dl</param-value>
+            <param-name>action</param-name>
+            <param-value>/hongs/lucene</param-value>
         </init-param>
     </filter>
     <filter>
         <filter-name>AutoFilter_Resume</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
+            <param-name>render</param-name>
+            <param-value>/hongs/resume</param-value>
+        </init-param>
+        <init-param>
             <param-name>action</param-name>
-            <param-value>/resume</param-value>
+            <param-value>/hongs/lucene</param-value>
         </init-param>
     </filter>
     <filter>
         <filter-name>AutoFilter_Search</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
+            <param-name>render</param-name>
+            <param-value>/hongs/search</param-value>
+        </init-param>
+        <init-param>
             <param-name>action</param-name>
-            <param-value>/search</param-value>
+            <param-value>/hongs/search</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>AutoFilter_DB</filter-name>
-        <url-pattern>/demo_db/*</url-pattern>
+        <url-pattern>/demo/db/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
         <filter-name>AutoFilter_DL</filter-name>
-        <url-pattern>/demo_dl/*</url-pattern>
+        <url-pattern>/demo/dl/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>

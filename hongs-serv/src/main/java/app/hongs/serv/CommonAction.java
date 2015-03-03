@@ -3,7 +3,7 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.SiteMap;
+import app.hongs.action.MenuSet;
 import app.hongs.action.anno.Action;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +38,7 @@ public class CommonAction {
             d = Integer.parseInt(depth);
         }
 
-        List list = SiteMap.getInstance(name).getMenuTranslated(l, d);
+        List list = MenuSet.getInstance(name).getMenuTranslated(l, d);
         Map data = new HashMap();
         data.put( "list", list );
         helper.reply(data);
@@ -58,15 +58,14 @@ public class CommonAction {
             n  = "common/goto.act?m=" + m + "&n=" + n;
         }
 
-        SiteMap site  =  SiteMap.getInstance(m);
-        Map<String, Map> page = site.getPage(n);
-        if (page != null &&  page.containsKey("pages")) {
-            Map<String, Map> pages = (Map) page.get("pages");
-            for (Map.Entry et : pages.entrySet()) {
+        MenuSet site  =  MenuSet.getInstance(m);
+        Map<String, Map> menu = site.getMenu(n);
+        if (menu != null &&  menu.containsKey("menus")) {
+            Map<String, Map> menus = (Map) menu.get("menus");
+            for (Map.Entry et : menus.entrySet()) {
                 String u = (String ) et.getKey();
                 if (site.chkAuth(u)) {
-                    String h = (String) ((Map) et.getValue()).get("href" );
-                    helper.redirect(Core.BASE_HREF+"/"+("".equals(h)?n:h));
+                    helper.redirect(Core.BASE_HREF +"/"+ u );
                     return;
                 }
             }

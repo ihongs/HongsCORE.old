@@ -11,7 +11,7 @@ import java.util.Map;
  * 索引服务
  * @author Hongs
  */
-@Cmdlet("search")
+@Cmdlet("hongs.search")
 public class SearchCmdlet {
 
     @Cmdlet("index")
@@ -41,8 +41,9 @@ public class SearchCmdlet {
         rd = vh.verify( rd, false );
 
         so.connect();
-        so.set(id, rd);
+        so.add( rd );
         so.commit( );
+        so.destroy();
     }
 
 }

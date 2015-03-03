@@ -96,9 +96,9 @@ public class DB
 {
 
   /**
-   * 是否为对象模式(即获取的是对象)
+   * 是否为字符模式(即获取的是文本)
    */
-  public boolean IN_OBJECT_MODE;
+  public boolean IN_STRING_MODE;
 
   /**
    * 是否为事务模式(即不会自动提交)
@@ -465,9 +465,9 @@ public class DB
     }
   }
   /**
-   * 事务:回滚
+   * 事务:撤销
    */
-  public void rollback()
+  public void revoke()
   {
     if (IN_TRANSC_MODE) {
         IN_TRANSC_MODE = false;
@@ -948,18 +948,18 @@ public class DB
        * 否则获取其对象形式.
        */
       Map<String, Object> values = new HashMap();
-      if (IN_OBJECT_MODE)
+      if (IN_STRING_MODE)
       {
         for (int i = 0; i < labels.length; i ++)
         {
-          values.put(labels[i], rs.getObject(i + 1));
+          values.put(labels[i], rs.getString(i + 1));
         }
       }
       else
       {
         for (int i = 0; i < labels.length; i ++)
         {
-          values.put(labels[i], rs.getString(i + 1));
+          values.put(labels[i], rs.getObject(i + 1));
         }
       }
       return values;
@@ -1594,8 +1594,12 @@ public class DB
      * 自动设定模式和事务
      */
 
-    db.IN_OBJECT_MODE = conf.getProperty( "core.db.in.object.mode" , false );
-    db.IN_TRANSC_MODE = Core.getInstance().containsKey("__IN_TRANSC_MODE__");
+    db.IN_STRING_MODE = conf.containsKey("core.in.string.mode")
+                      ? conf.getProperty("core.in.string.mode", false)
+                      : Core.getInstance().containsKey("__IN_STRING_MODE__");
+    db.IN_TRANSC_MODE = conf.containsKey("core.in.transc.mode")
+                      ? conf.getProperty("core.in.transc.mode", false)
+                      : Core.getInstance().containsKey("__IN_TRANSC_MODE__");
 
     return db;
   }

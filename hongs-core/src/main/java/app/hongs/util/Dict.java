@@ -1,16 +1,15 @@
 package app.hongs.util;
 
 import app.hongs.HongsError;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 树形操作工具
+ * 字典数据工具
  *
  * <p>
  * 用于获取和设置树型结构
@@ -24,75 +23,124 @@ import java.util.Map;
 public class Dict
 {
 
-  /**
-   * 设置树纵深值
-   * @param obj
-   * @param val
-   * @param keys
-   * @param snum
-   */
-  private static Object put(Object obj, Object val, Object[] keys, int snum)
+  private static Object gat(List lst, Object def, Object[] keys, int pos)
   {
-    Object key = keys[snum];
-
-    if (key == null || key.equals(""))
-    {
-      Collection col = (Collection)obj;
-
-      if (keys.length == snum + 1)
-      {
-        return col.add(val);
-      }
-      else
-      {
-        Object subNode;
-
-        Object key2 = keys[snum + 1];
-        if (key2 == null || key2.equals(""))
-        {
-          subNode = new ArrayList();
+    // 获取下面所有的节点的值
+    List col = new ArrayList();
+    for(Object sub : lst) {
+        Object obj = get(sub, def, keys, pos);
+        if (obj !=  null) {
+            col.add( obj);
         }
-        else
-        {
-          subNode = new LinkedHashMap();
-        }
-        col.add(subNode);
-
-        return put(subNode, val, keys, snum + 1);
-      }
     }
-    else
-    {
-      Map map = (Map)obj;
+    if (! col.isEmpty( )) {
+        return col;
+    } else {
+        return def;
+    }
+  }
 
-      if (keys.length == snum + 1)
-      {
-        return map.put(key, val);
-      }
-      else
-      {
-        Object subNode;
+  private static Object get(Object obj, Object def, Object[] keys, int pos)
+  {
+    Object key = keys[pos];
+    if (obj == null) {
+        return def;
+    }
 
-        if (map.containsKey(key))
-        {
-          subNode = map.get(key);
+    // 按键类型来决定容器类型
+    if (key == null) {
+        List lst = Synt.declare(obj, List.class);
+
+        if (keys.length == pos + 1) {
+            return lst;
+        } else {
+            return gat(lst, def, keys, pos + 1 );
         }
-        else
-        {
-          Object key2 = keys[snum + 1];
-          if (key2 == null || key2.equals(""))
-          {
-            subNode = new ArrayList();
-          }
-          else
-          {
-            subNode = new LinkedHashMap();
-          }
-          map.put(key, subNode);
+    } else
+    if (key instanceof Integer) {
+        List lst = Synt.declare(obj, List.class);
+
+        // 如果列表长度不够, 则直接返回默认值
+        int idx = (Integer)key;
+        if (lst.size( ) <= idx) {
+            return def;
         }
 
-        return put(subNode, val, keys, snum + 1);
-      }
+        if (keys.length == pos + 1) {
+            return Synt.defoult(lst.get(idx), def);
+        } else {
+            return get(lst.get(idx), def, keys, pos + 1);
+        }
+    } else {
+        Map  map = Synt.declare(obj,  Map.class);
+
+        if (keys.length == pos + 1) {
+            return Synt.defoult(map.get(key), def);
+        } else {
+            return get(map.get(key), def, keys, pos + 1);
+        }
+    }
+  }
+
+  private static Object put(Object obj, Object val, Object[] keys, int pos)
+  {
+    Object key = keys[pos];
+
+    // 按键类型来决定容器类型
+    if (key == null) {
+        List lst;
+        if (obj == null) {
+            lst = new ArrayList();
+        } else {
+            lst = Synt.declare(obj , List.class);
+        }
+
+        if (keys.length == pos + 1) {
+            lst.add(val);
+        } else {
+            lst.add(put(null, val, keys, pos+1));
+        }
+
+        return lst;
+    } else
+    if (key instanceof Integer) {
+        List lst;
+        if (obj == null) {
+            lst = new ArrayList();
+        } else {
+            lst = Synt.declare(obj , List.class);
+        }
+
+        // 如果列表长度不够, 填充到索引的长度
+        int idx = (Integer)key;
+        if (lst.size( ) <= idx) {
+            for(int i = 0; i <= idx; i++) {
+                lst.add( null );
+            }
+        }
+
+        if (keys.length == pos + 1) {
+            lst.set(idx, val);
+        } else {
+            lst.set(idx, put(lst.get(idx), val, keys, pos + 1));
+        }
+
+        return lst;
+    } else {
+        Map map;
+        if (obj == null) {
+            map = new LinkedHashMap();
+        } else {
+            map = Synt.declare(obj, Map.class);
+        }
+
+        if (keys.length == pos + 1) {
+            map.put(key, val);
+        } else {
+            map.put(key, put(map.get(key), val, keys, pos + 1));
+        }
+
+        return map;
     }
   }
 
@@ -107,37 +155,10 @@ public class Dict
   {
     if (map == null)
     {
-      throw new HongsError(0x47, "`map` can not be null");
-    }
-    Object val = map;
-    for  (Object key  :  keys)
-    {
-      if (val instanceof Map )
-      {
-        Map  obj = (Map ) val;
-        if (obj.containsKey(key))
-        {
-          val = obj.get(key);
-          continue;
-        }
-      }
-      else
-      if (val instanceof List)
-      {
-        List lst = (List) val;
-        int idx = key instanceof Integer ? (Integer)key
-                : Integer.parseInt ( key.toString( ) );
-        if (idx < lst.size())
-        {
-          val = lst.get(idx);
-          continue;
-        }
-      }
-
-      return def;
+      throw new HongsError(0x47, "`map` can not be null" );
     }
 
-    return val;
+    return get(map, def, keys, 0);
   }
 
   /**
@@ -146,20 +167,22 @@ public class Dict
    * @param val
    * @param keys
    */
-  public static Object put(Map map, Object val, Object... keys)
+  public static void put(Map map, Object val, Object... keys)
   {
     if (map == null)
     {
-      throw new HongsError(0x48, "`map` can not be null");
+      throw new HongsError(0x48, "`map` can not be null" );
     }
-    if (keys.length  !=  0)
+    if (keys.length ==  0)
     {
-      return put(map, val, keys, 0);
+      throw new HongsError(0x49,"`keys` can not be empty");
     }
-    else
+    if (keys[0] == null || keys[0] instanceof Integer)
     {
-      throw new HongsError(0x49, "`keys` is empty");
+      throw new HongsError(0x45,"first key can not be null or integer");
     }
+
+    put(map, val, keys, 0);
   }
 
   /**
@@ -198,6 +221,7 @@ public class Dict
 
   /**
    * 获取树纵深值
+   * @param <T>
    * @param map
    * @param def
    * @param keys
@@ -208,7 +232,7 @@ public class Dict
     try {
       return Synt.declare(get(map, def , keys), def);
     } catch (HongsError er) {
-      if (er.getCode()  ==  0x46) {
+      if (er.getCode( ) ==  0x46) {
         er = new HongsError(0x46, "Wrong type for key '"+Arrays.toString(keys)+"'", er.getCause());
       }
       throw er;
@@ -217,6 +241,7 @@ public class Dict
 
   /**
    * 获取树纵深值
+   * @param <T>
    * @param map
    * @param cls
    * @param keys
@@ -254,7 +279,7 @@ public class Dict
    */
   public static <T> T getParam(Map map, T def, String path)
   {
-    return getValue(map, def, parsePath(path));
+    return Dict.getValue(map, def, parsePath(path));
   }
 
   /**
@@ -266,19 +291,18 @@ public class Dict
    */
   public static <T> T getParam(Map map, Class<T> cls, String path)
   {
-    return getValue(map, cls, parsePath(path));
+    return Dict.getValue(map, cls, parsePath(path));
   }
 
   /**
    * 设置树纵深值(put的别名)
    * @param map
    * @param val
-   * @param path
-   * @return 键的旧的值
+   * @param keys
    */
-  public static Object setValue(Map map, Object val, Object... keys)
+  public static void setValue(Map map, Object val, Object... keys)
   {
-    return put(map, val, keys);
+    put(map, val, keys);
   }
 
   /**
@@ -286,11 +310,10 @@ public class Dict
    * @param map
    * @param val
    * @param path
-   * @return 键的旧的值
    */
-  public static Object setParam(Map map, Object val, String path)
+  public static void setParam(Map map, Object val, String path)
   {
-    return put(map, val, splitPath(path));
+    put(map, val, parsePath(path));
   }
 
   /**
@@ -298,6 +321,7 @@ public class Dict
    * 与 Map.putAll 的不同在于: 本函数会将其子级的 Map 也进行合并
    * @param map
    * @param oth
+   * @param keys
    */
   public static void setValues(Map map, Map oth, Object... keys) {
       Object sub = get(map, keys);
@@ -313,24 +337,30 @@ public class Dict
    * 与 Map.putAll 的不同在于: 本函数会将其子级的 Map 也进行合并
    * @param map
    * @param oth
+   * @param path
    */
   public static void setParams(Map map, Map oth, String path) {
-    setValues(map, oth, splitPath(path));
-  }
-
-  private static Object[] splitPath(String path) {
-    return path.replaceAll("\\]\\[", ".")
-               .replace("[", ".")
-               .replace("]", "" )
-               .split("\\.", -1 );
+    setValues(map, oth, parsePath(path));
   }
 
   private static Object[] parsePath(String path) {
-    return path.replaceAll("\\]\\[", ".")
-               .replace("[", ".")
-               .replace("]", "" )
-               .replaceFirst("\\.+$", "")
-               .split("\\.", -1 );
+    String[] keyz = path.replaceAll("\\]\\[", ".")
+                        .replace("[" , ".")
+                        .replace("]" , "" )
+                        .split("\\." , -1 );
+    Object[] keys = new Object[keyz.length];
+    int i = 0;
+    for(String keyn : keyz) {
+        if (keyn.length(  ) == 0) {
+            keys[i ++] = null;
+        } else
+        if (keyn.startsWith("#")) {
+            keys[i ++] = Synt.declare(keyn.substring(1), Integer.class);
+        } else {
+            keys[i ++] = keyn;
+        }
+    }
+    return  keys;
   }
 
 }

@@ -244,7 +244,7 @@ public class FormSet
       return CoreLanguage.getInstance(name);
     }
     catch (app.hongs.HongsError e) {
-      if  (  e.getCode( ) != 0x2a) {
+      if  (   e.getCode() != 0x2a) {
         throw e;
       }
       return CoreLanguage.getInstance("default");

@@ -130,13 +130,14 @@ function hsResponObj(rst, qut) {
                 }
             }
         }
-        if (typeof(rst.to) !== "undefined") {
-            if (rst.to) {
-                location.assign(rst.to);
+        // 服务器端要求跳转(通常为未登录缺少权限等)
+        if (typeof(rst["goto"]) !== "undefined") {
+            if  (  rst["goto"]) {
+                location.assign(rst["goto"]);
             } else {
                 location.reload();
             }
-            delete rst.to;
+            delete rst["goto"];
         }
     }
     return rst;
@@ -311,21 +312,16 @@ function hsSetParam (url, name, value) {
  */
 function hsGetValue (obj, path, def) {
     if (jQuery.isArray(path)) {
-        return hsGetPoint(obj, path, def);
+        return _hsGetPoint(obj, path, def);
     }
     if (typeof(path) === "number") {
-        return hsGetPoint(obj,[path],def);
+        return _hsGetPoint(obj,[path],def);
     }
     if (typeof(path) !== "string") {
         throw("hsGetValue: 'path' must be a string");
     }
-
-    path = path.replace(/\]\[/g, ".")
-               .replace(/\[/   , ".")
-               .replace(/\]/   , "" )
-               .replace(/\.+$/ , "" ) // a[b][c][] 与 a.b.c 一样, 应用场景: 表单中多选项按 id[] 提取数据
-               .split  (/\./ );
-    return hsGetPoint(obj, path, def);
+    var keys = _hsGetDakey(path);
+    return _hsGetPoint(obj, keys, def);
 }
 /**
  * 从树对象获取值(hsGetValue的底层方法)
@@ -334,30 +330,86 @@ function hsGetValue (obj, path, def) {
  * @param def 默认值
  * @return 获取到的值, 如果没有则取默认值
  */
-function hsGetPoint (obj, keys, def) {
+function _hsGetPoint(obj, keys, def) {
     if (!obj) {
-        return null;
+        return def;
     }
     if (!jQuery.isArray(obj ) && !jQuery.isPlainObject(obj )) {
-        throw("hsGetPoint: 'obj' must be an array or object");
+        throw("_hsGetPoint: 'obj' must be an array or object");
     }
     if (!jQuery.isArray(keys)) {
-        throw("hsGetPoint: 'keys' must be an array");
+        throw("_hsGetPoint: 'keys' must be an array");
     }
     if (!keys.length) {
-        throw("hsGetPoint: 'keys' can not be empty");
+        throw("_hsGetPoint: 'keys' can not be empty");
+    }
+    return _hsGetDepth(obj, keys, def, 0);
+}
+function _hsGetDepth(obj, keys, def, pos) {
+    var key = keys[pos];
+    if (obj == null) {
+        return def;
     }
 
-    var i , k;
-    for(i = 0; i < keys.length; i ++) {
-        k = keys[i];
-        if(typeof(obj[k]) !== "undefined") {
-           obj  = obj[k];
-           continue;
+    // 按键类型来决定容器类型
+    if (key == null) {
+        if (keys.length == pos + 1) {
+            return obj;
+        } else {
+            return _hsGetDapth(obj, keys, def, pos + 1);
         }
-        return  def;
+    } else
+    if (typeof(key) == "number") {
+        // 如果列表长度不够, 则直接返回默认值
+        if (obj.length  <= key ) {
+            return def;
+        }
+
+        if (keys.length == pos + 1) {
+            return obj[key] || def;
+        } else {
+            return _hsGetDepth(obj[key], keys, def, pos + 1);
+        }
+    } else {
+        if (keys.length == pos + 1) {
+            return obj[key] || def;
+        } else {
+            return _hsGetDepth(obj[key], keys, def, pos + 1);
+        }
     }
-        return  obj;
+}
+function _hsGetDapth(lst, keys, def, pos) {
+    var col = [];
+    for(var i = 0; i < lst.length; i ++) {
+        var obj  = _hsGetDepth(lst[i], keys, def, pos);
+        if (obj !=  null) {
+            col.push(obj);
+        }
+    }
+    if (!jQuery.isEmptyObject(col)) {
+        return col;
+    } else {
+        return def;
+    }
+}
+function _hsGetDakey(path) {
+    path = path.replace(/\]\[/g, ".")
+               .replace(/\[/   , ".")
+               .replace(/\]/   , "" )
+               .split  (/\./ );
+    var i , keys = [];
+    for(i = 0; i < path.length; i ++) {
+        var keyn = path[i];
+        if (keyn.length == 0) {
+            keys.push(null);
+        } else
+        if (keyn.substr(0, 1) == '#') {
+            keys.push(parseInt(keyn.substr(1)));
+        } else {
+            keys.push(keyn);
+        }
+    }
+    return keys;
 }
 /**
  * 向树对象设置值
@@ -372,19 +424,16 @@ function hsSetValue (obj, path, val) {
      a[][k] 空键将作为字符串对待, 但放在末尾可表示push
      */
     if (jQuery.isArray(path)) {
-        hsSetPoint(obj, path, val); return;
+        _hsSetPoint(obj, path, val); return;
     }
     if (typeof(path) === "number") {
-        obj[path] = val; return;
+        _hsSetPoint(obj,[path],val); return;
     }
     if (typeof(path) !== "string") {
         throw("hsSetValue: 'path' must be a string");
     }
-    path = path.replace(/\]\[/g, ".")
-               .replace(/\[/   , ".")
-               .replace(/\]/   , "" )
-               .split  ( "." );
-    hsSetPoint(obj, path, val);
+    var keys = _hsGetDakey(path);
+    _hsSetPoint(obj, keys, val );
 }
 /**
  * 向树对象设置值(hsSetValue的底层方法)
@@ -392,42 +441,70 @@ function hsSetValue (obj, path, val) {
  * @param {Array} keys ['a','b']
  * @param val
  */
-function hsSetPoint (obj, keys, val) {
+function _hsSetPoint(obj, keys, val) {
     if (!obj) {
         return;
     }
     if (!jQuery.isPlainObject(obj)) {
-        throw("hsSetPoint: 'obj' must be an object");
+        throw("_hsSetPoint: 'obj' must be an object");
     }
     if (!jQuery.isArray(keys)) {
-        throw("hsSetPoint: 'keys' must be an array");
+        throw("_hsSetPoint: 'keys' must be an array");
     }
     if (!keys.length) {
-        throw("hsSetPoint: 'keys' can not be empty");
+        throw("_hsSetPoint: 'keys' can not be empty");
     }
+    _hsSetDepth(obj, keys, val, 0);
+}
+function _hsSetDepth(obj, keys, val, pos) {
+    var key = keys[pos];
 
-    var i, k, t = keys[0];
-    for(i = 0; i < keys.length -1; i ++) {
-        k = keys[ i ];
-        t = keys[i+1];
-        if (!t)t = -1;
-        if (typeof(t) === "number")
-            if (!jQuery.isArray(obj[k])) {
-                obj[k] = [];
+    // 按键类型来决定容器类型
+    if (key == null) {
+        if (obj == null) {
+            obj =  [];
+        }
+
+        if (keys.length == pos + 1) {
+            obj.push(val);
+        } else {
+            obj.push(_hsSetDepth(null, keys, val, pos + 1));
+        }
+
+        return obj;
+    } else
+    if (typeof(key) == "number") {
+        if (obj == null) {
+            obj =  [];
+        }
+
+        // 如果列表长度不够, 填充到索引的长度
+        if (obj.length <= key) {
+            for(var i = 0; i <= key; i++) {
+                obj.push(null);
             }
-        else
-        if (typeof(t) === "string")
-            if (!jQuery.isPlainObject(obj[k])) {
-                obj[k] = {};
-            }
-        else
-            throw("hsSetPoint: key must be a string or number");
-        obj = obj[k];
+        }
+
+        if (keys.length == pos + 1) {
+            obj[key] = val;
+        } else {
+            obj[key] = _hsSetDepth(obj[key], keys, val, pos + 1);
+        }
+
+        return obj;
+    } else {
+        if (obj == null) {
+            obj =  {};
+        }
+
+        if (keys.length == pos + 1) {
+            obj[key] = val;
+        } else {
+            obj[key] = _hsSetDepth(obj[key], keys, val, pos + 1);
+        }
+
+        return obj;
     }
-    if (t !== -1)
-        obj[t] = val;
-    else
-        obj.push(val);
 }
 
 /**
@@ -447,7 +524,7 @@ function hsGetConf  (key, def) {
 /**
  * 获取语言
  * @param {String} key
- * @param {Object,Array} rep 替换参数, {a:1,b:2} 或 [1,2]
+ * @param {Object|Array} rep 替换参数, {a:1,b:2} 或 [1,2]
  * @return {String} 获取到的语言, 其中的 $a或$0 可被 rep 替换
  */
 function hsGetLang  (key, rep) {
@@ -706,7 +783,7 @@ function hsPrsDate(text, format) {
       text = parseInt(text);
     }
   }
-  
+
   if (typeof(text) === "number") {
     if (text <= 2147483647) {
       text = text * 1000 ;
@@ -1221,8 +1298,8 @@ $.fn._hsConfig = function() {
             }).call(this);
         }
         if (n) {
-            // IE 对相同 name 的 param 只取一个, 故需要加编号来表示数组
-            n = n.replace(/:.*$/ , ".");
+            // IE 对相同 name 的 param 只取一个, 故需要加编号(#)来表示数组
+            n = n.replace(/#.*$/ , ".");
             hsSetValue(obj, n, v);
         };
     }
@@ -1280,6 +1357,24 @@ $.fn._hsConstr = function(opts, func) {
     return inst;
 };
 
+// 三态选择
+$.propHooks.choosed = {
+    get : function(elem) {
+        return elem.checked ? true : (elem.indeterminate ?  null : false);
+    },
+    set : function(elem, stat) {
+        if (stat === null) {
+            elem.checked = false ;
+            elem.indeterminate = true ;
+        } else {
+            elem.checked = !!stat;
+            elem.indeterminate = false;
+        }
+    }
+};
+
+//** Global Events **/
+
 $(document)
 .on("ajaxError", function(evt, xhr, cnf) {
     var rst = hsResponObj(xhr);
@@ -1298,6 +1393,37 @@ $(document)
     else if (cnf.context instanceof HsTree) {
         cnf.context.treeBox.trigger(cnf.action+"Error", evt, rst);
     }
+})
+.on("hsReady", function() {
+    // 国际化
+    $(this).find(".i18n,[data-i18n]").each(function() {
+        var lang, lxng, lget, lset, that = this;
+
+        if ($(this).is("[placeholder]")) {
+            lget = function( ) {
+                lang = $(that).atrr("placeholder");
+            };
+            lset = function( ) {
+                $(that).attr("placeholder" , lxng);
+            };
+        } else {
+            lget = function( ) {
+                lang = $(that).text();
+            };
+            lset = function( ) {
+                $(that).text ( lxng );
+            };
+        }
+
+        lang = $(this).attr("data-i18n");
+        if (lang == null) {
+            lget();
+        }
+        lxng = hsGetLang(lang);
+        if (lxng != lang) {
+            lset();
+        }
+    });
 })
 .on("click", "[data-toggle=hsLoad]",
 function(evt) {
@@ -1339,18 +1465,19 @@ function(evt) {
     $(this).closest("a").hsClose();
     evt.stopPropagation();
 })
-.on("click", ".close,.cancel,.repeal",
+.on("click", ".close,.cancel,.revoke",
 function(evt) {
-    $(this).closest(".modal,.openbox").hsClose();
+    $(this).closest(".modal,.openbox").hsClose( );
     evt.stopPropagation();
 })
 .on("click", ".dropdown-toggle",
 function(evt) {
-    var body = $(this).siblings(  ".dropdown-body"  );
+    if ($(evt.target).is(".dropdown-deny"))return;
+    var body = $(this).siblings(".dropdown-body");
     if (body.size() == 0) return;
     var cont = $(this).parent( );
     cont.toggleClass( "dropup" );
-    body.toggleClass("invisible",!cont.is(".dropup"));
+    body.toggleClass("invisible", !cont.is(".dropup"));
     evt.stopPropagation();
 })
 .on("click", "select[multiple]",
@@ -1360,7 +1487,7 @@ function(evt) {
     }
     var vals = $(this).data("vals") || [];
     var valz = $(this).val();
-    if (valz.length == 0) {
+    if (!valz || valz.length === 0) {
         vals = [];
     } else {
         $.each(valz, function(x,  v  ) {
@@ -1373,7 +1500,7 @@ function(evt) {
         });
     }
     $(this).data("vals", vals);
-    $(this).val ( vals);
+    $(this).val ( vals );
 });
 
 $(function () {
