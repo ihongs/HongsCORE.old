@@ -580,7 +580,7 @@ function hsChkUri   (uri) {
  */
 function hsFixUri   (uri) {
     if (/^(\w+:\/\/|\/|\.)/.test(uri) === false) {
-        var pre = HsCONF("BASE_HREF");
+        var pre = HsCONF["BASE_HREF"];
         if (pre == undefined) {
             pre = jQuery("base").attr("href");
             HsCONF["BASE_HREF"] = pre;
