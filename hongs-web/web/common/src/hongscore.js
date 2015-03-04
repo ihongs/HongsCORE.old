@@ -582,11 +582,8 @@ function hsFixUri   (uri) {
     if (/^(\w+:\/\/|\/|\.)/.test(uri) === false) {
         var pre = HsCONF["BASE_HREF"];
         if (pre == undefined) {
-            pre = jQuery("base").attr("href");
+            pre = jQuery("base").attr("href").replace(/\/$/, '');
             HsCONF["BASE_HREF"] = pre;
-        }
-        else {
-            pre =  pre + "/";
         }
         return pre +"/"+ uri;
     }
