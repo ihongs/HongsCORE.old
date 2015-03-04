@@ -53,7 +53,7 @@ function H$() {
     case '%':
         var c = b === '$' ? window.sessionStorage : window.localStorage;
         if (typeof(c) === "undefined") {
-            throw("H$: Does not support '"+(b == '$' ? 'session' : 'local')+"Storage'");
+            throw("H$: Does not support '"+(b=='$' ? 'session':'local')+"Storage'");
         }
         if (arguments.length === 1) {
             return c.getItem(arguments[0]);
@@ -565,7 +565,13 @@ function hsGetLang  (key, rep) {
  * @return {Boolean} 是(true)否(false)有权访问
  */
 function hsChkUri   (uri) {
-    return HsAUTH? HsAUTH[hsFixUri(uri)]: false;
+    uri= hsFixUri   (uri);
+    if (typeof(HsAUTH[uri]) !== "undefined") {
+        return HsAUTH[uri];
+    }
+    else {
+        return false;
+    }
 }
 /**
  * 补全URI为其增加前缀
@@ -573,10 +579,20 @@ function hsChkUri   (uri) {
  * @return {String} 完整的URI
  */
 function hsFixUri   (uri) {
-    if (/^(\w+:\/\/|\/|\.)/.test(uri) === false)
-        return hsGetConf("BASE_HREF") +"/"+ uri;
-    else
+    if (/^(\w+:\/\/|\/|\.)/.test(uri) === false) {
+        var pre = HsCONF("BASE_HREF");
+        if (pre == undefined) {
+            pre = jQuery("base").attr("href");
+            HsCONF["BASE_HREF"] = pre;
+        }
+        else {
+            pre =  pre + "/";
+        }
+        return pre +"/"+ uri;
+    }
+    else {
         return uri;
+    }
 }
 
 /**

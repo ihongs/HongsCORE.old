@@ -9,16 +9,17 @@
 
 ## 环境加载
 
-    <link rel="stylesheet" type="text/css" href="../common/css/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="../common/css/hongscore.min.css"/>
-    <script type="text/javascript" src="../common/jquery.min.js"></script>
-    <script type="text/javascript" src="../common/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../common/hongscore.min.js"></script>
-    <script type="text/javascript" src="../common/conf/default.js"></script>
-    <script type="text/javascript" src="../common/lang/default.js"></script>
-    <script type="text/javascript" src="../common/auth/default.js"></script>
+    <base href="../">
+    <link rel="stylesheet" type="text/css" href="common/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="common/css/hongscore.min.css"/>
+    <script type="text/javascript" src="common/jquery.min.js"></script>
+    <script type="text/javascript" src="common/bootstrap.min.js"></script>
+    <script type="text/javascript" src="common/hongscore.min.js"></script>
+    <script type="text/javascript" src="common/conf/default.js"></script>
+    <script type="text/javascript" src="common/lang/default.js"></script>
+    <script type="text/javascript" src="common/auth/default.js"></script>
 
-注: 将以上代码加入 head 中，注意 link 的 href 和 script 的 src 路.
+注: 将以上代码加入 head 中, 注意 link 的 href 和 script 的 src 路径; 这里用 base 定义了基础路径, 以下的相对路径均基于此.
 
 ## HsTree 树型组件的用法
 
