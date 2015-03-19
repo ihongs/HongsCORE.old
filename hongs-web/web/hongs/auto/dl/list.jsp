@@ -43,15 +43,15 @@
 <div id="<%=_module%>-<%=_entity%>-<%=_action%>">
     <object class="config" name="hsList" data="">
         <param name="loadUrl" value="('<%=_module%>/<%=_entity%>/retrieve.act?jd=2')"/>
-        <param name="openUrls#0" value="['.create','<%=_module%>/<%=_entity%>/form.jsp','{TABSBOX}']"/>
-        <param name="openUrls#1" value="['.update','<%=_module%>/<%=_entity%>/form4update.jsp?id={ID}','{TABSBOX}']"/>
+        <param name="openUrls#0" value="['.create','<%=_module%>/<%=_entity%>/form.html','{TABSBOX}']"/>
+        <param name="openUrls#1" value="['.update','<%=_module%>/<%=_entity%>/form4update.html?id={ID}','{TABSBOX}']"/>
         <param name="sendUrls#0" value="['.delete','<%=_module%>/<%=_entity%>/delete.act','<%=lang.translate("fore.deletre.confirm", title)%>']"/>
         <param name="_fill__pick" value="(hsListFillPick)"/>
     </object>
     <div>
         <div class="toolbox col-md-9 btn-group">
             <%if ( "select".equals(_action)) {%>
-            <button type="button" class="create btn btn-primary"><%=lang.translate("fore.select", title)%></button>
+            <button type="button" class="ensure btn btn-primary"><%=lang.translate("fore.select", title)%></button>
             <%} // End If %>
             <button type="button" class="create btn btn-default"><%=lang.translate("fore.create", title)%></button>
             <%if (!"select".equals(_action)) {%>
@@ -77,10 +77,7 @@
                     for(Map.Entry et : flds.entrySet()) {
                         Map    info = (Map ) et.getValue();
                         String name = (String) et.getKey();
-                        String type = (String) info.get( "widget" );
-                        if (null == type) {
-                               type = (String) info.get("__type__");
-                        }
+                        String type = (String) info.get("__type__");
                         String disp = (String) info.get("__disp__");
 
                         if ("yes".equals(info.get("hideInList")) || "hidden".equals(type)) {
@@ -99,7 +96,7 @@
                     <th data-fn="<%=name%>" data-ft="_file"><%=disp%></th>
                     <%} else if ("enum".equals(type)) {%>
                     <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
-                    <%} else if ("pick".equals(type)) {%>
+                    <%} else if ("form".equals(type) || "picker".equals(type)) {%>
                     <th data-fn="<%=info.get("data-tn")%>.<%=info.get("data-tk")%>"><%=disp%></th>
                     <%} else if (!"primary".equals(info.get("primary")) && !"foreign".equals(info.get("foreign"))) {%>
                     <th data-fn="<%=name%>" class="sortable"><%=disp%></th>

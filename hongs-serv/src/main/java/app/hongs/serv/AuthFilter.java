@@ -1,11 +1,11 @@
 package app.hongs.serv;
 
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
+import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.MenuSet;
-import app.hongs.action.ActionDriver;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -13,12 +13,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 动作过滤器
@@ -45,17 +47,20 @@ public class AuthFilter
   /**
    * 首页路径
    */
-  private String indexPage;
+  private String indexPage = null;
 
   /**
    * 登录路径
    */
-  private String loginPage;
+  private String loginPage = null;
 
   /**
    * 不包含的URL
    */
   private String[][] excludeUrls;
+
+  private final Pattern IS_HTML = Pattern.compile("(text/html|text/plain)");
+  private final Pattern IS_JSON = Pattern.compile("(text/json|text/javascript|application/json)");
 
   @Override
   public void init(FilterConfig config)
@@ -137,11 +142,11 @@ public class AuthFilter
   }
 
   @Override
-  public void doFilter(Core core, ActionHelper helper, FilterChain chain)
+  public void doFilter(Core core, ActionHelper hlpr, FilterChain chain)
     throws IOException, ServletException
   {
-    ServletRequest  req = helper.getRequest( );
-    ServletResponse rsp = helper.getResponse();
+    ServletRequest  req = hlpr.getRequest( );
+    ServletResponse rsp = hlpr.getResponse();
     String act = ActionDriver.getCurrPath((HttpServletRequest) req);
 
     DO:do {
@@ -170,16 +175,16 @@ public class AuthFilter
     Set<String> authset = siteMap.getAuthSet();
     if (null == authset) {
         if (null != loginPage) {
-            doFailed((short)1);
+            doFailed(core, hlpr, (byte)1);
             return;
         }
         if (siteMap.actions.contains(act)) {
-            doFailed((short)3);
+            doFailed(core, hlpr, (byte)3);
             return;
         }
     } else {
         if (siteMap.actions.contains(act) && !authset.contains(act)) {
-            doFailed((short)3);
+            doFailed(core, hlpr, (byte)3);
             return;
         }
     }
@@ -189,78 +194,72 @@ public class AuthFilter
     chain.doFilter(req, rsp);
   }
 
-  private void doFailed(short type)
+  private void doFailed(Core core, ActionHelper hlpr, byte type)
   {
-    ActionHelper hlpr = Core.getInstance(ActionHelper.class);
-    CoreLanguage lang = Core.getInstance(CoreLanguage.class);
-
-    /**
-     * 根据错误类型获取错误消息及跳转URI
-     */
-    String msg;
+    CoreLocale lang = core.get(CoreLocale.class);
+    HttpServletRequest req = hlpr.getRequest(  );
+    String acc = req.getHeader("Accept");
     String uri;
-    if (1== type)
-    {
-      msg = lang.translate("core.error.no.login");
-      uri = this.loginPage;
-    }
-    else
-    {
-      msg = lang.translate("core.error.no.power");
-      uri = this.indexPage;
-    }
+    String msg;
 
-    /**
-     * 追加来源URI
-     */
-    String src = hlpr.getRequest().getRequestURI( );
-    String qry = hlpr.getRequest().getQueryString();
-    if (src != null && src.length() != -1)
-    {
-      if (qry != null && qry.length() != -1)
-      {
-        src = src + "?" + qry;
-      }
+    if (3 == type) {
+        uri = this.indexPage;
+        msg = lang.translate("core.error.no.power");
+    } else {
+        uri = this.loginPage;
+        msg = lang.translate("core.error.no.login");
 
-      try
-      {
-        src = URLEncoder.encode(src, "UTF-8");
-      }
-      catch (UnsupportedEncodingException ex)
-      {
-        src = "";
-      }
+        // 追加来源路径, 以便登录后跳回
+        if (uri != null && uri.length() > 0) {
+            String src = null;
+            String qry;
 
-      if (!uri.contains("?"))
-      {
-        uri += "?r=" + src;
-      }
-      else
-      {
-        uri += "&r=" + src;
-      }
-    }
+            if (req.getHeader("X-Requested-With") != null) {
+                src = req.getHeader("Referer");
+            } else if ( IS_HTML.matcher(acc).find( ) ) {
+                src = req.getRequestURI ();
+                qry = req.getQueryString();
+                if (qry != null && qry.length() != -1) {
+                    src += "?"  +  qry;
+                }
+            }
 
-    /**
-     * 修改(2013/02/22):
-     * 如果处于AJAX环境, 则是由JSON传递URL和消息
-     * 否则使用HTTP错误代码
-     */
-    if (hlpr.getRequest().getRequestURI().endsWith(".act")) {
-        Map rsp = new HashMap( );
-            rsp.put("ok", false);
-            rsp.put("err", "Er40" + type);
-            rsp.put("msg",  msg);
-        if (uri != null  && uri.length( ) != 0) {
-            rsp.put("goto", uri);
+            if (src != null) {
+                try {
+                    src = URLEncoder.encode(src, "UTF-8");
+                } catch ( UnsupportedEncodingException e) {
+                    src = "";
+                }
+                if (!uri.contains("?")) {
+                    uri += "?r=" + src;
+                } else {
+                    uri += "&r=" + src;
+                }
+            }
         }
+    }
+
+    if (IS_JSON.matcher(acc).find()) {
+        Map rsp = new HashMap();
+            rsp.put("ok",false);
+            rsp.put("msg", msg);
+            rsp.put("err","Er40"+ type);
+        if (uri != null && uri.length() != 0) {
+            rsp.put("url", uri);
+        }
+        
         hlpr.reply(rsp);
-    }
-    else {
-        if (uri != null  && uri.length() != 0) {
-            hlpr.redirect(uri);
+        if (type == 1 ) {
+            hlpr.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } else {
+            hlpr.getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
         }
-        else {
+    } else {
+        if (uri != null && uri.length() != 0) {
+            hlpr.redirect(uri);
+        } else if (type == 1 ) {
+            hlpr.error401(msg);
+        } else {
             hlpr.error403(msg);
         }
     }

@@ -1,28 +1,60 @@
 <root>
+    <enum name="__types__">
+        <!-- String -->
+        <value code="string">string</value>
+        <value code="text">string</value>
+        <value code="textarea">string</value>
+        <value code="hidden">string</value>
+        <value code="search">string</value>
+        <value code="tel">string</value>
+        <value code="url">string</value>
+        <value code="email">string</value>
+        <!-- Number -->
+        <value code="number">number</value>
+        <value code="range">number</value>
+        <value code="slider">number</value>
+        <value code="switch">number</value>
+        <!-- Date -->
+        <value code="date">date</value>
+        <value code="time">date</value>
+        <value code="datetime">date</value>
+        <!-- File -->
+        <value code="file">file</value>
+        <!-- Form -->
+        <value code="form">form</value>
+        <value code="picker">form</value>
+        <!-- Enum -->
+        <value code="enum">enum</value>
+        <value code="select">enum</value>
+        <value code="radio">enum</value>
+        <value code="check">enum</value>
+    </enum>
+    <enum name="__patts__">
+        <value code="url"><![CDATA[^(\w+:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}[#&+_\?\/\w \.\-=]*$]]></value>
+        <value code="email"><![CDATA[^([a-z0-9_\.\-\+]+)@([\da-z\.\-]+)\.([a-z\.]{2,6})$]]></value>
+    </enum>
     <!--
     <enum name="demo-enum">
         <value code="1">名称1</value>
         <value code="1">名称2</value>
     </enum>
     <form name="demo-form">
-        <field name="str" disp="文本" type="string" required="yes">
-            <param name="widget">text,textarea,hidden,search,tel,url,email</param>
+        <field name="str" disp="文本" type="text,textarea,hidden,search,tel,url,email">
             <param name="minlength">100</param>
             <param name="maxlength">500</param>
             <param name="pattern"></param>
         </field>
-        <field name="num" disp="数字" type="number" required="yes">
-            <param name="widget">number,range,color,swtich</param>
-            <param name="type">byte,short,int,long,float,double</type>
-            <param name="step">1</step>
+        <field name="num" disp="数字" type="number,range,slider,switch">
             <param name="min">100</param>
             <param name="max">500</param>
+            <param name="step">1</step>
+            <param name="type">int,long,float,double</type>
             <param name="format">####.##</param>
         </field>
-        <field name="date" disp="日期" type="date">
-            <param name="widget">date,time,datetime</param>
+        <field name="date" disp="日期" type="date,time,datetime">
             <param name="min">2014/01/02</param>
             <param name="max">2014/12/12</param>
+            <param name="type">date,timestamp,microtime</param>
             <param name="format">yyyy/MM</param>
         </field>
         <field name="file" disp="文件" type="file">
@@ -30,21 +62,21 @@
             <param name="name"></param>
             <param name="type"></param>
             <param name="extn"></param>
-            <param name="minsize"></param>
-            <param name="maxsize"></param>
         </field>
-        <field name="enum" disp="枚举" type="enum">
+        <field name="enum" disp="枚举" type="enum,select">
             <param name="conf"></param>
             <param name="enum">demo-enum</param>
         </field>
-        <field name="form" disp="表单" type="form">
+        <field name="form" disp="表单" type="form,picker">
             <param name="conf"></param>
             <param name="form">demo-form</param>
         </field>
-        <field name="more" disp="重复" type="string" repeated="yes">
-            <param name="distinct"></param>
-            <param name="maxcount"></param>
-            <param name="maxcount"></param>
+        <field name="more" disp="必填" type="text" required="yes">
+        </field>
+        <field name="more" disp="重复" type="text" repeated="yes">
+            <param name="distrinct"></param>
+            <param name="minrepeat"></param>
+            <param name="maxrepeat"></param>
         </field>
     </form>
     //-->

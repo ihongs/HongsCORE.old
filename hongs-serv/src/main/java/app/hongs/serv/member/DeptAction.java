@@ -1,12 +1,12 @@
 package app.hongs.serv.member;
 
-import app.hongs.dl.anno.CommitSuccess;
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.anno.Action;
 import app.hongs.db.DB;
+import app.hongs.dl.anno.CommitSuccess;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +20,10 @@ import java.util.Set;
 public class DeptAction {
 
     private app.hongs.serv.member.Dept model;
-    private CoreLanguage lang;
 
     public DeptAction()
     throws HongsException {
         model = (Dept) DB.getInstance("member").getModel("dept");
-        lang  = CoreLanguage.getInstance().clone();
-        lang.load("member");
     }
 
     @Action("list")
@@ -47,7 +44,9 @@ public class DeptAction {
     @CommitSuccess
     public void doSave(ActionHelper helper)
     throws HongsException {
-        String  id  = model.save(helper.getRequestData());
+        CoreLocale lang = CoreLocale.getInstance().clone();
+        lang.load("member");
+        String  id  = model.save(helper.getRequestData( ));
         String  msg = lang.translate("core.save.dept.success");
         helper.reply(msg, id, helper.getRequestData().get("name"));
     }
@@ -56,6 +55,8 @@ public class DeptAction {
     @CommitSuccess
     public void doDelete(ActionHelper helper)
     throws HongsException {
+        CoreLocale lang = CoreLocale.getInstance().clone( );
+        lang.load("member");
         int     rd  = model.delete(helper.getRequestData());
         String  msg = lang.translate("core.delete.dept.success", Integer.toString(rd));
         helper.reply(msg);

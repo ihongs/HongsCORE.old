@@ -147,6 +147,13 @@
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>AutoFilter_DL</filter-name>
+        <url-pattern>/huiyiabc/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
     <!-- Default Tags -->
     <jsp-config>
         <taglib>

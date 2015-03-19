@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -98,7 +97,7 @@ public class DB
   /**
    * 是否为字符模式(即获取的是文本)
    */
-  public boolean IN_STRING_MODE;
+  public boolean IN_OBJECT_MODE;
 
   /**
    * 是否为事务模式(即不会自动提交)
@@ -904,72 +903,6 @@ public class DB
     }
   }
 
-  /**
-   * 获取列名集合
-   * @param rs
-   * @return 列名集合
-   * @throws HongsException
-   */
-  public String[] getColLabels(ResultSet rs)
-    throws HongsException
-  {
-    try
-    {
-      ResultSetMetaData md = rs.getMetaData();
-      int c = md.getColumnCount();
-      String[] ls = new String[c];
-      for (int i = 0; i < c; i ++)
-      {
-        ls[i] = md.getColumnLabel(i + 1);
-      }
-      return ls;
-    }
-    catch (SQLException ex)
-    {
-      throw new app.hongs.HongsException(0x1043, ex);
-    }
-  }
-
-  /**
-   * 获取行值集合
-   * @param rs
-   * @param labels
-   * @return 行值集合
-   * @throws HongsException
-   */
-  public Map<String, Object> getRowValues(ResultSet rs, String... labels)
-    throws HongsException
-  {
-    try
-    {
-      /**
-       * 如果开启字符串模式,
-       * 则仅获取返回字符串;
-       * 否则获取其对象形式.
-       */
-      Map<String, Object> values = new HashMap();
-      if (IN_STRING_MODE)
-      {
-        for (int i = 0; i < labels.length; i ++)
-        {
-          values.put(labels[i], rs.getString(i + 1));
-        }
-      }
-      else
-      {
-        for (int i = 0; i < labels.length; i ++)
-        {
-          values.put(labels[i], rs.getObject(i + 1));
-        }
-      }
-      return values;
-    }
-    catch (SQLException ex)
-    {
-      throw new app.hongs.HongsException(0x1044, ex);
-    }
-  }
-
   //** 查询语句 **/
 
   /**
@@ -1594,9 +1527,9 @@ public class DB
      * 自动设定模式和事务
      */
 
-    db.IN_STRING_MODE = conf.containsKey("core.in.string.mode")
-                      ? conf.getProperty("core.in.string.mode", false)
-                      : Core.getInstance().containsKey("__IN_STRING_MODE__");
+    db.IN_OBJECT_MODE = conf.containsKey("core.in.object.mode")
+                      ? conf.getProperty("core.in.object.mode", false)
+                      : Core.getInstance().containsKey("__IN_OBJECT_MODE__");
     db.IN_TRANSC_MODE = conf.containsKey("core.in.transc.mode")
                       ? conf.getProperty("core.in.transc.mode", false)
                       : Core.getInstance().containsKey("__IN_TRANSC_MODE__");

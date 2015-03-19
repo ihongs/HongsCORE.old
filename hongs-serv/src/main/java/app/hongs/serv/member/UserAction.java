@@ -1,7 +1,7 @@
 package app.hongs.serv.member;
 
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.MenuSet;
@@ -23,13 +23,10 @@ import java.util.Set;
 public class UserAction {
 
     private app.hongs.serv.member.User model;
-    private CoreLanguage lang;
 
     public UserAction()
     throws HongsException {
         model = (User) DB.getInstance("member").getModel("user");
-        lang  = CoreLanguage.getInstance().clone();
-        lang.load("member");
     }
 
     @Action("list")
@@ -72,6 +69,8 @@ public class UserAction {
             data.remove("password");
         }
 
+        CoreLocale lang = CoreLocale.getInstance().clone();
+        lang.load("member");
         String  id  = model.save(data);
         String  msg = lang.translate("core.save.user.success");
         helper.reply(msg, id, helper.getRequestData().get("name"));
@@ -81,6 +80,8 @@ public class UserAction {
     @CommitSuccess
     public void doDelete(ActionHelper helper)
     throws HongsException {
+        CoreLocale lang = CoreLocale.getInstance().clone( );
+        lang.load("member");
         int     rd  = model.delete(helper.getRequestData());
         String  msg = lang.translate("core.remove.user.success", Integer.toString(rd));
         helper.reply(msg);

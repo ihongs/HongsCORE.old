@@ -62,6 +62,7 @@ import static org.apache.lucene.util.Version.LUCENE_CURRENT;
  */
 public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
+    protected final Map     types;
     protected final Map     fields;
     protected final String  datapath;
     protected final String  analyzer;
@@ -72,9 +73,10 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
     public String   idCol = "id";
     public String   wdCol = "wd";
+    public String[] findCols = new String[] {"wd"};
     public String[] dispCols = new String[] {"name"};
 
-    public LuceneRecord(Map fields, String datapath, String analyzer) {
+    public LuceneRecord(Map fields, String datapath, String analyzer) throws HongsException {
         if (datapath == null) {
             datapath = CoreConfig.getInstance().getProperty("core.lucene.datapath", "${VARS_PATH}/lucene") + "/test";
         } else
@@ -90,6 +92,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         ti.put("VARS_PATH", Core.VARS_PATH);
         datapath = Text.inject(datapath,ti);
 
+        this.types = FormSet.getInstance("default").getEnum("__types__");
         this.fields = fields;
         this.datapath = datapath;
         this.analyzer = analyzer;
@@ -136,7 +139,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         List list = new ArrayList();
         try {
             Query q = getFind(rd);
-            Sort  s = getSort (rd);
+            Sort  s = getSort(rd);
 
             if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
                 CoreLogger.debug("...\r\n\tQuery: "+q.toString()+"\r\n\tSort : "+s.toString());
@@ -384,10 +387,15 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             if (fm == null) {
                 continue;
             }
+            Object ft = fm.get("lucene-field"); // 存储类型
+            if ("stored".equals(ft)) {
+                continue;
+            }
+            Object dt = types.get(fm.get("__type__")); // 数据类型
 
             SortField.Type st;
-            if ("number".equals(fm.get("__type__"))) {
-                Object   nt  =  fm.get(  "type"  );
+            if ("number".equals(dt)) {
+                Object nt = fm.get("type");
                 if ("int".equals(nt)) {
                     st = SortField.Type.INT;
                 } else
@@ -421,22 +429,18 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             Object fv = e.getValue( );
             String fn = (String)e.getKey();
 
-            // 字段是否存在
             Map fm = (Map ) fields.get(fn);
             if (fm == null) {
                 continue;
             }
-
-            // 存储类型
-            String ft = Synt.declare(fm.get("lucene-field"), "");
+            Object ft = fm.get("lucene-field"); // 存储类型
             if ("stored".equals(ft)) {
                 continue;
             }
+            Object dt = types.get(fm.get("__type__")); // 数据类型
 
-            // 值类型
-            if ("number".equals(fm.get("__type__"))) {
-                // 数字类型
-                Object   nt  =  fm.get(  "type"  );
+            if ("number".equals(dt)) {
+                Object nt = fm.get("type");
                 if ("int".equals(nt)) {
                     qryAdd(query, fn, fv, new AddIntQuery());
                 } else
@@ -561,22 +565,28 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
     private Analyzer getAna() throws HongsException {
         try {
-            return (Analyzer) Class.forName(analyzer)
-                      .getConstructor(LUCENE_CURRENT.getClass())
-                      .newInstance   (LUCENE_CURRENT);
+            try {
+                return (Analyzer) Class.forName(analyzer )
+                .getConstructor(LUCENE_CURRENT.getClass())
+                .newInstance   (LUCENE_CURRENT);
+            } catch (NoSuchMethodException ex ) {
+                return (Analyzer) Class.forName(analyzer )
+                .getConstructor()
+                .newInstance   ();
+            }
+        } catch (ClassNotFoundException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch ( NoSuchMethodException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (     SecurityException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (   InstantiationException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        } catch (   IllegalAccessException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
         } catch ( IllegalArgumentException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         } catch (InvocationTargetException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (NoSuchMethodException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (SecurityException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (InstantiationException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (IllegalAccessException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        } catch (ClassNotFoundException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }
     }
@@ -598,20 +608,21 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
         for(Object o : fields.entrySet()) {
             Map.Entry e = (Map.Entry) o;
-            String k = (String) e.getKey();
-            Map    m = (Map ) e.getValue();
+            String k = (String)e.getKey();
+            Map    m = (Map )e.getValue();
 
-            if (! Synt.declare( m.get("lucene-store"), true )) {
+            if (! Synt.declare( m.get("lucene-store"), true)) {
                 continue;
             }
-            String g = Synt.declare(m.get("lucene-field"), "");
-            String t = Synt.declare(m.get("__type__"),"");
+            Object ft =              m.get("lucene-field") ;
+            Object dt =    types.get(m.get(  "__type__"  ));
+            boolean r = Synt.declare(m.get("__repeated__"), false);
 
             IndexableField[] fs = doc.getFields(k);
-            if (  "json".equals(g)) {
-                if (Synt.declare(m.get("__repeated__"),false)) {
+            if (  "json".equals(ft)) {
+                if (r) {
                     if (fs.length > 0) {
-                        for (IndexableField f : fs) {
+                        for(IndexableField f : fs) {
                             Dict.put(map, Data.toObject(f.stringValue()), k, null);
                         }
                     } else
@@ -627,10 +638,10 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                     }
                 }
             } else
-            if ("number".equals(t)) {
-                if (Synt.declare(m.get("__repeated__"),false)) {
+            if ("number".equals(dt)) {
+                if (r) {
                     if (fs.length > 0) {
-                        for (IndexableField f : fs) {
+                        for(IndexableField f : fs) {
                             Dict.put(map, f.numericValue(), k, null);
                         }
                     } else
@@ -647,9 +658,9 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 }
             } else
             {
-                if (Synt.declare(m.get("__repeated__"),false)) {
+                if (r) {
                     if (fs.length > 0) {
-                        for (IndexableField f : fs) {
+                        for(IndexableField f : fs) {
                             Dict.put(map, f.stringValue( ), k, null);
                         }
                     } else
@@ -681,50 +692,50 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 continue;
             }
 
-            String/***/ g = Synt.declare(m.get("lucene-field"), String.class);
+            String/***/ t = Synt.declare(m.get("lucene-field"), String.class);
             Field.Store s = Synt.declare(m.get("lucene-store"), true )
                           ?  Field.Store.YES : Field.Store.NO;
 
             // 如果未指定 lucene-field 则用 field-type 替代
-            if (g == null) {
-                g = Synt.declare(m.get("__type__"), "string");
-                if ("number".equals(g)) {
-                    g = Synt.declare(m.get("type"), "double");
+            if (t == null) {
+                t = Synt.declare(types.get(m.get("__type__")), "string");
+                if ("number".equals(t)) {
+                    t = Synt.declare(m.get("type"), "double");
                 }
             }
 
             doc.removeFields(k);
             if (v instanceof Collection) {
                 for (Object x : (Collection) v) {
-                    this.docAdd(doc, k, x, g, s);
+                    this.docAdd(doc, k, x, t, s);
                 }
             } else
             if (v instanceof Object[ ] ) {
                 for (Object x : (Object[ ] ) v) {
-                    this.docAdd(doc, k, x, g, s);
+                    this.docAdd(doc, k, x, t, s);
                 }
             } else
             {
-                /**/this.docAdd(doc, k, v, g, s);
+                /**/this.docAdd(doc, k, v, t, s);
             }
         }
     }
 
-    private void docAdd(Document doc, String k, Object v, String g, Field.Store s) {
+    private void docAdd(Document doc, String k, Object v, String t, Field.Store s) {
         if (null == v) v = "";
-        if (   "int".equals(g)) {
+        if (   "int".equals(t)) {
             doc.add(new    IntField(k, Synt.declare(v,Integer.class), s));
         } else
-        if (  "long".equals(g)) {
+        if (  "long".equals(t)) {
             doc.add(new   LongField(k, Synt.declare(v,   Long.class), s));
         } else
-        if ( "float".equals(g)) {
+        if ( "float".equals(t)) {
             doc.add(new  FloatField(k, Synt.declare(v,  Float.class), s));
         } else
-        if ("double".equals(g)) {
+        if ("double".equals(t)) {
             doc.add(new DoubleField(k, Synt.declare(v, Double.class), s));
         } else
-        if (  "json".equals(g)) {
+        if (  "json".equals(t)) {
             if (  "".equals(v)) {
                 v = "{}";
             } else
@@ -733,10 +744,10 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             }
             doc.add(new StoredField(k, (String) v));
         } else
-        if ("stored".equals(g)) {
+        if ("stored".equals(t)) {
             doc.add(new StoredField(k, Synt.declare(v, String.class)));
         } else
-        if (  "text".equals(g)) {
+        if (  "text".equals(t)) {
             doc.add(new   TextField(k, Synt.declare(v, String.class), s));
         } else
         {

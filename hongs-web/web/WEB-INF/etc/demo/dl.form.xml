@@ -28,33 +28,53 @@
         <value code="0">其他</value>
     </enum>
     <form name="demo1">
-        <field disp="ID" name="id" type="string">
-            <param name="widget">hidden</param>
-        </field>
-        <field disp="姓名" name="name" type="string" required="yes"/>
-        <field disp="电话" name="phone" type="number" required="yes"/>
-        <field disp="邮箱" name="email" type="string" required="yes"/>
+        <field disp="ID" name="id" type="hidden"/>
+        <field disp="姓名" name="name" type="text" required="yes"/>
+        <field disp="电话" name="phone" type="tel" required="yes"/>
+        <field disp="邮箱" name="email" type="email" required="yes"/>
         <field disp="照片" name="photo" type="file"/>
         <field disp="生日" name="birthday" type="date"/>
-        <field disp="性别" name="gender" type="enum">
+        <field disp="性别" name="gender" type="select">
             <param name="enum">gender</param>
         </field>
-        <field disp="职位" name="position" type="enum" repeated="yes">
+        <field disp="职位" name="position" type="select" repeated="yes">
             <param name="enum">position</param>
             <param name="hideInList">yes</param>
         </field>
-        <field disp="学历" name="degree" type="enum">
+        <field disp="学历" name="degree" type="radio">
             <param name="enum">degree</param>
-            <param name="widget">radio</param>
         </field>
-        <field disp="兴趣" name="interest" type="enum" repeated="yes">
+        <field disp="兴趣" name="interest" type="check" repeated="yes">
             <param name="enum">interest</param>
-            <param name="widget">check</param>
             <param name="hideInList">yes</param>
         </field>
-        <field disp="说明" name="note"  type="string">
-            <param name="widget">textarea</param>
+        <field disp="说明" name="note" type="textarea">
             <param name="hideInList">yes</param>
+        </field>
+    </form>
+    <form name="demo2">
+        <field disp="ID" name="id" type="hidden"/>
+        <field disp="名称" name="name" type="text" required="yes"/>
+        <field disp="说明" name="note" type="number" required="yes"/>
+        <field disp="照片" name="photo" type="file" required="yes"/>
+        <field disp="创建时间" name="ctime" type="date">
+            <param name="default">$now</param>
+            <param name="hideInForm">yes</param>
+        </field>
+    </form>
+    <form name="demo3">
+        <field disp="ID" name="id" type="hidden"/>
+        <field disp="选择商品" name="demo2_id." type="picker" required="yes" repeated="yes">
+            <param name="data-tn">demo2</param>
+            <param name="data-vk">id</param>
+            <param name="data-vk">name</param>
+        </field>
+        <field disp="姓名" name="name" type="text" required="yes"/>
+        <field disp="电话" name="phone" type="number" required="yes"/>
+        <field disp="地址" name="addr" type="text" required="yes"/>
+        <field disp="下单时间" name="ctime" type="date">
+            <param name="default">$now</param>
+            <param name="hideInForm">yes</param>
         </field>
     </form>
 </root>

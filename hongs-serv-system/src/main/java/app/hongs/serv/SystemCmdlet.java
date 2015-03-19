@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,13 +113,14 @@ public class SystemCmdlet {
     }
 
     /**
-     * 从数据库配置构建 form/page 配置
+     * 从 form 配置创建 db 配置
      * @param args 
      */
     public static void build(String[] args) {
-
+        Map<String, Object> opts = CmdletHelper.getOpts(args,
+            "conf:s", "form:s", "help:b");
     }
-  
+    
     private static class FileComparator implements Comparator<File> {
         @Override
         public int compare(File f1 , File f2) {

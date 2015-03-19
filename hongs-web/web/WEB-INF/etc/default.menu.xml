@@ -1,5 +1,6 @@
 <root>
     <menu href="/">
+        <include>huiyiabc/meeting</include>
         <include>member</include>
         <include>demo/db</include>
         <include>demo/dl</include>

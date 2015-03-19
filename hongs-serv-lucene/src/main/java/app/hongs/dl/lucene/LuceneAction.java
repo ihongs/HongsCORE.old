@@ -1,6 +1,6 @@
 package app.hongs.dl.lucene;
 
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
@@ -38,7 +38,7 @@ public class LuceneAction implements IAction {
         Map rd = helper.getRequestData();
         Object[] sa = sr.create(rd);
         sr.destroy();
-        CoreLanguage lang = CoreLanguage.getInstance();
+        CoreLocale lang = CoreLocale.getInstance();
         helper.reply(lang.translate("fore.update.success", lang.translate("fore.record")), sa);
     }
 
@@ -51,7 +51,7 @@ public class LuceneAction implements IAction {
         Map rd = helper.getRequestData();
         int sn = sr.update(rd);
         sr.destroy();
-        CoreLanguage lang = CoreLanguage.getInstance();
+        CoreLocale lang = CoreLocale.getInstance();
         helper.reply(lang.translate("fore.update.success", lang.translate("fore.record"), String.valueOf(sn)));
     }
 
@@ -63,7 +63,7 @@ public class LuceneAction implements IAction {
         Map rd = helper.getRequestData();
         int sn = sr.delete(rd);
         sr.destroy();
-        CoreLanguage lang = CoreLanguage.getInstance();
+        CoreLocale lang = CoreLocale.getInstance();
         helper.reply(lang.translate("fore.delete.success", lang.translate("fore.record"), String.valueOf(sn)));
     }
 

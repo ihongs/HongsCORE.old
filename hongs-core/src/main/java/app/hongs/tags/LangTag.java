@@ -1,17 +1,14 @@
 package app.hongs.tags;
 
+import app.hongs.CoreLocale;
+import app.hongs.util.Text;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.jsp.tagext.DynamicAttributes;
-
-import app.hongs.Core;
-import app.hongs.CoreLanguage;
-import app.hongs.util.Text;
 
 /**
  * 语言信息读取标签
@@ -39,7 +36,7 @@ public class LangTag extends TagSupport implements DynamicAttributes {
   public int doStartTag() throws JspException {
     JspWriter out = this.pageContext.getOut();
 
-    CoreLanguage lang = CoreLanguage.getInstance().clone();
+    CoreLocale lang = CoreLocale.getInstance().clone();
 
     if (this.load != null) {
       lang.load(this.load);

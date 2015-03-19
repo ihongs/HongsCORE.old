@@ -1,8 +1,8 @@
 package app.hongs.action;
 
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
-import app.hongs.CoreSerially;
+import app.hongs.CoreLocale;
+import app.hongs.CoreSerial;
 import app.hongs.HongsException;
 import app.hongs.util.Synt;
 import java.io.File;
@@ -39,8 +39,8 @@ import org.xml.sax.SAXException;
                 __disp__ : "Label",
                 __type__ : "string|number|date|file|enum|form",
                 __rule__ : "rule.class.Name",
-                __required__ : yes|no,
-                __repeated__ : yes}no,
+                __required__ : "yes|no",
+                __repeated__ : "yes|no",
                 "name" : "Value"
                 ...
             }
@@ -50,7 +50,7 @@ import org.xml.sax.SAXException;
     }
     enums = {
         "enum_name" : {
-            "code" : "Label"
+            "value_code" : "Label"
             ...
         }
         ...
@@ -67,7 +67,7 @@ import org.xml.sax.SAXException;
  * @author Hongs
  */
 public class FormSet
-  extends CoreSerially
+  extends CoreSerial
 {
 
   private String name;
@@ -131,22 +131,22 @@ public class FormSet
     Element root;
     try
     {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      DocumentBuilder dbn = dbf.newDocumentBuilder();
+      DocumentBuilderFactory dbf  = DocumentBuilderFactory.newInstance();
+      DocumentBuilder dbn  = dbf.newDocumentBuilder();
       Document  doc = dbn.parse( is );
       root = doc.getDocumentElement();
     }
     catch ( IOException ex)
     {
-      throw new HongsException(0x10e9 , ex);
+      throw new HongsException(0x10e9, "Read '" +name+".form.xml error'", ex);
     }
     catch (SAXException ex)
     {
-      throw new HongsException(0x10e9 , ex);
+      throw new HongsException(0x10e9, "Parse '"+name+".form.xml error'", ex);
     }
     catch (ParserConfigurationException ex)
     {
-      throw new HongsException(0x10e9 , ex);
+      throw new HongsException(0x10e9, "Parse '"+name+".form.xml error'", ex);
     }
 
     this.forms = new HashMap();
@@ -200,19 +200,30 @@ public class FormSet
         forms.put(namz, items);
 
         namz = element2.getAttribute("disp");
-        items.put("__disp__", Synt.declare(namz, ""));
+        items.put("__disp__", namz);
+
+        namz = element2.getAttribute("hint");
+        items.put("__hint__", namz);
 
         namz = element2.getAttribute("type");
-        items.put("__type__", Synt.declare(namz, ""));
+        items.put("__type__", namz);
 
         namz = element2.getAttribute("rule");
-        items.put("__rule__", Synt.declare(namz, ""));
+        items.put("__rule__", namz);
 
-        namz = element2.getAttribute("required");
-        items.put("__required__", Synt.declare(namz, false));
+        if (element2.hasAttribute("required")) {
+            namz = element2.getAttribute("required");
+            items.put("__required__",  namz  );
+        } else {
+            items.put("__required__", "false");
+        }
 
-        namz = element2.getAttribute("repeated");
-        items.put("__repeated__", Synt.declare(namz, false));
+        if (element2.hasAttribute("repeated")) {
+            namz = element2.getAttribute("repeated");
+            items.put("__repeated__",  namz  );
+        } else {
+            items.put("__repeated__", "false");
+        }
       }
       else
       if ("param".equals(tagName2))
@@ -239,20 +250,20 @@ public class FormSet
     return forms.get(name);
   }
 
-  public CoreLanguage getCurrTranslator() {
+  public CoreLocale getCurrTranslator() {
     try {
-      return CoreLanguage.getInstance(name);
+      return CoreLocale.getInstance(name);
     }
     catch (app.hongs.HongsError e) {
       if  (   e.getCode() != 0x2a) {
         throw e;
       }
-      return CoreLanguage.getInstance("default");
+      return CoreLocale.getInstance("default");
     }
   }
 
   public Map getEnumTranslated(String namc) {
-    CoreLanguage lang = getCurrTranslator();
+    CoreLocale lang = getCurrTranslator();
     Map anum = getEnum(namc);
     Map data = new LinkedHashMap();
     if (anum == null) return data ;
@@ -261,7 +272,7 @@ public class FormSet
       Map.Entry e = (Map.Entry) o ;
       String    n = (String) e.getValue();
       if (n == null || "".equals(n)) {
-          n = "fore.enum."+name+"."+namc+"."+(String) e.getKey();
+          n = "fore.enum."+name+"."+namc+"."+((String) e.getKey());
       }
       e.setValue( lang.translate(n));
     }
@@ -274,18 +285,21 @@ public class FormSet
     Map itemz = new LinkedHashMap();
     Map items = getForm(namc);
     if (items == null) return itemz;
-    CoreLanguage lang = getCurrTranslator();
+    CoreLocale lang = getCurrTranslator();
     for(Object o : items.entrySet()) {
       Map.Entry e = (Map.Entry) o;
       Map       m = (Map ) e.getValue();
       String    k = (String) e.getKey();
       String    n = (String) m.get("__disp__");
+      String    h = (String) m.get("__hint__");
+      Map       u = new LinkedHashMap();
+      u.putAll( m );
       if (n == null || "".equals(n)) {
           n = "fore.form."+name+"."+namc+"."+k;
+      }   u.put("__disp__", lang.translate(n));
+      if (h != null &&!"".equals(n)) {
+          u.put("__hint__", lang.translate(h));
       }
-      Map       u = new LinkedHashMap(  );
-      u.putAll( m );
-      u.put("__disp__",lang.translate(n));
       itemz.put(k, u);
     }
     return itemz;

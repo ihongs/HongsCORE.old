@@ -78,24 +78,24 @@ public class Mview {
                 }
             }
 
-            if (!fields.containsKey("widget")) {
+            if (!fields.containsKey("__type__")) {
                 if (name.endsWith("_id") || name.equals(table.primaryKey)) {
-                    field.put("widget", "hidden");
+                    field.put("__type__", "hidden");
                 } else
                 if (Pattern.compile("(decimal|numeric|integer|tinyint|smallint|float|double).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
-                    field.put("widget", "number");
+                    field.put("__type__", "number");
                 } else
                 if (Pattern.compile("(datetime|timestamp).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
-                    field.put("widget", "datetime");
+                    field.put("__type__", "datetime");
                 } else
                 if (Pattern.compile("(date)"  , Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
-                    field.put("widget", "date");
+                    field.put("__type__", "date");
                 } else
                 if (Pattern.compile("(time)"  , Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
-                    field.put("widget", "time");
+                    field.put("__type__", "time");
                 } else
                 if (Pattern.compile("(text).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
-                    field.put("widget", "textarea");
+                    field.put("__type__", "textarea");
                 }
             }
         }
@@ -143,8 +143,8 @@ public class Mview {
 
                 field = new HashMap();
                 fields.put(name, field);
-                field.put("widget", "pick");
-                field.put("__disp__", disp);
+                field.put("__type__","pick");
+                field.put("__disp__", disp );
                 field.put("data-tn", tn);
                 field.put("data-tk", tk);
                 field.put("data-vk", vk);

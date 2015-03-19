@@ -119,6 +119,11 @@ extends HashMap<String, Object>
   public final void destroy()
   throws Throwable
   {
+    if (this.isEmpty())
+    {
+      return;
+    }
+
     Iterator it;
 
     /**
@@ -148,6 +153,20 @@ extends HashMap<String, Object>
          continue;
       }
       it.remove();
+    }
+  }
+
+  @Override
+  protected void finalize()
+  throws Throwable
+  {
+    try
+    {
+       this.destroy( );
+    }
+    finally
+    {
+      super.finalize();
     }
   }
 
@@ -349,6 +368,15 @@ extends HashMap<String, Object>
       protected Core initialValue() {
             return new Core();
       }
+      @Override
+      public void remove() {
+          try {
+            ((Core) get()).destroy();
+          } catch (Throwable ex) {
+            throw  new Error(ex);
+          }
+            super.remove();
+      }
   };
 
   /**
@@ -358,9 +386,9 @@ extends HashMap<String, Object>
          =  new InheritableThreadLocal();
 
   /**
-   * 动作路径标识
+   * 动作时区标识
    */
-  public static InheritableThreadLocal<String> ACTION_NAME
+  public static InheritableThreadLocal<String> ACTION_ZONE
          =  new InheritableThreadLocal();
 
   /**
@@ -370,9 +398,9 @@ extends HashMap<String, Object>
          =  new InheritableThreadLocal();
 
   /**
-   * 动作时区标识
+   * 动作路径标识
    */
-  public static InheritableThreadLocal<String> ACTION_ZONE
+  public static InheritableThreadLocal<String> ACTION_NAME
          =  new InheritableThreadLocal();
 
   /**

@@ -7,6 +7,25 @@
 
 本工具集与 HongsCORE(Java) 配套使用, 使用 jQuery 作为核心辅助库, 使用 Bootstrap 作为 UI 库. 源码为 src 下以 hongs- 开头的文件, 以 hs 开头的为普通函数, 以 Hs 开头的为伪类函数, this 指向调用的容器对象.
 
+data 属性缩写:
+    Form:
+        data-fn     Field name
+        data-ft     Field type
+        data-pn     Param name
+        data-vk     Value key
+        data-tk     Text key
+        data-lk     List key
+        data-dk     Disp key
+    List:
+        data-fn     Field name
+        data-ft     Field type
+        data-pn     Page num
+        data-ob     Order by
+    Pick:
+        data-tn     Table name
+
+其他非缩写 data 属性通常可按字面意思理解, data-toggle,data-target 等为 bootstrap 定义的.
+
 ## 环境加载
 
     <base href="../">

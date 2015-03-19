@@ -1,6 +1,6 @@
 package app.hongs.serv.member;
 
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.VerifyHelper.Wrong;
@@ -39,7 +39,7 @@ public class SignAction {
         Table um = DB.getInstance("member").getTable("user");
         Map   ud = um.fetchLess(fc);
         if (!password.equals(ud.get("password"))) {
-            CoreLanguage lang = CoreLanguage.getInstance("member");
+            CoreLocale lang = CoreLocale.getInstance("member");
             Map m = new HashMap();
             Map e = new HashMap();
             m.put("password", new Wrong(lang.translate("core.username.or.password.invalid")));

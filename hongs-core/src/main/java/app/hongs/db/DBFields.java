@@ -1,6 +1,6 @@
 package app.hongs.db;
 
-import app.hongs.CoreSerially;
+import app.hongs.CoreSerial;
 import app.hongs.HongsException;
 
 import java.io.Serializable;
@@ -20,7 +20,7 @@ import java.sql.SQLException;
  * @author hongs
  */
 public class DBFields
-     extends CoreSerially
+     extends CoreSerial
   implements Serializable
 {
 

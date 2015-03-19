@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <form name="demo">
-        <field name="id" type="string" required="yes">
-            <param name="widget">hidden</param>
-        </field>
+        <field name="id" type="hidden"/>
         <field name="name" type="string" required="yes"/>
         <field name="email" type="string" required="yes"/>
         <field name="phone" type="string" required="yes"/>
@@ -15,7 +13,7 @@
         </field>
     </form>
     <form name="_demo_norepate">
-        <field name="id" type="string" required="yes"/>
+        <field name="id" type="string"/>
         <field name="name" type="string" required="yes"/>
         <field name="email" type="string" required="yes"/>
         <field name="phone" type="string" required="yes"/>

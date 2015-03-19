@@ -243,7 +243,7 @@ HsList.prototype = {
                     td.append('<span class="sort-ico"></span>');
                     td.click(function( ) {
                         var td = jQuery ( this );
-                        var fn = td.attr("data-sn")||td.attr("data-fn");
+                        var fn = td.attr("data-ob")||td.attr("data-fn");
                         var sn = "";
                         if ( td.hasClass("sort-a-z")) {
                             sn = "-"+fn;
@@ -256,7 +256,7 @@ HsList.prototype = {
                     });
                 }
                 var sn = hsGetSeria( this._data, this.sortKey );
-                var fn = td.attr("data-sn")||td.attr("data-fn");
+                var fn = td.attr("data-ob")||td.attr("data-fn");
                 td.removeClass("sort-a-z sort-z-a");
                 if (sn ==     fn) {
                     td.addClass("sort-a-z");

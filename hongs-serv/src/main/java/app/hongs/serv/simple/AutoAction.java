@@ -1,6 +1,6 @@
 package app.hongs.serv.simple;
 
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.anno.Action;
@@ -109,9 +109,9 @@ implements IAction {
     }
 
     public String getMyMsg(Model mod, String opr, int num) throws HongsException {
-        CoreLanguage lang = CoreLanguage.getInstance().clone();
-                     lang.loadIgnrFNF(mod.db.name);
-        Mview        view = new Mview(mod);
+        CoreLocale lang = CoreLocale.getInstance().clone();
+                   lang.loadIgnrFNF(mod.db.name);
+        Mview      view = new Mview(mod);
         return lang.translate("fore."+opr+".success", view.getTitle(), Integer.toString(num));
     }
 

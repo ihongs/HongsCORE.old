@@ -114,8 +114,8 @@ public class FetchMore
    * 获取关联数据
    * 类似 SQL: JOIN table ON super.key = table.col
    * @param table 关联表
-   * @param col   关联字段
    * @param key   源表关联键
+   * @param col   关联字段
    * @param caze  限制查询结构
    * @throws app.hongs.HongsException
    */
@@ -149,7 +149,7 @@ public class FetchMore
 
     // 识别字段别名
     String col2 = col;
-    if (!table.getFields().containsKey(col))
+    if (! table.getFields().containsKey(col))
     {
       Pattern pattern = Pattern.compile(
              "^(.+?)\\s+(?:AS\\s+)?`?(.+?)`?$",
@@ -248,8 +248,8 @@ public class FetchMore
    * 获取关联数据
    *
    * @param table 关联表
-   * @param col   关联字段
    * @param key   源表关联键
+   * @param col   关联字段
    * @throws app.hongs.HongsException
    */
   public void join(Table table, String key, String col)
@@ -262,7 +262,7 @@ public class FetchMore
    * 获取关联数据
    *
    * @param table 关联表
-   * @param key   关联字段
+   * @param key   源表关联键
    * @throws app.hongs.HongsException
    */
   public void join(Table table, String key)

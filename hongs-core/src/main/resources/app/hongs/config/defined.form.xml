@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <enum name="__defined_pattern__">
-        <value code="email">^([a-z0-9_\.\-\+]+)@([\da-z\.\-]+)\.([a-z\.]{2,6})$</value>
-        <value code="url">^(https?:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}[#&+_\?\/\w \.\-=]*$</value>
-    </enum>
-</root>

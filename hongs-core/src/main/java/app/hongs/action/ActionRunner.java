@@ -7,7 +7,7 @@ import app.hongs.HongsException;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Filter;
 import app.hongs.action.anno.FilterInvoker;
-import app.hongs.util.Cnames;
+import app.hongs.util.Cname;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -26,11 +26,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <h3>异常代码</h3>
  * <pre>
  * 区间: 0x10f0~0x10ff
- * 0x10f0 注解链溢出
  * 0x10f1 尚未登陆
  * 0x10f3 无权访问
  * 0x10f4 无此动作
- * 0x10f5 无法执行, 禁止访问或参数错误
+ * 0x10f5 不支持此方法
+ * 0x10fa 无法执行, 禁止访问或参数错误
+ * 0x10ff 注解链溢出
  * </pre>
  *
  * @author Hong
@@ -85,7 +86,7 @@ public class ActionRunner {
     public void doAction() throws HongsException {
         // 如果超出链长度, 则终止执行
         if ( idx  >  annarr.length) {
-            throw new HongsException(0x10f0, "Action annotation out of index: "
+            throw new HongsException(0x10ff, "Action annotation out of index: "
             +idx+">"+annarr.length);
         }
 
@@ -119,9 +120,9 @@ public class ActionRunner {
         try {
             method.invoke(object, helper);
         } catch (   IllegalAccessException e) {
-            throw new HongsException(0x10f5, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x10fa, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch ( IllegalArgumentException e) {
-            throw new HongsException(0x10f5, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x10fa, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
             if (ex instanceof HongsException) {
@@ -130,7 +131,7 @@ public class ActionRunner {
             if (ex instanceof HongsError) {
                 throw (HongsError) ex;
             } else {
-                throw new HongsException(0x10f5, ex);
+                throw new HongsException(0x10fa, ex);
             }
         }
     }
@@ -171,7 +172,7 @@ public class ActionRunner {
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);
                 try {
-                    clss = Cnames.getClassNames(pkgn, false);
+                    clss = Cname.getClassNames(pkgn, false);
                 } catch (IOException ex) {
                     throw new HongsError( 0x4a , "Can not load package '" + pkgn + "'.", ex);
                 }

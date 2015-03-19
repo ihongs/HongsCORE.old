@@ -1,7 +1,7 @@
 package app.hongs.action.serv;
 
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsError;
 import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionHelper;
@@ -197,11 +197,11 @@ public class LangAction
    */
   private static class Maker
   {
-    private CoreLanguage lang;
+    private CoreLocale lang;
 
     public Maker(String name)
     {
-      this.lang = new CoreLanguage(name);
+      this.lang = new CoreLocale(name);
     }
 
     public String make(String key)

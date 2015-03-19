@@ -2,8 +2,8 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.CoreLanguage;
-import app.hongs.CoreSerially;
+import app.hongs.CoreLocale;
+import app.hongs.CoreSerial;
 import app.hongs.HongsException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,7 +82,7 @@ import org.xml.sax.SAXException;
  * @author Hongs
  */
 public class MenuSet
-  extends CoreSerially
+  extends CoreSerial
 {
 
   private String name;
@@ -545,17 +545,17 @@ public class MenuSet
    * 获取翻译对象(与当前请求相关)
    * @return
    */
-  public CoreLanguage getCurrTranslator() {
-    CoreLanguage lang;
+  public CoreLocale getCurrTranslator() {
+    CoreLocale lang;
     try {
-      lang = CoreLanguage.getInstance(name).clone();
+      lang = CoreLocale.getInstance(name).clone();
     }
     catch (app.hongs.HongsError e ) {
       if  (   e.getCode() != 0x2a ) {
         throw e;
       }
       // 语言文件不存在则拿一个空代替
-      lang = new CoreLanguage(null);
+      lang = new CoreLocale(null);
     }
     for(String namz : imports) {
         lang.loadIgnrFNF(namz);
@@ -578,11 +578,11 @@ public class MenuSet
    */
   public  List<Map> getRoleTranslated(Set<String> rolez) {
       if (null == rolez)rolez = new HashSet();
-      CoreLanguage lang = getCurrTranslator();
+      CoreLocale lang = getCurrTranslator();
       return getRoleTranslated(rolez, menus, lang);
   }
 
-  private List<Map> getRoleTranslated(Set<String> rolez, Map<String, Map> menus, CoreLanguage lang) {
+  private List<Map> getRoleTranslated(Set<String> rolez, Map<String, Map> menus, CoreLocale lang) {
       List<Map> list = new ArrayList( );
 
       for(Map.Entry item : menus.entrySet()) {
@@ -661,11 +661,11 @@ public class MenuSet
    */
   public  List<Map> getMenuTranslated(int level, int depth, Set<String> rolez) {
       if (null == rolez)rolez = new HashSet();
-      CoreLanguage lang = getCurrTranslator();
+      CoreLocale lang = getCurrTranslator();
       return getMenuTranslated(level, depth, rolez, menus, lang, 0);
   }
 
-  private List<Map> getMenuTranslated(int level, int depth, Set<String> rolez, Map<String, Map> menus, CoreLanguage lang, int i) {
+  private List<Map> getMenuTranslated(int level, int depth, Set<String> rolez, Map<String, Map> menus, CoreLocale lang, int i) {
       List<Map> list = new ArrayList();
 
       if (null == menus || level+depth <= i) {

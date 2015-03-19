@@ -20,7 +20,7 @@
                 page += "?"+data;
             }
 
-            if (href.startsWith(path+"/") && href.contains("#")) {
+            if (href.startsWith(path+"/#")) {
                 href = href.substring(href.indexOf('#'));
                 page = Core.BASE_HREF + "/" + page;
             } else {
@@ -112,10 +112,19 @@
                 return !! $(this).attr("data-href");
             })
             .click(function() {
-                $("#main-context").hsLoad($(this).attr("data-href"));
+                var h  =  $(this).attr("data-href");
+                var p  =  $(this).attr("data-hrel");
+                if (p) {
+                    $(this).removeAttr("data-hrel");
+                    if (h.index('?') != -1 ) {
+                        h += '?' + p;
+                    } else {
+                        h += '&' + p;
+                    }
+                }
+                $("#main-context").hsLoad(h);
                 $(this).closest("li").addClass("active")
                        .siblings().removeClass("active");
-
             });
         $("#main-menubar>li>a")
             .click(function() {
@@ -136,9 +145,14 @@
             // Click the first available menu item
             var a;
             if (location.hash) {
-                a = $("#curr-menubar a[href='"+location.hash+"']");
+                // #abc&x=1&y=2
+                var h = location.hash ;
+                var p = h.indexOf('&');
+                p = p != -1 ? h.substring(p + 1) : "" ;
+                a = $("#curr-menubar a[href='"+h+"']");
+                a.attr("data-hrel", p);
             } else {
-                a = $("#curr-menubar a").first();
+                a = $("#curr-menubar a").first(/****/);
             }
             if (a.size() == 0) {
                 a = $("#main-menubar ul.dropdown-menu a").first( );

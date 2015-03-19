@@ -48,7 +48,7 @@ public class AutoFilter implements Filter {
         String act, url, ext; int pos;
 
         // 当前路径
-        url = app.hongs.action.ActionDriver.getCurrPath((HttpServletRequest) req);
+        url = ActionDriver.getCurrPath((HttpServletRequest) req);
 
         if (url.endsWith(".api")) {
             // 接口无需处理
@@ -65,7 +65,7 @@ public class AutoFilter implements Filter {
             }
 
             if(!ActionRunner.getActions().containsKey(act)) {
-                for(String uri : actSet()) {
+                for(String uri : getacts()) {
                     if(!act.endsWith(uri)) {
                         continue;
                     }
@@ -84,14 +84,20 @@ public class AutoFilter implements Filter {
         } else {
             File file = new File(Core.CONT_PATH + url);
             if (!file.exists()) {
-                String uri = url.substring(url.lastIndexOf('/'));
-                file = new File(Core.CONT_PATH + "/"+render+uri);
-                if (file.exists()) {
-                    // 虚拟路径
-                    req.setAttribute(ActionDriver.PATH, url);
-                    // 转发请求
-                    req.getRequestDispatcher(/**/render+uri).forward(req, rsp);
+                String uri;
+
+                uri = url.substring(url.lastIndexOf('/'));
+                if (doForwar(req, rsp, url, uri)) {
                     return;
+                }
+
+                // .html 转发给 .jsp
+                if (uri.endsWith(".html")) {
+                    uri = uri.substring(0, uri.length() - 5) + ".jsp";
+                    url = url.substring(0, url.length() - 5) + ".jsp";
+                    if (doForwar(req, rsp, url, uri)) {
+                        return;
+                    }
                 }
             }
         }
@@ -99,11 +105,21 @@ public class AutoFilter implements Filter {
         chain.doFilter(req, rsp);
     }
 
-    @Override
-    public void destroy() {
+    private boolean doForwar(ServletRequest req, ServletResponse rsp, String url, String uri)
+            throws ServletException, IOException {
+        File file = new File(Core.CONT_PATH +"/"+ render+uri);
+        if (file.exists()) {
+            // 虚拟路径
+            req.setAttribute(ActionDriver.PATH, url);
+            // 转发请求
+            req.getRequestDispatcher ( render + uri).forward(req, rsp);
+            return true ;
+        } else {
+            return false;
+        }
     }
 
-    private Set<String> actSet() {
+    private Set<String> getacts() {
         if (null != actset) {
             return  actset;
         }
@@ -132,6 +148,10 @@ public class AutoFilter implements Filter {
         }
 
         return actset;
+    }
+
+    @Override
+    public void destroy() {
     }
 
 }

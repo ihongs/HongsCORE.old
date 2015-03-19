@@ -57,25 +57,27 @@
             </div>
         </nav>
         <script type="text/javascript">
-            $("#sign-in-form").on("saveBack", function() {
-                var r = hsGetParam(location.href,"r");
-                if (r) {
-                    location.href = hsFixUri(r);
-                } else {
-                    location.href = "/";
-                }
-            });
-            
-//            var colors = ["#dddddd", "#dddddf", "#ddddff", "#dddfff", "#ddffff", "#dfffff",
-//                          "#ffffff", "#fffffd", "#ffffdd", "#fffddd", "#ffdddd", "#fddddd"];
-//            var colori = 1;
-//            setInterval(function() {
-//                $(".jumbotron").css("background-color", colors[colori]);
-//                    colori += 1;
-//                if (colori >= colors.length) {
-//                    colori  = 0;
-//                }
-//            }, 5000);
+            (function() {
+                $("#sign-in-form").on("saveBack", function() {
+                    var r = hsGetParam( location.href, "r" );
+                    if (r) {
+                        location.href = hsFixUri(r);
+                    } else {
+                        location.href = "/";
+                    }
+                });
+
+//                var colors = ["#dddddd", "#dddddf", "#ddddff", "#dddfff", "#ddffff", "#dfffff",
+//                              "#ffffff", "#fffffd", "#ffffdd", "#fffddd", "#ffdddd", "#fddddd"];
+//                var colori = 1;
+//                setInterval(function() {
+//                    $(".jumbotron").css("background-color", colors[colori]);
+//                        colori += 1;
+//                    if (colori >= colors.length) {
+//                        colori  = 0;
+//                    }
+//                }, 5000);
+            })(jQuery);
         </script>
     </body>
 </html>

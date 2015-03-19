@@ -1,7 +1,7 @@
 package app.hongs.action.serv;
 
 import app.hongs.Core;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.CoreLogger;
 import app.hongs.HongsCause;
 import app.hongs.HongsException;
@@ -42,16 +42,6 @@ public class ActsAction
   extends  ActionDriver
 {
 
-  private static final Map<Integer, String> ErrMap;
-  static
-  {
-    ErrMap = new HashMap();
-    ErrMap.put(0x10f1, "Er401");
-    ErrMap.put(0x10f3, "Er403");
-    ErrMap.put(0x10f4, "Er404");
-    ErrMap.put(0x10f5, "Er500");
-  }
-
   /**
    * 服务方法
    * Servlet Mapping: *.act<br/>
@@ -73,7 +63,7 @@ public class ActsAction
 
     if (act == null || act.length() == 0)
     {
-      senderr(req, helper, "Er404", "Action URI can not be empty.");
+      senderr(req, helper, 0x10f4, "Action URI can not be empty.");
       return;
     }
 
@@ -100,54 +90,69 @@ public class ActsAction
   {
     CoreLogger.error(ex);
 
-    String errno;
-    String error = ex.getLocalizedMessage();
+    int    errno;
+    String error;
     if (ex instanceof  HongsCause)
     {
-      HongsCause hc = (HongsCause) ex ;
-      errno = ErrMap.get(hc.getCode());
-      if (errno == null)
+      HongsCause hc = (HongsCause) ex;
+      String[] ls = hc.getLocalizedOptions();
+      if (ls == null || ls.length == 0 )
       {
-        errno = "Ex" + Integer.toHexString(hc.getCode());
-      } else
-      {
-        // 把当前请求路径放入翻译选项中
-        String[] ls = hc.getLocalizedOptions( );
-        if (  ls == null  ||  ls.length == 0  )
-        {
-          hc.setLocalizedOptions(ActionDriver.getRealPath(req));
-        }
+        hc.setLocalizedOptions(ActionDriver.getRealPath(req));
       }
+        errno = hc.getCode();
+        error = hc.getLocalizedMessage();
     } else
     {
-      errno = "Er500";
-      CoreLanguage lang = (CoreLanguage)
-          Core.getInstance(CoreLanguage.class );
+        errno = 0x10fa;
+        error = ex.getLocalizedMessage();
+      CoreLocale lang = (CoreLocale) Core.getInstance(CoreLocale.class);
       if (error == null || error.length() == 0)
       {
-        error = lang.translate("core.error.unkwn");
+        error = lang.translate("core.error.unkwn", ex.getClass().getName());
+      } else
+      {
+        error = lang.translate("core.error.label", ex.getClass().getName()) + ": " + error;
       }
-        error = lang.translate("core.error.label" ,
-        ex.getClass( ).getName()) + ": " + error  ;
     }
 
     senderr(req, helper, errno, error);
   }
 
-  private void senderr(HttpServletRequest req, ActionHelper helper, String errno, String error)
+  private void senderr(HttpServletRequest req, ActionHelper helper, int errno, String error)
     throws ServletException
   {
-    if ("Er404".equals(errno))
+    String errso;
+    switch (errno)
     {
-      helper.getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
-    } else
-    {
-      helper.getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      case 0x10f1:
+        errso = "Er401";
+        helper.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        break;
+      case 0x10f3:
+        errso = "Er403";
+        helper.getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
+        break;
+      case 0x10f4:
+        errso = "Er404";
+        helper.getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
+        break;
+      case 0x10f5:
+        errso = "Er405";
+        helper.getResponse().setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        break;
+      case 0x10fa:
+        errso = "Er500";
+        helper.getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        break;
+      default:
+        errso = "Ex" + Integer.toHexString(errno);
+        helper.getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     Map data = new HashMap();
     data.put( "ok" , false );
-    data.put( "err", errno );
+    data.put( "err", errso );
     data.put( "msg", error );
     helper.reply(data);
   }

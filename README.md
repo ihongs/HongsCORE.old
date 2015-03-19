@@ -16,9 +16,35 @@
 
 下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080/ 即可进入; 登录账号 `admin@xxx.com` 口令 `123456`; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; Linux,Mac 系统需要先赋予 run 执行权限(`chmod +x WEB-INF/run`).
 
+同时为 windows 用户提供了 setup.bat 和 start.bat 两个快捷命令来执行上面的两条命令, windows 用户只需双击即可设置和启动.
+
 注意: 需要 JDK 而非 JRE(Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 系统为 Windows 在官网下载并使用安装程序安装的通常已自动设置好了.
 
 > JDK 下载地址: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+## 前端开发
+
+如果你是一个前端开发人员，别去想什么 Node.js,MongoDB 等 javascript 一统前后端的方案了, 你应该做的就是把体验做好, 神马增删改查/权限控制就不要去想了, 你只需:
+
+1. 复制 demo/dl.form.xml 到 WEB-INF/etc 下并更名为 mytest.form.xml
+2. 复制 demo/dl.menu.xml 到 WEB-INF/etc 下并更名为 mytest.menu.xml
+3. 用文本编辑器打开 mytest.menu.xml 将 demo/dl 全部替换为 mytest, 并将"文档库测试"改成"我的测试"
+4. 用文本编辑器打开 default.menu.xml 在 root>menu 下加入[code]<include>mytest</include>[/code]
+5. 按照使用方法启动服务并打开浏览器登录后, 就能在右上角下拉菜单找到"我的测试"了
+
+现在, 你可以在项目目录下创建以下文件重建页面体系
+
+    mytest/default.html     默认索引页
+    mytest/list.html        列表页
+    mytest/form.htm         创建页
+    mytest/form4update.htm  修改页
+    mytest/list4select.html 选择页
+
+一个简单的方法是通过 http://127.0.0.1/mytest/form.html 这样的 url 来获取原始是 html 文件, 然后存下来后在这个基础上改. 以后会增加一个按钮来比较方便的固化这个 html.
+
+## 后端开发
+
+> 后续补充
 
 ## 类库依赖
 

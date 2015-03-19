@@ -1,7 +1,7 @@
 package app.hongs.db;
 
 import app.hongs.Core;
-import app.hongs.CoreSerially;
+import app.hongs.CoreSerial;
 import app.hongs.HongsException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
  * @author Hongs
  */
 public class DBConfig
-     extends CoreSerially
+     extends CoreSerial
   implements Serializable
 {
 

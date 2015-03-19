@@ -1,6 +1,6 @@
 package app.hongs.action.anno;
 
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
@@ -63,10 +63,10 @@ public class VerifyInvoker implements FilterInvoker {
 
             dat = new HashMap();
             dat.put("ok",false);
-            CoreLanguage  lng  =  CoreLanguage.getInstance( );
-            dat.put("msg",lng.translate("fore.form.invalid"));
-            dat.put("err", "Er400" );
-            dat.put("errors" , ers );
+            CoreLocale lng = CoreLocale.getInstance();
+            dat.put("msg", lng.translate("fore.form.invalid"));
+            dat.put("err", "Er400");
+            dat.put("errors", ers );
             helper.reply( dat );
 
             // Servlet 环境下设置状态码为 400(错误的请求)

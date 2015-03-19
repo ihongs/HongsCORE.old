@@ -616,6 +616,17 @@ public class ActionHelper
   }
 
   /**
+   * 401尚未登录
+   * @param msg
+   */
+  public void error401(String msg)
+  {
+    this.response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    this.responseData = null;
+    this.print(msg);
+  }
+
+  /**
    * 403禁止访问
    * @param msg
    */
@@ -633,6 +644,17 @@ public class ActionHelper
   public void error404(String msg)
   {
     this.response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    this.responseData = null;
+    this.print(msg);
+  }
+
+  /**
+   * 404缺少页面
+   * @param msg
+   */
+  public void error405(String msg)
+  {
+    this.response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     this.responseData = null;
     this.print(msg);
   }

@@ -3,12 +3,12 @@ package app.hongs.cmdlet;
 import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.util.Cnames;
+import app.hongs.util.Cname;
 import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +42,7 @@ public class CmdletRunner
     throws IOException, HongsException
   {
     args = init(args);
+
     Core  core = Core.getInstance();
     String act = Core.ACTION_NAME.get(  );
 
@@ -93,15 +94,15 @@ public class CmdletRunner
       if (! (ta instanceof HongsException)
       &&  ! (ta instanceof HongsError  ) )
       {
-        CoreLanguage lang = (CoreLanguage)
-            Core.getInstance(CoreLanguage.class );
+        CoreLocale lang = (CoreLocale) Core.getInstance(CoreLocale.class);
         if (error == null || error.length() == 0)
         {
-          error = lang.translate("core.error.unkwn");
+          error = lang.translate("core.error.unkwn", ta.getClass().getName());
         }
-          error = lang.translate("core.error.label",
-                  ta.getClass().getName())
-                  + ": " + error ;
+        else
+        {
+          error = lang.translate("core.error.label", ta.getClass().getName()) + ": " + error;
+        }
       }
 
       CmdletHelper.println(error);
@@ -117,7 +118,7 @@ public class CmdletRunner
       {
           CoreLogger.error(e);
       }
-      
+
       /**
        * 输出总的运行时间
        * 并清除参数及核心
@@ -276,7 +277,7 @@ public class CmdletRunner
          */
         if (lang != null)
         {
-          lang = CoreLanguage.getAcceptLanguage(lang);
+          lang = CoreLocale.getAcceptLanguage(lang);
         }
         if (lang == null)
         {
@@ -294,7 +295,7 @@ public class CmdletRunner
        * 检查语言参数设置
        */
       String l = lang;
-          lang = CoreLanguage.getAcceptLanguage(lang);
+          lang = CoreLocale.getAcceptLanguage(lang);
       if (lang ==null)
       {
         CmdletHelper.println("ERROR: Unsupported language: "+l+".");
@@ -331,6 +332,23 @@ public class CmdletRunner
     ActionHelper helper = new ActionHelper(req, con, ses, null );
     Core.getInstance().put(ActionHelper.class.getName(), helper);
 
+    // Clean instatnces in core at exit
+    Runtime.getRuntime().addShutdownHook( new Thread( )
+    {
+      @Override
+      public void  run()
+      {
+        try
+        {
+          Core.GLOBAL_CORE.destroy();
+        }
+        catch (Throwable ex)
+        {
+          throw new HongsError(HongsError.COMMON, ex);
+        }
+      }
+    });
+
     return args;
   }
 
@@ -357,7 +375,7 @@ public class CmdletRunner
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);
                 try {
-                    clss = Cnames.getClassNames(pkgn, false);
+                    clss = Cname.getClassNames(pkgn, false);
                 } catch (IOException ex) {
                     throw new HongsError( 0x4b , "Can not load package '" + pkgn + "'.", ex);
                 }

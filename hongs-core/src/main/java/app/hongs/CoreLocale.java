@@ -22,13 +22,13 @@ import java.util.Map;
  *
  * @author Hongs
  */
-public class CoreLanguage
+public class CoreLocale
   extends CoreConfig
 {
 
   private String lang;
 
-  private CoreLanguage that = null;
+  private CoreLocale that = null;
 
   /**
    * 加载指定路径\语言和名称的配置
@@ -37,7 +37,7 @@ public class CoreLanguage
    * @param name
    * @param lang
    */
-  public CoreLanguage(String name, String lang)
+  public CoreLocale(String name, String lang)
   {
     super(null);
 
@@ -57,7 +57,7 @@ public class CoreLanguage
                  .getProperty("core.language.default","zh"));
     if ( ! dlng.equals(lang))
     {
-      that = new CoreLanguage(name, dlng);
+      that = new CoreLocale(name, dlng);
     }
   }
 
@@ -65,7 +65,7 @@ public class CoreLanguage
    * 加载指定名称的配置
    * @param name
    */
-  public CoreLanguage(String name)
+  public CoreLocale(String name)
   {
     this(/**/name , Core.ACTION_LANG.get());
   }
@@ -73,15 +73,15 @@ public class CoreLanguage
   /**
    * 加载默认配置
    */
-  public CoreLanguage()
+  public CoreLocale()
   {
     this("default", Core.ACTION_LANG.get());
   }
 
   @Override
-  public CoreLanguage clone()
+  public CoreLocale clone()
   {
-    return (CoreLanguage) super.clone();
+    return (CoreLocale) super.clone();
   }
 
   /**
@@ -175,7 +175,7 @@ public class CoreLanguage
    * 如果配置core.load.language.once为true则仅加载一次
    * @return 唯一语言实例
    */
-  public static CoreLanguage getInstance()
+  public static CoreLocale getInstance()
   {
     return getInstance("default");
   }
@@ -186,7 +186,7 @@ public class CoreLanguage
    * @param name 配置名
    * @return 唯一语言实例
    */
-  public static CoreLanguage getInstance(String name)
+  public static CoreLocale getInstance(String name)
   {
     return getInstance(name, Core.ACTION_LANG.get());
   }
@@ -197,24 +197,24 @@ public class CoreLanguage
    * @param name 配置名
    * @return 唯一语言实例
    */
-  public static CoreLanguage getInstance(String name, String lang)
+  public static CoreLocale getInstance(String name, String lang)
   {
-    String ck = CoreLanguage.class.getName() + ":" + name + ":" + lang;
+    String ck = CoreLocale.class.getName() + ":" + name + ":" + lang;
 
     Core core = Core.getInstance();
     if (core.containsKey(ck))
     {
-      return (CoreLanguage)core.get(ck);
+      return (CoreLocale)core.get(ck);
     }
 
     Core gore = Core.GLOBAL_CORE;
     if (gore.containsKey(ck))
     {
-      return (CoreLanguage)gore.get(ck);
+      return (CoreLocale)gore.get(ck);
     }
 
-    CoreLanguage inst = new CoreLanguage(name, lang);
-    CoreConfig conf = CoreConfig.getInstance();
+    CoreLocale inst = new CoreLocale(name, lang);
+    CoreConfig conf = CoreConfig.getInstance(  );
     if (conf.getProperty("core.load.language.once", false))
     {
       gore.put(ck, inst);
@@ -243,13 +243,13 @@ public class CoreLanguage
       arr2 = arr1[i].split(";" , 2);
 
       lang = arr2[0];
-      if (CoreLanguage.hasAcceptLanguage(lang))
+      if (CoreLocale.hasAcceptLanguage(lang))
       {
         return lang;
       }
 
       lang = conf.getProperty("core.language.link." + lang);
-      if (CoreLanguage.hasAcceptLanguage(lang))
+      if (CoreLocale.hasAcceptLanguage(lang))
       {
         return lang;
       }
@@ -263,13 +263,13 @@ public class CoreLanguage
         arr2 = arr2[0].split("-", 2);
 
         lang = arr2[0];
-        if (CoreLanguage.hasAcceptLanguage(lang))
+        if (CoreLocale.hasAcceptLanguage(lang))
         {
           return lang;
         }
 
         lang = conf.getProperty("core.language.link." + lang);
-        if (CoreLanguage.hasAcceptLanguage(lang))
+        if (CoreLocale.hasAcceptLanguage(lang))
         {
           return lang;
         }

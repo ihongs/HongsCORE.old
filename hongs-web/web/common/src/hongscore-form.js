@@ -68,6 +68,7 @@ function HsForm(opts, context) {
         v = loadData[i].value;
         if ( n === idKey && v === "0" ) continue;
         formBox.find("[name='"   +n+"']").val(v);
+        formBox.find("[data-fn='"+n+"']").val(v);
         formBox.find("[data-pn='"+n+"']").val(v);
     }
 
@@ -340,13 +341,13 @@ HsForm.prototype = {
         }
         inp.find(":checkbox").first().change();
     },
-    _fill__chack : function(inp, v, n, t) {
+    _fill__choose : function(inp, v, n, t) {
         if (t !== "enum") return v;
 
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        var vl = inp.attr("data-vl"); if(!vl) vl = 0;
-        var tl = inp.attr("data-tl"); if(!tl) tl = 1;
+        var vl = inp.attr("data-lk"); if(!vl) vl = 0;
+        var tl = inp.attr("data-hl"); if(!tl) tl = 1;
 
         for(var i = 0; i < v.length; i ++) {
             var u = v[ i ][vl];

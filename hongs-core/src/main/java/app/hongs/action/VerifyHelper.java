@@ -1,6 +1,6 @@
 package app.hongs.action;
 
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Dict;
@@ -60,40 +60,75 @@ public class VerifyHelper {
         Map map  = cnf.getForm(form);
         if (map == null) return this;
 
+        FormSet dfs = FormSet.getInstance("default");
+        Map tps  = dfs.getEnum("__types__");
+        Map pts  = dfs.getEnum("__patts__");
+
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry et = (Map.Entry)it.next();
             String  code = (String) et.getKey();
             Map     optz = (Map)  et.getValue();
             Map     opts =  new HashMap( optz );
+            Object  o;
 
-            boolean required = Synt.declare(opts.remove("__required__"), false);
-            if (required) {
-                Rule rule = new Required();
-                Map  prms = new HashMap( );
-                     rule.setParams(prms );
-                this.addRule( code, rule );
+            o = opts.remove("__required__");
+            if (! "".equals(o)) {
+                if (Synt.declare(o, false)) {
+                    Rule rule = new Required();
+                    Map  prms = new HashMap( );
+                         rule.setParams(prms );
+                    this.addRule( code, rule );
+                } else {
+                    Rule rule = new Optional();
+                    this.addRule( code, rule );
+                }
             }
 
-            boolean repeated = Synt.declare(opts.remove("__repeated__"), false);
-            if (repeated) {
-                Rule rule = new Repeated();
-                Map  prms = new HashMap( );
-                     rule.setParams(prms );
-                this.addRule( code, rule );
-                if (opts.containsKey("distrinct"))
-                    prms.put("distrinct", opts.remove("distrinct"));
-                if (opts.containsKey("minrepeat"))
-                    prms.put("minrepeat", opts.remove("minrepeat"));
-                if (opts.containsKey("maxrepeat"))
-                    prms.put("maxrepeat", opts.remove("maxrepeat"));
+            o = opts.remove("__repeated__");
+            if (! "".equals(o)) {
+                if (Synt.declare(o, false)) {
+                    Rule rule = new Repeated();
+                    Map  prms = new HashMap( );
+                         rule.setParams(prms );
+                    this.addRule( code, rule );
+                    if (opts.containsKey("distrinct"))
+                        prms.put("distrinct", opts.remove("distrinct"));
+                    if (opts.containsKey("minrepeat"))
+                        prms.put("minrepeat", opts.remove("minrepeat"));
+                    if (opts.containsKey("maxrepeat"))
+                        prms.put("maxrepeat", opts.remove("maxrepeat"));
+                } else {
+                    Rule rule = new Norepeat();
+                    this.addRule( code, rule );
+                }
+            }
+
+            o = opts.remove("default");
+            if (o != null) {
+                Rule rule = new Default();
+                Map  prms = new HashMap();
+                     rule.setParams(prms);
+                this.addRule( code, rule);
+                prms.put("default" , o  );
+                prms.put("alwayset", opts.remove("default-alwayset"));
+                prms.put("increate", opts.remove("default-increate"));
             }
 
             String rule = (String) opts.get("__rule__");
             if (null == rule || "".equals(rule)) {
-                rule = (String) opts.get("__type__");
-                if (null == rule || "".equals(rule)) {
-                    continue;
+                String type = (String) opts.get("__type__");
+
+                // 类型映射
+                if (tps.containsKey(type)) {
+                    rule =  tps.get(type ).toString( );
+                } else {
+                    rule =   "string";
+                }
+
+                // 预定正则
+                if (pts.containsKey(type)) {
+                    opts.put("pattern", pts.get(type));
                 }
 
                 // 将 type 转换为 isType 规则名
@@ -101,7 +136,7 @@ public class VerifyHelper {
                 String n = rule.substring(   1);
                 rule = "Is"+c.toUpperCase()+ n ;
             }
-            if (!rule.contains(".")) {
+            if (! rule.contains(".") ) {
                 rule = this.getClass().getName()+"$"+rule;
             }
 
@@ -272,24 +307,24 @@ public class VerifyHelper {
         public abstract Object verify(Object value) throws Wrong, Wrongs, HongsException;
     }
 
-    public static class Skip extends Rule {
+    public static class Pass extends Rule {
         @Override
-        public Object verify(Object data) {
-            return SKIP;
+        public Object verify(Object value) {
+            return value;
         }
     }
 
-    public static class Pass extends Rule {
+    public static class Skip extends Rule {
         @Override
-        public Object verify(Object data) {
-            return data;
+        public Object verify(Object value) {
+            return SKIP ;
         }
     }
 
     public static class Required extends Rule {
         @Override
         public Object verify(Object value) throws Wrong {
-            if (value  ==  null ) {
+            if (value == null) {
                 if (update) return SKIP;
                 throw new Wrong("fore.form.required");
             }
@@ -304,6 +339,21 @@ public class VerifyHelper {
             }
             if ((value instanceof Map ) && ((Map ) value).isEmpty()) {
                 throw new Wrong("fore.form.requreid");
+            }
+            return value;
+        }
+    }
+
+    public static class Optional extends Rule {
+        @Override
+        public Object verify(Object value) throws Wrong {
+            try {
+                Required rule = new Required();
+                rule.setParams(params);
+                rule.setValues(values);
+                rule.verify(value);
+            }   catch (Wrong w) {
+                return SKIP ;
             }
             return value;
         }
@@ -340,12 +390,28 @@ public class VerifyHelper {
         }
     }
 
+    public static class Default extends Rule {
+        @Override
+        public Object verify(Object value) {
+            if (value==null|| Synt.declare(params.get("alwayset"), false)) { // 无论有没有都设置
+                if (update && Synt.declare(params.get("increate"), false)) { // 仅创建的时候设置
+                    return SKIP;
+                }
+                value = params.get("default");
+                if ( "$now".equals( value ) ) {
+                    value = new java.util.Date();
+                }
+            }
+            return value;
+        }
+    }
+
     //** 类型校验器 **/
 
     public static class IsString extends Rule {
         @Override
         public Object verify(Object value) {
-            return value.toString();
+            return /*value == null ? "" :*/ value.toString();
         }
     }
 
@@ -354,24 +420,25 @@ public class VerifyHelper {
         public Object verify(Object value) throws Wrong {
             // 类型转换
             String type = Synt.declare(params.get("type"), "");
+            Number  num;
             try {
                 if ( "byte".equals(type)) {
-                    value = Synt.declare(value, ( byte) 0);
+                    num = Synt.declare(value, ( byte) 0);
                 } else
                 if ("short".equals(type)) {
-                    value = Synt.declare(value, (short) 0);
+                    num = Synt.declare(value, (short) 0);
                 } else
                 if (  "int".equals(type)) {
-                    value = Synt.declare(value, 0 );
+                    num = Synt.declare(value, 0 );
                 } else
                 if ( "long".equals(type)) {
-                    value = Synt.declare(value, 0L);
+                    num = Synt.declare(value, 0L);
                 } else
                 if ("float".equals(type)) {
-                    value = Synt.declare(value, 0.0 );
+                    num = Synt.declare(value, 0.0 );
                 } else {
-                    type  = "double";
-                    value = Synt.declare(value, 0.0D);
+                    type= "double";
+                    num = Synt.declare(value, 0.0D);
                 }
             } catch (HongsError er) {
                 throw new Wrong("fore.form.conv.to."+type+".failed");
@@ -379,17 +446,16 @@ public class VerifyHelper {
 
             // 最大最小值
             Double m;
-            Double n = (Double) value;
             m = Synt.declare(params.get("min"), Double.class);
-            if (m != null && m > n) {
+            if (m != null && m > num.doubleValue()) {
                 throw new Wrong("fore.form.lt.min", Double.toString(m));
             }
             m = Synt.declare(params.get("max"), Double.class);
-            if (m != null && m < n) {
+            if (m != null && m < num.doubleValue()) {
                 throw new Wrong("fore.form.lt.max", Double.toString(m));
             }
 
-            return value;
+            return num;
         }
     }
 
@@ -403,8 +469,8 @@ public class VerifyHelper {
     public static class IsFile extends Rule {
         @Override
         public Object verify(Object value) throws Wrong {
-            if ("".equals(value)) {
-                return null; // 允许为空
+            if (value == null || "".equals(value)) {
+                return   null; // 允许为空
             }
 
             String name = Synt.declare(params.get("name"), String.class);
@@ -434,8 +500,8 @@ public class VerifyHelper {
     public static class IsEnum extends Rule {
         @Override
         public Object verify(Object value) throws Wrong, HongsException {
-            if ("".equals(value)) {
-                return null; // 允许为空
+            if (value == null || "".equals(value)) {
+                return   null; // 允许为空
             }
 
             String conf = Synt.declare(params.get("conf"), String.class);
@@ -458,6 +524,10 @@ public class VerifyHelper {
     public static class IsForm extends Rule {
         @Override
         public Object verify(Object value) throws Wrongs, HongsException {
+            if (value == null) {
+                return   null; // 允许为空
+            }
+
             boolean  ud = Synt.declare(params.get("__update__") , false);
             String conf = Synt.declare(params.get("conf"), String.class);
             String name = Synt.declare(params.get("form"), String.class);
@@ -491,8 +561,8 @@ public class VerifyHelper {
 
         @Override
         public String getLocalizedMessage() {
-            CoreLanguage trns = CoreLanguage.getInstance(getLocalizedSection());
-            String /***/ desx = trns.translate(getDesc(),getLocalizedOptions());
+            CoreLocale trns = CoreLocale.getInstance(  getLocalizedSection());
+            String/**/ desx = trns.translate(getDesc(),getLocalizedOptions());
             return desx;
         }
     }

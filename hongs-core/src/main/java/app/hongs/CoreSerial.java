@@ -45,7 +45,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Hongs
  */
-public abstract class CoreSerially
+public abstract class CoreSerial
   implements Serializable
 {
 
@@ -56,7 +56,7 @@ public abstract class CoreSerially
    * @param time
    * @throws app.hongs.HongsException
    */
-  public CoreSerially(String path, String name, long time)
+  public CoreSerial(String path, String name, long time)
     throws HongsException
   {
     this.init(path, name, time);
@@ -69,7 +69,7 @@ public abstract class CoreSerially
    * @param date
    * @throws app.hongs.HongsException
    */
-  public CoreSerially(String path, String name, Date date)
+  public CoreSerial(String path, String name, Date date)
     throws HongsException
   {
     this.init(path, name, date);
@@ -81,7 +81,7 @@ public abstract class CoreSerially
    * @param time
    * @throws app.hongs.HongsException
    */
-  public CoreSerially(String name, long time)
+  public CoreSerial(String name, long time)
     throws HongsException
   {
     this.init(name, time);
@@ -93,7 +93,7 @@ public abstract class CoreSerially
    * @param date
    * @throws app.hongs.HongsException
    */
-  public CoreSerially(String name, Date date)
+  public CoreSerial(String name, Date date)
     throws HongsException
   {
     this.init(name, date);
@@ -104,7 +104,7 @@ public abstract class CoreSerially
    * @param name
    * @throws app.hongs.HongsException
    */
-  public CoreSerially(String name)
+  public CoreSerial(String name)
     throws HongsException
   {
     this.init(name);
@@ -113,7 +113,7 @@ public abstract class CoreSerially
   /**
    * 空构造器(请自行执行init方法)
    */
-  public CoreSerially()
+  public CoreSerial()
   {
     // TODO: 请自行执行init方法
   }
@@ -144,7 +144,7 @@ public abstract class CoreSerially
    * @param time
    * @throws app.hongs.HongsException
    */
-  protected void init(String path, String name, long time)
+  protected final void init(String path, String name, long time)
     throws HongsException
   {
     if (path == null)
@@ -162,7 +162,7 @@ public abstract class CoreSerially
    * @param date
    * @throws app.hongs.HongsException
    */
-  protected void init(String path, String name, Date date)
+  protected final void init(String path, String name, Date date)
     throws HongsException
   {
     if (path == null)
@@ -173,54 +173,22 @@ public abstract class CoreSerially
     this.load(file, date!=null?date.getTime():0);
   }
 
-  protected void init(String name, long time)
+  protected final void init(String name, long time)
     throws HongsException
   {
     this.init(null, name, time);
   }
 
-  protected void init(String name, Date date)
+  protected final void init(String name, Date date)
     throws HongsException
   {
     this.init(null, name, date);
   }
 
-  protected void init(String name)
+  protected final void init(String name)
     throws HongsException
   {
     this.init(null, name, null);
-  }
-
-  /** 私有方法 **/
-
-  private static ReadWriteLock lockr = new ReentrantReadWriteLock();
-  private static Map< String, ReadWriteLock > locks = new HashMap();
-
-  private ReadWriteLock lock(String flag)
-  {
-      ReadWriteLock rwlock;
-      Lock lock;
-
-      lock = lockr. readLock();
-      lock.lock();
-      try {
-          rwlock = locks.get(flag);
-          if (rwlock != null) {
-              return rwlock;
-          }
-      } finally {
-          lock.unlock();
-      }
-
-      lock = lockr.writeLock();
-      lock.lock();
-      try {
-          rwlock = new ReentrantReadWriteLock();
-          locks.put(flag, rwlock);
-          return rwlock;
-      } finally {
-          lock.unlock();
-      }
   }
 
   /**
@@ -230,7 +198,7 @@ public abstract class CoreSerially
    * @param time
    * @throws app.hongs.HongsException
    */
-  private void load(File file, long time)
+  protected void load(File file, long time)
     throws HongsException
   {
       ReadWriteLock rwlock = lock(file.getAbsolutePath());
@@ -262,7 +230,7 @@ public abstract class CoreSerially
    * @param file
    * @throws app.hongs.HongsException
    */
-  private void load(File file)
+  protected final void load(File file)
     throws HongsException
   {
     try
@@ -295,7 +263,7 @@ public abstract class CoreSerially
    * @param file
    * @throws app.hongs.HongsException
    */
-  private void save(File file)
+  protected final void save(File file)
     throws HongsException
   {
     // 文件不存在则创建
@@ -333,6 +301,8 @@ public abstract class CoreSerially
       throw new HongsException(0x10d2, ex);
     }
   }
+
+  /** 私有方法 **/
 
   /**
    * 从缓存获取属性写入当前对象
@@ -403,5 +373,35 @@ public abstract class CoreSerially
       }
     }
   }
+
+  private ReadWriteLock lock(String flag)
+  {
+      ReadWriteLock rwlock;
+      Lock lock;
+
+      lock = lockr. readLock();
+      lock.lock();
+      try {
+          rwlock = locks.get(flag);
+          if (rwlock != null) {
+              return rwlock;
+          }
+      } finally {
+          lock.unlock();
+      }
+
+      lock = lockr.writeLock();
+      lock.lock();
+      try {
+          rwlock = new ReentrantReadWriteLock();
+          locks.put(flag, rwlock);
+          return rwlock;
+      } finally {
+          lock.unlock();
+      }
+  }
+
+  private static Map<String, ReadWriteLock> locks = new HashMap(  );
+  private static ReadWriteLock lockr = new ReentrantReadWriteLock();
 
 }

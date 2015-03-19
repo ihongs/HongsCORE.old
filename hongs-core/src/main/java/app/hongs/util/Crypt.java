@@ -23,7 +23,7 @@ import javax.crypto.spec.SecretKeySpec;
  * 加密解密
  * @author Hongs
  */
-public class Crypto {
+public class Crypt {
 
     public static String encrypt(String content, String scrtkey) throws HongsException {
         try {
@@ -50,8 +50,8 @@ public class Crypto {
     }
 
     private static byte[] docrypt(byte[] content, String scrtkey, boolean decrypt) throws HongsException {
-        String enc = CoreConfig.getInstance().getProperty("core.symmetric.encryption.method", "AES");
-        int    len = CoreConfig.getInstance().getProperty("core.symmetric.encryption.length",  128 );
+        String enc = CoreConfig.getInstance().getProperty("core.crypto.method", "AES");
+        int    len = CoreConfig.getInstance().getProperty("core.crypto.length",  128 );
 
         try {
             SecretKeySpec kspc;

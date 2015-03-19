@@ -62,12 +62,12 @@ public class HongsLocalized {
      * @return
      */
     public String getLocalizedMessage() {
-        CoreLanguage trns;
+        CoreLocale trns;
         String ckey, dkey;
         String codx, desx;
-        String[] optx;
+        String[]   optx;
 
-        trns = CoreLanguage.getInstance("_error_").clone();
+        trns = CoreLocale.getInstance("_error_").clone();
         codx = "Ex"+Integer.toHexString(code);
         desx = desc != null ? desc : "";
         optx = opts != null ? opts : new String[0];

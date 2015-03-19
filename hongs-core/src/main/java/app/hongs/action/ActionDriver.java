@@ -2,7 +2,7 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
@@ -320,7 +320,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
              * 检查是否是支持的语言
              */
             if (lang != null) {
-                lang = CoreLanguage.getAcceptLanguage(lang);
+                lang = CoreLocale.getAcceptLanguage(lang);
             if (lang != null) {
                 Core.ACTION_LANG.set(lang);
             }

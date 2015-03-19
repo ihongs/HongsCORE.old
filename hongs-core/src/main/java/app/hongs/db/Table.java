@@ -2,7 +2,7 @@ package app.hongs.db;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;
-import app.hongs.CoreLanguage;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import java.sql.Date;
 import java.sql.Time;
@@ -427,7 +427,7 @@ public class Table
       fmt = "yyyy/MM/dd HH:mm:ss";
     }
 
-    CoreLanguage conf = Core.getInstance(CoreLanguage.class);
+    CoreLocale conf = Core.getInstance(CoreLocale.class);
     return conf.getProperty("core.default."+type+".format", fmt);
   }
 

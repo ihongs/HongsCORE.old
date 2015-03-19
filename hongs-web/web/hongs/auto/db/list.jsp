@@ -63,13 +63,10 @@
                     for(Map.Entry et : flds.entrySet()) {
                         Map    info = (Map ) et.getValue();
                         String name = (String) et.getKey();
-                        String type = (String) info.get( "widget" );
-                        if (null == type) {
-                               type = (String) info.get("__type__");
-                        }
+                        String type = (String) info.get("__type__");
                         String disp = (String) info.get("__disp__");
 
-                        if ("1".equals(info.get("hideInList")) || "hidden".equals(type)) {
+                        if ("yes".equals(info.get("hideInList")) || "hidden".equals(type)) {
                             continue;
                         }
                      %>
@@ -83,9 +80,9 @@
                     <th data-fn="<%=name%>" data-ft="_time" class="sortable time"><%=disp%></th>
                     <%} else if ("file".equals(type)) {%>
                     <th data-fn="<%=name%>" data-ft="_file"><%=disp%></th>
-                    <%} else if ("enum".equals(type)) {%>
+                    <%} else if ("enum".equals(type) || "select".equals(type)) {%>
                     <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
-                    <%} else if ("pick".equals(type)) {%>
+                    <%} else if ("form".equals(type) || "picker".equals(type)) {%>
                     <th data-fn="<%=info.get("data-tn")%>.<%=info.get("data-tk")%>" class="sortable"><%=disp%></th>
                     <%} else if (!"primary".equals(info.get("primary")) && !"foreign".equals(info.get("foreign"))) {%>
                     <th data-fn="<%=name%>" class="sortable"><%=disp%></th>

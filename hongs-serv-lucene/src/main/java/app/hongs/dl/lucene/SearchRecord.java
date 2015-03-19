@@ -24,7 +24,7 @@ import org.apache.lucene.search.TopDocs;
  */
 public class SearchRecord extends LuceneRecord {
 
-    public SearchRecord( Map fields, String datapath, String analyzer ) {
+    public SearchRecord( Map fields, String datapath, String analyzer) throws HongsException {
         super(fields, datapath, analyzer);
     }
     public SearchRecord(String conf, String name) throws HongsException {

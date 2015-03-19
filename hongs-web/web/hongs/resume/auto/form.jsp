@@ -71,10 +71,7 @@
             for(Map.Entry et : flds.entrySet()) {
                 Map    info = (Map ) et.getValue();
                 String name = (String) et.getKey();
-                String type = (String) info.get( "widget" );
-                if (null == type) {
-                       type = (String) info.get("__type__");
-                }
+                String type = (String) info.get("__type__");
                 String disp = (String) info.get("__disp__");
                 String rqrd = Synt.declare(info.get("required"), false) ? "required=\"required\"" : "";
 

@@ -131,13 +131,13 @@ function hsResponObj(rst, qut) {
             }
         }
         // 服务器端要求跳转(通常为未登录缺少权限等)
-        if (typeof(rst["goto"]) !== "undefined") {
-            if  (  rst["goto"]) {
-                location.assign(rst["goto"]);
+        if (typeof(rst["url"]) !== "undefined") {
+            if  (  rst["url"]) {
+                location.assign(rst["url"]);
             } else {
                 location.reload();
             }
-            delete rst["goto"];
+            delete rst["url"];
         }
     }
     return rst;
