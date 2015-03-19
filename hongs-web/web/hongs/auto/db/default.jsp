@@ -1,4 +1,4 @@
-<%@page import="app.hongs.CoreLanguage"%>
+<%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.MenuSet"%>
 <%@page extends="app.hongs.action.Pagelet"%>
@@ -14,9 +14,9 @@
         throw new ServletException("URL Error");
     }
 
-    CoreLanguage lang = CoreLanguage.getInstance().clone();
-                 lang.loadIgnrFNF/***/(_module);
-    MenuSet site = MenuSet.getInstance(_module);
+    CoreLocale lang = CoreLocale.getInstance().clone();
+               lang.loadIgnrFNF(_module);
+    MenuSet    site = MenuSet.getInstance(_module);
 
     String title = lang.translate(site.getMenu("common/goto.act?m="+_module).get("disp").toString());
 %>

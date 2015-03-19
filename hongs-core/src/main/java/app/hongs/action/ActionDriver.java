@@ -277,7 +277,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         CoreConfig conf = core.get(CoreConfig.class);
 
         Core.ACTION_ZONE.set(conf.getProperty("core.timezone.default","GMT-8"));
-        if (conf.getProperty("core.language.probing", false)) {
+        if (conf.getProperty("core.timezone.probing", false)) {
             /**
              * 时区可以记录到Session/Cookies里
              */
@@ -312,7 +312,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                     }
                 }
             if (lang == null || lang.length() == 0) {
-                lang = req.getHeader("Accept-Language");
+                lang = req.getHeader( "Accept-Language" );
             }
             }
 

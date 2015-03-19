@@ -1,4 +1,4 @@
-<%@page import="app.hongs.CoreLanguage"%>
+<%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.MenuSet"%>
 <%@page import="java.util.Map"%>
@@ -14,9 +14,9 @@
     _entity = _module.substring(i+ 1);
     _module = _module.substring(0, i);
 
-    CoreLanguage lang = CoreLanguage.getInstance().clone();
-                 lang.loadIgnrFNF/***/(_module);
-    MenuSet site = MenuSet.getInstance(_module);
+    CoreLocale lang = CoreLocale.getInstance().clone();
+               lang.loadIgnrFNF(_module);
+    MenuSet    site = MenuSet.getInstance(_module);
 
     Map    pagz  = site.getMenu(_module+"/"+_entity+"/list.jsp");
     String title = pagz == null ? "" : (String) pagz.get("disp");

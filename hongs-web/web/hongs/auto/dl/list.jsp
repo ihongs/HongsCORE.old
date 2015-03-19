@@ -1,5 +1,5 @@
 ﻿<%@page import="app.hongs.CoreConfig"%>
-<%@page import="app.hongs.CoreLanguage"%>
+<%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.FormSet"%>
 <%@page import="app.hongs.action.MenuSet"%>
@@ -25,10 +25,10 @@
         _render = "list4"+_action+".jsp";
     }
 
-    CoreLanguage lang = CoreLanguage.getInstance().clone();
-                 lang.loadIgnrFNF/***/(_module);
-    MenuSet site = MenuSet.getInstance(_module);
-    FormSet form = FormSet.getInstance(_module);
+    CoreLocale lang = CoreLocale.getInstance().clone();
+               lang.loadIgnrFNF(_module);
+    MenuSet    site = MenuSet.getInstance(_module);
+    FormSet    form = FormSet.getInstance(_module);
     Map<String, Object> flds = form.getFormTranslated( _entity );
 
     Map    pagz  = site.getMenu(_module+"/"+_entity+"/list.jsp");

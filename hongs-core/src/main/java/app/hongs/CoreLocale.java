@@ -16,8 +16,8 @@ import java.util.Map;
  *
  * <h3>配置选项:</h3>
  * <pre>
- * core.load.language.once  为true则仅加载一次, 为false由Core控制
- * core.language.link.xx    语言链接, xx为语言, 如:link.zh=zh-CN
+ * core.load.locale.once  为true则仅加载一次, 为false由Core控制
+ * core.langauge.link.xx  语言链接, xx为语言, 如:link.zh=zh-CN
  * </pre>
  *
  * @author Hongs
@@ -54,7 +54,7 @@ public class CoreLocale
     }
 
     String dlng = getAcceptLanguage(CoreConfig.getInstance()
-                 .getProperty("core.language.default","zh"));
+                 .getProperty("core.langauge.default","zh"));
     if ( ! dlng.equals(lang))
     {
       that = new CoreLocale(name, dlng);
@@ -172,7 +172,7 @@ public class CoreLocale
 
   /**
    * 获取唯一语言对象
-   * 如果配置core.load.language.once为true则仅加载一次
+   * 如果配置core.load.locale.once为true则仅加载一次
    * @return 唯一语言实例
    */
   public static CoreLocale getInstance()
@@ -182,7 +182,7 @@ public class CoreLocale
 
   /**
    * 按配置名获取唯一语言对象
-   * 如果配置core.load.language.once为true则仅加载一次
+   * 如果配置core.load.locale.once为true则仅加载一次
    * @param name 配置名
    * @return 唯一语言实例
    */
@@ -193,7 +193,7 @@ public class CoreLocale
 
   /**
    * 按配置名和语言名获取唯一语言对象
-   * 如果配置core.load.language.once为true则仅加载一次
+   * 如果配置core.load.locale.once为true则仅加载一次
    * @param name 配置名
    * @return 唯一语言实例
    */
@@ -215,7 +215,7 @@ public class CoreLocale
 
     CoreLocale inst = new CoreLocale(name, lang);
     CoreConfig conf = CoreConfig.getInstance(  );
-    if (conf.getProperty("core.load.language.once", false))
+    if (conf.getProperty("core.load.locale.once", false))
     {
       gore.put(ck, inst);
     }

@@ -15,10 +15,10 @@ import javax.servlet.jsp.tagext.DynamicAttributes;
  *
  * <h3>使用方法:</h3>
  * <pre>
- * &lt;hs:lang load="language.name"/&gt;
- * &lt;hs:lang key="language.key" [esc="yes|no|EscapeSymbol"] [_0="replacement0" _1="replacement1"]/&gt;
- * &lt;hs:lang key="language.key" [esc="yes|no|EscapeSymbol"] [xx="replacementX" yy="replacementY"]/&gt;
- * &lt;hs:lang key="language.key" [esc="yes|no|EscapeSymbol"] [rep=String[]|List&lt;String&gt;|Map&lt;String, String&gt;]/&gt;
+ * &lt;hs:lang load="locale.config.name"/&gt;
+ * &lt;hs:lang key="locale.config.key" [esc="yes|no|EscapeSymbol"] [_0="replacement0" _1="replacement1"]/&gt;
+ * &lt;hs:lang key="locale.config.key" [esc="yes|no|EscapeSymbol"] [xx="replacementX" yy="replacementY"]/&gt;
+ * &lt;hs:lang key="locale.config.key" [esc="yes|no|EscapeSymbol"] [rep=String[]|List&lt;String&gt;|Map&lt;String, String&gt;]/&gt;
  * </pre>
  *
  * @author Hongs

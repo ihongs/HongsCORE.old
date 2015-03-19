@@ -1,6 +1,6 @@
 <%@page import="app.hongs.util.Synt"%>
 <%@page import="app.hongs.Core"%>
-<%@page import="app.hongs.CoreLanguage"%>
+<%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionHelper"%>
 <%@page import="app.hongs.action.MenuSet"%>
 <%@page import="java.util.List"%>
@@ -98,7 +98,7 @@
                 <%=makeMenu(mainMenu, path)%>
                 <%if (user != null) {%>
                 <li class="divider"></li>
-                <li><a href="javascript:;" id="sign-out"><%=CoreLanguage.getInstance().translate("fore.logout")%></a></li>
+                <li><a href="javascript:;" id="sign-out"><%=CoreLocale.getInstance().translate("fore.logout")%></a></li>
                 <%} // End If%>
             </ul>
         </li>

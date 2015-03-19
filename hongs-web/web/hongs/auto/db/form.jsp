@@ -1,5 +1,5 @@
 <%@page import="app.hongs.CoreConfig"%>
-<%@page import="app.hongs.CoreLanguage"%>
+<%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.db.DB"%>
 <%@page import="app.hongs.db.Mview"%>
@@ -22,8 +22,8 @@
 
     Mview view = new Mview(DB.getInstance(_module).getModel(_entity));
     Map<String, Map<String, String>> flds = view.getFields();
-    CoreLanguage lang = CoreLanguage.getInstance( ).clone( );
-                 lang.loadIgnrFNF(_module);
+    CoreLocale lang = CoreLocale.getInstance().clone();
+               lang.loadIgnrFNF(_module);
 
     String title = view.getTitle();
     String idKey = view.getIdKey();
