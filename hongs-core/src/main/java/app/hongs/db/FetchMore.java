@@ -148,17 +148,17 @@ public class FetchMore
     }
 
     // 识别字段别名
-    String col2 = col;
+    String rel = col;
     if (! table.getFields().containsKey(col))
     {
       Pattern pattern = Pattern.compile(
-             "^(.+?)\\s+(?:AS\\s+)?`?(.+?)`?$",
-                     Pattern.CASE_INSENSITIVE);
+           "^(.+?)\\s+(?:AS\\s+)?`?(.+?)`?$",
+                   Pattern.CASE_INSENSITIVE);
       Matcher matcher = pattern.matcher(col);
       if (matcher.find())
       {
-        col  = matcher.group(1);
-        col2 = matcher.group(2);
+        col = matcher.group(1);
+        rel = matcher.group(2);
       }
     }
     else
@@ -185,7 +185,7 @@ public class FetchMore
     {
       while ((sub = rs.fetch()) != null)
       {
-        sid = Synt.declare(sub.get(col2), String.class);
+        sid = Synt.declare(sub.get(rel), String.class);
         lst = map.get(sid);
 
         if (lst == null)
@@ -215,7 +215,7 @@ public class FetchMore
     {
       while ((sub = rs.fetch()) != null)
       {
-        sid = Synt.declare(sub.get(col2), String.class);
+        sid = Synt.declare(sub.get(rel), String.class);
         lst = map.get(sid);
 
         if (lst == null)

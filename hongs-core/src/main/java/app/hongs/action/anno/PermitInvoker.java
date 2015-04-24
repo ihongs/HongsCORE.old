@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
  */
 public class PermitInvoker implements FilterInvoker {
 
+    @Override
     public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno) throws HongsException {
         Permit ann  = (Permit) anno;
         String role = ann.role();
@@ -28,7 +29,7 @@ public class PermitInvoker implements FilterInvoker {
         if (has) {
             chains.doAction();
         } else {
-            throw new HongsException(0x10f3);
+            throw new HongsException(0x1103);
         }
     }
 

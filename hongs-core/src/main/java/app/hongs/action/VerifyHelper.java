@@ -22,14 +22,14 @@ import java.util.Set;
  *
  * <h3>异常代码</h3>
  * <pre>
- * 代码区间 0x1100~0x110f
- * error.Ex1100=规则格式错误
- * error.Ex1101=找不到表单规则
- * error.Ex1102=找不到规则的类
- * error.Ex1103=找不到规则的方法
- * error.Ex1104=无法获取规则方法
- * error.Ex1105=不正确的规则调用方法
- * error.Ex1106=执行规则方法时发生异常
+ * 代码区间 0x10f0~0x10ff
+ * error.Ex10f0=规则格式错误
+ * error.Ex10f1=找不到表单规则
+ * error.Ex10f2=找不到规则的类
+ * error.Ex10f3=找不到规则的方法
+ * error.Ex10f4=无法获取规则方法
+ * error.Ex10f5=不正确的规则调用方法
+ * error.Ex10f6=执行规则方法时发生异常
  * </pre>
  */
 public class VerifyHelper {
@@ -145,16 +145,16 @@ public class VerifyHelper {
                 inst = (Rule) (Class.forName(rule).newInstance());
             }
             catch (ClassNotFoundException ex) {
-                throw new HongsException(0x1101, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
+                throw new HongsException(0x10f1, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
             }
             catch (InstantiationException ex) {
-                throw new HongsException(0x1101, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
+                throw new HongsException(0x10f1, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
             }
             catch (IllegalAccessException ex) {
-                throw new HongsException(0x1101, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
+                throw new HongsException(0x10f1, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
             }
             catch (ClassCastException ex) {
-                throw new HongsException(0x1101, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
+                throw new HongsException(0x10f1, "Failed to get rule: "+rule+" in "+conf+":"+form, ex);
             }
 
             opts.put("__conf__", conf);

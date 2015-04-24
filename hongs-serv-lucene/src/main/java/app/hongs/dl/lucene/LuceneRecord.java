@@ -92,10 +92,10 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         ti.put("VARS_PATH", Core.VARS_PATH);
         datapath = Text.inject(datapath,ti);
 
-        this.types = FormSet.getInstance("default").getEnum("__types__");
         this.fields = fields;
         this.datapath = datapath;
         this.analyzer = analyzer;
+        this.types = FormSet.getInstance("default").getEnum("__types__");
     }
 
     public LuceneRecord(String conf, String form) throws HongsException {
@@ -116,9 +116,9 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             return data;
         }
 
-        // 明确指定页码为 0 则走 getAll
-        int pn = Synt.declare(rd.get("pn"), 1); // 页码
-        if (pn == 0) {
+        // 明确指定行为 0 则走 getAll
+        int rn = Synt.declare(rd.get("rn"), 0); // 行数
+        if (rn == 0) {
             Map  data = new HashMap();
             List list = getAll(rd);
             data.put("list", list);
@@ -127,9 +127,9 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
         // 计算分页
         CoreConfig conf = CoreConfig.getInstance();
-        int rn = Synt.declare(rd.get("rn"), 0); // 每页行数
+        int pn = Synt.declare(rd.get("pn"), 1); // 页码
+        int ln = Synt.declare(rd.get("ln"), 0); // 链数
         if (rn == 0) rn = conf.getProperty("fore.rows.per.page.N", 20);
-        int ln = Synt.declare(rd.get("ln"), 0); // 分链接数
         if (ln == 0) ln = conf.getProperty("fore.lnks.per.page.N", 5 );
         int limit = (int) (Math.ceil((double) pn / ln) * ln * rn + 1 );
         int minRn = (pn - 1) * rn;
@@ -359,7 +359,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         try {
                 Query  q    = new TermQuery(new Term(idCol, id));
               TopDocs  docs = finder.search(q, 1);
-            ScoreDoc[] hits = docs.scoreDocs;
+            ScoreDoc[] hits =   docs.scoreDocs;
             if  ( 0 != hits.length ) {
                 return finder.doc(hits[0].doc);
             } else {
@@ -538,10 +538,12 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
     public boolean IN_TRANSC_MODE = false;
 
+    @Override
     public void transc() {
         IN_TRANSC_MODE = true;
     }
 
+    @Override
     public void commit() throws HongsException {
         if (writer == null) {
             return;
@@ -553,12 +555,25 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
+    @Override
     public void revoke() throws HongsException {
         if (writer == null) {
             return;
         }
         try {
             writer.rollback();
+        } catch (IOException ex) {
+            throw new HongsException(HongsException.COMMON, ex);
+        }
+    }
+
+    private Director getDir() throws HongsException {
+        try {
+            Director dir = new Director();
+            File dio = new File(datapath);
+            dir.has  = dio.exists();
+            dir.dir  = FSDirectory.open(dio);
+            return dir;
         } catch (IOException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }
@@ -592,24 +607,13 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private Director getDir() throws HongsException {
-        try {
-            Director dir = new Director();
-            File dio = new File(datapath);
-            dir.has  = dio.exists();
-            dir.dir  = FSDirectory.open(dio);
-            return dir;
-        } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
-        }
-    }
-
     private String getTyp(Map m) {
         String t = Synt.declare(m.get("lucene-field"), String.class);
 
         // 如果未指定 lucene-field 则用 field-type 替代
         if (t == null) {
-            t = Synt.declare(types.get(m.get("__type__")), "string");
+            t = ( String ) m.get( "__type__" );
+            t = Synt.declare(types.get(t), t );
             if ("number".equals(t)) {
                 t = Synt.declare(m.get("type"), "double");
             } else

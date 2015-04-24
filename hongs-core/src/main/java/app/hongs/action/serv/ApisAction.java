@@ -58,15 +58,15 @@ public class ApisAction
     }
 
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse rsp)
-            throws IOException, ServletException {
-        doAction(req, rsp, "create", "save");
-    }
-
-    @Override
     public void doPut(HttpServletRequest req, HttpServletResponse rsp)
             throws IOException, ServletException {
         doAction(req, rsp, "update", "save");
+    }
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse rsp)
+            throws IOException, ServletException {
+        doAction(req, rsp, "create", "save");
     }
 
     @Override
@@ -127,7 +127,7 @@ public class ApisAction
             // 限定主键
             if (vaz != null && vaz.length() != 0) {
                 String   key = "id";
-                String[] vas = vaz.substring(2).split("_");
+                String[] vas = vaz.substring(2).split ("_");
                 if (vas.length > 1  ) {
                     key += "[]";
                 } else {
@@ -230,7 +230,7 @@ public class ApisAction
         }
     }
 
-    private static final Pattern _API_PMS = Pattern.compile("((?:/[^_]\\w+/_\\w+)*)?(/[^_]\\w+)(/_\\w+)?(/\\.\\w+)?$");
+    private static final Pattern _API_PMS = Pattern.compile("((?:/[^_][^/]+/_[^/]+)*)?(/[^_][^/]+)(/_[^/]+)?(/ [^/]+)?$");
 
     private static final Set _API_RSP = new HashSet();
     static {

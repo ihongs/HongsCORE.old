@@ -25,13 +25,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * <h3>异常代码</h3>
  * <pre>
- * 区间: 0x10f0~0x10ff
- * 0x10f1 尚未登陆
- * 0x10f3 无权访问
- * 0x10f4 无此动作
- * 0x10f5 不支持此方法
- * 0x10fa 无法执行, 禁止访问或参数错误
- * 0x10ff 注解链溢出
+ * 区间: 0x1100~0x110f
+ * 0x1100 错误请求
+ * 0x1101 尚未登陆
+ * 0x1103 无权访问
+ * 0x1104 无此动作
+ * 0x1105 不支持此方法
+ * 0x110e 无法执行, 禁止访问或参数错误
+ * 0x110f 注解链溢出
  * </pre>
  *
  * @author Hong
@@ -47,7 +48,7 @@ public class ActionRunner {
     public ActionRunner(String action, ActionHelper helper) throws HongsException {
         this.method = getActions().get(action);
         if ( method == null ) {
-            throw new HongsException(0x10f4, "Can not find action '"+action+"'");
+            throw new HongsException(0x1104, "Can not find action '"+action+"'");
         }
         this.object = Core.getInstance(method.getDeclaringClass());
         this.annarr = method.getAnnotations( );
@@ -86,7 +87,7 @@ public class ActionRunner {
     public void doAction() throws HongsException {
         // 如果超出链长度, 则终止执行
         if ( idx  >  annarr.length) {
-            throw new HongsException(0x10ff, "Action annotation out of index: "
+            throw new HongsException(0x110f, "Action annotation out of index: "
             +idx+">"+annarr.length);
         }
 
@@ -120,9 +121,9 @@ public class ActionRunner {
         try {
             method.invoke(object, helper);
         } catch (   IllegalAccessException e) {
-            throw new HongsException(0x10fa, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x110e, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch ( IllegalArgumentException e) {
-            throw new HongsException(0x10fa, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x110e, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
         } catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
             if (ex instanceof HongsException) {
@@ -131,7 +132,7 @@ public class ActionRunner {
             if (ex instanceof HongsError) {
                 throw (HongsError) ex;
             } else {
-                throw new HongsException(0x10fa, ex);
+                throw new HongsException(0x110e, ex);
             }
         }
     }

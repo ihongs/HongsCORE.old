@@ -63,7 +63,7 @@ public class ActsAction
 
     if (act == null || act.length() == 0)
     {
-      senderr(req, helper, 0x10f4, "Action URI can not be empty.");
+      senderr(req, helper, 0x1104, "Action URI can not be empty.");
       return;
     }
 
@@ -104,7 +104,7 @@ public class ActsAction
         error = hc.getLocalizedMessage();
     } else
     {
-        errno = 0x10fa;
+        errno = 0x110e;
         error = ex.getLocalizedMessage();
       CoreLocale lang = Core.getInstance(CoreLocale.class);
       if (error == null || error.length() == 0)
@@ -125,23 +125,27 @@ public class ActsAction
     String errso;
     switch (errno)
     {
-      case 0x10f1:
+      case 0x1100:
+        errso = "Er400";
+        helper.getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST );
+        break;
+      case 0x1101:
         errso = "Er401";
         helper.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         break;
-      case 0x10f3:
+      case 0x1103:
         errso = "Er403";
         helper.getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
         break;
-      case 0x10f4:
+      case 0x1104:
         errso = "Er404";
         helper.getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
         break;
-      case 0x10f5:
+      case 0x1105:
         errso = "Er405";
         helper.getResponse().setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         break;
-      case 0x10fa:
+      case 0x110e:
         errso = "Er500";
         helper.getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         break;
