@@ -79,6 +79,7 @@
 
 ## 更新日志
 
+* 2015/04/24 完善 Async 并添加 Batch 异步操作类, 为异步任务和消息处理进行准备
 * 2015/03/03 重构, 完善权限模块; 重写 Dict.get,Dict.put 及 JS 中的对应方法, 使程序逻辑更简单, 更接近 PHP 的关系数组操作方式
 * 2015/02/18 将 ActionWarder 的 Filter 模式改回 0.3.1 的独立继承模式, 新类为 ActionDriver, 兼容 ActionWarder 的 Filter 初始化模式; 今天是我的公历生日, 祝自己生日快乐, 万事如意!
 * 2015/02/14 增加 jetty,sqlite, 默认使用 jetty 运行, 数据库默认使用 sqlite
