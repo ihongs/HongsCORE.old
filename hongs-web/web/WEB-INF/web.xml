@@ -84,6 +84,18 @@
         </init-param>
     </filter>
     <filter>
+        <filter-name>AutoFilter_DX</filter-name>
+        <filter-class>app.hongs.serv.AutoFilter</filter-class>
+        <init-param>
+            <param-name>render</param-name>
+            <param-value>/hongs/auto/dl</param-value>
+        </init-param>
+        <init-param>
+            <param-name>action</param-name>
+            <param-value>/hongs/auto/db</param-value>
+        </init-param>
+    </filter>
+    <filter>
         <filter-name>AutoFilter_DL</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
@@ -148,8 +160,15 @@
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
     <filter-mapping>
+        <filter-name>AutoFilter_DX</filter-name>
+        <url-pattern>/food/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
         <filter-name>AutoFilter_DL</filter-name>
-        <url-pattern>/huiyiabc/*</url-pattern>
+        <url-pattern>/agile/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>

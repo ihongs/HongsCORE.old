@@ -569,7 +569,7 @@ public class Table
     /**
      * 是否关闭检查
      */
-    CoreConfig conf = (  CoreConfig  ) Core.getInstance(CoreConfig.class);
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
     boolean checked = conf.getProperty("core.table.checked.value", false);
 
     /**

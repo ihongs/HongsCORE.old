@@ -136,7 +136,7 @@
             });
         $("#sign-out")
             .click(function() {
-                $.get(hsFixUri("hongs/member/sign/out.act"), function() {
+                $.get(hsFixUri("hongs/member/sign/delete.act"), function() {
                     location.reload();
                 });
             });

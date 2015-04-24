@@ -8,3 +8,5 @@ nb-configuration.xml
 /hongs-serv-server/target/
 /hongs-serv-lucene/target/
 /hongs-task/target/
+/hongs-serv-resume/target/
+/hongs-serv-search/target/

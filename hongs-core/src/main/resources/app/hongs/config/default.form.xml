@@ -47,8 +47,8 @@
         <field name="num" disp="数字" type="number,range,slider,switch">
             <param name="min">100</param>
             <param name="max">500</param>
-            <param name="step">1</step>
-            <param name="type">int,long,float,double</type>
+            <param name="step">1</param>
+            <param name="type">int,long,float,double</param>
             <param name="format">####.##</param>
         </field>
         <field name="date" disp="日期" type="date,time,datetime">

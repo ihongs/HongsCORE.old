@@ -53,10 +53,12 @@ public class HongsError extends Error implements HongsCause {
         this(code, null, null);
     }
 
+    @Override
     public int getCode() {
         return that.getCode();
     }
 
+    @Override
     public String getDesc() {
         return that.getDesc();
     }
@@ -76,18 +78,22 @@ public class HongsError extends Error implements HongsCause {
         return that.getLocalizedMessage();
     }
 
+    @Override
     public String getLocalizedSection() {
         return that.getLocalizedSection();
     }
 
+    @Override
     public void setLocalizedSection(String lang) {
         that.setLocalizedSection(lang);
     }
 
+    @Override
     public String[] getLocalizedOptions() {
         return that.getLocalizedOptions();
     }
 
+    @Override
     public void setLocalizedOptions(String... opts) {
         that.setLocalizedOptions(opts);
     }

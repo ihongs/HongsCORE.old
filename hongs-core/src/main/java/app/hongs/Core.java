@@ -58,6 +58,7 @@ extends HashMap<String, Object>
   /**
    * 获取类对应的唯一对象
    *
+   * @param <T> 返回对象类型
    * @param ct [包路径.]类名.class
    * @return 唯一对象
    */
@@ -80,6 +81,17 @@ extends HashMap<String, Object>
     Core   core = Core.GLOBAL_CORE ;
     Object inst = check(core, name);
     return inst != null ? inst : build(core, name);
+  }
+
+  /**
+   * 调用原始get方法
+   *
+   * @param name
+   * @return 唯一对象
+   */
+  public Object got(String name)
+  {
+    return super.get(name);
   }
 
   /**

@@ -1,8 +1,10 @@
 <root>
     <menu href="/">
-        <include>huiyiabc/meeting</include>
         <include>member</include>
+        <include>resume</include>
         <include>demo/db</include>
         <include>demo/dl</include>
+        <include>food</include>
+        <include>client/client</include>
     </menu>
 </root>

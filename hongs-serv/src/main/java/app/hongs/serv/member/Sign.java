@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 角色工具
+ * 登录工具
  * @author Hongs
  */
 public class Sign {
@@ -90,6 +90,6 @@ public class Sign {
         }
     }
 
-    private static final byte[] pazz = {'8','9','A','B','C','D','E','F','0','1','2','3','4','5','6','7'};
+    private static final byte[] pazz = {'A','B','C','D','E','F','1','2','3','4','5','6','7','8','9','0'};
 
 }

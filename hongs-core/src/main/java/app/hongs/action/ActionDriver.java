@@ -252,7 +252,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     }
 
     private void doOutput(ActionHelper hlpr, HttpServletRequest req, HttpServletResponse rsp) {
-//        if (!hlpr.getResponse().isCommitted()) {
+//      if (!hlpr.getResponse().isCommitted()) {
             Map dat  = hlpr.getResponseData();
             if (dat != null) {
                 if (0< Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
@@ -265,7 +265,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 hlpr.print();
 //              hlpr.reinitHelper ( raq , rzp );
             }
-//        }
+//      }
     }
 
     private void doIniter(Core core, ActionHelper hlpr, HttpServletRequest req)

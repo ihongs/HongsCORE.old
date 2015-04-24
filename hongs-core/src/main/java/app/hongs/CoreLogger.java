@@ -114,8 +114,7 @@ public class CoreLogger implements Core.Destroy
       Core core = Core.getInstance();
       if (core.containsKey(app.hongs.action.ActionHelper.class.getName()))
       {
-        ActionHelper helper = (ActionHelper)
-          Core.getInstance(app.hongs.action.ActionHelper.class);
+        ActionHelper helper = Core.getInstance(app.hongs.action.ActionHelper.class);
         if (null != helper.getRequest()) {
           sb.append(' ')
             .append('[')

@@ -1,4 +1,4 @@
-package app.hongs.dl.lucene;
+package app.hongs.serv.search;
 
 import app.hongs.HongsException;
 import app.hongs.action.VerifyHelper;

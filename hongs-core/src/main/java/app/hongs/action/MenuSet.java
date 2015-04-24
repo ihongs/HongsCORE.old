@@ -470,11 +470,12 @@ public class MenuSet
       Set<String> roleset;
       if (session.contains(".")) {
           roleset = (Set) Core.getInstance (session);
-          if (roleset == null || (roleset.size() == 1 && roleset.contains(null))) {
+          if (roleset == null
+          || (roleset.size( ) == 1 && roleset.contains( null ) ) ) {
               roleset  = null;
           }
       } else {
-          ActionHelper help = (ActionHelper) Core.getInstance(ActionHelper.class);
+          ActionHelper help = Core.getInstance(ActionHelper.class);
           roleset = (Set) help.getSessvalue(session);
       }
       return roleset;

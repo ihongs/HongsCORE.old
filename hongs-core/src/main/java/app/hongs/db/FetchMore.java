@@ -47,26 +47,26 @@ public class FetchMore
    * @param map
    * @param key
    */
-  private void mapped(Map<Object, List> map, String... key)
+  private void mapped(Map<String, List> map, String... key)
   {
     Iterator it = this.rows.iterator();
     W:while (it.hasNext())
     {
       Object row = it.next();
-      Object obj = row;
+      Object sid = row;
 
       // 获取id值
       for (int i = 0; i < key.length; i ++)
       {
-        if (obj instanceof Map)
+        if (sid instanceof Map)
         {
-          obj = ((Map)obj).get(key[i]);
+          sid = ((Map)sid).get(key[i]);
         }
         else
-        if (obj instanceof List)
+        if (sid instanceof List)
         {
           List rowz = this.rows;
-          this.rows = (List)obj;
+          this.rows = (List)sid;
 
           // 切割子键数组
           int j = key.length - i ;
@@ -85,27 +85,27 @@ public class FetchMore
           continue W;
         }
       }
-      if (obj == null)
+      if (sid == null)
       {
           continue W;
       }
 
       // 登记行
-      if (map.containsKey(obj))
+      if (map.containsKey(sid))
       {
-        map.get(obj ).add(row);
+        map.get(sid.toString()).add(row);
       }
       else
       {
-        List lst = new ArrayList();
-        map.put(obj , lst);
+        List lst = new ArrayList(  );
+        map.put(sid.toString(), lst);
         lst.add(row);
       }
     }
   }
 
-  public Map<Object, List> mapped(String key) {
-    Map<Object, List> map = new HashMap();
+  public Map<String, List> mapped(String key) {
+    Map<String, List> map = new HashMap();
     mapped(map, key.split("\\."));
     return map;
   }
@@ -139,7 +139,7 @@ public class FetchMore
     }
 
     // 获取id及行号
-    Map<Object, List> map = this.mapped(key);
+    Map<String, List> map = this.mapped(key);
     Set ids = map.keySet();
     if (ids.isEmpty())
     {
@@ -168,7 +168,7 @@ public class FetchMore
 
     // 构建查询结构
     caze.from (tableName, name)
-      .where(col+" IN (?)", ids);
+        .where(col+" IN (?)", ids);
 
     /**
      * 根据 id 获取关联数据,
@@ -179,14 +179,14 @@ public class FetchMore
 
     Map     row, sub;
     List    lst;
-    String  id;
+    String  sid;
 
     if (! multi)
     {
       while ((sub = rs.fetch()) != null)
       {
-        id  = (String) sub.get(col2);
-        lst = ( List ) map.get( id );
+        sid = Synt.declare(sub.get(col2), String.class);
+        lst = map.get(sid);
 
         if (lst == null)
         {
@@ -215,8 +215,8 @@ public class FetchMore
     {
       while ((sub = rs.fetch()) != null)
       {
-        id  = (String) sub.get(col2);
-        lst = ( List ) map.get( id );
+        sid = Synt.declare(sub.get(col2), String.class);
+        lst = map.get(sid);
 
         if (lst == null)
         {

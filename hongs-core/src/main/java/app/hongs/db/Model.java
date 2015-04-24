@@ -192,20 +192,20 @@ public class Model
 
     if (rows != 0)
     {
-      caze.from (table.tableName , table.name);
+      caze.from (table.tableName , table.name );
       FetchPage fp = new FetchPage(caze, table);
       fp.setPage(page != 0 ? page : 1);
       fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
       // 页码等于 0 则不要列表数据
-      if (page != 0 )
+      if (page != 0)
       {
         List list = fp.getList();
         data.put( "list", list );
       }
 
       // 行数小于 0 则不要分页信息
-      if (rows >  0 )
+      if (rows >  0)
       {
         Map  info = fp.getPage();
         data.put( "page", info );

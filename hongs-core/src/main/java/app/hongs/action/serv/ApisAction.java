@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -171,7 +170,7 @@ public class ApisAction
 
         // 将请求数据处理之后传递
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
-        String  json = Synt.declare(req.getParameter("-api-data"),  String.class);
+        String  json = Synt.declare(req.getParameter("-api-data") , String.class);
         if (json != null) {
             try {
                 Map send = Synt.declare(Data.toObject(json), Map.class);
@@ -186,6 +185,7 @@ public class ApisAction
 
         // 将请求转发到动作处理器
         req.getRequestDispatcher("/"+act+ "/"+mtd+ ".act"+pms ).include(req, rsp);
+        hlpr.reinitHelper(req, rsp);
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
@@ -197,7 +197,7 @@ public class ApisAction
 
             // 状态总是 200
             if (scok != null && scok) {
-                hlpr.getResponse().setStatus(javax.servlet.http.HttpServletResponse.SC_OK);
+                rsp.setStatus(javax.servlet.http.HttpServletResponse.SC_OK);
             }
 
             // 返回节点
@@ -223,7 +223,7 @@ public class ApisAction
                 cnvr.num  = all || conv.contains( "num2str") ? new Conv2Str(/**/) : cnvr.all;
                 cnvr.nnll = all || conv.contains("null2str") ? new ConvNull2Str() : cnvr.all;
                 cnvr.bool = all || conv.contains("bool2str") ? new ConvBool2Str() : cnvr.all;
-                cnvr.date = conv.contains("date2stp") ? new ConvDate2Stp()
+                cnvr.date = conv.contains("date2mic") ? new ConvDate2Mic()
                           :(conv.contains("date2sec") ? new ConvDate2Sec() : new Conv2Obj());
                 hlpr.reply (Synt.foreach(resp, cnvr));
             }
@@ -285,7 +285,7 @@ public class ApisAction
             return ((Boolean) o) ? "1" : "";
         }
     }
-    private static class ConvDate2Stp extends Conv2Obj {
+    private static class ConvDate2Mic extends Conv2Obj {
         @Override
         public Object conv(Object o) {
             return ((Date) o).getTime();

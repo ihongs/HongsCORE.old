@@ -1,10 +1,11 @@
-package app.hongs.dl.lucene;
+package app.hongs.serv.search;
 
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
+import app.hongs.dl.lucene.LuceneAction;
 import java.util.Map;
 
 /**

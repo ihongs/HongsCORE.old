@@ -81,8 +81,7 @@ public class DeptAction {
         // 用户动作分组
         String id = helper.getParameter("id");
         if (id != null) {
-            app.hongs.serv.member.Dept model2 = (app.hongs.serv.member.Dept)
-                Core.getInstance(app.hongs.serv.member.Dept.class);
+            app.hongs.serv.member.Dept model2 = Core.getInstance(app.hongs.serv.member.Dept.class);
             Set rolez = model2.getRoles(id);
             data.put("roles", rolez);
         }

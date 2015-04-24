@@ -371,10 +371,17 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
     }
 
     public Sort getSort(Map rd) throws HongsException {
-        Set<String> ob = Synt.declare(rd.get("ob"), new HashSet());
+        List<String>    ob = Synt.declare (rd.get("ob"), new ArrayList());
         List<SortField> of = new ArrayList();
 
         for (String fn: ob) {
+            // 相关
+            if (fn.equals/**/("-") ) {
+                of.add(SortField.FIELD_SCORE);
+                continue;
+            }
+
+            // 逆序
             boolean rv;
             if (fn.startsWith("-") ) {
                 fn = fn.substring(1);
@@ -383,40 +390,42 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 rv = false;
             }
 
-            Map fm = (Map ) fields.get(fn);
-            if (fm == null) {
+            Map m = (Map ) fields.get(fn );
+            if (m == null) {
                 continue;
             }
-            Object ft = fm.get("lucene-field"); // 存储类型
-            if ("stored".equals(ft)) {
+            String t  =  getTyp(m);
+            if ("stored".equals(t)) {
                 continue;
             }
-            Object dt = types.get(fm.get("__type__")); // 数据类型
 
             SortField.Type st;
-            if ("number".equals(dt)) {
-                Object nt = fm.get("type");
-                if ("int".equals(nt)) {
-                    st = SortField.Type.INT;
-                } else
-                if ("long".equals(nt)) {
-                    st = SortField.Type.LONG;
-                } else
-                if ("float".equals(nt)) {
-                    st = SortField.Type.FLOAT;
-                } else
-                {
-                    st = SortField.Type.DOUBLE;
-                }
-            } else {
-                    st = SortField.Type.STRING;
+            if ("text".equals(t)) {
+                continue;
+            } else
+            if ( "int".equals(t)) {
+                st = SortField.Type.INT;
+            } else
+            if ("long".equals(t)) {
+                st = SortField.Type.LONG;
+            } else
+            if ( "float".equals(t)) {
+                st = SortField.Type.FLOAT;
+            } else
+            if ("double".equals(t))
+            {
+                st = SortField.Type.DOUBLE;
+            } else
+            {
+                st = SortField.Type.STRING;
             }
 
             of.add( new SortField(fn, st, rv));
         }
 
-        of.add(SortField.FIELD_SCORE);
-        of.add(SortField.FIELD_DOC  );
+        if (of.isEmpty()) {
+            of.add(SortField.FIELD_DOC);
+        }
 
         return new Sort(of.toArray(new SortField[0]));
     }
@@ -429,40 +438,32 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             Object fv = e.getValue( );
             String fn = (String)e.getKey();
 
-            Map fm = (Map ) fields.get(fn);
-            if (fm == null) {
+            Map m = (Map ) fields.get(fn );
+            if (m == null) {
                 continue;
             }
-            Object ft = fm.get("lucene-field"); // 存储类型
-            if ("stored".equals(ft)) {
+            String t  =  getTyp(m);
+            if ("stored".equals(t)) {
                 continue;
             }
-            Object dt = types.get(fm.get("__type__")); // 数据类型
 
-            if ("number".equals(dt)) {
-                Object nt = fm.get("type");
-                if ("int".equals(nt)) {
-                    qryAdd(query, fn, fv, new AddIntQuery());
-                } else
-                if ("long".equals(nt)) {
-                    qryAdd(query, fn, fv, new AddLongQuery());
-                } else
-                if ("float".equals(nt)) {
-                    qryAdd(query, fn, fv, new AddFloatQuery());
-                } else
-                {
-                    qryAdd(query, fn, fv, new AddDoubleQuery());
-                }
+            if ("text".equals(t)) {
+                qryAdd(query, fn, fv, new AddTextQuery());
+            } else
+            if ( "int".equals(t)) {
+                qryAdd(query, fn, fv, new AddIntQuery( ));
+            } else
+            if ("long".equals(t)) {
+                qryAdd(query, fn, fv, new AddLongQuery());
+            } else
+            if ( "float".equals(t)) {
+                qryAdd(query, fn, fv, new AddFloatQuery( ));
+            } else
+            if ("double".equals(t)) {
+                qryAdd(query, fn, fv, new AddDoubleQuery());
             } else
             {
-                if ("text".equals(ft)) {
-                    AddTextQuery q = new AddTextQuery();
-                                 q.ana( getAna() );
-                    qryAdd(query, fn, fv, q);
-                } else
-                {
-                    qryAdd(query, fn, fv, new AddStringQuery());
-                }
+                qryAdd(query, fn, fv, new AddStringQuery());
             }
         }
 
@@ -476,7 +477,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
     }
 
     public Map doc2Map(Document dc) throws HongsException {
-       return docPrs(dc);
+        return docPrs(dc);
     }
 
     public void initial() throws HongsException {
@@ -595,12 +596,35 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         try {
             Director dir = new Director();
             File dio = new File(datapath);
-            dir.has = dio.exists();
-            dir.dir = FSDirectory.open(dio);
+            dir.has  = dio.exists();
+            dir.dir  = FSDirectory.open(dio);
             return dir;
         } catch (IOException ex) {
             throw new HongsException(HongsException.COMMON, ex);
         }
+    }
+
+    private String getTyp(Map m) {
+        String t = Synt.declare(m.get("lucene-field"), String.class);
+
+        // 如果未指定 lucene-field 则用 field-type 替代
+        if (t == null) {
+            t = Synt.declare(types.get(m.get("__type__")), "string");
+            if ("number".equals(t)) {
+                t = Synt.declare(m.get("type"), "double");
+            } else
+            if (  "date".equals(t)) {
+                Object x = m.get( "type" );
+                if ("microtime".equals(x)) {
+                    t = "long";
+                } else
+                if ("timestamp".equals(x)) {
+                    t = "int" ;
+                }
+            }
+        }
+
+        return t;
     }
 
     private Map docPrs(Document doc) {
@@ -611,15 +635,14 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             String k = (String)e.getKey();
             Map    m = (Map )e.getValue();
 
-            if (! Synt.declare( m.get("lucene-store"), true)) {
+            if (/***/ ! Synt.declare(m.get("lucene-store"), true)) {
                 continue;
             }
-            Object ft =              m.get("lucene-field") ;
-            Object dt =    types.get(m.get(  "__type__"  ));
             boolean r = Synt.declare(m.get("__repeated__"), false);
-
+            String  t = getTyp (m);
             IndexableField[] fs = doc.getFields(k);
-            if (  "json".equals(ft)) {
+
+            if (  "json".equals(t)) {
                 if (r) {
                     if (fs.length > 0) {
                         for(IndexableField f : fs) {
@@ -638,11 +661,15 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                     }
                 }
             } else
-            if ("number".equals(dt)) {
+            if (   "int".equals(t)
+            ||    "long".equals(t)
+            ||   "float".equals(t)
+            ||  "double".equals(t)
+            ||  "number".equals(t)) {
                 if (r) {
                     if (fs.length > 0) {
                         for(IndexableField f : fs) {
-                            Dict.put(map, f.numericValue(), k, null);
+                            Dict.put(map , f.numericValue(), k, null);
                         }
                     } else
                     {
@@ -661,7 +688,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 if (r) {
                     if (fs.length > 0) {
                         for(IndexableField f : fs) {
-                            Dict.put(map, f.stringValue( ), k, null);
+                            Dict.put(map , f.stringValue( ), k, null);
                         }
                     } else
                     {
@@ -692,19 +719,11 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 continue;
             }
 
-            String/***/ t = Synt.declare(m.get("lucene-field"), String.class);
-            Field.Store s = Synt.declare(m.get("lucene-store"), true )
-                          ?  Field.Store.YES : Field.Store.NO;
+            Field.Store s = Synt.declare(m.get("lucene-store"), true)
+                          ? Field.Store.YES : Field.Store.NO;
+            String      t = getTyp(m);
 
-            // 如果未指定 lucene-field 则用 field-type 替代
-            if (t == null) {
-                t = Synt.declare(types.get(m.get("__type__")), "string");
-                if ("number".equals(t)) {
-                    t = Synt.declare(m.get("type"), "double");
-                }
-            }
-
-            doc.removeFields(k);
+            doc.removeFields (k);
             if (v instanceof Collection) {
                 for (Object x : (Collection) v) {
                     this.docAdd(doc, k, x, t, s);
@@ -735,6 +754,9 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         if ("double".equals(t)) {
             doc.add(new DoubleField(k, Synt.declare(v, Double.class), s));
         } else
+        if ("stored".equals(t)) {
+            doc.add(new StoredField(k, Synt.declare(v, String.class)   ));
+        } else
         if (  "json".equals(t)) {
             if (  "".equals(v)) {
                 v = "{}";
@@ -744,9 +766,6 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             }
             doc.add(new StoredField(k, (String) v));
         } else
-        if ("stored".equals(t)) {
-            doc.add(new StoredField(k, Synt.declare(v, String.class)));
-        } else
         if (  "text".equals(t)) {
             doc.add(new   TextField(k, Synt.declare(v, String.class), s));
         } else
@@ -755,7 +774,8 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private void qryAdd(BooleanQuery qry, String k, Object v, AddQuery q) {
+    private void qryAdd(BooleanQuery qry, String k, Object v, AddQuery q)
+    throws HongsException {
         Map m;
         if (v instanceof Map) {
             m = new HashMap();
@@ -779,6 +799,11 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
 
         float w = 1F;
+
+        // 对 text 类型指定分词器
+        if (q instanceof AddTextQuery) {
+            ((AddTextQuery) q).ana(getAna());
+        }
 
         if (m.containsKey("-wt")) {
             Object n = m.remove("-wt");
@@ -859,7 +884,8 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             qry.add(q.add(k, n, x, l, r), BooleanClause.Occur.MUST);
         }
 
-        // 其他 IN
+        //** 其他查询 **/
+        
         if (!m.isEmpty()) {
             Set s = new HashSet();
             s.addAll(m.values( ));
@@ -978,18 +1004,8 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
         @Override
         public Query add(String k, Object v) {
-            String  n2 = v.toString();
-
-            int p = n2.indexOf('^');
-            Float x = null;
-            if (p > 0) {
-                x  = Float.parseFloat(n2.substring(p + 1));
-                n2 = n2.substring(0, p);
-            }
-
-            Query   q2 = new TermQuery(new Term(k, n2));
+            Query   q2 = new TermQuery(new Term(k, v.toString()));
             if (w != null) q2.setBoost(w);
-            if (x != null) q2.setBoost(x);
             return  q2;
         }
         @Override
@@ -1015,7 +1031,8 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         @Override
         public Query add(String k, Object v) {
             try {
-                Query   q2 = new QueryParser(LUCENE_CURRENT, k, a).parse(QueryParser.escape(v.toString()));
+                Query   q2 = new QueryParser(LUCENE_CURRENT, k,a)
+                        .parse(QueryParser.escape(v.toString( )));
                 if (w != null) q2.setBoost(w);
                 return  q2;
             } catch (ParseException ex) {

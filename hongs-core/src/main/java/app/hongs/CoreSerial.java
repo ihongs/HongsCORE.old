@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  <p>
  * <pre>
  * entrySet(),keySet(),values() 返回的对象无法被序列化,
- * 可 new HashSet(x.entrySet()) 预处理后再存入当前对象.
+ * 请 new HashSet(x.entrySet()) 预处理后再存入当前对象.
  * 详见: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4756277
  * </pre>
  *
@@ -312,11 +312,12 @@ public abstract class CoreSerial
   private void load(Map<String, Object> map)
     throws HongsException
   {
-    Field[] fields = this.getClass().getDeclaredFields();
+    Field[] fields = this.getClass().getFields();
     for (Field field : fields)
     {
       int ms = field.getModifiers();
-      if (Modifier.isStatic(ms)
+      if (Modifier.isTransient(ms )
+      ||  Modifier.isStatic(ms)
       || !Modifier.isPublic(ms))
       {
         continue;
@@ -347,11 +348,12 @@ public abstract class CoreSerial
   private void save(Map<String, Object> map)
     throws HongsException
   {
-    Field[] fields = this.getClass().getDeclaredFields();
+    Field[] fields = this.getClass().getFields();
     for (Field field : fields)
     {
       int ms = field.getModifiers();
-      if (Modifier.isStatic(ms)
+      if (Modifier.isTransient(ms )
+      ||  Modifier.isStatic(ms)
       || !Modifier.isPublic(ms))
       {
         continue;

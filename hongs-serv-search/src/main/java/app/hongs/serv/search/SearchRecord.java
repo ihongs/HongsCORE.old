@@ -1,8 +1,9 @@
-package app.hongs.dl.lucene;
+package app.hongs.serv.search;
 
 import app.hongs.Core;
 import app.hongs.CoreLogger;
 import app.hongs.HongsException;
+import app.hongs.dl.lucene.LuceneRecord;
 import app.hongs.util.Synt;
 import java.io.IOException;
 import java.util.ArrayList;

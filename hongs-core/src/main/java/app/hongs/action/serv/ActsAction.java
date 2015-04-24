@@ -106,7 +106,7 @@ public class ActsAction
     {
         errno = 0x10fa;
         error = ex.getLocalizedMessage();
-      CoreLocale lang = (CoreLocale) Core.getInstance(CoreLocale.class);
+      CoreLocale lang = Core.getInstance(CoreLocale.class);
       if (error == null || error.length() == 0)
       {
         error = lang.translate("core.error.unkwn", ex.getClass().getName());

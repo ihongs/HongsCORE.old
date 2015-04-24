@@ -23,8 +23,8 @@ import javax.servlet.http.HttpSession;
 @Action("hongs/member/sign")
 public class SignAction {
 
-    @Action("in")
-    public void signIn(ActionHelper ah) throws HongsException {
+    @Action("create")
+    public void create(ActionHelper ah) throws HongsException {
         String username = Synt.declare(ah.getParameter("username"), "");
         String password = Synt.declare(ah.getParameter("password"), "");
 
@@ -51,24 +51,22 @@ public class SignAction {
         }
 
         // 获取用户权限
-        User user = new  User();
-        Set<String> r = user.getRoles((String)ud.get("id"));
+        User user = new User();
+        Set<String> roles = user.getRoles((String) ud.get("id"));
 
         // 设置用户会话
         HttpSession sess = ah.getRequest().getSession(true);
         sess.setAttribute("user", ud.get( "id" ));
         sess.setAttribute("name", ud.get("name"));
-        sess.setAttribute("roles", r);
-        ah.reply(true);
+        sess.setAttribute("roles", roles);
+
+        Map data = new HashMap();
+        data.put("jsessionid", sess.getId());
+        ah.reply(data);
     }
 
-    @Action("on")
-    public void signOn(ActionHelper ah) {
-
-    }
-
-    @Action("out")
-    public void signOut(ActionHelper ah) {
+    @Action("delete")
+    public void delete(ActionHelper ah) {
         // 清除用户会话
         HttpSession sess = ah.getRequest().getSession();
         sess.invalidate();

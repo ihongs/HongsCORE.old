@@ -106,8 +106,7 @@ public class UserAction {
         // 用户动作分组
         String id = helper.getParameter("id");
         if (id != null) {
-            app.hongs.serv.member.User model2 = (app.hongs.serv.member.User)
-                Core.getInstance(app.hongs.serv.member.User.class);
+            app.hongs.serv.member.User model2 = Core.getInstance(app.hongs.serv.member.User.class);
             Set rolez = model2.getRoles(id);
             data.put("roles", rolez);
         }
