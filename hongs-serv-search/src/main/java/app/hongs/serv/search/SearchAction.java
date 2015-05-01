@@ -6,6 +6,9 @@ import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
 import app.hongs.dl.lucene.LuceneAction;
+import app.hongs.util.Synt;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +22,23 @@ public class SearchAction extends LuceneAction {
     @Supply()
     @Override
     public void retrieve(ActionHelper helper) throws HongsException {
+        /**
+         * 有指定查询条件则按匹配度排序
+         */
+        Map rd = helper.getRequestData();
+        Object wd = rd.get("wd");
+        if (wd != null && "".equals(wd)) {
+            List ob = Synt.declare(rd.get("ob"), List.class);
+            if( ob == null) {
+                ob =  new ArrayList();
+                rd.put("ob", ob);
+                ob.add( 0 , "-");
+            } else
+            if(!ob.contains("-")) {
+                ob.add( 0 , "-");
+            }
+        }
+
         super.retrieve(helper);
     }
 

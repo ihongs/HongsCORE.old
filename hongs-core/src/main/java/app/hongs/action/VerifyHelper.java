@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * 数据校验助手
@@ -35,6 +36,8 @@ import java.util.Set;
 public class VerifyHelper {
 
     private Map<String, List<Rule>> rules;
+    private boolean update;
+    private boolean prompt;
 
     public VerifyHelper() {
         rules = new LinkedHashMap();
@@ -42,16 +45,11 @@ public class VerifyHelper {
 
     public VerifyHelper addRule(String name, Rule... rule) {
         List rulez = rules.get(name);
-        if (rulez == null   ) {
+        if (rulez == null) {
             rulez =  new ArrayList();
             rules.put( name, rulez );
         }
-        for(Rule rula : rule) {
-            if (rula.params == null) {
-                rula.params =  new HashMap();
-            }
-            rulez.add(rula);
-        }
+        rulez.addAll(Arrays.asList(rule));
         return this;
     }
 
@@ -120,15 +118,16 @@ public class VerifyHelper {
                 String type = (String) opts.get("__type__");
 
                 // 类型映射
-                if (tps.containsKey(type)) {
-                    rule =  tps.get(type ).toString( );
+                if ( tps.containsKey(/**/type )) {
+                    rule  =  tps.get(/**/type ).toString( );
                 } else {
-                    rule =   "string";
+                    rule  =  "string";
                 }
 
                 // 预定正则
-                if (pts.containsKey(type)) {
-                    opts.put("pattern", pts.get(type));
+                if ( pts.containsKey(/**/type )
+                && !opts.containsKey("pattern")) {
+                    opts.put("pattern" , type );
                 }
 
                 // 将 type 转换为 isType 规则名
@@ -167,7 +166,20 @@ public class VerifyHelper {
         return this;
     }
 
-    public Map verify(Map values, boolean update) throws Wrongs, HongsException {
+    public boolean isUpdate() {
+        return update;
+    }
+    public boolean isPrompt() {
+        return prompt;
+    }
+    public void isUpdate(boolean update) {
+        this.update = update;
+    }
+    public void isPrompt(boolean prompt) {
+        this.prompt = prompt;
+    }
+
+    public Map verify(Map values) throws Wrongs, HongsException {
         Map<String, Object> valuez = new LinkedHashMap();
         Map<String, Wrong > wrongz = new LinkedHashMap();
 
@@ -177,32 +189,35 @@ public class VerifyHelper {
 
         for(Map.Entry<String, List<Rule>> et : rules.entrySet()) {
             List<Rule> rulez = et.getValue();
-            String name = et.getKey();
-            Object data = Dict.getParam(values, name);
+            String     name  = et.getKey(  );
+            Object     data  = Dict.getParam(values, name  );
 
-            data = verify(values, update, data, name, rulez, wrongz);
+            data = verify(rulez, data, name, valuez, wrongz);
 
-            if (data == SKIP) {
-                continue;
+            if (data != SKIP) {
+                Dict.setParam( valuez, data, name );
+            } else if (prompt && !wrongz.isEmpty()) {
+                break;
             }
-
-            Dict.setParam(valuez, data, name);
         }
 
-        if (!wrongz.isEmpty()) {
+        if (! wrongz.isEmpty()) {
             throw new Wrongs(wrongz);
         }
 
         return valuez;
     }
 
-    private Object verify(Map values, boolean update, Object data, String name, List<Rule> rulez, Map wrongz) throws HongsException {
+    private Object verify(List<Rule> rulez, Object data, String name, Map values, Map wrongz) throws HongsException {
         int i =0;
         for (Rule  rule  :  rulez) {
             i ++;
 
+            if (rule.params==null) {
+                rule.setParams(new HashMap());
+            }
             rule.setValues(values);
-            rule.setUpdate(update);
+            rule.setHelper( this );
 
             try {
                 data = rule.verify(data);
@@ -221,14 +236,14 @@ public class VerifyHelper {
 
             if (rule instanceof Repeated) {
                 List<Rule> rulex = rulez.subList(i, rulez.size());
-                data = repeat(values, update, data, name, rulex, wrongz, rule.params);
+                data = repeat(rulex, data, name, values, wrongz, rule.params);
                 break;
             }
         }
         return  data ;
     }
 
-    private Object repeat(Map values, boolean update, Object data, String name, List<Rule> rulez, Map wrongz, Map params)
+    private Object repeat(List<Rule> rulez, Object data, String name, Map values, Map wrongz, Map params)
     throws HongsException {
         Collection data2 = new ArrayList();
 
@@ -237,19 +252,23 @@ public class VerifyHelper {
             int i3 = 0;
             for(Object data3 : ( Collection ) data) {
                 String name3 = name + "." + (i3 ++);
-                data3 = verify(values, update, data3, name3, rulez, wrongz);
+                data3 = verify(rulez, data3, name3, values, wrongz);
                 if (data3 !=  SKIP ) {
                     data2.add(data3);
+                } else if (prompt && !wrongz.isEmpty()) {
+                    return SKIP;
                 }
             }
         } else if (data instanceof Map) {
-            for(Object i3 : ((Map ) data).entrySet()) {
+            for(Object i3 : ( ( Map ) data).entrySet()) {
                 Map.Entry e3 = (Map.Entry) i3;
                 Object data3 = e3.getValue( );
                 String name3 = name +"."+ ( (String) e3.getKey( ) );
-                data3 = verify(values, update, data3, name3, rulez, wrongz);
+                data3 = verify(rulez, data3, name3, values, wrongz);
                 if (data3 !=  SKIP ) {
                     data2.add(data3);
+                } else if (prompt && !wrongz.isEmpty()) {
+                    return SKIP;
                 }
             }
         }
@@ -264,10 +283,12 @@ public class VerifyHelper {
         n = Synt.declare(params.get("minrepeat"), 0);
         if (n != 0 && c < n) {
             failed(wrongz, new Wrong("fore.form.lt.minrepeat", String.valueOf(n), String.valueOf(c)), name);
+            return SKIP;
         }
         n = Synt.declare(params.get("maxrepeat"), 0);
         if (n != 0 && c > n) {
             failed(wrongz, new Wrong("fore.form.gt.maxrepeat", String.valueOf(n), String.valueOf(c)), name);
+            return SKIP;
         }
 
         return data2;
@@ -287,12 +308,12 @@ public class VerifyHelper {
 
     //** 顶级校验器 **/
 
-    public static Object SKIP = new Object();
+    public static final Object SKIP = new Object();
 
     public static abstract class Rule {
         protected Map params = null;
         protected Map values = null;
-        protected boolean update;
+        protected VerifyHelper helper;
 
         public void setParams(Map params) {
             this.params = params;
@@ -300,8 +321,8 @@ public class VerifyHelper {
         public void setValues(Map values) {
             this.values = values;
         }
-        public void setUpdate(boolean update) {
-            this.update = update;
+        public void setHelper(VerifyHelper helper) {
+            this.helper = helper;
         }
 
         public abstract Object verify(Object value) throws Wrong, Wrongs, HongsException;
@@ -325,7 +346,9 @@ public class VerifyHelper {
         @Override
         public Object verify(Object value) throws Wrong {
             if (value == null) {
-                if (update) return SKIP;
+                if (helper.isUpdate()) {
+                    return SKIP;
+                }
                 throw new Wrong("fore.form.required");
             }
             if ("".equals(value)) {
@@ -393,8 +416,8 @@ public class VerifyHelper {
     public static class Default extends Rule {
         @Override
         public Object verify(Object value) {
-            if (value==null|| Synt.declare(params.get("alwayset"), false)) { // 无论有没有都设置
-                if (update && Synt.declare(params.get("increate"), false)) { // 仅创建的时候设置
+            if (/**/ value  ==  null  || Synt.declare(params.get("alwayset"), false)) { // 无论有没有都设置
+                if (helper.isUpdate() && Synt.declare(params.get("increate"), false)) { // 仅创建的时候设置
                     return SKIP;
                 }
                 value = params.get("default");
@@ -410,8 +433,36 @@ public class VerifyHelper {
 
     public static class IsString extends Rule {
         @Override
-        public Object verify(Object value) {
-            return /*value == null ? "" :*/ value.toString();
+        public Object verify(Object value) throws Wrong, HongsException {
+            String str = Synt.declare(value, "");
+
+            // 长度限制
+            int len;
+            len = Synt.declare(params.get("minlength"), 0);
+            if (len > 0 && len > str.length()) {
+                throw new Wrong("fore.form.lt.minlength", Integer.toString(len));
+            }
+            len = Synt.declare(params.get("maxlength"), 0);
+            if (len > 0 && len < str.length()) {
+                throw new Wrong("fore.form.lt.maxlength", Integer.toString(len));
+            }
+
+            // 正则匹配
+            Map<String,String> pats = FormSet.getInstance().getEnum("__patts__");
+            String type  = Synt.declare(params.get("pattern"), "");
+            String patt  = pats.get(type);
+            if (   patt != null ) {
+                if (!Pattern.compile(patt).matcher(str).matches()) {
+                    throw new Wrong("fore.form.is.not." + type);
+                }
+            } else
+            if (!"".equals(type)) {
+                if (!Pattern.compile(patt).matcher(str).matches()) {
+                    throw new Wrong("fore.form.is.not.matches");
+                }
+            }
+
+            return str;
         }
     }
 
@@ -524,11 +575,10 @@ public class VerifyHelper {
     public static class IsForm extends Rule {
         @Override
         public Object verify(Object value) throws Wrongs, HongsException {
-            if (value == null) {
+            if (value == null || "".equals(value)) {
                 return   null; // 允许为空
             }
 
-            boolean  ud = Synt.declare(params.get("__update__") , false);
             String conf = Synt.declare(params.get("conf"), String.class);
             String name = Synt.declare(params.get("form"), String.class);
             if (conf == null || "".equals(conf)) {
@@ -538,9 +588,12 @@ public class VerifyHelper {
                 name = Synt.declare(params.get("__name__"), "");
             }
 
+            Map data = Synt.declare(value , Map.class);
             VerifyHelper hlpr = new VerifyHelper();
-            hlpr.addRulesByForm(conf  , name  );
-            return  hlpr.verify(values, update);
+            hlpr.addRulesByForm(conf, name );
+            hlpr.isUpdate(helper.isUpdate());
+            hlpr.isPrompt(helper.isPrompt());
+            return hlpr.verify(data);
         }
     }
 
@@ -605,14 +658,9 @@ public class VerifyHelper {
         @Override
         public String getLocalizedMessage() {
             StringBuilder sb = new StringBuilder();
-            sb.append(super.getLocalizedMessage()).append("\r\n");
             try {
-                for (Map.Entry<String, String> et : getErrors().entrySet()) {
-                    sb.append( "\t" )
-                      .append(et.getKey(  ))
-                      .append( ": " )
-                      .append(et.getValue())
-                      .append("\r\n");
+                for(Map.Entry<String, String> et : getErrors().entrySet()) {
+                    sb.append(et.getValue()).append("\r\n");
                 }
             } catch (HongsException ex) {
                 throw new HongsError(HongsError.COMMON, ex);

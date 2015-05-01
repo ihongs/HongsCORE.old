@@ -38,7 +38,7 @@ public class SearchCmdlet {
         // 校验数据
         VerifyHelper vh = new VerifyHelper();
         vh.addRulesByForm(mod, ent);
-        rd = vh.verify( rd, false );
+        rd = vh.verify(rd);
 
         so.connect();
         so.add( rd );

@@ -69,7 +69,7 @@ public class SignAction {
     public void delete(ActionHelper ah) {
         // 清除用户会话
         HttpSession sess = ah.getRequest().getSession();
-        sess.invalidate();
+        sess.invalidate( );
         ah.reply(true);
     }
 

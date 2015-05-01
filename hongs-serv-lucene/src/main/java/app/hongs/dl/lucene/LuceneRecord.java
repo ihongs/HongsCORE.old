@@ -116,8 +116,15 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             return data;
         }
 
+        // 获取行数, 默认依从配置
+        int rn;
+        if (rd.containsKey("rn")) {
+            rn = Synt.declare(rd.get("rn"), 0);
+        } else {
+            rn = CoreConfig.getInstance().getProperty("fore.rows.per.page", 10);
+        }
+
         // 明确指定行为 0 则走 getAll
-        int rn = Synt.declare(rd.get("rn"), 0); // 行数
         if (rn == 0) {
             Map  data = new HashMap();
             List list = getAll(rd);
@@ -125,12 +132,16 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             return data;
         }
 
+        // 获取链数, 默认依从配置
+        int ln;
+        if (rd.containsKey("ln")) {
+            ln = Synt.declare(rd.get("ln"), 0);
+        } else {
+            ln = CoreConfig.getInstance().getProperty("fore.lnks.per.page", 10);
+        }
+
         // 计算分页
-        CoreConfig conf = CoreConfig.getInstance();
         int pn = Synt.declare(rd.get("pn"), 1); // 页码
-        int ln = Synt.declare(rd.get("ln"), 0); // 链数
-        if (rn == 0) rn = conf.getProperty("fore.rows.per.page.N", 20);
-        if (ln == 0) ln = conf.getProperty("fore.lnks.per.page.N", 5 );
         int limit = (int) (Math.ceil((double) pn / ln) * ln * rn + 1 );
         int minRn = (pn - 1) * rn;
         int maxRn =  rn +   minRn;
@@ -467,7 +478,12 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             }
         }
 
-        return query.clauses().size() > 0 ? query : new MatchAllDocsQuery();
+        // 没有条件则查询全部
+        if ( query.clauses( ).isEmpty( ) ) {
+            return new MatchAllDocsQuery();
+        }
+
+        return query;
     }
 
     public Document map2Doc(Map rd) throws HongsException {
@@ -889,7 +905,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
 
         //** 其他查询 **/
-        
+
         if (!m.isEmpty()) {
             Set s = new HashSet();
             s.addAll(m.values( ));

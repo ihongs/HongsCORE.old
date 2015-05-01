@@ -512,18 +512,6 @@ public class ActionHelper
   }
 
   /**
-   * 返回检查结果
-   * 针对 exists,unique 等
-   * @param ok
-   */
-  public void reply(boolean ok)
-  {
-    Map map = new HashMap();
-    map.put("ok", ok);
-    reply(map);
-  }
-
-  /**
    * 返回操作结果
    * 针对 create,update,delete 等
    * @param msg
@@ -539,6 +527,44 @@ public class ActionHelper
     if (null !=  back && back.length != 0) {
         map.put("back" , back);
     }
+    reply(map);
+  }
+
+  /**
+   * 返回检查结果
+   * 针对 exists,unique 等
+   * @param ok
+   */
+  public void reply(boolean ok)
+  {
+    Map map = new HashMap();
+    map.put("ok", ok);
+    reply(map);
+  }
+
+  /**
+   * 返回错误消息
+   * @param msg
+   */
+  public void fault(String msg)
+  {
+    Map map = new HashMap();
+    map.put("ok" , false);
+    map.put("msg", msg);
+    reply(map);
+  }
+
+  /**
+   * 返回错误消息
+   * @param msg
+   * @param err
+   */
+  public void fault(String msg, String err)
+  {
+    Map map = new HashMap();
+    map.put("ok" , false);
+    map.put("err", err);
+    map.put("msg", msg);
     reply(map);
   }
 

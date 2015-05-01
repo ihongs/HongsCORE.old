@@ -565,8 +565,11 @@ HsForm.prototype = {
                     } else
                     if (rst["list"] && rst["list"].length) {
                         ret = true;
+                    } else
+                    if (rst["back"] && rst["back"].length) {
+                        ret = rst["back"][0] || rst["msg"];
                     } else {
-                        ret = rst["ok"] || rst["msg"];
+                        ret = rst["ok"] /**/ || rst["msg"];
                     }
                 }
             });

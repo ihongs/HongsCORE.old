@@ -12,8 +12,7 @@
         <!-- Number -->
         <value code="number">number</value>
         <value code="range">number</value>
-        <value code="slider">number</value>
-        <value code="switch">number</value>
+        <value code="onoff">number</value>
         <!-- Date -->
         <value code="date">date</value>
         <value code="time">date</value>
@@ -44,10 +43,9 @@
             <param name="maxlength">500</param>
             <param name="pattern"></param>
         </field>
-        <field name="num" disp="数字" type="number,range,slider,switch">
+        <field name="num" disp="数字" type="number,range,onoff">
             <param name="min">100</param>
             <param name="max">500</param>
-            <param name="step">1</param>
             <param name="type">int,long,float,double</param>
             <param name="format">####.##</param>
         </field>

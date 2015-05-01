@@ -24,6 +24,7 @@ implements IAction {
 
     @Action("retrieve")
     @Supply()
+    @Override
     public void retrieve(ActionHelper helper)
     throws HongsException {
         Model   mod = getModel(helper);
@@ -41,34 +42,37 @@ implements IAction {
     @Action("create")
     @Verify()
     @CommitSuccess
+    @Override
     public void create(ActionHelper helper) throws HongsException {
         Model   mod = getModel(helper);
         Map     req = getMyReq(helper, mod);
-        String  i   = mod.create(req);
-        String  n   = (String) req.get(mod.findCols[0]);
+        String  id  = mod.create(req);
+        String  nm  = (String) req.get(mod.findCols[0]);
         String  msg = getMyMsg(mod, "create", 1);
-        helper.reply(msg, i, n);
+        helper.reply(msg, id, nm);
     }
 
     @Action("update")
     @Verify()
     @CommitSuccess
+    @Override
     public void update(ActionHelper helper) throws HongsException {
         Model   mod = getModel(helper);
         Map     req = getMyReq(helper, mod);
-        int     i   = mod.update(req);
-        String  msg = getMyMsg(mod, "update", i);
-        helper.reply(msg, i);
+        int     na  = mod.update(req);
+        String  msg = getMyMsg(mod, "update", na);
+        helper.reply(msg, na);
     }
 
     @Action("delete")
     @CommitSuccess
+    @Override
     public void delete(ActionHelper helper) throws HongsException {
         Model   mod = getModel(helper);
         Map     req = getMyReq(helper, mod);
-        int     i   = mod.delete(req);
-        String  msg = getMyMsg(mod, "delete", i);
-        helper.reply(msg, i);
+        int     na   = mod.delete(req);
+        String  msg = getMyMsg(mod, "delete", na);
+        helper.reply(msg, na);
     }
 
     @Action("exists")
