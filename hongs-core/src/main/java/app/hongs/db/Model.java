@@ -3,7 +3,9 @@ package app.hongs.db;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
+import app.hongs.util.Synt;
 import app.hongs.util.Text;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -728,6 +730,28 @@ public class Model
       {
         this.findFilter(caze, value, findCols);
         continue;
+      }
+
+      // 或
+      if ("-or".equals(key))
+      {
+        StringBuilder ws = new StringBuilder();
+        FetchCase     cx = new FetchCase();
+        cx.wparams   = caze.wparams ;
+        cx.options   = caze.options ;
+        cx.joinList  = caze.joinList;
+        Set<Map> set = Synt.declare(value, Set.class);
+        for(Map  map : set )
+        {
+          filter( cx , map );
+          ws.append(" OR (")
+            .append(cx.wheres)
+            .append(/**/")");
+        }
+        if (! set.isEmpty())
+        {
+          caze.where("(" + ws.substring(4) + ")");
+        }
       }
 
       // 当前表字段

@@ -1,6 +1,7 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
+import app.hongs.util.Dict;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,8 +71,8 @@ public class FetchCase
   protected StringBuilder       orders;
   protected int[]               limits;
 
-  private   List<Object>        wparams;
-  private   List<Object>        hparams;
+  protected List<Object>        wparams;
+  protected List<Object>        hparams;
   protected Map<String,Object>  options;
 
   private   short               joinType;
@@ -279,21 +280,19 @@ public class FetchCase
     caze.options = this.options;
     this.joinList.add(caze);
     caze.joinExpr = null;
-    caze.joinType = 0;
+    caze.joinType = LEFT;
     return caze;
-  }
-
-  public FetchCase on(String expr, byte type)
-  {
-    this.joinExpr = expr;
-    this.joinType = type;
-    return this;
   }
 
   public FetchCase on(String expr)
   {
     this.joinExpr = expr;
-    this.joinType = LEFT;
+    return this;
+  }
+  
+  public FetchCase rs( byte  type)
+  {
+    this.joinType = type;
     return this;
   }
 
@@ -617,6 +616,11 @@ public class FetchCase
 
   //** 获取关联 **/
 
+  /**
+   * 获取关联对象
+   * @param name
+   * @return 
+   */
   public FetchCase getJoin(String name)
   {
     for (FetchCase caze : this.joinList)
@@ -629,6 +633,11 @@ public class FetchCase
     return null;
   }
 
+  /**
+   * 获取关联的关联对象
+   * @param name
+   * @return 
+   */
   public FetchCase getJoin(String... name)
   {
     FetchCase caze = this;
@@ -644,6 +653,12 @@ public class FetchCase
     return caze;
   }
 
+  /**
+   * 获取关联的关联对象(不存在则创建)
+   * @param name
+   * @return
+   * @throws HongsException 
+   */
   public FetchCase gotJoin(String... name)
     throws HongsException
   {
@@ -691,8 +706,7 @@ public class FetchCase
    */
   public <T> T getOption(String key, T def)
   {
-    Object obj = this.options.get(key);
-    return obj != null ? (T)obj : def;
+    return Dict.getValue(options, def, key);
   }
 
   /**

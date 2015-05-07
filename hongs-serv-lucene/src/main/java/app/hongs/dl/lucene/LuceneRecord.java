@@ -381,121 +381,6 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    public Sort getSort(Map rd) throws HongsException {
-        List<String>    ob = Synt.declare (rd.get("ob"), new ArrayList());
-        List<SortField> of = new ArrayList();
-
-        for (String fn: ob) {
-            // 相关
-            if (fn.equals/**/("-") ) {
-                of.add(SortField.FIELD_SCORE);
-                continue;
-            }
-
-            // 逆序
-            boolean rv;
-            if (fn.startsWith("-") ) {
-                fn = fn.substring(1);
-                rv = true ;
-            } else {
-                rv = false;
-            }
-
-            Map m = (Map ) fields.get(fn );
-            if (m == null) {
-                continue;
-            }
-            String t  =  getTyp(m);
-            if ("stored".equals(t)) {
-                continue;
-            }
-
-            SortField.Type st;
-            if ("text".equals(t)) {
-                continue;
-            } else
-            if ( "int".equals(t)) {
-                st = SortField.Type.INT;
-            } else
-            if ("long".equals(t)) {
-                st = SortField.Type.LONG;
-            } else
-            if ( "float".equals(t)) {
-                st = SortField.Type.FLOAT;
-            } else
-            if ("double".equals(t))
-            {
-                st = SortField.Type.DOUBLE;
-            } else
-            {
-                st = SortField.Type.STRING;
-            }
-
-            of.add( new SortField(fn, st, rv));
-        }
-
-        if (of.isEmpty()) {
-            of.add(SortField.FIELD_DOC);
-        }
-
-        return new Sort(of.toArray(new SortField[0]));
-    }
-
-    public Query getFind(Map rd) throws HongsException {
-        BooleanQuery query = new BooleanQuery();
-
-        for(Object o : rd.entrySet()) {
-            Map.Entry e = (Map.Entry) o;
-            Object fv = e.getValue( );
-            String fn = (String)e.getKey();
-
-            Map m = (Map ) fields.get(fn );
-            if (m == null) {
-                continue;
-            }
-            String t  =  getTyp(m);
-            if ("stored".equals(t)) {
-                continue;
-            }
-
-            if ("text".equals(t)) {
-                qryAdd(query, fn, fv, new AddTextQuery());
-            } else
-            if ( "int".equals(t)) {
-                qryAdd(query, fn, fv, new AddIntQuery( ));
-            } else
-            if ("long".equals(t)) {
-                qryAdd(query, fn, fv, new AddLongQuery());
-            } else
-            if ( "float".equals(t)) {
-                qryAdd(query, fn, fv, new AddFloatQuery( ));
-            } else
-            if ("double".equals(t)) {
-                qryAdd(query, fn, fv, new AddDoubleQuery());
-            } else
-            {
-                qryAdd(query, fn, fv, new AddStringQuery());
-            }
-        }
-
-        // 没有条件则查询全部
-        if ( query.clauses( ).isEmpty( ) ) {
-            return new MatchAllDocsQuery();
-        }
-
-        return query;
-    }
-
-    public Document map2Doc(Map rd) throws HongsException {
-        Document doc = new Document();
-        docAdd(doc , rd);
-        return doc ;
-    }
-
-    public Map doc2Map(Document dc) throws HongsException {
-        return docPrs(dc);
-    }
-
     public void initial() throws HongsException {
         if (reader != null) {
             return;
@@ -583,7 +468,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private Director getDir() throws HongsException {
+    protected final Director getDir() throws HongsException {
         try {
             Director dir = new Director();
             File dio = new File(datapath);
@@ -595,7 +480,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private Analyzer getAna() throws HongsException {
+    protected final Analyzer getAna() throws HongsException {
         try {
             try {
                 return (Analyzer) Class.forName(analyzer )
@@ -623,18 +508,18 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private String getTyp(Map m) {
-        String t = Synt.declare(m.get("lucene-field"), String.class);
+    protected String getType(Map fd) {
+        String t = Synt.declare(fd.get("lucene-field"), String.class);
 
         // 如果未指定 lucene-field 则用 field-type 替代
         if (t == null) {
-            t = ( String ) m.get( "__type__" );
-            t = Synt.declare(types.get(t), t );
+            t = (String) fd.get( "__type__" );
+            t = Synt.declare(types.get(t), t);
             if ("number".equals(t)) {
-                t = Synt.declare(m.get("type"), "double");
+                t = Synt.declare(fd.get("type"), "double");
             } else
             if (  "date".equals(t)) {
-                Object x = m.get( "type" );
+                Object x = fd.get("type");
                 if ("microtime".equals(x)) {
                     t = "long";
                 } else
@@ -647,7 +532,127 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         return t;
     }
 
-    private Map docPrs(Document doc) {
+    protected Query getFind(Map rd) throws HongsException {
+        BooleanQuery query = new BooleanQuery();
+
+        for(Object o : rd.entrySet()) {
+            Map.Entry e = (Map.Entry) o;
+            Object fv = e.getValue( );
+            String fn = (String)e.getKey();
+
+            Map m = (Map ) fields.get(fn );
+            if (m == null) {
+                continue;
+            }
+            String t =  getType(m);
+            if ("stored".equals(t)) {
+                continue;
+            }
+
+            if ("int".equals(t)) {
+                qryAdd(query, fn, fv, new AddIntQuery());
+            } else
+            if ("long".equals(t)) {
+                qryAdd(query, fn, fv, new AddLongQuery());
+            } else
+            if ("float".equals(t)) {
+                qryAdd(query, fn, fv, new AddFloatQuery());
+            } else
+            if ("double".equals(t)) {
+                qryAdd(query, fn, fv, new AddDoubleQuery());
+            } else
+            if ("text".equals(t)) {
+                qryAdd(query, fn, fv, new AddSearchQuery());
+            } else
+            {
+                qryAdd(query, fn, fv, new AddStringQuery());
+            }
+        }
+
+        // 或条件
+        if (rd.containsKey("-or")) {
+            BooleanQuery qay = new BooleanQuery();
+            Set<Map> set = Synt.declare(rd.get("-or"), Set.class);
+            for(Map  map : set) {
+                qay.add(getFind(map), BooleanClause.Occur.SHOULD);
+            }
+            query.add(qay, BooleanClause.Occur.MUST);
+        }
+
+        // 没有条件则查询全部
+        if ( query.clauses( ).isEmpty( ) ) {
+            return new MatchAllDocsQuery();
+        }
+
+        return query;
+    }
+
+    protected Sort getSort(Map rd) throws HongsException {
+        List<String>    ob = Synt.declare (rd.get("ob"), new ArrayList());
+        List<SortField> of = new ArrayList();
+
+        for (String fn: ob) {
+            // 相关
+            if (fn.equals/**/("-") ) {
+                of.add(SortField.FIELD_SCORE);
+                continue;
+            }
+
+            // 逆序
+            boolean rv;
+            if (fn.startsWith("-") ) {
+                fn = fn.substring(1);
+                rv = true ;
+            } else {
+                rv = false;
+            }
+
+            Map m = (Map ) fields.get(fn );
+            if (m == null) {
+                continue;
+            }
+            String t =  getType(m);
+            if ("stored".equals(t)) {
+                continue;
+            }
+
+            SortField.Type st;
+            if ("text".equals(t)) {
+                continue;
+            } else
+            if ( "int".equals(t)) {
+                st = SortField.Type.INT;
+            } else
+            if ("long".equals(t)) {
+                st = SortField.Type.LONG;
+            } else
+            if ( "float".equals(t)) {
+                st = SortField.Type.FLOAT;
+            } else
+            if ("double".equals(t)) {
+                st = SortField.Type.DOUBLE;
+            } else
+            {
+                st = SortField.Type.STRING;
+            }
+
+            of.add( new SortField(fn, st, rv));
+        }
+
+        if (of.isEmpty()) {
+            of.add(SortField.FIELD_DOC);
+        }
+
+        return new Sort(of.toArray(new SortField[0]));
+    }
+
+    public Document map2Doc(Map rd) throws HongsException {
+        Document doc = new Document();
+        docAdd(doc , rd);
+        return doc ;
+    }
+
+    public Map doc2Map(Document doc) {
         Map map = new HashMap();
 
         for(Object o : fields.entrySet()) {
@@ -659,7 +664,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 continue;
             }
             boolean r = Synt.declare(m.get("__repeated__"), false);
-            String  t = getTyp (m);
+            String  t = getType(m);
             IndexableField[] fs = doc.getFields(k);
 
             if (  "json".equals(t)) {
@@ -728,7 +733,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         return map;
     }
 
-    private void docAdd(Document doc, Map rd) {
+    protected void docAdd(Document doc, Map rd) {
         for(Object o : fields.entrySet()) {
             Map.Entry e = (Map.Entry) o;
             Map    m = (Map ) e.getValue();
@@ -741,7 +746,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
             Field.Store s = Synt.declare(m.get("lucene-store"), true)
                           ? Field.Store.YES : Field.Store.NO;
-            String      t = getTyp(m);
+            String      t = getType(m);
 
             doc.removeFields (k);
             if (v instanceof Collection) {
@@ -760,7 +765,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private void docAdd(Document doc, String k, Object v, String t, Field.Store s) {
+    protected void docAdd(Document doc, String k, Object v, String t, Field.Store s) {
         if (null == v) v = "";
         if (   "int".equals(t)) {
             doc.add(new    IntField(k, Synt.declare(v,Integer.class), s));
@@ -794,7 +799,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private void qryAdd(BooleanQuery qry, String k, Object v, AddQuery q)
+    protected void qryAdd(BooleanQuery qry, String k, Object v, AddQuery q)
     throws HongsException {
         Map m;
         if (v instanceof Map) {
@@ -821,8 +826,8 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         float w = 1F;
 
         // 对 text 类型指定分词器
-        if (q instanceof AddTextQuery) {
-            ((AddTextQuery) q).ana(getAna());
+        if (q instanceof AddSearchQuery) {
+            ((AddSearchQuery) q).ana(getAna());
         }
 
         if (m.containsKey("-wt")) {
@@ -918,13 +923,13 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         public  boolean  has;
     }
 
-    private static interface AddQuery {
+    protected static interface AddQuery {
         public void  bst(float  w);
         public Query add(String k, Object v);
         public Query add(String k, Object n, Object x, boolean l, boolean r);
     }
 
-    private static class AddIntQuery implements AddQuery {
+    protected static class AddIntQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -947,7 +952,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private static class AddLongQuery implements AddQuery {
+    protected static class AddLongQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -970,7 +975,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private static class AddFloatQuery implements AddQuery {
+    protected static class AddFloatQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -993,7 +998,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private static class AddDoubleQuery implements AddQuery {
+    protected static class AddDoubleQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -1016,7 +1021,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private static class AddStringQuery implements AddQuery {
+    protected static class AddStringQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -1038,7 +1043,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    private static class AddTextQuery implements AddQuery {
+    protected static class AddSearchQuery implements AddQuery {
         private Analyzer a = null;
         private Float    w = null;
         public void  ana(Analyzer a) {

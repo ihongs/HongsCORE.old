@@ -382,7 +382,7 @@ public class FetchMore
         }
 
         // 设置关联关系
-        caze2.on(pk+"="+fk, ji);
+        caze2.on(pk+"="+fk).rs(ji);
 
         buildCase(caze2, assoc);
 
