@@ -64,7 +64,7 @@
         </init-param>
         <init-param>
             <param-name>exclude-urls</param-name>
-            <param-value>/hongs/member/sign/in.act;/hongs/member/sign/out.act</param-value>
+            <param-value>/hongs/member/sign/create.act;/hongs/member/sign/delete.act</param-value>
         </init-param>
     </filter>
     <filter-mapping>

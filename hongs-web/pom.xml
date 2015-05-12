@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hongs-serv-resume</artifactId>
+            <artifactId>hongs-serv-search</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

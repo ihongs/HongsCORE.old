@@ -206,7 +206,7 @@ public class CmdletRunner
     for (Map.Entry et : conf.entrySet()) {
         String k = (String)et.getKey ( );
         String v = (String)et.getValue();
-        if (k.startsWith("start.")) {
+        if (k.startsWith("begin.")) {
             k = k.substring(6  );
             v = Text.inject(v,m);
             System.setProperty(k,v);
