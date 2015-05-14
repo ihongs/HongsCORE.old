@@ -73,8 +73,8 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
 
         if (back == null) {
             if (!tasks.isEmpty()) {
-                throw new HongsException(HongsException.COMMON,
-                "There is "+tasks.size( )+" task(s) not run.");
+                throw HongsException.common(
+                    "There is "+ tasks.size() +" task(s) not run.");
             }
             return;
         }

@@ -149,21 +149,38 @@ public class FetchMore
 
     // 识别字段别名
     String rel = col;
-    if (! table.getFields().containsKey(col))
+    if (table.getFields().containsKey(col))
     {
-      Pattern pattern = Pattern.compile(
-           "^(.+?)\\s+(?:AS\\s+)?`?(.+?)`?$",
-                   Pattern.CASE_INSENSITIVE);
-      Matcher matcher = pattern.matcher(col);
-      if (matcher.find())
-      {
-        col = matcher.group(1);
-        rel = matcher.group(2);
-      }
+      col = ".`" + col + "`";
     }
     else
     {
-      col = ".`" + col + "`";
+      Pattern pattern;
+      Matcher matcher;
+      do
+      {
+        pattern = Pattern.compile(
+            "^(.+?)(?:\\s+AS)?\\s+`?(.+?)`?$",
+            Pattern.CASE_INSENSITIVE );
+        matcher = pattern.matcher(col);
+        if (matcher.find())
+        {
+          col = matcher.group(1);
+          rel = matcher.group(2);
+          break;
+        }
+
+        pattern = Pattern.compile(
+            "^(.+?)\\.\\s*`?(.+?)`?$");
+        matcher = pattern.matcher(col);
+        if (matcher.find())
+        {
+          col = matcher.group(0);
+          rel = matcher.group(2);
+          break;
+        }
+      }
+      while (false);
     }
 
     // 构建查询结构

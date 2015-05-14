@@ -350,7 +350,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 rd = that.getRequestData( );
                 xd = that.getResponseData();
             } catch (HongsException ex) {
-                throw new HongsError( HongsError.COMMON , ex );
+                throw HongsError.common(null, ex);
             }
             if (xd == null) {
                 xd = (Map ) req.getAttribute("__HONGS_DATA__");
@@ -362,7 +362,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
               sb.append("\r\n\tResults     : ").append(Text.indent(Data.toString(xd)).substring(1));
             }
 
-            CoreLogger.debug(sb.toString( ));
+            CoreLogger.debug( sb.toString());
         }
 
         try {

@@ -13,22 +13,7 @@ package app.hongs;
  */
 public class HongsException extends Exception implements HongsCause {
 
-    /**
-     * 通用异常(不确定异常号)
-     */
-    public static final int COMMON = 0x1000;
-
-    /**
-     * 通知异常(消息作为翻译)
-     */
-    public static final int NOTICE = 0x1001;
-
-    /**
-     * 动作异常
-     */
-    public static final int ACTION = 0x1002;
-
-    private HongsLocalized that;
+    protected HongsLocalized that;
 
     public HongsException(int code, String desc, Throwable cause) {
         super(cause);
@@ -84,18 +69,64 @@ public class HongsException extends Exception implements HongsCause {
     }
 
     @Override
-    public void setLocalizedSection(String lang) {
-        that.setLocalizedSection(lang);
-    }
-
-    @Override
     public String[] getLocalizedOptions() {
         return that.getLocalizedOptions();
     }
 
     @Override
-    public void setLocalizedOptions(String... opts) {
+    public HongsException setLocalizedSection(String lang) {
+        that.setLocalizedSection(lang);
+        return this;
+    }
+
+    @Override
+    public HongsException setLocalizedOptions(String... opts) {
         that.setLocalizedOptions(opts);
+        return this;
+    }
+
+    public static  final int COMMON = 0x1000;
+
+    public static  final int NOTICE = 0x1001;
+
+    /**
+     * 常规异常(无需异常代码)
+     * @param desc
+     * @param cause
+     * @return
+     */
+    public static  HongsException common(String desc, Throwable cause) {
+        return new HongsException(COMMON, desc, cause);
+    }
+
+    /**
+     * 常规异常(无需异常代码)
+     * @param desc
+     * @return
+     */
+    public static  HongsException common(String desc ) {
+        return new HongsException(COMMON, desc, null );
+    }
+
+    /**
+     * 通知异常(解释作为翻译)
+     * 与 setLocalizedSection, setLocalizedOptions 配套使用
+     * @param desc
+     * @param cause
+     * @return
+     */
+    public static  HongsException notice(String desc, Throwable cause) {
+        return new HongsException(NOTICE, desc, cause);
+    }
+
+    /**
+     * 通知异常(解释作为翻译)
+     * 与 setLocalizedSection, setLocalizedOptions 配套使用
+     * @param desc
+     * @return
+     */
+    public static  HongsException notice(String desc ) {
+        return new HongsException(NOTICE, desc, null );
     }
 
 }

@@ -13,21 +13,6 @@ package app.hongs;
  */
 public class HongsError extends Error implements HongsCause {
 
-    /**
-     * 通用错误
-     */
-    public static final int COMMON = 0x10;
-
-    /**
-     * 通知错误
-     */
-    public static final int NOTICE = 0x11;
-
-    /**
-     * 动作错误(异常数据已进过)
-     */
-    public static final int ACTION = 0x12;
-
     protected HongsLocalized that;
 
     public HongsError(int code, String desc, Throwable cause) {
@@ -84,18 +69,64 @@ public class HongsError extends Error implements HongsCause {
     }
 
     @Override
-    public void setLocalizedSection(String lang) {
-        that.setLocalizedSection(lang);
-    }
-
-    @Override
     public String[] getLocalizedOptions() {
         return that.getLocalizedOptions();
     }
 
     @Override
-    public void setLocalizedOptions(String... opts) {
+    public HongsError setLocalizedSection(String lang) {
+        that.setLocalizedSection(lang);
+        return this;
+    }
+
+    @Override
+    public HongsError setLocalizedOptions(String... opts) {
         that.setLocalizedOptions(opts);
+        return this;
+    }
+
+    public static  final int COMMON = 0x10;
+
+    public static  final int NOTICE = 0x11;
+
+    /**
+     * 常规错误(无需错误代码)
+     * @param desc
+     * @param cause
+     * @return 
+     */
+    public static  HongsError common(String desc, Throwable cause) {
+        return new HongsError(COMMON, desc, cause);
+    }
+
+    /**
+     * 常规错误(无需错误代码)
+     * @param desc
+     * @return 
+     */
+    public static  HongsError common(String desc ) {
+        return new HongsError(COMMON, desc, null );
+    }
+
+    /**
+     * 通知错误(解释作为翻译)
+     * 与 setLocalizedSection, setLocalizedOptions 配套使用
+     * @param desc
+     * @param cause
+     * @return 
+     */
+    public static  HongsError notice(String desc, Throwable cause) {
+        return new HongsError(NOTICE, desc, cause);
+    }
+    
+    /**
+     * 通知错误(解释作为翻译)
+     * 与 setLocalizedSection, setLocalizedOptions 配套使用
+     * @param desc
+     * @return 
+     */
+    public static  HongsError notice(String desc ) {
+        return new HongsError(NOTICE, desc, null );
     }
 
 }

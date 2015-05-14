@@ -663,7 +663,7 @@ public class VerifyHelper {
                     sb.append(et.getValue()).append("\r\n");
                 }
             } catch (HongsException ex) {
-                throw new HongsError(HongsError.COMMON, ex);
+                throw HongsError.common(null, ex);
             }
             return sb.toString().trim();
         }

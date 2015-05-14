@@ -51,7 +51,7 @@ public class CommitInvoker implements FilterInvoker {
                 if (ex instanceof HongsException) {
                     throw  (  HongsException  ) ex;
                 } else {
-                    throw new HongsException(HongsException.COMMON, ex);
+                    throw HongsException.common(null, ex);
                 }
             }
         } finally {

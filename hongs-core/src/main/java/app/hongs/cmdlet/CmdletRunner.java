@@ -77,11 +77,11 @@ public class CmdletRunner
     }
     catch (   IllegalAccessException ex)
     {
-      CmdletHelper.println("ERROR: Illegal access for method '"+method.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+      CmdletHelper.println("ERROR: Illegal access for method '"+method.getClass().getName()+"."+method.getName()+"(String[]).");
     }
     catch ( IllegalArgumentException ex)
     {
-      CmdletHelper.println("ERROR: Illegal params for method '"+method.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+      CmdletHelper.println("ERROR: Illegal params for method '"+method.getClass().getName()+"."+method.getName()+"(String[]).");
     }
     catch (InvocationTargetException ex)
     {
@@ -312,21 +312,21 @@ public class CmdletRunner
     Map req  = null;
     if (str != null && str.length() > 0)
     {
-        req = ActionHelper.parseParam(CmdletHelper.parseQuery(str));
+        req = ActionHelper.parseParam(ActionHelper.parseQuery(str));
     }
 
     str = (String) opts.get("context--");
     Map con  = null;
     if (str != null && str.length() > 0)
     {
-        con = ActionHelper.parseParam(CmdletHelper.parseQuery(str));
+        con = ActionHelper.parseParam(ActionHelper.parseQuery(str));
     }
 
     str = (String) opts.get("session--");
     Map ses  = null;
     if (str != null && str.length() > 0)
     {
-        ses = ActionHelper.parseParam(CmdletHelper.parseQuery(str));
+        ses = ActionHelper.parseParam(ActionHelper.parseQuery(str));
     }
 
     ActionHelper helper = new ActionHelper(req, con, ses, null );
@@ -344,7 +344,7 @@ public class CmdletRunner
         }
         catch (Throwable ex)
         {
-          throw new HongsError(HongsError.COMMON, ex);
+          throw HongsError.common(null, ex);
         }
       }
     });

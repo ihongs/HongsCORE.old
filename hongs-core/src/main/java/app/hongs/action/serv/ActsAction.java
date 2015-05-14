@@ -4,6 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.CoreLogger;
 import app.hongs.HongsCause;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
@@ -63,7 +64,7 @@ public class ActsAction
 
     if (act == null || act.length() == 0)
     {
-      senderr(req, helper, 0x1104, "Action URI can not be empty.");
+      senderr(helper, 0x1104, "Action URI can not be empty.");
       return;
     }
 
@@ -77,53 +78,63 @@ public class ActsAction
     try
     {
       ActionRunner runner = new ActionRunner(act, helper);
-      runner.doAction();
+      runner.doAction(  );
     }
     catch (HongsException  ex)
     {
       senderr(req, helper, ex);
     }
+    catch (HongsError/**/  ex)
+    {
+      senderr(req, helper, ex);
+    }
   }
 
-  private void senderr(HttpServletRequest req, ActionHelper helper, Throwable ex)
+  private void senderr(HttpServletRequest req, ActionHelper helper, HongsCause ex)
     throws ServletException
   {
-    CoreLogger.error(ex);
+    Throwable ta = (Throwable) ex ;
+    int       errno = ex.getCode();
+    String    error;
 
-    int    errno;
-    String error;
-    if (ex instanceof  HongsCause)
+    if (errno == 0x110e)
     {
-      HongsCause hc = (HongsCause) ex;
-      String[] ls = hc.getLocalizedOptions();
-      if (ls == null || ls.length == 0 )
-      {
-        hc.setLocalizedOptions(ActionDriver.getRealPath(req));
-      }
-        errno = hc.getCode();
-        error = hc.getLocalizedMessage();
-    } else
-    {
-        errno = 0x110e;
-        error = ex.getLocalizedMessage();
+      ta = ex.getCause();
+        errno  = 0x110e ;
+        error  = ta.getLocalizedMessage();
       CoreLocale lang = Core.getInstance(CoreLocale.class);
       if (error == null || error.length() == 0)
       {
         error = lang.translate("core.error.unkwn", ex.getClass().getName());
-      } else
+      }
+      else
       {
         error = lang.translate("core.error.label", ex.getClass().getName()) + ": " + error;
       }
     }
+    else
+    {
+      if ( errno <= 0x1f00 && errno >= 0x110f )
+      {
+        String[] ls = ex.getLocalizedOptions( );
+        if (ls == null || ls.length == 0)
+        {
+          ex.setLocalizedOptions(ActionDriver.getRealPath(req), ex.getDesc());
+        }
+      }
+        error = ex.getLocalizedMessage( );
+    }
 
-    senderr(req, helper, errno, error);
+    senderr(helper, errno, error);
+
+    CoreLogger.error(ta);
   }
 
-  private void senderr(HttpServletRequest req, ActionHelper helper, int errno, String error)
+  private void senderr(ActionHelper helper, int errno, String error)
     throws ServletException
   {
     String errso;
-    switch (errno)
+    switch(errno)
     {
       case 0x1100:
         errso = "Er400";

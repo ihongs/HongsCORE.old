@@ -11,7 +11,9 @@ public interface HongsCause
 
     public String getDesc();
 
-    public String getMessage();
+    public Throwable getCause();
+
+    public String getMessage( );
 
     public String getLocalizedMessage();
 
@@ -19,8 +21,8 @@ public interface HongsCause
 
     public String[] getLocalizedOptions();
 
-    public void setLocalizedSection(String lang);
+    public HongsCause setLocalizedSection(String lang);
 
-    public void setLocalizedOptions(String... opts);
+    public HongsCause setLocalizedOptions(String... opts);
 
 }

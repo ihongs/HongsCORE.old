@@ -30,9 +30,9 @@ public class FetchNext {
                 fs.put(md.getColumnLabel(i), Class.forName(md.getColumnClassName(i)));
             }
         } catch (SQLException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         } catch (ClassNotFoundException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 

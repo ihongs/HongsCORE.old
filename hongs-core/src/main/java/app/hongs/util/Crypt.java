@@ -29,7 +29,7 @@ public class Crypt {
         try {
             return new String(docrypt(content.getBytes(), scrtkey, false), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -37,7 +37,7 @@ public class Crypt {
         try {
             return new String(docrypt(content.getBytes(), scrtkey, true ), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -67,15 +67,15 @@ public class Crypt {
 
             return cphr.doFinal(content);
         } catch (NoSuchAlgorithmException e) {
-            throw new HongsException(HongsException.COMMON, e);
+            throw HongsException.common(null, e);
         } catch (NoSuchPaddingException e) {
-            throw new HongsException(HongsException.COMMON, e);
+            throw HongsException.common(null, e);
         } catch (InvalidKeyException e) {
-            throw new HongsException(HongsException.COMMON, e);
+            throw HongsException.common(null, e);
         } catch (IllegalBlockSizeException e) {
-            throw new HongsException(HongsException.COMMON, e);
+            throw HongsException.common(null, e);
         } catch (BadPaddingException e) {
-            throw new HongsException(HongsException.COMMON, e);
+            throw HongsException.common(null, e);
         }
     }
 

@@ -171,7 +171,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             rc = docs.length;
             pc = (int) Math.ceil((double) rc / rn);
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
 
         // 记录分页
@@ -233,7 +233,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
     public String add(Map rd) throws HongsException {
         String id = Synt.declare(rd.get(idCol), String.class);
         if (id != null && id.length() != 0) {
-            throw new HongsException(HongsException.COMMON, "Id can not set in add");
+            throw HongsException.common("Id can not set in add");
         }
         id = Core.getUniqueId();
         rd.put(idCol , id );
@@ -249,11 +249,11 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
      */
     public void put(String id, Map rd) throws HongsException {
         if (id == null && id.length() == 0) {
-            throw new HongsException(HongsException.COMMON, "Id must be set in put");
+            throw HongsException.common("Id must be set in put");
         }
         Document doc = getDoc(id);
         if (doc == null) {
-            throw new HongsException(HongsException.COMMON, "Doc#"+id+" not exists");
+            throw HongsException.common("Doc#"+id+" not exists");
         }
         docAdd(doc, rd);
         setDoc(id, doc);
@@ -323,7 +323,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 }
             }
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
 
         return list;
@@ -334,7 +334,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         try {
             writer.addDocument(doc);
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
         if (!IN_TRANSC_MODE) {
             commit();
@@ -346,7 +346,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         try {
             writer.updateDocument(new Term(idCol, id), doc);
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
         if (!IN_TRANSC_MODE) {
             commit();
@@ -358,7 +358,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         try {
             writer.deleteDocuments(new Term(idCol, id));
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
         if (!IN_TRANSC_MODE) {
             commit();
@@ -377,7 +377,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 return null;
             }
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -399,7 +399,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             reader = DirectoryReader.open(dir);
             finder = new IndexSearcher(reader);
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -417,7 +417,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
             writer = new IndexWriter(dir, iwc);
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -433,7 +433,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 writer  = null ;
             }
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -452,7 +452,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         try {
             writer.commit();
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -464,7 +464,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         try {
             writer.rollback();
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -476,7 +476,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             dir.dir  = FSDirectory.open(dio);
             return dir;
         } catch (IOException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -492,19 +492,19 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 .newInstance   ();
             }
         } catch (ClassNotFoundException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         } catch ( NoSuchMethodException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         } catch (     SecurityException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         } catch (   InstantiationException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         } catch (   IllegalAccessException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         } catch ( IllegalArgumentException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         } catch (InvocationTargetException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 
@@ -1061,7 +1061,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
                 if (w != null) q2.setBoost(w);
                 return  q2;
             } catch (ParseException ex) {
-                throw new HongsError(HongsError.COMMON, ex);
+                throw HongsError.common(null, ex);
             }
         }
         @Override

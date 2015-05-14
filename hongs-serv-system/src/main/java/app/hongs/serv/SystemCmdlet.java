@@ -105,9 +105,9 @@ public class SystemCmdlet {
                     CmdletHelper.println("Excute error:" + e);
                 }
             } catch (FileNotFoundException ex) {
-                throw new HongsException(HongsException.COMMON, ex);
+                throw HongsException.common(null, ex);
             } catch (IOException ex) {
-                throw new HongsException(HongsException.COMMON, ex);
+                throw HongsException.common(null, ex);
             }
         }
     }

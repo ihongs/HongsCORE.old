@@ -86,7 +86,7 @@ public class Sign {
             }
             return new String(pxwd);
         } catch (NoSuchAlgorithmException ex) {
-            throw new HongsException(HongsException.COMMON, ex);
+            throw HongsException.common(null, ex);
         }
     }
 

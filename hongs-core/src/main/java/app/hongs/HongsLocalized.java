@@ -44,8 +44,8 @@ public class HongsLocalized {
         String desx = desc != null ? desc : "";
         if (null  !=  lang) {
             codx   =  lang
-                  .replaceAll("[/\\\\]", ".")
-                .replaceFirst("\\.error$","")
+                .replaceAll  ("[/\\\\]", ".")
+                .replaceFirst("_error$", "" )
               + "." + codx;
         }
         if (null  ==  desc) {
@@ -54,7 +54,7 @@ public class HongsLocalized {
                 return  cause.getMessage(   );
             }
         }
-        return codx + ": " + desx;
+        return codx + " " + desx;
     }
 
     /**
@@ -93,8 +93,8 @@ public class HongsLocalized {
         if (null  !=  lang) {
             trns.load(lang);
             codx   =  lang
-                  .replaceAll("[/\\\\]", ".")
-                .replaceFirst("\\.error$","")
+                .replaceAll  ("[/\\\\]", ".")
+                .replaceFirst("_error$", "" )
               + "." + codx ;
         }
         if (trns.containsKey(ckey)) {
@@ -121,19 +121,19 @@ public class HongsLocalized {
     }
 
     /**
-     * 设置翻译章节(模块语言)
-     * @param lang
-     */
-    public void setLocalizedSection(String lang) {
-        this.lang = lang;
-    }
-
-    /**
      * 获取翻译选项(填充参数)
      * @return
      */
     public String[] getLocalizedOptions() {
         return this.opts;
+    }
+
+    /**
+     * 设置翻译章节(模块语言)
+     * @param lang
+     */
+    public void setLocalizedSection(String lang) {
+        this.lang = lang;
     }
 
     /**

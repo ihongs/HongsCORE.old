@@ -1,6 +1,8 @@
 package app.hongs.cmdlet.serv;
 
 import app.hongs.Core;
+import app.hongs.HongsException;
+import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.cmdlet.CmdletRunner;
 import app.hongs.cmdlet.anno.Cmdlet;
@@ -76,6 +78,32 @@ public class Common {
         }
     }
 
+    @Cmdlet("show-cmdlets")
+    public static void showCmdlets(String[] args) {
+        Map<String, String> a = new TreeMap(new PropComparator());
+        int i = 0, j;
+
+        for (Map.Entry<String, Method> et : CmdletRunner.getCmdlets().entrySet()) {
+            String k = et.getKey(  );
+            Method v = et.getValue();
+            a.put(k, v.getDeclaringClass().getName()+"."+v.getName());
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
+    }
+
     @Cmdlet("show-actions")
     public static void showActions(String[] args) {
         Map<String, String> a = new TreeMap(new PropComparator());
@@ -102,30 +130,15 @@ public class Common {
         }
     }
 
-    @Cmdlet("show-cmdlets")
-    public static void showCmdlets(String[] args) {
-        Map<String, String> a = new TreeMap(new PropComparator());
-        int i = 0, j;
-
-        for (Map.Entry<String, Method> et : CmdletRunner.getCmdlets().entrySet()) {
-            String k = et.getKey(  );
-            Method v = et.getValue();
-            a.put(k, v.getDeclaringClass().getName()+"."+v.getName());
-            j = k.length();
-            if (i < j && j < 31) {
-                i = j;
-            }
+    @Cmdlet("exec-action")
+    public static void execAction(String[] args) throws HongsException {
+        if (args.length == 0) {
+            System.err.println("Action name required!\r\nUsage: ACTION_NAME --request-- URL_QUERY_STRING --context-- XXX --session XXX");
+            return;
         }
-
-        for (Map.Entry<String, String> n : a.entrySet()) {
-            StringBuilder s = new StringBuilder();
-            s.append(n.getKey());
-            for (j = n.getKey( ).length( ); j < i; j ++) {
-                s.append(" " );
-            }   s.append("\t");
-            s.append(n.getValue());
-            System.out.println (s);
-        }
+        ActionHelper a = Core.getInstance(ActionHelper.class/**/);
+        new app.hongs.action.ActionRunner(args[0], a ).doAction();
+        app.hongs.util.Data.dumps(a.getResponseData());
     }
 
     private static class PropComparator implements Comparator<String> {
