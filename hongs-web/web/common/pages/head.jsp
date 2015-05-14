@@ -69,8 +69,8 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="#" style="font-weight:bold;">
-        <span style="color:#f08" class="glyphicon glyphicon-fire"></span>
+    <a class="navbar-brand" href="#">
+        <!--span style="color:#f08" class="glyphicon glyphicon-fire"></span-->
         <span style="color:#f00">H</span>
         <span style="color:#f22">o</span>
         <span style="color:#f44">n</span>

@@ -1,12 +1,12 @@
 /**
  * HongsCORE 公共样式
  * 作者: 黄弘<kevin.hongs@gmail.com>
- * 更新: 2014/07/31 23:58:10
+ * 更新: 2015/05/14 22:16:10
  */
 
 html, body, label, input, select, button, textarea {
     color: #666;
-    font-size: 14px;
+    font-size: 15px;
     font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,STHeiti,"Microsoft Yahei",sans-serif;;
 }
 h1, h2, h3, h4, h5, h6 {
@@ -99,8 +99,16 @@ select[multiple].form-control {
     width: 600px;
 }
 
+#headbox ul.nav {
+    font-size: 18px;
+}
 #headbox ul.nav>li.active {
     font-weight: bolder;
+}
+#headbox .navbar-brand span {
+    font-size: 28px;
+    font-weight: bolder;
+    text-shadow: 0 0 6px #F88, -1px -1px #FFF, 1px -1px  #000;
 }
 
 #bodybox {
