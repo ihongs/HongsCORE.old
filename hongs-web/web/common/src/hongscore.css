@@ -7,13 +7,13 @@
 html, body, label, input, select, button, textarea {
     color: #666;
     font-size: 14px;
-    font-family: 'Microsoft YaHei', Arial;
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,STHeiti,"Microsoft Yahei",sans-serif;;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Microsoft YaHei', Arial;
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,STHeiti,"Microsoft Yahei",sans-serif;;
 }
 pre, code {
-    font-family: SimSun, Monaco, Consolas, 'Courier New';
+    font-family: Consolas,Menlo,Monaco,"Courier New",monospace;
 }
 
 fieldset {
