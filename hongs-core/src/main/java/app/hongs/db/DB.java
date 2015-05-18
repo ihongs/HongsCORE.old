@@ -5,6 +5,8 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
+import app.hongs.dl.ITrnsct;
+import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.beans.PropertyVetoException;
@@ -91,7 +93,7 @@ import javax.sql.DataSource;
  * @author Hongs
  */
 public class DB
-  implements Core.Destroy
+  implements Core.Destroy, ITrnsct
 {
 
   /**
@@ -102,7 +104,7 @@ public class DB
   /**
    * 是否为事务模式(即不会自动提交)
    */
-  public boolean IN_TRANSC_MODE;
+  public boolean IN_COMMIT_MODE;
 
   /**
    * 库名
@@ -410,7 +412,7 @@ public class DB
     // 自动提交设置
     try
     {
-      this.connection.setAutoCommit(!this.IN_TRANSC_MODE);
+      this.connection.setAutoCommit(!this.IN_COMMIT_MODE);
     }
     catch (SQLException ex )
     {
@@ -448,12 +450,22 @@ public class DB
   }
 
   /**
+   * 事务:开始
+   */
+  @Override
+  public void trnsct()
+  {
+    this.IN_COMMIT_MODE = true ;
+  }
+
+  /**
    * 事务:提交
    */
+  @Override
   public void commit()
   {
-    if (IN_TRANSC_MODE) {
-        IN_TRANSC_MODE = false;
+    if (IN_COMMIT_MODE) {
+        IN_COMMIT_MODE = false;
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.commit();
@@ -463,13 +475,15 @@ public class DB
         }
     }
   }
+
   /**
-   * 事务:撤销
+   * 事务:回滚
    */
-  public void revoke()
+  @Override
+  public void rolbak()
   {
-    if (IN_TRANSC_MODE) {
-        IN_TRANSC_MODE = false;
+    if (IN_COMMIT_MODE) {
+        IN_COMMIT_MODE = false;
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.rollback();
@@ -480,6 +494,10 @@ public class DB
     }
   }
 
+  /**
+   * 获得全部的关联表名
+   * @return 关联名集合
+   */
   public Set<String> getTableNames()
   {
     return this.tableConfigs.keySet();
@@ -621,6 +639,13 @@ public class DB
     return tobj;
   }
 
+  /**
+   * 通过表名获取表模型
+   * 表名可以为"库名.表名"
+   * @param tableName
+   * @return 指定表模型
+   * @throws app.hongs.HongsException
+   */
   public Model getModel(String tableName)
     throws HongsException
   {
@@ -1479,25 +1504,30 @@ public class DB
   public static DB getInstance(String name)
     throws HongsException
   {
+    DB db;
+    do
+    {
+    
     String key = DB.class.getName() + ":" + name;
-
+    
     Core core = Core.THREAD_CORE.get();
     if ( core.containsKey(key))
     {
-      return (DB)core.get(key);
+      db =  (DB) core.get(key);
+      break;
     }
 
     Core gore = Core.GLOBAL_CORE;
     if ( gore.containsKey(key))
     {
-      return (DB)gore.get(key);
+      db =  (DB) gore.get(key);
+      break;
     }
 
     /**
      * 如果存在dbClass描述则调用对应类来获取实例
      */
 
-    DB       db ;
     DBConfig cf = new DBConfig (name);
 
     if (cf.dbClass != null && cf.dbClass.length() != 0)
@@ -1522,17 +1552,16 @@ public class DB
     {
       core.put(key, db);
     }
+    
+    db.IN_OBJECT_MODE = conf.getProperty("core.in.object.mode", false);
+    
+    }
+    while (false);
 
-    /**
-     * 自动设定模式和事务
-     */
-
-    db.IN_OBJECT_MODE = conf.containsKey("core.in.object.mode")
-                      ? conf.getProperty("core.in.object.mode", false)
-                      : Core.getInstance().containsKey("__IN_OBJECT_MODE__");
-    db.IN_TRANSC_MODE = conf.containsKey("core.in.transc.mode")
-                      ? conf.getProperty("core.in.transc.mode", false)
-                      : Core.getInstance().containsKey("__IN_TRANSC_MODE__");
+    db.IN_OBJECT_MODE = Synt.declare(
+              Core.getInstance().got("__IN_OBJECT_MODE__"), db.IN_OBJECT_MODE);
+    db.IN_COMMIT_MODE = Synt.declare(
+              Core.getInstance().got("__IN_COMMIT_MODE__"), false /* reset */);
 
     return db;
   }

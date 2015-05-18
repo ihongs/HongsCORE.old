@@ -49,7 +49,7 @@ public class DBSync
   {
     List<String> sqls = this.syncSlaverSqls(slaver, tablePrefix, tableSuffix, delExtraTables, delExtraFields);
     DB sdb = slaver;
-    sdb.IN_TRANSC_MODE = true;
+    sdb.IN_COMMIT_MODE = true;
     try
     {
       for (String sql : sqls)
@@ -60,7 +60,7 @@ public class DBSync
     }
     catch (HongsException ex)
     {
-      sdb.revoke();
+      sdb.rolbak();
       throw ex;
     }
   }

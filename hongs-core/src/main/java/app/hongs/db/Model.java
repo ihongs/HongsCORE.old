@@ -5,7 +5,6 @@ import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 import app.hongs.util.Synt;
 import app.hongs.util.Text;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;

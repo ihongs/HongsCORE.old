@@ -42,7 +42,7 @@ public class VerifyInvoker implements FilterInvoker {
         Object  id  = dat.get("id");
         Object  jd  = dat.get("jd");
         String  act = chains.getAction();
-        boolean prp = !"1".equals(jd) && !"2".equals(jd);
+        boolean prp =  !"1".equals(jd) && !"2".equals(jd);
         boolean upd = act.endsWith("update") || (null != id && ! "".equals(id));
 
         // 执行校验
@@ -66,7 +66,7 @@ public class VerifyInvoker implements FilterInvoker {
                 dat.put("msg", err.getLocalizedMessage());
             } else {
                 Map ers;
-                if ("1".equals(jd)) {
+                if ("2".equals(jd)) {
                     ers = err.getErrmap();
                 } else {
                     ers = err.getErrors();

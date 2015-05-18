@@ -5,7 +5,7 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.FilterInvoker;
-import app.hongs.dl.ITransc;
+import app.hongs.dl.ITrnsct;
 import java.lang.annotation.Annotation;
 
 /**
@@ -22,40 +22,40 @@ public class CommitInvoker implements FilterInvoker {
         Core core = Core.getInstance();
 
         try {
-            core.put("__IN_TRANSC_MODE__", true);
+            core.put("__IN_COMMIT_MODE__", true);
 
-            try {
                 // 开启
                 for(Object o : core.values()) {
-                    if (o instanceof ITransc) {
-                        ((ITransc) o).transc();
+                    if (o instanceof ITrnsct) {
+                        ((ITrnsct) o).trnsct();
                     }
                 }
 
+            try {
                 chains.doAction();
 
                 // 提交
                 for(Object o : core.values()) {
-                    if (o instanceof ITransc) {
-                        ((ITransc) o).commit();
+                    if (o instanceof ITrnsct) {
+                        ((ITrnsct) o).commit();
                     }
                 }
             } catch (Exception|Error ex) {
                 // 回滚
                 for(Object o : core.values()) {
-                    if (o instanceof ITransc) {
-                        ((ITransc) o).revoke();
+                    if (o instanceof ITrnsct) {
+                        ((ITrnsct) o).rolbak();
                     }
                 }
 
                 if (ex instanceof HongsException) {
-                    throw  (  HongsException  ) ex;
+                    throw (HongsException) ex ;
                 } else {
-                    throw HongsException.common(null, ex);
+                    throw  HongsException.common(null, ex);
                 }
             }
         } finally {
-            core.remove("__IN_TRANSC_MODE__");
+            core.remove("__IN_COMMIT_MODE__");
         }
     }
 }

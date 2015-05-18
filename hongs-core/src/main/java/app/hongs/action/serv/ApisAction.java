@@ -221,8 +221,9 @@ public class ApisAction
                 boolean     all =  conv.contains( "all2str");
                 cnvr.all  = all ?  new  Conv2Str( ) : new Conv2Obj( ) ;
                 cnvr.num  = all || conv.contains( "num2str") ? new Conv2Str(/**/) : cnvr.all;
-                cnvr.nnll = all || conv.contains("null2str") ? new ConvNull2Str() : cnvr.all;
-                cnvr.bool = all || conv.contains("bool2str") ? new ConvBool2Str() : cnvr.all;
+                cnvr.nul  = all || conv.contains("null2str") ? new ConvNull2Str() : cnvr.all;
+                cnvr.bool = conv.contains("bool2str") ? new ConvBool2Str()
+                          :(conv.contains("bool2num") ? new ConvBool2Num() : new Conv2Obj());
                 cnvr.date = conv.contains("date2mic") ? new ConvDate2Mic()
                           :(conv.contains("date2sec") ? new ConvDate2Sec() : new Conv2Obj());
                 hlpr.reply (Synt.foreach(resp, cnvr));
@@ -242,24 +243,24 @@ public class ApisAction
     private static class Conv extends Synt.LeafNode {
         private Conv2Obj all;
         private Conv2Obj num;
-        private Conv2Obj nnll;
+        private Conv2Obj nul;
         private Conv2Obj bool;
         private Conv2Obj date;
         @Override
         public Object leaf(Object o) {
             if (o == null) {
-                return nnll.conv(o);
-            }
-            if (o instanceof Boolean) {
-                return bool.conv(o);
-            }
+                return nul.conv(o);
+            } else
             if (o instanceof Number ) {
-                return num .conv(o);
-            }
-            if (o instanceof Date ) {
+                return num.conv(o);
+            } else
+            if (o instanceof Boolean) {
+                o = bool.conv(o);
+            } else
+            if (o instanceof Date) {
                 o = date.conv(o);
             }
-            return  all .conv(o);
+            return   all.conv(o);
         }
     }
     private static class Conv2Obj {
@@ -283,6 +284,12 @@ public class ApisAction
         @Override
         public Object conv(Object o) {
             return ((Boolean) o) ? "1" : "";
+        }
+    }
+    private static class ConvBool2Num extends Conv2Obj {
+        @Override
+        public Object conv(Object o) {
+            return ((Boolean) o) ?  1  :  0;
         }
     }
     private static class ConvDate2Mic extends Conv2Obj {

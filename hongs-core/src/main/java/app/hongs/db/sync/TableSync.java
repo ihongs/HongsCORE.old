@@ -46,7 +46,7 @@ public class TableSync
   {
     List<String> sqls = this.syncSlaverSqls(slaver, delExtraFields);
     DB sdb = slaver.db;
-    sdb.IN_TRANSC_MODE = true;
+    sdb.IN_COMMIT_MODE = true;
     try
     {
       for (String sql : sqls)
@@ -57,7 +57,7 @@ public class TableSync
     }
     catch (HongsException ex)
     {
-      sdb.revoke();
+      sdb.rolbak();
       throw ex;
     }
   }

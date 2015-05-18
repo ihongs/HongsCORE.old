@@ -210,7 +210,7 @@ public class ActionHelper
         // 处理上传文件
         if ("multipart/form-data".equals(ct))
         {
-          setUploadsData( );
+          setUploadsData( this.requestData );
         }
       }
     }
@@ -221,7 +221,7 @@ public class ActionHelper
    * 解析 multipart/form-data 数据, 并将上传的文件放入临时目录
    * @throws HongsException
    */
-  protected final void setUploadsData() throws HongsException {
+  protected final void setUploadsData(Map rd) throws HongsException {
     CoreConfig conf = CoreConfig.getInstance();
 
     Map inj = new HashMap();
@@ -328,7 +328,7 @@ public class ActionHelper
                 fw.close();
             }
 
-            Dict.setParam(requestData, v, n);
+            Dict.setParam(rd, v, n);
         }
     } catch (FileUploadException ex) {
         throw HongsException.common(null, ex);

@@ -7,7 +7,7 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.FormSet;
 import app.hongs.dl.IRecord;
-import app.hongs.dl.ITransc;
+import app.hongs.dl.ITrnsct;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
@@ -60,7 +60,7 @@ import static org.apache.lucene.util.Version.LUCENE_CURRENT;
  * Lucene 记录模型
  * @author Hongs
  */
-public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
+public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     protected final Map     types;
     protected final Map     fields;
@@ -72,34 +72,45 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
     protected IndexSearcher finder = null;
 
     public String   idCol = "id";
-    public String   wdCol = "wd";
-    public String[] findCols = new String[] {"wd"};
+    public String[] findCols = new String[] { "wd" };
     public String[] dispCols = new String[] {"name"};
 
-    public LuceneRecord(Map fields, String datapath, String analyzer) throws HongsException {
+    public LuceneRecord(Map fields, String datapath, String analyzer)
+    throws HongsException {
         if (datapath == null) {
-            datapath = CoreConfig.getInstance().getProperty("core.lucene.datapath", "${VARS_PATH}/lucene") + "/test";
-        } else
+            datapath = CoreConfig.getInstance().getProperty(
+                    "core.lucene.datapath",
+                    "${VARS_PATH}/lucene") + "/test";
+        }
         if (! new File(datapath).isAbsolute( )) {
-            datapath = CoreConfig.getInstance().getProperty("core.lucene.datapath", "${VARS_PATH}/lucene") + "/" + datapath;
+            datapath = CoreConfig.getInstance().getProperty(
+                    "core.lucene.datapath",
+                    "${VARS_PATH}/lucene") + "/" + datapath;
         }
         if (analyzer == null) {
-            analyzer = CoreConfig.getInstance().getProperty("core.lucene.analyzer", "org.apache.lucene.analysis.standard.StandardAnalyzer");
+            analyzer = CoreConfig.getInstance().getProperty(
+                    "core.lucene.analyzer",
+                    "org.apache.lucene.analysis.standard.StandardAnalyzer");
         }
 
         Map ti = new HashMap();
-        ti.put("BASE_PATH", Core.VARS_PATH);
+        ti.put("BASE_PATH", Core.BASE_PATH);
         ti.put("VARS_PATH", Core.VARS_PATH);
         datapath = Text.inject(datapath,ti);
 
-        this.fields = fields;
         this.datapath = datapath;
         this.analyzer = analyzer;
-        this.types = FormSet.getInstance("default").getEnum("__types__");
+        this.fields   = fields;
+        this.types    = FormSet.getInstance("default").getEnum("__types__");
+
+        // Is false for autocommit
+        this.IN_COMMIT_MODE = Synt.declare(
+                    Core.getInstance().got( "__IN_COMMIT_MODE__" ), false );
     }
 
-    public LuceneRecord(String conf, String form) throws HongsException {
-        this(FormSet.getInstance(conf).getForm(form), conf + "/" + form, null);
+    public LuceneRecord(String conf, String form)
+    throws HongsException {
+        this(FormSet.getInstance(conf).getForm(form), conf+"/"+form, null );
     }
 
     @Override
@@ -108,7 +119,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
 
         // 指定单个 id 则走 get
         Object id = rd.get (idCol);
-        if (id != null && !(id instanceof Collection) && !(id instanceof Map)) {
+        if (null != id && !(id instanceof Map) && !(id instanceof Collection)) {
             String jd = id.toString();
             Map  data = new HashMap();
             Map  info = get ( jd );
@@ -169,7 +180,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             }
 
             rc = docs.length;
-            pc = (int) Math.ceil((double) rc / rn);
+            pc = (int) Math.ceil((double)rc / rn);
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
@@ -336,7 +347,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        if (!IN_TRANSC_MODE) {
+        if (!IN_COMMIT_MODE) {
             commit();
         }
     }
@@ -348,7 +359,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        if (!IN_TRANSC_MODE) {
+        if (!IN_COMMIT_MODE) {
             commit();
         }
     }
@@ -360,7 +371,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        if (!IN_TRANSC_MODE) {
+        if (!IN_COMMIT_MODE) {
             commit();
         }
     }
@@ -389,7 +400,7 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
             Director  dio = getDir();
             Directory dir = dio.dir ;
 
-            // 索引目录不存在则先写入一个
+            // 索引目录不存在则先写入一个并删除
             if (!dio.has) {
                 connect();
                 del(add(new HashMap()));
@@ -437,11 +448,11 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         }
     }
 
-    public boolean IN_TRANSC_MODE = false;
+    public boolean IN_COMMIT_MODE = false;
 
     @Override
-    public void transc() {
-        IN_TRANSC_MODE = true;
+    public void trnsct() {
+        IN_COMMIT_MODE = true;
     }
 
     @Override
@@ -449,18 +460,20 @@ public class LuceneRecord implements IRecord, ITransc, Core.Destroy {
         if (writer == null) {
             return;
         }
+        IN_COMMIT_MODE =false;
         try {
-            writer.commit();
+            writer.commit(  );
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
     }
 
     @Override
-    public void revoke() throws HongsException {
+    public void rolbak() throws HongsException {
         if (writer == null) {
             return;
         }
+        IN_COMMIT_MODE =false;
         try {
             writer.rollback();
         } catch (IOException ex) {
