@@ -212,7 +212,7 @@ function hsFormFillPick(box, v, n, t) {
     var mul = /(\[\]|\.\.|\.$)/.test(n); // a[b][]|a[][b]|a.b.|a..b 均表示多选
 
     if (t == "info") {
-        var tn = box.attr("data-tn") || '';
+        var tn = box.attr("data-tn") || n.replace(/_id$/, "");
         v = hsGetValue(this._info, tn);
         if (! v ) return ;
         if (!mul) v = [v];

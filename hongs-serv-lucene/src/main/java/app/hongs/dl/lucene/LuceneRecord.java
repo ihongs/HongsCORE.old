@@ -113,6 +113,22 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         this(FormSet.getInstance(conf).getForm(form), conf+"/"+form, null );
     }
 
+    /**
+     * 获取数据
+     *
+     * 以下参数为特殊参数:
+     * id   ID
+     * wd   搜索
+     * ob   排序
+     * pn   页码
+     * rn   每页行数
+     * ln   分页链接数
+     * 请注意尽量避免将其作为字段名(id,wd除外)
+     *
+     * @param rd
+     * @return
+     * @throws HongsException 
+     */
     @Override
     public Map retrieve(Map rd) throws HongsException {
         initial();
@@ -206,6 +222,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         return resp;
     }
 
+    /**
+     * 创建记录
+     * @param rd
+     * @return ID,名称等(由dispCols指定)
+     * @throws HongsException 
+     */
     @Override
     public String[] create(Map rd) throws HongsException {
         String[] resp;
@@ -217,6 +239,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         return resp;
     }
 
+    /**
+     * 更新记录
+     * @param rd
+     * @return
+     * @throws HongsException 
+     */
     @Override
     public int update(Map rd) throws HongsException {
         Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
@@ -226,6 +254,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         return ids.size();
     }
 
+    /**
+     * 删除记录
+     * @param rd
+     * @return
+     * @throws HongsException 
+     */
     @Override
     public int delete(Map rd) throws HongsException {
         Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
@@ -250,6 +284,24 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         rd.put(idCol , id );
         addDoc(map2Doc(rd));
         return id;
+    }
+
+    /**
+     * 设置文档(无则添加)
+     * @param id
+     * @param rd
+     * @throws HongsException
+     */
+    public void set(String id, Map rd) throws HongsException {
+        if (id == null && id.length() == 0) {
+            throw HongsException.common("Id must be set in put");
+        }
+        Document doc = getDoc(id);
+        if (doc == null) {
+            doc =  new Document();
+        }
+        docAdd(doc, rd);
+        setDoc(id, doc);
     }
 
     /**
@@ -537,7 +589,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                     t = "long";
                 } else
                 if ("timestamp".equals(x)) {
-                    t = "int" ;
+                    t = "long";
                 }
             }
         }
@@ -582,10 +634,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             }
         }
 
-        // 或条件
-        if (rd.containsKey("-or")) {
+        // 并条件
+        if (rd.containsKey("ar")) {
             BooleanQuery qay = new BooleanQuery();
-            Set<Map> set = Synt.declare(rd.get("-or"), Set.class);
+            Set<Map> set = Synt.declare(rd.get("ar"), Set.class );
+            for(Map  map : set) {
+                query.add(getFind(map), BooleanClause.Occur.MUST);
+            }
+        }
+
+        // 或条件
+        if (rd.containsKey("or")) {
+            BooleanQuery qay = new BooleanQuery();
+            Set<Map> set = Synt.declare(rd.get("or"), Set.class );
             for(Map  map : set) {
                 qay.add(getFind(map), BooleanClause.Occur.SHOULD);
             }
@@ -659,15 +720,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         return new Sort(of.toArray(new SortField[0]));
     }
 
-    public Document map2Doc(Map rd) throws HongsException {
+    public Document map2Doc(Map map) throws HongsException {
         Document doc = new Document();
-        docAdd(doc , rd);
-        return doc ;
+        docAdd(doc, map);
+        return doc;
     }
 
     public Map doc2Map(Document doc) {
         Map map = new HashMap();
+        mapAdd(map, doc);
+        return map;
+    }
 
+    protected void mapAdd(Map map, Document doc) {
         for(Object o : fields.entrySet()) {
             Map.Entry e = (Map.Entry) o;
             String k = (String)e.getKey();
@@ -742,16 +807,14 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 }
             }
         }
-
-        return map;
     }
 
-    protected void docAdd(Document doc, Map rd) {
+    protected void docAdd(Document doc, Map map) {
         for(Object o : fields.entrySet()) {
             Map.Entry e = (Map.Entry) o;
             Map    m = (Map ) e.getValue();
             String k = (String) e.getKey();
-            Object v = Dict.getParam(rd,k);
+            Object v = Dict.getParam(map, k);
 
             if (null == v) {
                 continue;

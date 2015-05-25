@@ -22,10 +22,9 @@
       <xs:attribute name="url" type="xs:string" use="required"/>
       <xs:attribute name="user" type="xs:string"/>
       <xs:attribute name="password" type="xs:string"/>
+      <xs:attribute name="maxIdleTime" type="xs:int"/>
       <xs:attribute name="minPoolSize" type="xs:int"/>
       <xs:attribute name="maxPoolSize" type="xs:int"/>
-      <xs:attribute name="maxIdleSize" type="xs:int"/>
-      <xs:attribute name="maxStatements" type="xs:int"/>
       <xs:attribute name="initialPoolSize" type="xs:int"/>
     </xs:complexType>
   </xs:element>

@@ -1,13 +1,15 @@
 package app.hongs.db;
 
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.FormSet;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
+//import java.util.List;
+//import java.util.regex.Pattern;
 
 /**
  * 视图工具
@@ -37,13 +39,16 @@ public class Mview {
 
     public String getTitle()
     throws HongsException {
-        String sql = "SHOW TABLE STATUS WHERE name = ?";
-        List<Map<String, Object>> rows = db.fetchAll(sql, table.tableName);
-        String dsp = (String)rows.get(0).get("Comment");
-        if (null == dsp || "".equals(dsp)) {
-            dsp = table.name;
-        }
-        return dsp;
+        CoreLocale trns = CoreLocale.getInstance(db.name) ;
+        String     disp = "table." + table.name + ".name" ;
+        return trns.contains(disp) ? trns.translate(disp) : table.name;
+//        String sql = "SHOW TABLE STATUS WHERE name = ?";
+//        List<Map<String, Object>> rows = db.fetchAll(sql, table.tableName);
+//        String dsp = (String)rows.get(0).get("Comment");
+//        if (null == dsp || "".equals(dsp)) {
+//            dsp = table.name;
+//        }
+//        return dsp;
     }
 
     public Map<String, Map<String, String>> getFields()
@@ -53,12 +58,23 @@ public class Mview {
             fields =  new  LinkedHashMap();
         }
 
+        CoreLocale trns = CoreLocale.getInstance(db.name);
+
+        /*
         String sql = "SHOW FULL FIELDS FROM `"+table.tableName+"`";
         List<Map<String, Object>> rows = db.fetchAll(sql);
         for (Map<String, Object>  row  : rows) {
-            String disp = (String) row.get("Comment");
-            String name = (String) row.get( "Field" );
-            String type = (String) row.get( "Type"  );
+            String disp = (String)row.get("Comment");
+            String name = (String)row.get( "Field" );
+            String type = (String)row.get( "Type"  );
+        */
+        Map<String, Map> cols = table.getFields();
+        for(Map.Entry<String, Map> ent : cols.entrySet()) {
+            Map     col  = ent.getValue();
+            String  name = ent.getKey(  );
+            Integer type = (Integer) col.get("type");
+            Boolean rqrd = (Boolean) col.get("required");
+            String  disp = "field."+ table.name +"."+ name +".name";
 
             Map field = (Map) fields.get(name);
             if (field == null) {
@@ -66,22 +82,42 @@ public class Mview {
                 fields.put(name, field);
             }
 
-            if (!fields.containsKey("__required__")) {
-                field.put("__required__", "NO".equals(row.get("Null")) ? "yes" : "");
+            if (!field.containsKey("__required__")) {
+//              field.put("__required__", "NO".equals(row.get("Null")) ? "yes" : "");
+                field.put("__required__", rqrd ? "yes" : "");
             }
 
-            if (!fields.containsKey("__disp__")) {
-                if (disp != null && !"".equals(disp)) {
+            if (!field.containsKey("__disp__")) {
+//              if (disp!=null && !"".equals(disp)) {
+                if (trns.containsKey(disp)) {
+                    disp = trns.translate(disp);
                     field.put("__disp__", disp);
                 } else {
                     field.put("__disp__", name);
                 }
             }
 
-            if (!fields.containsKey("__type__")) {
+            if (!field.containsKey("__type__")) {
                 if (name.endsWith("_id") || name.equals(table.primaryKey)) {
                     field.put("__type__", "hidden");
                 } else
+                if (type == Types.INTEGER || type == Types.TINYINT || type == Types.BIGINT || type == Types.SMALLINT
+                ||  type == Types.NUMERIC || type == Types.DECIMAL || type == Types.DOUBLE || type == Types.FLOAT) {
+                    field.put("__type__", "number");
+                } else
+                if (type == Types.LONGVARCHAR || type == Types.LONGNVARCHAR) {
+                    field.put("__type__", "textarea");
+                } else
+                if (type == Types.TIMESTAMP) {
+                    field.put("__type__", "datetime");
+                } else
+                if (type == Types.DATE) {
+                    field.put("__type__", "date");
+                } else
+                if (type == Types.TIME) {
+                    field.put("__type__", "time");
+                }
+                /*
                 if (Pattern.compile("(decimal|numeric|integer|tinyint|smallint|float|double).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                     field.put("__type__", "number");
                 } else
@@ -97,6 +133,7 @@ public class Mview {
                 if (Pattern.compile("(text).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
                     field.put("__type__", "textarea");
                 }
+                */
             }
         }
 

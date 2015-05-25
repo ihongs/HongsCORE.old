@@ -26,7 +26,7 @@ public class DBFields
 
   private Table table;
 
-  public Map<String, Object> fields;
+  public Map<String, Map> fields;
 
   public DBFields(Table table)
     throws HongsException
@@ -58,26 +58,28 @@ public class DBFields
       {
         Map field = new HashMap();
         field.put("type",           md.getColumnType(i));
-        field.put("size",           md.getPrecision(i));
+        field.put("size",           md.getPrecision (i));
         field.put("scale",          md.getScale(i));
         field.put("signed",         md.isSigned(i));
-        field.put("nullable",       md.isNullable(i));
-        field.put("currency",       md.isCurrency(i));
+        field.put("required",       md.isNullable(i)
+              != ResultSetMetaData.columnNullable  );
         field.put("autoIncrement",  md.isAutoIncrement(i));
         field.put("caseSensitive",  md.isCaseSensitive(i));
 
         // 在这里没什么意义的属性:
         /*
-        field.put("catalogName",    md.getCatalogName(i));
-        field.put("schemaName",     md.getSchemaName(i));
+        field.put("nullable",       md.isNullable(i));
+        field.put("currency",       md.isCurrency(i));
+        field.put("writable",       md.isWritable(i));
+        field.put("readOnly",       md.isReadOnly(i));
+        field.put("searchable",     md.isSearchable(i));
         field.put("tableName",      md.getTableName(i));
+        field.put("schemaName",     md.getSchemaName(i));
+        field.put("catalogName",    md.getCatalogName(i));
         field.put("label",          md.getColumnLable(i));
         field.put("typeName",       md.getColumnTypeName(i));
         field.put("className",      md.getColumnClassName(i));
         field.put("displaySize",    md.getColumnDisplaySize(i));
-        field.put("readOnly",       md.isReadOnly(i));
-        field.put("writable",       md.isWritable(i));
-        field.put("searchable",     md.isSearchable(i));
         */
 
         this.fields.put(md.getColumnName(i), field);

@@ -58,6 +58,9 @@ public class SupplyHelper {
         FormSet cnf = FormSet.getInstance(conf);
         Map map  = cnf.getForm(form);
         if (map == null) return this;
+        
+        FormSet dfs = FormSet.getInstance("default");
+        Map tps  = dfs.getEnum("__types__");
 
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
@@ -65,6 +68,7 @@ public class SupplyHelper {
             Map       mt = (Map ) et.getValue();
             String  name = (String) et.getKey();
             String  type = (String) mt.get("__type__");
+                    type = (String) tps.get(type); // 类型别名转换
             if (! "enum".equals(type)) {
                 continue;
             }

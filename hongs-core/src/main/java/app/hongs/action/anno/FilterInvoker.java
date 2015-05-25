@@ -13,5 +13,5 @@ import java.lang.annotation.Annotation;
  * @author Hongs
  */
 public interface FilterInvoker {
-    public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno) throws HongsException;
+    public void invoke(ActionHelper helper, ActionRunner runner, Annotation anno) throws HongsException;
 }

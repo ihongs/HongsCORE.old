@@ -353,8 +353,8 @@ public class DB
             if (info.containsKey("password")) {
               pool.setPassword(info.getProperty("password"));
             }
-            if (info.containsKey("initialPoolSize")) {
-              pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
+            if (info.containsKey("maxIdleTime")) {
+              pool.setMaxIdleTime(Integer.parseInt(info.getProperty("maxIdleTime")));
             }
             if (info.containsKey("minPoolSize")) {
               pool.setMinPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
@@ -362,11 +362,8 @@ public class DB
             if (info.containsKey("maxPoolSize")) {
               pool.setMaxPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
             }
-            if (info.containsKey("maxIdleTime")) {
-              pool.setMaxIdleTime(Integer.parseInt(info.getProperty("maxIdleTime")));
-            }
-            if (info.containsKey("maxStatements")) {
-              pool.setMaxStatements(Integer.parseInt(info.getProperty("maxStatements")));
+            if (info.containsKey("initialPoolSize")) {
+              pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
             }
           }
           finally

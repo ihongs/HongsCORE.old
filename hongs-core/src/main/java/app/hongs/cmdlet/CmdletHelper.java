@@ -64,7 +64,7 @@ public class CmdletHelper
     List<String>        newArgs = new ArrayList();
     Set<String>         reqOpts = new LinkedHashSet();
     Set<String>         errMsgs = new LinkedHashSet();
-    Pattern  p = Pattern.compile("^([\\w\\.\\-\\|]*)(=|:|\\+|\\*|:\\+)([sifb]|\\/(.+)\\/(i)?( .*)?)$");
+    Pattern  p = Pattern.compile("^([\\w\\.\\-\\|]*)(=|:|\\+|\\*)([sifb]|\\/(.+)\\/(i)?( .*)?)$");
     Pattern bp = Pattern.compile("^(true|false|yes|no|y|n|1|0)$", Pattern.CASE_INSENSITIVE);
     Pattern tp = Pattern.compile("^(true|yes|y|1)$", Pattern.CASE_INSENSITIVE);
     Pattern fp = Pattern.compile("^\\d+(\\.\\d+)?$");
@@ -206,8 +206,9 @@ public class CmdletHelper
               } else {
                 newOpts.put(name, val );
               }
-              continue F;
             }
+            
+            continue F;
           }
 
           if ('b' == type) {

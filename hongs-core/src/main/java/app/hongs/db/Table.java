@@ -80,9 +80,9 @@ public class Table
    */
   public String primaryKey = "";
 
+  private   Map fields;
   protected Map assocs;
   protected Map relats;
-  private   Map fields;
 
   public Table(DB db, Map tblConf)
     throws HongsException
@@ -606,7 +606,7 @@ public class Table
             value =  null;
 
         if (value == null
-        && (Integer)column.get("nullable") == ResultSetMetaData.columnNoNulls)
+        && (Boolean)column.get("required"))
         {
           throw nullException(namc);
         }
@@ -614,8 +614,8 @@ public class Table
       else
       {
         if (isNew == true
-        &&!(Boolean)column.get("autoIncrement")
-        && (Integer)column.get("nullable") == ResultSetMetaData.columnNoNulls)
+        && (Boolean)column.get("required" )
+        &&!(Boolean)column.get("autoIncrement"))
         {
           throw nullException(namc);
         }
@@ -652,7 +652,7 @@ public class Table
       }
 
       // 判断整型数值
-      else if (type == Types.INTEGER || type == Types.TINYINT || type == Types.SMALLINT || type == Types.BIGINT)
+      else if (type == Types.TINYINT || type == Types.INTEGER || type == Types.BIGINT || type == Types.SMALLINT)
       {
         if (!valueStr.matches("^[\\-+]?[0-9]+$"))
         {
@@ -681,7 +681,7 @@ public class Table
       }
 
       // 判断非整型数值
-      else if (type == Types.FLOAT || type == Types.DOUBLE || type == Types.NUMERIC || type == Types.DECIMAL)
+      else if (type == Types.NUMERIC || type == Types.DECIMAL || type == Types.DOUBLE || type == Types.FLOAT)
       {
         if (!valueStr.matches("^[\\-+]?[0-9]+(\\.[0-9]+)?$"))
         {

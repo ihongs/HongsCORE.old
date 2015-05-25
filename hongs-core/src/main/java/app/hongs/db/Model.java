@@ -62,6 +62,11 @@ public class Model
   public Table table;
 
   /**
+   * ID参数名
+   */
+  protected String idKey = "id";
+
+  /**
    * 页码参数名
    * 影响getPage
    */
@@ -98,6 +103,18 @@ public class Model
   public String[] findCols = new String[] {"name"};
 
   /**
+   * 或参数名
+   * 用于组合 (a = 1 OR a = 2)
+   */
+  protected String orKey = "or";
+
+  /**
+   * 并参数名
+   * 用于组合 (a = 1 OR a = 2) AND (b = 1 OR b = 2)
+   */
+  protected String arKey = "ar";
+
+  /**
    * 构造方法
    *
    * 需指定该模型对应的表对象.
@@ -116,6 +133,8 @@ public class Model
 
     // 配置
     CoreConfig conf = Core.getInstance(CoreConfig.class);
+    this.idKey   = conf.getProperty("fore.id.key"  , "id");
+    this.orKey   = conf.getProperty("fore.or.key"  , "or");
     this.pageKey = conf.getProperty("fore.page.key", "pn");
     this.rowsKey = conf.getProperty("fore.rows.key", "rn");
     this.colsKey = conf.getProperty("fore.cols.key", "cs");
@@ -246,7 +265,11 @@ public class Model
   public Map getInfo(Map rd, FetchCase caze)
     throws HongsException
   {
-    String id = (String)rd.get(this.table.primaryKey);
+    String id = Synt.declare(rd.get( this.idKey), String.class);
+    if (id == null || id.length() == 0)
+    {
+      id = Synt.declare(rd.get(table.primaryKey), String.class);
+    }
     Map info = this.get(id, caze);
     Map data = new HashMap();
     data.put( "info", info );
@@ -290,7 +313,10 @@ public class Model
   public int update(Map rd, FetchCase caze)
     throws HongsException
   {
-    Object idz = rd.get(this.table.primaryKey);
+    Object idz = rd.get(this.idKey);
+    if (idz == null) {
+        idz =  rd.get(table.primaryKey);
+    }
     if (idz == null) {
         return this.put(null, null);
     }
@@ -302,8 +328,8 @@ public class Model
         ids.add   ( idz.toString());
     }
 
-    Map  dat  =  new  HashMap  (   rd  );
-    rd.remove(  this.table.primaryKey  );
+    Map dat = new  HashMap  (  rd  );
+    rd.remove(this.table.primaryKey);
 
     for (String id : ids )
     {
@@ -337,7 +363,10 @@ public class Model
   public int delete(Map rd, FetchCase caze)
     throws HongsException
   {
-    Object idz = rd.get(this.table.primaryKey);
+    Object idz = rd.get(this.idKey);
+    if (idz == null) {
+        idz =  rd.get(table.primaryKey);
+    }
     if (idz == null) {
         return this.del(null, null);
     }
@@ -419,18 +448,18 @@ public class Model
 
     caze.where(".`"+n+"` = ?", v);
 
-    Iterator it = rd.entrySet( ).iterator();
+    Iterator it = rd.entrySet().iterator();
     while (it.hasNext())
     {
       Map.Entry entry = (Map.Entry)it.next();
       String field = (String) entry.getKey();
-      String value = (String) entry.getValue( );
+      String value = (String) entry.getValue();
 
       if (columns.containsKey(field))
       {
-        if (field.equals(this.table.primaryKey))
+        if (field.equals( this.table.primaryKey) || field.equals(this.idKey))
         {
-          caze.where(".`"+ this.table.primaryKey+"` != ?", value);
+          caze.where(".`"+this.table.primaryKey+"` != ?", value);
         }
         else
         {
@@ -467,7 +496,11 @@ public class Model
   public String add(Map<String, Object> data)
     throws HongsException
   {
-    String id = (String) data.get(this.table.primaryKey);
+    String id = Synt.declare(data.get( this.idKey), String.class);
+    if (id == null && id.length() == 0)
+    {
+      id = Synt.declare(data.get(table.primaryKey), String.class);
+    }
     if (id != null && id.length() != 0)
     {
       throw new HongsException(0x10a1, "Add can not have a id");
@@ -477,7 +510,7 @@ public class Model
     data.put(this.table.primaryKey, id);
 
     // 存入主数据
-    /**  **/ this.table.insert ( data );
+    this.table.insert/* new */ ( data );
 
     // 存入子数据
     this.table.insertSubValues ( data );
@@ -641,19 +674,19 @@ public class Model
    * 如需指定关联方式请设置FetchCase的option: ASSOC_JOINS, ASSOC_TYEPS
    *
    * 设计目标:
-   * 1) 按照cols参数设置查询字段;
-   *    限定字段列表: cols=a+b+c或cols=-a+x.b, -表示排除该字段;
-   * 2) 按照sort参数设置排序方式,
-   *    多个字段排序: sort=a+b+c或sort=-a+b+c, -表示该字段逆序;
-   * 3) 按照find参数设置模糊查询,
-   *    多关键词搜索: find=x+y+z;
-   *    指定字段搜索: find.a=x或find.a.b=y, 同样适用上面的规则,
-   *    a.b为搜索关联表, 但需注意: a,a.b必须在findKeys中有指定;
+   * 1) 按照cs参数设置查询字段;
+   *    限定字段列表: cs=a+b+c或cs=-a+x.b, -表示排除该字段;
+   * 2) 按照ob参数设置排序方式,
+   *    多个字段排序: ob=a+b+c或ob=-a+b+c, -表示该字段逆序;
+   * 3) 按照wd参数设置模糊查询,
+   *    多关键词搜索: wd=x+y+z;
+   *    指定字段搜索: wd.a=x或wd.a.b=y, 同样适用上面的规则,
+   *    a.b为搜索关联表, 但需注意: a,a.b必须在findCols中有指定;
    * 4) 如果有字段名相同的参数则获取与之对应的记录,
-   *    可以在字段名后跟.加上gt,lt,ge,le,ne分布表示&gt;,&lt;,&ge;,&le;,&ne;
+   *    可以在字段名后跟.加上-gt,-lt,-ge,-le,-ne分别表示&gt;,&lt;,&ge;,&le;,&ne;
    * 5) 如果有子表.字段名相同的参数则获取与之对应的记录,
-   *    可以在子表.字段名后跟.加上gt,lt,ge,le,ne分布表示&gt;,&lt;,&ge;,&le;,&ne;
-   * 注: "+"在URL中表示空格; 以上设计目录均已实现; 以上1/2/3中的参数名可统一设置或单独指定;
+   *    可以在子表.字段名后跟.加上-gt,-lt,-ge,-le,-ne分别表示&gt;,&lt;,&ge;,&le;,&ne;
+   * 注: "+" 在URL中表示空格; 以上设计目录均已实现; 以上1/2/3中的参数名可统一设置或单独指定;
    * </pre>
    *
    * @param caze
@@ -664,7 +697,7 @@ public class Model
     throws HongsException
   {
     /**
-     * 如果不是 getInfo 且没指定关联类型
+     * 如果不是 get 且没指定关联类型
      * 默认只关联 BLS_TO,HAS_ONE 的表(仅能关联一个)
      * 默认只连接 LEFT  ,INNER   的表(必须满足左表)
      */
@@ -696,7 +729,8 @@ public class Model
      * 依据设计规则, 解析请求参数, 转为查询结构
      */
     Iterator it = rd.entrySet().iterator();
-    Map columns = this.table.getFields();
+    Map fields = this.table.getFields();
+    Map relats = this.table.relats;
     while (it.hasNext())
     {
       Map.Entry et = (Map.Entry)it.next();
@@ -713,14 +747,14 @@ public class Model
       // 字段
       if (key.equals(this.colsKey))
       {
-        this.colsFilter(caze, value, columns);
+        this.colsFilter(caze, value, fields);
         continue;
       }
 
       // 排序
       if (key.equals(this.sortKey))
       {
-        this.sortFilter(caze, value, columns);
+        this.sortFilter(caze, value, fields);
         continue;
       }
 
@@ -731,40 +765,28 @@ public class Model
         continue;
       }
 
-      // 或
-      if ("-or".equals(key))
-      {
-        StringBuilder ws = new StringBuilder();
-        FetchCase     cx = new FetchCase();
-        cx.wparams   = caze.wparams ;
-        cx.options   = caze.options ;
-        cx.joinList  = caze.joinList;
-        Set<Map> set = Synt.declare(value, Set.class);
-        for(Map  map : set )
-        {
-          filter( cx , map );
-          ws.append(" OR (")
-            .append(cx.wheres)
-            .append(/**/")");
-        }
-        if (! set.isEmpty())
-        {
-          caze.where("(" + ws.substring(4) + ")");
-        }
-      }
-
       // 当前表字段
-      if (columns.containsKey(key))
+      if (fields.containsKey(key))
       {
         this.mkeyFilter(caze, value, key);
         continue;
       }
 
       // 关联表字段
-      if (value instanceof Map)
+      if (relats.containsKey(key))
       {
         this.skeyFilter(caze, value, key);
         continue;
+      }
+
+      // 组查询语句
+      if (key.equals(this.arKey))
+      {
+        this.packFilter(caze, value, "AND");
+      } else
+      if (key.equals(this.orKey))
+      {
+        this.packFilter(caze, value, "OR" );
       }
     }
   }
@@ -808,7 +830,7 @@ public class Model
     Set<String> cols;
     if (val instanceof String)
     {
-      cols = new HashSet(Arrays.asList(((String)val).split("[ ,\\+]")));
+      cols = new HashSet(Arrays.asList(((String)val).split("[, \\+]")));
     } else
     if (val instanceof Collection)
     {
@@ -1109,6 +1131,10 @@ public class Model
   protected void mkeyFilter(FetchCase caze, Object val, String key)
     throws HongsException
   {
+    if (key.indexOf('.') == -1)
+    {
+      key = ".`" + key + "`";
+    }
     if (val instanceof Map)
     {
       Map map = (Map) val;
@@ -1117,49 +1143,49 @@ public class Model
       {
         set.remove("-lt");
         Object vaz = map.get("-lt");
-        caze.where(".`"+key+"` < ?", vaz);
+        caze.where(key+" < ?", vaz);
       }
       if (map.containsKey("-le"))
       {
         set.remove("-le");
         Object vaz = map.get("-le");
-        caze.where(".`"+key+"` <= ?", vaz);
+        caze.where(key+" <= ?",vaz);
       }
       if (map.containsKey("-gt"))
       {
         set.remove("-gt");
         Object vaz = map.get("-gt");
-        caze.where(".`"+key+"` > ?", vaz);
+        caze.where(key+" > ?", vaz);
       }
       if (map.containsKey("-ge"))
       {
         set.remove("-ge");
         Object vaz = map.get("-ge");
-        caze.where(".`"+key+"` >= ?", vaz);
+        caze.where(key+" >= ?",vaz);
       }
       if (map.containsKey("-eq"))
       {
         set.remove("-eq");
         Object vaz = map.get("-eq");
-        caze.where(".`"+key+"` = ?", vaz);
+        caze.where(key+" = ?", vaz);
       }
       if (map.containsKey("-ne"))
       {
         set.remove("-ne");
         Object vaz = map.get("-ne");
-        caze.where(".`"+key+"` != ?", vaz);
+        caze.where(key+" != ?",vaz);
       }
       if (map.containsKey("-in"))
       {
         set.remove("-eq");
         Object vaz = map.get("-eq");
-        caze.where(".`"+key+"` IN (?)", vaz);
+        caze.where(key+" IN (?)", vaz);
       }
       if (map.containsKey("-ni"))
       {
         set.remove("-ne");
         Object vaz = map.get("-ne");
-        caze.where(".`"+key+"` NOT IN (?)", vaz);
+        caze.where(key+" NOT IN (?)", vaz);
       }
       if (!set.isEmpty())
       {
@@ -1171,17 +1197,17 @@ public class Model
     } else
     if (val instanceof Collection)
     {
-        Set nul = new HashSet(  ); nul.add( "" );
-        Set col = new HashSet(( Collection )val);
-        if (!col.equals(nul) && !col.isEmpty( ))
+        Set nul = new HashSet( );  nul.add("");
+        Set col = new HashSet((Collection)val);
+        if (!col.equals(nul) && !col.isEmpty())
         {
-            caze.where(".`"+key+"` IN (?)", val);
+            caze.where(key+" IN (?)", val);
         }
     } else
     {
-        if (!"".equals( val )  &&  null  != val)
+        if (! "".equals(val) && null  !=  val)
         {
-            caze.where(".`"+key + "` = ?" , val);
+            caze.where(key + " = ?" , val);
         }
     }
   }
@@ -1202,12 +1228,12 @@ public class Model
         tns  = new HashSet( ); caze.setOption("ASSOCS", tns);
     }
 
-    Map tc = this.table.getAssoc(key);
+    Map tc =  this.table.getAssoc( key );
     if (tc == null) return;
-    String[]     ts = Table.getAssocPath(tc);
-    String       tn = Table.getAssocName(tc);
-    Table        tb =  this.db.getTable (tn);
-    Map cs = tb.getFields();
+    String[] ts = Table.getAssocPath(tc);
+    String   tn = Table.getAssocName(tc);
+    Table    tb =  this.db.getTable (tn);
+    Map      cs = tb.getFields();
 
     Map<String, Object>  vs = (Map) val ;
     for (Map.Entry et2 : vs.entrySet( ))
@@ -1219,12 +1245,47 @@ public class Model
       {
         if (val2 != null)
         {
-          tns.addAll(new HashSet( Arrays.asList(ts)));
+          tns.addAll(new HashSet(Arrays.asList(ts)));
           tns.add(key);
-          FetchCase cace = caze.gotJoin(ts).join(key);
-          this.mkeyFilter( cace , val2 , key2 );
+          caze.gotJoin(ts).join (key);
+          this.mkeyFilter( caze, val2, "`"+key+"`.`"+key2+"`");
         }
       }
+    }
+  }
+
+  /**
+   * 组条件查询语句过滤
+   * @param caze
+   * @param val
+   * @param key
+   * @throws HongsException 
+   */
+  protected void packFilter(FetchCase caze, Object val, String key)
+  throws HongsException
+  {
+    StringBuilder ws = new StringBuilder();
+    FetchCase     cx = new FetchCase();
+    cx.wparams   = caze.wparams ;
+    cx.options   = caze.options ;
+    cx.joinList  = caze.joinList;
+    Set<Map> set = Synt.declare(val, Set.class);
+    for(Map  map : set)
+    {
+      filter( cx , map);
+      if (cx.wheres.length() > 0)
+      {
+        ws.append(' ')
+          .append(key)
+          .append(' ')
+          .append('(')
+          .append(cx.wheres.substring(5))
+          .append(')');
+      }
+    }
+    if (ws.length() > 0)
+    {
+      caze.where ( '(' + ws.substring(key.length() + 2) + ")");
     }
   }
 
