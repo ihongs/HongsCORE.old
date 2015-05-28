@@ -93,10 +93,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                     "org.apache.lucene.analysis.standard.StandardAnalyzer");
         }
 
-        Map ti = new HashMap();
-        ti.put("BASE_PATH", Core.BASE_PATH);
-        ti.put("VARS_PATH", Core.VARS_PATH);
-        datapath = Text.inject(datapath,ti);
+        Map m = new HashMap();
+        m.put("CORE_PATH", Core.CORE_PATH);
+        m.put("CONF_PATH", Core.CONF_PATH);
+        m.put("VARS_PATH", Core.VARS_PATH);
+        m.put("TMPS_PATH", Core.TMPS_PATH);
+        datapath = Text.inject(datapath,m);
 
         this.datapath = datapath;
         this.analyzer = analyzer;
@@ -179,7 +181,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Query q = getFind(rd);
             Sort  s = getSort(rd);
 
-            if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
                 CoreLogger.debug("...\r\n\tQuery: "+q.toString()+"\r\n\tSort : "+s.toString());
             }
 

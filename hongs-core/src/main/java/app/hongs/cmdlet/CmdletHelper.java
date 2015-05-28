@@ -1,14 +1,10 @@
 package app.hongs.cmdlet;
 
 import app.hongs.Core;
-import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
-import app.hongs.HongsException;
 import app.hongs.util.Text;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -20,11 +16,6 @@ import java.util.regex.Pattern;
 
 /**
  * 外壳程序助手类
- *
- * <h3>配置选项:</h3>
- * <pre>
- * core.cmd.line.time.format    输出记录中的时间格式, 默认为"yyyy/MM/dd HH:mm:ss"
- * </pre>
  *
  * @author Hongs
  */
@@ -286,33 +277,8 @@ public class CmdletHelper
    */
   public static void println(String text)
   {
-    CoreConfig conf = Core.getInstance(CoreConfig.class);
-    String f = conf.getProperty("core.cmd.line.time.format",
-                                "yyyy/MM/dd HH:mm:ss"  );
-    Date   d = new Date(System.currentTimeMillis());
-    String t = new SimpleDateFormat(f).format(d);
-    System.err.println(t + " " + text);
-  }
-
-  /**
-   * 输出到日志
-   * @param text
-   */
-  public static void print2Log(String text) throws HongsException
-  {
-    /**/String path = Core.ACTION_NAME.get().replace(':', '!');
-    CoreLogger logr = CoreLogger.getInstance(path);
-    logr.println(text);
-  }
-
-  /**
-   * 输出和日志
-   * @param text
-   */
-  public static void print4Log(String text) throws HongsException
-  {
-    CmdletHelper.println  (text);
-    CmdletHelper.print2Log(text);
+    String path = Core.ACTION_NAME.get().replace('/', '.').replace(':', '.');
+    CoreLogger.getLogger("hongs.print." +path).trace(CoreLogger.envir(text));
   }
 
   /**

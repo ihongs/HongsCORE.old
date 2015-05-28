@@ -224,11 +224,14 @@ public class ActionHelper
   protected final void setUploadsData(Map rd) throws HongsException {
     CoreConfig conf = CoreConfig.getInstance();
 
-    Map inj = new HashMap();
-    inj.put("BASE_PATH", Core.BASE_PATH);
-    inj.put("VARS_PATH", Core.VARS_PATH);
-    String path = conf.getProperty("core.upload.filepath", "${VARS_PATH}/upload/");
-    path = Text.inject(path, inj);
+    Map m = new HashMap();
+    m.put("BASE_PATH", Core.BASE_PATH);
+    m.put("CORE_PATH", Core.CORE_PATH);
+    m.put("CONF_PATH", Core.CONF_PATH);
+    m.put("VARS_PATH", Core.VARS_PATH);
+    m.put("TMPS_PATH", Core.TMPS_PATH);
+    String path = conf.getProperty("core.upload.filepath", "${TMPS_PATH}/upload/");
+    path = Text.inject(path, m);
 
     Set<String> allowTypes = null;
     Set<String>  denyTypes = null;
@@ -254,14 +257,14 @@ public class ActionHelper
 
     long fileSizeMax = 0;
     long fullSizeMax = 0;
-    long m;
-    m = conf.getProperty("fore.upload.file.size.max", 0);
-    if (m != 0) {
-        fileSizeMax = m;
+    long i;
+    i = conf.getProperty("fore.upload.file.size.max", 0);
+    if ( i != 0 ) {
+         fileSizeMax = i;
     }
-    m = conf.getProperty("fore.upload.full.size.max", 0);
-    if (m != 0) {
-        fullSizeMax = m;
+    i = conf.getProperty("fore.upload.full.size.max", 0);
+    if ( i != 0 ) {
+         fullSizeMax = i;
     }
 
     //** 解析数据 **/

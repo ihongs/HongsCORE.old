@@ -177,7 +177,7 @@
     <jsp-config>
         <taglib>
             <taglib-uri>/hongs.tag</taglib-uri>
-            <taglib-location>/WEB-INF/web.tld</taglib-location>
+            <taglib-location>web.tld</taglib-location>
         </taglib>
     </jsp-config>
     <!-- Other Settings -->

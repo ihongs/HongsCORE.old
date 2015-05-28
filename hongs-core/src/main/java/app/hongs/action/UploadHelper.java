@@ -122,7 +122,7 @@ public class UploadHelper {
         this.resultName = famc;
         String path = this.getResultPath();
         if (! new File(path).isAbsolute()) {
-            path = Core.BASE_PATH + "/../" + path;
+            path = Core.CORE_PATH + "/../" + path;
         }
 
         try {
@@ -197,7 +197,7 @@ public class UploadHelper {
      * @throws app.hongs.action.VerifyHelper.Wrong
      */
     public File upload(String fame) throws VerifyHelper.Wrong {
-        return upload(fame, Core.VARS_PATH + "/upload/");
+        return upload(fame, Core.TMPS_PATH + "/upload/");
     }
 
     /**

@@ -65,7 +65,8 @@ public class DBConfig
   {
     File xmlFile = new File(Core.CONF_PATH
                  + File.separator + name + ".db.xml");
-    File serFile = new File(Core.SERS_PATH
+    File serFile = new File(Core.VARS_PATH
+                 + File.separator + "serial"
                  + File.separator + name + ".db.ser");
     if (xmlFile.exists())
     {

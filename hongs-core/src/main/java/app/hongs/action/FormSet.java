@@ -93,9 +93,10 @@ public class FormSet
   protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + name + ".form.xml");
-    File serFile = new File(Core.SERS_PATH
-                + File.separator + name + ".form.ser");
+                 + File.separator + name + ".form.xml");
+    File serFile = new File(Core.VARS_PATH
+                 + File.separator + "serial"
+                 + File.separator + name + ".form.ser");
     if (xmlFile.exists())
     {
       return xmlFile.lastModified() > serFile.lastModified();

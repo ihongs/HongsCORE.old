@@ -3,10 +3,9 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
-import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Synt;
-import java.util.Map;
+import java.io.File;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
@@ -19,24 +18,23 @@ public class ServerCmdlet {
 
     @Cmdlet("start")
     public static void start(String[] args) throws HongsException {
-        Map<String, Object> opts = CmdletHelper.getOpts(args,
-            "port:i", "path:s", "help:b");
+        int port = args.length > 0 ? Synt.declare(args[0], 8080) : 8080;
 
-        if (Synt.declare(opts.get("help"), false)) {
-            System.err.println("Usage: --port SERVICE_PORT --path CONTEXT_PATH");
-            return;
+        String conf = Core.CORE_PATH + File.separator + "web.xml";
+        if(!(new File(conf)).exists()) {
+               conf = Core.CONF_PATH + File.separator + "web.xml";
         }
 
         WebAppContext webapp = new WebAppContext();
-        Server server = new Server(Synt.declare(opts.get("port"),8080));
-        webapp.setContextPath (Synt.declare(opts.get("path"),""));
-        webapp.setDescriptor  (Core.BASE_PATH+"/WEB-INF/web.xml");
-        webapp.setResourceBase(Core.CONT_PATH);
+        Server server = new Server(port);
+        webapp.setDescriptor  (conf);
+        webapp.setContextPath (Core.BASE_HREF);
+        webapp.setResourceBase(Core.BASE_PATH);
         webapp.setParentLoaderPriority( true );
         server.setHandler(webapp);
 
         Runtime.getRuntime().addShutdownHook(new StopServer(server));
-        
+
         try {
             server.start();
             server.join( );

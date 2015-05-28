@@ -1,12 +1,11 @@
 .project
 nbproject
 nb-configuration.xml
+/hongs-web/target/
 /hongs-core/target/
 /hongs-serv/target/
-/hongs-web/target/
+/hongs-serv-lucene/target/
+/hongs-serv-search/target/
 /hongs-serv-system/target/
 /hongs-serv-server/target/
-/hongs-serv-lucene/target/
-/hongs-task/target/
-/hongs-serv-resume/target/
-/hongs-serv-search/target/
+/Hongs-CORE-0.3-SNAPSHOT/

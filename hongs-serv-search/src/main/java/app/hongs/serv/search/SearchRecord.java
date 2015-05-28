@@ -219,7 +219,7 @@ public class SearchRecord extends LuceneRecord {
         try {
             Query q = getFind(rd);
 
-            if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
                 CoreLogger.debug("...\r\n\tQuery: "+q.toString());
             }
 

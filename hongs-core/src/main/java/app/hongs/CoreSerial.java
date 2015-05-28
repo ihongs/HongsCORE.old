@@ -149,7 +149,7 @@ public abstract class CoreSerial
   {
     if (path == null)
     {
-      path = Core.SERS_PATH;
+        path = Core.VARS_PATH + File.separator + "serial";
     }
     File file = new File(path + File.separator + name + ".ser");
     this.load(file, time + file.lastModified( ));
@@ -167,7 +167,7 @@ public abstract class CoreSerial
   {
     if (path == null)
     {
-      path = Core.SERS_PATH;
+        path = Core.VARS_PATH + File.separator + "serial";
     }
     File file = new File(path + File.separator + name + ".ser");
     this.load(file, date!=null?date.getTime():0);

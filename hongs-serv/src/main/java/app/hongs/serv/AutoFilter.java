@@ -82,7 +82,7 @@ public class AutoFilter implements Filter {
                 }
             }
         } else {
-            File file = new File(Core.CONT_PATH + url);
+            File file = new File(Core.BASE_PATH + url);
             if (!file.exists()) {
                 String uri;
 
@@ -107,7 +107,7 @@ public class AutoFilter implements Filter {
 
     private boolean doForwar(ServletRequest req, ServletResponse rsp, String url, String uri)
             throws ServletException, IOException {
-        File file = new File(Core.CONT_PATH +"/"+ render+uri);
+        File file = new File(Core.BASE_PATH +"/"+ render+uri);
         if (file.exists()) {
             // 虚拟路径
             req.setAttribute(ActionDriver.PATH, url);

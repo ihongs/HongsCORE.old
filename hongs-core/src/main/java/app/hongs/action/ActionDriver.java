@@ -84,85 +84,88 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
          * 如果核心类中基础路径已设置, 则表示已经被实例过了
          * 即无需再重复获取配置信息了
          */
-        if (Core.ENVIR == 1 && Core.BASE_HREF != null) {
+        if (Core.ENVIR == 1) {
             return;
         }
         INIT= true;
 
-        System.setProperty( "file.encoding", "UTF-8" );
+        if (Core.BASE_HREF != null) {
+            System.setProperty("file.encoding", "UTF-8");
 
-        /** 静态属性配置 **/
+            /** 核心属性配置 **/
 
-        String str;
+            String str;
 
-        Core.ENVIR = 1;
-        Core.DEBUG = 0;
-        Core.BASE_HREF = cont.getContextPath();
-        Core.CONT_PATH = cont.getRealPath ("");
-        Core.BASE_PATH = Core.CONT_PATH + File.separator + "WEB-INF";
+            Core.ENVIR = 1;
+            Core.DEBUG = 0;
+            Core.BASE_HREF = cont.getContextPath();
+            Core.BASE_PATH = cont.getRealPath("" );
 
-        // 调试开关
-        str = cont.getInitParameter("debug");
-        if (str != null) {
-            Core.DEBUG = Byte.parseByte(str);
+            str = cont.getInitParameter("debug");
+            if (str != null) {
+                Core.DEBUG = Byte.parseByte(str);
+            }
+
+            Core.CORE_PATH = Core.BASE_PATH + File.separator + "WEB-INF";
+            File cp = new File( Core.CORE_PATH );
+            if (!cp.exists()) {
+                Core.CORE_PATH = cp.getParent( );
+            }
+
+            Core.CONF_PATH = Core.CORE_PATH + File.separator + "etc";
+            Core.VARS_PATH = Core.CORE_PATH + File.separator + "var";
+            Core.TMPS_PATH = Core.VARS_PATH + File.separator + "tmp";
+
+            //** 系统属性配置 **/
+
+            CoreConfig cnf = CoreConfig.getInstance("_begin_");
+
+            Core.SERVER_ID = cnf.getProperty("core.server.id", "1");
+
+            Map m = new HashMap();
+            m.put("BASE_PATH", Core.BASE_PATH);
+            m.put("CORE_PATH", Core.CORE_PATH);
+            m.put("CONF_PATH", Core.CONF_PATH);
+            m.put("VARS_PATH", Core.VARS_PATH);
+            m.put("TMPS_PATH", Core.TMPS_PATH);
+
+            // 启动系统属性
+            for (Map.Entry et : cnf.entrySet( )) {
+                String k = (String)et.getKey(  );
+                String v = (String)et.getValue();
+                if (k.startsWith("begin.")) {
+                    k = k.substring(6  );
+                    v = Text.inject(v,m);
+                    System.setProperty(k,v);
+                }
+            }
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+            // 调试系统属性
+            for (Map.Entry et : cnf.entrySet()) {
+                String k = (String)et.getKey ( );
+                String v = (String)et.getValue();
+                if (k.startsWith("debug.")) {
+                    k = k.substring(6  );
+                    v = Text.inject(v,m);
+                    System.setProperty(k,v);
+                }
+            }
+            }
         }
-
-        // 资源目录
-        Core.CONF_PATH = Core.BASE_PATH + File.separator + "etc";
-        Core.VARS_PATH = Core.BASE_PATH + File.separator + "var";
-
-        CoreConfig conf = CoreConfig.getInstance("_begin_");
-
-        // 资源配置
-        Core.VARS_PATH = conf.getProperty("core.vars.path", Core.VARS_PATH);
-        Core.LOGS_PATH = Core.VARS_PATH + File.separator + "log";
-        Core.SERS_PATH = Core.VARS_PATH + File.separator + "ser";
-        Core.LOGS_PATH = conf.getProperty("core.logs.path", Core.LOGS_PATH);
-        Core.SERS_PATH = conf.getProperty("core.tmps.path", Core.SERS_PATH);
-        Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
         // 调一下 ActionRunner 来加载动作
         ActionRunner.getActions();
 
-        //** 系统属性配置 **/
-
-        Map m = new HashMap();
-        m.put("BASE_PATH", Core.BASE_PATH);
-        m.put("CONF_PATH", Core.CONF_PATH);
-        m.put("VARS_PATH", Core.VARS_PATH);
-
-        // 启动系统属性
-        for (Map.Entry et : conf.entrySet()) {
-            String k = (String)et.getKey ( );
-            String v = (String)et.getValue();
-            if (k.startsWith("begin.")) {
-                k = k.substring(6  );
-                v = Text.inject(v,m);
-                System.setProperty(k,v);
-            }
-        }
-
-        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
-        // 调试系统属性
-        for (Map.Entry et : conf.entrySet()) {
-            String k = (String)et.getKey ( );
-            String v = (String)et.getValue();
-            if (k.startsWith("debug.")) {
-                k = k.substring(6  );
-                v = Text.inject(v,m);
-                System.setProperty(k,v);
-            }
-        }
-
+        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
             CoreLogger.debug(new StringBuilder("...")
                 .append("\r\n\tSERVER_ID   : ").append(Core.SERVER_ID)
                 .append("\r\n\tBASE_HREF   : ").append(Core.BASE_HREF)
-                .append("\r\n\tWEBS_PATH   : ").append(Core.CONT_PATH)
                 .append("\r\n\tBASE_PATH   : ").append(Core.BASE_PATH)
+                .append("\r\n\tCORE_PATH   : ").append(Core.CORE_PATH)
                 .append("\r\n\tCONF_PATH   : ").append(Core.CONF_PATH)
                 .append("\r\n\tVARS_PATH   : ").append(Core.VARS_PATH)
-                .append("\r\n\tLOGS_PATH   : ").append(Core.LOGS_PATH)
-                .append("\r\n\tSERS_PATH   : ").append(Core.SERS_PATH)
+                .append("\r\n\tTMPS_PATH   : ").append(Core.TMPS_PATH)
                 .toString());
         }
     }
@@ -176,7 +179,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             return;
         }
 
-        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
+        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
             Core core = Core.GLOBAL_CORE;
             long time = System.currentTimeMillis() - Core.STARTS_TIME;
             CoreLogger.debug(new StringBuilder("...")
@@ -255,7 +258,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
 //      if (!hlpr.getResponse().isCommitted()) {
             Map dat  = hlpr.getResponseData();
             if (dat != null) {
-                if (0< Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
+                if (0< Core.DEBUG && 8 != (8 & Core.DEBUG)) {
                     req.setAttribute("__HONGS_DATA__", dat );
                 }
 
@@ -329,7 +332,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     }
 
     private void doFinish(Core core, ActionHelper hlpr, HttpServletRequest req) {
-        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
+        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
             ActionHelper that = Core.getInstance(ActionHelper.class);
             HttpServletRequest R = that.getRequest();
             long time = System.currentTimeMillis() - Core.ACTION_TIME.get();

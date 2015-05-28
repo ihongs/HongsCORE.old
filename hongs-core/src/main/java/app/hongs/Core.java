@@ -28,14 +28,13 @@ import java.util.Map;
  *
  * <h3>静态属性:</h3>
  * <pre>
- DEBUG            标识不同调试模式(0 无 , 1 输出, 2 日志, 4 禁止了调试 8 禁止了错误; 可使用位运算, 比如 3 表示既输出又记录)
  ENVIR            标识不同运行环境(0 cmd, 1 web)
+ DEBUG            标识不同调试模式(0 无 , 1 输出, 2 日志, 4 禁止错误 8 禁止调试 16 静默模式; 可使用位运算, 比如 3 表示既输出又记录)
  BASE_HREF        应用访问路径(WEB应用中为ContextPath)
- BASE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
- CONF_PATH        配置信息存放目录
- VARS_PATH        临时文件存放目录
- LOGS_PATH        日志文件存放目录
- SERS_PATH        缓存文件存放目录
+ CORE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
+ CONF_PATH        配置文件存放目录
+ VARS_PATH        数据文件存放目录
+ TMPS_PATH        临时文件存放目录
  SERVER_ID        服务器ID(会附在 Core.getUniqueId() 的左侧)
  注: 以上属性需要在 Servlet/Filter/Cmdlet 等初始化时进行设置.
  </pre>
@@ -312,29 +311,29 @@ extends HashMap<String, Object>
   //** 静态属性及方法 **/
 
   /**
-   * 调试级别(0 无, 1输出, 2日志, 4禁用调试, 8禁用错误)
-   */
-  public static byte DEBUG;
-
-  /**
    * 运行环境(0 Cmd, 1 Web)
    */
   public static byte ENVIR;
 
   /**
-   * 应用基础链接
+   * 调试级别(0 无 , 1 输出, 2 日志, 4 禁用错误, 8 禁用调试, 16 静默模式)
+   */
+  public static byte DEBUG;
+
+  /**
+   * WEB基础链接
    */
   public static String BASE_HREF = null;
 
   /**
-   * 应用基础目录
+   * WEB顶级目录
    */
   public static String BASE_PATH = null;
 
   /**
-   * 应用顶级目录
+   * 应用文件顶级目录
    */
-  public static String CONT_PATH;
+  public static String CORE_PATH = null;
 
   /**
    * 配置文件存放目录
@@ -342,19 +341,14 @@ extends HashMap<String, Object>
   public static String CONF_PATH;
 
   /**
-   * 临时文件存放目录
+   * 数据文件存放目录
    */
   public static String VARS_PATH;
 
   /**
-   * 日志文件存放目录
+   * 临时文件存放目录
    */
-  public static String LOGS_PATH;
-
-  /**
-   * 缓存文件存放目录
-   */
-  public static String SERS_PATH;
+  public static String TMPS_PATH;
 
   /**
    * 服务器编号

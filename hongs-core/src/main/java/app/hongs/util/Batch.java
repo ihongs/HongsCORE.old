@@ -49,7 +49,9 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
         }
 
         if (name != null) {
-            back  = new File(Core.SERS_PATH + File.separator + name + ".batch.ser");
+            back  = new File(Core.VARS_PATH
+                  + File.separator + "serial"
+                  + File.separator + name + ".batch.ser");
             if (back.exists()) {
                 load ( back );
             }

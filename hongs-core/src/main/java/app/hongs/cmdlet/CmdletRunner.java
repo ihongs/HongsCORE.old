@@ -9,6 +9,7 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.util.Cname;
+import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
- * 外壳程序启动器(原名shell)
+ * 外壳程序启动器
  *
  * <h3>配置选项:</h3>
  * <pre>
@@ -48,7 +48,7 @@ public class CmdletRunner
 
     if (null == act || act.length() == 0)
     {
-      CmdletHelper.println("ERROR: Cmdlet name can not be empty.");
+      System.err.println("ERROR: Cmdlet name can not be empty.");
       return;
     }
 
@@ -56,21 +56,21 @@ public class CmdletRunner
     Method method = getCmdlets().get(act);
     if (null == method)
     {
-      CmdletHelper.println("ERROR: Cmdlet "+act+" is not exists.");
+      System.err.println("ERROR: Cmdlet "+act+" is not exists.");
       return;
     }
 
     // 执行方法
     try
     {
-      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+      if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
         CoreLogger.debug(Core.ACTION_NAME.get()+" Starting...");
       }
 
       method.invoke(null, new Object[] {args} );
 
-      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+      if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
         CoreLogger.debug(Core.ACTION_NAME.get()+" Finished!!!");
       }
@@ -123,7 +123,7 @@ public class CmdletRunner
        * 输出总的运行时间
        * 并清除参数及核心
        */
-      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+      if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
           CoreLogger.debug("Total exec time: "
           +(Text.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
@@ -136,75 +136,56 @@ public class CmdletRunner
   {
     Map<String, Object> opts;
     opts = CmdletHelper.getOpts(args,
-      "debug:i", "basepath:s", "websroot:s", "basehref:s", "timezone:s", "language:s", "request--:s" , "session--:s"
+      "debug:i",
+      "request--:s", "session--:s", "context--:s",
+      "corepath--:s", "confpath--:s", "varspath--:s", "tmpspath--:s",
+      "basepath--:s", "basehref--:s", "language--:s", "timezone--:s"
     );
     args = (String[]) opts.get("");
 
     Core.THREAD_CORE.set(Core.GLOBAL_CORE);
     Core.ACTION_TIME.set(Core.STARTS_TIME);
 
-    /** 静态属性配置 **/
+    /** 核心属性配置 **/
 
     Core.ENVIR = 0;
-    Core.DEBUG = 0;
-    Core.BASE_PATH = System.getProperty("user.dir");
 
-    if (opts.containsKey("debug"))
-    {
-      Core.DEBUG = Byte.parseByte(opts.get("debug").toString());
+    Core.DEBUG = Synt.declare(opts.get("debug") , (byte)  0 );
+
+    Core.CORE_PATH = Synt.declare(opts.get("corepath--"), System.getProperty("user.dir"));
+
+    Core.CONF_PATH = Synt.declare(opts.get("confpath--"), Core.CORE_PATH + File.separator + "etc");
+
+    Core.VARS_PATH = Synt.declare(opts.get("varspath--"), Core.CORE_PATH + File.separator + "var");
+
+    Core.TMPS_PATH = Synt.declare(opts.get("tmpspath--"), Core.VARS_PATH + File.separator + "tmp");
+
+    Core.BASE_PATH = Synt.declare(opts.get("basepath--"), Core.CORE_PATH + File.separator + "web");
+
+    Core.BASE_HREF = Synt.declare(opts.get("basehref--"), "");
+
+    // 如果 web 目录不存在, 则可能在 WEB-INF 下
+    File bp = new File(Core.BASE_PATH );
+    if (!bp.exists()) {
+        Core.BASE_PATH = bp.getParent();
     }
-
-    if (opts.containsKey("basepath"))
-    {
-      Core.BASE_PATH = (String)opts.get( "basepath" );
-      Core.BASE_PATH =  Pattern.compile( "[/\\\\]$" )
-          .matcher(Core.BASE_PATH).replaceFirst( "" );
-    }
-
-    if (opts.containsKey("webspath"))
-    {
-      Core.CONT_PATH = (String)opts.get( "webspath" );
-      Core.CONT_PATH =  Pattern.compile( "[/\\\\]$" )
-          .matcher(Core.CONT_PATH).replaceFirst( "" );
-    }
-    else
-    {
-      Core.CONT_PATH = Core.BASE_PATH + "/..";
-    }
-
-    if (opts.containsKey("basehref"))
-    {
-      Core.BASE_HREF = (String)opts.get( "basehref" );
-      Core.BASE_HREF =  Pattern.compile( "[/\\\\]$" )
-          .matcher(Core.BASE_HREF).replaceFirst( "" );
-    }
-    else
-    {
-      Core.BASE_HREF = "";
-    }
-
-    Core.CONF_PATH = Core.BASE_PATH + File.separator + "etc";
-    Core.VARS_PATH = Core.BASE_PATH + File.separator + "var";
-
-    CoreConfig conf = CoreConfig.getInstance("_begin_");
-
-    Core.VARS_PATH = conf.getProperty("core.vars.path", Core.VARS_PATH);
-    Core.LOGS_PATH = Core.VARS_PATH + File.separator + "log";
-    Core.SERS_PATH = Core.VARS_PATH + File.separator + "ser";
-    Core.LOGS_PATH = conf.getProperty("core.logs.path", Core.LOGS_PATH);
-    Core.SERS_PATH = conf.getProperty("core.tmps.path", Core.SERS_PATH);
-    Core.SERVER_ID = conf.getProperty("core.server.id", "" );
 
     /** 系统属性配置 **/
 
+    CoreConfig cnf = CoreConfig.getInstance("_begin_");
+
+    Core.SERVER_ID = cnf.getProperty("core.server.id", "1");
+
     Map m = new HashMap();
     m.put("BASE_PATH", Core.BASE_PATH);
+    m.put("CORE_PATH", Core.CORE_PATH);
     m.put("CONF_PATH", Core.CONF_PATH);
     m.put("VARS_PATH", Core.VARS_PATH);
+    m.put("TMPS_PATH", Core.TMPS_PATH);
 
     // 启动系统属性
-    for (Map.Entry et : conf.entrySet()) {
-        String k = (String)et.getKey ( );
+    for (Map.Entry et : cnf.entrySet( )) {
+        String k = (String)et.getKey(  );
         String v = (String)et.getValue();
         if (k.startsWith("begin.")) {
             k = k.substring(6  );
@@ -213,9 +194,9 @@ public class CmdletRunner
         }
     }
 
-    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG))) {
+    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
     // 调试系统属性
-    for (Map.Entry et : conf.entrySet()) {
+    for (Map.Entry et : cnf.entrySet()) {
         String k = (String)et.getKey ( );
         String v = (String)et.getValue();
         if (k.startsWith("debug.")) {
@@ -228,7 +209,7 @@ public class CmdletRunner
 
     /** 实例属性配置 **/
 
-    conf = CoreConfig.getInstance();
+    cnf = CoreConfig.getInstance();
 
     String act = null;
     if (args.length > 0 )
@@ -241,24 +222,24 @@ public class CmdletRunner
     Core.ACTION_NAME.set(act);
 
     String zone = null;
-    if (opts.containsKey("timezone"))
+    if (opts.containsKey("timezone--"))
     {
-      zone = (String)opts.get("timezone");
+      zone = (String)opts.get("timezone--");
     }
     if (zone == null || zone.length() == 0)
     {
-      zone = conf.getProperty("core.timezone.default");
+      zone = cnf.getProperty("core.timezone.default");
     }
     Core.ACTION_ZONE.set(zone);
 
     String lang = null;
-    if (opts.containsKey("language"))
+    if (opts.containsKey("language--"))
     {
-      lang = (String)opts.get("language");
+      lang = (String)opts.get("language--");
     }
     if (lang == null || lang.length() == 0)
     {
-      if (conf.getProperty("core.language.probing", false))
+      if (cnf.getProperty("core.language.probing", false))
       {
         String l = System.getProperty("user.language");
         String c = System.getProperty("user.country" );
@@ -281,12 +262,12 @@ public class CmdletRunner
         }
         if (lang == null)
         {
-          lang = conf.getProperty("core.language.default", "zh-CN");
+          lang = cnf.getProperty("core.language.default", "zh-CN");
         }
       }
       else
       {
-          lang = conf.getProperty("core.language.default", "zh-CN");
+          lang = cnf.getProperty("core.language.default", "zh-CN");
       }
     }
     else

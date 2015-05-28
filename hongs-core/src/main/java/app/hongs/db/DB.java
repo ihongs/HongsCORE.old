@@ -251,7 +251,7 @@ public class DB
         }
         this.connection.setAutoCommit( false );
 
-        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
         {
           CoreLogger.debug("Connect to database(origin mode): "+name);
         }
@@ -299,8 +299,10 @@ public class DB
 
         // 注入特定路径
         Map inj = new HashMap();
-        inj.put("BASE_PATH", Core.BASE_PATH);
+        inj.put("CORE_PATH", Core.CORE_PATH);
+        inj.put("CONF_PATH", Core.CONF_PATH);
         inj.put("VARS_PATH", Core.VARS_PATH);
+        inj.put("TMPS_PATH", Core.VARS_PATH);
         uri = Text.inject(uri, inj);
         url = "jdbc:sqlite:" + uri ;
 
@@ -375,7 +377,7 @@ public class DB
         this.connection = pool.getConnection();
         this.connection.setAutoCommit( false );
 
-        if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
         {
           CoreLogger.debug("Connect to database(source mode): "+drv+" "+url);
         }
@@ -431,7 +433,7 @@ public class DB
         return;
       }
 
-      if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+      if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
         CoreLogger.debug("Close database connection, URL: "
           + this.connection.getMetaData().getURL());
@@ -571,7 +573,7 @@ public class DB
       return tobj;
     }
 
-    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
       app.hongs.CoreLogger.debug(
           "INFO(DB): tableClass("+tcls+") for table("+tableName+") has been defined, try to get it");
@@ -694,7 +696,7 @@ public class DB
       return mobj;
     }
 
-    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
       app.hongs.CoreLogger.debug(
           "INFO(DB): modelClass("+mcls+") for table("+tableName+") has been defined, try to get it");
@@ -975,7 +977,7 @@ public class DB
   {
     this.connect();
 
-    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -1117,7 +1119,7 @@ public class DB
   {
     this.connect();
 
-    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -1157,7 +1159,7 @@ public class DB
   {
     this.connect();
 
-    if (0 < Core.DEBUG && !(4 == (4 & Core.DEBUG)))
+    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
       StringBuilder sb = new StringBuilder(sql);
       List      paramz = new ArrayList(Arrays.asList(params));
@@ -1488,12 +1490,12 @@ public class DB
    * 如果指定数据库配置中有指定dbClass, 务必添加方法:
    * </p>
    * <pre>
-   * public static XxxDB getInstance()
-   *    throws HongsException
-   * {
-   *    return new XxxDB();
-   * }
-   * </pre>
+ public static XxxDB getLogger()
+    throws HongsException
+ {
+    return new XxxDB();
+ }
+ </pre>
    * @param name
    * @return 指定DB对象
    * @throws app.hongs.HongsException
@@ -1570,12 +1572,12 @@ public class DB
    * 如果指定数据库配置中有指定dbClass, 务必添加方法:
    * </p>
    * <pre>
-   * public static XxxDB getInstance()
-   *    throws HongsException
-   * {
-   *    return new XxxDB();
-   * }
-   * </pre>
+ public static XxxDB getLogger()
+    throws HongsException
+ {
+    return new XxxDB();
+ }
+ </pre>
    * @return 默认DB对象
    * @throws app.hongs.HongsException
    */

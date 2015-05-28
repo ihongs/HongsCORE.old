@@ -128,9 +128,10 @@ public class MenuSet
   protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                + File.separator + name + ".menu.xml");
-    File serFile = new File(Core.SERS_PATH
-                + File.separator + name + ".menu.ser");
+                 + File.separator + name + ".menu.xml");
+    File serFile = new File(Core.VARS_PATH
+                 + File.separator + "serial"
+                 + File.separator + name + ".menu.ser");
     if (xmlFile.exists())
     {
       return xmlFile.lastModified() > serFile.lastModified();

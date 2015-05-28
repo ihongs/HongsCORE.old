@@ -31,13 +31,11 @@ public class SystemCmdlet {
      */
     @Cmdlet("setup")
     public static void setup(String[] args) throws HongsException {
-        String dir = "_setup_";
+        String dir;
         if ( 0  < args.length ) {
             dir = args[0];
-        }
-
-        if (! new File(dir).isAbsolute()) {
-            dir = Core.BASE_PATH+"/"+dir;
+        } else {
+            dir = Core.CONF_PATH + "/_setup_";
         }
 
         List<File> fxs = new ArrayList();
