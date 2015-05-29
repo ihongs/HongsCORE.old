@@ -49,6 +49,7 @@ public class CmdletRunner
     if (null == act || act.length() == 0)
     {
       System.err.println("ERROR: Cmdlet name can not be empty.");
+      System.exit(2);
       return;
     }
 
@@ -57,6 +58,7 @@ public class CmdletRunner
     if (null == method)
     {
       System.err.println("ERROR: Cmdlet "+act+" is not exists.");
+      System.exit(2);
       return;
     }
 
@@ -65,23 +67,25 @@ public class CmdletRunner
     {
       if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
-        CoreLogger.debug(Core.ACTION_NAME.get()+" Starting...");
+        CmdletHelper.println("Starting...");
       }
 
-      method.invoke(null, new Object[] {args} );
+      method.invoke(null, new Object[] { args } );
 
       if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
-        CoreLogger.debug(Core.ACTION_NAME.get()+" Finished!!!");
+        CmdletHelper.println("Finished!!!");
       }
     }
     catch (   IllegalAccessException ex)
     {
-      CmdletHelper.println("ERROR: Illegal access for method '"+method.getClass().getName()+"."+method.getName()+"(String[]).");
+      CoreLogger.error("Illegal access for method '"+method.getClass().getName()+"."+method.getName()+"(String[]).");
+      System.exit(3);
     }
     catch ( IllegalArgumentException ex)
     {
-      CmdletHelper.println("ERROR: Illegal params for method '"+method.getClass().getName()+"."+method.getName()+"(String[]).");
+      CoreLogger.error("Illegal params for method '"+method.getClass().getName()+"."+method.getName()+"(String[]).");
+      System.exit(3);
     }
     catch (InvocationTargetException ex)
     {
@@ -105,8 +109,8 @@ public class CmdletRunner
         }
       }
 
-      CmdletHelper.println(error);
       CoreLogger.error(ta);
+      System.exit(4);
     }
     finally
     {
@@ -117,6 +121,7 @@ public class CmdletRunner
       catch (Throwable e)
       {
           CoreLogger.error(e);
+          System.exit (5);
       }
 
       /**
@@ -125,7 +130,7 @@ public class CmdletRunner
        */
       if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
-          CoreLogger.debug("Total exec time: "
+          CmdletHelper.println("Total exec time: "
           +(Text.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
       }
     }
@@ -136,10 +141,10 @@ public class CmdletRunner
   {
     Map<String, Object> opts;
     opts = CmdletHelper.getOpts(args,
-      "debug:i",
-      "request--:s", "session--:s", "context--:s",
-      "corepath--:s", "confpath--:s", "varspath--:s", "tmpspath--:s",
-      "basepath--:s", "basehref--:s", "language--:s", "timezone--:s"
+      "debug:i" ,
+      "corepath:s" , "confpath:s" , "varspath:s" , "tmpspath:s" ,
+      "basepath:s" , "basehref:s" , "language:s" , "timezone:s" ,
+      "request--:s", "session--:s", "context--:s"
     );
     args = (String[]) opts.get("");
 
@@ -152,17 +157,17 @@ public class CmdletRunner
 
     Core.DEBUG = Synt.declare(opts.get("debug") , (byte)  0 );
 
-    Core.CORE_PATH = Synt.declare(opts.get("corepath--"), System.getProperty("user.dir"));
+    Core.CORE_PATH = Synt.declare(opts.get("corepath"), System.getProperty("user.dir"));
 
-    Core.CONF_PATH = Synt.declare(opts.get("confpath--"), Core.CORE_PATH + File.separator + "etc");
+    Core.CONF_PATH = Synt.declare(opts.get("confpath"), Core.CORE_PATH + File.separator + "etc");
 
-    Core.VARS_PATH = Synt.declare(opts.get("varspath--"), Core.CORE_PATH + File.separator + "var");
+    Core.VARS_PATH = Synt.declare(opts.get("varspath"), Core.CORE_PATH + File.separator + "var");
 
-    Core.TMPS_PATH = Synt.declare(opts.get("tmpspath--"), Core.VARS_PATH + File.separator + "tmp");
+    Core.TMPS_PATH = Synt.declare(opts.get("tmpspath"), Core.VARS_PATH + File.separator + "tmp");
 
-    Core.BASE_PATH = Synt.declare(opts.get("basepath--"), Core.CORE_PATH + File.separator + "web");
+    Core.BASE_PATH = Synt.declare(opts.get("basepath"), Core.CORE_PATH + File.separator + "web");
 
-    Core.BASE_HREF = Synt.declare(opts.get("basehref--"), "");
+    Core.BASE_HREF = Synt.declare(opts.get("basehref"), "");
 
     // 如果 web 目录不存在, 则可能在 WEB-INF 下
     File bp = new File(Core.BASE_PATH );
@@ -222,9 +227,9 @@ public class CmdletRunner
     Core.ACTION_NAME.set(act);
 
     String zone = null;
-    if (opts.containsKey("timezone--"))
+    if (opts.containsKey("timezone"))
     {
-      zone = (String)opts.get("timezone--");
+      zone = (String)opts.get("timezone");
     }
     if (zone == null || zone.length() == 0)
     {
@@ -233,9 +238,9 @@ public class CmdletRunner
     Core.ACTION_ZONE.set(zone);
 
     String lang = null;
-    if (opts.containsKey("language--"))
+    if (opts.containsKey("language"))
     {
-      lang = (String)opts.get("language--");
+      lang = (String)opts.get("language");
     }
     if (lang == null || lang.length() == 0)
     {
@@ -279,7 +284,7 @@ public class CmdletRunner
           lang = CoreLocale.getAcceptLanguage(lang);
       if (lang ==null)
       {
-        CmdletHelper.println("ERROR: Unsupported language: "+l+".");
+        CoreLogger.error("ERROR: Unsupported language: "+l+".");
         System.exit(1);
       }
     }

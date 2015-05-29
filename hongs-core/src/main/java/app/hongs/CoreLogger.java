@@ -61,21 +61,28 @@ public class CoreLogger
     /**
      * 输出
      * @param text
+     * @param args
      */
-    public static void print(String text, Object... args) {
-        if (16 == (16 & Core.DEBUG)) {
-            return; // 禁止了输出
+    public static void trace(String text, Object... args) {
+        if (4 == (4 & Core.DEBUG)) {
+            return; // 禁止跟踪
         }
-        getLogger("hongs.print").trace(envir(text), args);
+        if (1 == (1 & Core.DEBUG)) {
+            getLogger("hongs.print").trace(envir(text), args);
+        }
+        if (2 == (2 & Core.DEBUG)) {
+            getLogger("hongs.trace").trace(envir(text), args);
+        }
     }
 
     /**
      * 调试
      * @param text
+     * @param args
      */
     public static void debug(String text, Object... args) {
         if (8 == (8 & Core.DEBUG)) {
-            return; // 禁止了调试
+            return; // 禁止调试
         }
         if (1 == (1 & Core.DEBUG)) {
             getLogger("hongs.print").debug(envir(text), args);
@@ -87,13 +94,13 @@ public class CoreLogger
 
     /**
      * 错误
+     * 既不显示又不记录则显示错误
      * @param text
+     * @param args
      */
     public static void error(String text, Object... args) {
-        if (4 == (4 & Core.DEBUG)) {
-            return; // 禁止了错误
-        }
-        if (1 == (1 & Core.DEBUG)) {
+        if (1 == (1 & Core.DEBUG )
+        ||  2 != (2 & Core.DEBUG)) {
             getLogger("hongs.print").error(envir(text), args);
         }
         if (2 == (2 & Core.DEBUG)) {
@@ -103,13 +110,19 @@ public class CoreLogger
 
     /**
      * 错误
+     * 既不显示又不记录则显示概要
      * @param t
      */
     public static void error(Throwable t)
     {
+        if (1 != (1 & Core.DEBUG )
+        &&  2 != (2 & Core.DEBUG)) {
+            getLogger("hongs.print").error(envir(t.getMessage()));
+            return;
+        }
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         t.printStackTrace(new PrintStream(b));
-        CoreLogger.error(b.toString());
+        CoreLogger.error (/**/b.toString ( ));
     }
 
 }

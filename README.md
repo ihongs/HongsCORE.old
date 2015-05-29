@@ -1,12 +1,12 @@
 # HongsCORE framework for Java
 
-* 文档版本: 15.02.14
-* 软件版本: 0.3.6-20150303
+* 文档版本: 15.05.28
+* 软件版本: 0.3.6-20150528
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
 **HongsCORE** 即 **Hong's Common Object Requesting Engine**, 通用对象请求引擎, 拼凑的有些生硬. 在设计第一个原型框架时(PHP 版 2006 年), 我买了一台 Intel Core CPU 的笔记本电脑, 当时随意的给她取了个名字叫 Core, 后来觉得名字应该更有意义才扩展成了以上缩写.
-另一个理由是, 从最初的 PHP 版一直到现在的 Java 版, 我都有设计一个核心工厂类, 主要作用就是用于请求和管理唯一对象, 实现  Singleton (单例模式), 在需要某个对象时只管请求, 使对象的使用效率更高. 具体到这个 Java 版本中, 利用了 Tomcat 等 Servlet 容器的单实例多线程特性来实现行之有效的单例模式.
+另一个原因是: 从最初的 PHP 版一直到现在的 Java 版, 我都有设计一个核心工厂类, 主要作用就是用于请求和管理唯一对象, 实现  Singleton (单例模式), 在需要某个对象时只管请求, 使对象的使用效率更高. 具体到这个 Java 版本中, 利用了 Tomcat 等 Servlet 容器的单实例多线程特性来实现行之有效的单例模式.
 
 原 PHP 版框架在 上海科捷信息技术有限公司(北京) 的 AFP8 系统(已被其他公司收购)中使用, 其部分模块是在科捷的工作期间开发的, 本人已于 2011 年离开科捷, 故不再对其更新. 原科捷公司和其 AFP8 系统及其衍生品拥有原 PHP 版框架代码的全部处置权.
 
@@ -14,33 +14,33 @@
 
 ## 使用方法
 
-下载 HongsCORE-x.x.x.zip 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `WEB-INF/run system:setup` 设置数据库, 再执行 `WEB-INF/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://127.0.0.1:8080/ 即可进入; 登录账号 `admin@xxx.com` 口令 `123456`; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; Linux,Mac 系统需要先赋予 run 执行权限(`chmod +x WEB-INF/run`).
+下载 Hongs-CORE-x.x.x.tar.gz 后解压到任意目录, 打开命令行(Linux,Mac的终端)并切换到该目录下, 先执行 `bin/run system:setup` 设置数据库, 再执行 `bin/run server:start` 启动服务器, 然后打开浏览器在地址栏输入 http://localhost:8080/ 即可进入; 登录账号 `admin@xxx.com` 口令 `123456`; 如需停止服务, 关闭命令窗口或按 Ctrl+C 即可; Linux,Mac 系统需要检查 run 是否有执行权限(`chmod +x etc/*`).
 
 同时为 windows 用户提供了 setup.bat 和 start.bat 两个快捷命令来执行上面的两条命令, windows 用户只需双击即可设置和启动.
 
-注意: 需要 JDK 而非 JRE(Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 系统为 Windows 在官网下载并使用安装程序安装的通常已自动设置好了.
+注意: 需要 JDK 而非 JRE(Java) 才能运行, 使用前请确保 JDK 已安装并加入 PATH 环境变量, 或设置 JAVA_HOME 环境变量为 jdk 的安装目录(Windows 必须设置). Windows,Linux,Mac 系统在官网下载并使用安装程序安装的通常已自动设置好了.
 
 > JDK 下载地址: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 ## 前端开发
 
-如果你是一个前端开发人员，别去想什么 Node.js,MongoDB 等 javascript 一统前后端的方案了, 你应该做的就是把体验做好, 神马增删改查/权限控制就不要去想了, 你只需:
+如果你是一位前端开发人员，别去想什么 Node.js,MongoDB 等 javascript 一统前后端的方案了, 你应该做的就是把体验做好, 神马增/删/改/查/接口/权限就不用费劲考虑了, 你只需:
 
-1. 复制 demo/dl.form.xml 到 WEB-INF/etc 下并更名为 mytest.form.xml
-2. 复制 demo/dl.menu.xml 到 WEB-INF/etc 下并更名为 mytest.menu.xml
+1. 复制 etc/demo/dl.form.xml 到 etc 下并更名为 mytest.form.xml
+2. 复制 etc/demo/dl.menu.xml 到 etc 下并更名为 mytest.menu.xml
 3. 用文本编辑器打开 mytest.menu.xml 将 demo/dl 全部替换为 mytest, 并将"文档库测试"改成"我的测试"
 4. 用文本编辑器打开 default.menu.xml 在 root>menu 下加入[code]<include>mytest</include>[/code]
 5. 按照使用方法启动服务并打开浏览器登录后, 就能在右上角下拉菜单找到"我的测试"了
 
 现在, 你可以在项目目录下创建以下文件重建页面体系
 
-    mytest/default.html     默认索引页
+    mytest/default.html     索引页
     mytest/list.html        列表页
     mytest/list4select.html 选择页
     mytest/form.html        创建页
     mytest/form4update.html 修改页
 
-一个简单的方法是通过 http://127.0.0.1/myproj/mytest/form.html 这样的 url 来获取原始是 html 文件, 然后存下来后在这个基础上改. 以后会增加一个按钮来比较方便的固化这个 html.
+一个简单的方法是通过 http://localhost:8080/mytest/form.html 这样的 url 来获取 html 文件, 然后存下来后在这个基础上改. 以后会增加一个按钮来比较方便的固化这个 html.
 
 ## 后端开发
 
@@ -57,7 +57,7 @@
 
 ## 许可说明
 
-本软件及源码在 [**MIT License**](LICENSE.md) 下发布，源码开放使用和修改，依赖的库请参阅其对应的许可声明。请在源码中保留作者（**黄弘**）的署名。
+本软件及源码在 [**MIT License**](LICENSE.txt) 下发布，源码开放使用和修改，依赖的库请参阅其对应的许可声明。请在源码中保留作者（**黄弘**）的署名。
 
 > 被授权人权利：  
 > 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。  
@@ -79,6 +79,7 @@
 
 ## 更新日志
 
+* 2015/05/28 强化并首选 jetty 作为嵌入式 web 容器; 因其他容器的 jsp 版本可能与 jetty 使用的冲突, 需要去掉 jsp 相关的包方可在 tomcat 等容器下正常打开页面
 * 2015/04/24 完善 Async 并添加 Batch 异步操作类, 为异步任务和消息处理进行准备
 * 2015/03/03 重构, 完善权限模块; 重写 Dict.get,Dict.put 及 JS 中的对应方法, 使程序逻辑更简单, 更接近 PHP 的关系数组操作方式
 * 2015/02/18 将 ActionWarder 的 Filter 模式改回 0.3.1 的独立继承模式, 新类为 ActionDriver, 兼容 ActionWarder 的 Filter 初始化模式; 今天是我的公历生日, 祝自己生日快乐, 万事如意!
@@ -115,25 +116,27 @@
 ### 目录结构:
 
     /
-      + WEB-INF
-        - etc           配置资源(配置/语言/权限/集合/数据库等)
-        - lib           后端库
-        - var           临时文件(可配置)
-          - log         运行日志(可配置)
-          - ser         缓存文件(可配置)
-            upload      文件上传临时存放目录
-          - sqlite      Sqlite本地数据库目录
-          - lucene      Lucene本地索引库目录
-      + common          前端通用库(js,css等)
-        - css           前端样式
-        - fonts         前端字体
-        - img           前端图片
-        - pages         通用页面(页头/页尾/组件等jsp,html文件)
-        - auth          权限信息(虚拟目录)
-        - conf          配置资源(虚拟目录)
-        - lang          语言资源(虚拟目录)
-      - compon          其他可选前端组件
-      - hongs           内置样例页面组件
+        - lib               运行库
+        - bin               运维脚本
+        - etc               配置资源(启动时可指定)
+        - var               数据文件(启动时可指定)
+            - tmp           临时文件(启动时可指定)
+                - upload    文件上传临时存放目录
+            - log           运行日志(在log4j2配置)
+            - serial        序列缓存数据文件目录
+            - sqlite        Sqlite本地数据库目录
+            - lucene        Lucene本地索引库目录
+        - web
+            + common        前端通用库
+                - css       前端样式
+                - fonts     前端字体
+                - img       前端图片
+                - pages     通用页面
+                - auth      权限信息(虚拟目录)
+                - conf      配置资源(虚拟目录)
+                - lang      语言资源(虚拟目录)
+            - compon        其他可选前端组件
+            - hongs         内置样例页面组件
 
 ### 类库结构:
 
@@ -159,7 +162,7 @@
     common/lang/name.js 读取 WEB-INF/conf/name.xx-XX.properties 中 fore.xxxx. 开头的配置
 
 action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 WEB-INF/etc/\_begin\_.properties 中设置 core.load.serv 为 Action,Cmdlet 类, 或 xxx.foo.* 告知该包下存在 Action,Cmdlet 类, 多个类/包用";"分隔.
-最后3个路径, 将扩展名 .js 换成 .json 即可得到 JSON 格式的数据; 语言配置可在 name 后加语言区域标识, 如 example.zh-CN.js 为获取 example 的中文大陆简体的语言配置.
+最后3个路径, 将扩展名 .js 换成 .json 即可得到 JSON 格式的数据; 语言配置可在 name 后加语言区域标识, 如 example.zh-CN.js 为获取 example 的中文大陆简体的 js 格式的语言配置.
 
 ## 请求规则
 
@@ -208,11 +211,13 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 有一些参数名具有特定意义, 如:
 
-    wd      搜索字词
-    ob      排序字段
     pn      当前页码
     rn      额定行数
+    wd      搜索字词
+    ob      排序字段
     cs      限定列名
+    or      或查询
+    ar      多组或
 
 ## 响应数据
 
@@ -257,7 +262,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
         ...
     }
 
-    // 创建返回, 在 create,save 动作返回
+    // 返回数据, 在 create,save 动作返回
     "back": [
         "ID",
         "名称",
@@ -266,12 +271,13 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 在调用 API(REST) 时, 可在 url 后加请求参数 --api-back=包裹其他数据的键名, 可加请求参数 --api-conv.= 来转换基本数据类型, 其取值可以为:
 
-    all2str     全部转为字符串
-    num2str     数字转为字符串
-    null2str    空转为空字符串
-    bool2str    true转为字符串1, false转为空字符串
-    date2mic    转为时间戳(毫秒)
+    all2str     全部转为字串
+    num2str     数字转为字串
+    null2str    空转为空字串
+    bool2str    true转为字串1, false转为空串
+    bool2num    true转为数字1, false转为数字0
     date2sec    转为时间戳(秒)
+    date2mic    转为时间戳(毫秒)
 
 dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为字符串; 如果仅指定 all2str 则时间/日期会转为"年-月-日"格式的字符串.
 
@@ -296,7 +302,7 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
     etime   结束时间, DATETIME,TIMESTAMP,BIGINT,INTEGER
     state   状态标识, TINYINT, 1为正常, 0为删除, 可用其他数字表示其他状态
 
-因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请务必避开这些名称: pn,rn,wd,ob,cs. 另, 在配置文件和 Model 中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
+因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请尽量避开这些名称: pn,rn,wd,ob,cs,or,ar. 另, 在配置文件和 Model 中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 # HongsCORE framework for Javascript
 

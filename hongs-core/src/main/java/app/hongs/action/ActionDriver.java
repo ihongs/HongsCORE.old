@@ -89,17 +89,17 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         }
         INIT= true;
 
-        if (Core.BASE_HREF != null) {
+        if (Core.BASE_HREF == null) {
             System.setProperty("file.encoding", "UTF-8");
 
             /** 核心属性配置 **/
-
-            String str;
 
             Core.ENVIR = 1;
             Core.DEBUG = 0;
             Core.BASE_HREF = cont.getContextPath();
             Core.BASE_PATH = cont.getRealPath("" );
+
+            String str;
 
             str = cont.getInitParameter("debug");
             if (str != null) {
@@ -212,7 +212,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         } else {
             core = Core.getInstance(/**/);
             req.setAttribute(CORE , core);
-            hlpr = new ActionHelper(req , rsq);
+            hlpr = new ActionHelper( req , rsq);
             core.put ( ActionHelper.class.getName(), hlpr);
 
             try {
@@ -241,7 +241,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         } else {
             core = Core.getInstance(/**/);
             req.setAttribute(CORE , core);
-            hlpr = new ActionHelper(req , rsq);
+            hlpr = new ActionHelper( req , rsq);
             core.put ( ActionHelper.class.getName(), hlpr);
 
             try {

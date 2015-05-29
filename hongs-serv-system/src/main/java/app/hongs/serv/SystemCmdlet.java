@@ -35,7 +35,7 @@ public class SystemCmdlet {
         if ( 0  < args.length ) {
             dir = args[0];
         } else {
-            dir = Core.CONF_PATH + "/_setup_";
+            dir = Core.VARS_PATH + "/setup";
         }
 
         List<File> fxs = new ArrayList();

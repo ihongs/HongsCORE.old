@@ -576,7 +576,7 @@ public class DB
     if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
       app.hongs.CoreLogger.debug(
-          "INFO(DB): tableClass("+tcls+") for table("+tableName+") has been defined, try to get it");
+          "DB: tableClass("+tcls+") for table("+tableName+") has been defined, try to get it");
     }
 
     /**
@@ -699,7 +699,7 @@ public class DB
     if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
       app.hongs.CoreLogger.debug(
-          "INFO(DB): modelClass("+mcls+") for table("+tableName+") has been defined, try to get it");
+          "DB: modelClass("+mcls+") for table("+tableName+") has been defined, try to get it");
     }
 
     /**
@@ -983,7 +983,7 @@ public class DB
       List      paramz = new ArrayList(Arrays.asList(params));
       DB.checkSQLParams(sb, paramz);
       DB.mergeSQLParams(sb, paramz);
-      app.hongs.CoreLogger.debug("INFO(DB.query): " + sb.toString());
+      app.hongs.CoreLogger.debug("DB.query: " + sb.toString());
     }
 
     PreparedStatement ps = this.prepareStatement(sql, params);
@@ -1125,7 +1125,7 @@ public class DB
       List      paramz = new ArrayList(Arrays.asList(params));
       DB.checkSQLParams(sb, paramz);
       DB.mergeSQLParams(sb, paramz);
-      app.hongs.CoreLogger.debug("INFO(DB.execute): " + sb.toString());
+      app.hongs.CoreLogger.debug("DB.execute: " + sb.toString());
     }
 
     /**
@@ -1165,7 +1165,7 @@ public class DB
       List      paramz = new ArrayList(Arrays.asList(params));
       DB.checkSQLParams(sb, paramz);
       DB.mergeSQLParams(sb, paramz);
-      app.hongs.CoreLogger.debug("INFO(DB.updates): " + sb.toString());
+      app.hongs.CoreLogger.debug("DB.updates: " + sb.toString());
     }
 
     PreparedStatement ps = this.prepareStatement(sql, params);

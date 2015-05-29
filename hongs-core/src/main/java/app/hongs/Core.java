@@ -316,7 +316,8 @@ extends HashMap<String, Object>
   public static byte ENVIR;
 
   /**
-   * 调试级别(0 无 , 1 输出, 2 日志, 4 禁用错误, 8 禁用调试, 16 静默模式)
+   * 调试级别(0 静默, 1 输出, 2 日志, 4 禁止跟踪, 8 禁止调试)
+   * 注意: 错误总是会记录日志
    */
   public static byte DEBUG;
 
