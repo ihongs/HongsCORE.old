@@ -16,9 +16,9 @@ then
     fi
 fi
 
-"$JAVA_PATH" $JAVA_OPTS  \
- -classpath "$KLASSPATH" \
- -Dlog4j.configurationFile="$CORE_PATH/lib/classes/log4j2.xml" \
- -Ddirs.log="$CORE_PATH/var/log"  \
- app.hongs.cmdlet.CmdletRunner $@ \
+"$JAVA_PATH" $JAVA_OPTS \
+ -classpath "$KLASSPATH"\
+ -Dlog4j.configurationFile="$CORE_PATH/lib/classes/log4j2.xml"\
+ -Dlogs.dir="$CORE_PATH/var/log" \
+ app.hongs.cmdlet.CmdletRunner $@\
  --corepath "$CORE_PATH"
