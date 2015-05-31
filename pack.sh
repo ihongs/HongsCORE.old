@@ -6,25 +6,25 @@ PACK_PATH="$WORK_PATH/$PACK_NAME"
 BASE_PATH="$WORK_PATH/hongs-web/target/$PACK_NAME"
 CORE_PATH="$BASE_PATH/WEB-INF"
 
-rm -rf 	"$PACK_PATH"
-mkdir  	"$PACK_PATH"
+rm -rf    "$PACK_PATH"
+mkdir     "$PACK_PATH"
 
-cp -rf 	"$BASE_PATH" "$PACK_PATH/web"
-mv     	"$PACK_PATH/web/WEB-INF/"* "$PACK_PATH/"
-rm -rf 	"$PACK_PATH/web/WEB-INF/"
-rm -rf  "$PACK_PATH/web/META-INF"
-mv     	"$PACK_PATH/web.xml" "$PACK_PATH/etc/"
-mv     	"$PACK_PATH/web.tld" "$PACK_PATH/etc/"
-mv     	"$PACK_PATH/classes" "$PACK_PATH/lib/"
+cp -rf    "$BASE_PATH" "$PACK_PATH/web"
+mv        "$PACK_PATH/web/WEB-INF/"* "$PACK_PATH/"
+rm -rf    "$PACK_PATH/web/WEB-INF/"
+rm -rf    "$PACK_PATH/web/META-INF"
+mv        "$PACK_PATH/web.xml" "$PACK_PATH/etc/"
+mv        "$PACK_PATH/web.tld" "$PACK_PATH/etc/"
+mv        "$PACK_PATH/classes" "$PACK_PATH/lib/"
 
-rm -rf  "$PACK_PATH/var/log"
-mkdir   "$PACK_PATH/var/log"
-rm -rf  "$PACK_PATH/var/tmp"
-mkdir   "$PACK_PATH/var/tmp"
+rm -rf    "$PACK_PATH/var/log"
+mkdir     "$PACK_PATH/var/log"
+rm -rf    "$PACK_PATH/var/tmp"
+mkdir     "$PACK_PATH/var/tmp"
 
-cp -f   "$WORK_PATH/hongs-serv-server/"*.bat "$PACK_PATH/"
-cp -f   "$WORK_PATH/hongs-serv-system/"*.bat "$PACK_PATH/"
+cp -f     "$WORK_PATH/hongs-serv-server/"*.bat "$PACK_PATH/"
+cp -f     "$WORK_PATH/hongs-serv-system/"*.bat "$PACK_PATH/"
 
-chmod +x "$PACK_PATH/bin/"*
+chmod +x  "$PACK_PATH/bin/"*
 
-tar cfz "$PACK_PATH.tar.gz" "$PACK_PATH"
+tar cfz   "$PACK_PATH.tar.gz" "$PACK_PATH"
