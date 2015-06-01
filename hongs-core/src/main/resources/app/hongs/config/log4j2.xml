@@ -9,17 +9,17 @@
     </Properties>
     <Appenders>
         <Console name="CONSOLE" target="SYSTEM_ERR">
-            <PatternLayout pattern="${corePatt}"/>
+            <PatternLayout pattern="${lessPatt}"/>
         </Console>
         <RollingFile name="LessLog" fileName="${fileName}" filePattern="${filePatt}">
-            <PatternLayout pattern="${corePatt}"/>
+            <PatternLayout pattern="${lessPatt}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="${fileSize}"/>
             </Policies>
         </RollingFile>
         <RollingFile name="MoreLog" fileName="${fileName}" filePattern="${filePatt}">
-            <PatternLayout pattern="${rootPatt}"/>
+            <PatternLayout pattern="${morePatt}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="${fileSize}"/>

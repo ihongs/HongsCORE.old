@@ -298,7 +298,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             }
         }
 
-        Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh-CN"));
+        Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh_CN"));
         if (conf.getProperty("core.language.probing", false)) {
             /**
              * 语言可以记录到Session/Cookies里

@@ -11,13 +11,13 @@ import java.util.Map;
  * <p>
  * 为与配置保持一致, 故从CoreConfig继承.<br/>
  * 放弃使用"ResourceBundle"类加载语言资源.<br/>
- * 资源文件名为"xxx_语言[-国家].properties".<br/>
+ * 资源文件名为"xxx_语言[_国家].properties".<br/>
  * </p>
  *
  * <h3>配置选项:</h3>
  * <pre>
  * core.load.locale.once  为true则仅加载一次, 为false由Core控制
- * core.langauge.link.xx  语言链接, xx为语言, 如:link.zh=zh-CN
+ * core.langauge.link.xx  语言链接, xx为语言, 如:link.zh=zh_CN
  * </pre>
  *
  * @author Hongs
@@ -230,12 +230,12 @@ public class CoreLocale
   /**
    * 从HEAD串中获取支持的语言
    * @param lang
-   * @return 语言标识, 如zh,zh-CN, 不存在为null
+   * @return 语言标识, 如zh,zh_CN, 不存在为null
    */
   public static String getAcceptLanguage(String lang)
   {
     CoreConfig conf = Core.getInstance(CoreConfig.class);
-    String[]   arr1 = lang.split(",");
+    String[]   arr1 = lang.replace('-' , '_').split(",");
     String[]   arr2;
 
     for (int i = 0; i < arr1.length; i ++)
@@ -255,12 +255,12 @@ public class CoreLocale
       }
 
       /**
-       * 如果语言字串中带有"-"符号, 则按"-"拆分去后面部分,
+       * 如果语言字串中带有"_"符号, 则按"_"拆分去后面部分,
        * 检查其是否是允许的语种.
        */
-      if ( 0 < arr2[0].indexOf('-'))
+      if ( 0 < arr2[0].indexOf('_'))
       {
-        arr2 = arr2[0].split("-", 2);
+        arr2 = arr2[0].split("_", 2);
 
         lang = arr2[0];
         if (CoreLocale.hasAcceptLanguage(lang))

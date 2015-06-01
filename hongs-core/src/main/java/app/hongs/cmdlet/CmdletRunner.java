@@ -250,7 +250,7 @@ public class CmdletRunner
         String c = System.getProperty("user.country" );
         if (l != null && c != null)
         {
-          lang = l.toLowerCase() +"-"+ c.toUpperCase();
+          lang = l.toLowerCase() +"_"+ c.toUpperCase();
         }
         else
         if (l != null)
@@ -267,12 +267,12 @@ public class CmdletRunner
         }
         if (lang == null)
         {
-          lang = cnf.getProperty("core.language.default", "zh-CN");
+          lang = cnf.getProperty("core.language.default", "zh_CN");
         }
       }
       else
       {
-          lang = cnf.getProperty("core.language.default", "zh-CN");
+          lang = cnf.getProperty("core.language.default", "zh_CN");
       }
     }
     else
