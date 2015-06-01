@@ -84,7 +84,9 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
          * 如果核心类中基础路径已设置, 则表示已经被实例过了
          * 即无需再重复获取配置信息了
          */
-        if (Core.ENVIR == 1) {
+        if (Core.ENVIR != 1) {
+            Core.ENVIR  = 1;
+        } else {
             return;
         }
         INIT= true;
@@ -94,8 +96,6 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
 
             /** 核心属性配置 **/
 
-            Core.ENVIR = 1;
-            Core.DEBUG = 0;
             Core.BASE_HREF = cont.getContextPath();
             Core.BASE_PATH = cont.getRealPath("" );
 
@@ -159,6 +159,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
 
         if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
             CoreLogger.debug(new StringBuilder("...")
+                .append("\r\n\tDEBUG       : ").append(Core.DEBUG)
                 .append("\r\n\tSERVER_ID   : ").append(Core.SERVER_ID)
                 .append("\r\n\tBASE_HREF   : ").append(Core.BASE_HREF)
                 .append("\r\n\tBASE_PATH   : ").append(Core.BASE_PATH)
@@ -346,6 +347,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
                 .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
                 .append("\r\n\tObjects     : ").append(core.keySet( ).toString());
+            CoreLogger.getLogger("hongs.debug.action").debug(sb.toString());
 
             // 输入输出数据, 这对调试程序非常有帮助
             Map rd, xd;
@@ -358,14 +360,15 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             if (xd == null) {
                 xd = (Map ) req.getAttribute("__HONGS_DATA__");
             }
+            sb.setLength(0);
             if (rd != null && !rd.isEmpty()) {
-              sb.append("\r\n\tRequest     : ").append(Text.indent(Data.toString(rd)).substring(1));
+                CoreLogger.getLogger("hongs.debug.action.request")
+                          .debug("\r\n" + Text.indent(Data.toString(rd)));
             }
             if (xd != null && !xd.isEmpty()) {
-              sb.append("\r\n\tResults     : ").append(Text.indent(Data.toString(xd)).substring(1));
+                CoreLogger.getLogger("hongs.debug.action.results")
+                          .debug("\r\n" + Text.indent(Data.toString(xd)));
             }
-
-            CoreLogger.debug( sb.toString());
         }
 
         try {

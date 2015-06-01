@@ -182,7 +182,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Sort  s = getSort(rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("...\r\n\tQuery: "+q.toString()+"\r\n\tSort : "+s.toString());
+                CoreLogger.debug("Lucene Query: "+q.toString()+" Sort: "+s.toString()+" Limit: "+limit);
             }
 
             TopDocs docz = finder.search(q, limit, s);
@@ -362,6 +362,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             Query q = getFind(rd);
             Sort  s = getSort(rd);
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+                CoreLogger.debug("Lucene Query: "+q.toString()+" Sort: "+s.toString());
+            }
 
             TopDocs  docz;
             if (s != null) {
@@ -960,24 +964,24 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
         //** 区间查询 **/
 
-        Integer n, x;
+        Object  n, x;
         boolean l, r;
 
         if (m.containsKey("-gt")) {
-            n = Synt.declare(m.remove("-gt"), 0); l = false;
+            n = m.remove ("-gt"); l = false;
         } else
         if (m.containsKey("-ge")) {
-            n = Synt.declare(m.remove("-ge"), 0); l = true;
+            n = m.remove ("-ge"); l = true;
         } else
         {
             n = null; l = true;
         }
 
         if (m.containsKey("-lt")) {
-            x = Synt.declare(m.remove("-lt"), 0); r = false;
+            x = m.remove ("-lt"); r = false;
         } else
         if (m.containsKey("-le")) {
-            x = Synt.declare(m.remove("-le"), 0); r = true;
+            x = m.remove ("-le"); r = true;
         } else
         {
             x = null; r = true;
