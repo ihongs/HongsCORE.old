@@ -1,7 +1,7 @@
 .DS_Store
 .project
 nbproject
-nbactions.xml
+nbactions*
 nb-configuration.xml
 /hongs-web/target/
 /hongs-core/target/
