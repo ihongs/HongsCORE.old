@@ -24,6 +24,18 @@ public class CoreLogger
     }
 
     /**
+     * 获取动作空间标识
+     * @reutrn
+     */
+    public static String space(String name) {
+        String flag = Core.ACTION_NAME.get( );
+        if (flag != null && !"".equals(flag)) {
+            name += "." + flag.replace('/', '.').replace(':', '.');
+        }
+        return name;
+    }
+
+    /**
      * 补充动作环境信息
      * @param text
      * @return
@@ -57,7 +69,7 @@ public class CoreLogger
 
         return  line.append( text ).toString( );
     }
-
+    
     /**
      * 输出
      * @param text
@@ -68,10 +80,10 @@ public class CoreLogger
             return; // 禁止跟踪
         }
         if (1 == (1 & Core.DEBUG)) {
-            getLogger("hongs.print").trace(envir(text), args);
+            getLogger(space("hongs.out")).trace(envir(text), args);
         }
         if (2 == (2 & Core.DEBUG)) {
-            getLogger("hongs.trace").trace(envir(text), args);
+            getLogger(space("hongs.log")).trace(envir(text), args);
         }
     }
 
@@ -85,10 +97,10 @@ public class CoreLogger
             return; // 禁止调试
         }
         if (1 == (1 & Core.DEBUG)) {
-            getLogger("hongs.print").debug(envir(text), args);
+            getLogger(space("hongs.out")).debug(envir(text), args);
         }
         if (2 == (2 & Core.DEBUG)) {
-            getLogger("hongs.debug").debug(envir(text), args);
+            getLogger(space("hongs.log")).debug(envir(text), args);
         }
     }
 
@@ -99,12 +111,13 @@ public class CoreLogger
      * @param args
      */
     public static void error(String text, Object... args) {
+        String flag = space("");
         if (1 == (1 & Core.DEBUG )
         ||  2 != (2 & Core.DEBUG)) {
-            getLogger("hongs.print").error(envir(text), args);
+            getLogger("hongs.out" + flag).error(envir(text), args);
         }
         if (2 == (2 & Core.DEBUG)) {
-            getLogger("hongs.error").error(envir(text), args);
+            getLogger("hongs.log" + flag).error(envir(text), args);
         }
     }
 
@@ -113,16 +126,25 @@ public class CoreLogger
      * 既不显示又不记录则显示概要
      * @param t
      */
-    public static void error(Throwable t)
-    {
+    public static void error(Throwable t) {
+        String flag = space("");
+        
         if (1 != (1 & Core.DEBUG )
         &&  2 != (2 & Core.DEBUG)) {
-            getLogger("hongs.print").error(envir(t.getMessage()));
+            getLogger("hongs.out" + flag).error(envir(t.getMessage()));
             return;
         }
+        
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         t.printStackTrace(new PrintStream(b));
-        CoreLogger.error (/**/b.toString ( ));
+        
+        if (1 == (1 & Core.DEBUG )
+        ||  2 != (2 & Core.DEBUG)) {
+            getLogger("hongs.out" + flag).error(envir(b.toString(  )));
+        }
+        if (2 == (2 & Core.DEBUG)) {
+            getLogger("hongs.log" + flag).error(envir(b.toString(  )));
+        }
     }
 
 }

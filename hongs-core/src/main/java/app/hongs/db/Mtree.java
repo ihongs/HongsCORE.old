@@ -100,8 +100,9 @@ public class Mtree extends Model
     super(table);
     
     CoreConfig conf = Core.getInstance(CoreConfig.class);
-    this.bidKey = conf.getProperty("fore.tree.bid.key", "bid");
     this.rootId = conf.getProperty("fore.tree.root.id",  "0" );
+    this.pidKey = conf.getProperty("fore.tree.pid.key", "pid");
+    this.bidKey = conf.getProperty("fore.tree.bid.key", "bid");
   }
 
   //** 标准动作方法 **/

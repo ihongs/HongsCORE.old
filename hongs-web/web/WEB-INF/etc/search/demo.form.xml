@@ -4,21 +4,18 @@
         <field disp="ID" name="id" type="string" required="yes">
             <param name="html-type">hidden</param>
         </field>
-        <field disp="检索" name="wd" type="string" required="yes">
+        <field disp="检索" name="wd" type="search" required="yes">
             <param name="html-type">textarea</param>
-            <param name="lucene-field">text</param>
-            <param name="lucene-store">no</param>
+            <param name="invisble">yes</param>
         </field>
         <field disp="名称" name="name" type="string">
             <param name="html-type">text</param>
         </field>
-        <field disp="说明" name="note" type="string">
+        <field disp="说明" name="note" type="stored">
             <param name="html-type">textarea</param>
-            <param name="lucene-field">stored</param>
         </field>
-        <field disp="数据" name="data" type="string" rule="skip">
+        <field disp="数据" name="data" type="json" rule="Pass">
             <param name="html-type">textarea</param>
-            <param name="lucene-field">json</param>
         </field>
         <field disp="类型" name="type" type="string">
         </field>

@@ -2,10 +2,10 @@
     <enum name="__types__">
         <!-- String -->
         <value code="string">string</value>
-        <value code="text">string</value>
-        <value code="textarea">string</value>
         <value code="hidden">string</value>
         <value code="search">string</value>
+        <value code="text">string</value>
+        <value code="textarea">string</value>
         <value code="tel">string</value>
         <value code="url">string</value>
         <value code="email">string</value>

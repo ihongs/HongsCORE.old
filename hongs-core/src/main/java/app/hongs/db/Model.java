@@ -187,6 +187,11 @@ public class Model
       caze = new FetchCase();
     }
 
+    if (rd.containsKey( idKey ))
+    {
+      rd.put(table.primaryKey, rd.get(idKey));
+    }
+
     caze.setOption("MODEL_METHOD", "getList");
     this.filter(caze, rd);
 
@@ -217,18 +222,18 @@ public class Model
       fp.setPage(page != 0 ? page : 1);
       fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
+      // 行数小于 0 则不要分页信息
+      if (rows  > 0)
+      {
+        Map  info = fp.getPage();
+        data.put( "page", info );
+      }
+
       // 页码等于 0 则不要列表数据
       if (page != 0)
       {
         List list = fp.getList();
         data.put( "list", list );
-      }
-
-      // 行数小于 0 则不要分页信息
-      if (rows >  0)
-      {
-        Map  info = fp.getPage();
-        data.put( "page", info );
       }
     }
     else
@@ -265,14 +270,27 @@ public class Model
   public Map getInfo(Map rd, FetchCase caze)
     throws HongsException
   {
-    String id = Synt.declare(rd.get( this.idKey), String.class);
-    if (id == null || id.length() == 0)
+    if (rd == null)
     {
-      id = Synt.declare(rd.get(table.primaryKey), String.class);
+      rd = new HashMap();
     }
-    Map info = this.get(id, caze);
+    if (caze == null)
+    {
+      caze = new FetchCase();
+    }
+
+    if (rd.containsKey( idKey ))
+    {
+      rd.put(table.primaryKey, rd.get(idKey));
+    }
+
+    caze.setOption("MODEL_METHOD", "getInfo");
+    this.filter(caze, rd);
+
+    Map info = table.fetchLess(caze);
     Map data = new HashMap();
     data.put( "info", info );
+
     return data;
   }
 
@@ -697,11 +715,11 @@ public class Model
     throws HongsException
   {
     /**
-     * 如果不是 get 且没指定关联类型
+     * 如果没指定查询的字
      * 默认只关联 BLS_TO,HAS_ONE 的表(仅能关联一个)
      * 默认只连接 LEFT  ,INNER   的表(必须满足左表)
      */
-    if (!"get".equals(caze.getOption("MODEL_METHOD")) && !"-".equals(rd.get("cx")))
+    if (! rd.containsKey(this.colsKey))
     {
       if (caze.getOption("ASSOC_TYPES") == null)
       {
@@ -1259,7 +1277,7 @@ public class Model
    * @param caze
    * @param val
    * @param key
-   * @throws HongsException 
+   * @throws HongsException
    */
   protected void packFilter(FetchCase caze, Object val, String key)
   throws HongsException

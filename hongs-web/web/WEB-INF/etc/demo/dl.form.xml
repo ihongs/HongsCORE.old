@@ -51,6 +51,9 @@
         <field disp="说明" name="note" type="textarea">
             <param name="hideInList">yes</param>
         </field>
+        <field disp="添加新字段" name="testx" type="input">
+            
+        </field>
     </form>
     <form name="demo2">
         <field disp="ID" name="id" type="hidden"/>

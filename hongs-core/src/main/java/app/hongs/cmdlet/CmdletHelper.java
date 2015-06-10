@@ -1,6 +1,5 @@
 package app.hongs.cmdlet;
 
-import app.hongs.Core;
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.util.Text;
@@ -270,15 +269,14 @@ public class CmdletHelper
   //** 输出相关 **/
 
   /**
-   * 输出(到标准错误)
-   * 通常, 辅助信息输出标准错误, 结果数据输出标准输出, 方便其他程序/进程处理
-   * 如果需要输出结构化的数据供其它程序处理, 请不要使用此函数
+   * 输出辅助信息
+   * 通常为方便其他程序/进程处理, 辅助信息走标准错误, 结果数据走标准输出
+   * 如果需要输出结构化的数据供其它程序处理, 请不要使用此方法
    * @param text
    */
   public static void println(String text)
   {
-    String path = Core.ACTION_NAME.get().replace('/', '.').replace(':', '.');
-    CoreLogger.getLogger("hongs.print." +path).trace(CoreLogger.envir(text));
+    CoreLogger.getLogger(CoreLogger.space("hongs.out")).trace(CoreLogger.envir(text));
   }
 
   /**

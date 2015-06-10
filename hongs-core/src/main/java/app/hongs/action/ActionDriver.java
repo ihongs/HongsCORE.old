@@ -260,7 +260,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             Map dat  = hlpr.getResponseData();
             if (dat != null) {
                 if (0< Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                    req.setAttribute("__HONGS_DATA__", dat );
+                    req.setAttribute("__HONGS_RESP__", dat );
                 }
 
 //              HttpServletRequest  raq = hlpr.getRequest( );
@@ -336,7 +336,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
             ActionHelper that = Core.getInstance(ActionHelper.class);
             HttpServletRequest R = that.getRequest();
-            long time = System.currentTimeMillis() - Core.ACTION_TIME.get();
+            long time = System.currentTimeMillis(  ) - Core.ACTION_TIME.get();
             StringBuilder sb = new StringBuilder("...");
               sb.append("\r\n\tACTION_NAME : ").append(Core.ACTION_NAME.get())
                 .append("\r\n\tACTION_TIME : ").append(Core.ACTION_TIME.get())
@@ -347,10 +347,9 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
                 .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
                 .append("\r\n\tObjects     : ").append(core.keySet( ).toString());
-            CoreLogger.getLogger("hongs.debug.action").debug(sb.toString());
 
             // 输入输出数据, 这对调试程序非常有帮助
-            Map rd, xd;
+            Map rd, xd; CoreConfig cf = CoreConfig.getInstance();
             try {
                 rd = that.getRequestData( );
                 xd = that.getResponseData();
@@ -358,17 +357,20 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 throw HongsError.common(null, ex);
             }
             if (xd == null) {
-                xd = (Map ) req.getAttribute("__HONGS_DATA__");
+                xd = (Map ) req.getAttribute( "__HONGS_RESP__" );
             }
-            sb.setLength(0);
-            if (rd != null && !rd.isEmpty()) {
-                CoreLogger.getLogger("hongs.debug.action.request")
-                          .debug("\r\n" + Text.indent(Data.toString(rd)));
+            if (cf.getProperty("core.log.action.request", false)
+            &&  rd != null && !rd.isEmpty()) {
+              sb.append("\r\n\tRequest     : ")
+                .append(Text.indent(Data.toString(rd)).substring(1));
             }
-            if (xd != null && !xd.isEmpty()) {
-                CoreLogger.getLogger("hongs.debug.action.results")
-                          .debug("\r\n" + Text.indent(Data.toString(xd)));
+            if (cf.getProperty("core.log.action.results", false)
+            &&  xd != null && !xd.isEmpty()) {
+              sb.append("\r\n\tResults     : ")
+                .append(Text.indent(Data.toString(xd)).substring(1));
             }
+            
+            CoreLogger.getLogger("hongs.log.action").debug(sb.toString());
         }
 
         try {

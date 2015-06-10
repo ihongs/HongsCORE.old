@@ -25,9 +25,6 @@ import org.apache.lucene.search.TopDocs;
  */
 public class SearchRecord extends LuceneRecord {
 
-    public SearchRecord( Map fields, String datapath, String analyzer) throws HongsException {
-        super(fields, datapath, analyzer);
-    }
     public SearchRecord(String conf, String name) throws HongsException {
         super(conf, name);
     }
@@ -217,7 +214,7 @@ public class SearchRecord extends LuceneRecord {
         int total = 0;
 
         try {
-            Query q = getFind(rd);
+            Query q = getQuery(rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
                 CoreLogger.debug("...\r\n\tQuery: "+q.toString());

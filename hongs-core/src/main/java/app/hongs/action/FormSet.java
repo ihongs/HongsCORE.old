@@ -4,7 +4,6 @@ import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
-import app.hongs.util.Synt;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

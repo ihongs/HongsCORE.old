@@ -3,6 +3,7 @@ package app.hongs.util;
 import app.hongs.HongsError;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -85,58 +86,7 @@ public class Synt {
             return null;
         }
 
-        if (String.class.isAssignableFrom(cls)) {
-            val = val.toString();
-        } else if (Boolean.class.isAssignableFrom(cls)) {
-            if (val instanceof Number) {
-                val = ((Number) val).intValue() != 0;
-            } else if (val instanceof String) {
-                String str = ((String) val).trim(  );
-                /****/ if (TRUE.matcher(str).matches()) {
-                    val = true ;
-                } else if (FLSE.matcher(str).matches()) {
-                    val = false;
-                }
-            }
-        } else if ( Number.class.isAssignableFrom(cls)) {
-            if (Integer.class.isAssignableFrom(cls)) {
-                if (val instanceof Number) {
-                    val = ((Number) val).intValue();
-                } else if (val instanceof String) {
-                    val = Integer.parseInt(((String) val).trim());
-                }
-            } else if (Byte.class.isAssignableFrom(cls)) {
-                if (val instanceof Number) {
-                    val = ((Number) val).byteValue();
-                } else if (val instanceof String) {
-                    val = Byte.parseByte(((String) val).trim());
-                }
-            } else if (Short.class.isAssignableFrom(cls)) {
-                if (val instanceof Number) {
-                    val = ((Number) val).shortValue();
-                } else if (val instanceof String) {
-                    val = Short.parseShort(((String) val).trim());
-                }
-            } else if (Long.class.isAssignableFrom(cls)) {
-                if (val instanceof Number) {
-                    val = ((Number) val).longValue();
-                } else if (val instanceof String) {
-                    val = Long.parseLong(((String) val).trim());
-                }
-            } else if (Float.class.isAssignableFrom(cls)) {
-                if (val instanceof Number) {
-                    val = ((Number) val).floatValue();
-                } else if (val instanceof String) {
-                    val = Float.parseFloat(((String) val).trim());
-                }
-            } else {
-                if (val instanceof Number) {
-                    val = ((Number) val).doubleValue();
-                } else if (val instanceof String) {
-                    val = Double.parseDouble(((String) val).trim());
-                }
-            }
-        } else if (List.class.isAssignableFrom(cls)) {
+        if (List.class.isAssignableFrom(cls)) {
             if (val instanceof List) {
             } else if (val instanceof Set) {
                 val = new ArrayList(( Set) val);
@@ -149,7 +99,8 @@ public class Synt {
                 lst.add(val);
                 val = lst;
             }
-        } else if ( Set.class.isAssignableFrom(cls)) {
+        } else
+        if ( Set.class.isAssignableFrom(cls)) {
             if (val instanceof Set) {
             } else if (val instanceof List) {
                 val = new LinkedHashSet((List) val);
@@ -161,6 +112,80 @@ public class Synt {
                 Set set = new LinkedHashSet( );
                 set.add(val);
                 val = set;
+            }
+        } else {
+            /**
+             * 针对 servlet 的 requestMap 制定的规则
+             * 如果只需要一个值, 而 requestMap 是数组
+             * 则取第一个值
+             */
+            if (val instanceof Collection) {
+                val = ((Collection) val).toArray(new String[0])[0];
+            } else
+            if (val instanceof Object [ ]) {
+                val = ((Object [ ]) val)[0];
+            }
+
+            if ( String.class.isAssignableFrom(cls)) {
+                val = val.toString();
+            } else
+            if (Boolean.class.isAssignableFrom(cls)) {
+                if (val instanceof Number) {
+                    val = ((Number) val).intValue() != 0;
+                } else if (val instanceof String) {
+                    String str = ((String) val).trim(  );
+                    if (TRUE.matcher(str).matches()) {
+                        val = true ;
+                    } else
+                    if (FAKE.matcher(str).matches()) {
+                        val = false;
+                    }
+                }
+            } else
+            if ( Number.class.isAssignableFrom(cls)) {
+                if (Integer.class.isAssignableFrom(cls)) {
+                    if (val instanceof Number) {
+                        val = ((Number) val).intValue();
+                    } else
+                    if (val instanceof String) {
+                        val = Integer.parseInt(((String) val).trim());
+                    }
+                } else if (Byte.class.isAssignableFrom(cls)) {
+                    if (val instanceof Number) {
+                        val = ((Number) val).byteValue();
+                    } else
+                    if (val instanceof String) {
+                        val = Byte.parseByte(((String) val).trim());
+                    }
+                } else if (Short.class.isAssignableFrom(cls)) {
+                    if (val instanceof Number) {
+                        val = ((Number) val).shortValue();
+                    } else
+                    if (val instanceof String) {
+                        val = Short.parseShort(((String) val).trim());
+                    }
+                } else if (Long.class.isAssignableFrom(cls)) {
+                    if (val instanceof Number) {
+                        val = ((Number) val).longValue();
+                    } else
+                    if (val instanceof String) {
+                        val = Long.parseLong(((String) val).trim());
+                    }
+                } else if (Float.class.isAssignableFrom(cls)) {
+                    if (val instanceof Number) {
+                        val = ((Number) val).floatValue();
+                    } else
+                    if (val instanceof String) {
+                        val = Float.parseFloat(((String) val).trim());
+                    }
+                } else {
+                    if (val instanceof Number) {
+                        val = ((Number) val).doubleValue();
+                    } else
+                    if (val instanceof String) {
+                        val = Double.parseDouble(((String) val).trim());
+                    }
+                }
             }
         }
 
@@ -272,10 +297,9 @@ public class Synt {
         return dat.toArray();
     }
 
-    public static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
-    public static final Pattern FLSE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
-
     private static final Number ZERO = 0;
+    public static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
+    public static final Pattern FAKE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
 
     /**
      * 在 Each.each 里

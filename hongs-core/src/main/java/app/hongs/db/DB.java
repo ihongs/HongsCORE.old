@@ -367,6 +367,16 @@ public class DB
             if (info.containsKey("initialPoolSize")) {
               pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
             }
+            
+            if (info.containsKey("idleConnectionTestPeriod")) {
+              pool.setIdleConnectionTestPeriod(Integer.parseInt(info.getProperty("idleConnectionTestPeriod")));
+            }
+            if (info.containsKey("testConnectionOnCheckout")) {
+              pool.setTestConnectionOnCheckout(Boolean.parseBoolean(info.getProperty("testConnectionOnCheckout")));
+            }
+            if (info.containsKey("testConnectionOnCheckin" )) {
+              pool.setTestConnectionOnCheckin (Boolean.parseBoolean(info.getProperty("testConnectionOnCheckin" )));
+            }
           }
           finally
           {
@@ -1506,9 +1516,9 @@ public class DB
     DB db;
     do
     {
-    
+
     String key = DB.class.getName() + ":" + name;
-    
+
     Core core = Core.THREAD_CORE.get();
     if ( core.containsKey(key))
     {
@@ -1551,9 +1561,9 @@ public class DB
     {
       core.put(key, db);
     }
-    
+
     db.IN_OBJECT_MODE = conf.getProperty("core.in.object.mode", false);
-    
+
     }
     while (false);
 
