@@ -346,9 +346,10 @@ HsForm.prototype = {
 
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        var vl = inp.attr("data-lk"); if(!vl) vl = 0;
-        var tl = inp.attr("data-hl"); if(!tl) tl = 1;
+        var vl = inp.attr("data-vl"); if(!vl) vl = 0; // Value List
+        var tl = inp.attr("data-tl"); if(!tl) tl = 1; // Title Line
 
+        if (v !== undefined) {
         for(var i = 0; i < v.length; i ++) {
             var u = v[ i ][vl];
             var s = v[ i ][tl];
@@ -367,7 +368,7 @@ HsForm.prototype = {
                 lab.find("span" ).text(hsGetValue(w, tk));
                 set.append(lab);
             }
-        }
+        } }
 
         inp.find(":checkbox").first().change();
     },

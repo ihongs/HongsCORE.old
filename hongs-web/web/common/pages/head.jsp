@@ -21,7 +21,7 @@
             }
 
             if (href.startsWith(path+"/#")) {
-                href = href.substring(href.indexOf('#'));
+                //href = href.substring(href.indexOf('#'));
                 page = Core.BASE_HREF + "/" + page;
             } else {
                 href = Core.BASE_HREF + "/" + href;
@@ -71,6 +71,7 @@
     </button>
     <a class="navbar-brand" href="#">
         <!--span style="color:#f08" class="glyphicon glyphicon-fire"></span-->
+        <!--
         <span style="color:#f00">H</span>
         <span style="color:#f22">o</span>
         <span style="color:#f44">n</span>
@@ -80,6 +81,8 @@
         <span style="color:#fbb">O</span>
         <span style="color:#fcc">R</span>
         <span style="color:#fdd">E</span>
+        //-->
+        <span>新会议邦</span>
     </a>
 </div>
 

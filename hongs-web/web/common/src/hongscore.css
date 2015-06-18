@@ -78,6 +78,11 @@ select[multiple].form-control {
 .checkbox label {
     margin-right: 20px;
 }
+.form-control[readonly] {
+    background: #fff;
+    cursor: default;
+}
+
 
 .dropdown-toggle {
     cursor: pointer;

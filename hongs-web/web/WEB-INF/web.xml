@@ -80,95 +80,36 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
-            <param-value>/hongs/auto/db</param-value>
-        </init-param>
-    </filter>
-    <filter>
-        <filter-name>AutoFilter_DX</filter-name>
-        <filter-class>app.hongs.serv.AutoFilter</filter-class>
-        <init-param>
-            <param-name>render</param-name>
-            <param-value>/hongs/auto/dl</param-value>
-        </init-param>
-        <init-param>
-            <param-name>action</param-name>
-            <param-value>/hongs/auto/db</param-value>
+            <param-value>/hongs/db</param-value>
         </init-param>
     </filter>
     <filter>
         <filter-name>AutoFilter_DL</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
-            <param-name>render</param-name>
-            <param-value>/hongs/auto/dl</param-value>
+            <param-name>action</param-name>
+            <param-value>/hongs/db</param-value>
         </init-param>
         <init-param>
-            <param-name>action</param-name>
-            <param-value>/hongs/lucene</param-value>
+            <param-name>render</param-name>
+            <param-value>/hongs/dl</param-value>
         </init-param>
     </filter>
     <filter>
-        <filter-name>AutoFilter_Resume</filter-name>
+        <filter-name>AutoFilter_DM</filter-name>
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
-            <param-name>render</param-name>
-            <param-value>/hongs/resume</param-value>
-        </init-param>
-        <init-param>
             <param-name>action</param-name>
-            <param-value>/hongs/lucene</param-value>
+            <param-value>/hongs/dm</param-value>
         </init-param>
-    </filter>
-    <filter>
-        <filter-name>AutoFilter_Search</filter-name>
-        <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>render</param-name>
-            <param-value>/hongs/search</param-value>
-        </init-param>
-        <init-param>
-            <param-name>action</param-name>
-            <param-value>/hongs/search</param-value>
+            <param-value>/hongs/dm</param-value>
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>AutoFilter_DB</filter-name>
-        <url-pattern>/demo/db/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AutoFilter_DL</filter-name>
-        <url-pattern>/demo/dl/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AutoFilter_Resume</filter-name>
-        <url-pattern>/resume/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AutoFilter_Search</filter-name>
-        <url-pattern>/search/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AutoFilter_DX</filter-name>
-        <url-pattern>/food/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AutoFilter_DL</filter-name>
-        <url-pattern>/agile/*</url-pattern>
+        <filter-name>AutoFilter_DM</filter-name>
+        <url-pattern>/hongs/dm/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>

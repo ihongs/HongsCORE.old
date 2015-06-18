@@ -1,0 +1,541 @@
+<h2>${opr}表单</h2>
+<div id="hongs-module-form-form">
+    <div class="row clearfix">
+        <div class="col-md-8">
+            <div>
+                <object class="config" name="hsForm" data="">
+                    <param name="loadUrl" value="hongs/module/form/info.act"/>
+                    <param name="saveUrl" value="hongs/module/form/save.act"/>
+                </object>
+                <form class="record-form">
+                    <input type="hidden" name="id"/>
+                    <input type="hidden" name="unit_id" data-pn="unit_id"/>
+                    <input type="hidden" name="conf"/>
+                    <div class="form-group" data-type="text">
+                        <label class="control-label clearfix" style="display: block;">
+                            <span>表单名称</span>
+                        </label>
+                        <input class="form-control" name="name" type="text" placeholder="输入名字用以识别这个表单"/>
+                    </div>
+                    <div style="display: none;">
+                        <button type="submit"/>
+                    </div>
+                </form>
+            </div>
+            <div>
+                <object class="config" name="hsForm" data="">
+                </object>
+                <form class="target-form">
+                    <div class="form-group" data-type="line">
+                        <legend class="clearfix" data-valtype="text">
+                            <span>请将左侧的字段拖拽到此处(手机等小屏幕则在按钮下方)</span>
+                        </legend>
+                    </div>
+                    <div class="target-area"></div>
+                    <div class="clearfix">
+                        <div class="pull-left" >
+                            <button type="button" class="btn btn-success">保存设置</button>
+                        </div>
+                        <div class="pull-right">
+                            <button type="submit" class="btn btn-primary">模拟提交</button>
+                            <button type="reset"  class="btn btn-link">重置</button>
+                        </div>
+                    </div>
+                    <div style="display: none;">
+                        <div class="form-gorup">
+                            <input type="hidden" name="validate" data-validate="validate"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <form class="widget-form" onsubmit="return false;">
+                <div class="form-group" data-type="line">
+                    <legend class="clearfix" data-valtype="text">
+                        <span>分隔栏</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </legend>
+                    <input type="line" style="display: none;"/>
+                </div>
+                <div class="form-group" data-type="text">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>单行文本</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <input class="form-control" type="text" placeholder="请输入..."/>
+                </div>
+                <div class="form-group" data-type="email">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>邮箱</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <input class="form-control" type="email" placeholder="请输入电子邮箱"/>
+                </div>
+                <div class="form-group" data-type="url">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>网址</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <input class="form-control" type="url" placeholder="请输入网址"/>
+                </div>
+                <div class="form-group" data-type="tel">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>电话</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <input class="form-control" type="tel" placeholder="请输入电话号码"/>
+                </div>
+                <div class="form-group" data-type="number">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>数字</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <input class="form-control" type="number" placeholder="请输入数字"/>
+                </div>
+                <div class="form-group" data-type="date">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>日期</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <input class="form-control" type="date" placeholder="请选择日期"/>
+                </div>
+                <div class="form-group" data-type="file">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>文件</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <input class="form-control" type="file" placeholder="请选择文件"/>
+                </div>
+                <div class="form-group" data-type="select">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>单择</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <select class="form-control">
+                        <option value="">选项1</option>
+                        <option value="">选项2</option>
+                        <option value="">选项3</option>
+                        <option value="">选项4</option>
+                        <option value="">选项5</option>
+                    </select>
+                </div>
+                <div class="form-group" data-type="select">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>多选</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <select class="form-control" multiple="multiple">
+                        <option value="">选项1</option>
+                        <option value="">选项2</option>
+                        <option value="">选项3</option>
+                        <option value="">选项4</option>
+                        <option value="">选项5</option>
+                    </select>
+                </div>
+                <div class="form-group" data-type="textarea">
+                    <label class="control-label clearfix" style="display: block;">
+                        <span>多行文本</span>
+                        <span class="glyphicon glyphicon-remove pull-right"></span>
+                        <span class="glyphicon glyphicon-cog    pull-right"></span>
+                    </label>
+                    <textarea class="form-control" placeholder="请输入..."></textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div style="display:none;">
+        <div class="widget-pane widget-pane-title">
+            <div class="form-group">
+                <input class="form-control" type="text" name="span:first" value=""/>
+            </div>
+        </div>
+        <div class="widget-pane widget-pane-text widget-pane-textarea">
+            <div class="form-group">
+                <label class="control-label">字段名称</label>
+                <input class="form-control" type="text" name="label span:first" value=""/>
+            </div>
+            <div class="form-group">
+                <label class="control-label">提示</label>
+                <input class="form-control" type="text" name="input|placeholder" value=""/>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="input|required" value="required"/>必填
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-listable" value="required"/>列举
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-sortable" value="required"/>排序
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-findable" value="required"/>搜索
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-filtable" value="required"/>筛选
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="control-label">长度范围</label>
+                <div class="control-group">
+                    <input class="form-control" type="number" name="input|minlength" value="" style="display: inline-block; width: 8em;"/>
+                    <span>&nbsp;~&nbsp;</span>
+                    <input class="form-control" type="number" name="input|maxlength" value="" style="display: inline-block; width: 8em;"/>
+                </div>
+            </div>
+        </div>
+        <div class="widget-pane widget-pane-email widget-pane-url widget-pane-tel widget-pane-textarea">
+            <div class="form-group">
+                <label class="control-label">字段名称</label>
+                <input class="form-control" type="text" name="label span:first" value=""/>
+            </div>
+            <div class="form-group">
+                <label class="control-label">提示</label>
+                <input class="form-control" type="text" name="input|placeholder" value=""/>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="input|required" value="required"/>必填
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-listable" value="required"/>列举
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-sortable" value="required"/>排序
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-findable" value="required"/>搜索
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-filtable" value="required"/>筛选
+                </label>
+            </div>
+        </div>
+        <div class="widget-pane widget-pane-number">
+            <div class="form-group">
+                <label class="control-label">字段名称</label>
+                <input class="form-control" type="text" name="label span:first" value=""/>
+            </div>
+            <div class="form-group">
+                <label class="control-label">提示</label>
+                <input class="form-control" type="text" name="input|placeholder" value=""/>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="input|required" value="required"/>必填
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-listable" value="required"/>列举
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-sortable" value="required"/>排序
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-findable" value="required"/>搜索
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-filtable" value="required"/>筛选
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="control-label">取值范围</label>
+                <div class="control-group">
+                    <input class="form-control" type="number" name="input|min" value="" style="display: inline-block; width: 8em;"/>
+                    <span>&nbsp;~&nbsp;</span>
+                    <input class="form-control" type="number" name="input|max" value="" style="display: inline-block; width: 8em;"/>
+                </div>
+            </div>
+        </div>
+        <div class="widget-pane widget-pane-date">
+            <div class="form-group">
+                <label class="control-label">字段名称</label>
+                <input class="form-control" type="text" name="label span:first" value=""/>
+            </div>
+            <div class="form-group">
+                <label class="control-label">提示</label>
+                <input class="form-control" type="text" name="input|placeholder" value=""/>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="input|required" value="required"/>必填
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-listable" value="required"/>列举
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-sortable" value="required"/>排序
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-findable" value="required"/>搜索
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-filtable" value="required"/>筛选
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="control-label">日期范围</label>
+                <div class="control-group">
+                    <input class="form-control" type="number" name="input|mindate" value="" style="display: inline-block; width: 8em;"/>
+                    <span>&nbsp;~&nbsp;</span>
+                    <input class="form-control" type="number" name="input|maxdate" value="" style="display: inline-block; width: 8em;"/>
+                </div>
+            </div>
+        </div>
+        <div class="widget-pane widget-pane-file">
+            <div class="form-group">
+                <label class="control-label">字段名称</label>
+                <input class="form-control" type="text" name="label span:first" value=""/>
+            </div>
+            <div class="form-group">
+                <label class="control-label">提示</label>
+                <input class="form-control" type="text" name="input|placeholder" value=""/>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="input|required" value="required"/>必填
+                </label>
+                <label>
+                    <input type="checkbox" name="input|data-listable" value="required"/>列举
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="control-label">文件类型</label>
+                <input class="form-control" type="text" name="input|data-extn" value=""/>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form onsubmit="return false;">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+
+<style type="text/css">
+    #hongs-module-form-form legend
+        {margin-bottom: 15px;}
+    #hongs-module-form-form .target-form .glyphicon
+        {margin: 4px 0 0 4px;}
+    #hongs-module-form-form .widget-form .glyphicon,
+    #hongs-module-form-form .widget-form .widget-pane
+        {display: none;}
+    #hongs-module-form-form legend .glyphicon,
+    #hongs-module-form-form label .glyphicon
+        {color: #eee;}
+    #hongs-module-form-form legend:hover .glyphicon-cog,
+    #hongs-module-form-form label:hover .glyphicon-cog
+        {color: #66b;}
+    #hongs-module-form-form legend:hover .glyphicon-remove,
+    #hongs-module-form-form label:hover .glyphicon-remove
+        {color: #b66;}
+    #hongs-module-form-form .form-group legend
+        {font-size: 15px;}
+</style>
+
+<script type="text/javascript" src="common/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    (function ($) {
+        var context = $("#hongs-module-form-form");
+        var widgetForm = context.find(".widget-form");
+        var recordForm = context.find(".record-form");
+        var targetForm = context.find(".target-form");
+        var targetArea = targetForm.find(".target-area");
+        var modal = context.find(".modal");
+        var field ;
+
+        widgetForm.find(".form-group").draggable({
+            appendTo: "body",
+            helper  : "clone"
+        });
+        targetForm.droppable({
+            accept  : ":not(.ui-sortable-helper)",
+            drop    : function(ev, ui) {
+                targetArea.append(ui.draggable.clone());
+            }
+        }).sortable({
+            items   : ".form-group",
+            sort    : function() {
+                $(this).removeClass("ui-state-default");
+            }
+        });
+        
+        targetForm.find("[name=validate]").data("validate", function(val, inp) {
+            return false; // 并不真的提交
+        });
+
+        targetForm.on("click", ".btn-success", function() {
+            recordForm.find("[name=conf]").val(getConfs());
+            recordForm.find(":submit").click();
+        });
+        targetForm.on("click", ".target-area .glyphicon-remove", function() {
+            $(this).closest(".form-group").remove();
+        });
+        targetForm.on("click", ".target-area .glyphicon-cog", function() {
+            field = $(this).closest(".form-group");
+            var type  = field.attr ( "data-type" );
+            var name  = getTypeName(type);
+            var pane  = getTypePane(type);
+            modal.find("h4").text(name);
+            modal.find( ".modal-body" )
+                 .empty( ).append(pane);
+            
+            loadConf(modal, field);
+            modal.modal( "show"  );
+        });
+        targetForm.on("click", "legend .glyphicon-cog", function() {
+            field = $(this).closest("legend");
+            var name = "表单名称";
+            var pane = getTypePane ( "title");
+            modal.find("h4").text(name);
+            modal.find( ".modal-body" )
+                 .empty( ).append(pane);
+            
+            loadConf(modal, field);
+            modal.modal( "show"  );
+        });
+        modal.find("form").submit(function() {
+            modal.modal( "hide"  );
+            saveConf(modal, field);
+        });
+        
+        function getTypeName(type) {
+            return widgetForm.find("[data-type='"+type+"'] label span:first").text();
+        }
+        function getTypeItem(type) {
+            return widgetForm.find("[data-type='"+type+"']" ).clone();
+        }
+        function getTypePane(type) {
+            return context.find(".widget-pane-"+type).first().clone();
+        }
+        
+        function loadConf(modal, field) {
+            modal.find("input").each(function() {
+                var name = $(this).attr("name");
+                var attr ;
+                var pos  = name.indexOf("|");
+                if (pos !== -1) {
+                    attr = name.substring(pos + 1);
+                    name = name.substring(0 , pos);
+                    if ($(this).is(":checkbox")) {
+                        if (/^data-/.test(attr)) {
+                            $(this).prop("checked", field.find(name).attr(attr) ? true : false);
+                        } else {
+                            $(this).prop("checked", field.find(name).prop(attr));
+                        }
+                    } else {
+                        $(this).val(field.find(name).attr(attr));
+                    }
+                } else {
+                    $(this).val(field.find(name).text());
+                }
+            });
+        }
+        function saveConf(modal, field) {
+            modal.find("input").each(function() {
+                var name = $(this).attr("name");
+                var attr ;
+                var pos  = name.indexOf("|");
+                if (pos !== -1) {
+                    attr = name.substring(pos + 1);
+                    name = name.substring(0 , pos);
+                    if ($(this).is(":checkbox")) {
+                        if (/^data-/.test(attr)) {
+                            field.find(name).attr(attr, $(this).prop("checked") ? "true" : "" );
+                        } else {
+                            field.find(name).prop(attr, $(this).prop("checked"));
+                        }
+                    } else {
+                        field.find(name).attr(attr, $(this).val());
+                    }
+                } else {
+                    field.find(name).text($(this).val());
+                }
+            });
+        }
+        
+        function getConfs() {
+            var fields = [];
+            targetArea.find(".form-group").each(function() {
+                var label = $(this).find("label span:first");
+                var input = $(this).find("input,select,textarea");
+                var disp  = label.text();
+                var name  = input.attr("name");
+                var type  = input.attr("type");
+                var required = input.prop("required") ? "true" : "";
+                var repeated = input.prop("multiple") ? "true" : "";
+                var params   = {};console.log(input)
+                var a = input.get(0).attributes;
+                for(var k in a) {
+                    if (!/^data-/.test(k)) {
+                        continue;
+                    }
+                    var v =  a[k];
+                    params[k.substring(5)] = v;
+                }
+                fields.push({
+                    "disp": disp,
+                    "name": name,
+                    "type": type,
+                    "required": required,
+                    "repeated": repeated,
+                    "params": params
+                });
+            });
+            return JSON.stringify(fields);
+        }
+        function setConfs(fields) {
+            for (var i = 0; i < fields.length; i ++) {
+                var field = fields[i];
+                var disp  = field["__disp__"];
+                var name  = field['__name__'];
+                var type  = field["__type__"];
+                if (name === "id" || type === "hidden") {
+                    continue;
+                }
+                var required = field["__required__"];
+                var repeated = field["__repeated__"];
+                var group = getTypeItem(type);
+                var label = group.find("label span:first");
+                var input = group.find("input,select,textarea");
+                label.text(disp);
+                input.attr("name", name);
+                input.prop("required", !!required);
+                input.prop("multiple", !!repeated);
+                for(var k in field) {
+                    if (/^__/.test(k)) {
+                        continue;
+                    }
+                    var v =  field[k];
+                    input.attr(k , v);
+                }
+                targetArea.append(group);
+            }
+        }
+    })(jQuery);
+</script>

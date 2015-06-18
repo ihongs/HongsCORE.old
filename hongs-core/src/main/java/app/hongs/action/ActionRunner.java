@@ -40,20 +40,23 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class ActionRunner {
     private int idx = 0;
     private String action;
-    private final Object object;
-    private final Method method;
+    private final Object   object;
+    private final Method   method;
+    private final Class<?> classx;
     private final ActionHelper helper;
     private final Annotation[] annarr;
 
     public ActionRunner(String action, ActionHelper helper) throws HongsException {
-        this.method = getActions().get(action);
-        if ( method == null ) {
+        Mathod m = getActions().get(action);
+        if ( m == null ) {
             throw new HongsException(0x1104, "Can not find action '"+action+"'");
         }
-        this.object = Core.getInstance(method.getDeclaringClass());
-        this.annarr = method.getAnnotations( );
-        this.helper = helper;
         this.action = action;
+        this.helper = helper;
+        this.classx = m.classx;
+        this.method = m.method;
+        this.object = Core.getInstance(classx);
+        this.annarr = method.getAnnotations( );
         helper.setAttribute("__RUNNER__",this);
     }
 
@@ -66,7 +69,7 @@ public class ActionRunner {
     }
 
     public String getClsAnn() {
-        return object.getClass().getAnnotation(Action.class).value();
+        return classx.getAnnotation(Action.class).value();
     }
 
     /**
@@ -121,9 +124,9 @@ public class ActionRunner {
         try {
             method.invoke(object, helper);
         } catch (   IllegalAccessException e) {
-            throw new HongsException(0x110e, "Illegal access for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x110e, "Illegal access for method '"+classx.getName()+"."+method.getName()+"(ActionHelper).");
         } catch ( IllegalArgumentException e) {
-            throw new HongsException(0x110e, "Illegal params for method '"+object.getClass().getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x110e, "Illegal params for method '"+classx.getName()+"."+method.getName()+"(ActionHelper).");
         } catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
             if (ex instanceof HongsError/**/) {
@@ -138,9 +141,24 @@ public class ActionRunner {
     }
 
     private static final ReadWriteLock ACTLOCK = new ReentrantReadWriteLock();
-    private static Map<String, Method> ACTIONS = null;
+    private static Map<String, Mathod> ACTIONS = null;
 
-    public  static Map<String, Method> getActions() {
+    public  static final class Mathod {
+        Method   method;
+        Class<?> classx;
+        @Override
+        public String    toString() {
+            return classx.getName()+"."+method.getName();
+        }
+        public Method   getMethod() {
+            return method;
+        }
+        public Class<?> getClassx() {
+            return classx;
+        }
+    }
+    
+    public  static Map<String, Mathod> getActions() {
         Lock rlock = ACTLOCK. readLock();
         rlock.lock();
         try {
@@ -162,8 +180,8 @@ public class ActionRunner {
         }
     }
 
-    private static Map<String, Method> getActions(String... pkgs) {
-        Map<String, Method> acts = new HashMap();
+    private static Map<String, Mathod> getActions(String... pkgs) {
+        Map<String, Mathod> acts = new HashMap();
 
         for(String pkgn : pkgs) {
             pkgn = pkgn.trim( );
@@ -173,7 +191,7 @@ public class ActionRunner {
             if (pkgn.endsWith(".*")) {
                 pkgn = pkgn.substring(0, pkgn.length() -2);
                 try {
-                    clss = Cname.getClassNames(pkgn, false);
+                    clss = Cname.getClassNames(pkgn,false);
                 } catch (IOException ex) {
                     throw new HongsError( 0x4a , "Can not load package '" + pkgn + "'.", ex);
                 }
@@ -222,11 +240,15 @@ public class ActionRunner {
                     if (prms == null || prms.length != 1 || !prms[0].isAssignableFrom(ActionHelper.class)) {
                         throw new HongsError(0x4a, "Can not find action method '"+clsn+"."+mtdn+"(ActionHelper)'.");
                     }
+                    
+                    Mathod mtdx = new Mathod();
+                    mtdx.method = mtdo;
+                    mtdx.classx = clso;
 
                     if ("__main__".equals(actx)) {
-                        acts.put(actn /*__main__*/ , mtdo );
+                        acts.put(actn /*__main__*/ , mtdx );
                     } else {
-                        acts.put(actn + "/" + actx , mtdo );
+                        acts.put(actn + "/" + actx , mtdx );
                     }
                 }
             }

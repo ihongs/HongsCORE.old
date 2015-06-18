@@ -29,24 +29,26 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hongs-serv-system</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>hongs-serv-lucene</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hongs-serv-search</artifactId>
+            <artifactId>hongs-serv-manage</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hongs-serv-system</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>hongs-serv-server</artifactId>
             <version>${project.version}</version>
         </dependency>
+        //-->
     </dependencies>
     <build>
         <!--directory>bin</directory-->

@@ -1,6 +1,7 @@
 package app.hongs.action.anno;
 
 import app.hongs.CoreLocale;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
@@ -46,16 +47,27 @@ public class VerifyInvoker implements FilterInvoker {
         boolean upd = act.endsWith("update") || (null != id && ! "".equals(id));
 
         // 执行校验
-        VerifyHelper ver = new VerifyHelper();
-        ver.isPrompt(prp);
-        ver.isUpdate(upd);
-        if (null != conf &&  null != form) {
-            ver.addRulesByForm(conf, form);
-        }
         try {
-            Map vls = ver.verify(dat);
-            if (clean) dat.clear(   );
-            dat.putAll( vls );
+            do {
+                VerifyHelper ver  =  new VerifyHelper( );
+
+                if (null != conf && null != form) {
+                    try {
+                        ver.addRulesByForm( conf, form );
+                    } catch (HongsError ex) {
+                        if (ex.getCode() == 0x2a) {
+                            break; // 配置不存在则不校验
+                        }
+                    }
+                }
+
+                ver.isPrompt( prp );
+                ver.isUpdate( upd );
+                Map vls = ver.verify(dat);
+                if (clean) dat.clear(   );
+                dat.putAll(vls);
+            } while ( false );
+
             chains.doAction();
         } catch (Wrongs err ) {
             dat = new HashMap();

@@ -11,3 +11,7 @@ nb-configuration.xml
 /hongs-serv-system/target/
 /hongs-serv-server/target/
 /Hongs-CORE-0.3-SNAPSHOT/
+/hongs-serv-resume/target/
+/hongs-serv-member/target/
+/hongs-serv-module/target/
+/hongs-serv-manage/target/

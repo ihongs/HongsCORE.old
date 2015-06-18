@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 系统设置命令
+ * 管理命令
  * @author Hongs
  */
 @Cmdlet("system")

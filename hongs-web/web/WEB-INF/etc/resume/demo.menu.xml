@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <menu disp="档案管理" href="common/goto.act?m=resume">
-        <menu disp="测试" href="resume/#demo" page="resume/demo/list.jsp"/>
-    </menu>
-</root>

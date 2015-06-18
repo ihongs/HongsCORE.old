@@ -99,6 +99,14 @@ INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/retrieve');
 INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/create');
 INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/update');
 INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/delete');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/retrieve');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/create');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/update');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/delete');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/retrieve');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/create');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/update');
+INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/delete');
 
 --
 -- 用户所属部门

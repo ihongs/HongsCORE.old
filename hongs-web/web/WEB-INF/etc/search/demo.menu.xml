@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <menu disp="搜索服务" href="common/goto.act?m=search">
-        <menu disp="测试" href="search/#demo" page="search/demo/main.jsp"/>
-    </menu>
-</root>

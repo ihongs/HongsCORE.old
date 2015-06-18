@@ -104,7 +104,7 @@ public class DB
   /**
    * 是否为事务模式(即不会自动提交)
    */
-  public boolean IN_COMMIT_MODE;
+  public boolean IN_TRNSCT_MODE;
 
   /**
    * 库名
@@ -367,7 +367,7 @@ public class DB
             if (info.containsKey("initialPoolSize")) {
               pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
             }
-            
+
             if (info.containsKey("idleConnectionTestPeriod")) {
               pool.setIdleConnectionTestPeriod(Integer.parseInt(info.getProperty("idleConnectionTestPeriod")));
             }
@@ -421,7 +421,7 @@ public class DB
     // 自动提交设置
     try
     {
-      this.connection.setAutoCommit(!this.IN_COMMIT_MODE);
+      this.connection.setAutoCommit(!this.IN_TRNSCT_MODE);
     }
     catch (SQLException ex )
     {
@@ -441,6 +441,20 @@ public class DB
       ||  this.connection.isClosed())
       {
         return;
+      }
+
+      // 默认退出时提交
+      if(this.IN_TRNSCT_MODE)
+      {
+        try
+        {
+          this.commit();
+        }
+        catch (Error e)
+        {
+          this.rolbak();
+          throw e;
+        }
       }
 
       if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
@@ -464,7 +478,7 @@ public class DB
   @Override
   public void trnsct()
   {
-    this.IN_COMMIT_MODE = true ;
+    this.IN_TRNSCT_MODE = true ;
   }
 
   /**
@@ -473,15 +487,15 @@ public class DB
   @Override
   public void commit()
   {
-    if (IN_COMMIT_MODE) {
-        IN_COMMIT_MODE = false;
+    if (IN_TRNSCT_MODE) {
         try {
             if (connection != null && !connection.isClosed()) {
-                connection.commit();
+                connection.commit(  );
             }
         } catch (SQLException ex) {
           throw new HongsError(0x44, ex);
         }
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
     }
   }
 
@@ -491,8 +505,7 @@ public class DB
   @Override
   public void rolbak()
   {
-    if (IN_COMMIT_MODE) {
-        IN_COMMIT_MODE = false;
+    if (IN_TRNSCT_MODE) {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.rollback();
@@ -500,6 +513,7 @@ public class DB
         } catch (SQLException ex) {
           throw new HongsError(0x44, ex);
         }
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
     }
   }
 
@@ -1569,8 +1583,8 @@ public class DB
 
     db.IN_OBJECT_MODE = Synt.declare(
               Core.getInstance().got("__IN_OBJECT_MODE__"), db.IN_OBJECT_MODE);
-    db.IN_COMMIT_MODE = Synt.declare(
-              Core.getInstance().got("__IN_COMMIT_MODE__"), false /* reset */);
+    db.IN_TRNSCT_MODE = Synt.declare(
+              Core.getInstance().got("__IN_TRNSCT_MODE__"), false /* reset */);
 
     return db;
   }

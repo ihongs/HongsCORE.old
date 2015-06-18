@@ -2,6 +2,7 @@ package app.hongs.dl;
 
 import app.hongs.util.Dict;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,13 +44,13 @@ public class MergeMore
           obj = ((Map)obj).get(keys[i]);
         }
         else
-        if (obj instanceof List)
+        if (obj instanceof Collection )
         {
           // 切割子键数组
           int j  = keys.length - i;
           String[] keyz = new String[j];
           System.arraycopy(keys,i, keyz,0,j);
-
+          
           // 往下递归一层
           this.mapped(map, (List) obj, keyz);
 
@@ -65,16 +66,57 @@ public class MergeMore
           continue W;
       }
 
-      // 登记行
-      if (map.containsKey(obj))
+      /**
+       * 登记行
+       * 如果对应多个值
+       * 则将多个值加入映射关系
+       * 这种情况必须使用append
+       */
+      if  (obj instanceof Collection)
       {
-        map.get(obj ).add(row);
+      for (Object xbj : ( Collection) obj)
+      {
+        if (map.containsKey(xbj))
+        {
+          map.get(xbj ).add(row);
+        }
+        else
+        {
+          List lst = new ArrayList();
+          map.put(xbj , lst);
+          lst.add(row);
+        }
+      }
+      }
+      else
+      if  (obj instanceof Object [ ])
+      {
+      for (Object xbj : ( Object [ ]) obj)
+      {
+        if (map.containsKey(xbj))
+        {
+          map.get(xbj ).add(row);
+        }
+        else
+        {
+          List lst = new ArrayList();
+          map.put(xbj , lst);
+          lst.add(row);
+        }
+      }
       }
       else
       {
-        List lst = new ArrayList();
-        map.put(obj , lst);
-        lst.add(row);
+        if (map.containsKey(obj))
+        {
+          map.get(obj ).add(row);
+        }
+        else
+        {
+          List lst = new ArrayList();
+          map.put(obj , lst);
+          lst.add(row);
+        }
       }
     }
   }
@@ -90,6 +132,49 @@ public class MergeMore
     Map<Object, List> map = new HashMap();
     mapped(map, rows, key.split( "\\." ));
     return map;
+  }
+
+  public void append(List<Map> rows, Map<Object, List> map, String col, String sub)
+  {
+    Map     row, raw;
+    List    lst;
+    Object  rid;
+
+    Iterator rs = rows.iterator();
+    while (rs.hasNext())
+    {
+      raw = ( Map  ) rs.next(   );
+      rid =          raw.get(col);
+      lst = ( List ) map.get(rid);
+
+      if (lst == null)
+      {
+        //throw new HongsException(0x10c0, "Line nums is null");
+        continue;
+      }
+
+      Iterator it = lst.iterator();
+      while (it.hasNext())
+      {
+        row = (Map) it.next();
+
+        if (row.containsKey(sub))
+        {
+          (( List ) row.get(sub)).add(raw);
+        }
+        else
+        {
+          List lzt = new ArrayList();
+          row.put(sub, lzt);
+          lzt.add(raw);
+        }
+      }
+    }
+  }
+
+  public void append(List<Map> rows, String key, String col, String sub)
+  {
+    append(rows, mapped(key), col, sub);
   }
 
   public void extend(List<Map> rows, Map<Object, List> map, String col, String sub)
@@ -134,47 +219,9 @@ public class MergeMore
     extend(rows, mapped(key), col, sub);
   }
 
-  public void append(List<Map> rows, Map<Object, List> map, String col, String sub)
+  public void extend(List<Map> rows, String key, String col)
   {
-    Map     row, raw;
-    List    lst;
-    Object  rid;
-
-    Iterator rs = rows.iterator();
-    while (rs.hasNext())
-    {
-      raw = ( Map  ) rs.next(   );
-      rid =          raw.get(col);
-      lst = ( List ) map.get(rid);
-
-      if (lst == null)
-      {
-        //throw new HongsException(0x10c0, "Line nums is null");
-        continue;
-      }
-
-      Iterator it = lst.iterator();
-      while (it.hasNext())
-      {
-        row = (Map) it.next();
-
-        if (row.containsKey(sub))
-        {
-          (( List ) row.get(sub)).add(raw);
-        }
-        else
-        {
-          List lzt = new ArrayList();
-          row.put(sub, lzt);
-          lzt.add(raw);
-        }
-      }
-    }
-  }
-
-  public void append(List<Map> rows, String key, String col, String sub)
-  {
-    append(rows, mapped(key), col, sub);
+    extend(rows, mapped(key), col,null);
   }
 
 }

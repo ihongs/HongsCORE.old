@@ -1,0 +1,62 @@
+-- DB: module
+
+--
+-- 单元
+--
+
+DROP TABLE IF EXISTS `a_module_unit`;
+CREATE TABLE `a_module_unit` (
+  `id` char(20) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `ctime` int(11) DEFAULT NULL,
+  `mtime` int(11) DEFAULT NULL,
+  `state` tinyint(4) DEFAULT '1',
+  PRIMARY KEY (`id`)
+);
+
+CREATE INDEX `IK_a_module_unit_state` ON `a_module_unit` (`state`);
+CREATE INDEX `IK_a_module_unit_ctime` ON `a_module_unit` (`ctime`);
+CREATE INDEX `IK_a_module_unit_mtime` ON `a_module_unit` (`mtime`);
+CREATE UNIQUE INDEX `UK_a_module_unit_name` ON `a_module_unit` (`name`);
+
+--
+-- 表单
+--
+
+DROP TABLE IF EXISTS `a_module_form`;
+CREATE TABLE `a_module_form` (
+  `id` char(20) NOT NULL,
+  `unit_id` char(20) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `conf` text NOT NULL,
+  `ctime` int(11) DEFAULT NULL,
+  `mtime` int(11) DEFAULT NULL,
+  `state` tinyint(4) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`unit_id`) REFERENCES `a_module_unit` (`id`) ON DELETE CASCADE
+);
+
+CREATE INDEX `IK_a_module_form_state` ON `a_module_form` (`state`);
+CREATE INDEX `IK_a_module_form_ctime` ON `a_module_form` (`ctime`);
+CREATE INDEX `IK_a_module_form_mtime` ON `a_module_form` (`mtime`);
+CREATE UNIQUE INDEX `UK_a_module_form_name` ON `a_module_form` (`name`,`unit_id`);
+
+--
+-- 数据
+--
+
+DROP TABLE IF EXISTS `a_module_data`;
+CREATE TABLE `a_module_data` (
+  `id` char(20) NOT NULL,
+  `form_id` char(20) NOT NULL,
+  `data` text NOT NULL,
+  `ctime` int(11) DEFAULT NULL,
+  `mtime` int(11) DEFAULT NULL,
+  `state` tinyint(4) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`form_id`) REFERENCES `a_module_form` (`id`) ON DELETE CASCADE
+);
+
+CREATE INDEX `IK_a_module_data_state` ON `a_module_data` (`state`);
+CREATE INDEX `IK_a_module_data_ctime` ON `a_module_data` (`ctime`);
+CREATE INDEX `IK_a_module_data_mtime` ON `a_module_data` (`mtime`);

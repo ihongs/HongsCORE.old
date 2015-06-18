@@ -579,7 +579,7 @@ function hsChkUri   (uri) {
  * @return {String} 完整的URI
  */
 function hsFixUri   (uri) {
-    if (/^(\w+:\/\/|\/|\.)/.test(uri) === false) {
+    if (/^(\w+:\/\/|\/|\.|\.\.)/.test(uri) === false) {
         var pre = HsCONF["BASE_HREF"];
         if (pre == undefined) {
             pre = jQuery("base").attr("href").replace(/\/$/, '');

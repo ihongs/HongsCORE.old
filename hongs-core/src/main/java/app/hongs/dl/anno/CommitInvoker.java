@@ -22,7 +22,7 @@ public class CommitInvoker implements FilterInvoker {
         Core core = Core.getInstance();
 
         try {
-            core.put("__IN_COMMIT_MODE__", true);
+            core.put("__IN_TRNSCT_MODE__", true);
 
                 // 开启
                 for(Object o : core.values()) {
@@ -55,7 +55,7 @@ public class CommitInvoker implements FilterInvoker {
                 }
             }
         } finally {
-            core.remove("__IN_COMMIT_MODE__");
+            core.remove("__IN_TRNSCT_MODE__");
         }
     }
 }

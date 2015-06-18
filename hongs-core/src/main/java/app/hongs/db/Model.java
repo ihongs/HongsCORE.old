@@ -3,6 +3,7 @@ package app.hongs.db;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
+import app.hongs.dl.IRecord;
 import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.util.Arrays;
@@ -49,6 +50,7 @@ import java.util.Set;
  * @author Hongs
  */
 public class Model
+implements IRecord
 {
 
   /**
@@ -103,6 +105,11 @@ public class Model
   public String[] findCols = new String[] {"name"};
 
   /**
+   * 被显示的字段
+   */
+  public String[] dispCols = new String[] {"name"};
+
+  /**
    * 或参数名
    * 用于组合 (a = 1 OR a = 2)
    */
@@ -143,6 +150,24 @@ public class Model
   }
 
   //** 标准动作方法 **/
+
+  /**
+   * 综合提取方法
+   * @param rd
+   * @return
+   * @throws HongsException 
+   */
+  @Override
+  public Map retrieve(Map rd)
+    throws HongsException
+  {
+    Object id = rd.get ( this.table.primaryKey);
+    if (id == null || id instanceof Collection) {
+      return  this.getList(rd);
+    } else {
+      return  this.getInfo(rd);
+    }
+  }
 
   /**
    * 获取分页(无查询结构)
@@ -301,10 +326,18 @@ public class Model
    * @return 记录ID
    * @throws HongsException
    */
-  public String create(Map rd)
+  @Override
+  public String[] create(Map rd)
     throws HongsException
   {
-    return this.add(rd);
+    String[] resp;
+    resp = new String[dispCols.length  + 1];
+    resp[0] = add(rd);
+    for (int i=0; i < dispCols.length; i++)
+    {
+        resp[i+1] = Synt.declare(rd.get(dispCols[i]), String.class);
+    }
+    return resp;
   }
 
   /**
@@ -314,6 +347,7 @@ public class Model
    * @return 更新条数
    * @throws app.hongs.HongsException
    */
+  @Override
   public int update(Map rd)
     throws HongsException
   {
@@ -364,6 +398,7 @@ public class Model
    * @return 删除条数
    * @throws app.hongs.HongsException
    */
+  @Override
   public int delete(Map rd)
     throws HongsException
   {
@@ -515,7 +550,7 @@ public class Model
     throws HongsException
   {
     String id = Synt.declare(data.get( this.idKey), String.class);
-    if (id == null && id.length() == 0)
+    if (id == null || id.length() == 0)
     {
       id = Synt.declare(data.get(table.primaryKey), String.class);
     }
@@ -748,7 +783,9 @@ public class Model
      */
     Iterator it = rd.entrySet().iterator();
     Map fields = this.table.getFields();
-    Map relats = this.table.relats;
+    Map relats = this.table.relats != null
+               ? this.table.relats
+               : new HashMap();
     while (it.hasNext())
     {
       Map.Entry et = (Map.Entry)it.next();

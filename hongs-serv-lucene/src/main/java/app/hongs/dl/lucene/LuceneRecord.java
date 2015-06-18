@@ -81,7 +81,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected IndexReader   reader = null;
     protected IndexSearcher finder = null;
 
-    public boolean IN_COMMIT_MODE = false;
+    public boolean IN_TRNSCT_MODE = false;
 
     public String   idCol = "id";
     public String[] findCols = new String[] { "wd" };
@@ -112,8 +112,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         this.talias   = talias != null ? talias : FormSet.getInstance("default").getEnum("__types__");
 
         // Is false for autocommit
-        this.IN_COMMIT_MODE = Synt.declare(
-                    Core.getInstance().got( "__IN_COMMIT_MODE__" ), false );
+        this.IN_TRNSCT_MODE = Synt.declare( Core.getInstance( ).got( "__IN_TRNSCT_MODE__" ) , false );
     }
 
     public LuceneRecord(String conf, String form)
@@ -157,13 +156,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
         try {
 
-        // 指定单个 id 则走 get
+        // 指定单个 id 则走 getOne
         Object id = rd.get (idCol);
         if (null != id && !(id instanceof Map) && !(id instanceof Collection)) {
-            String jd = id.toString();
             Map  data = new HashMap();
-            Map  info = get ( jd );
-            data.put("info", info);
+            List list = getAll(rd, 0, 1);
+            data.put("info", ! list.isEmpty( ) ? list.get(0) : new HashMap( ));
             return data;
         }
 
@@ -205,22 +203,25 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Sort  s = getSort (rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("Lucene Query: "+q.toString()+" Sort: "+s.toString()+" Range: "+minRn+","+maxRn);
+                CoreLogger.debug("LuceneRecord.retrieve: "+q.toString()+" Sort: "+s.toString()+" Page: "+pn+" Rows: "+rn);
             }
 
-            TopDocs docz = finder.search(q, limit, s);
+            TopDocs tops = finder.search(q, limit, s);
 
-            if (maxRn > docz.totalHits) {
-                maxRn = docz.totalHits;
+            if (maxRn > tops.totalHits) {
+                maxRn = tops.totalHits;
             }
 
-            ScoreDoc[] docs = docz.scoreDocs;
-            for (int i = minRn; i < maxRn; i ++) {
-                Document doc = reader.document(docs[i].doc);
-                list.add(doc2Map(doc));
+            ScoreDoc[] scos = tops.scoreDocs;
+            ScoreDoc   sco  ;
+            Document   doc  ;
+            for (int i = minRn; i < maxRn; i++) {
+                sco =  scos[i];
+                doc = reader.document(sco.doc );
+                list.add(/**/doc2Map (doc)/**/);
             }
 
-            rc = docs.length;
+            rc = scos.length;
             pc = (int) Math.ceil((double)rc / rn);
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
@@ -399,31 +400,94 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Sort  s = getSort (rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("Lucene Query: "+q.toString()+" Sort: "+s.toString());
+                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString());
             }
 
-            TopDocs  docz;
+            int n  = 1000;
+            TopDocs  tops;
             if (s != null) {
-                docz = finder.search(q, 100, s);
+                tops = finder.search(q, n, s);
             } else {
-                docz = finder.search(q, 100);
+                tops = finder.search(q, n);
             }
 
-            while ( docz.totalHits > 0) {
-                ScoreDoc[] docs = docz.scoreDocs;
-                for(ScoreDoc d  : docs) {
-                    Document doc = reader.document(d.doc);
-                    list.add(doc2Map(doc));
+            while ( tops.totalHits > 0) {
+                ScoreDoc[] scos  = tops.scoreDocs;
+                ScoreDoc   sco   = null;
+                Document   doc   ;
+                for(int i = n; i < scos.length; i ++) {
+                    sco = scos[i];
+                    doc = reader.document(sco.doc );
+                    list.add(/**/doc2Map (doc)/**/);
                 }
 
-                if (docs.length  ==  0) {
-                    break;
+                if (scos.length  ==  n) {
+                    if (s != null) {
+                        tops = finder.searchAfter(sco, q, n, s);
+                    } else {
+                        tops = finder.searchAfter(sco, q, n);
+                    }
                 }
+            }
+        } catch (IOException ex) {
+            throw HongsException.common(null, ex);
+        }
 
-                if (s != null) {
-                    docz = finder.searchAfter(docs[docs.length - 1], q, 100, s);
-                } else {
-                    docz = finder.searchAfter(docs[docs.length - 1], q, 100);
+        return list;
+    }
+
+    /**
+     * 获取部分文档
+     * @param rd
+     * @param limit
+     * @return
+     * @throws HongsException
+     */
+    public List getAll(Map rd, int limit) throws HongsException {
+        return  getAll(    rd,  0, limit);
+    }
+
+    /**
+     * 获取部分文档
+     * @param rd
+     * @param start
+     * @param limit
+     * @return
+     * @throws HongsException
+     */
+    public List getAll(Map rd, int start, int limit) throws HongsException {
+        List list = new ArrayList();
+
+        initial();
+        try {
+            Query q = getQuery(rd);
+            Sort  s = getSort (rd);
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString()+" Limit: "+start+","+limit);
+            }
+
+            int m = start + limit;
+            int n = 100;
+            if (n > m) {
+                n = m;
+            }
+
+            TopDocs  tops;
+            if (s != null) {
+                tops = finder.search(q, n, s);
+            } else {
+                tops = finder.search(q, n);
+            }
+
+            if (tops.totalHits > 0) {
+                ScoreDoc[] scos  = tops.scoreDocs;
+                ScoreDoc   sco   ;
+                Document   doc   ;
+                for(int i = n; i < scos.length; i ++) {
+                    sco = scos[i];
+                    doc = reader.document(sco.doc );
+                    list.add(/**/doc2Map (doc)/**/);
                 }
             }
         } catch (IOException ex) {
@@ -440,7 +504,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        if (!IN_COMMIT_MODE) {
+        if (!IN_TRNSCT_MODE) {
             commit();
         }
     }
@@ -452,7 +516,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        if (!IN_COMMIT_MODE) {
+        if (!IN_TRNSCT_MODE) {
             commit();
         }
     }
@@ -464,7 +528,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        if (!IN_COMMIT_MODE) {
+        if (!IN_TRNSCT_MODE) {
             commit();
         }
     }
@@ -540,13 +604,25 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     @Override
     public void destroy() throws HongsException {
         try {
+            if (writer != null) {
+            // 默认退出时提交
+            if (IN_TRNSCT_MODE) {
+                try {
+                    commit();
+                } catch (HongsException he) {
+                    rolbak();
+                    throw he;
+                }
+            }
+
+                writer.maybeMerge( );
+                writer.close( );
+                writer  = null ;
+            }
+
             if (reader != null) {
                 reader.close( );
                 reader  = null ;
-            }
-            if (writer != null) {
-                writer.close( );
-                writer  = null ;
             }
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
@@ -555,7 +631,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     @Override
     public void trnsct() {
-        IN_COMMIT_MODE = true;
+        IN_TRNSCT_MODE = true;
     }
 
     @Override
@@ -563,12 +639,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (writer == null) {
             return;
         }
-        IN_COMMIT_MODE =false;
         try {
             writer.commit(  );
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
     }
 
     @Override
@@ -576,12 +652,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (writer == null) {
             return;
         }
-        IN_COMMIT_MODE =false;
         try {
             writer.rollback();
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
     }
 
     /**
@@ -627,7 +703,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             CustomAnalyzer.Builder cb = CustomAnalyzer.builder();
             String kn, an, ac; Map oc;
-            
+
             // 分词器
             an = Synt.declare(fc.get("lucene-tokenizer"), "");
             if (!"".equals(an)) {
