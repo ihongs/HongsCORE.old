@@ -46,7 +46,7 @@ public class TableSync
   {
     List<String> sqls = this.syncSlaverSqls(slaver, delExtraFields);
     DB sdb = slaver.db;
-    sdb.IN_COMMIT_MODE = true;
+    sdb.IN_TRNSCT_MODE = true;
     try
     {
       for (String sql : sqls)
