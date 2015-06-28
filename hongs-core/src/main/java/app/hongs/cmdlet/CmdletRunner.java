@@ -1,6 +1,5 @@
 package app.hongs.cmdlet;
 
-import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLocale;
@@ -8,10 +7,14 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Cname;
+import app.hongs.util.Data;
 import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -154,22 +157,15 @@ public class CmdletRunner
     /** 核心属性配置 **/
 
     Core.ENVIR = 0;
-
-    Core.DEBUG = Synt.declare(opts.get("debug") , (byte)  0 );
-
+    Core.DEBUG = Synt.declare(opts.get("debug") , (byte) 0);
     Core.CORE_PATH = Synt.declare(opts.get("corepath"), System.getProperty("user.dir"));
-
     Core.CONF_PATH = Synt.declare(opts.get("confpath"), Core.CORE_PATH + File.separator + "etc");
-
     Core.VARS_PATH = Synt.declare(opts.get("varspath"), Core.CORE_PATH + File.separator + "var");
-
     Core.TMPS_PATH = Synt.declare(opts.get("tmpspath"), Core.VARS_PATH + File.separator + "tmp");
-
     Core.BASE_PATH = Synt.declare(opts.get("basepath"), Core.CORE_PATH + File.separator + "web");
-
     Core.BASE_HREF = Synt.declare(opts.get("basehref"), "");
 
-    // 如果 web 目录不存在, 则可能在 WEB-INF 下
+    // 如果 web 目录不存在, 则视为在 WEB-INF 下
     File bp = new File(Core.BASE_PATH );
     if (!bp.exists()) {
         Core.BASE_PATH = bp.getParent();
@@ -178,7 +174,6 @@ public class CmdletRunner
     /** 系统属性配置 **/
 
     CoreConfig cnf = CoreConfig.getInstance("_begin_");
-
     Core.SERVER_ID = cnf.getProperty("core.server.id", "1");
 
     Map m = new HashMap();
@@ -298,27 +293,48 @@ public class CmdletRunner
     Map req  = null;
     if (str != null && str.length() > 0)
     {
-        req = ActionHelper.parseParam(ActionHelper.parseQuery(str));
+        if (str.startsWith("@")) {
+            str = getFileStr(str.substring(1));
+        }
+        if (str.startsWith("{") && str.endsWith("}")) {
+            req = ( Map ) Data.toObject( str );
+        } else {
+            req = ActionHelper.parseParam(ActionHelper.parseQuery(str));
+        }
     }
 
     str = (String) opts.get("context--");
     Map con  = null;
     if (str != null && str.length() > 0)
     {
-        con = ActionHelper.parseParam(ActionHelper.parseQuery(str));
+        if (str.startsWith("@")) {
+            str = getFileStr(str.substring(1));
+        }
+        if (str.startsWith("{") && str.endsWith("}")) {
+            con = ( Map ) Data.toObject( str );
+        } else {
+            con = ActionHelper.parseParam(ActionHelper.parseQuery(str));
+        }
     }
 
     str = (String) opts.get("session--");
     Map ses  = null;
     if (str != null && str.length() > 0)
     {
-        ses = ActionHelper.parseParam(ActionHelper.parseQuery(str));
+        if (str.startsWith("@")) {
+            str = getFileStr(str.substring(1));
+        }
+        if (str.startsWith("{") && str.endsWith("}")) {
+            ses = ( Map ) Data.toObject( str );
+        } else {
+            ses = ActionHelper.parseParam(ActionHelper.parseQuery(str));
+        }
     }
 
     ActionHelper helper = new ActionHelper(req, con, ses, null );
     Core.getInstance().put(ActionHelper.class.getName(), helper);
 
-    // Clean instatnces in core at exit
+    // Clean instatnces fis core at exit
     Runtime.getRuntime().addShutdownHook( new Thread( )
     {
       @Override
@@ -421,6 +437,24 @@ public class CmdletRunner
         }
 
         return acts;
+    }
+
+    private static String getFileStr(String path) throws HongsException {
+        File   file = new File(path);
+        Long   size = file.length( );
+        byte[] cont = new byte[size.intValue()];
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            fis.read (cont);
+            fis.close(/**/);
+        } catch (FileNotFoundException e) {
+            throw HongsException.common("Can not find " + path, e);
+        } catch (IOException e) {
+            throw HongsException.common("Can not read " + path, e);
+        }
+        String text = new String(cont);
+        text = text.replaceAll("//.*?([\\r\\n])" , "$1");
+        return text.trim( );
     }
 
 }

@@ -162,7 +162,10 @@ public class LangAction
     // 公共语言
     if ("default".equals(confName))
     {
-      sb.append("\t\"error.label\":\"")
+      sb.append("\t\"lang\":\"" )
+        .append(Core.ACTION_LANG)
+        .append("\",\n")
+        .append("\t\"error.label\":\"")
         .append(mk.lang.getProperty("core.error.label", "ERROR"))
         .append("\",\n")
         .append("\t\"error.unkwn\":\"")

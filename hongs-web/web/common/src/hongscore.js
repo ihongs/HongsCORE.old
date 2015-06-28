@@ -541,7 +541,7 @@ function hsGetLang  (key, rep) {
     }
 
     if (rep instanceof Object) {
-        key = key.replace( /\$(\{\w+\}|\w+)/gm, function(w) {
+        key = key.replace( /\$(\w+|\{.+?\})/gm, function(w) {
             if (w.substring(0 , 2) == "${") {
                 w = w.substring(2, w.length - 1);
             }
@@ -591,6 +591,32 @@ function hsFixUri   (uri) {
         return uri;
     }
 }
+/**
+ * 补全URI为其设置参数
+ * @param {String} uri
+ * @param {Object} pms
+ * @returns {String} 完整的URI
+ */
+function hsFixPms   (uri, pms) {
+    if (pms instanceof Element || pms instanceof jQuery) {
+        var c = jQuery(pms).closest(".loadbox");
+        var d = hsSerialArr(c.data("data"));
+          pms = hsSerialArr(c.data("url" ));
+        for (var i = 0; i < d.length; i ++) {
+          pms.push(d[i]);
+        }
+    }
+    return uri.replace( /\$(\w+|\{.+?\})/gm, function(w) {
+        if (w.substring(0 , 2) === "${") {
+            w = w.substring(2, w.length -1);
+        }
+        else {
+            w = w.substring(1);
+        }
+        w = hsGetSeria(pms, w);
+        return  w;
+    });
+};
 
 /**
  * 格式化数字
@@ -1286,7 +1312,7 @@ $.fn.hsTaba = function(url) {
 
 $.fn._hsConfig = function() {
     var obj = {};
-    var arr = jQuery(this).find("param");
+    var arr = this.find("param");
     for(var i = 0; i < arr.length; i ++) {
         var n = jQuery(arr[i]).attr("name" );
         var v = jQuery(arr[i]).attr("value");
@@ -1294,6 +1320,11 @@ $.fn._hsConfig = function() {
         case "S:": // String
             v = v.substring(2);
             break;
+        case "I:": // Integer
+            v = v.substring(2);
+            v =  parseInt  (v);
+            break;
+        case "F:":
         case "N:": // Number
             v = v.substring(2);
             v =  parseFloat(v);
@@ -1302,13 +1333,17 @@ $.fn._hsConfig = function() {
             v = v.substring(2);
             v = /(true|yes|ok|t|y|1)/i.test(v);
             break;
+        case "P:": // Property
+            v = v.substring(2);
+            v = this.get(0)[v];
+            break;
         default:
             (function () {
                 if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
                     v = eval('('+v+')');
                 else  if  (/^\s*(\(.*\))\s*$/.test(v))
                     v = eval(v);
-            }).call(this);
+            }).call(this.get(0));
         }
         if (n) {
             // IE 对相同 name 的 param 只取一个, 故需要加编号(#)来表示数组
@@ -1442,6 +1477,7 @@ $(document)
 function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
+        url = hsFixPms( url , this );
     if (box) {
         box = $(this)._hsTarget(box);
         box.hsLoad( url );
@@ -1452,6 +1488,7 @@ function(evt) {
 function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
+        url = hsFixPms( url , this );
     if (box) {
         box = $(this)._hsTarget(box);
         box.hsOpen( url );
@@ -1478,8 +1515,11 @@ function(evt) {
     $(this).closest("a").hsClose();
     evt.stopPropagation();
 })
-.on("click", ".close,.cancel,.revoke",
+.on("click", ".close,.cancel",
 function(evt) {
+    if($(this).closest(".dont-close,.form-group").size()) {
+        return; // 不要对表单项内的 close 执行关闭块的动作
+    }
     $(this).closest(".modal,.openbox").hsClose( );
     evt.stopPropagation();
 })

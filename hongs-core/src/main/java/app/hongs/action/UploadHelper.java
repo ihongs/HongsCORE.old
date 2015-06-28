@@ -122,7 +122,7 @@ public class UploadHelper {
         this.resultName = famc;
         String path = this.getResultPath();
         if (! new File(path).isAbsolute()) {
-            path = Core.CORE_PATH + "/../" + path;
+            path = Core.BASE_PATH + "/" + path;
         }
 
         try {
@@ -169,7 +169,7 @@ public class UploadHelper {
                 BufferedReader fr = new BufferedReader(sr)) {
                 type = fr.readLine().trim();
                 extn = fr.readLine().trim();
-                extn = getUploadExtn(extn);
+                //extn = getUploadExtn(extn);
             }
             fs.close();
 
@@ -209,7 +209,7 @@ public class UploadHelper {
     public static void upload(Map<String, Object> request, UploadHelper... uploads) throws VerifyHelper.Wrong {
         for(UploadHelper upload : uploads) {
             String v = null;
-            String n = upload.uploadName;
+            String n = upload.uploadName != null ? upload.uploadName : "file";
             v = Dict.getParam(request, v, n);
             if (v  !=  null) {
                 upload.upload(v);

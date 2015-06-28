@@ -219,6 +219,7 @@ public class ActionHelper
 
   /**
    * 解析 multipart/form-data 数据, 并将上传的文件放入临时目录
+   * @param rd
    * @throws HongsException
    */
   protected final void setUploadsData(Map rd) throws HongsException {
@@ -242,7 +243,7 @@ public class ActionHelper
     if (x != null) {
         allowTypes = new HashSet(Arrays.asList(x.split(",")));
     }
-    x = conf.getProperty( "fore.upload.deny.types", null);
+    x = conf.getProperty("fore.upload.deny.types" , null);
     if (x != null) {
          denyTypes = new HashSet(Arrays.asList(x.split(",")));
     }
@@ -250,7 +251,7 @@ public class ActionHelper
     if (x != null) {
         allowExtns = new HashSet(Arrays.asList(x.split(",")));
     }
-    x = conf.getProperty( "fore.upload.deny.extns", null);
+    x = conf.getProperty("fore.upload.deny.extns" , null);
     if (x != null) {
          denyExtns = new HashSet(Arrays.asList(x.split(",")));
     }
@@ -327,7 +328,7 @@ public class ActionHelper
 
                 // 记录类型和名称
                 FileWriter fw = new FileWriter(info);
-                fw.write(type +"\r\n"+ name);
+                fw.write(type + "\r\n" + extn +"\r\n"+ name);
                 fw.close();
             }
 

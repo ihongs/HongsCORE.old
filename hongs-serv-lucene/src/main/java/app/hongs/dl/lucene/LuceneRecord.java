@@ -132,7 +132,9 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * cs   字段
      * pn   页码
      * rn   每页行数
-     * ln   分页链接数
+     * ln   分页数量
+     * or   多组"或"关系条件
+     * ar   串联多组关系条件
      * 请注意尽量避免将其作为字段名(id,wd除外)
      *
      * @param rd
@@ -141,8 +143,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     @Override
     public Map retrieve(Map rd) throws HongsException {
-        initial();
-
         /**
          * 用 cs 参数指定仅获取哪些字段
          */
@@ -158,10 +158,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
         // 指定单个 id 则走 getOne
         Object id = rd.get (idCol);
-        if (null != id && !(id instanceof Map) && !(id instanceof Collection)) {
+        if (id != null && !(id instanceof Collection) && !(id instanceof Map)) {
             Map  data = new HashMap();
-            List list = getAll(rd, 0, 1);
-            data.put("info", ! list.isEmpty( ) ? list.get(0) : new HashMap( ));
+            Map  info = getOne(rd);
+            data.put("info", info);
             return data;
         }
 
@@ -190,14 +190,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 获取页码, 依此计算分页
+        if (ln < 1) ln = 1; // 链数不得少于 1
         int pn = Synt.declare(rd.get("pn"), 1);
-        int limit = (int) (Math.ceil( (double) pn / ln ) * ln * rn + 1);
-        int minRn = (pn - 1) * rn;
-        int maxRn =  minRn   + rn;
+        int minPn = pn - (ln / 2 );
+        if (minPn < 1)   minPn = 1;
+        int maxPn = ln + minPn - 1;
+        int limit = rn * maxPn + 1;
+        int minRn = rn * (pn - 1 );
+        int maxRn = rn + minRn;
 
         // 查询列表
-        int rc, pc;
         List list = new ArrayList();
+        int rc, pc;
+        initial( );
         try {
             Query q = getQuery(rd);
             Sort  s = getSort (rd);
@@ -237,7 +242,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         page.put("lnks", ln);
         page.put("rowscount", rc);
         page.put("pagecount", pc);
-        page.put("uncertain", true);
+        page.put("uncertain", pc > maxPn);
         if (rc == 0) {
             page.put("err", 1);
         } else
@@ -309,6 +314,95 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     /**
+     * 获取单个文档
+     * @param rd
+     * @return
+     * @throws HongsException
+     */
+    public Map getOne(Map rd) throws HongsException {
+        initial();
+        try {
+            Query q = getQuery(rd);
+            Sort  s = getSort (rd);
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+                CoreLogger.debug("LuceneRecord.getOne: "+q.toString()+" Sort: "+s.toString());
+            }
+
+            TopDocs  tops;
+            if (s != null) {
+                tops = finder.search(q, 1, s);
+            } else {
+                tops = finder.search(q, 1);
+            }
+
+            if (tops.totalHits > 0) {
+                ScoreDoc[] scos  = tops.scoreDocs;
+                ScoreDoc   sco   = scos[ 0 ] /**/;
+                Document   doc   = reader.document(sco.doc);
+                return doc2Map(doc);
+            }
+
+            return new HashMap(   );
+        } catch (IOException ex) {
+            throw HongsException.common(null, ex);
+        }
+    }
+
+    /**
+     * 获取全部文档
+     * @param rd
+     * @return
+     * @throws HongsException
+     */
+    public List getAll(Map rd) throws HongsException {
+        initial();
+        try {
+            Query q = getQuery(rd);
+            Sort  s = getSort (rd);
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString());
+            }
+
+            int n  = 1000;
+            TopDocs  tops;
+            if (s != null) {
+                tops = finder.search(q, n, s);
+            } else {
+                tops = finder.search(q, n);
+            }
+
+            List list = new ArrayList();
+
+            while(tops.totalHits > 0) {
+                ScoreDoc[] scos  = tops.scoreDocs;
+                ScoreDoc   sco   = null;
+                Document   doc   ;
+                for(int i = 0; i < scos.length; i ++) {
+                    sco = scos[i];
+                    doc = reader.document(sco.doc );
+                    list.add(/**/doc2Map (doc)/**/);
+                }
+
+                if (n != scos.length) {
+                    break;
+                }
+
+                if (s != null) {
+                    tops = finder.searchAfter(sco, q, n, s);
+                } else {
+                    tops = finder.searchAfter(sco, q, n);
+                }
+            }
+
+            return  list;
+        } catch (IOException ex) {
+            throw HongsException.common(null, ex);
+        }
+    }
+
+    /**
      * 添加文档
      * @param rd
      * @return ID
@@ -326,24 +420,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     /**
-     * 设置文档(无则添加)
-     * @param id
-     * @param rd
-     * @throws HongsException
-     */
-    public void set(String id, Map rd) throws HongsException {
-        if (id == null && id.length() == 0) {
-            throw HongsException.common("Id must be set in put");
-        }
-        Document doc = getDoc(id);
-        if (doc == null) {
-            doc =  new Document();
-        }
-        docAdd(doc, rd);
-        setDoc(id, doc);
-    }
-
-    /**
      * 修改文档(局部更新)
      * @param id
      * @param rd
@@ -356,7 +432,47 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         Document doc = getDoc(id);
         if (doc == null) {
             throw HongsException.common("Doc#"+id+" not exists");
+        } else {
+            /**
+             * 实际运行中发现
+             * 直接往取出的 doc 里设置属性, 会造成旧值的索引丢失
+             * 故只好转换成 map 再重新设置, 这样才能确保索引完整
+             * 但那些 Store=NO 的数据将无法设置
+             */
+            Map md = doc2Map(doc);
+            md.putAll(rd);
+            rd = md;
         }
+        rd.put(idCol, id);
+        docAdd(doc, rd);
+        setDoc(id, doc);
+    }
+
+    /**
+     * 设置文档(无则添加)
+     * @param id
+     * @param rd
+     * @throws HongsException
+     */
+    public void set(String id, Map rd) throws HongsException {
+        if (id == null && id.length() == 0) {
+            throw HongsException.common("Id must be set in put");
+        }
+        Document doc = getDoc(id);
+        if (doc == null) {
+            doc =  new Document();
+        } else {
+            /**
+             * 实际运行中发现
+             * 直接往取出的 doc 里设置属性, 会造成旧值的索引丢失
+             * 故只好转换成 map 再重新设置, 这样才能确保索引完整
+             * 但那些 Store=NO 的数据将无法设置
+             */
+            Map md = doc2Map(doc);
+            md.putAll(rd);
+            rd = md;
+        }
+        rd.put(idCol, id);
         docAdd(doc, rd);
         setDoc(id, doc);
     }
@@ -383,118 +499,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         } else {
             return new HashMap();
         }
-    }
-
-    /**
-     * 获取全部文档
-     * @param rd
-     * @return
-     * @throws HongsException
-     */
-    public List getAll(Map rd) throws HongsException {
-        List list = new ArrayList();
-
-        initial();
-        try {
-            Query q = getQuery(rd);
-            Sort  s = getSort (rd);
-
-            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString());
-            }
-
-            int n  = 1000;
-            TopDocs  tops;
-            if (s != null) {
-                tops = finder.search(q, n, s);
-            } else {
-                tops = finder.search(q, n);
-            }
-
-            while ( tops.totalHits > 0) {
-                ScoreDoc[] scos  = tops.scoreDocs;
-                ScoreDoc   sco   = null;
-                Document   doc   ;
-                for(int i = n; i < scos.length; i ++) {
-                    sco = scos[i];
-                    doc = reader.document(sco.doc );
-                    list.add(/**/doc2Map (doc)/**/);
-                }
-
-                if (scos.length  ==  n) {
-                    if (s != null) {
-                        tops = finder.searchAfter(sco, q, n, s);
-                    } else {
-                        tops = finder.searchAfter(sco, q, n);
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            throw HongsException.common(null, ex);
-        }
-
-        return list;
-    }
-
-    /**
-     * 获取部分文档
-     * @param rd
-     * @param limit
-     * @return
-     * @throws HongsException
-     */
-    public List getAll(Map rd, int limit) throws HongsException {
-        return  getAll(    rd,  0, limit);
-    }
-
-    /**
-     * 获取部分文档
-     * @param rd
-     * @param start
-     * @param limit
-     * @return
-     * @throws HongsException
-     */
-    public List getAll(Map rd, int start, int limit) throws HongsException {
-        List list = new ArrayList();
-
-        initial();
-        try {
-            Query q = getQuery(rd);
-            Sort  s = getSort (rd);
-
-            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString()+" Limit: "+start+","+limit);
-            }
-
-            int m = start + limit;
-            int n = 100;
-            if (n > m) {
-                n = m;
-            }
-
-            TopDocs  tops;
-            if (s != null) {
-                tops = finder.search(q, n, s);
-            } else {
-                tops = finder.search(q, n);
-            }
-
-            if (tops.totalHits > 0) {
-                ScoreDoc[] scos  = tops.scoreDocs;
-                ScoreDoc   sco   ;
-                Document   doc   ;
-                for(int i = n; i < scos.length; i ++) {
-                    sco = scos[i];
-                    doc = reader.document(sco.doc );
-                    list.add(/**/doc2Map (doc)/**/);
-                }
-            }
-        } catch (IOException ex) {
-            throw HongsException.common(null, ex);
-        }
-
-        return list;
     }
 
     public void addDoc(Document doc) throws HongsException {
@@ -844,21 +848,13 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         for(Object o : rd.entrySet()) {
             Map.Entry e = (Map.Entry) o;
             Object fv = e.getValue( );
-            String fn = (String)e.getKey();
+            String fn = (String) e.getKey();
 
-            // 搜索
-            if ("wd".equals(fn)) {
-                for (String fm : findCols) {
-                    qryAdd(query, fm, fv, new AddSearchQuery());
-                }
-                continue;
-            }
-            // 排序
-            if ("ob".equals(fn)) {
+            if ("wd".equals(fn) || "ob".equals(fn)) {
                 continue;
             }
 
-            Map m = (Map ) fields.get(fn);
+            Map m = (Map ) fields.get( fn );
             if (m == null) {
                 continue;
             }
@@ -890,11 +886,20 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             qryAdd(query, fn, fv, aq);
         }
 
-        // 并条件
-        if (rd.containsKey("ar")) {
-            Set<Map> set = Synt.declare(rd.get("ar"), Set.class);
-            for(Map  map : set) {
-                query.add(getQuery(map), BooleanClause.Occur.MUST);
+        // 关键词
+        if (rd.containsKey("wd")) {
+            Object fv = rd.get("wd");
+            if(fv instanceof Map) {
+                Map fm = (Map) fv;
+                for(String fk : findCols) {
+                if (fm.containsKey( fk )) {
+                    qryAdd(query, fk, fm.get(fk), new AddSearchQuery());
+                }
+                }
+            } else {
+                for(String fk : findCols) {
+                    qryAdd(query, fk, fv/*WORD*/, new AddSearchQuery());
+                }
             }
         }
 
@@ -906,6 +911,14 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 qay.add(getQuery(map), BooleanClause.Occur.SHOULD);
             }
             query.add(qay, BooleanClause.Occur.MUST);
+        }
+
+        // 并条件
+        if (rd.containsKey("ar")) {
+            Set<Map> set = Synt.declare(rd.get("ar"), Set.class);
+            for(Map  map : set) {
+                query.add(getQuery(map), BooleanClause.Occur.MUST);
+            }
         }
 
         // 没有条件则查询全部

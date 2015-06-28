@@ -14,14 +14,14 @@ function HsList(opts, context) {
     var pageBox  = context.find   (".pagebox");
     var findBox  = context.find   (".findbox");
     var loadUrl  = hsGetValue(opts, "loadUrl");
-    var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
+    var openUrls = hsGetValue(opts, "openUrls");
     var loadMode = hsGetValue(opts, "loadMode", 1); // 加载模式, 0无 1附带上层数据
 
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
     this.rowsPerPage = hsGetConf("rows.per.page", 20);
-    this.lnksPerPage = hsGetConf("lnks.per.page", 5 );
+    this.lnksPerPage = hsGetConf("lnks.per.page", 10);
 
     this.context = context;
     this.loadBox = loadBox;
@@ -35,104 +35,20 @@ function HsList(opts, context) {
         }
     }
 
-    var i, a, n, m, u;
     var that = this;
+    var m, n, u, a, i;
 
-    function openHand(evt) {
-        //var n = evt.data[0];
-        var n = jQuery(this);
-        var m = evt.data[1];
-        var u = evt.data[2];
-
-        switch (m) {
-            case "{CONTEXT}": m = context; break;
-            case "{LOADBOX}": m = loadBox; break;
-            case "{AUTOBOX}": m = n._hsTarget('@'); break;
-            case "{TABSBOX}":
-                m = context.closest(".panes").data("rel");
-                m = m.hsTaba(context.attr("id"));
-                m = m[0];
-                break;
-            default: m = n._hsTarget(m);
-        }
-
-        /*
-        if (typeof(n) === "string")
-            n = loadBox.find(n);
-        else if (n)
-            n = jQuery(n);
-        */
-        /*
-        if (typeof(m) === "string")
-            m = loadBox.find(m);
-        else*/ if (m)
-            m = jQuery(m);
-
-        var t = n.closest(".tooltip");
-        if (t.length)
-            n = t.data   ( "trigger");
-
-        if (typeof(u) === "function") {
-            u.call(n, m, that);
-            return;
-        }
-
-        if (0 <= u.indexOf("{ID}")) {
-            var cks;
-            if (0 <= jQuery.inArray(listBox[0], n.parents())) {
-                cks = that.getRow(n);
-            }
-            else {
-                cks = that.getOne( );
-            }
-            if (cks == null) return ;
-            var sid = cks.val();
-
-            u = u.replace ("{ID}", encodeURIComponent( sid ));
-        }
-
-        that.open( n, m, u );
-    }
-
-    if (openUrls) jQuery.each(openUrls, function(i, a) {
-        switch (a.length) {
-        case 3:
-            n = a[0];
-            u = a[1];
-            m = a[2];
-            break;
-        case 2:
-            n = a[0];
-            u = a[1];
-            m = undefined;
-            break;
-        default:
-            return;
-        }
-
-        if (typeof(n) === "string")
-            context.on("click", n, [n, m, u], openHand);
-        else if (n)
-            n.on("click", [n, m, u], openHand);
-    });
+    //** 发送服务 **/
 
     function sendHand(evt) {
-        //var n = evt.data[0];
         var n = jQuery(this);
         var m = evt.data[1];
         var u = evt.data[2];
 
-        /*
-        if (typeof(n) === "string")
-            n = loadBox.find(n);
-        else if (n)
-            n = jQuery(n);
-        */
-
         var t = n.closest(".tooltip");
-        if (t.length)
+        if (t.length) {
             n = t.data   ( "trigger");
-
+        }
         if (typeof(u) === "function") {
             u.call(n, m, that);
             return;
@@ -141,8 +57,7 @@ function HsList(opts, context) {
         var cks;
         if (-1 != jQuery.inArray(listBox[0], n.parents())) {
             cks = that.getRow(n);
-        }
-        else {
+        } else {
             cks = that.getAll( );
         }
         if (cks == null) return ;
@@ -166,11 +81,82 @@ function HsList(opts, context) {
             return;
         }
 
-        if (typeof(n) === "string")
+        if (typeof(n) === "string") {
             context.on("click", n, [n, m, u], sendHand);
-        else if (n)
+        } else if (n) {
             n.on("click", [n, m, u], sendHand);
+        }
     });
+
+    //** 打开服务 **/
+
+    function openHand(evt) {
+        var n = jQuery(this);
+        var m = evt.data[1];
+        var u = evt.data[2];
+
+        switch (m) {
+            case "{CONTEXT}": m = context; break;
+            case "{LOADBOX}": m = loadBox; break;
+            case "{AUTOBOX}": m = n._hsTarget('@'); break;
+            case "{TABSBOX}":
+                m = context.closest(".panes").data("rel");
+                m = m.hsTaba(context.attr("id"));
+                m = m[0];
+                break;
+            default: m = n._hsTarget(m);
+        }
+
+        var t = n.closest(".tooltip");
+        if (t.length) {
+            n = t.data   ( "trigger");
+        }
+        if (typeof(u) === "function") {
+            u.call(n, m, that);
+            return;
+        }
+
+        if (0 <= u.indexOf("{ID}")) {
+            var sid;
+            if (0 <= jQuery.inArray(listBox[0], n.parents())) {
+                sid = that.getRow(n);
+            }
+            else {
+                sid = that.getOne( );
+            }
+            if (sid == null) return ;
+            sid = sid.val( );
+
+            u  = u.replace("{ID}", encodeURIComponent( sid ));
+        }
+
+        that.open( n, m, u );
+    }
+
+    if (openUrls) jQuery.each(openUrls, function(i, a) {
+        switch (a.length) {
+        case 3:
+            n = a[0];
+            u = a[1];
+            m = a[2];
+            break;
+        case 2:
+            n = a[0];
+            u = a[1];
+            m = undefined;
+            break;
+        default:
+            return;
+        }
+
+        if (typeof(n) === "string") {
+            context.on("click", n, [n, m, u], openHand);
+        } else if (n) {
+            n.on("click", [n, m, u], openHand);
+        }
+    });
+
+    //** 搜索服务 **/
 
     if (findBox.length) {
         findBox.on("submit", function() {
@@ -179,10 +165,12 @@ function HsList(opts, context) {
         });
     }
 
+    //** 立即加载 **/
+
     if (loadUrl) {
         var loadData = [];
         loadMode = parseInt(loadMode);
-        if ( 1 & loadMode ) {
+        if (1 === ( 1 & loadMode ) ) {
             a = hsSerialArr(loadBox.data("url" ));
             for (i = 0; i < a.length; i ++ ) {
                 loadData.push(a[i] );
@@ -218,10 +206,13 @@ HsList.prototype = {
     loadBack : function(rst) {
         rst = hsResponObj(rst);
         if (rst.ok === false) return;
-        this.listBox.trigger("loadOver", [rst]);
-        if (rst.list) this.fillList( rst.list );
-        if (rst.page) this.fillPage( rst.page );
-        this.listBox.trigger("loadBack", [rst]);
+
+        this.listBox.trigger("loadOver", [rst, this]);
+
+        if (rst.list) this.fillList(rst.list);
+        if (rst.page) this.fillPage(rst.page);
+
+        this.listBox.trigger("loadBack", [rst, this]);
     },
     fillList : function(list) {
         var tb, tr, td, tds, cls, fns, fts, i, j, n, t, v;
@@ -280,12 +271,13 @@ HsList.prototype = {
                 if (!n) continue;
                 v = hsGetValue(list[i] , n) || "";
 
+                // 按名称填充
                 if (typeof(this["_fill_"+n]) !== "undefined") {
                     v = this["_fill_"+n].call(this, td, v, n);
                     if(!v) continue;
-                }
+                } else
                 // 按类型填充
-                else if (typeof(fts[n]) !== "undefined") {
+                if (typeof(fts[n]) !== "undefined") {
                     t =  fts[n];
                 if (typeof(this["_fill_"+t]) !== "undefined") {
                     v = this["_fill_"+t].call(this, td, v, n);
@@ -315,12 +307,14 @@ HsList.prototype = {
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
-        p  = page.page      || 1;
-        t  = page.pagecount || 1;
-        pmin = Math.floor((p - 1) / this.lnksPerPage);
-        pmin = pmin * this.lnksPerPage + 1;
+        p = page.page     || 1;
+        t = page.pagecount|| 1;
+        pmin = p - Math.floor(this.lnksPerPage / 2);
+        if (pmin < 1) pmin = 1;
         pmax = pmin + this.lnksPerPage - 1;
-        if(t < pmax)  pmax = t;
+        if (pmax > t) pmax = t;
+        pmin = pmax - this.lnksPerPage + 1;
+        if (pmin < 1) pmin = 1;
 
         this.pageBox.empty();
         //this.pageBox.addClass("clearfix");
@@ -328,37 +322,35 @@ HsList.prototype = {
         var btns = pbox;//jQuery('<ul class="pagination pull-left" ></ul>').appendTo(this.pageBox);
         var nums = pbox;//jQuery('<ul class="pagination pull-right"></ul>').appendTo(this.pageBox);
 
-        if (1 != p) {
-            pn = p - 1;
-            btns.append(jQuery('<li class="page-prev"><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
+        if (1 < p) {
+            btns.append(jQuery('<li class="page-prev"><a href="javascript:;" data-pn="'+(p-1)+'" title="'+hsGetLang("list.prev.page")+'">&lsaquo;</a></li>'));
         } else {
-            btns.append(jQuery('<li class="page-prev disabled"><a href="javascript:;" title="'+hsGetLang("list.prev.page")+'">&laquo;</a></li>'));
+            btns.append(jQuery('<li class="page-prev disabled"><a href="javascript:;" title="'+hsGetLang("list.prev.page")+'">&lsaquo;</a></li>'));
         }
 
         if (1 < pmin) {
-            nums.append(jQuery('<li class="page-home"><a href="javascript:;" data-pn="'+1+'">'+1+'</a></li>'));
-        }
-        if (1 < pmin - 1) {
-            nums.append(jQuery('<li class="unit-prev"><a href="javascript:;" data-pn="'+(pmin-1)+'">&hellip;</a></li>'));
-        }
-        for(i = pmin; i < pmax + 1; i ++) {
-            nums.append(jQuery('<li class="page-link'+(i == p ? ' active' : '')+'"><a href="javascript:;" data-pn="'+i+'">'+i+'</a></li>'));
-        }
-        if (t > pmax + 1) {
-            nums.append(jQuery('<li class="unit-next"><a href="javascript:;" data-pn="'+(pmax+1)+'">&hellip;</a></li>'));
-        }
-        if (t > pmax) {
-            nums.append(jQuery('<li class="page-last"><a href="javascript:;" data-pn="'+t+'">'+t+'</a></li>'));
-        }
-
-        if (t != p) {
-            pn = p + 1;
-            btns.append(jQuery('<li class="page-next"><a href="javascript:;" data-pn="'+pn+'" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
+            btns.append(jQuery('<li class="page-home"><a href="javascript:;" data-pn="'+1+'" title="'+1+'">&laquo;</a></li>'));
         } else {
-            btns.append(jQuery('<li class="page-next disabled"><a href="javascript:;" title="'+hsGetLang("list.next.page")+'">&raquo;</a></li>'));
+            btns.append(jQuery('<li class="page-home disabled"><a href="javascript:;" title="'+1+'">&laquo;</a></li>'));
         }
 
-        // 页码不确定则不末页显示为更多
+        for(i = pmin; i < pmax + 1; i ++) {
+            nums.append(jQuery('<li class="page-link'+(i === p ? ' active' : '')+'"><a href="javascript:;" data-pn="'+i+'" title="'+i+'">'+i+'</a></li>'));
+        }
+
+        if (t > pmax) {
+            btns.append(jQuery('<li class="page-last"><a href="javascript:;" data-pn="'+t+'" title="'+t+'">&raquo;</a></li>'));
+        } else {
+            btns.append(jQuery('<li class="page-last disabled"><a href="javascript:;" title="'+t+'">&raquo;</a></li>'));
+        }
+
+        if (t > p) {
+            btns.append(jQuery('<li class="page-next"><a href="javascript:;" data-pn="'+(p+1)+'" title="'+hsGetLang("list.next.page")+'">&rsaquo;</a></li>'));
+        } else {
+            btns.append(jQuery('<li class="page-next disabled"><a href="javascript:;" title="'+hsGetLang("list.next.page")+'">&rsaquo;</a></li>'));
+        }
+
+        // 页码不确定则不在末页显示为更多
         if (page.uncertain && t == pmax + 1) {
             nums.find(".page-last").addClass("lnks-next").find("a").html("&hellip;");
         }
@@ -391,10 +383,12 @@ HsList.prototype = {
     },
     sendBack : function(btn, rst, data) {
         rst = hsResponObj(rst);
-        if (rst.ok === false) return;
-        var evt = new jQuery.Event("sendBack");
-        btn.trigger(evt, [rst, data]);
+        if (rst.ok === false ) return;
+
+        var evt = jQuery.Event( "sendBack" );
+        btn.trigger(evt , [rst, data, this]);
         if (evt.isDefaultPrevented()) return;
+
         this.load();
     },
 
@@ -402,28 +396,35 @@ HsList.prototype = {
         var that = this;
         var dat2 = jQuery.extend({}, hsSerialObj(url), hsSerialObj(data||{}));
         if (box == "@") box = jQuery(btn).closest(".loadbox");
-        if (box)
+        if (box) {
+            box.data( "rel", btn.closest(".loadbox").get(0) );
             box.hsOpen(url, data, function() {
-               that.openBack(btn, jQuery(this), dat2 );
-            }).data("rel", btn.closest(".loadbox")[0]);
-        else
-              $.hsOpen(url, data, function() {
-               that.openBack(btn, jQuery(this), dat2 );
+               that.openBack(btn, jQuery(this), dat2);
             });
+        } else {
+         jQuery.hsOpen(url, data, function() {
+               that.openBack(btn, jQuery(this), dat2);
+            });
+        }
     },
     openBack : function(btn, box, data) {
         var that = this;
-        btn.trigger("openBack", [box, data]);
-        box.on("saveBack", function(evt,rst) {
-            if(evt.isDefaultPrevented()) return;
-            btn.trigger ( evt , [rst, data]);
-            if(evt.isDefaultPrevented()) return;
-            that.load();
+        btn.trigger("openBack", [box, data, this]);
+
+        box.on("saveBack", function(evt, rst, rel) {
+            var ext = jQuery.Event( "saveBack" );
+            ext.relatedTarget = evt.target;
+            ext.relatedHsInst = rel /****/;
+            btn.trigger(ext , [rst, data, that]);
+            if (ext.isDefaultPrevented()) return;
+
+            that.load( );
         });
     },
 
     getRow   : function(o) {
-        return o.parents("tr").find(".checkone").filter(":checkbox,:radio,:hidden");
+        return o.closest("tr,.itembox").find(".checkone")
+                .filter (  ":checkbox,:radio,:hidden"   );
     },
     getAll   : function() {
         var cks = this.context.find(".checkone").filter(":checked");
@@ -494,13 +495,63 @@ HsList.prototype = {
     _fill__datetime : function(td, v, n) {
         return hsFmtDate(v, hsGetLang("datetime.format"));
     },
+    _fill__date : function(td, v, n) {
+        return hsFmtDate(v, hsGetLang("date.format"));
+    },
     _fill__time : function(td, v, n) {
         return hsFmtDate(v, hsGetLang("time.format"));
     },
-    _fill__date : function(td, v, n) {
-        return hsFmtDate(v, hsGetLang("date.format"));
+    _fill__html : function(td, v, n) {
+        td.html(v); return false;
     }
 };
+
+/**
+ * 这是比 fillList 更简单的卡片式展现方式
+ * 需替代 fillList 时, 在初始化参数中加入
+ * fillList: hsListFillItem
+ * @param {array} list 返回的列表数据
+ */
+function hsListFillItem(list) {
+    var that = this;
+    var cb = this.context.find(".itembox:hidden:first");
+    var tr, td, n, t, v ;
+    this.listBox.empty();
+    for(var i = 0; i < list.length; i ++ ) {
+        this._info = list[i];
+        tr = cb.clone();
+        tr.appendTo(this.listBox);
+        tr.find("[data-fn]").each(function() {
+            td= jQuery(this);
+            n = td.attr("data-fn");
+            t = td.attr("data-ft");
+            v = hsGetValue(list[i], n) || "";
+
+            // 按名字填充
+            if (typeof(that["_fill_"+n]) !== "undefined") {
+                v = that["_fill_"+n].call(that, td, v, n);
+                if (!v && (v !== 0 || v !== "")) return;
+            } else
+            // 按类型填充
+            if (typeof(that["_fill_"+t]) !== "undefined") {
+                v = that["_fill_"+t].call(that, td, v, n);
+                if (!v && (v !== 0 || v !== "")) return;
+            }
+            // 无值不处理
+            if (!v && (v !== 0 || v !== "")) {
+                return;
+            }
+
+            if (td.is("input,select,textarea")) {
+                td.val (v);
+            } else {
+                td.text(v);
+            }
+        }).show();
+    }
+    if (typeof(this._info) !== "undefined")
+        delete this._info;
+}
 
 jQuery.fn.hsList = function(opts) {
     return this._hsConstr(opts, HsList);

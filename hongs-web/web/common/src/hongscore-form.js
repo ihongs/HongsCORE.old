@@ -11,9 +11,10 @@ function HsForm(opts, context) {
 
     var loadBox  = context.closest(".loadbox");
     var formBox  = context.find   ( "form"   );
-    var saveUrl  = hsGetValue(opts, "saveUrl");
     var loadUrl  = hsGetValue(opts, "loadUrl");
+    var saveUrl  = hsGetValue(opts, "saveUrl");
     var loadMode = hsGetValue(opts, "loadMode", 1); // 加载模式, 0无 1附带上层数据 2总是进行加载
+
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
 
     if (formBox.length === 0) formBox = context;
@@ -29,14 +30,14 @@ function HsForm(opts, context) {
         }
     }
 
+    var loadData = [];
     var a, i, n, v;
 
     /**
      * 获取並使用上层数据
      */
-    var loadData = [];
     loadMode = parseInt(loadMode);
-    if ( 1 & loadMode ) {
+    if (1 === ( 1 & loadMode ) ) {
         a = hsSerialArr(loadBox.data("url" ));
         for (i = 0; i < a.length; i ++ ) {
             loadData.push(a[i] );
@@ -51,7 +52,7 @@ function HsForm(opts, context) {
         loadData.push(a[i] );
     }
     a = hsGetSeria (loadData, idKey);
-    if ((2 & loadMode) || a) {
+    if (a || 2 === ( 2 & loadMode )) {
         this.load(loadUrl, loadData);
     } else {
         this.fillEnum( { } );
@@ -62,7 +63,6 @@ function HsForm(opts, context) {
      * 在打开表单窗口时, 可能指定一些参数(如父ID, 初始选中项等)
      * 这时有必要将这些参数值填写入对应的表单项, 方便初始化过程
      */
-    var n, v;
     for(i = 0; i < loadData.length; i ++) {
         n = loadData[i].name ;
         v = loadData[i].value;
@@ -77,9 +77,11 @@ function HsForm(opts, context) {
 }
 HsForm.prototype = {
     load     : function(url, data) {
+        if (url ) this._url  = url;
+        if (data) this._data = hsSerialArr(data);
         jQuery.hsAjax({
-            "url"       : url,
-            "data"      : data,
+            "url"       : this._url ,
+            "data"      : this._data,
             "type"      : "POST",
             "dataType"  : "json",
             "action"    : "load",
@@ -92,13 +94,16 @@ HsForm.prototype = {
     loadBack : function(rst) {
         rst = hsResponObj(rst);
         if (rst["ok"] === false) return;
-        this.formBox.trigger("loadOver", [rst]);
+
+        this.formBox.trigger("loadOver", [rst, this]);
+
         if (rst["enum"]) this.fillEnum(rst["enum"]);
         if (rst["info"]) this.fillInfo(rst["info"]);
         else if (rst.list && rst.list[0]) {
             this.fillInfo (  rst.list[0]); // retrieve 可能仅提供 list
         }
-        this.formBox.trigger("loadBack", [rst]);
+
+        this.formBox.trigger("loadBack", [rst, this]);
     },
     fillEnum : function(enam) {
         var nodes, datas, i, n, t, v, inp;
@@ -177,11 +182,16 @@ HsForm.prototype = {
 
             if (i == 0) {
                 v = this._fill__review(inp, v, n, "info");
-                inp.text(v);
+                if (! v && (v !== 0 || v !== "")) continue;
+                if (inp.is("input,select,textarea")) {
+                    inp.val (v);
+                } else {
+                    inp.text(v);
+                }
             }
             else if (inp.attr("type") == "checkbox"
                  ||  inp.attr("type") == "radio") {
-                jQuery.each(!jQuery.isArray(v) ? [v] : v,
+                jQuery.each(! jQuery.isArray(v) ? [v] : v ,
                 function(i, u) {
                     inp.filter("[value='"+u+"']")
                        .prop  ("checked" , true )
@@ -246,62 +256,40 @@ HsForm.prototype = {
     },
     saveBack : function(rst) {
         rst = hsResponObj(rst, true);
-        if (rst.ok  === false) {
-            var evt = new jQuery.Event("saveFail");
-            this.formBox.trigger(evt, [rst]);
-            this.formBox.find(".form-group").removeClass("has-error");
-            this.formBox.find(".help-block").   addClass("invisible");
+        if (rst.ok === false) {
+            var evt = jQuery.Event("saveFail");
+            this.formBox.trigger(evt, [rst, this]);
+
+            // 错误提示
             if (rst.errors) {
+                this.formBox.find(".form-group").removeClass("has-error");
+                this.formBox.find(".help-block").   addClass("invisible");
                 for(var n in rst.errors) {
                     var e =  rst.errors[n];
                     this.haserror(n , e);
                 }
-            }
-
-            // 错误提示
-            if (rst.msg) {
-                alert(rst.msg);
-            } else {
+            } else
+            if (! rst.msg ) {
                 alert(hsGetLang("error.unkwn"));
             }
+            if (  rst.msg ) {
+                alert(rst.msg);
+            }
         } else {
+            var evt = jQuery.Event("saveBack");
+            this.formBox.trigger(evt, [rst, this]);
+            if (evt.isDefaultPrevented( )) return ;
+
+            // 关闭窗口
+            this.loadBox.hsClose();
+
             // 完成提示
-            if (rst.msg) {
+            if (  rst.msg ) {
                 jQuery.hsNote(rst.msg, 'alert-success');
             }
-
-            var evt = new jQuery.Event("saveBack");
-            this.formBox.trigger(evt, [rst]);
-            if (! evt.isDefaultPrevented( )) {
-                this.loadBox.hsClose();
-            }
         }
     },
 
-    _fill__review : function(inp, v, n, t) {
-        if (t === "enum") {
-            inp.data("enum", v );
-            return v;
-        }
-        var a = inp.data("enum");
-          inp.removeData("enum");
-        if (! a)
-            return v;
-
-        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
-        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        var i, c, b = {};
-        for(i == 0; i < a.length; i ++) {
-            c = a[i]; b[c[vk]] = b[c[tk]];
-        }
-        if (! jQuery.isArray(v)) {
-            v = [v];
-        }
-        inp.empty();
-        for(i == 0; i < v.length; i ++) {
-            inp.append(jQuery('<li></li>').text(b[v[i]]));
-        }
-    },
     _fill__select : function(inp, v, n, t) {
         if (t !== "enum")  return v;
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
@@ -371,6 +359,71 @@ HsForm.prototype = {
         } }
 
         inp.find(":checkbox").first().change();
+    },
+
+    _fill__review : function(inp, v, n, t) {
+        if (t === "enum") {
+            inp.data("enum", v );
+            return v;
+        }
+
+        var a = inp.data("enum");
+          inp.removeData("enum");
+        if (! a)
+            return v;
+
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        var i, c, b = {};
+        inp.empty( );
+        if (! jQuery.isArray(v)) {
+            v =  [v];
+        }
+        for(i == 0; i < a.length; i ++) {
+            c = a[i]; b[c[vk]] = c[tk];
+        }
+        for(i == 0; i < v.length; i ++) {
+            inp.append(jQuery('<li></li>').text(b[v[i]]));
+        }
+        return false;
+    },
+    _fill__htime : function(td, v, n) {
+        var d1  =  new Date ();
+        var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
+        if (d1.getFullYear() == d2.getFullYear()
+        &&  d1.getMonth() == d2.getMonth()
+        &&  d1.getDate( ) == d2.getDate()) {
+            return hsGetLang("time.today", [
+                   hsFmtDate(v, hsGetLang("time.format"))
+            ]);
+        }
+        else {
+            return hsFmtDate(v, hsGetLang("date.format"));
+        }
+    },
+    _fill__hdate : function(td, v, n) {
+        var d1  =  new Date ();
+        var d2  =  hsPrsDate(v, hsGetLang("date.format"));
+        if (d1.getFullYear() == d2.getFullYear()
+        &&  d1.getMonth() == d2.getMonth()
+        &&  d1.getDate( ) == d2.getDate()) {
+            return hsGetLang("date.today");
+        }
+        else {
+            return hsFmtDate(v, hsGetLang("date.format"));
+        }
+    },
+    _fill__datetime : function(td, v, n) {
+        return hsFmtDate(v, hsGetLang("datetime.format"));
+    },
+    _fill__date : function(td, v, n) {
+        return hsFmtDate(v, hsGetLang("date.format"));
+    },
+    _fill__time : function(td, v, n) {
+        return hsFmtDate(v, hsGetLang("time.format"));
+    },
+    _fill__html : function(td, v, n) {
+        td.html(v); return false;
     },
 
     valiInit : function() {
@@ -649,5 +702,31 @@ jQuery.fn.hsForm = function(opts) {
         var siz = box.find(":checkbox:not(.checkall)").length;
         var len = box.find(":checkbox:not(.checkall):checked").length;
         box.find(".checkall").prop("choosed", siz && siz==len ? true : (len && siz!=len ? null : false));
+    })
+    .on("click", "[data-toggle=hsEdit]",
+    function(evt) {
+        var that = $(this).closest(".HsForm").data("HsForm");
+        var func = function() {
+            $(this).on("saveBack", function(evt, rst, rel) {
+                var ext = jQuery.Event("saveBack");
+                ext.relatedTarget = evt.target;
+                ext.relatedHsInst = rel /****/;
+                that.formBox.trigger(ext, [rst, that]);
+                if (ext.isDefaultPrevented( )) return ;
+
+                that.load( );
+            });
+        };
+
+        var box = $(this).attr("data-target");
+        var url = $(this).attr("data-href");
+            url = hsFixPms( url , this );
+        if (box) {
+            box = $(this)._hsTarget(box);
+            box.hsOpen(url, func);
+        } else {
+              $.hsOpen(url, func);
+        }
+        evt.stopPropagation();
     });
 })(jQuery);

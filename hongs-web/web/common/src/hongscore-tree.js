@@ -13,10 +13,9 @@ function HsTree(opts, context) {
     var treeBox  = context.find   (".treebox");
     var findBox  = context.find   (".findbox");
     var loadUrl  = hsGetValue(opts, "loadUrl");
-    var openUrls = hsGetValue(opts, "openUrls");
     var sendUrls = hsGetValue(opts, "sendUrls");
+    var openUrls = hsGetValue(opts, "openUrls");
     var linkUrls = hsGetValue(opts, "linkUrls");
-    var loadMode = hsGetValue(opts, "loadMode", 0); // 加载模式, 0无 1附带上层数据
 
     // 数据的节点属性的键
     this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
@@ -44,103 +43,20 @@ function HsTree(opts, context) {
         }
     }
 
-    var i, a, n, m, u;
     var that = this;
+    var m, n, u;
 
-    function openHand(evt) {
-        //var n = evt.data[0];
-        var n = jQuery(this);
-        var m = evt.data[1];
-        var u = evt.data[2];
-
-        switch (m) {
-            case "{CONTEXT}": m = context; break;
-            case "{LOADBOX}": m = loadBox; break;
-            case "{AUTOBOX}": m = n._hsTarget('@'); break;
-            case "{TABSBOX}":
-                m = context.closest(".panes").data("rel");
-                m = m.hsTaba(context.attr("id"));
-                m = m[0];
-                break;
-            default: m = n._hsTarget(m);
-        }
-
-        /*
-        if (typeof(n) === "string")
-            n = loadBox.find(n);
-        else if (n)
-            n = jQuery(n);
-        */
-        /*
-        if (typeof(m) === "string")
-            m = loadBox.find(m);
-        else*/ if (m)
-            m = jQuery(m);
-
-        var tip = n.closest(".tooltip");
-        if (tip.length)
-            n   = tip.data ( "trigger");
-
-        if (typeof(u) === "function") {
-            u.call( that, n, m );
-            return;
-        }
-
-        if (0 <= u.indexOf("{ID}")) {
-            var sid;
-            if (0 <= jQuery.inArray(treeBox[0], n.parents())) {
-                sid = that.getId (n);
-            }
-            else {
-                sid = that.getSid( );
-            }
-            if (sid == null) return ;
-
-            u = u.replace ("{ID}", encodeURIComponent( sid ));
-        }
-
-        that.open( n, m, u );
-    }
-
-    if (openUrls) jQuery.each(openUrls, function(i, a) {
-        switch (a.length) {
-        case 3:
-            n = a[0];
-            u = a[1];
-            m = a[2];
-            break;
-        case 2:
-            n = a[0];
-            u = a[1];
-            m = undefined;
-            break;
-        default:
-            return;
-        }
-
-        if (typeof(n) === "string")
-            context.on("click", n, [n, m, u], openHand);
-        else if (n)
-            n.on("click", [n, m, u], openHand);
-    });
+    //** 发送服务 **/
 
     function sendHand(evt) {
-        //var n = evt.data[0];
         var n = jQuery(this);
         var m = evt.data[1];
         var u = evt.data[2];
 
-        /*
-        if (typeof(n) === "string")
-            n = loadBox.find(n);
-        else if (n)
-            n = jQuery(n);
-        */
-
         var tip = n.closest(".tooltip");
-        if (tip.length)
+        if (tip.length) {
             n   = tip.data ( "trigger");
-
+        }
         if (typeof(u) === "function") {
             u.call( that, n, m );
             return;
@@ -149,8 +65,7 @@ function HsTree(opts, context) {
         var sid;
         if (-1 != jQuery.inArray(treeBox[0], n.parents())) {
             sid = that.getId (n);
-        }
-        else {
+        } else {
             sid = that.getSid( );
         }
         if (sid == null) return ;
@@ -177,13 +92,91 @@ function HsTree(opts, context) {
             return;
         }
 
-        if (typeof(n) === "string")
+        if (typeof(n) === "string") {
             context.on("click", n, [n, m, u], sendHand);
-        else if (n)
+        } else if (n) {
             n.on("click", [n, m, u], sendHand);
+        }
     });
 
-    // 当选中时, 在指定区域加载指定页面, 并附带树节点ID
+    //** 打开服务 **/
+
+    function openHand(evt) {
+        var n = jQuery(this);
+        var m = evt.data[1];
+        var u = evt.data[2];
+
+        switch (m) {
+            case "{CONTEXT}": m = context; break;
+            case "{LOADBOX}": m = loadBox; break;
+            case "{AUTOBOX}": m = n._hsTarget('@'); break;
+            case "{TABSBOX}":
+                m = context.closest(".panes").data("rel");
+                m = m.hsTaba(context.attr("id"));
+                m = m[0];
+                break;
+            default: m = n._hsTarget(m);
+        }
+
+        var tip = n.closest(".tooltip");
+        if (tip.length) {
+            n   = tip.data ( "trigger");
+        }
+        if (typeof(u) === "function") {
+            u.call( that, n, m );
+            return;
+        }
+
+        if (0 <= u.indexOf("{ID}")) {
+            var sid;
+            if (0 <= jQuery.inArray(treeBox[0], n.parents())) {
+                sid = that.getId (n);
+            }
+            else {
+                sid = that.getSid( );
+            }
+            if (sid == null) return ;
+
+            u  = u.replace("{ID}", encodeURIComponent( sid ));
+        }
+
+        that.open( n, m, u );
+    }
+
+    if (openUrls) jQuery.each(openUrls, function(i, a) {
+        switch (a.length) {
+        case 3:
+            n = a[0];
+            u = a[1];
+            m = a[2];
+            break;
+        case 2:
+            n = a[0];
+            u = a[1];
+            m = undefined;
+            break;
+        default:
+            return;
+        }
+
+        if (typeof(n) === "string") {
+            context.on("click", n, [n, m, u], openHand);
+        } else if (n) {
+            n.on("click", [n, m, u], openHand);
+        }
+    });
+
+    //** 搜索服务 **/
+
+    if (findBox.length) {
+        findBox.on("submit", function() {
+            that.find( loadUrl , this );
+            return true;
+        });
+    }
+
+    //** 关联打开 **/
+
     if (linkUrls) {
         treeBox.on("select", function(evt, id) {
             for (var i = 0; i < linkUrls.length; i ++) {
@@ -193,12 +186,7 @@ function HsTree(opts, context) {
         });
     }
 
-    if (findBox.length) {
-        findBox.on("submit", function() {
-            that.find( loadUrl , this );
-            return true;
-        });
-    }
+    //** 折叠选中 **/
 
     treeBox.on("click", ".tree-node td.tree-hand", function() {
         that.toggle(jQuery(this).closest(".tree-node"));
@@ -207,12 +195,16 @@ function HsTree(opts, context) {
         that.select(jQuery(this).closest(".tree-node"));
     });
 
-    var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
-                  +rootInfo["id"]+'"></div>')
-                  .appendTo( treeBox );
-    this.fillInfo( rootInfo, rootBox );
-    this.select  (     rootInfo["id"]);
-    this.load(loadUrl, rootInfo["id"]);
+    //** 立即加载 **/
+
+    if (loadUrl) {
+        var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
+                      +rootInfo["id"]+'"></div>')
+                      .appendTo( treeBox );
+        this.fillInfo( rootInfo, rootBox );
+        this.select  (     rootInfo["id"]);
+        this.load(loadUrl, rootInfo["id"]);
+    }
 }
 HsTree.prototype = {
     load     : function(url, pid) {
@@ -235,15 +227,19 @@ HsTree.prototype = {
         });
     },
     loadBack : function(rst, pid) {
-        rst = hsResponObj(rst );
-        var sid = this.getSid();
+        rst = hsResponObj(rst);
         if (rst.ok === false) return;
-        this.treeBox.trigger("loadOver", [rst, pid]);
+
+        this.treeBox.trigger("loadOver", [rst, pid, this]);
+
         if (rst.list) this.fillList( rst.list, pid );
-        this.treeBox.trigger("loadBack", [rst, pid]);
-        if (this.treeBox.find("#tree-node-"+sid).length == 0) {
+        if (this.treeBox.find(
+        "#tree-node-" + this.getSid()).size() === 0) {
             this.select ( pid );
         }
+
+        this.treeBox.trigger("loadBack", [rst, pid, this]);
+
     },
     fillList : function(list, pid) {
         var lst, nod, i, id;
@@ -363,62 +359,79 @@ HsTree.prototype = {
     },
     sendBack : function(btn, rst, data) {
         rst = hsResponObj(rst);
-        if (rst.ok === false) return;
-        var evt = new jQuery.Event("sendBack");
-        btn.trigger(evt, [rst, data]);
+        if (rst.ok === false ) return;
+
+        var evt = jQuery.Event( "sendBack" );
+        btn.trigger(evt , [rst, data, this]);
         if (evt.isDefaultPrevented()) return;
 
-        if (data[this.idKey ] !== undefined)
-            this.load(null, this.getPid(data[this.idKey])); // 移动/删除
-        if (data[this.pidKey] !== undefined)
-            this.load(null, data[this.pidKey]); // 移动
+        // 更新/删除/移动
+        if (data[this.idKey ] !== undefined) {
+            this.load(null, this.getPid(data[this.idKey]));
+        }
+        // 移动
+        if (data[this.pidKey] !== undefined) {
+            this.load(null, /* Moved */ data[this.pidKey]);
+        }
     },
 
     open     : function(btn, box, url, data) {
         var that = this;
         var dat2 = jQuery.extend({}, hsSerialObj(url), hsSerialObj(data||{}));
-        if (box == "@") box = jQuery(btn).parent(".loadbox");
-        if (box)
-            box.hsOpen(url, data, function( ) {
-               that.openBack(btn, jQuery(this), dat2 );
-            }).data("rel", btn.closest(".loadbox")[0]);
-        else
-              $.hsOpen(url, data, function( ) {
-               that.openBack(btn, jQuery(this), dat2 );
+        if (box == "@") box = jQuery(btn).closest(".loadbox");
+        if (box) {
+            box.data( "rel", btn.closest(".loadbox").get(0) );
+            box.hsOpen(url, data, function() {
+               that.openBack(btn, jQuery(this), dat2);
             });
+        } else {
+         jQuery.hsOpen(url, data, function() {
+               that.openBack(btn, jQuery(this), dat2);
+            });
+        }
     },
     openBack : function(btn, box, data) {
         var that = this;
-        btn.trigger("openBack", [box, data]);
-        box.on("saveBack", function(evt,rst) {
-            if (evt.isDefaultPrevented()) return;
-            btn.trigger ( evt , [rst, data]);
+        btn.trigger("openBack", [box, data, this]);
+
+        box.on("saveBack", function(evt, rst, rel) {
+            var ext = jQuery.Event( "saveBack" );
+            ext.relatedTarget = evt.target;
+            ext.relatedHsInst = rel /****/;
+            btn.trigger(evt , [rst, data, that]);
             if (evt.isDefaultPrevented()) return;
 
-            if (data[that.idKey] !== undefined)
+            if (data[that.idKey] !== undefined) {
                 that.load(null, that.getPid(data[that.idKey])); // 修改
-            else
-                that.load(null, that.getSid( )); // 添加
+            } else {
+                that.load(null, that.getSid(/* Current id */)); // 添加
+            }
         });
     },
 
     select   : function(id) {
         var nod = this.getNode(id);
             id  = this.getId (nod);
-        this.treeBox.find(".tree-node")
+        nod.trigger("select", [ id, this ] );
+
+        this.treeBox.find(".tree-curr")
             .removeClass ( "tree-curr");
-        nod.addClass ( "tree-curr").trigger("select", [id]);
+            nod.addClass ( "tree-curr");
     },
     toggle   : function(id) {
         var nod = this.getNode(id);
             id  = this.getId (nod);
+        nod.trigger("toggle", [ id, this ] );
+
         var lst = nod.children(".tree-list");
-        lst.toggle(); nod.trigger("toggle", [id]);
-        if (lst.length == 0) this.load(null, id );
-        else {
+            lst.toggle();
+        if (lst.size( )) {
             nod.removeClass("tree-open tree-fold");
-            lst.is(":visible") ? nod.addClass("tree-open")
-                               : nod.addClass("tree-fold");
+            lst.is(":visible") ?
+               nod.addClass("tree-open") :
+               nod.addClass("tree-fold") ;
+        } else {
+            this.load(null, id);
         }
     },
 
@@ -440,11 +453,11 @@ HsTree.prototype = {
     getPid   : function(id) {
         return this.getId(this.getPnode(id));
     },
-    getRid   : function() {
-        return this.getId(this.treeBox.find(".tree-root"));
-    },
     getSid   : function() {
         return this.getId(this.treeBox.find(".tree-curr"));
+    },
+    getRid   : function() {
+        return this.getId(this.treeBox.find(".tree-root"));
     }
 };
 

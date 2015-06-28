@@ -50,7 +50,7 @@ public class SystemCmdlet {
 
         Pattern pan = Pattern.compile("^(\\d+\\.)?(.*?)\\.sql$" ); // 文件名为 01.xxxx.sql 这样的
         Pattern pat = Pattern.compile("^--\\s*DB:\\s*([^\\s*]+)"); // 在第一行指定适用的数据库配置
-        Collections.sort(fxs, new FileComparator());
+        Collections.sort( fxs,new FileComparator());
         for ( File  fo  : fxs ) {
             Matcher man = pan.matcher(fo.getName());
             if (!man.matches()) {
@@ -116,7 +116,7 @@ public class SystemCmdlet {
      */
     public static void build(String[] args) {
         Map<String, Object> opts = CmdletHelper.getOpts(args,
-            "conf:s", "form:s", "help:b");
+            "conf:s", "name:s", "help:b");
     }
     
     private static class FileComparator implements Comparator<File> {

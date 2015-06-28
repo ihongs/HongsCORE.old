@@ -161,162 +161,25 @@ implements IRecord
   public Map retrieve(Map rd)
     throws HongsException
   {
-    Object id = rd.get ( this.table.primaryKey);
-    if (id == null || id instanceof Collection) {
-      return  this.getList(rd);
+    return this.retrieve(rd, null);
+  }
+
+  /**
+   * 综合提取方法
+   * @param rd
+   * @param caze
+   * @return
+   * @throws HongsException 
+   */
+  public Map retrieve(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    Object id = rd.get(this.table.primaryKey);
+    if (id == null || id instanceof Map || id instanceof Collection) {
+      return  this.getList(rd, caze);
     } else {
-      return  this.getInfo(rd);
+      return  this.getInfo(rd, caze);
     }
-  }
-
-  /**
-   * 获取分页(无查询结构)
-   *
-   * 为空则page.errno为1, 页码超出则page.errno为2
-   *
-   * 含分页信息
-   *
-   * @param rd
-   * @return 单页列表
-   * @throws app.hongs.HongsException
-   */
-  public Map getList(Map rd)
-    throws HongsException
-  {
-    return this.getList(rd, null);
-  }
-
-  /**
-   * 获取分页
-   *
-   * 为空则page.errno为1, 页码超出则page.errno为2
-   * 页码等于 0 则不要列表数据
-   * 行数小于 0 则不要分页信息
-   * 行数等于 0 则不要使用分页
-   * 页码小于 0 则逆向倒数获取
-   *
-   * @param rd
-   * @param caze
-   * @return 单页列表
-   * @throws app.hongs.HongsException
-   */
-  public Map getList(Map rd, FetchCase caze)
-    throws HongsException
-  {
-    if (rd == null)
-    {
-      rd = new HashMap();
-    }
-    if (caze == null)
-    {
-      caze = new FetchCase();
-    }
-
-    if (rd.containsKey( idKey ))
-    {
-      rd.put(table.primaryKey, rd.get(idKey));
-    }
-
-    caze.setOption("MODEL_METHOD", "getList");
-    this.filter(caze, rd);
-
-    // 获取页码, 默认为第一页
-    int page = 1;
-    if (rd.containsKey(this.pageKey))
-    {
-      page = Integer.parseInt((String)rd.get(this.pageKey));
-    }
-
-    // 获取行数, 默认依从配置
-    int rows;
-    if (rd.containsKey(this.rowsKey))
-    {
-      rows = Integer.parseInt((String)rd.get(this.rowsKey));
-    }
-    else
-    {
-      rows = CoreConfig.getInstance().getProperty("fore.rows.per.page", 10);
-    }
-
-    Map data = new HashMap();
-
-    if (rows != 0)
-    {
-      caze.from (table.tableName , table.name );
-      FetchPage fp = new FetchPage(caze, table);
-      fp.setPage(page != 0 ? page : 1);
-      fp.setRows(rows >  0 ? rows : Math.abs(rows));
-
-      // 行数小于 0 则不要分页信息
-      if (rows  > 0)
-      {
-        Map  info = fp.getPage();
-        data.put( "page", info );
-      }
-
-      // 页码等于 0 则不要列表数据
-      if (page != 0)
-      {
-        List list = fp.getList();
-        data.put( "list", list );
-      }
-    }
-    else
-    {
-      // 行数等于 0 则不要使用分页
-        List list = table.fetchMore(caze);
-        data.put( "list", list );
-    }
-
-    return data;
-  }
-
-  /**
-   * 获取信息(无查询结构)
-   *
-   * @param rd
-   * @return 记录信息
-   * @throws app.hongs.HongsException
-   */
-  public Map getInfo(Map rd)
-    throws HongsException
-  {
-    return this.getInfo(rd, null);
-  }
-
-  /**
-   * 获取信息(调用get)
-   *
-   * @param rd
-   * @param caze
-   * @return 记录信息
-   * @throws app.hongs.HongsException
-   */
-  public Map getInfo(Map rd, FetchCase caze)
-    throws HongsException
-  {
-    if (rd == null)
-    {
-      rd = new HashMap();
-    }
-    if (caze == null)
-    {
-      caze = new FetchCase();
-    }
-
-    if (rd.containsKey( idKey ))
-    {
-      rd.put(table.primaryKey, rd.get(idKey));
-    }
-
-    caze.setOption("MODEL_METHOD", "getInfo");
-    this.filter(caze, rd);
-
-    Map info = table.fetchLess(caze);
-    Map data = new HashMap();
-    data.put( "info", info );
-
-    return data;
   }
 
   /**
@@ -441,6 +304,18 @@ implements IRecord
 
   //** 扩展动作方法 **/
 
+  public boolean unique(Map rd)
+    throws HongsException
+  {
+    return !exists(rd);
+  }
+
+  public boolean unique(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    return !exists(rd, caze);
+  }
+
   /**
    * 检查是否存在
    *
@@ -525,18 +400,6 @@ implements IRecord
     return !row.isEmpty();
   }
 
-  public boolean unique(Map rd)
-    throws HongsException
-  {
-    return !exists(rd);
-  }
-
-  public boolean unique(Map rd, FetchCase caze)
-    throws HongsException
-  {
-    return !exists(rd, caze);
-  }
-
   //** 标准模型方法 **/
 
   /**
@@ -549,11 +412,7 @@ implements IRecord
   public String add(Map<String, Object> data)
     throws HongsException
   {
-    String id = Synt.declare(data.get( this.idKey), String.class);
-    if (id == null || id.length() == 0)
-    {
-      id = Synt.declare(data.get(table.primaryKey), String.class);
-    }
+    String id = Synt.declare(data.get(this.idKey),String.class);
     if (id != null && id.length() != 0)
     {
       throw new HongsException(0x10a1, "Add can not have a id");
@@ -685,11 +544,12 @@ implements IRecord
       throw new HongsException(0x10a4, "ID can not be empty for get");
     }
 
+    Map rd = new HashMap();
+    rd.put(table.primaryKey, id);
+        
     // 调用filter进行过滤
     caze = caze != null ? caze.clone() : new FetchCase();
     caze.setOption("MODEL_METHOD", "get");
-    Map rd = new HashMap();
-        rd.put (table.primaryKey ,  id  );
     this.filter(caze , rd);
 
     return this.table.fetchLess(caze);
@@ -710,6 +570,156 @@ implements IRecord
     this.filter(caze , rd);
 
     return this.table.fetchMore(caze);
+  }
+
+  /**
+   * 获取信息(无查询结构)
+   *
+   * @param rd
+   * @return 记录信息
+   * @throws app.hongs.HongsException
+   */
+  public Map getInfo(Map rd)
+    throws HongsException
+  {
+    return this.getInfo(rd, null);
+  }
+
+  /**
+   * 获取信息(调用get)
+   *
+   * @param rd
+   * @param caze
+   * @return 记录信息
+   * @throws app.hongs.HongsException
+   */
+  public Map getInfo(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    if (rd == null)
+    {
+      rd = new HashMap();
+    }
+    if (caze == null)
+    {
+      caze = new FetchCase();
+    }
+
+    if (rd.containsKey( idKey ))
+    {
+      rd.put(table.primaryKey, rd.get(idKey));
+    }
+
+    caze.setOption("MODEL_METHOD", "getInfo");
+    this.filter(caze, rd);
+
+    Map info = table.fetchLess(caze);
+    Map data = new HashMap();
+    data.put( "info", info );
+
+    return data;
+  }
+
+  /**
+   * 获取分页(无查询结构)
+   *
+   * 为空则page.errno为1, 页码超出则page.errno为2
+   *
+   * 含分页信息
+   *
+   * @param rd
+   * @return 单页列表
+   * @throws app.hongs.HongsException
+   */
+  public Map getList(Map rd)
+    throws HongsException
+  {
+    return this.getList(rd, null);
+  }
+
+  /**
+   * 获取分页
+   *
+   * 为空则page.errno为1, 页码超出则page.errno为2
+   * 页码等于 0 则不要列表数据
+   * 行数小于 0 则不要分页信息
+   * 行数等于 0 则不要使用分页
+   * 页码小于 0 则逆向倒数获取
+   *
+   * @param rd
+   * @param caze
+   * @return 单页列表
+   * @throws app.hongs.HongsException
+   */
+  public Map getList(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    if (rd == null)
+    {
+      rd = new HashMap();
+    }
+    if (caze == null)
+    {
+      caze = new FetchCase();
+    }
+
+    if (rd.containsKey( idKey ))
+    {
+      rd.put(table.primaryKey, rd.get(idKey));
+    }
+
+    caze.setOption("MODEL_METHOD", "getList");
+    this.filter(caze, rd);
+
+    // 获取页码, 默认为第一页
+    int page = 1;
+    if (rd.containsKey(this.pageKey))
+    {
+      page = Integer.parseInt((String)rd.get(this.pageKey));
+    }
+
+    // 获取行数, 默认依从配置
+    int rows;
+    if (rd.containsKey(this.rowsKey))
+    {
+      rows = Integer.parseInt((String)rd.get(this.rowsKey));
+    }
+    else
+    {
+      rows = CoreConfig.getInstance().getProperty("fore.rows.per.page", 10);
+    }
+
+    Map data = new HashMap();
+
+    if (rows != 0)
+    {
+      caze.from (table.tableName , table.name );
+      FetchPage fp = new FetchPage(caze, table);
+      fp.setPage(page != 0 ? page : 1);
+      fp.setRows(rows >  0 ? rows : Math.abs(rows));
+
+      // 行数小于 0 则不要分页信息
+      if (rows  > 0)
+      {
+        Map  info = fp.getPage();
+        data.put( "page", info );
+      }
+
+      // 页码等于 0 则不要列表数据
+      if (page != 0)
+      {
+        List list = fp.getList();
+        data.put( "list", list );
+      }
+    }
+    else
+    {
+      // 行数等于 0 则不要使用分页
+        List list = table.fetchMore(caze);
+        data.put( "list", list );
+    }
+
+    return data;
   }
 
   //** 辅助过滤方法 **/
@@ -1232,14 +1242,14 @@ implements IRecord
       }
       if (map.containsKey("-in"))
       {
-        set.remove("-eq");
-        Object vaz = map.get("-eq");
+        set.remove("-in");
+        Object vaz = map.get("-in");
         caze.where(key+" IN (?)", vaz);
       }
       if (map.containsKey("-ni"))
       {
-        set.remove("-ne");
-        Object vaz = map.get("-ne");
+        set.remove("-ni");
+        Object vaz = map.get("-ni");
         caze.where(key+" NOT IN (?)", vaz);
       }
       if (!set.isEmpty())

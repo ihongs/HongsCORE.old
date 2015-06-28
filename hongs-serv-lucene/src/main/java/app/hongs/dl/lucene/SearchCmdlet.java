@@ -25,7 +25,7 @@ public class SearchCmdlet {
             "name=s",
             "id*s",
             "wd*s",
-            "ob:s",
+            "ob*s",
             "pn:i",
             "rn:i"
         });
