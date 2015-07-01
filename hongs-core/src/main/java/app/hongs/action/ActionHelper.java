@@ -319,7 +319,7 @@ public class ActionHelper
 
                 v = Core.getUniqueId();
                 String file = path + v + ".tmp";
-                String info = path + v + ".txt";
+                String info = path + v + ".ten";
 
                 /**/FileOutputStream fos = new /**/FileOutputStream(new File( file ));
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -328,7 +328,7 @@ public class ActionHelper
 
                 // 记录类型和名称
                 FileWriter fw = new FileWriter(info);
-                fw.write(type + "\r\n" + extn +"\r\n"+ name);
+                fw.write(type + "\r\n" + extn + "\r\n" + name);
                 fw.close();
             }
 

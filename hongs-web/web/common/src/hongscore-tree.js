@@ -16,6 +16,7 @@ function HsTree(opts, context) {
     var sendUrls = hsGetValue(opts, "sendUrls");
     var openUrls = hsGetValue(opts, "openUrls");
     var linkUrls = hsGetValue(opts, "linkUrls");
+    var loadData = hsGetValue(opts, "loadData");
 
     // 数据的节点属性的键
     this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
@@ -29,7 +30,8 @@ function HsTree(opts, context) {
     var rootInfo = {
             id   : hsGetValue(opts, "rootId", hsGetConf("tree.root.id",  "0" )),
             name : hsGetValue(opts, "rootName", hsGetLang("tree.root.name")),
-            note : hsGetValue(opts, "rootNote", hsGetLang("tree.root.note"))
+            note : hsGetValue(opts, "rootNote", hsGetLang("tree.root.note")),
+            type : "__ROOT__"
         };
 
     this.context = context;
@@ -72,7 +74,7 @@ function HsTree(opts, context) {
 
         var dat = {};
         dat[that.idKey] =  sid  ;
-
+        u = hsFixPms(u, loadBox);
         that.send(n, m, u, dat );
     }
 
@@ -140,6 +142,7 @@ function HsTree(opts, context) {
             u  = u.replace("{ID}", encodeURIComponent( sid ));
         }
 
+        u = hsFixPms(u, loadBox);
         that.open( n, m, u );
     }
 
@@ -166,6 +169,26 @@ function HsTree(opts, context) {
         }
     });
 
+    //** 选中打开 **/
+
+    treeBox.on("click", ".tree-node td.tree-hand", function() {
+        that.toggle(jQuery(this).closest(".tree-node"));
+    });
+    treeBox.on("click", ".tree-node td:not(.tree-hand)", function() {
+        that.select(jQuery(this).closest(".tree-node"));
+    });
+
+    if (linkUrls) {
+        treeBox.on("select", function(evt, id) {
+            for(var i = 0; i < linkUrls.length; i ++) {
+                var u = linkUrls[i][1];
+                u = u.replace('{ID}', encodeURIComponent(id));
+                u = hsFixPms (   u  , loadBox   );
+                jQuery( linkUrls[i][0]).hsLoad(u);
+            }
+        });
+    }
+
     //** 搜索服务 **/
 
     if (findBox.length) {
@@ -175,35 +198,30 @@ function HsTree(opts, context) {
         });
     }
 
-    //** 关联打开 **/
-
-    if (linkUrls) {
-        treeBox.on("select", function(evt, id) {
-            for (var i = 0; i < linkUrls.length; i ++) {
-                jQuery(linkUrls[i][0])
-               .hsLoad(linkUrls[i][1].replace('{ID}', encodeURIComponent(id)));
-            }
-        });
-    }
-
-    //** 折叠选中 **/
-
-    treeBox.on("click", ".tree-node td.tree-hand", function() {
-        that.toggle(jQuery(this).closest(".tree-node"));
-    });
-    treeBox.on("click", ".tree-node td:not(.tree-hand)", function() {
-        that.select(jQuery(this).closest(".tree-node"));
-    });
-
     //** 立即加载 **/
 
+    var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
+                 +rootInfo["id"]+'"></div>')
+                 .appendTo(treeBox);
+    this.fillInfo(rootInfo,rootBox);
+    this.select  (rootInfo["id"]  );
+
     if (loadUrl) {
-        var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
-                      +rootInfo["id"]+'"></div>')
-                      .appendTo( treeBox );
-        this.fillInfo( rootInfo, rootBox );
-        this.select  (     rootInfo["id"]);
-        this.load(loadUrl, rootInfo["id"]);
+        if (loadData === "{LOADBOX}") {
+            loadData  =  [];
+            jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
+            jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
+        }
+
+        // 因 load 方法没有 data 字段, 顾将参数拼接到 loadUrl 上
+        if (loadUrl.indexOf('?') < 0) {
+            loadUrl += "?";
+        } else {
+            loadUrl += "&";
+        }
+        loadUrl += jQuery.serialize(loadData);
+
+        this.load( loadUrl , rootInfo["id"] );
     }
 }
 HsTree.prototype = {

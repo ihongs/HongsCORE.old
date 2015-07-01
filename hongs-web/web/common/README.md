@@ -12,11 +12,10 @@ data 属性缩写:
     Form:
         data-fn     Field name
         data-ft     Field type
-        data-pn     Param name
         data-vk     Value key
         data-tk     Text key
-        data-lk     List key
         data-dk     Disp key
+        data-lk     List key
     List:
         data-fn     Field name
         data-ft     Field type

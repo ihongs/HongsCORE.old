@@ -536,15 +536,19 @@ public class VerifyHelper {
             if (x != null) u.setUploadHref(x);
             x = (String) params.get( "path" );
             if (x != null) u.setUploadPath(x);
-            x = (String) params.get( "name" );
-            if (x != null) u.setUploadDate(x);
             x = (String) params.get( "type" );
             if (x != null) u.setAllowTypes(x.split(","));
             x = (String) params.get( "extn" );
             if (x != null) u.setAllowExtns(x.split(","));
 
-            u.upload(value.toString());
-            return  u.getResultHref( );
+            x = (String) params.get( "temp" );
+            if (x != null && !"".equals( x )) {
+                u.upload(x, value.toString());
+            } else {
+                u.upload(   value.toString());
+            }
+
+            return u.getResultHref();
         }
     }
 

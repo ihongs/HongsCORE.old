@@ -13,9 +13,11 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"   );
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var saveUrl  = hsGetValue(opts, "saveUrl");
-    var loadMode = hsGetValue(opts, "loadMode", 1); // 加载模式, 0无 1附带上层数据 2总是进行加载
+    var loadData = hsGetValue(opts, "loadData",[]);
+    var initData = hsGetValue(opts, "initData",[]);
 
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
+    var jdKey    = hsGetValue(opts, "jdKey", "jd"); // jd参数名, 用于判断是否要枚举表
 
     if (formBox.length === 0) formBox = context;
 
@@ -30,32 +32,40 @@ function HsForm(opts, context) {
         }
     }
 
-    var loadData = [];
-    var a, i, n, v;
+    if (loadData === '{LOADBOX}') {
+        loadData  =  [];
+        jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
+        jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
+    } else {
+        loadData = hsSerialArr(loadData);
+    }
+    if (initData === '{LOADBOX}') {
+        initData  =  [];
+        jQuery.merge(initData, hsSerialArr(loadBox.data("url" )));
+        jQuery.merge(initData, hsSerialArr(loadBox.data("data")));
+    } else {
+        initData = hsSerialArr(initData);
+    }
+
+    if (loadUrl) {
+        loadUrl = hsFixPms(loadUrl, loadBox);
+        jQuery.merge(loadData, hsSerialArr(loadUrl));
+    }
+    if (saveUrl) {
+        saveUrl = hsFixPms(saveUrl, loadBox);
+        jQuery.merge(initData, hsSerialArr(saveUrl));
+    }
 
     /**
-     * 获取並使用上层数据
+     * 如果存在 id 或 jd 则进行数据加载
+     * 否则调用 fillEnum 进行选项初始化
      */
-    loadMode = parseInt(loadMode);
-    if (1 === ( 1 & loadMode ) ) {
-        a = hsSerialArr(loadBox.data("url" ));
-        for (i = 0; i < a.length; i ++ ) {
-            loadData.push(a[i] );
-        }
-        a = hsSerialArr(loadBox.data("data"));
-        for (i = 0; i < a.length; i ++ ) {
-            loadData.push(a[i] );
-        }
-    }
-    a = hsSerialArr(loadUrl);
-    for (i = 0; i < a.length; i ++ ) {
-        loadData.push(a[i] );
-    }
-    a = hsGetSeria (loadData, idKey);
-    if (a || 2 === ( 2 & loadMode )) {
-        this.load(loadUrl, loadData);
+    if (loadUrl
+    && (hsGetSeria(loadData, idKey  )
+    ||  hsGetSeria(loadData, jdKey))) {
+        this.load (loadUrl, loadData);
     } else {
-        this.fillEnum( { } );
+        this.fillEnum({ });
     }
 
     /**
@@ -63,6 +73,8 @@ function HsForm(opts, context) {
      * 在打开表单窗口时, 可能指定一些参数(如父ID, 初始选中项等)
      * 这时有必要将这些参数值填写入对应的表单项, 方便初始化过程
      */
+    jQuery.merge ( loadData, initData );
+    var i , n, v;
     for(i = 0; i < loadData.length; i ++) {
         n = loadData[i].name ;
         v = loadData[i].value;
@@ -72,8 +84,8 @@ function HsForm(opts, context) {
         formBox.find("[data-pn='"+n+"']").val(v);
     }
 
-    this.valiInit();
     this.saveInit(saveUrl);
+    this.valiInit(/** **/);
 }
 HsForm.prototype = {
     load     : function(url, data) {
@@ -329,7 +341,7 @@ HsForm.prototype = {
         }
         inp.find(":checkbox").first().change();
     },
-    _fill__choose : function(inp, v, n, t) {
+    _fill__checkbag : function(inp, v, n, t) {
         if (t !== "enum") return v;
 
         var vk = inp.attr("data-vk"); if(!vk) vk = 0;
@@ -701,7 +713,8 @@ jQuery.fn.hsForm = function(opts) {
         var box = $(this).closest("fieldset");
         var siz = box.find(":checkbox:not(.checkall)").length;
         var len = box.find(":checkbox:not(.checkall):checked").length;
-        box.find(".checkall").prop("choosed", siz && siz==len ? true : (len && siz!=len ? null : false));
+        var ckd = siz && siz == len ? true : (len && siz != len ? null : false);
+        box.find(".checkall").prop("choosed", ckd);
     })
     .on("click", "[data-toggle=hsEdit]",
     function(evt) {

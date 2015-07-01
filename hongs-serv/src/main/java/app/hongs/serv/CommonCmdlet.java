@@ -21,7 +21,7 @@ public class CommonCmdlet {
 
     @Cmdlet("make-uid")
     public static void makeUID(String[] args) {
-        System.out.println(Core.getUniqueId());
+        System.out.println(Core.getUniqueId(args.length > 0 ? args[0] : Core.SERVER_ID));
     }
 
     @Cmdlet("show-env")
@@ -133,7 +133,7 @@ public class CommonCmdlet {
     @Cmdlet("exec-action")
     public static void execAction(String[] args) throws HongsException {
         if (args.length == 0) {
-            System.err.println("Action name required!\r\nUsage: ACTION_NAME --request-- URL_QUERY_STRING --context-- XXX --session XXX");
+            System.err.println("Action name required!\r\nUsage: ACTION_NAME --request-- QUERY_STRING --context-- QUERY_STRING --session QUERY_STRING");
             return;
         }
         ActionHelper a = Core.getInstance(ActionHelper.class/**/);

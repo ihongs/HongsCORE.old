@@ -180,8 +180,8 @@ public class Mview {
 
                 field = new HashMap();
                 fields.put(name, field);
-                field.put("__type__","pick");
-                field.put("__disp__", disp );
+                field.put("__type__","picker");
+                field.put("__disp__",  disp  );
                 field.put("data-tn", tn);
                 field.put("data-tk", tk);
                 field.put("data-vk", vk);

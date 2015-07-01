@@ -1,4 +1,4 @@
-package app.hongs.db.serv;
+package app.hongs.db;
 
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
@@ -6,10 +6,7 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
-import app.hongs.db.DB;
-import app.hongs.db.Model;
-import app.hongs.db.Mview;
-import app.hongs.dl.anno.CommitSuccess;
+import app.hongs.action.anno.CommitSuccess;
 import app.hongs.dl.IAction;
 import java.util.Map;
 
@@ -18,7 +15,7 @@ import java.util.Map;
  * @author Hongs
  */
 @Action("hongs/db")
-public class BaseAction
+public class DBAction
 implements IAction {
 
     @Action("retrieve")

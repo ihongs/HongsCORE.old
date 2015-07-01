@@ -42,7 +42,7 @@ Hong's Auto Info Manage
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/hongscore.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/hongscore-list.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/hongscore-form.js"></script>
-        <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/hongscore-pick.js"></script>
+        <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/hongscore_pick.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/conf/default.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/lang/default.js"></script>
         <script type="text/javascript" src="<%=request.getContextPath()%>/common/src/bootstrap-datetimepicker.js"></script>

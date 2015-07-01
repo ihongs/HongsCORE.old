@@ -8,7 +8,7 @@ import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
 import app.hongs.dl.IAction;
-import app.hongs.dl.anno.CommitSuccess;
+import app.hongs.action.anno.CommitSuccess;
 import java.util.Map;
 
 /**

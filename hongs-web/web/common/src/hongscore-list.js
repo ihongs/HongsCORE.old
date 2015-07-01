@@ -16,7 +16,7 @@ function HsList(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var sendUrls = hsGetValue(opts, "sendUrls");
     var openUrls = hsGetValue(opts, "openUrls");
-    var loadMode = hsGetValue(opts, "loadMode", 1); // 加载模式, 0无 1附带上层数据
+    var loadData = hsGetValue(opts, "loadData");
 
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
@@ -36,7 +36,7 @@ function HsList(opts, context) {
     }
 
     var that = this;
-    var m, n, u, a, i;
+    var m, n, u;
 
     //** 发送服务 **/
 
@@ -62,6 +62,7 @@ function HsList(opts, context) {
         }
         if (cks == null) return ;
 
+        u = hsFixPms(u, loadBox);
         that.send(n, m, u, cks );
     }
 
@@ -130,6 +131,7 @@ function HsList(opts, context) {
             u  = u.replace("{ID}", encodeURIComponent( sid ));
         }
 
+        u = hsFixPms(u, loadBox);
         that.open( n, m, u );
     }
 
@@ -168,23 +170,12 @@ function HsList(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        var loadData = [];
-        loadMode = parseInt(loadMode);
-        if (1 === ( 1 & loadMode ) ) {
-            a = hsSerialArr(loadBox.data("url" ));
-            for (i = 0; i < a.length; i ++ ) {
-                loadData.push(a[i] );
-            }
-            a = hsSerialArr(loadBox.data("data"));
-            for (i = 0; i < a.length; i ++ ) {
-                loadData.push(a[i] );
-            }
+        if (loadData === "{LOADBOX}") {
+            loadData  =  [];
+            jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
+            jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
         }
-        a = hsSerialArr(loadUrl);
-        for (i = 0; i < a.length; i ++ ) {
-            loadData.push(a[i] );
-        }
-        this.load(loadUrl, loadData);
+        this.load(hsFixPms(loadUrl, loadBox), loadData);
     }
 }
 HsList.prototype = {
@@ -578,9 +569,10 @@ jQuery.fn.hsList = function(opts) {
         var box = $(this ).closest(".HsList" );
         var siz = box.find(".checkone").length;
         var len = box.find(".checkone:checked").length;
+        var ckd = siz && siz == len ? true : (len && siz != len ? null : false);
         box.find(".for-select").prop("disabled", len != 1);
         box.find(".for-checks").prop("disabled", len == 0);
-        box.find(".checkall"  ).prop("choosed" , siz && siz==len ? true : (len && siz!=len ? null : false));
+        box.find(".checkall").prop("choosed", ckd);
     })
     .on("change", ".HsList .checkall",
     function() {

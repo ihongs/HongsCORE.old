@@ -594,7 +594,7 @@ function hsFixUri   (uri) {
 /**
  * 补全URI为其设置参数
  * @param {String} uri
- * @param {Object} pms
+ * @param {Object} pms 可以是 hsSerialArr 或 .loadbox 节点
  * @returns {String} 完整的URI
  */
 function hsFixPms   (uri, pms) {
@@ -606,15 +606,16 @@ function hsFixPms   (uri, pms) {
           pms.push(d[i]);
         }
     }
-    return uri.replace( /\$(\w+|\{.+?\})/gm, function(w) {
+    pms = hsSerialObj (pms);
+    return uri.replace(/\$(\w+|\{.+?\})/gm , function(w) {
         if (w.substring(0 , 2) === "${") {
             w = w.substring(2, w.length -1);
         }
         else {
             w = w.substring(1);
         }
-        w = hsGetSeria(pms, w);
-        return  w;
+        w = hsGetValue(pms, w);
+        return  w || "";
     });
 };
 
@@ -1041,13 +1042,30 @@ $.fn.hsLoad = function(url, data, complete) {
         complete = function() {};
     }
 
-    this.data( "url", url ).data( "data", data );
     this.addClass("loadbox").addClass("loading");
-    return $.fn.jqLoad.call(this, hsFixUri(url ), data, function() {
+    this.data("url", url).data("data", data);
+    url = hsFixUri ( url);
+    if (! data) data = [];
+
+    /**
+     * 为了给加载区域内传递参数
+     * 通常将参数附加在请求之上
+     * 但这样会导致静态页不缓存
+     * 故, 如果是 html 且无参数"_=RANDOM"
+     * 则不传递参数到服务端接口
+     */
+    if (/\.html($|\?)/.test(url)
+    &&  ! hsGetParam(url , '_' )
+    &&  ! hsGetSeria(data, '_')) {
+        url  = url.replace(/\?.*$/, "");
+        data = undefined ;
+    }
+
+    return $.fn.jqLoad.call(this, url, data, function() {
         var that = $(this);
-        that.removeClass(  "loading"  );
+        that.removeClass(/**/"loading");
         complete.apply(this, arguments);
-        that.hsReady(    );
+        that.hsReady(/**/);
     });
 };
 $.fn.hsOpen = function(url, data, complete) {

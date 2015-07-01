@@ -33,14 +33,17 @@ public class Synt {
     }
 
     /**
-     * 取默认值(null,"",0 均视为无值)
+     * 取默认值(null,false,0,"" 均视为无值)
      * @param <T>
      * @param vals
      * @return
      */
     public static <T> T defxult(T... vals) {
         for (T  val  : vals) {
-            if (val != null && "".equals(val) && ZERO.equals(val)) {
+            if (val != null
+            && !FALS.equals(val)
+            && !EMPT.equals(val)
+            && !ZERO.equals(val)) {
                 return val ;
             }
         }
@@ -129,20 +132,10 @@ public class Synt {
             if ( String.class.isAssignableFrom(cls)) {
                 val = val.toString();
             } else
-            if (Boolean.class.isAssignableFrom(cls)) {
-                if (val instanceof Number) {
-                    val = ((Number) val).intValue() != 0;
-                } else if (val instanceof String) {
-                    String str = ((String) val).trim(  );
-                    if (TRUE.matcher(str).matches()) {
-                        val = true ;
-                    } else
-                    if (FAKE.matcher(str).matches()) {
-                        val = false;
-                    }
-                }
-            } else
             if ( Number.class.isAssignableFrom(cls)) {
+                if (EMPT.equals(val)) {
+                    return null; // 空串视为未取值
+                }
                 if (Integer.class.isAssignableFrom(cls)) {
                     if (val instanceof Number) {
                         val = ((Number) val).intValue();
@@ -184,6 +177,19 @@ public class Synt {
                     } else
                     if (val instanceof String) {
                         val = Double.parseDouble(((String) val).trim());
+                    }
+                }
+            } else
+            if (Boolean.class.isAssignableFrom(cls)) {
+                if (val instanceof Number) {
+                    val = ((Number) val).intValue() != 0;
+                } else if (val instanceof String) {
+                    String str = ((String) val).trim(  );
+                    if (TRUE.matcher(str).matches()) {
+                        val = true ;
+                    } else
+                    if (FAKE.matcher(str).matches()) {
+                        val = false;
                     }
                 }
             }
@@ -297,9 +303,11 @@ public class Synt {
         return dat.toArray();
     }
 
-    private static final Number ZERO = 0;
-    public static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
-    public static final Pattern FAKE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
+    private static final Number  ZERO = 0;
+    private static final String  EMPT = "";
+    private static final Boolean FALS = false;
+    public  static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
+    public  static final Pattern FAKE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
 
     /**
      * 在 Each.each 里
