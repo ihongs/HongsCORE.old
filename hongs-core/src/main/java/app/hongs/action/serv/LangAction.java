@@ -189,7 +189,7 @@ public class LangAction
       sb.append(mk.make((String) it.next( )));
     }
 
-    sb.append("\"\":\"\"\r\n}");
+    sb.append("\t\"\":\"\"\r\n}");
     return sb.toString();
   }
 

@@ -1,10 +1,13 @@
 package app.hongs.util;
 
 import app.hongs.Core;
+import app.hongs.CoreLogger;
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.BlockingQueue;
@@ -45,6 +48,8 @@ public abstract class Async<T> extends CoreSerial implements Core.Destroy {
         for(int i = 0; i < maxServs; i ++) {
             servs.execute(new Atask(this));
         }
+
+        //tasks.offer(null); // 放一个空对象促使其执行终止时未执行完的任务
     }
 
     @Override
@@ -61,7 +66,7 @@ public abstract class Async<T> extends CoreSerial implements Core.Destroy {
         if (back == null) {
             if (!tasks.isEmpty()) {
                 throw HongsException.common(
-                    "There is "+ tasks.size() +" task(s) not run.");
+                    "There has "+ tasks.size() +" task(s) not run.");
             }
             return;
         }
@@ -89,15 +94,16 @@ public abstract class Async<T> extends CoreSerial implements Core.Destroy {
 
     /**
      * 添加一个任务
-     * @param data 
+     * @param data
+     * @throws IllegalStateException 当队列满时
      */
     public void add(T data) {
-        tasks.offer(  data);
+          tasks.add(  data);
     }
 
     /**
      * 执行一个任务
-     * @param list 
+     * @param data
      */
     abstract public void run(T data);
 
@@ -111,12 +117,28 @@ public abstract class Async<T> extends CoreSerial implements Core.Destroy {
 
         @Override
         public void run() {
-            try {
-                while (true) {
-                    async.run(async.tasks.take());
+            Object  data;
+            while ( true) {
+                try {
+                    data = async.tasks.take();
+                } catch (InterruptedException e) {
+                    Thread.currentThread( ).interrupt( );
+                    break;
                 }
-            } catch (InterruptedException e) {
-                // Nothing to do.
+
+                if (null  ==  data) {
+                    continue;
+                }
+
+                try {
+                    async.run(data);
+                } catch (Error | Exception e) {
+                    ByteArrayOutputStream b = new ByteArrayOutputStream();
+                    e.printStackTrace(new PrintStream(b));
+                    String n = async.getClass().getName();
+                    String s = /**/b.toString();
+                    CoreLogger.getLogger(n).error(s);
+                }
             }
         }
 

@@ -269,7 +269,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
         ...
     ]
 
-在调用 API(REST) 时, 可在 url 后加请求参数 --api-back=包裹其他数据的键名, 可加请求参数 --api-conv.= 来转换基本数据类型, 其取值可以为:
+在调用 API(REST) 时, 可在 url 后加请求参数 --api-wrap=包裹其他数据的键名, 可加请求参数 --api-conv.= 来转换基本数据类型, 其取值可以为:
 
     all2str     全部转为字串
     num2str     数字转为字串

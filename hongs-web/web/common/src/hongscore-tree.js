@@ -37,6 +37,8 @@ function HsTree(opts, context) {
     this.context = context;
     this.loadBox = loadBox;
     this.treeBox = treeBox;
+    this._url  = "";
+    this._pid  = "";
 
     if (opts) for ( var k in opts ) {
         if ('_'===k.substring(0, 1)

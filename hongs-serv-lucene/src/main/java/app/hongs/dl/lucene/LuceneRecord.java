@@ -82,6 +82,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected IndexSearcher finder = null;
 
     public boolean IN_TRNSCT_MODE = false;
+    public boolean IN_OBJECT_MODE = false;
 
     public String   idCol = "id";
     public String[] findCols = new String[] { "wd" };
@@ -89,15 +90,16 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     public LuceneRecord(String path, final Map fields, final Map talias)
     throws HongsException {
+        CoreConfig conf = CoreConfig.getInstance();
         if (path == null) {
-            path = CoreConfig.getInstance().getProperty(
+            path = conf.getProperty(
                     "core.lucene.datapath",
-                    "${VARS_PATH}/lucene") + "/test";
+                    "${VARS_PATH}/lucene") + "/test" ;
         }
-        if (! new File(path).isAbsolute( )) {
-            path = CoreConfig.getInstance().getProperty(
+        if (! new File(path).isAbsolute()) {
+            path = conf.getProperty(
                     "core.lucene.datapath",
-                    "${VARS_PATH}/lucene") + "/" + path;
+                    "${VARS_PATH}/lucene") + "/"+path;
         }
 
         Map m = new HashMap();
@@ -105,20 +107,21 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         m.put("CONF_PATH", Core.CONF_PATH);
         m.put("VARS_PATH", Core.VARS_PATH);
         m.put("TMPS_PATH", Core.TMPS_PATH);
-        path = Text.inject(path,m);
+        path = Text.inject(path, m);
 
         this.dataPath = path;
-        this.fields   = fields != null ? fields : FormSet.getInstance("default").getForm(  "test"   );
-        this.talias   = talias != null ? talias : FormSet.getInstance("default").getEnum("__types__");
 
-        // Is false for autocommit
-        this.IN_TRNSCT_MODE = Synt.declare( Core.getInstance( ).got( "__IN_TRNSCT_MODE__" ) , false );
+        this.fields = fields != null ? fields : FormSet.getInstance("default").getForm(  "test"   );
+        this.talias = talias != null ? talias : FormSet.getInstance("default").getEnum("__types__");
+
+        this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), conf.getProperty("core.in.trnsct.mode", false));        
+        this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"), conf.getProperty("core.in.object.mode", false));
     }
 
     public LuceneRecord(String conf, String form)
     throws HongsException {
         this(conf+"/"+form,
-            FormSet.getInstance(  conf   ).getForm(   form    ),
+            FormSet.getInstance(  conf   ).getForm(   form    ) ,
             FormSet.getInstance("default").getEnum("__types__"));
     }
 
@@ -807,6 +810,14 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     /**
      * 获取字段类型
+     * 支持的类型有
+     * int
+     * long
+     * float
+     * double
+     * string
+     * text
+     * json
      * @param fc 字段配置
      * @return
      */
@@ -817,11 +828,11 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (t == null) {
             t = (String) fc.get("__type__");
 
-            if ("search".equals(t) || "find".equals(t)) {
-                return "text";
-            } else
             if ("stored".equals(t) || "json".equals(t)) {
                 return t;
+            }
+            if ("search".equals(t) || "find".equals(t)) {
+                return "text";
             }
 
             t = Synt.declare(talias.get(t) , t);
@@ -830,10 +841,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             } else
             if (  "date".equals(t)) {
                 Object x = fc.get("type");
-                if ("microtime".equals(x)) {
-                    t = "long";
-                } else
-                if ("timestamp".equals(x)) {
+                if ("microtime".equals(x) || "timestamp".equals(x)) {
                     t = "long";
                 }
             }
@@ -1011,38 +1019,35 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                         for(IndexableField f : fs) {
                             Dict.put(map, Data.toObject(f.stringValue()), k, null);
                         }
-                    } else
-                    {
+                    } else {
                         map.put(k, new ArrayList());
                     }
                 } else {
                     if (fs.length > 0) {
                         map.put(k, Data.toObject(fs[0].stringValue()));
-                    } else
-                    {
+                    } else {
                         map.put(k, new HashMap( ) );
                     }
                 }
             } else
-            if (   "int".equals(t)
+            if ((  "int".equals(t)
             ||    "long".equals(t)
             ||   "float".equals(t)
             ||  "double".equals(t)
-            ||  "number".equals(t)) {
+            ||  "number".equals(t))
+            &&  IN_OBJECT_MODE) {
                 if (r) {
                     if (fs.length > 0) {
                         for(IndexableField f : fs) {
                             Dict.put(map , f.numericValue(), k, null);
                         }
-                    } else
-                    {
+                    } else {
                         map.put(k, new ArrayList());
                     }
                 } else {
                     if (fs.length > 0) {
                         map.put(k, fs[0].numericValue());
-                    } else
-                    {
+                    } else {
                         map.put(k, 0 );
                     }
                 }
@@ -1053,15 +1058,13 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                         for(IndexableField f : fs) {
                             Dict.put(map , f.stringValue( ), k, null);
                         }
-                    } else
-                    {
+                    } else {
                         map.put(k, new ArrayList());
                     }
                 } else {
                     if (fs.length > 0) {
                         map.put(k, fs[0].stringValue( ));
-                    } else
-                    {
+                    } else {
                         map.put(k, "");
                     }
                 }
@@ -1109,31 +1112,30 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     protected void docAdd(Document doc, String k, Object v, String t, boolean u, boolean s, boolean r) {
-        if (null == v) v = "";
         if (   "int".equals(t)) {
-            doc.add(new    IntField(k, Synt.declare(v,Integer.class), u ? Field.Store.YES : Field.Store.NO));
+            doc.add(new    IntField(k, Synt.declare(v, 0 ), u ? Field.Store.YES : Field.Store.NO));
         } else
         if (  "long".equals(t)) {
-            doc.add(new   LongField(k, Synt.declare(v,   Long.class), u ? Field.Store.YES : Field.Store.NO));
+            doc.add(new   LongField(k, Synt.declare(v, 0L), u ? Field.Store.YES : Field.Store.NO));
         } else
         if ( "float".equals(t)) {
-            doc.add(new  FloatField(k, Synt.declare(v,  Float.class), u ? Field.Store.YES : Field.Store.NO));
+            doc.add(new  FloatField(k, Synt.declare(v, 0.0F), u ? Field.Store.YES : Field.Store.NO));
         } else
         if ("double".equals(t)) {
-            doc.add(new DoubleField(k, Synt.declare(v, Double.class), u ? Field.Store.YES : Field.Store.NO));
+            doc.add(new DoubleField(k, Synt.declare(v, 0.0D), u ? Field.Store.YES : Field.Store.NO));
         } else
         if ("string".equals(t)) {
-            doc.add(new StringField(k, Synt.declare(v, String.class), u ? Field.Store.YES : Field.Store.NO));
+            doc.add(new StringField(k, Synt.declare(v, ""), u ? Field.Store.YES : Field.Store.NO));
         } else
         if (  "text".equals(t)) {
-            doc.add(new   TextField(k, Synt.declare(v, String.class), u ? Field.Store.YES : Field.Store.NO));
+            doc.add(new   TextField(k, Synt.declare(v, ""), u ? Field.Store.YES : Field.Store.NO));
         } else
         if (  "json".equals(t)) {
-            if (  "".equals(v)) {
+            if (v == null || "".equals(v)) {
                 v = "{}";
             } else
-            if (!(v instanceof String)) {
-                v = Data.toString( v );
+            if (! ( v instanceof String )) {
+                v = Data.toString(v);
             }
             doc.add(new StoredField(k, ( String ) v));
         } else
@@ -1147,13 +1149,13 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (s) {
             if (   "int".equals(t)
             ||    "long".equals(t)) {
-                doc.add(new NumericDocValuesField("."+k, Synt.declare(v, Long.class)));
+                doc.add(new NumericDocValuesField("."+k, Synt.declare(v, 0L)));
             } else
             if ( "float".equals(t)) {
-                doc.add(new   FloatDocValuesField("."+k, Synt.declare(v, Long.class)));
+                doc.add(new   FloatDocValuesField("."+k, Synt.declare(v, 0.0F)));
             } else
             if ("double".equals(t)) {
-                doc.add(new  DoubleDocValuesField("."+k, Synt.declare(v, Long.class)));
+                doc.add(new  DoubleDocValuesField("."+k, Synt.declare(v, 0.0D)));
             } else
             if (r) {
                 doc.add(new SortedSetDocValuesField("."+k, new BytesRef(Synt.declare(v, ""))));

@@ -189,7 +189,7 @@ public class UploadHelper {
             extn = getUploadExtn( file );
             type = getUploadType( file );
         } else {
-            file = new File(path+".ten");
+            file = new File(path+".txn");
 
             /**
              * 从上传信息中提取类型和扩展名

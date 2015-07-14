@@ -372,6 +372,7 @@ public class VerifyHelper {
         public Object verify(Object value) throws Wrong {
             try {
                 Required rule = new Required();
+                rule.setHelper(helper);
                 rule.setParams(params);
                 rule.setValues(values);
                 rule.verify(value);
@@ -403,6 +404,7 @@ public class VerifyHelper {
         public Object verify(Object value) throws Wrong {
             try {
                 Repeated rule = new Repeated();
+                rule.setHelper(helper);
                 rule.setParams(params);
                 rule.setValues(values);
                 rule.verify(value);

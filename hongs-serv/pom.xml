@@ -21,7 +21,8 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>hongs-core</artifactId>
-            <version>${project.version}</version>
+            <version>0.3-SNAPSHOT</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

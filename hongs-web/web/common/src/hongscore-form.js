@@ -24,6 +24,8 @@ function HsForm(opts, context) {
     this.context = context;
     this.loadBox = loadBox;
     this.formBox = formBox;
+    this._url  = "";
+    this._data = [];
 
     if (opts) for ( var k in opts ) {
         if ('_'===k.substring(0, 1)
@@ -32,6 +34,10 @@ function HsForm(opts, context) {
         }
     }
 
+    if (loadUrl) {
+        loadUrl = hsFixPms(loadUrl, loadBox);
+        jQuery.merge(loadData, hsSerialArr(loadUrl));
+    }
     if (loadData === '{LOADBOX}') {
         loadData  =  [];
         jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
@@ -39,17 +45,13 @@ function HsForm(opts, context) {
     } else {
         loadData = hsSerialArr(loadData);
     }
+
     if (initData === '{LOADBOX}') {
         initData  =  [];
         jQuery.merge(initData, hsSerialArr(loadBox.data("url" )));
         jQuery.merge(initData, hsSerialArr(loadBox.data("data")));
     } else {
         initData = hsSerialArr(initData);
-    }
-
-    if (loadUrl) {
-        loadUrl = hsFixPms(loadUrl, loadBox);
-        jQuery.merge(loadData, hsSerialArr(loadUrl));
     }
     if (saveUrl) {
         saveUrl = hsFixPms(saveUrl, loadBox);
@@ -81,7 +83,6 @@ function HsForm(opts, context) {
         if ( n === idKey && v === "0" ) continue;
         formBox.find("[name='"   +n+"']").val(v);
         formBox.find("[data-fn='"+n+"']").val(v);
-        formBox.find("[data-pn='"+n+"']").val(v);
     }
 
     this.saveInit(saveUrl);

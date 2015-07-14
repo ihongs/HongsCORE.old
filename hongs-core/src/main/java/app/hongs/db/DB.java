@@ -97,12 +97,14 @@ public class DB
 {
 
   /**
-   * 是否为字符模式(即获取的是文本)
+   * 是否为对象模式(即获取的是对象)
+   * 注意: 仅当使用 DB.getInstance 才根据环境设置, new DB 的都是 false
    */
   public boolean IN_OBJECT_MODE;
 
   /**
    * 是否为事务模式(即不会自动提交)
+   * 注意: 仅当使用 DB.getInstance 才根据环境设置, new DB 的都是 false
    */
   public boolean IN_TRNSCT_MODE;
 
@@ -1577,6 +1579,7 @@ public class DB
     }
 
     db.IN_OBJECT_MODE = conf.getProperty("core.in.object.mode", false);
+    db.IN_TRNSCT_MODE = conf.getProperty("core.in.trnsct.mode", false);
 
     }
     while (false);
@@ -1584,7 +1587,7 @@ public class DB
     db.IN_OBJECT_MODE = Synt.declare(
               Core.getInstance().got("__IN_OBJECT_MODE__"), db.IN_OBJECT_MODE);
     db.IN_TRNSCT_MODE = Synt.declare(
-              Core.getInstance().got("__IN_TRNSCT_MODE__"), false /* reset */);
+              Core.getInstance().got("__IN_TRNSCT_MODE__"), db.IN_TRNSCT_MODE);
 
     return db;
   }

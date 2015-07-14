@@ -1351,10 +1351,6 @@ $.fn._hsConfig = function() {
             v = v.substring(2);
             v = /(true|yes|ok|t|y|1)/i.test(v);
             break;
-        case "P:": // Property
-            v = v.substring(2);
-            v = this.get(0)[v];
-            break;
         default:
             (function () {
                 if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
@@ -1364,11 +1360,23 @@ $.fn._hsConfig = function() {
             }).call(this.get(0));
         }
         if (n) {
-            // IE 对相同 name 的 param 只取一个, 故需要加编号(#)来表示数组
+            // IE 对相同 name 的 param 只取一个
+            // 故需要加编号(#)来表示数组
             n = n.replace(/#.*$/ , ".");
             hsSetValue(obj, n, v);
         };
     }
+
+    // 由于 jQuery.fn.data 在 object 无效
+    // 故从 conf 属性里提取额外配置
+    var c  =  this.get(0)["conf"];
+    if (c !== undefined ) {
+        for(var n in c  ) {
+            var v  = c[n];
+            hsSetValue(obj, n, v);
+        }
+    }
+
     return obj;
 };
 $.fn._hsTarget = function(selr) {

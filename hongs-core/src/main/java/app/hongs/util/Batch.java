@@ -1,17 +1,20 @@
 package app.hongs.util;
 
 import app.hongs.Core;
+import app.hongs.CoreLogger;
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +22,9 @@ import java.util.concurrent.TimeUnit;
  * 批量任务
  * 此类用于批量执行一些操作, 应用场景同异步任务
  * 不同点在于仅当数量或时间累积到一定量时才执行
- * 注意: 数量和时间是按工作线程来计算的, 如: 工作线程数为2, 缓冲区阈值为5, 初始情况下要累积到10才会执行
+ * 注意: 数量和时间按工作线程计算.
+ * 例如: 工作线程数2, 缓冲区容量5,
+ * 初始情况下要累积到10个才会执行.
  * @author Hongs
  * @param <T> 任务的数据类型
  */
@@ -36,16 +41,16 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
      * @param maxServs  最多可用的线程数量
      * @param sizeout   缓冲区长度达到此数量后执行
      * @param timeout   此秒后还没有新的进来则执行
-     * @param withset   缓冲区类型: true 为 Set, false 为 List
+     * @param deduplicate 是否去重(缓冲类型): true 为 Set, false 为 List
      * @throws HongsException
      */
-    protected Batch(String name, int maxTasks, int maxServs, int sizeout, int timeout, boolean withset) throws HongsException {
+    protected Batch(String name, int maxTasks, int maxServs, int sizeout, int timeout, boolean deduplicate) throws HongsException {
         servs = Executors.newCachedThreadPool(  );
         tasks = new LinkedBlockingQueue(maxTasks);
         cache = new ArrayList();
 
         for(int i = 0; i < maxServs; i ++) {
-            cache.add/**/( withset ? new HashSet(  ) : new ArrayList(  ) );
+            cache.add(deduplicate ? new LinkedHashSet() : new ArrayList());
         }
 
         if (name != null) {
@@ -60,6 +65,8 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
         for(int i = 0; i < maxServs; i ++) {
             servs.execute(new Btask(this, cache.get(i), sizeout, timeout));
         }
+
+        //tasks.offer(null); // 放一个空对象促使其执行终止时未执行完的任务
     }
 
     @Override
@@ -76,7 +83,7 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
         if (back == null) {
             if (!tasks.isEmpty()) {
                 throw HongsException.common(
-                    "There is "+ tasks.size() +" task(s) not run.");
+                    "There has "+ tasks.size() +" task(s) not run.");
             }
             return;
         }
@@ -117,21 +124,22 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
 
     /**
      * 添加一个任务
-     * @param data 
+     * @param data
+     * @throws IllegalStateException 当队列满时
      */
     public void add(T data) {
-        tasks.offer(  data);
+          tasks.add(  data);
     }
 
     /**
      * 执行一批任务
-     * @param list 
+     * @param list
      */
     abstract public void run(Collection<T> list);
 
     /**
      * 获取缓冲区任务数量
-     * @return 
+     * @return
      */
     public int getCacheSize() {
         int m  = 0;
@@ -143,7 +151,7 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
 
     /**
      * 检查缓冲区是否为空
-     * @return 
+     * @return
      */
     public boolean isEmptyCache() {
         for(Collection<T> x : cache) {
@@ -170,25 +178,43 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
 
         @Override
         public void run() {
-            try {
-                Object  data ;
-                while ( true ) {
+            Object  data;
+            while ( true) {
+                try {
                     data = batch.tasks.poll(timeout, TimeUnit.SECONDS);
-                    if( null  !=  data ) {
-                        cache.add(data );
-                        if( cache.size (   ) >= sizeout ) {
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+
+                if (null  !=  data) {
+                    cache.add(data);
+                    if (cache.size( ) >= sizeout) {
+                        try {
                             batch.run(cache);
-                            cache.clear(   );
+                        } catch (Error | Exception e) {
+                            ByteArrayOutputStream b = new ByteArrayOutputStream();
+                            e.printStackTrace(new PrintStream(b));
+                            String n = batch.getClass().getName();
+                            String s = /**/b.toString();
+                            CoreLogger.getLogger(n).error(s);
                         }
-                    } else {
-                        if(!cache.isEmpty()) {
+                        cache.clear();
+                    }
+                } else {
+                    if (cache.isEmpty() == false) {
+                        try {
                             batch.run(cache);
-                            cache.clear(   );
+                        } catch (Error | Exception e) {
+                            ByteArrayOutputStream b = new ByteArrayOutputStream();
+                            e.printStackTrace(new PrintStream(b));
+                            String n = batch.getClass().getName();
+                            String s = /**/b.toString();
+                            CoreLogger.getLogger(n).error(s);
                         }
+                        cache.clear();
                     }
                 }
-            } catch (InterruptedException e) {
-                // Nothing to do.
             }
         }
 

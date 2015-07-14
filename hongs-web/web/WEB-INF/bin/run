@@ -5,12 +5,12 @@
 bindir=$(cd `dirname $0`; pwd)
 CORE_PATH=`dirname $bindir`
 JAVA_PATH=`command -v java`
-KLASSPATH="$CLASSPATH:$CORE_PATH/lib/*:$CORE_PATH/lib/classes:$CORE_PATH/classes"
+KLASSPATH="$CLASSPATH:$CORE_PATH/lib/*:$CORE_PATH/classes:$CORE_PATH/lib/classes:$CORE_PATH/bin/classes"
 
 # Check java is exists
-if [ '' = $JAVA_PATH ]
+if [ '' = "$JAVA_PATH" ]
 then
-    if [ '' = $JAVA_HOME ]
+    if [ '' = "$JAVA_HOME" ]
     then
         echo  "Java not found!"; exit 1
     else

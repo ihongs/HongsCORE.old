@@ -27,6 +27,8 @@ function HsList(opts, context) {
     this.loadBox = loadBox;
     this.listBox = listBox;
     this.pageBox = pageBox;
+    this._url  = "";
+    this._data = [];
 
     if (opts) for ( var k in opts ) {
         if ('_'===k.substring(0, 1)
@@ -283,11 +285,13 @@ HsList.prototype = {
     },
     fillPage : function(page) {
         switch (page.err) {
-            case 1:
+            case  1 :
+            case "1":
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
                 this.listBox.children().hide();
                 return;
-            case 2:
+            case  2 :
+            case "2":
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
                 this.listBox.children().hide();
                 hsSetSerial(this._data,"page",1);
@@ -298,9 +302,9 @@ HsList.prototype = {
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
-        p = page.page     || 1;
-        t = page.pagecount|| 1;
-        pmin = p - Math.floor(this.lnksPerPage / 2);
+        p = page.page ? parseInt(page.page) : 1 ;
+        t = page.pagecount ? parseInt(page.pagecount): 1;
+        pmin = p - Math.floor( this.lnksPerPage / 2 );
         if (pmin < 1) pmin = 1;
         pmax = pmin + this.lnksPerPage - 1;
         if (pmax > t) pmax = t;

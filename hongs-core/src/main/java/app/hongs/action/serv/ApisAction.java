@@ -14,8 +14,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,86 +84,24 @@ public class ApisAction
     private void doAction(HttpServletRequest req, HttpServletResponse rsp, String... mts)
             throws ServletException, IOException {
         String act = ActionDriver.getCurrPath(req);
-        String mtd = mts[0];
-
         if (act == null || act.length() == 0) {
             rsp.sendError(HttpServletResponse.SC_NOT_FOUND, "API URI can not be empty.");
             return;
         }
 
-        // 去掉扩展名
-        act = act.substring(1);
-        int pos;
-            pos = act.lastIndexOf('.');
-        if (pos > -1)
-            act = act.substring(0,pos);
-
-        /**
-         * 映射规则:
-         * /module/assoc/_{assocId}/model/_{modelId}/.{action}.api
-         * /module/model/action.act?assoc_id={assocId}&id={modelId}
-         * 其中 /assoc/_{assocId} 可以有零或多组; _{modelId} 可以有零或多个;
-         * .{action} 可以省略, 默认以 Http 的 Method 来判断
-         */
-        StringBuilder pms = new StringBuilder();
-        Matcher mat = _API_PMS.matcher("/"+act);
-        if (mat.find()) {
-            String pmz = mat.group(1);
-            String acn = mat.group(2);
-            String vaz = mat.group(3);
-            String mtz = mat.group(4);
-
-            // 指定资源
-            act = act.substring(0, mat.start() - 1) + acn;
-
-            // 指定方法
-            if (mtz != null && mtz.length() != 0) {
-                mtd  = mtz.substring( 2 );
-                mts  = new String[] {mtd};
-            }
-
-            // 限定主键
-            if (vaz != null && vaz.length() != 0) {
-                String   key = "id";
-                String[] vas = vaz.substring(2).split ("_");
-                if (vas.length > 1  ) {
-                    key += "[]";
-                } else {
-                    if ( mtd.equals("retrieve")) {
-                         mts = new String[]{"retrieve", "info", "list"};
-                    }
-                }
-                for(String val : vas) {
-                    pms.append("&").append(key).append("=").append(val);
-                }
-            }
-
-            // 限定外键
-            if (pmz != null && pmz.length() != 0) {
-                String[] pns = pmz.substring(1).split("/");
-                for(int i = 0; i < pns.length; i += 2) {
-                    String   key = pns[i]+"_id";
-                    String[] vas = pns[i + 1 ].substring(1).split ("_");
-                    if (vas.length > 1  ) {
-                        key += "[]";
-                    }
-                    for(String val : vas) {
-                        pms.append("&").append(key).append("=").append(val);
-                    }
-                }
-            }
-
-            // QueryString 必须以 ? 开头才行
-            if (pms.length ( )  >  0 ) {
-                pms.replace(0, 1, "?");
-            }
+        // 去前后缀
+        String acl = act.substring( 1 );
+        int pos  = acl.lastIndexOf('.');
+        if (pos != -1) {
+            acl  = acl.substring(0,pos);
         }
 
-        for (String mtn : mts) {
-            if (ActionRunner.getActions().containsKey(act+"/"+mtn)) {
-                mtd  = mtn ;
-                break;
-            }
+        // 解析路径
+        Map acx = ActionRunner.getActions();
+        if (acx.containsKey(acl) == false ) {
+            act =  parseAct(acx, acl, mts );
+        } else {
+            act =  "/" + acl + ".act";
         }
 
         // 将请求数据处理之后传递
@@ -184,14 +120,14 @@ public class ApisAction
         }
 
         // 将请求转发到动作处理器
-        req.getRequestDispatcher("/"+act+ "/"+mtd+ ".act"+pms ).include(req, rsp);
+        req.getRequestDispatcher(act).include(req, rsp);
         hlpr.reinitHelper(req, rsp);
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
         if (resp != null) {
             Boolean scok = Synt.declare(req.getParameter("-api-scok"), Boolean.class);
-            String  back = Synt.declare(req.getParameter("-api-back"),  String.class);
+            String  back = Synt.declare(req.getParameter("-api-wrap"),  String.class);
             String  ccnv = Synt.declare(req.getParameter("-api-conv"),  String.class);
             Set     conv = Synt.declare(ccnv == null ? null : ccnv.split("[\\s\\+]+"), Set.class);
 
@@ -231,7 +167,60 @@ public class ApisAction
         }
     }
 
-    private static final Pattern _API_PMS = Pattern.compile("((?:/[^_][^/]+/_[^/]+)*)?(/[^_][^/]+)(/_[^/]+)?(/ [^/]+)?$");
+    private String parseAct(Map acx, String act, String... mts) {
+        String[] ats = act.split("/");
+        String   m   = mts[0];
+        String   n   = ats[0];
+        StringBuilder u = new StringBuilder();
+        StringBuilder p = new StringBuilder();
+
+        u.append(n);
+        for(int i = 1; i < ats.length; i ++ ) {
+            String  v = ats[i];
+            if (v.startsWith(".")) {
+                String[] a = v.substring(1).split("\\.");
+                if (a.length == 0) {
+                    continue;
+                }
+
+                /**
+                 * 最后一个总是叫 id
+                 * 且如果只有一个 id
+                 * 则把 info 放到候选方法名列表里
+                 * 并比 list 优先匹配
+                 */
+                if (i == ats.length - 1) {
+                    if  (  a.length < 2 &&  "retrieve".equals(m )  )  {
+                        mts = new String[] {"retrieve", "info", "list"};
+                    }
+                    n = "id";
+                }
+
+                if (a.length > 1) {
+                    n += ".";
+                }
+                for(String x : a) {
+                    p.append('&').append(n).append('=').append(x);
+                }
+            } else {
+                n=v;u.append('/').append(n);
+            }
+        }
+
+        n = u.toString(/**/);
+        for (String x : mts) {
+            if (acx.containsKey(n+"/"+x)) {
+                m = x;
+                break;
+            }
+        }
+
+        if (p.length () > 0) {
+            p.replace(0, 1, "?");
+        }
+
+        return "/"+ n +"/"+ m + ".act" + p.toString();
+    }
 
     private static final Set _API_RSP = new HashSet();
     static {
@@ -242,8 +231,8 @@ public class ApisAction
 
     private static class Conv extends Synt.LeafNode {
         private Conv2Obj all;
-        private Conv2Obj num;
         private Conv2Obj nul;
+        private Conv2Obj num;
         private Conv2Obj bool;
         private Conv2Obj date;
         @Override

@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class Synt {
 
     /**
-     * 取默认值
+     * 取默认值(null 视为无值)
      * @param <T>
      * @param vals
      * @return
@@ -60,11 +60,8 @@ public class Synt {
      * @return
      */
     public static <T> T declare(Object val, T def) {
-        if (val == null) {
-            return def ;
-        }
-
-        return (T) declare(val, def.getClass());
+        val = declare(val, def.getClass());
+        return null == val ? def : (T) val;
     }
 
     /**
@@ -303,7 +300,7 @@ public class Synt {
         return dat.toArray();
     }
 
-    private static final Number  ZERO = 0;
+    private static final Number  ZERO = 0 ;
     private static final String  EMPT = "";
     private static final Boolean FALS = false;
     public  static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);

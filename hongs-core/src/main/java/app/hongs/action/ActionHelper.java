@@ -55,6 +55,11 @@ public class ActionHelper
   private HttpServletRequest request;
 
   /**
+   * 请求字段
+   */
+  private Set<String> requestKeys = null;
+
+  /**
    * 请求数据
    */
   private Map<String, Object> requestData = null;
@@ -194,9 +199,13 @@ public class ActionHelper
     if (this.requestData == null)
     {
       String ct  = this.request.getContentType();
-      if (   ct == null)
+      if  (  ct != null)
       {
-        ct = "text/plan";
+        ct = ct.split(";", 2)[0];
+      }
+      else
+      {
+        ct = "application/x-www-form-urlencode" ;
       }
 
       if ("application/json".equals(ct) || "text/json".equals(ct))
@@ -231,8 +240,14 @@ public class ActionHelper
     m.put("CONF_PATH", Core.CONF_PATH);
     m.put("VARS_PATH", Core.VARS_PATH);
     m.put("TMPS_PATH", Core.TMPS_PATH);
-    String path = conf.getProperty("core.upload.filepath", "${TMPS_PATH}/upload/");
-    path = Text.inject(path, m);
+    String path = conf.getProperty("core.upload.filepath", "${TMPS_PATH}/upload");
+    path = Text.inject (path, m);
+
+    // 目录不存在则创建
+    File df = new File (path);
+    if (!df.isDirectory()) {
+         df.mkdirs();
+    }
 
     Set<String> allowTypes = null;
     Set<String>  denyTypes = null;
@@ -268,6 +283,9 @@ public class ActionHelper
          fullSizeMax = i;
     }
 
+    Set<String> uploadKeys = new HashSet( );
+    setAttribute("__UPLOAD__" , uploadKeys);
+
     //** 解析数据 **/
 
     try {
@@ -286,9 +304,14 @@ public class ActionHelper
             String v;
 
             if (fis.isFormField()) {
-                v = fis.toString();
+                v = Streams.asString(fis.openStream());
             } else {
                 String type = fis.getContentType();
+                if (type != null) {
+                    type  = type.split(";" , 2)[0];
+                } else {
+                    type  = "";
+                }
 
                 // 检查类型
                 if (allowTypes != null && !allowTypes.contains(type)) {
@@ -306,7 +329,7 @@ public class ActionHelper
                     extn = name.substring(pos + 1);
                 }
                 else {
-                    extn = null;
+                    extn = "";
                 }
 
                 // 检查扩展
@@ -318,21 +341,23 @@ public class ActionHelper
                 }
 
                 v = Core.getUniqueId();
-                String file = path + v + ".tmp";
-                String info = path + v + ".ten";
+                String file = path + File.separator + v + ".tmp";
+                String info = path + File.separator + v + ".txn";
 
+                // 存储到临时文件
                 /**/FileOutputStream fos = new /**/FileOutputStream(new File( file ));
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                 BufferedInputStream  bis = new BufferedInputStream (fis.openStream());
                 Streams.copy(bis, bos, true);
 
                 // 记录类型和名称
-                FileWriter fw = new FileWriter(info);
-                fw.write(type + "\r\n" + extn + "\r\n" + name);
-                fw.close();
+                try(FileWriter fw  =  new FileWriter(info)) {
+                    fw.write(type+"\r\n"+extn+"\r\n"+name);
+                }
             }
 
-            Dict.setParam(rd, v, n);
+            Dict.setParam (rd, v, n);
+            uploadKeys.add(/****/ n);
         }
     } catch (FileUploadException ex) {
         throw HongsException.common(null, ex);
