@@ -7,6 +7,7 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
+import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
@@ -96,20 +97,17 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
 
             /** 核心属性配置 **/
 
+            Core.DEBUG = Synt.declare(cont.getInitParameter("debug"), (byte) 0);
+
             Core.BASE_HREF = cont.getContextPath();
             Core.BASE_PATH = cont.getRealPath("" );
 
-            String str;
-
-            str = cont.getInitParameter("debug");
-            if (str != null) {
-                Core.DEBUG = Byte.parseByte(str);
-            }
-
+            Core.BASE_PATH = Core.BASE_PATH.replaceFirst("[/\\\\]$", "");
             Core.CORE_PATH = Core.BASE_PATH + File.separator + "WEB-INF";
-            File cp = new File( Core.CORE_PATH );
+
+            File cp = new File(Core.CORE_PATH );
             if (!cp.exists()) {
-                Core.CORE_PATH = cp.getParent( );
+                Core.CORE_PATH = cp.getParent();
             }
 
             Core.CONF_PATH = Core.CORE_PATH + File.separator + "etc";
@@ -119,8 +117,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             //** 系统属性配置 **/
 
             CoreConfig cnf = CoreConfig.getInstance("_begin_");
-
-            Core.SERVER_ID = cnf.getProperty("core.server.id", "1");
+            Core.SERVER_ID = cnf.getProperty("core.server.id" , "1");
 
             Map m = new HashMap();
             m.put("BASE_PATH", Core.BASE_PATH);

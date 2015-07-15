@@ -159,6 +159,7 @@ public class CmdletRunner
     Core.ENVIR = 0;
     Core.DEBUG = Synt.declare(opts.get("debug") , (byte) 0);
     Core.CORE_PATH = Synt.declare(opts.get("corepath"), System.getProperty("user.dir"));
+    Core.CORE_PATH = new File(Core.CORE_PATH).getAbsolutePath();
     Core.CONF_PATH = Synt.declare(opts.get("confpath"), Core.CORE_PATH + File.separator + "etc");
     Core.VARS_PATH = Synt.declare(opts.get("varspath"), Core.CORE_PATH + File.separator + "var");
     Core.TMPS_PATH = Synt.declare(opts.get("tmpspath"), Core.VARS_PATH + File.separator + "tmp");
@@ -174,7 +175,7 @@ public class CmdletRunner
     /** 系统属性配置 **/
 
     CoreConfig cnf = CoreConfig.getInstance("_begin_");
-    Core.SERVER_ID = cnf.getProperty("core.server.id", "1");
+    Core.SERVER_ID = cnf.getProperty("core.server.id" , "1");
 
     Map m = new HashMap();
     m.put("BASE_PATH", Core.BASE_PATH);
