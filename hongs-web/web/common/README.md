@@ -46,8 +46,8 @@ data 属性缩写:
         <object class="config" name="hsTree" data="">
             <param name="loadUrl" value="hongs/member/dept/list.act"/>
             <param name="linkUrls#0" value="['.main-context','hongs/member/user/list.html?dept_id={ID}']"/>
-            <param name="openUrls#0" value="['.create','hongs/member/dept/form.html?pid={ID}','{TABSBOX}']"/>
-            <param name="openUrls#1" value="['.modify','hongs/member/dept/form.html?id={ID}','{TABSBOX}']"/>
+            <param name="openUrls#0" value="['.create','hongs/member/dept/form.html?pid={ID}','@']"/>
+            <param name="openUrls#1" value="['.modify','hongs/member/dept/form.html?id={ID}','@']"/>
             <param name="sendUrls#0" value="['.delete','hongs/member/dept/delete.act','您确定要删除此部门?']"/>
             <param name="rootName" value="组织架构"/>
         </object>
@@ -64,8 +64,8 @@ data 属性缩写:
     <div id="member_user_list">
         <object class="config" name="hsList" data="">
             <param name="loadUrl" value="('hongs/member/user/list.act?dept_id='+H$('&dept_id',this))"/>
-            <param name="openUrls#0" value="['.create','hongs/member/user/form.html?dept_id='+H$('&dept_id',this),'{TABSBOX}']"/>
-            <param name="openUrls#1" value="['.modify','hongs/member/user/form.html?id={ID}','{TABSBOX}']"/>
+            <param name="openUrls#0" value="['.create','hongs/member/user/form.html?dept_id='+H$('&dept_id',this),'@']"/>
+            <param name="openUrls#1" value="['.modify','hongs/member/user/form.html?id={ID}','@']"/>
             <param name="sendUrls#0" value="['.delete','hongs/member/user/delete.act','您确定要删除此用户?']"/>
         </object>
         <div>

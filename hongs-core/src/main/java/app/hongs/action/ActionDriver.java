@@ -294,6 +294,10 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                     }
                 }
             }
+
+            if (zone != null) {
+                Core.ACTION_ZONE.set(zone);
+            }
         }
 
         Core.ACTION_LANG.set(conf.getProperty("core.language.default","zh_CN"));

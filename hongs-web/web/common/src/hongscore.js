@@ -108,7 +108,10 @@ function hsResponObj(rst, qut) {
     }
     if (typeof(rst) === "object") {
         if (typeof(rst.ok ) === "undefined") {
-            rst.ok  = true;
+            rst.ok = true ;
+        } else
+        if (rst.ok === "0") {
+            rst.ok = false;
         }
         if (typeof(rst.err) === "undefined") {
             rst.err =  "" ;
@@ -138,6 +141,12 @@ function hsResponObj(rst, qut) {
                 location.reload();
             }
             delete rst["url"];
+        }
+        // 针对特定数据结构
+        if (rst['data']) {
+            var dat = rst['data'];
+            delete    rst['data'];
+            jQuery.extend(rst, dat);
         }
     }
     return rst;
@@ -1074,25 +1083,27 @@ $.fn.hsOpen = function(url, data, complete) {
     var pre;
     var tab;
 
-    if (prt.is(".panes")) {
-        prt = prt.data("rel");
-        prt = prt.hsTaba(url);
-        tab = prt[0]; prt = prt[1];
-    } else
     if (prt.is( ".nav" )) {
         prt = prt.hsTaba(url);
-        tab = prt[0]; prt = prt[1];
+        tab = prt[0];
+        prt = prt[1];
+    } else
+    if (prt.is(".panes")) {
+        prt = $(prt.data( "nav" ));
+        prt = prt.hsTaba(url);
+        tab = prt[0];
+        prt = prt[1];
     } else
     if (prt.parent().is( ".nav" )) {
         tab = prt;
-        prt = tab.parent().data("rel").children().eq(tab.index());
+        prt = tab.parent().data("panes").children().eq(tab.index());
     } else
     if (prt.parent().is(".panes")) {
-        tab = prt.parent().data("rel").children().eq(prt.index());
+        tab = prt.parent().data( "nav" ).children().eq(prt.index());
     }
 
     if (tab) {
-        pre = tab.parent( ).children( ).filter(".active");
+        pre = tab.parent().children( ).filter(".active");
         tab.show().find( "a" ).click();
         if (tab.find("a span").size()) {
             tab.find("a span").not(".close").text(hsGetLang("loading"));
@@ -1119,11 +1130,11 @@ $.fn.hsClose = function() {
     var tab;
 
     if (prt.parent().is(".panes")) {
-        tab = prt.parent().data("rel").children().eq(prt.index());
+        tab = prt.parent().data( "nav" ).children().eq(prt.index());
     } else
     if (prt.parent().is( ".nav" )) {
         tab = prt;
-        prt = tab.parent().data("rel").children().eq(tab.index());
+        prt = tab.parent().data("panes").children().eq(tab.index());
         box = prt.children(".openbox");
     }
 
@@ -1155,8 +1166,8 @@ $.fn.hsClose = function() {
 };
 $.fn.hsCloze = function() {
     var box = $(this);
-    $( document.body).find(".openbox").each(function() {
-        if (box.is($(this).data("rel"))) {
+    $( document.body).find( ".openbox" ).each(function( ) {
+        if (!box.is(this) && box.is($(this).data("rel"))) {
             $(this).hsClose();
         }
     });
@@ -1182,7 +1193,7 @@ $.fn.hsReady = function() {
     });
 
     // 至少要执行 hsInit
-    if (box.children("object.config[name=hsInit]").size( ) === 0) {
+    if (box.children("object.config[name=hsInit]").size() === 0 ) {
         box.hsInit({});
     }
 
@@ -1239,7 +1250,7 @@ $.fn.hsInit = function(cnf) {
     if (box.parent().parent().is(".panes")) {
         var a = box.parent();
         var b = box.parent().parent();
-        a = b.data("rel").children().eq(a.index());
+        a = b.data("nav").children().eq(a.index());
         for(var k in cnf) {
             var v =  cnf[k];
             switch (k) {
@@ -1298,8 +1309,8 @@ $.fn.hsTabs = function(rel) {
             rel = box.siblings(".panes");
         }
     }
-    box.data("rel", rel);
-    rel.data("rel", box);
+    rel.data("nav"  , box);
+    box.data("panes", rel);
     if (! box.has(".active").size()) {
         box.find("li>a").first().click();
     }
@@ -1319,12 +1330,12 @@ $.fn.hsTaba = function(url) {
         tab = $('<li></li>').attr( 'data-for', url )
             .appendTo(box)
             .append($('<a href="javascript:;"></a>')
-                .append( '<span></span>' )
-                .append( '<span class="close">&times;</span>' )
+                .append('<span></span>')
+                .append('<span class="close">&times;</span>')
             );
-        return [tab, $('<div></div>').appendTo(box.data("rel"))];
+        return [tab, $( '<div></div>' ).appendTo(box.data("panes"))];
     } else {
-        return [tab, box.data("rel").children().eq(tab.index())];
+        return [tab, $(box.data("nav")).children().eq(tab.index( ))];
     }
 };
 
@@ -1526,9 +1537,9 @@ function(evt) {
 .on("click", ".nav>li>a",
 function(evt) {
     var tab = $( this ).parent( );
-    var idx = tab.index  (      );
     var nav = tab.closest(".nav");
-    var pns = nav.data   ( "rel");
+    var pns = nav.data ( "panes");
+    var idx = tab.index( );
     nav.children().removeClass("active")
             .eq (idx).addClass("active").show();
     if (pns) {

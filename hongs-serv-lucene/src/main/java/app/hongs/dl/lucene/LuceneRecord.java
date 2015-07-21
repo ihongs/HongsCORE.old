@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,8 +75,8 @@ import org.apache.lucene.util.BytesRef;
 public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     protected final String  dataPath;
-    protected final Map     fields;
-    protected final Map     talias;
+    protected final Map<String, Map   > fields;
+    protected final Map<String, String> talias;
 
     protected IndexWriter   writer = null;
     protected IndexReader   reader = null;
@@ -88,7 +89,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public String[] findCols = new String[] { "wd" };
     public String[] dispCols = new String[] {"name"};
 
-    public LuceneRecord(String path, final Map fields, final Map talias)
+    public LuceneRecord(String path, final Map<String, Map> fields, final Map<String, String> talias)
     throws HongsException {
         CoreConfig conf = CoreConfig.getInstance();
         if (path == null) {
@@ -114,7 +115,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         this.fields = fields != null ? fields : FormSet.getInstance("default").getForm(  "test"   );
         this.talias = talias != null ? talias : FormSet.getInstance("default").getEnum("__types__");
 
-        this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), conf.getProperty("core.in.trnsct.mode", false));        
+        this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), conf.getProperty("core.in.trnsct.mode", false));
         this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"), conf.getProperty("core.in.object.mode", false));
     }
 
@@ -127,18 +128,18 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     /**
      * 获取数据
-     *
-     * 以下参数为特殊参数:
-     * id   ID
-     * wd   搜索
-     * ob   排序
-     * cs   字段
-     * pn   页码
-     * rn   每页行数
-     * ln   分页数量
-     * or   多组"或"关系条件
-     * ar   串联多组关系条件
-     * 请注意尽量避免将其作为字段名(id,wd除外)
+
+ 以下参数为特殊参数:
+ id   ID
+ wd   搜索
+ ob   排序
+ fs   字段
+ pn   页码
+ rn   每页行数
+ ln   分页数量
+ or   多组"或"关系条件
+ ar   串联多组关系条件
+ 请注意尽量避免将其作为字段名(id,wd除外)
      *
      * @param rd
      * @return
@@ -146,19 +147,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     @Override
     public Map retrieve(Map rd) throws HongsException {
-        /**
-         * 用 cs 参数指定仅获取哪些字段
-         */
-        Set cs = Synt.declare(rd.get("cs"), new HashSet());
-        boolean ce = cs.isEmpty();
-        if(!ce) for (Object o : fields.entrySet()) {
-            Map.Entry e = (Map.Entry) o;
-            String k = (String)e.getKey();
-            Map    m = (Map )e.getValue();
-            m.put("-ignore-", ce||!cs.contains(k));
-        }
-        try {
-
         // 指定单个 id 则走 getOne
         Object id = rd.get (idCol);
         if (id != null && !(id instanceof Collection) && !(id instanceof Map)) {
@@ -209,6 +197,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             Query q = getQuery(rd);
             Sort  s = getSort (rd);
+                      ignFlds (rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
                 CoreLogger.debug("LuceneRecord.retrieve: "+q.toString()+" Sort: "+s.toString()+" Page: "+pn+" Rows: "+rn);
@@ -254,19 +243,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         return resp;
-
-        /**
-         * 获取信息结束
-         * 还原 fields 数据
-         * 去掉里面的 -ignore- 标识
-         */
-        } finally {
-            if(!ce) for (Object o : fields.entrySet()) {
-                Map.Entry e = (Map.Entry) o;
-                Map m = (Map)e.getValue();
-                m.remove( "-ignore-" );
-            }
-        }
     }
 
     /**
@@ -327,6 +303,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             Query q = getQuery(rd);
             Sort  s = getSort (rd);
+                      ignFlds (rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
                 CoreLogger.debug("LuceneRecord.getOne: "+q.toString()+" Sort: "+s.toString());
@@ -363,6 +340,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             Query q = getQuery(rd);
             Sort  s = getSort (rd);
+                      ignFlds (rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
                 CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString());
@@ -442,7 +420,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
              * 故只好转换成 map 再重新设置, 这样才能确保索引完整
              * 但那些 Store=NO 的数据将无法设置
              */
-            Map md = doc2Map(doc);
+            ignFlds(new HashMap());
+            Map  md = doc2Map(doc);
             md.putAll(rd);
             rd = md;
         }
@@ -471,7 +450,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
              * 故只好转换成 map 再重新设置, 这样才能确保索引完整
              * 但那些 Store=NO 的数据将无法设置
              */
-            Map md = doc2Map(doc);
+            ignFlds(new HashMap());
+            Map  md = doc2Map(doc);
             md.putAll(rd);
             rd = md;
         }
@@ -498,9 +478,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public Map get(String id) throws HongsException {
         Document doc = getDoc(id);
         if (doc != null) {
-            return doc2Map(doc );
+           ignFlds(new HashMap());
+            return doc2Map( doc );
         } else {
-            return new HashMap();
+            return new HashMap( );
         }
     }
 
@@ -858,7 +839,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Object fv = e.getValue( );
             String fn = (String) e.getKey();
 
-            if ("wd".equals(fn) || "ob".equals(fn)) {
+            if ("wd".equals(fn) || "ob".equals(fn) || "sf".equals(fn)) {
                 continue;
             }
 
@@ -938,7 +919,20 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     protected Sort getSort(Map rd) throws HongsException {
-        List<String>    ob = Synt.declare (rd.get("ob"), new ArrayList());
+        Set<String> ob;
+        Object xb = rd.get("ob" );
+        if (xb instanceof String)
+        {
+          ob = new HashSet(Arrays.asList(((String)xb).split("[, \\+]")));
+        } else
+        if (xb instanceof Collection)
+        {
+          ob = new HashSet((Collection)xb);
+        } else
+        {
+          ob = new HashSet();
+        }
+
         List<SortField> of = new ArrayList();
 
         for (String fn: ob) {
@@ -996,6 +990,50 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         return new Sort(of.toArray(new SortField[0]));
+    }
+
+    protected void ignFlds(Map rd) {
+        Set<String> fs;
+        Object fz = rd.get("sf" );
+        if (fz instanceof String)
+        {
+          fs = new HashSet(Arrays.asList(((String)fz).split("[, \\+]")));
+        } else
+        if (fz instanceof Collection)
+        {
+          fs = new HashSet((Collection)fz);
+        } else
+        {
+          fs = new HashSet();
+        }
+
+        if (!fs.isEmpty()) {
+            Set<String> cf = new HashSet();
+            Set<String> sf = new HashSet();
+            for (String fn : fs) {
+                if (fn.startsWith("-")) {
+                    fn= fn.substring(1);
+                    cf.add(fn);
+                } else {
+                    sf.add(fn);
+                }
+            }
+            if (!sf.isEmpty()) {
+                cf.addAll(fields.keySet());
+                cf.removeAll(sf);
+            }
+
+            for(Map.Entry<String, Map> me : fields.entrySet()) {
+                Map fc = me.getValue();
+                String f = me.getKey();
+                fc.put("-ignore-", cf.contains(f));
+            }
+        } else {
+            for(Map.Entry<String, Map> me : fields.entrySet()) {
+                Map fc = me.getValue();
+                fc.remove("-ignore-" );
+            }
+        }
     }
 
     protected void mapAdd(Map map, Document doc) {

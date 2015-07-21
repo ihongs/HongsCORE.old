@@ -75,7 +75,7 @@ public class FetchCase
   protected List<Object>        hparams;
   protected Map<String,Object>  options;
 
-  private   short               joinType;
+  private   byte                joinType;
   private   String              joinExpr;
   protected Set<FetchCase>      joinList;
 
@@ -289,8 +289,8 @@ public class FetchCase
     this.joinExpr = expr;
     return this;
   }
-  
-  public FetchCase rs( byte  type)
+
+  public FetchCase by( byte  type)
   {
     this.joinType = type;
     return this;
@@ -619,7 +619,7 @@ public class FetchCase
   /**
    * 获取关联对象
    * @param name
-   * @return 
+   * @return
    */
   public FetchCase getJoin(String name)
   {
@@ -636,7 +636,7 @@ public class FetchCase
   /**
    * 获取关联的关联对象
    * @param name
-   * @return 
+   * @return
    */
   public FetchCase getJoin(String... name)
   {
@@ -644,10 +644,10 @@ public class FetchCase
     for (String n : name)
     {
       FetchCase c = caze.getJoin(n);
-      if (c == null) {
-          return c;
+      if (null != c) {
+          caze  = c;
       } else {
-          caze = c;
+          caze  = null; break; /* break */
       }
     }
     return caze;
@@ -657,7 +657,7 @@ public class FetchCase
    * 获取关联的关联对象(不存在则创建)
    * @param name
    * @return
-   * @throws HongsException 
+   * @throws HongsException
    */
   public FetchCase gotJoin(String... name)
     throws HongsException
@@ -666,10 +666,10 @@ public class FetchCase
     for (String n : name)
     {
       FetchCase c = caze.getJoin(n);
-      if (c == null) {
-          caze = caze.join(n);
+      if (null != c) {
+          caze  = c;
       } else {
-          caze = c;
+          caze  = caze.join(n).by((byte)0);
       }
     }
     return caze;
@@ -742,7 +742,7 @@ public class FetchCase
   {
     return !this.joinList.isEmpty();
   }
-  
+
   /**
    * 是否有设置查询字段
    * @return 存在为true, 反之为false

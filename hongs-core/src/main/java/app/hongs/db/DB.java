@@ -349,10 +349,11 @@ public class DB
             pool = new ComboPooledDataSource();
             sourcePool.put( namc, pool );
             pool.setDriverClass(drv);
-            pool.setJdbcUrl(url);
+            pool.setJdbcUrl/**/(url);
+//          pool.setProperties(info); // 无效, 只能用下面的方式来设置
 
-            if (info.containsKey("user")) {
-              pool.setUser(info.getProperty("user"));
+            if (info.containsKey("user"    )) {
+              pool.setUser    (info.getProperty("user"    ));
             }
             if (info.containsKey("password")) {
               pool.setPassword(info.getProperty("password"));
@@ -360,24 +361,48 @@ public class DB
             if (info.containsKey("maxIdleTime")) {
               pool.setMaxIdleTime(Integer.parseInt(info.getProperty("maxIdleTime")));
             }
-            if (info.containsKey("minPoolSize")) {
-              pool.setMinPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
-            }
             if (info.containsKey("maxPoolSize")) {
               pool.setMaxPoolSize(Integer.parseInt(info.getProperty("maxPoolSize")));
+            }
+            if (info.containsKey("minPoolSize")) {
+              pool.setMinPoolSize(Integer.parseInt(info.getProperty("minPoolSize")));
             }
             if (info.containsKey("initialPoolSize")) {
               pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
             }
 
-            if (info.containsKey("idleConnectionTestPeriod")) {
-              pool.setIdleConnectionTestPeriod(Integer.parseInt(info.getProperty("idleConnectionTestPeriod")));
+            if (info.containsKey("maxStatements"  )) {
+              pool.setMaxStatements  (Integer.parseInt(info.getProperty("maxStatements"  )));
+            }
+            if (info.containsKey("maxStatementsPerConnection")) {
+              pool.setMaxStatementsPerConnection(Integer.parseInt(info.getProperty("maxStatementsPerConnection")));
+            }
+
+            if (info.containsKey("checkoutTimeout")) {
+              pool.setCheckoutTimeout(Integer.parseInt(info.getProperty("checkoutTimeout")));
+            }
+            if (info.containsKey("idleConnectionTestPeriod"  )) {
+              pool.setIdleConnectionTestPeriod  (Integer.parseInt(info.getProperty("idleConnectionTestPeriod"  )));
+            }
+
+            if (info.containsKey("numHelperThreads"    )) {
+              pool.setNumHelperThreads    (Integer.parseInt(info.getProperty("numHelperThreads"    )));
+            }
+            if (info.containsKey("acquireIncrement"    )) {
+              pool.setAcquireIncrement    (Integer.parseInt(info.getProperty("acquireIncrement"    )));
+            }
+            if (info.containsKey("acquireRetryDelay"   )) {
+              pool.setAcquireRetryDelay   (Integer.parseInt(info.getProperty("acquireRetryDelay"   )));
+            }
+            if (info.containsKey("acquireRetryAttempts")) {
+              pool.setAcquireRetryAttempts(Integer.parseInt(info.getProperty("acquireRetryAttempts")));
+            }
+
+            if (info.containsKey("testConnectionOnCheckin" )) {
+              pool.setTestConnectionOnCheckin (Boolean.parseBoolean(info.getProperty("testConnectionOnCheckin" )));
             }
             if (info.containsKey("testConnectionOnCheckout")) {
               pool.setTestConnectionOnCheckout(Boolean.parseBoolean(info.getProperty("testConnectionOnCheckout")));
-            }
-            if (info.containsKey("testConnectionOnCheckin" )) {
-              pool.setTestConnectionOnCheckin (Boolean.parseBoolean(info.getProperty("testConnectionOnCheckin" )));
             }
           }
           finally

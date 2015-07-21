@@ -26,15 +26,14 @@ public class ServerCmdlet {
         }
 
         WebAppContext webapp = new WebAppContext();
-        Server server = new Server(port);
         webapp.setDescriptor  (conf);
         webapp.setContextPath (Core.BASE_HREF);
         webapp.setResourceBase(Core.BASE_PATH);
         webapp.setParentLoaderPriority( true );
-        server.setHandler(webapp);
 
+        Server server = new Server(port);
+        /****/ server.setHandler(webapp);
         Runtime.getRuntime().addShutdownHook(new StopServer(server));
-
         try {
             server.start();
             server.join( );
@@ -54,6 +53,7 @@ public class ServerCmdlet {
 
         @Override
         public void run() {
+            System.out.println("");
             if (server.isStopped( )) {
                 System.err.println("Server is stopped !!!");
                 return;

@@ -101,12 +101,7 @@ function HsList(opts, context) {
         switch (m) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
-            case "{AUTOBOX}": m = n._hsTarget('@'); break;
-            case "{TABSBOX}":
-                m = context.closest(".panes").data("rel");
-                m = m.hsTaba(context.attr("id"));
-                m = m[0];
-                break;
+            case "{AUTOBOX}": m =   '@';
             default: m = n._hsTarget(m);
         }
 
@@ -172,7 +167,7 @@ function HsList(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        if (loadData === "{LOADBOX}") {
+        if (loadData === undefined) {
             loadData  =  [];
             jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
             jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
@@ -390,12 +385,11 @@ HsList.prototype = {
     open     : function(btn, box, url, data) {
         var that = this;
         var dat2 = jQuery.extend({}, hsSerialObj(url), hsSerialObj(data||{}));
-        if (box == "@") box = jQuery(btn).closest(".loadbox");
         if (box) {
-            box.data( "rel", btn.closest(".loadbox").get(0) );
             box.hsOpen(url, data, function() {
-               that.openBack(btn, jQuery(this), dat2);
-            });
+               that.openBack(btn, jQuery( this ), dat2 );
+            })
+            .data("rel", btn.closest(".loadbox").get(0));
         } else {
          jQuery.hsOpen(url, data, function() {
                that.openBack(btn, jQuery(this), dat2);

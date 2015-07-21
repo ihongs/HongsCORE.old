@@ -28,7 +28,7 @@ function HsTree(opts, context) {
 
     // 根节点信息
     var rootInfo = {
-            id   : hsGetValue(opts, "rootId", hsGetConf("tree.root.id",  "0" )),
+            id   : hsGetValue(opts, "rootId"  , hsGetConf("tree.root.id", "0")),
             name : hsGetValue(opts, "rootName", hsGetLang("tree.root.name")),
             note : hsGetValue(opts, "rootNote", hsGetLang("tree.root.note")),
             type : "__ROOT__"
@@ -113,12 +113,7 @@ function HsTree(opts, context) {
         switch (m) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
-            case "{AUTOBOX}": m = n._hsTarget('@'); break;
-            case "{TABSBOX}":
-                m = context.closest(".panes").data("rel");
-                m = m.hsTaba(context.attr("id"));
-                m = m[0];
-                break;
+            case "{AUTOBOX}": m =   '@';
             default: m = n._hsTarget(m);
         }
 
@@ -209,7 +204,7 @@ function HsTree(opts, context) {
     this.select  (rootInfo["id"]  );
 
     if (loadUrl) {
-        if (loadData === "{LOADBOX}") {
+        if (loadData === undefined) {
             loadData  =  [];
             jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
             jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
@@ -221,9 +216,9 @@ function HsTree(opts, context) {
         } else {
             loadUrl += "&";
         }
-        loadUrl += jQuery.serialize(loadData);
+        loadUrl += jQuery.param(loadData);
 
-        this.load( loadUrl , rootInfo["id"] );
+        this.load(loadUrl,rootInfo["id"]);
     }
 }
 HsTree.prototype = {
@@ -398,12 +393,11 @@ HsTree.prototype = {
     open     : function(btn, box, url, data) {
         var that = this;
         var dat2 = jQuery.extend({}, hsSerialObj(url), hsSerialObj(data||{}));
-        if (box == "@") box = jQuery(btn).closest(".loadbox");
         if (box) {
-            box.data( "rel", btn.closest(".loadbox").get(0) );
             box.hsOpen(url, data, function() {
-               that.openBack(btn, jQuery(this), dat2);
-            });
+               that.openBack(btn, jQuery( this ), dat2 );
+            })
+            .data("rel", btn.closest(".loadbox").get(0));
         } else {
          jQuery.hsOpen(url, data, function() {
                that.openBack(btn, jQuery(this), dat2);
@@ -455,20 +449,13 @@ HsTree.prototype = {
         }
     },
 
-    getNode  : function(id) {
-        if (typeof(id) === "object")
-            return id.closest(".tree-node" );
-        else
-            return this.treeBox.find( "#tree-node-" + id );
-    },
-    getPnode : function(id) {
-        return this.getNode(id).parent().closest(".tree-node");
-    },
     getId    : function(id) {
         if (typeof(id) === "object")
             return this.getId(id.attr("id"));
+        else  if  (id)
+            return id.toString().substr(10 );
         else
-            return id.toString( ).substr(10);
+            return "";
     },
     getPid   : function(id) {
         return this.getId(this.getPnode(id));
@@ -478,6 +465,15 @@ HsTree.prototype = {
     },
     getRid   : function() {
         return this.getId(this.treeBox.find(".tree-root"));
+    },
+    getNode  : function(id) {
+        if (typeof(id) === "object")
+            return id.closest(".tree-node" );
+        else
+            return this.treeBox.find( "#tree-node-" + id );
+    },
+    getPnode : function(id) {
+        return this.getNode(id).parent().closest(".tree-node");
     }
 };
 

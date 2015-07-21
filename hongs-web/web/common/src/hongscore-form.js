@@ -13,8 +13,8 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"   );
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var saveUrl  = hsGetValue(opts, "saveUrl");
-    var loadData = hsGetValue(opts, "loadData",[]);
-    var initData = hsGetValue(opts, "initData",[]);
+    var loadData = hsGetValue(opts, "loadData");
+    var initData = hsGetValue(opts, "initData");
 
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
     var jdKey    = hsGetValue(opts, "jdKey", "jd"); // jd参数名, 用于判断是否要枚举表
@@ -34,19 +34,19 @@ function HsForm(opts, context) {
         }
     }
 
-    if (loadUrl) {
-        loadUrl = hsFixPms(loadUrl, loadBox);
-        jQuery.merge(loadData, hsSerialArr(loadUrl));
-    }
-    if (loadData === '{LOADBOX}') {
+    if (loadData === undefined) {
         loadData  =  [];
         jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
         jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
     } else {
         loadData = hsSerialArr(loadData);
     }
+    if (loadUrl) {
+        loadUrl = hsFixPms(loadUrl, loadBox);
+        jQuery.merge(loadData, hsSerialArr(loadUrl));
+    }
 
-    if (initData === '{LOADBOX}') {
+    if (initData === undefined) {
         initData  =  [];
         jQuery.merge(initData, hsSerialArr(loadBox.data("url" )));
         jQuery.merge(initData, hsSerialArr(loadBox.data("data")));

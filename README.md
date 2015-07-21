@@ -211,11 +211,11 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 有一些参数名具有特定意义, 如:
 
-    pn      当前页码
-    rn      额定行数
-    wd      搜索字词
-    ob      排序字段
-    cs      限定列名
+    pn      当前页码(page num)
+    rn      额定行数(rows cnt)
+    wd      搜索字词(word)
+    ob      排序字段(order by)
+    sf      查询字段(select for)
     or      或查询
     ar      多组或
 
@@ -302,7 +302,7 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
     etime   结束时间, DATETIME,TIMESTAMP,BIGINT,INTEGER
     state   状态标识, TINYINT, 1为正常, 0为删除, 可用其他数字表示其他状态
 
-因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请尽量避开这些名称: pn,rn,wd,ob,cs,or,ar. 另, 在配置文件和 Model 中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
+因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请尽量避开这些名称: pn,rn,wd,ob,sf,or,ar. 另, 在配置文件和 Model 中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 # HongsCORE framework for Javascript
 

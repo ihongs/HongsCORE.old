@@ -27,7 +27,7 @@ import java.util.Set;
  * permit 默认调用 filter 来实现的, 可覆盖它来做资源过滤操作.<br/>
  * 可使用查询参数:
  * <code>
- * ?f1=123&f2.-gt=456&wd=a+b&ob=-f1+f2&pn=1&rs=10&cs=id+f1+f2
+ * ?pn=1&rn=10&f1=123&f2.-gt=456&wd=a+b&ob=-f1+f2&sf=id+f1+f2
  * </code>
  详见 filter 方法说明
  </p>
@@ -84,7 +84,7 @@ implements IRecord
    * 字段参数名
    * 影响getPage/getList/filter
    */
-  protected String colsKey = "cs";
+  protected String colsKey = "sf";
 
   /**
    * 排序参数名
@@ -144,7 +144,7 @@ implements IRecord
     this.orKey   = conf.getProperty("fore.or.key"  , "or");
     this.pageKey = conf.getProperty("fore.page.key", "pn");
     this.rowsKey = conf.getProperty("fore.rows.key", "rn");
-    this.colsKey = conf.getProperty("fore.cols.key", "cs");
+    this.colsKey = conf.getProperty("fore.cols.key", "sf");
     this.sortKey = conf.getProperty("fore.sort.key", "ob");
     this.findKey = conf.getProperty("fore.find.key", "wd");
   }
@@ -738,7 +738,7 @@ implements IRecord
    *
    * 设计目标:
    * 1) 按照cs参数设置查询字段;
-   *    限定字段列表: cs=a+b+c或cs=-a+x.b, -表示排除该字段;
+   *    限定字段列表: sf=a+b+c或sf=-a+x.b, -表示排除该字段;
    * 2) 按照ob参数设置排序方式,
    *    多个字段排序: ob=a+b+c或ob=-a+b+c, -表示该字段逆序;
    * 3) 按照wd参数设置模糊查询,
@@ -764,22 +764,24 @@ implements IRecord
      * 默认只关联 BLS_TO,HAS_ONE 的表(仅能关联一个)
      * 默认只连接 LEFT  ,INNER   的表(必须满足左表)
      */
-    if (! rd.containsKey(this.colsKey))
+    if (! rd.containsKey(this.colsKey)
+    && ("getAll" .equals(rd.get("MODEL_METHOD"))
+    ||  "getList".equals(rd.get("MODEL_METHOD"))
+    ))
     {
-      if (caze.getOption("ASSOC_TYPES") == null)
-      {
-        Set types = new HashSet();
-        types.add("BLS_TO" );
-        types.add("HAS_ONE");
-        caze.setOption("ASSOC_TYPES", types);
-      }
-
-      if (caze.getOption("ASSOC_JOINS") == null)
+      if (null == caze.getOption("ASSOC_JOINS"))
       {
         Set types = new HashSet();
         types.add( "LEFT"  );
         types.add( "INNER" );
         caze.setOption("ASSOC_JOINS", types);
+      }
+      if (null == caze.getOption("ASSOC_TYPES"))
+      {
+        Set types = new HashSet();
+        types.add("BLS_TO" );
+        types.add("HAS_ONE");
+        caze.setOption("ASSOC_TYPES", types);
       }
     }
 
