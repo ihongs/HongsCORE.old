@@ -97,11 +97,22 @@ public class ActsAction
     int       errno = ex.getCode();
     String    error;
 
+    if (errno <= 0x110d && errno >= 0x1100 )
+    {
+      String[] ls = ex.getLocalizedOptions();
+      if (ls == null || ls.length == 0)
+      {
+        ex.setLocalizedOptions(ActionDriver.getRealPath(req), ex.getDesc());
+      }
+      error = ex.getLocalizedMessage( );
+    }
+    else
     if (errno == 0x110e)
     {
-      ta = ex.getCause();
-        errno  = 0x110e ;
-        error  = ta.getLocalizedMessage();
+      ta = ex.getCause(  );
+      CoreLogger.error(ta);
+      error = ta.getLocalizedMessage( );
+
       CoreLocale lang = Core.getInstance(CoreLocale.class);
       if (error == null || error.length() == 0)
       {
@@ -114,20 +125,11 @@ public class ActsAction
     }
     else
     {
-      if ( errno <= 0x1f00 && errno >= 0x110f )
-      {
-        String[] ls = ex.getLocalizedOptions( );
-        if (ls == null || ls.length == 0)
-        {
-          ex.setLocalizedOptions(ActionDriver.getRealPath(req), ex.getDesc());
-        }
-      }
-        error = ex.getLocalizedMessage( );
+      CoreLogger.error(ta);
+      error = ex.getLocalizedMessage( );
     }
 
     senderr(helper, errno, error);
-
-    CoreLogger.error(ta);
   }
 
   private void senderr(ActionHelper helper, int errno, String error)

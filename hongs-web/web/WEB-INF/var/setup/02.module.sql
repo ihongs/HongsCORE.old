@@ -7,7 +7,9 @@
 DROP TABLE IF EXISTS `a_module_unit`;
 CREATE TABLE `a_module_unit` (
   `id` char(20) NOT NULL,
+  `pid` char(20) DEFAULT NULL,
   `name` varchar(200) NOT NULL,
+  `note` text,
   `ctime` int(11) DEFAULT NULL,
   `mtime` int(11) DEFAULT NULL,
   `state` tinyint(4) DEFAULT '1',
@@ -17,7 +19,8 @@ CREATE TABLE `a_module_unit` (
 CREATE INDEX `IK_a_module_unit_state` ON `a_module_unit` (`state`);
 CREATE INDEX `IK_a_module_unit_ctime` ON `a_module_unit` (`ctime`);
 CREATE INDEX `IK_a_module_unit_mtime` ON `a_module_unit` (`mtime`);
-CREATE UNIQUE INDEX `UK_a_module_unit_name` ON `a_module_unit` (`name`);
+CREATE INDEX `IK_a_member_dept_dept` ON `a_member_dept` (`pid`);
+CREATE UNIQUE INDEX `UK_a_module_unit_name` ON `a_module_unit` (`name`,`pid`);
 
 --
 -- 表单

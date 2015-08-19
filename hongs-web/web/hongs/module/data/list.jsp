@@ -56,7 +56,7 @@
             <button type="button" class="create btn btn-default"><%=lang.translate("fore.create", title)%></button>
             <%if (!"select".equals(_action)) {%>
             <button type="button" class="update for-select btn btn-default"><%=lang.translate("fore.update", title)%></button>
-            <button type="button" class="delete for-checks btn btn-danger" ><%=lang.translate("fore.delete", title)%></button>
+            <button type="button" class="delete for-checks btn btn-warning"><%=lang.translate("fore.delete", title)%></button>
             <%} // End If %>
         </div>
         <form class="findbox col-md-3 input-group" action="" method="POST">

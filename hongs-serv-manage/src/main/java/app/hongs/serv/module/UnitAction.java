@@ -6,6 +6,7 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.anno.Action;
 import app.hongs.db.DB;
 import app.hongs.action.anno.CommitSuccess;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,7 +43,10 @@ public class UnitAction {
         CoreLocale lang = CoreLocale.getInstance();
         String id  = model.save(data);
         String msg = lang.translate("core.save.success");
-        helper.reply(msg, id, helper.getRequestData().get("name"));
+        Map info = new HashMap();
+        info.put( "id" , id);
+        info.put("name", data.get("name") );
+        helper.reply(msg, info );
     }
 
     @Action("delete")
@@ -53,7 +57,7 @@ public class UnitAction {
         CoreLocale lang = CoreLocale.getInstance().clone( );
         int    rd  = model.delete(data);
         String msg = lang.translate("core.remove.success", Integer.toString(rd));
-        helper.reply(msg);
+        helper.reply(msg, rd);
     }
 
     @Action("unique")

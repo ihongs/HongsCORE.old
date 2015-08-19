@@ -87,8 +87,7 @@ public class DBFields
     }
     catch (SQLException ex)
     {
-      // 抛出Table的异常代号
-      throw new HongsException(0x106a, ex);
+      throw new HongsException(0x107a, ex);
     }
     finally
     {

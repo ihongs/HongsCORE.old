@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,7 +135,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
  id   ID
  wd   搜索
  ob   排序
- fs   字段
+ sf   字段
  pn   页码
  rn   每页行数
  ln   分页数量
@@ -252,14 +254,13 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @throws HongsException
      */
     @Override
-    public String[] create(Map rd) throws HongsException {
-        String[] resp;
-        resp = new String[dispCols.length  +  1];
-        resp[0] = add(rd);
-        for (int i = 0; i<dispCols.length; i ++) {
-            resp[i + 1] = Synt.declare(rd.get(dispCols[i]), String.class);
+    public Map create(Map rd) throws HongsException {
+        Map sd = new HashMap();
+        sd.put("id" , add(rd));
+        for(String fn : dispCols) {
+            sd.put(fn, rd.get(fn));
         }
-        return resp;
+        return rd;
     }
 
     /**
@@ -407,7 +408,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @throws HongsException
      */
     public void put(String id, Map rd) throws HongsException {
-        if (id == null && id.length() == 0) {
+        if (id == null || id.length() == 0) {
             throw HongsException.common("Id must be set in put");
         }
         Document doc = getDoc(id);
@@ -437,7 +438,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @throws HongsException
      */
     public void set(String id, Map rd) throws HongsException {
-        if (id == null && id.length() == 0) {
+        if (id == null || id.length() == 0) {
             throw HongsException.common("Id must be set in put");
         }
         Document doc = getDoc(id);
@@ -544,7 +545,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     public Map doc2Map(Document doc) {
-        Map map = new HashMap();
+        Map map = new LinkedHashMap();
         mapAdd(map, doc);
         return map;
     }
@@ -555,19 +556,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
         try {
             // 索引目录不存在则先写入一个并删除
-            if (!(new File(dataPath)).exists( ) ) {
+            if (!(new File(dataPath)).exists()) {
                 connect();
-                del(add(new HashMap() ) );
+                del(add(new HashMap( )));
                 commit( );
             }
 
-            Path dp = Paths.get(dataPath);
-            Directory dir = FSDirectory.open(dp);
+            Path p = Paths.get(dataPath);
+            Directory dir = FSDirectory.open(p);
 
-            reader = DirectoryReader.open(dir);
-            finder = new IndexSearcher(reader);
-        } catch (IOException ex) {
-            throw HongsException.common(null,ex);
+            reader = DirectoryReader.open (dir);
+            finder = new IndexSearcher (reader);
+        } catch (IOException x) {
+            throw HongsException.common(null,x);
         }
     }
 
@@ -576,16 +577,15 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             return;
         }
         try {
-            Path dp = Paths.get(dataPath);
-            Directory dir = FSDirectory.open(dp);
-
-            Analyzer  ana = getAnalyzer();
-            IndexWriterConfig iwc = new IndexWriterConfig(ana);
+            IndexWriterConfig iwc = new IndexWriterConfig(getAnalyzer());
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 
-            writer = new IndexWriter(dir, iwc);
-        } catch (IOException ex) {
-            throw HongsException.common(null,ex);
+            Path d = Paths.get(dataPath);
+            Directory dir = FSDirectory.open(d);
+
+            writer = new IndexWriter(dir , iwc);
+        } catch (IOException x) {
+            throw HongsException.common(null,x);
         }
     }
 
@@ -593,17 +593,17 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public void destroy() throws HongsException {
         try {
             if (writer != null) {
-            // 默认退出时提交
-            if (IN_TRNSCT_MODE) {
-                try {
-                    commit();
-                } catch (HongsException he) {
-                    rolbak();
-                    throw he;
+                // 默认退出时提交
+                if (IN_TRNSCT_MODE) {
+                    try {
+                        commit();
+                    } catch (HongsException he) {
+                        rolbak();
+                        throw he;
+                    }
                 }
-            }
 
-                writer.maybeMerge( );
+                writer.maybeMerge();
                 writer.close( );
                 writer  = null ;
             }
@@ -612,8 +612,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 reader.close( );
                 reader  = null ;
             }
-        } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+        } catch (IOException x) {
+            throw HongsException.common(null,x);
         }
     }
 
@@ -839,7 +839,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Object fv = e.getValue( );
             String fn = (String) e.getKey();
 
-            if ("wd".equals(fn) || "ob".equals(fn) || "sf".equals(fn)) {
+            if ("wd".equals(fn) || "ob".equals(fn) || "sf".equals(fn)
+            ||  "or".equals(fn) || "ar".equals(fn) || "xr".equals(fn)) {
                 continue;
             }
 
@@ -851,22 +852,22 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             AddQuery aq;
             String t = getFtype(m);
             if (   "int".equals(t)) {
-                aq = new AddIntQuery();
+                aq = new IntQuery();
             } else
             if (  "long".equals(t)) {
-                aq = new AddLongQuery();
+                aq = new LongQuery();
             } else
             if ( "float".equals(t)) {
-                aq = new AddFloatQuery();
+                aq = new FloatQuery();
             } else
             if ("double".equals(t)) {
-                aq = new AddDoubleQuery();
+                aq = new DoubleQuery();
             } else
             if ("string".equals(t)) {
-                aq = new AddStringQuery();
+                aq = new StringQuery();
             } else
             if (  "text".equals(t)) {
-                aq = new AddSearchQuery();
+                aq = new SearchQuery();
             } else
             {
                 continue;
@@ -882,12 +883,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 Map fm = (Map) fv;
                 for(String fk : findCols) {
                 if (fm.containsKey( fk )) {
-                    qryAdd(query, fk, fm.get(fk), new AddSearchQuery());
+                    qryAdd(query, fk, fm.get(fk), new SearchQuery());
                 }
                 }
             } else {
                 for(String fk : findCols) {
-                    qryAdd(query, fk, fv/*WORD*/, new AddSearchQuery());
+                    qryAdd(query, fk, fv/*WORD*/, new SearchQuery());
                 }
             }
         }
@@ -902,17 +903,30 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             query.add(qay, BooleanClause.Occur.MUST);
         }
 
+        // 附条件
+        if (rd.containsKey("xr")) {
+            Set<Map> set = Synt.declare(rd.get("xr"), Set.class);
+            for(Map  map : set) {
+                query.add(getQuery(map), BooleanClause.Occur.SHOULD);
+            }
+        }
+
         // 并条件
         if (rd.containsKey("ar")) {
             Set<Map> set = Synt.declare(rd.get("ar"), Set.class);
             for(Map  map : set) {
-                query.add(getQuery(map), BooleanClause.Occur.MUST);
+                query.add(getQuery(map), BooleanClause.Occur.MUST  );
             }
         }
 
         // 没有条件则查询全部
         if ( query.clauses( ).isEmpty( ) ) {
             return new MatchAllDocsQuery();
+        }
+
+        // 有条件无排序则按相关度排序
+        if(!rd.containsKey("ob")) {
+            rd.put("ob", "-");
         }
 
         return query;
@@ -923,14 +937,14 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         Object xb = rd.get("ob" );
         if (xb instanceof String)
         {
-          ob = new HashSet(Arrays.asList(((String)xb).split("[, \\+]")));
+          ob = new LinkedHashSet(Arrays.asList(((String)xb).split("[, \\+]")));
         } else
         if (xb instanceof Collection)
         {
-          ob = new HashSet((Collection)xb);
+          ob = new LinkedHashSet((Collection)xb);
         } else
         {
-          ob = new HashSet();
+          ob = new LinkedHashSet();
         }
 
         List<SortField> of = new ArrayList();
@@ -997,14 +1011,14 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         Object fz = rd.get("sf" );
         if (fz instanceof String)
         {
-          fs = new HashSet(Arrays.asList(((String)fz).split("[, \\+]")));
+          fs = new LinkedHashSet(Arrays.asList(((String)fz).split("[, \\+]")));
         } else
         if (fz instanceof Collection)
         {
-          fs = new HashSet((Collection)fz);
+          fs = new LinkedHashSet((Collection)fz);
         } else
         {
-          fs = new HashSet();
+          fs = new LinkedHashSet();
         }
 
         if (!fs.isEmpty()) {
@@ -1231,8 +1245,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         float w = 1F;
 
         // 对 text 类型指定分词器
-        if (q instanceof AddSearchQuery) {
-            ((AddSearchQuery) q).ana(getAnalyzer(k));
+        if (q instanceof SearchQuery) {
+            ((SearchQuery) q).ana(getAnalyzer(k));
         }
 
         if (m.containsKey("-wt")) {
@@ -1323,18 +1337,13 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
-    private static class Director {
-        public Directory dir;
-        public  boolean  has;
-    }
-
     protected static interface AddQuery {
         public void  bst(float  w);
         public Query add(String k, Object v);
         public Query add(String k, Object n, Object x, boolean l, boolean r);
     }
 
-    protected static class AddIntQuery implements AddQuery {
+    protected static class IntQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -1357,7 +1366,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
-    protected static class AddLongQuery implements AddQuery {
+    protected static class LongQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -1380,7 +1389,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
-    protected static class AddFloatQuery implements AddQuery {
+    protected static class FloatQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -1403,7 +1412,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
-    protected static class AddDoubleQuery implements AddQuery {
+    protected static class DoubleQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -1426,7 +1435,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
-    protected static class AddStringQuery implements AddQuery {
+    protected static class StringQuery implements AddQuery {
         private Float w = null;
         @Override
         public void  bst(float  w) {
@@ -1448,7 +1457,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
-    protected static class AddSearchQuery implements AddQuery {
+    protected static class SearchQuery implements AddQuery {
         private Analyzer a = null;
         private Float    w = null;
         public void  ana(Analyzer a) {

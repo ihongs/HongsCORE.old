@@ -63,17 +63,22 @@ public class UserAction {
     @Action("save")
     public void doSave(ActionHelper helper)
     throws HongsException {
-        // Ignore empty password in update
         Map data = helper.getRequestData( );
-        if ("".equals(data.get("password"))) {
+        // Ignore empty password in update
+        if("".equals(data.get("password"))) {
             data.remove("password");
         }
-
-        CoreLocale lang = CoreLocale.getInstance().clone();
+        
+        CoreLocale lang = CoreLocale.getInstance().clone( );
         lang.load("member");
+        
         String  id  = model.save(data);
         String  msg = lang.translate("core.save.user.success");
-        helper.reply(msg, id, helper.getRequestData().get("name"));
+        
+        Map info = new HashMap();
+        info.put( "id" , id);
+        info.put("name", data.get("name"));
+        helper.reply(msg , info);
     }
 
     @Action("delete")
@@ -84,7 +89,7 @@ public class UserAction {
         lang.load("member");
         int     rd  = model.delete(helper.getRequestData());
         String  msg = lang.translate("core.remove.user.success", Integer.toString(rd));
-        helper.reply(msg);
+        helper.reply(msg, rd);
     }
 
     @Action("unique")

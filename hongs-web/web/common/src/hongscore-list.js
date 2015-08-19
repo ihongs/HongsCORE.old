@@ -280,20 +280,20 @@ HsList.prototype = {
     },
     fillPage : function(page) {
         switch (page.err) {
+            case  2 :
+            case "2":
+                hsSetSerial(this._data, "page", page.pagecount || 1);
+                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
+                this.listBox.hide ();
+                this.load();
+                return;
             case  1 :
             case "1":
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
-                this.listBox.children().hide();
-                return;
-            case  2 :
-            case "2":
-                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
-                this.listBox.children().hide();
-                hsSetSerial(this._data,"page",1);
-                this.load();
+                this.listBox.hide ();
                 return;
             default:
-                this.listBox.children().show();
+                this.listBox.show ();
         }
 
         var i, p, t, pn, pmin, pmax, that = this;
@@ -392,7 +392,7 @@ HsList.prototype = {
             .data("rel", btn.closest(".loadbox").get(0));
         } else {
          jQuery.hsOpen(url, data, function() {
-               that.openBack(btn, jQuery(this), dat2);
+               that.openBack(btn, jQuery( this ), dat2 );
             });
         }
     },
@@ -567,16 +567,16 @@ jQuery.fn.hsList = function(opts) {
         var box = $(this ).closest(".HsList" );
         var siz = box.find(".checkone").length;
         var len = box.find(".checkone:checked").length;
-        var ckd = siz && siz == len ? true : (len && siz != len ? null : false);
-        box.find(".for-select").prop("disabled", len != 1);
-        box.find(".for-checks").prop("disabled", len == 0);
+        var ckd = siz && siz === len ? true : (len && len !== siz ? null : false);
+        box.find(".for-select").prop("disabled", len !== 1);
+        box.find(".for-checks").prop("disabled", len === 0);
         box.find(".checkall").prop("choosed", ckd);
     })
     .on("change", ".HsList .checkall",
     function() {
-        this.indeterminate = false;
         var box = $(this ).closest(".HsList" );
         var ckd = $(this/**/).prop("checked" );
+                  $(this/**/).prop("choosed", ckd);
         box.find(".checkone").prop("checked", ckd).trigger("change");
     })
     .on("loadBack", ".HsList .listbox",

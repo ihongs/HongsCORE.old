@@ -1,10 +1,5 @@
-<object class="config" name="hsInit" data="">
-    <param name="width" value="600px"/>
-</object>
-
-<h2>${opr}用户</h2>
-
-<div id="member_user_form">
+<h2>${DO}用户</h2>
+<div id="member-user-form">
     <object class="config" name="hsForm" data="">
         <param name="loadUrl" value="hongs/member/user/info.act?jd=0&-with-roles=1"/>
         <param name="saveUrl" value="hongs/member/user/save.act"/>
@@ -13,7 +8,7 @@
         <input type="hidden" name="id"/>
         <input type="hidden" name="depts.0.dept_id" data-pn="dept_id"/>
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <div class="form-group">
                     <label class="control-label">邮箱</label>
                     <input type="email" name="username" class="form-control" required="required" data-unique="hongs/member/user/unique.act?id={id}"/>
@@ -34,7 +29,7 @@
                     <textarea name="note" class="form-control"></textarea>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <h3>权限设置</h3>
                 <div class="form-group" data-fn="roles..role" data-ft="_checkbag" data-vk="name" data-tk="disp" data-vl="list" data-tl="disp">
                 </div>

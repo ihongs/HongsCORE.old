@@ -4,13 +4,13 @@
         <title>HongsCORE::Login</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+        <link rel="icon" type="image/x-icon" href="favicon.ico"/>
         <link rel="stylesheet" type="text/css" href="common/css/bootstrap.min.css"/>
         <link rel="stylesheet" type="text/css" href="common/src/hongscore.css"/>
-        <script type="text/javascript" src="common/jquery.min.js"></script>
         <!--[if glt IE8.0]>
         <script type="text/javascript" src="compon/respond/respond.min.js"></script>
         <![endif]-->
+        <script type="text/javascript" src="common/jquery.min.js"></script>
         <script type="text/javascript" src="common/bootstrap.min.js"></script>
         <script type="text/javascript" src="common/src/hongscore.js"></script>
         <script type="text/javascript" src="common/src/hongscore-form.js"></script>
@@ -39,10 +39,10 @@
                             <param name="saveUrl" value="hongs/member/sign/create.act"/>
                         </object>
                         <div class="form-group">
-                            <input name="username" type="text" value="abc@def.cn" placeholder="Please input your Username" data-i18n="input.username" class="form-control" required="required"/>
+                            <input name="username" type="text" value="abc@def.cn" placeholder="input.username" class="form-control i18n" required="required"/>
                         </div>
                         <div class="form-group">
-                            <input name="password" type="password" value="123456" placeholder="Please input your Password" data-i18n="input.password" class="form-control" required="required"/>
+                            <input name="password" type="password" value="123456" placeholder="input.password" class="form-control i18n" required="required"/>
                         </div>
                         <div>
                             <button type="submit" class="btn btn-primary btn-lg" data-i18n="login">Sign in Now</button>
@@ -53,7 +53,7 @@
         </div>
         <nav id="footbox" class="navbar">
             <div class="container">
-                <blockquote><p>Copyleft &copy; 2015 黄弘. <small class="pull-right">Powered by <a href="https://github.com/ihongs/HongsCORE/">HongsCORE</a>, v15.2.14, Beta.</small></p></blockquote>
+                <blockquote><p>Copyleft &copy; 2015 黄弘. <small class="pull-right">Powered by <a href="https://github.com/ihongs/HongsCORE/" target="_blank">HongsCORE</a>, and <a href="power.html" target="_blank">others</a>.</small></p></blockquote>
             </div>
         </nav>
         <script type="text/javascript">
@@ -63,20 +63,20 @@
                     if (r) {
                         location.href = hsFixUri(r);
                     } else {
-                        location.href = "/";
+                        location.href = "./";
                     }
                 });
 
-//                var colors = ["#dddddd", "#dddddf", "#ddddff", "#dddfff", "#ddffff", "#dfffff",
-//                              "#ffffff", "#fffffd", "#ffffdd", "#fffddd", "#ffdddd", "#fddddd"];
-//                var colori = 1;
-//                setInterval(function() {
-//                    $(".jumbotron").css("background-color", colors[colori]);
-//                        colori += 1;
-//                    if (colori >= colors.length) {
-//                        colori  = 0;
-//                    }
-//                }, 5000);
+                var colors = ["#222222", "#222224", "#222244", "#222444", "#224444", "#244444",
+                              "#444444", "#444442", "#444422", "#444222", "#442222", "#422222"];
+                var colori = 1;
+                setInterval(function() {
+                    $(".jumbotron").css("background-color", colors[colori]);
+                        colori += 1;
+                    if (colori >= colors.length) {
+                        colori  = 0;
+                    }
+                }, 2000);
             })(jQuery);
         </script>
     </body>

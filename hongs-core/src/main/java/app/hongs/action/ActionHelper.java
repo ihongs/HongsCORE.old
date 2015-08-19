@@ -543,19 +543,47 @@ public class ActionHelper
 
   /**
    * 返回操作结果
-   * 针对 create,update,delete 等
+   * 针对 create 等
    * @param msg
-   * @param back
+   * @param info
    */
-  public void reply(String msg, Object... back)
+  public void reply(String msg, Map info)
   {
     Map map = new HashMap();
-    map.put("ok", true);
-    if (null !=  msg  ) {
-        map.put("msg"  , msg );
+    if (null !=  msg) {
+        map.put("msg", msg);
     }
-    if (null !=  back && back.length != 0) {
-        map.put("back" , back);
+    map.put("info", info);
+    reply(map);
+  }
+
+  /**
+   * 返回操作结果
+   * 针对 update,delete 等
+   * @param msg
+   * @param size
+   */
+  public void reply(String msg, int size)
+  {
+    Map map = new HashMap();
+    if (null !=  msg) {
+        map.put("msg", msg);
+    }
+    map.put("size", size);
+    reply(map);
+  }
+
+  /**
+   * 返回操作结果
+   * 针对 update,delete 等
+   * @param msg
+   * @param size
+   */
+  public void reply(String msg)
+  {
+    Map map = new HashMap();
+    if (null !=  msg) {
+        map.put("msg", msg);
     }
     reply(map);
   }

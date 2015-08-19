@@ -241,13 +241,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
         ...
     ],
 
-    // 分页信息, 在 retrieve,list 动作返回
-    "page": {
-        "pagecount": 总的页数,
-        "rowscount": 当前行数
-    }
-
-    // 信息单元, 在 retrieve,info 动作返回
+    // 信息单元, 在 retrieve,info,create 动作返回
     "info": {
         "字段": "取值",
         ...
@@ -262,12 +256,14 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
         ...
     }
 
-    // 返回数据, 在 create,save 动作返回
-    "back": [
-        "ID",
-        "名称",
-        ...
-    ]
+    // 分页信息, 在 retrieve,list 动作返回
+    "page": {
+        "pagecount": 总的页数,
+        "rowscount": 当前行数
+    }
+
+    // 数量信息, 在 update,delete 动作返回
+    "size": 操作数量
 
 在调用 API(REST) 时, 可在 url 后加请求参数 --api-wrap=包裹其他数据的键名, 可加请求参数 --api-conv.= 来转换基本数据类型, 其取值可以为:
 

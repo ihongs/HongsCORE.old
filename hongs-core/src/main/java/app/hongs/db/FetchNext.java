@@ -30,9 +30,9 @@ public class FetchNext {
                 fs.put(md.getColumnLabel(i), Class.forName(md.getColumnClassName(i)));
             }
         } catch (SQLException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException(0x10a0, ex);
         } catch (ClassNotFoundException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException(0x10a2, ex);
         }
     }
 
@@ -62,13 +62,13 @@ public class FetchNext {
                   }
                   return row;
                 } catch (SQLException ex) {
-                  throw new app.hongs.HongsException(0x1044, ex);
+                  throw new app.hongs.HongsException(0x10a4, ex);
                 }
             }
             this.close();
         } catch (SQLException ex) {
             this.close();
-            throw new app.hongs.HongsException(0x1042, ex);
+            throw new app.hongs.HongsException(0x10a6, ex);
         }
         return null;
     }

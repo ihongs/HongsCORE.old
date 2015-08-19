@@ -56,7 +56,6 @@ public class VerifyHelper {
     public VerifyHelper addRulesByForm(String conf, String form) throws HongsException {
         FormSet cnf = FormSet.getInstance(conf);
         Map map  = cnf.getForm(form);
-        if (map == null) return this;
 
         FormSet dfs = FormSet.getInstance("default");
         Map tps  = dfs.getEnum("__types__");

@@ -74,9 +74,9 @@ import org.xml.sax.SAXException;
  *
  * <h3>异常代码:</h3>
  * <pre>
- * 区间: 0x10e0~0x10ef
+ * 区间: 0x10e0~0x10e7
  * 0x10e0 配置文件不存在
- * 0x10e2 解析文件失败
+ * 0x10e1 解析文件失败
  * </pre>
  *
  * @author Hongs
@@ -160,7 +160,7 @@ public class MenuSet
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsError(0x2a, "Can not find the sitemap config file '" + name + ".menu.xml'.");
+            throw new app.hongs.HongsException(0x10e0, "Can not find the menuset config file '" + name + ".menu.xml'.");
         }
     }
 
@@ -183,17 +183,17 @@ public class MenuSet
         this.session = c.getProperty("core.default.auth.session", "roles");
       }
     }
-    catch (IOException ex)
+    catch ( IOException ex)
     {
-      throw new HongsException(0x10e1, ex);
+      throw new HongsException(0x10e1, "Read '" +name+".menu.xml error'", ex);
     }
     catch (SAXException ex)
     {
-      throw new HongsException(0x10e1, ex);
+      throw new HongsException(0x10e1, "Parse '"+name+".menu.xml error'", ex);
     }
     catch (ParserConfigurationException ex)
     {
-      throw new HongsException(0x10e1, ex);
+      throw new HongsException(0x10e1, "Parse '"+name+".menu.xml error'", ex);
     }
 
     this.paths = new HashMap();

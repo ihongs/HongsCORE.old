@@ -400,7 +400,7 @@ HsTree.prototype = {
             .data("rel", btn.closest(".loadbox").get(0));
         } else {
          jQuery.hsOpen(url, data, function() {
-               that.openBack(btn, jQuery(this), dat2);
+               that.openBack(btn, jQuery( this ), dat2 );
             });
         }
     },

@@ -21,7 +21,7 @@
             }
 
             if (href.startsWith(path+"/#")) {
-                //href = href.substring(href.indexOf('#'));
+                href = href.substring(href.indexOf('#'));
                 page = Core.BASE_HREF + "/" + page;
             } else {
                 href = Core.BASE_HREF + "/" + href;
@@ -70,19 +70,16 @@
         <span class="icon-bar"></span>
     </button>
     <a class="navbar-brand" href="#">
-        <!--span style="color:#f08" class="glyphicon glyphicon-fire"></span-->
-        <!--
-        <span style="color:#f00">H</span>
-        <span style="color:#f22">o</span>
-        <span style="color:#f44">n</span>
-        <span style="color:#f66">g</span>
-        <span style="color:#f88">s</span>
+        <span style="color:#800; font-size: 0.90em;" class="glyphicon glyphicon-fire"></span>
+        <span style="color:#b00">H</span>
+        <span style="color:#b22">o</span>
+        <span style="color:#b44">n</span>
+        <span style="color:#b66">g</span>
+        <span style="color:#b88">s</span>
         <span style="color:#faa">C</span>
         <span style="color:#fbb">O</span>
         <span style="color:#fcc">R</span>
         <span style="color:#fdd">E</span>
-        //-->
-        <span>新会议邦</span>
     </a>
 </div>
 
@@ -148,7 +145,7 @@
             // Click the first available menu item
             var a;
             if (location.hash) {
-                // #abc&x=1&y=2
+                // #def&x=1&y=2
                 var h = location.hash ;
                 var p = h.indexOf('&');
                 p = p != -1 ? h.substring(p + 1) : "" ;
@@ -161,11 +158,6 @@
                 a = $("#main-menubar ul.dropdown-menu a").first( );
             }
             a.click();
-
-            // Auto hide the main menu
-            setTimeout(function() {
-                $("#main-menubar>li>a").first().click();
-            }, 1000);
         });
     })(jQuery);
 </script>

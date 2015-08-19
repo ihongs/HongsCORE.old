@@ -58,9 +58,9 @@ import org.xml.sax.SAXException;
  *
  * <h3>异常代码:</h3>
  * <pre>
- * 区间: 0x10e0~0x10ef
- * 0x10e0 配置文件不存在
- * 0x10e2 解析文件失败
+ * 区间: 0x10e8~0x10ef
+ * 0x10e8 配置文件不存在
+ * 0x10e9 解析文件失败
  * </pre>
  *
  * @author Hongs
@@ -124,7 +124,7 @@ public class FormSet
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsError(0x2a, "Can not find the formset config file '" + name + ".form.xml'.");
+            throw new app.hongs.HongsException(0x10e8, "Can not find the formset config file '" + name + ".form.xml'.");
         }
     }
 
@@ -242,11 +242,17 @@ public class FormSet
     }
   }
 
-  public Map getEnum(String name) {
+  public Map getEnum(String name) throws HongsException {
+    if (!enums.containsKey(name)) {
+        throw  new HongsException(0x10eb, "Enum "+name+" in "+this.name+" is not exists");
+    }
     return enums.get(name);
   }
 
-  public Map getForm(String name) {
+  public Map getForm(String name) throws HongsException {
+    if (!forms.containsKey(name)) {
+        throw  new HongsException(0x10ea, "Form "+name+" in "+this.name+" is not exists");
+    }
     return forms.get(name);
   }
 
@@ -263,12 +269,12 @@ public class FormSet
   }
 
   public Map getEnumTranslated(String namc) {
+    Map items = enums.get(namc);
+    Map itemz = new LinkedHashMap();
+    if (items == null) return itemz;
     CoreLocale lang = getCurrTranslator();
-    Map anum = getEnum(namc);
-    Map data = new LinkedHashMap();
-    if (anum == null) return data ;
-    data.putAll(anum);
-    for (Object o : data.entrySet()) {
+    itemz.putAll(items);
+    for(Object o : itemz.entrySet()) {
       Map.Entry e = (Map.Entry) o ;
       String    n = (String) e.getValue();
       if (n == null || "".equals(n)) {
@@ -276,14 +282,14 @@ public class FormSet
       }
       e.setValue( lang.translate(n));
     }
-    return data;
+    return itemz;
   }
 
   public Map getFormTranslated(String namc)
     throws HongsException
   {
-    Map itemz = new LinkedHashMap();
     Map items = getForm(namc);
+    Map itemz = new LinkedHashMap();
     if (items == null) return itemz;
     CoreLocale lang = getCurrTranslator();
     for(Object o : items.entrySet()) {

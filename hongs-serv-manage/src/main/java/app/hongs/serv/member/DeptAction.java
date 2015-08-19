@@ -44,11 +44,17 @@ public class DeptAction {
     @CommitSuccess
     public void doSave(ActionHelper helper)
     throws HongsException {
-        CoreLocale lang = CoreLocale.getInstance().clone();
+        Map data = helper.getRequestData( );
+        CoreLocale lang = CoreLocale.getInstance().clone( );
         lang.load("member");
-        String  id  = model.save(helper.getRequestData( ));
+        
+        String  id  = model.save(data);
         String  msg = lang.translate("core.save.dept.success");
-        helper.reply(msg, id, helper.getRequestData().get("name"));
+        
+        Map info = new HashMap();
+        info.put( "id" , id);
+        info.put("name", data.get("name"));
+        helper.reply(msg , info);
     }
 
     @Action("delete")
@@ -59,7 +65,7 @@ public class DeptAction {
         lang.load("member");
         int     rd  = model.delete(helper.getRequestData());
         String  msg = lang.translate("core.delete.dept.success", Integer.toString(rd));
-        helper.reply(msg);
+        helper.reply(msg, rd);
     }
 
     @Action("unique")

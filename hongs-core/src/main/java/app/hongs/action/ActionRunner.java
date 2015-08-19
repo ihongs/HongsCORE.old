@@ -130,7 +130,7 @@ public class ActionRunner {
         } catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
             if (ex instanceof HongsError/**/) {
-                throw (HongsError) ex;
+                throw (HongsError/**/) ex;
             } else
             if (ex instanceof HongsException) {
                 throw (HongsException) ex;

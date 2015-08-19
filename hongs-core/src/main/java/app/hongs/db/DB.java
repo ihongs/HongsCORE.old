@@ -74,11 +74,7 @@ import javax.sql.DataSource;
  *
  * 0x1041  构建语句失败
  * 0x1042  绑定参数失败
- * 0x1043  获取列名失败
- * 0x1044  获取行数据失败
- *
- * 0x1047  查询语句失败
- * 0x1048  获取查询结果失败
+ * 0x1043  查询语句失败
  *
  * 0x104a  执行语句失败
  * 0x104b  插入的值不能为空
@@ -248,10 +244,9 @@ public class DB
         else
         {
           this.connection = ds.getConnection(
-                 info.getProperty(  "user"  ),
+                 info.getProperty("user"    ) ,
                  info.getProperty("password"));
         }
-        this.connection.setAutoCommit( false );
 
         if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
         {
@@ -329,9 +324,9 @@ public class DB
         }
         */
 
-        String namc = drv+" "+url;
+        String namc = drv+" "+url ;
         ComboPooledDataSource pool;
-        sourceLock.readLock( ).lock();
+        sourceLock.readLock().lock( );
         try
         {
           pool = sourcePool.get(namc);
@@ -371,7 +366,7 @@ public class DB
               pool.setInitialPoolSize(Integer.parseInt(info.getProperty("initialPoolSize")));
             }
 
-            if (info.containsKey("maxStatements"  )) {
+            if (info.containsKey("maxStatements")) {
               pool.setMaxStatements  (Integer.parseInt(info.getProperty("maxStatements"  )));
             }
             if (info.containsKey("maxStatementsPerConnection")) {
@@ -381,29 +376,29 @@ public class DB
             if (info.containsKey("checkoutTimeout")) {
               pool.setCheckoutTimeout(Integer.parseInt(info.getProperty("checkoutTimeout")));
             }
-            if (info.containsKey("idleConnectionTestPeriod"  )) {
+            if (info.containsKey("idleConnectionTestPeriod")) {
               pool.setIdleConnectionTestPeriod  (Integer.parseInt(info.getProperty("idleConnectionTestPeriod"  )));
             }
+            if (info.containsKey("testConnectionOnCheckout")) {
+              pool.setTestConnectionOnCheckout(Boolean.parseBoolean(info.getProperty("testConnectionOnCheckout")));
+            }
+            if (info.containsKey("testConnectionOnCheckin" )) {
+              pool.setTestConnectionOnCheckin (Boolean.parseBoolean(info.getProperty("testConnectionOnCheckin" )));
+            }
 
-            if (info.containsKey("numHelperThreads"    )) {
+            if (info.containsKey("numHelperThreads" )) {
               pool.setNumHelperThreads    (Integer.parseInt(info.getProperty("numHelperThreads"    )));
             }
-            if (info.containsKey("acquireIncrement"    )) {
+            if (info.containsKey("acquireIncrement" )) {
               pool.setAcquireIncrement    (Integer.parseInt(info.getProperty("acquireIncrement"    )));
             }
-            if (info.containsKey("acquireRetryDelay"   )) {
+            if (info.containsKey("acquireRetryDelay")) {
               pool.setAcquireRetryDelay   (Integer.parseInt(info.getProperty("acquireRetryDelay"   )));
             }
             if (info.containsKey("acquireRetryAttempts")) {
               pool.setAcquireRetryAttempts(Integer.parseInt(info.getProperty("acquireRetryAttempts")));
             }
 
-            if (info.containsKey("testConnectionOnCheckin" )) {
-              pool.setTestConnectionOnCheckin (Boolean.parseBoolean(info.getProperty("testConnectionOnCheckin" )));
-            }
-            if (info.containsKey("testConnectionOnCheckout")) {
-              pool.setTestConnectionOnCheckout(Boolean.parseBoolean(info.getProperty("testConnectionOnCheckout")));
-            }
           }
           finally
           {
@@ -412,7 +407,6 @@ public class DB
         }
 
         this.connection = pool.getConnection();
-        this.connection.setAutoCommit( false );
 
         if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
         {
@@ -441,7 +435,8 @@ public class DB
       throw new HongsException(0x1025, "Can not find source or origin");
     }
 
-    } while (false);
+    }
+    while (false);
 
     /** 初始化设置 **/
 
@@ -1055,7 +1050,7 @@ public class DB
     }
     catch (SQLException ex )
     {
-      throw new app.hongs.HongsException(0x1047, ex);
+      throw new app.hongs.HongsException(0x1043, ex);
     }
 
     return new FetchNext(this, ps, rs);

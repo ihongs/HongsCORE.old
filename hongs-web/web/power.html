@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+    <head>
+        <title>HongsCORE::Login</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+        <link rel="stylesheet" type="text/css" href="common/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="common/src/hongscore.css"/>
+        <!--[if glt IE8.0]>
+        <script type="text/javascript" src="compon/respond/respond.min.js"></script>
+        <![endif]-->
+        <script type="text/javascript" src="common/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class="jumbotron" style="margin-top: 2em; background-color: #222; color: #ccc;">
+            <div class="container">
+                <h1>Thanks for</h1>
+                <ul style="font-weight: bold;">
+                    <li><a href="http://www.jquery.com/" target="_blank">jQuery</a></li>
+                    <li><a href="http://www.jqueryui.com/" target="_blank">jQuery UI</a></li>
+                    <li><a href="http://getbootstrap.com/" target="_blank">Bootstrap</a></li>
+                    <li><a href="http://glyphicons.com/" target="_blank">Glyphicons</a></li>
+                    <li><a href="https://github.com/ihongs/HongsCORE" target="_blank">HongsCORE</a></li>
+                </ul>
+            </div>
+        </div>
+        <nav id="footbox" class="navbar">
+            <div class="container">
+                <blockquote><p>Copyleft &copy; 2015 黄弘. <small class="pull-right">Powered by <a href="https://github.com/ihongs/HongsCORE/" target="_blank">HongsCORE</a>, and <a href="power.html" target="_blank">others</a>.</small></p></blockquote>
+            </div>
+        </nav>
+        <script type="text/javascript">
+            (function() {
+                var colors = ["#222222", "#222224", "#222244", "#222444", "#224444", "#244444",
+                              "#444444", "#444442", "#444422", "#444222", "#442222", "#422222"];
+                var colori = 1;
+                setInterval(function() {
+                    $(".jumbotron").css("background-color", colors[colori]);
+                        colori += 1;
+                    if (colori >= colors.length) {
+                        colori  = 0;
+                    }
+                }, 2000);
+            })(jQuery);
+        </script>
+    </body>
+</html>

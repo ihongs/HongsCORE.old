@@ -36,10 +36,10 @@ public class LuceneAction implements IAction {
     public void create(ActionHelper helper) throws HongsException {
         LuceneRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
-        Object[] sa = sr.create(rd);
+        Map sd = sr.create(rd);
         sr.destroy();
         CoreLocale lang = CoreLocale.getInstance();
-        helper.reply(lang.translate("fore.update.success", lang.translate("fore.record")), sa);
+        helper.reply(lang.translate("fore.update.success", lang.translate("fore.record")), sd);
     }
 
     @Action("update")
@@ -52,7 +52,7 @@ public class LuceneAction implements IAction {
         int sn = sr.update(rd);
         sr.destroy();
         CoreLocale lang = CoreLocale.getInstance();
-        helper.reply(lang.translate("fore.update.success", lang.translate("fore.record"), String.valueOf(sn)));
+        helper.reply(lang.translate("fore.update.success", lang.translate("fore.record"), String.valueOf(sn)), sn);
     }
 
     @Action("delete")
@@ -64,7 +64,7 @@ public class LuceneAction implements IAction {
         int sn = sr.delete(rd);
         sr.destroy();
         CoreLocale lang = CoreLocale.getInstance();
-        helper.reply(lang.translate("fore.delete.success", lang.translate("fore.record"), String.valueOf(sn)));
+        helper.reply(lang.translate("fore.delete.success", lang.translate("fore.record"), String.valueOf(sn)), sn);
     }
 
     public LuceneRecord getModel(ActionHelper helper)

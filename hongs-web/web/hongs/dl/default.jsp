@@ -56,7 +56,7 @@ Hong's Auto Info Manage
             </div>
         </nav>
         <div id="bodybox">
-            <div class="container tabsbox" id="main-context"></div>
+            <div class="container tabw" id="main-context"></div>
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">

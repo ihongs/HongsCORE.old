@@ -24,9 +24,9 @@ implements IAction {
     public void retrieve(ActionHelper helper)
     throws HongsException {
         Model   mod = getModel(helper);
-        Map     req = getRqMap(helper, mod);
-        Map     rsp = mod.retrieve(/**/req);
-        chkRpDat(helper, mod, rsp);
+        Map     req = getRqMap(helper, mod,"retrieve");
+        Map     rsp = mod.retrieve(req);
+                rsp = getRtMap(helper, mod, rsp);
         helper.reply(rsp);
     }
 
@@ -36,10 +36,10 @@ implements IAction {
     @Override
     public void create(ActionHelper helper) throws HongsException {
         Model   mod = getModel(helper);
-        Map     req = getRqMap(helper, mod);
-        Object[]  a = mod.create(req);
+        Map     req = getRqMap(helper, mod, "create");
+        Map       m = mod.create(req);
         String  msg = getRpMsg(helper, mod, "create", 1);
-        helper.reply(msg, a);
+        helper.reply(msg, m);
     }
 
     @Action("update")
@@ -48,7 +48,7 @@ implements IAction {
     @Override
     public void update(ActionHelper helper) throws HongsException {
         Model   mod = getModel(helper);
-        Map     req = getRqMap(helper, mod);
+        Map     req = getRqMap(helper, mod, "update");
         int       n = mod.update(req);
         String  msg = getRpMsg(helper, mod, "update", n);
         helper.reply(msg, n);
@@ -59,7 +59,7 @@ implements IAction {
     @Override
     public void delete(ActionHelper helper) throws HongsException {
         Model   mod = getModel(helper);
-        Map     req = getRqMap(helper, mod);
+        Map     req = getRqMap(helper, mod, "delete");
         int       n = mod.delete(req);
         String  msg = getRpMsg(helper, mod, "delete", n);
         helper.reply(msg, n);
@@ -69,7 +69,7 @@ implements IAction {
     public void isExists(ActionHelper helper)
     throws HongsException {
         Model   mod = getModel(helper);
-        Map     req = getRqMap(helper, mod);
+        Map     req = getRqMap(helper, mod, "exists");
         boolean rst = mod.exists(req);
         helper.reply(rst);
     }
@@ -78,7 +78,7 @@ implements IAction {
     public void isUnique(ActionHelper helper)
     throws HongsException {
         Model   mod = getModel(helper);
-        Map     req = getRqMap(helper, mod);
+        Map     req = getRqMap(helper, mod, "unique");
         boolean rst = mod.unique(req);
         helper.reply(rst);
     }
@@ -100,13 +100,27 @@ implements IAction {
     }
 
     /**
-     * 获取请求数据
+     * 整理返回数据
      * @param helper
      * @param mod
+     * @param rsp
      * @return
      * @throws HongsException 
      */
-    protected  Map   getRqMap(ActionHelper helper, Model mod)
+    protected  Map   getRtMap(ActionHelper helper, Model mod,  Map   rsp)
+    throws HongsException {
+        return rsp;
+    }
+
+    /**
+     * 获取请求数据
+     * @param helper
+     * @param mod
+     * @param opr
+     * @return
+     * @throws HongsException 
+     */
+    protected  Map   getRqMap(ActionHelper helper, Model mod, String opr)
     throws HongsException {
         Map req = helper.getRequestData();
         if (req.containsKey("id")) {
@@ -116,18 +130,8 @@ implements IAction {
     }
 
     /**
-     * 整理返回数据
-     * @param helper
-     * @param mod
-     * @param rsp
-     */
-    protected  void  chkRpDat(ActionHelper helper, Model mod, Map rsp)
-    throws HongsException {
-        // Nothing todo
-    }
-
-    /**
      * 获取返回消息
+     * @param helper
      * @param mod
      * @param opr
      * @param num

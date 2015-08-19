@@ -29,12 +29,12 @@ public class SupplyInvoker implements FilterInvoker {
 
         if ("0".equals(jd)) {
             jd  = "1";
-            rsp = new HashMap(  );
+            rsp = new HashMap();
         } else {
-            chains.doAction(/**/);
-            rsp = helper.getResponseData();
-            if (rsp == null || !Synt.declare(rsp.get("ok"), false)
-            ||  jd  == null || "".equals(jd ) || "0".equals(jd ) ) {
+            chains.doAction(  );
+            rsp = helper.getResponseData(  );
+            if ( jd == null || "".equals(jd) || "-".equals(jd)
+            ||  rsp == null || !Synt.declare(rsp.get("ok"), false)) {
                 return;
             }
         }
@@ -52,8 +52,16 @@ public class SupplyInvoker implements FilterInvoker {
         }
 
         // 填充数据
-        SupplyHelper sup = new SupplyHelper().addEnumsByForm(conf, form);
-        sup.supply ( rsp , Short.parseShort(jd.toString()));
+        try {
+            SupplyHelper sup;
+            sup = new SupplyHelper().addEnumsByForm(conf, form);
+            sup.supply ( rsp , Short.parseShort(jd.toString()));
+        } catch (HongsException  ex) {
+            int  ec  = ex.getCode( );
+            if  (ec != 0x10e8 && ec != 0x10e9 && ec != 0x10ea ) {
+                throw  ex;
+            }
+        }
 
         // 返回数据
         helper.reply(rsp);

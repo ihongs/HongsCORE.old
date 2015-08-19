@@ -1,7 +1,6 @@
 package app.hongs.action.anno;
 
 import app.hongs.CoreLocale;
-import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
@@ -10,6 +9,7 @@ import app.hongs.action.VerifyHelper.Wrongs;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
 /**
  * 数据校验处理器
@@ -44,32 +44,17 @@ public class VerifyInvoker implements FilterInvoker {
         Object  jd  = dat.get("jd");
         String  act = chains.getAction();
         boolean prp =  !"1".equals(jd) && !"2".equals(jd);
-        boolean upd = act.endsWith("update") || (null != id && ! "".equals(id));
+        boolean upd = act.endsWith("/update") || (null != id && !"".equals(id));
 
         // 执行校验
         try {
-            do {
-                VerifyHelper ver  =  new VerifyHelper( );
-
-                if (null != conf && null != form) {
-                    try {
-                        ver.addRulesByForm( conf, form );
-                    } catch (HongsError ex) {
-                        if (ex.getCode() == 0x2a) {
-                            break; // 配置不存在则不校验
-                        }
-                    }
-                }
-
-                ver.isPrompt( prp );
-                ver.isUpdate( upd );
-                Map vls = ver.verify(dat);
-                if (clean) dat.clear(   );
-                dat.putAll(vls);
-            } while ( false );
-
-            chains.doAction();
-        } catch (Wrongs err ) {
+            VerifyHelper ver = new VerifyHelper( ).addRulesByForm( conf, form );
+            ver.isPrompt(prp);
+            ver.isUpdate(upd);
+            Map vls =  ver.verify(dat);
+            if (clean) dat.clear (   );
+            dat.putAll  (vls);
+        } catch (Wrongs  err) {
             dat = new HashMap();
             dat.put("ok",false);
 
@@ -86,15 +71,24 @@ public class VerifyInvoker implements FilterInvoker {
                 dat.put("errors", ers );
                 dat.put("err", "Er400");
                 CoreLocale lng = CoreLocale.getInstance();
-                dat.put("msg", lng.translate( "fore.form.invalid" ));
+                dat.put("msg", lng.translate("fore.form.invalid"));
             }
 
             helper.reply(dat);
 
-            // Servlet 环境下设置状态码为 400(错误的请求)
+            // Servlet 环境下设置状态码为 400 (错误的请求)
             if (helper.getResponse() != null) {
-                helper.getResponse().setStatus(javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST);
+                helper.getResponse().setStatus(SC_BAD_REQUEST);
+            }
+
+            return;
+        } catch (HongsException  ex) {
+            int  ec  = ex.getCode( );
+            if  (ec != 0x10e8 && ec != 0x10e9 && ec != 0x10ea) {
+                throw  ex;
             }
         }
+
+        chains.doAction();
     }
 }

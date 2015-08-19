@@ -63,7 +63,7 @@ function HsForm(opts, context) {
      * 否则调用 fillEnum 进行选项初始化
      */
     if (loadUrl
-    && (hsGetSeria(loadData, idKey  )
+    && (hsGetSeria(loadData, idKey)
     ||  hsGetSeria(loadData, jdKey))) {
         this.load (loadUrl, loadData);
     } else {
@@ -349,29 +349,37 @@ HsForm.prototype = {
         var tk = inp.attr("data-tk"); if(!tk) tk = 1;
         var vl = inp.attr("data-vl"); if(!vl) vl = 0; // Value List
         var tl = inp.attr("data-tl"); if(!tl) tl = 1; // Title Line
+        var bc = this._fill__checkbag_body_class || "checkbox";
+        var ic = this._fill__checkbag_item_class || "col-md-6";
 
         if (v !== undefined) {
         for(var i = 0; i < v.length; i ++) {
             var u = v[ i ][vl];
             var s = v[ i ][tl];
-            var set = jQuery('<fieldset><legend class="dropdown-toggle"><input type="checkbox" class="checkall dropdown-deny"/>'
-                        +'&nbsp;<span></span><b class="caret"></b></legend>'
-                    +'<div class="dropdown-body checkbox"></div></fieldset>');
+            var set = jQuery('<fieldset>'
+                            +'<legend class="dropdown-toggle">'
+                            +'<input type="checkbox" class="checkall dropdown-deny"/>'
+                            +'&nbsp;<span></span><b class="caret"></b>'
+                            +'</legend>'
+                            +'<div class="dropdown-body '+bc+'"></div>'
+                            +'</fieldset>');
             set.find("span").first().text(s);
             inp.append(set );
             set = set.find ( "div" );
 
             for(var j = 0; j < u.length; j ++) {
                 var w = u[ j ];
-                var lab = jQuery('<label class="col-md-2"><input type="checkbox"/><span></span></label>');
+                var lab = jQuery('<label class="'+ic+'"><input type="checkbox"/>'
+                                +'<span></span></label>');
                 lab.find("input").attr("name", n).data(w)
                                  .val (hsGetValue(w, vk));
                 lab.find("span" ).text(hsGetValue(w, tk));
                 set.append(lab);
             }
-        } }
+        }}
 
         inp.find(":checkbox").first().change();
+        inp.hsReady();
     },
 
     _fill__review : function(inp, v, n, t) {
@@ -602,8 +610,13 @@ HsForm.prototype = {
             try {
                 return hsGetValue(fd, fn).call(this, val, inp);
             } catch (ex) {
-                if (window.console)
-                    window.console.log("Call "+ fn +" error: " + ex, val, inp);
+                if (window.console) {
+                    if (window.console.error) {
+                        window.console.error("Call "+ fn +" error: " + ex, val, inp);
+                    } else {
+                        window.console.log  ("Call "+ fn +" error: " + ex, val, inp);
+                    }
+                }
                 return false;
             }
         },

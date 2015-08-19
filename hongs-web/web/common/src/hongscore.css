@@ -7,10 +7,10 @@
 html, body, label, input, select, button, textarea {
     color: #666;
     font-size: 15px;
-    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,STHeiti,"Microsoft Yahei",sans-serif;;
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,STHeiti,"Microsoft Yahei",sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,STHeiti,"Microsoft Yahei",sans-serif;;
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,STHeiti,"Microsoft Yahei",sans-serif;
 }
 pre, code {
     font-family: Consolas,Menlo,Monaco,"Courier New",monospace;
@@ -71,18 +71,17 @@ legend {
     line-height: 21px;
 }
 textarea.form-control,
-select[multiple].form-control {
+.form-control[multiple] {
     min-height: 126px;
-}
-.radio label,
-.checkbox label {
-    margin-right: 20px;
 }
 .form-control[readonly] {
     background: #fff;
     cursor: default;
 }
 
+.center-block {
+    float: none;
+}
 
 .dropdown-toggle {
     cursor: pointer;
@@ -109,11 +108,6 @@ select[multiple].form-control {
 }
 #headbox ul.nav>li.active {
     font-weight: bolder;
-}
-#headbox .navbar-brand span {
-    font-size: 28px;
-    font-weight: bolder;
-    text-shadow: 0 0 6px #F88, -1px -1px #FFF, 1px -1px  #000;
 }
 
 #bodybox {
@@ -142,11 +136,9 @@ select[multiple].form-control {
     display: inline-block;
 }
 
-.main-context {
-    padding: 0;
-}
+.main-context,
 .side-context {
-    padding: 0 1em 0 0;
+    padding: 0;
 }
 
 object.config,
@@ -164,12 +156,15 @@ object.config,
     padding-right: 0;
 }
 
-.listbox {
-    margin-top: 15.75px;
+.listbox,
+.pagebox,
+.toolbox,
+.findbox {
     margin-bottom: 15.75px
 }
 
 .listbox .table,
+.toolbox .alert,
 .pagebox .alert,
 .pagebox .pagination {
     margin: 0;

@@ -283,11 +283,10 @@ function hsSetParams(url, name, value) {
     url = url.replace(reg, "");
     for (var i = 0; i < value.length; i ++)
     {
-        url += "&"+encodeURIComponent(name)
-            +  "="+encodeURIComponent(value[i]);
+        url += "&"+name+"="+encodeURIComponent(value[i]);
     }
     if (url.indexOf("?") < 0 ) {
-        url = url.replace("&", "?");
+        url  = url.replace("&", "?");
     }
     return url;
 }
@@ -1006,7 +1005,7 @@ $.hsNote = function(msg, cls, sec) {
 
     var div = $('<div class="alert alert-dismissable">'
               + '<button type="button" class="close">&times;</button>'
-              + '<div class="notebox"></div></div>')
+              + '<div class="alert-body notebox"></div></div>')
              .addClass(cls);
     var btn = div.find( "button" );
     var box = div.find(".notebox").append(msg);
@@ -1071,10 +1070,8 @@ $.fn.hsLoad = function(url, data, complete) {
     }
 
     return $.fn.jqLoad.call(this, url, data, function() {
-        var that = $(this);
-        that.removeClass(/**/"loading");
-        complete.apply(this, arguments);
-        that.hsReady(/**/);
+        $(this).removeClass("loading").hsReady();
+        complete.apply(this,arguments);
     });
 };
 $.fn.hsOpen = function(url, data, complete) {
@@ -1083,30 +1080,31 @@ $.fn.hsOpen = function(url, data, complete) {
     var pre;
     var tab;
 
-    if (prt.is( ".nav" )) {
-        prt = prt.hsTaba(url);
+    if (prt.is(".panes")) {
+        prt = prt.data("tabs");
+        prt = prt.hsTadd(url );
         tab = prt[0];
         prt = prt[1];
     } else
-    if (prt.is(".panes")) {
-        prt = $(prt.data( "nav" ));
-        prt = prt.hsTaba(url);
+    if (prt.is( ".nav" )) {
+        prt = prt.hsTadd(url );
         tab = prt[0];
         prt = prt[1];
+    } else
+    if (prt.parent().is(".panes")) {
+        tab = prt.parent().data( "tabs").children().eq(prt.index());
     } else
     if (prt.parent().is( ".nav" )) {
         tab = prt;
-        prt = tab.parent().data("panes").children().eq(tab.index());
-    } else
-    if (prt.parent().is(".panes")) {
-        tab = prt.parent().data( "nav" ).children().eq(prt.index());
+        prt = prt.parent().data("panes").children().eq(tab.index());
     }
 
     if (tab) {
         pre = tab.parent().children( ).filter(".active");
         tab.show().find( "a" ).click();
         if (tab.find("a span").size()) {
-            tab.find("a span").not(".close").text(hsGetLang("loading"));
+            tab.find("a span").not(".close" /*btn*/)
+                         .text(hsGetLang("loading"));
         } else {
             tab.find("a").text(hsGetLang("loading"));
         }
@@ -1130,19 +1128,19 @@ $.fn.hsClose = function() {
     var tab;
 
     if (prt.parent().is(".panes")) {
-        tab = prt.parent().data( "nav" ).children().eq(prt.index());
+        tab = prt.parent().data( "tabs").children().eq(prt.index());
     } else
     if (prt.parent().is( ".nav" )) {
         tab = prt;
-        prt = tab.parent().data("panes").children().eq(tab.index());
-        box = prt.children(".openbox");
+        prt = prt.parent().data("panes").children().eq(tab.index());
+        box = prt.children(  ).first(  );
     }
 
     // 触发事件
     box.trigger("hsClose");
 
     // 联动关闭
-    box.hsCloze();
+    box.hsCloze(/*recur*/);
 
     // 恢复标签
     if (tab) {
@@ -1160,6 +1158,10 @@ $.fn.hsClose = function() {
     // 关闭浮窗
     if (box.closest(".modal").size()) {
         box.closest(".modal").modal("hide").remove();
+    } else
+    // 关闭通知
+    if (box.closest(".alert").size()) {
+        box.closest(".alert") /* destroy */.remove();
     }
 
     return box;
@@ -1176,30 +1178,38 @@ $.fn.hsCloze = function() {
 $.fn.hsReady = function() {
     var box = $(this);
 
-    // 为标签页进行包裹
-    if (box.is( ".tabsbox" ) ) {
-        box.hsTabw().hsReady();
-        return box;
-    }
-
     // 为避免在 chrome 等浏览器中显示空白间隔, 清除全部空白文本节点
-    box.find('*').contents().filter(function() {
-        return this.nodeType == 3 && /^\s+$/.test(this.nodeValue);
+    box.find("*").contents().filter(function() {
+        return this.nodeType === 3 && /^\s+$/.test(this.nodeValue);
     }).remove();
 
-    // 为所有的 input 加上 input-type , 方便设置样式, 兼容老浏览器
-    box.find('input').each(function() {
+    // 输入类
+    box.find("input"/*class*/).each(function() {
         $(this).addClass("input-" + $(this).attr("type"));
     });
 
-    // 至少要执行 hsInit
-    if (box.children("object.config[name=hsInit]").size() === 0 ) {
-        box.hsInit({});
+    // 折叠栏
+    box.find(".dropdown-body").each(function() {
+        var u = $(this).parent().is(".dropup");
+        $(this).toggleClass("invisible", ! u );
+    });
+
+    // 选项卡
+    box.find(".tabs,[data-tabs]").each(function() {
+        $(this).hsTabs();
+    });
+
+    // 国际化
+    box.find(".i18n,[data-i18n]").each(function() {
+        $(this).hsI18n();
+    });
+
+    // 初始化
+    if (! box.children("object.config[name=hsInit]").size()) {
+        $(this).hsInit();
     }
 
-    //** 语义标签解析 **/
-
-    box.find("object.config" ).each(function() {
+    box.find("object.config").each(function( ) {
         var prnt = $(this).parent();
         var func = $(this).attr("name");
         var opts = $(this)._hsConfig( );
@@ -1207,55 +1217,90 @@ $.fn.hsReady = function() {
             prnt[func]( opts );
     }).remove();
 
-    box.find("[data-eval]").each(function() {
-        eval($(this).attr("data-eval"));
-    });
+    // 在加载前触发事件
+    box.trigger("hsReady");
+
+    // 加载、打开、执行
     box.find("[data-load]").each(function() {
         $(this).hsLoad($(this).attr("data-load"));
     });
     box.find("[data-open]").each(function() {
         $(this).hsOpen($(this).attr("data-open"));
     });
-
-    box.find(".nav").each(function() {
-        $(this).hsTabs(  );
+    box.find("[data-eval]").each(function() {
+        eval($(this).attr("data-eval"));
     });
 
-    box.find(".dropdown-body").each(function() {
-        var x = $(this).parent().is(".dropup");
-        $(this).toggleClass("invisible" , ! x);
-    });
-
-    box.trigger("hsReady");
     return box;
 };
+
+// 选项卡
+$.fn.hsTabs = function(rel) {
+    var box = $(this);
+    if (! rel) {
+        if (box.attr("data-tabs")) {
+            rel = _hsTarget(this, box.attr("data-tabs"));
+            /***/ rel.addClass( "panes");
+        } else {
+            rel = box.siblings(".panes");
+        }
+    }
+    rel.data( "tabs", box);
+    box.data("panes", rel);
+    if (box.has(".active").size() === 0) {
+        box.find("li>a").first().click();
+    }
+    return box;
+};
+$.fn.hsTadd = function(flg) {
+    var box = $(this);
+    var tab ;
+    if (! flg) {
+        tab = []; flg = '';
+    } else {
+        tab = box.find("[data-for='"+flg+"']").closest("li");
+    }
+    if (! tab.length) {
+        tab = $( '<li><a href="javascript:;"><span></span>'
+            + '<span class="close">&times;</span></a></li>');
+        tab.attr('data-for', flg).appendTo(box);
+        return [tab, $( '<div></div>'  ).appendTo(box.data("panes"))];
+    } else {
+        return [tab, $(box.data("tabs")).children( ).eq(tab.index())];
+    }
+};
+
+// 初始化
 $.fn.hsInit = function(cnf) {
+    if (cnf ===  undefined) {
+        cnf =  {/**/};
+    }
     var box = $(this);
 
     // 自动提取标题, 替换编辑文字
     // 如主键不叫id, 打开编辑页面, 则需加上id=1
     var h = box.children("h1,h2,h3");
     if (h.length ) {
-        cnf.title = h.text( );
+        cnf.title = h.text();
     }
     if (cnf.title) {
         cnf.title = H$("&id", box)?
-            hsGetLang(cnf.title, {'opr':cnf.update||hsGetLang("form.update")}):
-            hsGetLang(cnf.title, {'opr':cnf.create||hsGetLang("form.create")});
+            hsGetLang(cnf.title, {'DO':cnf.update||hsGetLang("form.update")}):
+            hsGetLang(cnf.title, {'DO':cnf.create||hsGetLang("form.create")});
     }
     if (h.length ) {
-        h.text(  cnf.title  );
+        h.text ( cnf.title );
     }
 
     if (box.parent().parent().is(".panes")) {
         var a = box.parent();
         var b = box.parent().parent();
-        a = b.data("nav").children().eq(a.index());
+        a = b.data("tabs").children().eq(a.index());
         for(var k in cnf) {
             var v =  cnf[k];
             switch (k) {
                 case "title":
-                    var x = a.find( "a"  );
+                    var x = a.find("a");
                     var y = x.find("span").not(".close");
                     if (y.size()) {
                         y.text(v);
@@ -1272,7 +1317,7 @@ $.fn.hsInit = function(cnf) {
             var v =  cnf[k];
             switch (k) {
                 case "title":
-                    a.find(".modal-title" ).text(v);
+                    a.find(".modal-title" ).text( v );
                     break;
                 case "modal":
                     a.find(".modal-dialog").addClass("modal-"+v);
@@ -1285,58 +1330,39 @@ $.fn.hsInit = function(cnf) {
     return box;
 };
 
-// 包裹标签
-$.fn.hsTabw = function() {
+// 国际化
+$.fn.hsI18n = function(rep) {
     var box = $(this);
-    var tbs = $('<ul class="nav nav-tabs"><li><a href="javascript:;"></a></li></ul>');
-    var pns = $('<div class="panes"></div>');
-    var pan = $('<div></div>').appendTo(pns);
-    var div = $('<div></div>').appendTo(pan);
-    div.append(box.contents()).addClass("openbox");
-    box.append(tbs);
-    box.append(pns);
-    tbs.hsTabs();
-    return div;
-};
-// 关联窗格
-$.fn.hsTabs = function(rel) {
-    var box = $(this);
-    if (! rel) {
-        if (box.attr("data-target")) {
-            rel = _hsTarget(this, box.attr("data-target"));
-                  rel.addClass( "panes");
-        } else {
-            rel = box.siblings(".panes");
-        }
+    var lng;
+
+    if (box.attr("placeholder")) {
+        lng = box.attr("placeholder");
+        lng = hsGetLang(lng, rep);
+        box.attr("placeholder" , lng);
     }
-    rel.data("nav"  , box);
-    box.data("panes", rel);
-    if (! box.has(".active").size()) {
-        box.find("li>a").first().click();
+    if (box.attr("title")) {
+        lng = box.attr("title");
+        lng = hsGetLang(lng, rep);
+        box.attr("title" , lng);
     }
+    if (box.attr("alt")) {
+        lng = box.attr("alt");
+        lng = hsGetLang(lng, rep);
+        box.attr("alt" , lng);
+    }
+
+    if (box.attr("data-i18n")) {
+        lng = box.attr("data-i18n");
+        lng = hsGetLang(lng, rep);
+        box.text ( lng );
+    } else
+    if ($(this).text()) {
+        lng = box.text();
+        lng = hsGetLang(lng, rep);
+        box.text ( lng );
+    }
+
     return box;
-};
-// 添加标签
-$.fn.hsTaba = function(url) {
-    var box = $(this);
-    var tab;
-    if (! url) {
-        url  =  '';
-        tab  =  [];
-    } else {
-        tab  =  box.find("[data-for='" + url + "']").closest("li");
-    }
-    if (! tab.length) {
-        tab = $('<li></li>').attr( 'data-for', url )
-            .appendTo(box)
-            .append($('<a href="javascript:;"></a>')
-                .append('<span></span>')
-                .append('<span class="close">&times;</span>')
-            );
-        return [tab, $( '<div></div>' ).appendTo(box.data("panes"))];
-    } else {
-        return [tab, $(box.data("nav")).children().eq(tab.index( ))];
-    }
 };
 
 $.fn._hsConfig = function() {
@@ -1345,6 +1371,8 @@ $.fn._hsConfig = function() {
     for(var i = 0; i < arr.length; i ++) {
         var n = jQuery(arr[i]).attr("name" );
         var v = jQuery(arr[i]).attr("value");
+        n = $.trim(n);
+        v = $.trim(v);
         switch (v.substring(0, 2)) {
         case "S:": // String
             v = v.substring(2);
@@ -1353,21 +1381,21 @@ $.fn._hsConfig = function() {
             v = v.substring(2);
             v =  parseInt  (v);
             break;
-        case "F:":
+        case "F:": // Float
         case "N:": // Number
             v = v.substring(2);
             v =  parseFloat(v);
             break;
         case "B:": // Boolean
             v = v.substring(2);
-            v = /(true|yes|ok|t|y|1)/i.test(v);
+            v = !/(false|not|no|f|n|0|)/i.test(v);
             break;
         default:
             (function () {
-                if (/^\s*(\[.*\]|\{.*\})\s*$/.test(v))
+                if ( /^(\[.*\]|\{.*\})$/ .test(v))
                     v = eval('('+v+')');
-                else  if  (/^\s*(\(.*\))\s*$/.test(v))
-                    v = eval(v);
+                else  if  ( /^(\(.*\))$/ .test(v))
+                    v = eval(v );
             }).call(this.get(0));
         }
         if (n) {
@@ -1380,13 +1408,15 @@ $.fn._hsConfig = function() {
 
     // 由于 jQuery.fn.data 在 object 无效
     // 故从 conf 属性里提取额外配置
-    var c  =  this.get(0)["conf"];
-    if (c !== undefined ) {
-        for(var n in c  ) {
-            var v  = c[n];
-            hsSetValue(obj, n, v);
+    this.each(function() {
+        var c = this["conf"];
+        if (c !== undefined) {
+            for(var n in c ) {
+                var v  = c[n];
+                hsSetValue(obj, n, v);
+            }
         }
-    }
+    });
 
     return obj;
 };
@@ -1395,33 +1425,52 @@ $.fn._hsTarget = function(selr) {
     var flag = selr.charAt(0);
     var salr = selr.substr(1);
     switch (flag) {
-        case '@':
+        case '>':
+        case '~':
+        case '+':
+        case ':':
+            return salr ? $(selr, elem) : elem;
+        case '$':
+            return salr ? $(salr, elem) : elem;
+        case '%':
             do {
                 var x;
-
-                x = elem.closest(".panes");
-                if (x.size()) {
-                    elem = x;
-                    break;
-                }
-
-                x = elem.closest(".openbox");
-                if (x.size()) {
-                    elem = x;
-                    break;
-                }
-
                 x = elem.closest(".loadbox");
                 if (x.size()) {
                     elem = x;
                     break;
                 }
+                x = elem.closest(".openbox");
+                if (x.size()) {
+                    elem = x;
+                    break;
+                }
+                elem = document;
             } while (false);
-            return salr ? jQuery(salr, elem) : elem;
-        case '>':
-            return salr ? jQuery(selr, elem) : elem;
+            return salr ? $(salr, elem) : elem;
+        case '@':
+            do {
+                var x;
+                x = elem.closest(".panes");
+                if (x.size()) {
+                    elem = x;
+                    break;
+                }
+                x = elem.closest(".openbox");
+                if (x.size()) {
+                    elem = x;
+                    break;
+                }
+                x = elem.closest(".loadbox");
+                if (x.size()) {
+                    elem = x;
+                    break;
+                }
+                elem = document;
+            } while (false);
+            return salr ? $(salr, elem) : elem;
         default :
-            return jQuery(selr);
+            return $(selr);
     }
 };
 $.fn._hsConstr = function(opts, func) {
@@ -1439,7 +1488,7 @@ $.fn._hsConstr = function(opts, func) {
             inst[k]  =  opts[k];
         }
     }
-    return inst;
+    return  inst;
 };
 
 // 三态选择
@@ -1463,52 +1512,21 @@ $.propHooks.choosed = {
 $(document)
 .on("ajaxError", function(evt, xhr, cnf) {
     var rst = hsResponObj(xhr);
-    if (typeof(cnf.action) === "undefined" ) {
+    if (typeof(cnf.action) === "undefined") {
         return;
     }
-    if (typeof(cnf.button) !== "undefined" ) {
+    if (typeof(cnf.button) !== "undefined") {
         $(cnf.button).trigger(cnf.action+"Error", evt, rst);
     }
-    else if (cnf.context instanceof HsForm) {
-        cnf.context.formBox.trigger(cnf.action+"Error", evt, rst);
+    else if (HsForm !== undefined && cnf.context instanceof HsForm) {
+        cnf.context.context.trigger( cnf.action+"Error", evt, rst );
     }
-    else if (cnf.context instanceof HsList) {
-        cnf.context.listBox.trigger(cnf.action+"Error", evt, rst);
+    else if (HsList !== undefined && cnf.context instanceof HsList) {
+        cnf.context.context.trigger( cnf.action+"Error", evt, rst );
     }
-    else if (cnf.context instanceof HsTree) {
-        cnf.context.treeBox.trigger(cnf.action+"Error", evt, rst);
+    else if (HsTree !== undefined && cnf.context instanceof HsTree) {
+        cnf.context.context.trigger( cnf.action+"Error", evt, rst );
     }
-})
-.on("hsReady", function() {
-    // 国际化
-    $(this).find(".i18n,[data-i18n]").each(function() {
-        var lang, lxng, lget, lset, that = this;
-
-        if ($(this).is("[placeholder]")) {
-            lget = function( ) {
-                lang = $(that).atrr("placeholder");
-            };
-            lset = function( ) {
-                $(that).attr("placeholder" , lxng);
-            };
-        } else {
-            lget = function( ) {
-                lang = $(that).text();
-            };
-            lset = function( ) {
-                $(that).text ( lxng );
-            };
-        }
-
-        lang = $(this).attr("data-i18n");
-        if (lang == null) {
-            lget();
-        }
-        lxng = hsGetLang(lang);
-        if (lxng != lang) {
-            lset();
-        }
-    });
 })
 .on("click", "[data-toggle=hsLoad]",
 function(evt) {
@@ -1534,6 +1552,34 @@ function(evt) {
     }
     evt.stopPropagation();
 })
+.on("click", ".close,.cancel,.goback",
+function(evt) {
+    var box;
+    do {
+        box = $(this).closest(".nav>li>a");
+        if (box.size()) {
+            break;
+        }
+        if ($(this).closest(".form-group,.dont-close").size()) {
+            return;
+        }
+        box = $(this).closest(".notebox");
+        if (box.is(".alert-body")) {
+            box = box.closest(".alert");
+            break;
+        }
+        box = $(this).closest(".openbox");
+        if (box.is(".modal-body")) {
+            box = box.closest(".modal");
+            break;
+        }
+        if ($(this).closest(/*ignore*/".alert,.modal").size()) {
+            return;
+        }
+    } while (false);
+    box.hsClose(  );
+    evt.stopPropagation();
+})
 .on("click", ".nav>li>a",
 function(evt) {
     var tab = $( this ).parent( );
@@ -1545,19 +1591,6 @@ function(evt) {
     if (pns) {
         pns.children( ).hide( ).eq(idx ).show();
     }
-    evt.stopPropagation();
-})
-.on("click", ".nav>li>a>.close",
-function(evt) {
-    $(this).closest("a").hsClose();
-    evt.stopPropagation();
-})
-.on("click", ".close,.cancel",
-function(evt) {
-    if($(this).closest(".dont-close,.form-group").size()) {
-        return; // 不要对表单项内的 close 执行关闭块的动作
-    }
-    $(this).closest(".modal,.openbox").hsClose( );
     evt.stopPropagation();
 })
 .on("click", ".dropdown-toggle",
@@ -1580,20 +1613,20 @@ function(evt) {
     if (!valz || valz.length === 0) {
         vals = [];
     } else {
-        $.each(valz, function(x,  v  ) {
+        $.each(valz, function(x, v) {
             var i = $.inArray(v, vals);
             if (i >= 0) {
-                vals.splice(i, 1);
+                vals.splice(i,1);
             } else {
-                vals.push( v );
+                vals.push  ( v );
             }
         });
     }
-    $(this).data("vals", vals);
+    $(this).data("vals", vals);console.log(vals)
     $(this).val ( vals );
 });
 
-$(function () {
+$(function() {
     $(document).hsReady();
 });
 

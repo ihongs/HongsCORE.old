@@ -33,6 +33,8 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
 
     var v    = { };
     var n    = box.attr("name")||box.attr("data-fn");
+    var vk   = box.attr("data-vk") ||  "id" ;
+    var tk   = box.attr("data-tk") || "name";
     var form = box.closest(".HsForm").data("HsForm");
     var mul  = /(\[\]|\.\.|\.$)/.test(n);
     var btn  = jQuery(this);
@@ -110,13 +112,13 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
            .addClass("pickbox")
         .toggleClass("pickmul", mul)
         .on("saveBack", function(evt, rst) {
-            if (! rst || ! rst.back || ! rst.back.length) {
+            if (! rst || ! rst.info) {
                 return false;
             }
-            if (rst.back.length == 1) {
-                rst.back[1] = $(this).find(".pick-name,[name]").val();
+            if (! rst.info[vk] /**/) {
+                rst.info[vk] = $(this).find(".pick-name,[name]").val();
             }
-            if (! pickItem(rst.back[0], rst.back[1]) || ! pickBack()) {
+            if (! pickItem(rst.info[vk], rst.info[tk]) || ! pickBack()) {
                 return false;
             }
             
@@ -218,8 +220,8 @@ function hsFormFillPick(box, v, n, t) {
         if (!mul) v = [v];
     }
     if (jQuery.isArray(v)) {
-        var vk = box.attr("data-vk") || 0;
-        var tk = box.attr("data-tk") || 1;
+        var vk = box.attr("data-vk") ||  "id" ;
+        var tk = box.attr("data-tk") || "name";
         var x  = {};
         for(var i = 0; i < v.length; i++) {
             var j = v[i];
@@ -344,8 +346,8 @@ function hsListFillPick(cel, v, n) {
         } else {
             var nav = $(this).closest(".nav");
             if (nav.size()) {
-                var idx = $(this).closest( "li" ).index();
-                box = nav.data("tabs").getPanes().eq(idx);
+                var idx = $(this).closest( "li" ).index( );
+                box = nav.data("panes").children().eq(idx);
             }
         }
 

@@ -1,22 +1,29 @@
-<h2>${opr}单元</h2>
-<div id="member_user_form" class="row">
-    <div class="col-md-6">
-        <object class="config" name="hsForm" data="">
-            <param name="loadUrl" value="hongs/module/unit/info.act"/>
-            <param name="saveUrl" value="hongs/module/unit/save.act"/>
-        </object>
-        <form action="" method="POST">
-            <input type="hidden" name="id"/>
-            <div class="form-group">
-                <label class="control-label">单元名称</label>
-                <input type="text" name="name" class="form-control" required="required" data-unique="hongs/module/unit/unique.act?id={id}"/>
+<h2>${DO}单元</h2>
+<div id="member_user_form">
+    <object class="config" name="hsForm" data="">
+        <param name="loadUrl" value="hongs/module/unit/info.act"/>
+        <param name="saveUrl" value="hongs/module/unit/save.act"/>
+    </object>
+    <form action="" method="POST">
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="pid"/>
+        <div class="row">
+            <div class="col-md-6 center-block">
+                <div class="form-group">
+                    <label class="control-label">名称</label>
+                    <input type="text" name="name" class="form-control" required="required"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">备注</label>
+                    <textarea name="note" class="form-control"></textarea>
+                </div>
+                <div>
+                    <button type="submit" class="ensure btn btn-primary">提交</button>
+                    <button type="button" class="cancel btn btn-link">取消</button>
+                </div>
             </div>
-            <div>
-                <button type="submit" class="ensure btn btn-primary">提交</button>
-                <button type="button" class="cancel btn btn-link">取消</button>
-            </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 <script type="text/javascript">
     (function($) {

@@ -34,17 +34,17 @@ import java.util.Set;
  *
  * <h3>异常代码:</h3>
  * <pre>
- * 区间: 0x10a0~0x10af
- * 0x10a1 创建时不得含有id
- * 0x10a2 更新时必须含有id
- * 0x10a3 删除时必须含有id
- * 0x10a4 获取时必须含有id
- * 0x10a6 无权更新该资源
- * 0x10a7 无权删除该资源
- * 0x10a8 无权获取该资源
- * 0x10aa 参数n和v不能为空(检查存在)
- * 0x10ab 指定的字段不存在(检查存在)
- * 0x10ac 不支持的运算符: $0
+ * 区间: 0x1090~0x109f
+ * 0x1091 创建时不得含有id
+ * 0x1092 更新时必须含有id
+ * 0x1093 删除时必须含有id
+ * 0x1094 获取时必须含有id
+ * 0x1096 无权更新该资源
+ * 0x1097 无权删除该资源
+ * 0x1098 无权获取该资源
+ * 0x109a 参数n和v不能为空(检查存在)
+ * 0x109b 指定的字段不存在(检查存在)
+ * 0x109c 不支持的运算符: $0
  * </pre>
  *
  * @author Hongs
@@ -67,6 +67,18 @@ implements IRecord
    * ID参数名
    */
   protected String idKey = "id";
+
+  /**
+   * 或参数名
+   * 用于组合 (a = 1 OR a = 2)
+   */
+  protected String orKey = "or";
+
+  /**
+   * 并参数名
+   * 用于组合 (a = 1 OR a = 2) AND (b = 1 OR b = 2)
+   */
+  protected String arKey = "ar";
 
   /**
    * 页码参数名
@@ -110,18 +122,6 @@ implements IRecord
   public String[] dispCols = new String[] {"name"};
 
   /**
-   * 或参数名
-   * 用于组合 (a = 1 OR a = 2)
-   */
-  protected String orKey = "or";
-
-  /**
-   * 并参数名
-   * 用于组合 (a = 1 OR a = 2) AND (b = 1 OR b = 2)
-   */
-  protected String arKey = "ar";
-
-  /**
    * 构造方法
    *
    * 需指定该模型对应的表对象.
@@ -142,6 +142,7 @@ implements IRecord
     CoreConfig conf = Core.getInstance(CoreConfig.class);
     this.idKey   = conf.getProperty("fore.id.key"  , "id");
     this.orKey   = conf.getProperty("fore.or.key"  , "or");
+    this.arKey   = conf.getProperty("fore.ar.key"  , "or");
     this.pageKey = conf.getProperty("fore.page.key", "pn");
     this.rowsKey = conf.getProperty("fore.rows.key", "rn");
     this.colsKey = conf.getProperty("fore.cols.key", "sf");
@@ -190,17 +191,16 @@ implements IRecord
    * @throws HongsException
    */
   @Override
-  public String[] create(Map rd)
+  public Map create(Map rd)
     throws HongsException
   {
-    String[] resp;
-    resp = new String[dispCols.length  + 1];
-    resp[0] = add(rd);
-    for (int i=0; i < dispCols.length; i++)
+    Map sd = new HashMap();
+    sd.put("id" , add(rd));
+    for(String fn : dispCols )
     {
-        resp[i+1] = Synt.declare(rd.get(dispCols[i]), String.class);
+        sd.put(fn, rd.get(fn));
     }
-    return resp;
+    return sd;
   }
 
   /**
@@ -360,7 +360,7 @@ implements IRecord
     // 是否缺少n或v参数
     if (!rd.containsKey("n") || !rd.containsKey("v"))
     {
-      throw new HongsException(0x10aa, "Param n or v can not be empty");
+      throw new HongsException(0x109a, "Param n or v can not be empty");
     }
 
     String n = (String) rd.get("n");
@@ -371,7 +371,7 @@ implements IRecord
     // 是否缺少n对应的字段
     if (!columns.containsKey(n))
     {
-      throw new HongsException(0x10ab, "Column " + n + " is not exists");
+      throw new HongsException(0x109b, "Column " + n + " is not exists");
     }
 
     caze.where(".`"+n+"` = ?", v);
@@ -415,7 +415,7 @@ implements IRecord
     String id = Synt.declare(data.get(this.idKey),String.class);
     if (id != null && id.length() != 0)
     {
-      throw new HongsException(0x10a1, "Add can not have a id");
+      throw new HongsException(0x1091, "Add can not have a id");
     }
 
     id = Core.getUniqueId();
@@ -458,7 +458,7 @@ implements IRecord
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x10a2, "ID can not be empty for put");
+      throw new HongsException(0x1092, "ID can not be empty for put");
     }
 
     // 调用setFileter进行校验
@@ -466,7 +466,7 @@ implements IRecord
     caze.setOption("MODEL_METHOD", "put");
     if (!this.permit(caze, id))
     {
-      throw new HongsException(0x10a6, "Can not put the resource for id '"+id+"'");
+      throw new HongsException(0x1096, "Can not put the resource for id '"+id+"'");
     }
 
     // 更新主数据
@@ -510,7 +510,7 @@ implements IRecord
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x10a3, "ID can not be empty for del");
+      throw new HongsException(0x1093, "ID can not be empty for del");
     }
 
     // 调用setFileter进行校验
@@ -518,7 +518,7 @@ implements IRecord
     caze.setOption("MODEL_METHOD", "del");
     if (!this.permit(caze, id))
     {
-      throw new HongsException(0x10a7, "Can not del the resource for id '"+id+"'");
+      throw new HongsException(0x1097, "Can not del the resource for id '"+id+"'");
     }
 
     // 删除子数据
@@ -541,7 +541,7 @@ implements IRecord
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x10a4, "ID can not be empty for get");
+      throw new HongsException(0x1094, "ID can not be empty for get");
     }
 
     Map rd = new HashMap();
@@ -897,11 +897,11 @@ implements IRecord
     Set<String> cols;
     if (val instanceof String)
     {
-      cols = new HashSet(Arrays.asList(((String)val).split("[, \\+]")));
+      cols = new LinkedHashSet(Arrays.asList(((String)val).split("[, \\+]")));
     } else
     if (val instanceof Collection)
     {
-      cols = new HashSet((Collection)val);
+      cols = new LinkedHashSet((Collection)val);
     } else
     {
       return;
@@ -1027,11 +1027,11 @@ implements IRecord
     Set<String> cols;
     if (val instanceof String)
     {
-      cols = new HashSet(Arrays.asList(((String)val).split("[ ,\\+]")));
+      cols = new LinkedHashSet(Arrays.asList(((String)val).split("[ ,\\+]")));
     } else
     if (val instanceof Collection)
     {
-      cols = new HashSet((Collection)val);
+      cols = new LinkedHashSet((Collection)val);
     } else
     {
       return;
@@ -1257,7 +1257,7 @@ implements IRecord
       if (!set.isEmpty())
       {
         String ss = set.toString();
-        HongsException ex = new HongsException(0x10ac, "Unrecognized symbols: "+ss);
+        HongsException ex = new HongsException(0x109c, "Unrecognized symbols: "+ss);
         ex.setLocalizedOptions(ss);
         throw ex;
       }
