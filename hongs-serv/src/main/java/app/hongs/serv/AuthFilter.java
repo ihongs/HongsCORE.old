@@ -60,7 +60,7 @@ public class AuthFilter
   private String[][] excludeUrls;
 
   private final Pattern IS_HTML = Pattern.compile("(text/html|text/plain)");
-  private final Pattern IS_JSON = Pattern.compile("(text/json|text/javascript|application/json)");
+  private final Pattern IS_JSON = Pattern.compile("(application/json|text/json|text/javascript)");
 
   @Override
   public void init(FilterConfig config)
@@ -198,7 +198,6 @@ public class AuthFilter
   {
     CoreLocale lang = core.get(CoreLocale.class);
     HttpServletRequest req = hlpr.getRequest(  );
-    String acc = req.getHeader("Accept");
     String uri;
     String msg;
 
@@ -214,12 +213,13 @@ public class AuthFilter
             String src = null;
             String qry;
 
-            if (req.getHeader("X-Requested-With") != null) {
-                src = req.getHeader("Referer");
-            } else if ( IS_HTML.matcher(acc).find( ) ) {
-                src = req.getRequestURI ();
-                qry = req.getQueryString();
-                if (qry != null && qry.length() != -1) {
+            if (isAjax(req)) {
+                src =  req.getHeader("Referer");
+            } else
+            if (isHtml(req)) {
+                src =  req.getRequestURI( );
+                qry =  req.getQueryString();
+                if (qry != null && qry.length() != 0) {
                     src += "?"  +  qry;
                 }
             }
@@ -230,29 +230,29 @@ public class AuthFilter
                 } catch ( UnsupportedEncodingException e) {
                     src = "";
                 }
-                if (!uri.contains("?")) {
-                    uri += "?r=" + src;
-                } else {
+                if (uri.contains("?")) {
                     uri += "&r=" + src;
+                } else {
+                    uri += "?r=" + src;
                 }
             }
         }
     }
 
-    if (IS_JSON.matcher(acc).find()) {
+    if (isAjax(req) || isJson(req)) {
         Map rsp = new HashMap();
             rsp.put("ok",false);
             rsp.put("msg", msg);
-            rsp.put("err","Er40"+ type);
+            rsp.put("err","Er40"+type );
         if (uri != null && uri.length() != 0) {
-            rsp.put("url", uri);
+            rsp.put("goto",uri);
         }
-        
+
         hlpr.reply(rsp);
         if (type == 1 ) {
             hlpr.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         } else {
-            hlpr.getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
+            hlpr.getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN   );
         }
     } else {
         if (uri != null && uri.length() != 0) {
@@ -265,4 +265,16 @@ public class AuthFilter
     }
   }
 
+  private boolean isAjax(HttpServletRequest req) {
+      return req.getHeader("X-Requested-With") != null;
+  }
+  
+  private boolean isJson(HttpServletRequest req) {
+      return IS_JSON.matcher(req.getHeader("Accept")).find();
+  }
+  
+  private boolean isHtml(HttpServletRequest req) {
+      return IS_HTML.matcher(req.getHeader("Accept")).find();
+  }
+  
 }

@@ -70,7 +70,7 @@ public class SignAction {
         // 清除用户会话
         HttpSession sess = ah.getRequest().getSession();
         sess.invalidate( );
-        ah.reply(true);
+        ah.reply("");
     }
 
 }

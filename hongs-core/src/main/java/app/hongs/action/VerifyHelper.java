@@ -454,12 +454,12 @@ public class VerifyHelper {
             String patt  = pats.get(type);
             if (   patt != null ) {
                 if (!Pattern.compile(patt).matcher(str).matches()) {
-                    throw new Wrong("fore.form.is.not." + type);
+                    throw new Wrong("fore.form.is.not."+type);
                 }
             } else
             if (!"".equals(type)) {
                 if (!Pattern.compile(patt).matcher(str).matches()) {
-                    throw new Wrong("fore.form.is.not.matches");
+                    throw new Wrong("fore.form.is.not.match");
                 }
             }
 

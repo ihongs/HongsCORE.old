@@ -8,6 +8,7 @@ import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
 import app.hongs.action.anno.CommitSuccess;
 import app.hongs.dl.IAction;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -70,7 +71,9 @@ implements IAction {
     throws HongsException {
         Model   mod = getModel(helper);
         Map     req = getRqMap(helper, mod, "exists");
-        boolean rst = mod.exists(req);
+        boolean   v = mod.exists(req);
+        Map     rst = new HashMap();
+        rst.put("valid" , v);
         helper.reply(rst);
     }
 
@@ -79,7 +82,9 @@ implements IAction {
     throws HongsException {
         Model   mod = getModel(helper);
         Map     req = getRqMap(helper, mod, "unique");
-        boolean rst = mod.unique(req);
+        boolean   v = mod.unique(req);
+        Map     rst = new HashMap();
+        rst.put("valid" , v);
         helper.reply(rst);
     }
 

@@ -134,7 +134,7 @@ public class AutoFilter implements Filter {
         // 也就是说, 即使不对外提供 retrieve 也要存在 retrieve 方法才行
         Class cls = ActionRunner.getActions()
         .get(action.substring(1)+"/retrieve")
-        .getClassx();
+        .getMclass();
 
         for(Method mtd : cls.getMethods( ) ) {
             Action ann = mtd.getAnnotation(Action.class);

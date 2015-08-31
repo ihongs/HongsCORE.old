@@ -1127,7 +1127,25 @@ public class DB
   public List fetchMore(FetchCase caze)
     throws HongsException
   {
-    return this.fetch(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
+  boolean in_obejct_mode = false;
+  boolean on_object_mode = false;
+    try
+    {
+      if (caze.hasOption("FETCH_OBJECT"))
+      {
+          on_object_mode = true ;
+          in_obejct_mode = IN_OBJECT_MODE;
+          IN_OBJECT_MODE = caze.getOption( "FETCH_OBJECT", false );
+      }
+      return fetch(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
+    }
+    finally
+    {
+      if (on_object_mode)
+      {
+          IN_OBJECT_MODE = in_obejct_mode;
+      }
+    }
   }
 
   /**

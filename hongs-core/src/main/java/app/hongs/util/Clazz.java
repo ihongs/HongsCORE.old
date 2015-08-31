@@ -14,37 +14,15 @@ import java.util.jar.JarFile;
  * 通过包名获取类名集合
  * <p>
  * 此类被用于处理 _begin_.properties 中 core.load.serv 下 .* 后缀的包名扩展类名;
- * 但有个缺陷, 比如 app.demo.action 包存在于两个不同包下, 将只有一个包的类会被找到;
+ * 但有个缺陷, 比如 app.demo.action 包存在于两个不同包下, 只有一个包的类会被找到;
  * 这是因为 ClassLoader 的 getResource() 并不会把所有不同 jar 中的同名资源都返回;
  * </p>
  * @author Hongs
  */
-public class Cname {
-    /**
-     * 测试
-     * @param args 包名1 包名2... [-r(包含下级)]
-     * @throws IOException
-     */
-    public static void main(String[] args) throws IOException {
-        boolean wcp  =  false;
-        Set<String> pkgs = new HashSet();
-        for (String pkg  :  args) {
-            if ("-r".equals(pkg)) {
-                wcp  =  true ;
-            } else {
-                pkgs.add(pkg);
-            }
-        }
-        for (String pkg  :  pkgs) {
-            Set<String> clss = getClassNames(pkg, wcp);
-            for(String  cls  : clss) {
-                System.out.println(cls);
-            }
-        }
-    }
+public class Clazz {
 
     /**
-     * 通过报名获取类名集合
+     * 通过包名获取类名集合
      * @param pkgn 包名
      * @param recu 递归
      * @return
@@ -143,6 +121,29 @@ public class Cname {
         }
 
         return  names;
+    }
+
+    /**
+     * 测试
+     * @param args 包名1 包名2... [-r(包含下级)]
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException {
+        boolean wcp  =  false;
+        Set<String> pkgs = new HashSet();
+        for (String pkg  :  args) {
+            if ("-r".equals(pkg)) {
+                wcp  =  true ;
+            } else {
+                pkgs.add(pkg);
+            }
+        }
+        for (String pkg  :  pkgs) {
+            Set<String> clss = getClassNames(pkg, wcp);
+            for(String  cls  : clss) {
+                System.out.println(cls);
+            }
+        }
     }
 
 }

@@ -192,7 +192,7 @@ public class Table
     String state = getField("state");
     String mtime = getField("mtime");
     String ctime = getField("ctime");
-    String etime = getField("etime");
+//  String etime = getField("etime");
 
     // 存在 state 字段则自动放入默认值
     if (state != null && !values.containsKey(state))
@@ -253,6 +253,7 @@ public class Table
     }
 
     // 存在 etime 字段则自动放入结束时间
+    /*
     if (etime != null && !values.containsKey(etime) && this.primaryKey != null)
     {
       Map<String, Object> valuez = new HashMap();
@@ -290,6 +291,7 @@ public class Table
 
       this.update(valuez, "`"+this.primaryKey+"`=? AND `"+etime+"`=?", paramz);
     }
+    */
 
     // 整理数据
     Map mainValues = this.checkMainValues(values, true);

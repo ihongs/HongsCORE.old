@@ -50,7 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 public class ActionDriver extends HttpServlet implements Servlet, Filter {
 
     /**
-     * 初始化标识, 为 true 表示该对象负责的初始化
+     * 首位标识, 为 true 表示第一个执行，负责系统初始化
      */
     private boolean INIT = false;
 
@@ -60,7 +60,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
      * @throws ServletException
      */
     @Override
-    public void init(FilterConfig conf) throws ServletException {
+    public void init( FilterConfig conf) throws ServletException {
         this.init(conf.getServletContext());
     }
 
@@ -71,7 +71,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
      */
     @Override
     public void init(ServletConfig conf) throws ServletException {
-       super.init(conf);
+       super.init(conf /*call super init*/);
         this.init(conf.getServletContext());
     }
 
@@ -81,10 +81,6 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
      * @throws ServletException
      */
     synchronized private void init(ServletContext cont) throws ServletException {
-        /**
-         * 如果核心类中基础路径已设置, 则表示已经被实例过了
-         * 即无需再重复获取配置信息了
-         */
         if (Core.ENVIR != 1) {
             Core.ENVIR  = 1;
         } else {
@@ -117,7 +113,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             //** 系统属性配置 **/
 
             CoreConfig cnf = CoreConfig.getInstance("_begin_");
-            Core.SERVER_ID = cnf.getProperty("core.server.id" , "1");
+            Core.SERVER_ID = cnf.getProperty("core.server.id" , "1" );
 
             Map m = new HashMap();
             m.put("BASE_PATH", Core.BASE_PATH);
@@ -151,9 +147,6 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             }
         }
 
-        // 调一下 ActionRunner 来加载动作
-        ActionRunner.getActions();
-
         if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
             CoreLogger.debug(new StringBuilder("...")
                 .append("\r\n\tDEBUG       : ").append(Core.DEBUG)
@@ -166,6 +159,9 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tTMPS_PATH   : ").append(Core.TMPS_PATH)
                 .toString());
         }
+
+        // 调一下 ActionRunner 来加载动作
+        ActionRunner.getActions();
     }
 
     /**
@@ -370,7 +366,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
               sb.append("\r\n\tResults     : ")
                 .append(Text.indent(Data.toString(xd)).substring(1));
             }
-            
+
             CoreLogger.getLogger("hongs.log.action").debug(sb.toString());
         }
 

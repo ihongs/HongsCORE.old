@@ -63,7 +63,7 @@ legend {
 .btn.btn-warning .close,
 .btn.btn-danger .close,
 .btn.btn-info .close {
-    color: #fff;
+    color: #eee;
 }
 
 .btn,
@@ -78,13 +78,16 @@ textarea.form-control,
     background: #fff;
     cursor: default;
 }
+.dropdown-toggle {
+    cursor: pointer;
+}
 
 .center-block {
     float: none;
 }
 
-.dropdown-toggle {
-    cursor: pointer;
+.checkbox label {
+    padding-right: 15px;
 }
 
 /** 布局 **/

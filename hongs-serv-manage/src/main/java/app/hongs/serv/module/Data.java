@@ -3,11 +3,16 @@ package app.hongs.serv.module;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
+import app.hongs.db.FetchCase;
 import app.hongs.db.Model;
 import app.hongs.dl.lucene.LuceneRecord;
 import app.hongs.util.Synt;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.lucene.document.Document;
 
 /**
@@ -18,6 +23,23 @@ public class Data extends LuceneRecord {
 
     public Data(String conf, String form) throws HongsException {
         super(conf, form);
+
+        Set<String> findFields = new LinkedHashSet();
+        Set<String> dispFields = new LinkedHashSet();
+
+        for(Map.Entry<String, Map> et : fields.entrySet()) {
+            Map field = et.getValue();
+            String fn = et.getKey(  );
+            if (Synt.declare(field.get("findable"),false)) {
+                findFields.add(fn);
+            }
+            if (Synt.declare(field.get("listable"),false)) {
+                dispFields.add(fn);
+            }
+        }
+
+        findCols = findFields.toArray(new String[0]);
+        dispCols = dispFields.toArray(new String[0]);
     }
 
     /**
@@ -28,13 +50,8 @@ public class Data extends LuceneRecord {
      */
     @Override
     public String add(Map rd) throws HongsException {
-        String id = Synt.declare(rd.get(idCol), String.class);
-        if (id != null && id.length() != 0) {
-            throw HongsException.common("Id can not set in add");
-        }
-        id = Core.getUniqueId();
-        rd.put(idCol , id );
-        addDoc(map2Doc(rd));
+        String id = Core.getUniqueId();
+        save(id, rd);
         return id;
     }
 
@@ -46,29 +63,7 @@ public class Data extends LuceneRecord {
      */
     @Override
     public void put(String id, Map rd) throws HongsException {
-        if (id == null || id.length() == 0) {
-            throw HongsException.common("Id must be set in put");
-        }
-        Document doc = getDoc(id);
-        if (doc == null) {
-            throw HongsException.common("Doc#"+id+" not exists");
-        } else {
-            /**
-             * 实际运行中发现
-             * 直接往取出的 doc 里设置属性, 会造成旧值的索引丢失
-             * 故只好转换成 map 再重新设置, 这样才能确保索引完整
-             * 但那些 Store=NO 的数据将无法设置
-             */
-            ignFlds(new HashMap());
-            Map  md = doc2Map(doc);
-            md.putAll(rd);
-            rd = md;
-        }
-        rd.put(idCol, id);
-        docAdd(doc, rd);
-        setDoc(id, doc);
-        
-        change(id,  rd);
+        save(id, rd);
     }
 
     /**
@@ -77,51 +72,99 @@ public class Data extends LuceneRecord {
      * @param rd
      * @throws HongsException
      */
+    @Override
     public void set(String id, Map rd) throws HongsException {
-        if (id == null && id.length() == 0) {
-            throw HongsException.common("Id must be set in put");
-        }
-        Document doc = getDoc(id);
-        if (doc == null) {
-            doc =  new Document();
-        } else {
-            /**
-             * 实际运行中发现
-             * 直接往取出的 doc 里设置属性, 会造成旧值的索引丢失
-             * 故只好转换成 map 再重新设置, 这样才能确保索引完整
-             * 但那些 Store=NO 的数据将无法设置
-             */
-            ignFlds(new HashMap());
-            Map  md = doc2Map(doc);
-            md.putAll(rd);
-            rd = md;
-        }
-        rd.put(idCol, id);
-        docAdd(doc, rd);
-        setDoc(id, doc);
-        
-        change(id,  rd);
+        save(id, rd);
     }
 
-    private void change(String id, Map rd) throws HongsException {
+    /**
+     * 删除文档
+     * @param id
+     * @throws HongsException
+     */
+    @Override
+    public void del(String id) throws HongsException {
+        save(id, null);
+    }
+
+    public void save(String id, Map rd) throws HongsException {
+        Model model = DB.getInstance("module").getModel("data");
+        Map   dd,od = new HashMap();
+        od.put("etime", System.currentTimeMillis());
+        String   where = "`id` = ? AND `etime` = ?";
+        Object[] param = new String[ ] { id , "0" };
+
+        // 删除当前数据
+        if (rd == null) {
+            od.put("state", 0);
+            model.table.update(od, where, param);
+            super.del(id);
+            return;
+        }
+
+        // 获取旧的数据
+        FetchCase fc = new FetchCase();
+        fc.select ( "data" ).where(where, param);
+        dd = model.table.fetchLess(fc);
+        if(!dd.isEmpty()) {
+            dd = (Map) app.hongs.util.Data.toObject(dd.get("data").toString());
+        }
+
+        // 合并新旧数据
+        int i = 0;
+        for(String fn : fields.keySet()) {
+            String fr = Synt.declare(rd.get(fn), "");
+            String fo = Synt.declare(dd.get(fn), "");
+            if (   rd.containsKey( fn )) {
+                dd.put( fn , fr );
+            }
+            if ( ! fr.equals(fo)) {
+                i += 1;
+            }
+        }
+        if (i == 0) {
+            return;
+        }
+
+        // 拼接展示字段
         StringBuilder nm = new StringBuilder();
         for (String fn : dispCols) {
-            nm.append(rd.get(fn).toString()).append(' ');
+            nm.append(dd.get(fn).toString()).append(' ');
         }
-        
-        Map dd = new HashMap();
-        for(Map.Entry<String, Map> me : fields.entrySet()) {
-            String fn = me.getKey();
-            dd.put(fn , rd.get(fn));
-        }
-        
+
+        // 保存到数据库
         Map nd = new HashMap();
-        nd.put("id", id);
-        nd.put("name", nm.toString().trim());
+        nd.put( "id" , id);
+        nd.put("name", nm.toString( ).trim( ));
         nd.put("data", app.hongs.util.Data.toString(dd));
-        
-        Model model = DB.getInstance("module").getModel("data");
-        model.create(rd);
+        model.table.update(od , where , param);
+        model.table.insert(nd);
+
+        // 保存到索引库
+        Document doc = new Document(  );
+        dd.put("mtime",od.get("etime"));
+        dd.put(idCol , id);
+        docAdd(doc, dd);
+        setDoc(id, doc);
     }
-    
+
+    public void rvcr(String id) throws HongsException {
+        Model model = DB.getInstance("module").getModel("data");
+
+        Map dd;
+        FetchCase fc = new FetchCase();
+        fc.select("data").where("`id` = ? AND `etime` = ? AND `state` != ?", id, 0, 0);
+        dd = model.table.fetchLess(fc);
+        if (dd.isEmpty()) {
+            super.del(id);
+        }
+        dd = (Map) app.hongs.util.Data.toObject(dd.get("data").toString());
+        
+        Document doc = new Document();
+        dd.put("mtime",System.currentTimeMillis());
+        dd.put(idCol , id);
+        docAdd(doc, dd);
+        setDoc(id, doc);
+    }
+
 }

@@ -7,7 +7,7 @@ import app.hongs.HongsException;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Filter;
 import app.hongs.action.anno.FilterInvoker;
-import app.hongs.util.Cname;
+import app.hongs.util.Clazz;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.servlet.ServletException;
 
 /**
  * 动作执行器
@@ -53,7 +54,7 @@ public class ActionRunner {
         }
         this.action = action;
         this.helper = helper;
-        this.classx = m.classx;
+        this.classx = m.mclass;
         this.method = m.method;
         this.object = Core.getInstance(classx);
         this.annarr = method.getAnnotations( );
@@ -145,19 +146,19 @@ public class ActionRunner {
 
     public  static final class Mathod {
         Method   method;
-        Class<?> classx;
+        Class<?> mclass;
         @Override
         public String    toString() {
-            return classx.getName()+"."+method.getName();
+            return mclass.getName()+"."+method.getName();
         }
         public Method   getMethod() {
             return method;
         }
-        public Class<?> getClassx() {
-            return classx;
+        public Class<?> getMclass() {
+            return mclass;
         }
     }
-    
+
     public  static Map<String, Mathod> getActions() {
         Lock rlock = ACTLOCK. readLock();
         rlock.lock();
@@ -189,9 +190,9 @@ public class ActionRunner {
             Set< String > clss ;
 
             if (pkgn.endsWith(".*")) {
-                pkgn = pkgn.substring(0, pkgn.length() -2);
+                pkgn = pkgn.substring(0, pkgn.length() - 2);
                 try {
-                    clss = Cname.getClassNames(pkgn,false);
+                    clss = Clazz.getClassNames(pkgn, false);
                 } catch (IOException ex) {
                     throw new HongsError( 0x4a , "Can not load package '" + pkgn + "'.", ex);
                 }
@@ -240,10 +241,10 @@ public class ActionRunner {
                     if (prms == null || prms.length != 1 || !prms[0].isAssignableFrom(ActionHelper.class)) {
                         throw new HongsError(0x4a, "Can not find action method '"+clsn+"."+mtdn+"(ActionHelper)'.");
                     }
-                    
+
                     Mathod mtdx = new Mathod();
                     mtdx.method = mtdo;
-                    mtdx.classx = clso;
+                    mtdx.mclass = clso;
 
                     if ("__main__".equals(actx)) {
                         acts.put(actn /*__main__*/ , mtdx );

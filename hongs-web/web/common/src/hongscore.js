@@ -133,20 +133,19 @@ function hsResponObj(rst, qut) {
                 }
             }
         }
-        // 服务器端要求跳转(通常为未登录缺少权限等)
-        if (typeof(rst["url"]) !== "undefined") {
-            if  (  rst["url"]) {
-                location.assign(rst["url"]);
+        // 针对特定数据结构
+        if (typeof(rst['data']) !== "undefined") {
+            jQuery.extend(rst , rst['data']);
+            delete rst['data'];
+        }
+        // 服务器端要求跳转 (通常为未登录无权限)
+        if (typeof(rst["goto"]) !== "undefined") {
+            if/**/(rst["goto"]) {
+                location.assign(rst["goto"]);
             } else {
                 location.reload();
             }
-            delete rst["url"];
-        }
-        // 针对特定数据结构
-        if (rst['data']) {
-            var dat = rst['data'];
-            delete    rst['data'];
-            jQuery.extend(rst, dat);
+            delete rst["goto"];
         }
     }
     return rst;

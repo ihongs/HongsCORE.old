@@ -52,8 +52,8 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
@@ -121,6 +121,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"), conf.getProperty("core.in.object.mode", false));
     }
 
+    /**
+     * 通过配置名和表单名来构建实例
+     * @param conf
+     * @param form
+     * @throws HongsException
+     */
     public LuceneRecord(String conf, String form)
     throws HongsException {
         this(conf+"/"+form,
@@ -130,18 +136,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     /**
      * 获取数据
-
- 以下参数为特殊参数:
- id   ID
- wd   搜索
- ob   排序
- sf   字段
- pn   页码
- rn   每页行数
- ln   分页数量
- or   多组"或"关系条件
- ar   串联多组关系条件
- 请注意尽量避免将其作为字段名(id,wd除外)
+     *
+     * 以下参数为特殊参数, 并不像 db.Model 受配置控制(约定胜于配置):
+     * id   ID
+     * wd   搜索
+     * ob   排序
+     * sf   字段
+     * pn   页码
+     * rn   每页行数
+     * ln   分页数量
+     * or   多组"或"关系条件
+     * ar   串联多组关系条件
+     * xr   附加多组或关系, LuceneRecord 特有
+     * 请注意尽量避免将其作为字段名(id,wd除外)
      *
      * @param rd
      * @return
@@ -214,10 +221,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             ScoreDoc[] scos = tops.scoreDocs;
             ScoreDoc   sco  ;
             Document   doc  ;
-            for (int i = minRn; i < maxRn; i++) {
+            for(int i = minRn; i < maxRn; i ++) {
                 sco =  scos[i];
                 doc = reader.document(sco.doc );
-                list.add(/**/doc2Map (doc)/**/);
+                list.add(/**/doc2Map (/**/doc));
             }
 
             rc = scos.length;
@@ -250,7 +257,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     /**
      * 创建记录
      * @param rd
-     * @return ID,名称等(由dispCols指定)
+     * @return id,name等(由dispCols指定)
      * @throws HongsException
      */
     @Override
@@ -361,10 +368,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 ScoreDoc[] scos  = tops.scoreDocs;
                 ScoreDoc   sco   = null;
                 Document   doc   ;
-                for(int i = 0; i < scos.length; i ++) {
-                    sco = scos[i];
+                for(int i = 0; i < scos.length;i++) {
+                    sco =  scos[i];
                     doc = reader.document(sco.doc );
-                    list.add(/**/doc2Map (doc)/**/);
+                    list.add(/**/doc2Map (/**/doc));
                 }
 
                 if (n != scos.length) {
@@ -402,18 +409,18 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     /**
-     * 修改文档(局部更新)
+     * 设置文档(无则添加)
      * @param id
      * @param rd
      * @throws HongsException
      */
-    public void put(String id, Map rd) throws HongsException {
+    public void set(String id, Map rd) throws HongsException {
         if (id == null || id.length() == 0) {
             throw HongsException.common("Id must be set in put");
         }
         Document doc = getDoc(id);
         if (doc == null) {
-            throw HongsException.common("Doc#"+id+" not exists");
+            doc =  new Document();
         } else {
             /**
              * 实际运行中发现
@@ -432,18 +439,18 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     /**
-     * 设置文档(无则添加)
+     * 修改文档(局部更新)
      * @param id
      * @param rd
      * @throws HongsException
      */
-    public void set(String id, Map rd) throws HongsException {
+    public void put(String id, Map rd) throws HongsException {
         if (id == null || id.length() == 0) {
             throw HongsException.common("Id must be set in put");
         }
         Document doc = getDoc(id);
         if (doc == null) {
-            doc =  new Document();
+            throw HongsException.common("Doc#"+id+" not exists");
         } else {
             /**
              * 实际运行中发现
@@ -550,6 +557,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         return map;
     }
 
+    /**
+     * 初始化读操作
+     * @throws HongsException
+     */
     public void initial() throws HongsException {
         if (reader != null) {
             return;
@@ -572,6 +583,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
+    /**
+     * 连接写数据库
+     * @throws HongsException
+     */
     public void connect() throws HongsException {
         if (writer != null) {
             return;
@@ -589,6 +604,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
+    /**
+     * 销毁读写连接
+     * @throws HongsException
+     */
     @Override
     public void destroy() throws HongsException {
         try {
@@ -617,11 +636,18 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
+    /**
+     * 事务开始
+     */
     @Override
     public void trnsct() {
         IN_TRNSCT_MODE = true;
     }
 
+    /**
+     * 提交更改
+     * @throws HongsException
+     */
     @Override
     public void commit() throws HongsException {
         if (writer == null) {
@@ -635,6 +661,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
     }
 
+    /**
+     * 回滚操作
+     * @throws HongsException
+     */
     @Override
     public void rolbak() throws HongsException {
         if (writer == null) {
@@ -661,23 +691,11 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             String fn = (String) et.getKey();
             Map    fc = (Map ) et.getValue();
             String t = getFtype(fc);
-            if ("search".equals(t )
-            ||    "text".equals(t)) {
+            if ("search".equals(t)) {
                 az.put(fn, getAnalyzer(fc, false));
             }
         }
         return new PerFieldAnalyzerWrapper(ad, az);
-    }
-
-    /**
-     * 查询分析器
-     * @param fn 字段名
-     * @return
-     * @throws HongsException
-     */
-    protected Analyzer getAnalyzer(String fn) throws HongsException {
-        Map fc = (Map) fields.get(fn);
-        return getAnalyzer(fc, true );
     }
 
     /**
@@ -809,11 +827,11 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (t == null) {
             t = (String) fc.get("__type__");
 
-            if ("stored".equals(t) || "json".equals(t)) {
+            if ("stored".equals(t) || "search".equals(t)) {
                 return t;
             }
-            if ("search".equals(t) || "find".equals(t)) {
-                return "text";
+            if ("textarea".equals(t)) {
+                return "stored";
             }
 
             t = Synt.declare(talias.get(t) , t);
@@ -826,11 +844,23 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                     t = "long";
                 }
             }
+        } else
+        if (t.equals("number")) {
+            t = "double";
+        } else
+        if (t.equals( "text" )) {
+            t = "search";
         }
 
         return t;
     }
 
+    /**
+     * 查询分析
+     * @param rd
+     * @return
+     * @throws HongsException
+     */
     protected Query getQuery(Map rd) throws HongsException {
         BooleanQuery query = new BooleanQuery();
 
@@ -866,7 +896,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             if ("string".equals(t)) {
                 aq = new StringQuery();
             } else
-            if (  "text".equals(t)) {
+            if ("search".equals(t)) {
                 aq = new SearchQuery();
             } else
             {
@@ -879,28 +909,37 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         // 关键词
         if (rd.containsKey("wd")) {
             Object fv = rd.get("wd");
-            if(fv instanceof Map) {
-                Map fm = (Map) fv;
-                for(String fk : findCols) {
-                if (fm.containsKey( fk )) {
-                    qryAdd(query, fk, fm.get(fk), new SearchQuery());
-                }
-                }
+            
+            /**
+             * 当设置了多个搜索字段时
+             * 将条件整理为 +(fn1:xxx fn2:xxx)
+             */
+            BooleanQuery quary;
+            if (findCols.length < 2) {
+                quary =  query;
             } else {
-                for(String fk : findCols) {
-                    qryAdd(query, fk, fv/*WORD*/, new SearchQuery());
+                quary = new BooleanQuery();
+                query.add(quary, BooleanClause.Occur.MUST);
+                if (!(fv instanceof Map) ) {
+                   Map fw = new HashMap( );
+                   fw.put("-or" , fv);
+                   fv= fw;
                 }
+            }
+            
+            for(String fk : findCols) {
+                qryAdd(quary, fk, fv, new SearchQuery( ) );
             }
         }
 
         // 或条件
         if (rd.containsKey("or")) {
-            BooleanQuery qay = new BooleanQuery();
+            BooleanQuery quary = new BooleanQuery( );
             Set<Map> set = Synt.declare(rd.get("or"), Set.class);
             for(Map  map : set) {
-                qay.add(getQuery(map), BooleanClause.Occur.SHOULD);
+                quary.add(getQuery(map), BooleanClause.Occur.SHOULD);
             }
-            query.add(qay, BooleanClause.Occur.MUST);
+            query.add(quary, BooleanClause.Occur.MUST);
         }
 
         // 附条件
@@ -932,6 +971,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         return query;
     }
 
+    /**
+     * 排序分析
+     * @param rd
+     * @return
+     * @throws HongsException
+     */
     protected Sort getSort(Map rd) throws HongsException {
         Set<String> ob;
         Object xb = rd.get("ob" );
@@ -1006,6 +1051,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         return new Sort(of.toArray(new SortField[0]));
     }
 
+    /**
+     * 忽略字段
+     * @param rd
+     */
     protected void ignFlds(Map rd) {
         Set<String> fs;
         Object fz = rd.get("sf" );
@@ -1138,7 +1187,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             String  t = getFtype(m);
             boolean u = !Synt.declare(m.get("invisble"), false);
             boolean s =  Synt.declare(m.get("sortable"), false);
-            boolean r = Synt.declare(m.get("__repeated__"), false);
+            boolean r =  Synt.declare(m.get("__repeated__"), false);
 
             doc.removeFields(k);
             if (r && v instanceof Collection) {
@@ -1179,7 +1228,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if ("string".equals(t)) {
             doc.add(new StringField(k, Synt.declare(v, ""), u ? Field.Store.YES : Field.Store.NO));
         } else
-        if (  "text".equals(t)) {
+        if ("search".equals(t)) {
             doc.add(new   TextField(k, Synt.declare(v, ""), u ? Field.Store.YES : Field.Store.NO));
         } else
         if (  "json".equals(t)) {
@@ -1242,16 +1291,25 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             }
         }
 
-        float w = 1F;
-
         // 对 text 类型指定分词器
         if (q instanceof SearchQuery) {
-            ((SearchQuery) q).ana(getAnalyzer(k));
+            SearchQuery sq = (SearchQuery) q;
+            Map fc = (Map) fields.get(k);
+            sq.ana(getAnalyzer(fc,true));
+            // 额外的一些细微配置
+            sq.advanceAnalysisInUse(Synt.declare(fc.get("lucene-parser-advanceAnalysisInUse"), Boolean.class));
+            sq.defaultOperatorIsAnd(Synt.declare(fc.get("lucene-parser-defaultOperatorIsAnd"), Boolean.class));
+            sq.allowLeadingWildcard(Synt.declare(fc.get("lucene-parser-allowLeadingWildcard"), Boolean.class));
+            sq.lowercaseExpandedTerms(Synt.declare(fc.get("lucene-parser-lowercaseExpandedTerms"), Boolean.class));
+            sq.enablePositionIncrements(Synt.declare(fc.get("lucene-parser-enablePositionIncrements"), Boolean.class));
+            sq.phraseSlop (Synt.declare(fc.get("lucene-parser-phraseSlop" ), Integer.class));
+            sq.fuzzyPreLen(Synt.declare(fc.get("lucene-parser-fuzzyPreLen"), Integer.class));
+            sq.fuzzyMinSim(Synt.declare(fc.get("lucene-parser-fuzzyMinSim"),   Float.class));
         }
 
         if (m.containsKey("-wt")) {
             Object n = m.remove("-wt");
-            q.bst( Synt.declare(n, w));
+            q.bst(Synt.declare(n, 1F));
         }
 
         if (m.containsKey("-eq")) {
@@ -1302,7 +1360,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         //** 区间查询 **/
 
         Object  n, x;
-        boolean l, r;
+        boolean l, g;
 
         if (m.containsKey("-gt")) {
             n = m.remove ("-gt"); l = false;
@@ -1315,17 +1373,17 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         if (m.containsKey("-lt")) {
-            x = m.remove ("-lt"); r = false;
+            x = m.remove ("-lt"); g = false;
         } else
         if (m.containsKey("-le")) {
-            x = m.remove ("-le"); r = true;
+            x = m.remove ("-le"); g = true;
         } else
         {
-            x = null; r = true;
+            x = null; g = true;
         }
 
         if (n != null || x != null) {
-            qry.add(q.add(k, n, x, l, r), BooleanClause.Occur.MUST);
+            qry.add(q.add(k, n, x, l, g), BooleanClause.Occur.MUST);
         }
 
         //** 其他查询 **/
@@ -1347,7 +1405,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         private Float w = null;
         @Override
         public void  bst(float  w) {
-            this.w  = w;
+            this.w = w;
         }
         @Override
         public Query add(String k, Object v) {
@@ -1357,10 +1415,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             return  q2;
         }
         @Override
-        public Query add(String k, Object n, Object x, boolean l, boolean r) {
+        public Query add(String k, Object n, Object x, boolean l, boolean g) {
             Integer n2 = Synt.declare(n, Integer.class);
             Integer x2 = Synt.declare(x, Integer.class);
-            Query   q2 = NumericRangeQuery.newIntRange(k, n2, x2, l, r);
+            Query   q2 = NumericRangeQuery.newIntRange(k, n2, x2, l, g);
             if (w != null) q2.setBoost(w);
             return  q2;
         }
@@ -1370,7 +1428,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         private Float w = null;
         @Override
         public void  bst(float  w) {
-            this.w  = w;
+            this.w = w;
         }
         @Override
         public Query add(String k, Object v) {
@@ -1380,10 +1438,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             return  q2;
         }
         @Override
-        public Query add(String k, Object n, Object x, boolean l, boolean r) {
+        public Query add(String k, Object n, Object x, boolean l, boolean g) {
             Long    n2 = Synt.declare(n, Long.class);
             Long    x2 = Synt.declare(x, Long.class);
-            Query   q2 = NumericRangeQuery.newLongRange(k, n2, x2, l, r);
+            Query   q2 = NumericRangeQuery.newLongRange(k, n2, x2, l, g);
             if (w != null) q2.setBoost(w);
             return  q2;
         }
@@ -1393,7 +1451,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         private Float w = null;
         @Override
         public void  bst(float  w) {
-            this.w  = w;
+            this.w = w;
         }
         @Override
         public Query add(String k, Object v) {
@@ -1403,10 +1461,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             return  q2;
         }
         @Override
-        public Query add(String k, Object n, Object x, boolean l, boolean r) {
+        public Query add(String k, Object n, Object x, boolean l, boolean g) {
             Float   n2 = Synt.declare(n, Float.class);
             Float   x2 = Synt.declare(x, Float.class);
-            Query   q2 = NumericRangeQuery.newFloatRange(k, n2, x2, l, r);
+            Query   q2 = NumericRangeQuery.newFloatRange(k, n2, x2, l, g);
             if (w != null) q2.setBoost(w);
             return  q2;
         }
@@ -1416,7 +1474,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         private Float w = null;
         @Override
         public void  bst(float  w) {
-            this.w  = w;
+            this.w = w;
         }
         @Override
         public Query add(String k, Object v) {
@@ -1426,10 +1484,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             return  q2;
         }
         @Override
-        public Query add(String k, Object n, Object x, boolean l, boolean r) {
+        public Query add(String k, Object n, Object x, boolean l, boolean g) {
             Double  n2 = Synt.declare(n, Double.class);
             Double  x2 = Synt.declare(x, Double.class);
-            Query   q2 = NumericRangeQuery.newDoubleRange(k, n2, x2, l, r);
+            Query   q2 = NumericRangeQuery.newDoubleRange(k, n2, x2, l, g);
             if (w != null) q2.setBoost(w);
             return  q2;
         }
@@ -1439,7 +1497,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         private Float w = null;
         @Override
         public void  bst(float  w) {
-            this.w  = w;
+            this.w = w;
         }
         @Override
         public Query add(String k, Object v) {
@@ -1448,40 +1506,89 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             return  q2;
         }
         @Override
-        public Query add(String k, Object n, Object x, boolean l, boolean r) {
+        public Query add(String k, Object n, Object x, boolean l, boolean g) {
             String  n2 = n.toString();
             String  x2 = x.toString();
-            Query   q2 = TermRangeQuery.newStringRange(k, n2, x2, l, r);
+            Query   q2 = TermRangeQuery.newStringRange(k, n2, x2, l, g);
             if (w != null) q2.setBoost(w);
             return  q2;
         }
     }
 
     protected static class SearchQuery implements AddQuery {
+        private Boolean  des = null;
+        private Boolean  and = null;
+        private Boolean  alw = null;
+        private Boolean  let = null;
+        private Boolean  epi = null;
+        private Integer  phr = null;
+        private Integer  fpl = null;
+        private Float    fms = null;
+        public void  advanceAnalysisInUse(Boolean x) {
+            this.des = x;
+        }
+        public void  defaultOperatorIsAnd(Boolean x) {
+            this.and = x;
+        }
+        public void  allowLeadingWildcard(Boolean x) {
+            this.alw = x;
+        }
+        public void  lowercaseExpandedTerms(Boolean x) {
+            this.let = x;
+        }
+        public void  enablePositionIncrements(Boolean x) {
+            this.epi = x;
+        }
+        public void  phraseSlop (Integer x) {
+            this.phr = x;
+        }
+        public void  fuzzyPreLen(Integer x) {
+            this.fpl = x;
+        }
+        public void  fuzzyMinSim(Float   x) {
+            this.fms = x;
+        }
+        
         private Analyzer a = null;
         private Float    w = null;
         public void  ana(Analyzer a) {
-            this.a  = a;
+            this.a = a;
         }
         @Override
         public void  bst(  float  w) {
-            this.w  = w;
+            this.w = w;
         }
         @Override
         public Query add(String k, Object v) {
             try {
-                Query  q2 = new QueryParser(k, a).parse(QueryParser.escape(v.toString()));
-                if (w  != null) q2.setBoost(   w);
+                QueryParser qp = new QueryParser(k , a);
+                
+                String s = v.toString( );
+                if (des == null || !des) {
+                    s = QueryParser.escape(s);
+                }
+                if (and != null &&  and) {
+                    qp.setDefaultOperator (QueryParser.AND_OPERATOR);
+                }
+                if (alw != null) qp.setAllowLeadingWildcard(alw);
+                if (let != null) qp.setLowercaseExpandedTerms(let);
+                if (epi != null) qp.setEnablePositionIncrements(epi);
+                if (phr != null) qp.setPhraseSlop (phr);
+                if (fms != null) qp.setFuzzyMinSim(fms);
+                if (fpl != null) qp.setFuzzyPrefixLength(fpl);
+                
+                Query  q2 = qp.parse(s);
+                if (w != null) q2.setBoost(w);
                 return q2;
             } catch (ParseException ex) {
-                throw HongsError.common(null, ex);
+                throw HongsError.common(null , ex);
             }
         }
         @Override
-        public Query add(String k, Object n, Object x, boolean l, boolean r) {
+        public Query add(String k, Object n, Object x, boolean l, boolean g) {
             String  n2 = n.toString();
             String  x2 = x.toString();
-            Query   q2 = TermRangeQuery.newStringRange(k, n2, x2, l, r);
+            Query   q2 = TermRangeQuery.newStringRange(k, n2, x2, l, g);
             if (w != null) q2.setBoost(w);
             return  q2;
         }

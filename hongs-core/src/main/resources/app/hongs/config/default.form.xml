@@ -30,8 +30,8 @@
         <value code="check">enum</value>
     </enum>
     <enum name="__patts__">
-        <value code="url"><![CDATA[^(\w+:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}[#&+_\?\/\w \.\-=]*$]]></value>
         <value code="email"><![CDATA[^([a-z0-9_\.\-\+]+)@([\da-z\.\-]+)\.([a-z\.]{2,6})$]]></value>
+        <value code="url"><![CDATA[^(\w+:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}[#&+_\?\/\w \.\-=]*$]]></value>
     </enum>
     <!--
     <enum name="demo-enum">

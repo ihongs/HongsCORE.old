@@ -124,22 +124,32 @@ public class MenuSet
     this.init(name + ".menu");
   }
 
-  @Override
-  protected boolean expired(long time)
+  protected boolean expired(String name)
   {
     File xmlFile = new File(Core.CONF_PATH
                  + File.separator + name + ".menu.xml");
     File serFile = new File(Core.VARS_PATH
                  + File.separator + "serial"
                  + File.separator + name + ".menu.ser");
-    if (xmlFile.exists())
+    return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();
+  }
+
+  @Override
+  protected boolean expired(long time)
+  {
+    // 检查当前文件
+    if (expired(name))
     {
-      return xmlFile.lastModified() > serFile.lastModified();
+        return  true ;
     }
-    else
+    // 检查引入文件
+    for(String  namz : imports)
     {
-      return false;
+    if (expired(namz))
+    {
+        return  true ;
     }
+    }   return  false;
   }
 
   @Override
@@ -621,7 +631,7 @@ public class MenuSet
                 lizt.add( role );
             }
 
-            if (!lizt.isEmpty()) {
+            if (! lizt.isEmpty()) {
                 // 没有指定 disp 则用 href 获取
                 if ("".equals(s)) {
                     s = "core.role." + h ;
@@ -724,14 +734,14 @@ public class MenuSet
   //** 工厂方法 **/
 
   public static MenuSet getInstance(String name) throws HongsException {
-      String key = MenuSet.class.getName() + ":" + name;
+      String cn = MenuSet.class.getName() + ":" + name;
       Core core = Core.getInstance();
       MenuSet inst;
-      if (core.containsKey(key)) {
-          inst = (MenuSet) core.get(key);
+      if (core.containsKey(cn)) {
+          inst = (MenuSet) core.get( cn );
       } else {
           inst = new MenuSet( name );
-          core.put( key, inst );
+          core.put( cn , inst );
       }
       return inst;
   }

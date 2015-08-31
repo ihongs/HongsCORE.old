@@ -8,7 +8,7 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.cmdlet.anno.Cmdlet;
-import app.hongs.util.Cname;
+import app.hongs.util.Clazz;
 import app.hongs.util.Data;
 import app.hongs.util.Synt;
 import app.hongs.util.Text;
@@ -295,7 +295,7 @@ public class CmdletRunner
     if (str != null && str.length() > 0)
     {
         if (str.startsWith("@")) {
-            str = getFileStr(str.substring(1));
+            str = getContent(str.substring(1));
         }
         if (str.startsWith("{") && str.endsWith("}")) {
             req = ( Map ) Data.toObject( str );
@@ -309,7 +309,7 @@ public class CmdletRunner
     if (str != null && str.length() > 0)
     {
         if (str.startsWith("@")) {
-            str = getFileStr(str.substring(1));
+            str = getContent(str.substring(1));
         }
         if (str.startsWith("{") && str.endsWith("}")) {
             con = ( Map ) Data.toObject( str );
@@ -323,7 +323,7 @@ public class CmdletRunner
     if (str != null && str.length() > 0)
     {
         if (str.startsWith("@")) {
-            str = getFileStr(str.substring(1));
+            str = getContent(str.substring(1));
         }
         if (str.startsWith("{") && str.endsWith("}")) {
             ses = ( Map ) Data.toObject( str );
@@ -376,9 +376,9 @@ public class CmdletRunner
             Set< String > clss ;
 
             if (pkgn.endsWith(".*")) {
-                pkgn = pkgn.substring(0, pkgn.length() -2);
+                pkgn = pkgn.substring(0, pkgn.length() - 2);
                 try {
-                    clss = Cname.getClassNames(pkgn, false);
+                    clss = Clazz.getClassNames(pkgn, false);
                 } catch (IOException ex) {
                     throw new HongsError( 0x4b , "Can not load package '" + pkgn + "'.", ex);
                 }
@@ -440,7 +440,7 @@ public class CmdletRunner
         return acts;
     }
 
-    private static String getFileStr(String path) throws HongsException {
+    private static String getContent(String path) throws HongsException {
         File   file = new File(path);
         Long   size = file.length( );
         byte[] cont = new byte[size.intValue()];

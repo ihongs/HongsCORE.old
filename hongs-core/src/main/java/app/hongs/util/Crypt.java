@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package app.hongs.util;
 
 import app.hongs.CoreConfig;
@@ -25,33 +19,61 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class Crypt {
 
-    public static String encrypt(String content, String scrtkey) throws HongsException {
+    public static String encrypt(String content) throws HongsException {
         try {
-            return new String(docrypt(content.getBytes(), scrtkey, false), "UTF-8");
+            return new String(docrypt(content.getBytes(), null, false), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw HongsException.common(null, ex);
         }
     }
 
-    public static String decrypt(String content, String scrtkey) throws HongsException {
+    public static String decrypt(String content) throws HongsException {
         try {
-            return new String(docrypt(content.getBytes(), scrtkey, true ), "UTF-8");
+            return new String(docrypt(content.getBytes(), null, true ), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw HongsException.common(null, ex);
         }
     }
 
-    public static byte[] encrypt(byte[] content, String scrtkey) throws HongsException {
-        return docrypt(content, scrtkey, false);
+    public static String encrypt(String content, String key) throws HongsException {
+        try {
+            return new String(docrypt(content.getBytes(), key , false), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw HongsException.common(null, ex);
+        }
     }
 
-    public static byte[] decrypt(byte[] content, String scrtkey) throws HongsException {
-        return docrypt(content, scrtkey, true );
+    public static String decrypt(String content, String key) throws HongsException {
+        try {
+            return new String(docrypt(content.getBytes(), key , true ), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw HongsException.common(null, ex);
+        }
     }
 
-    private static byte[] docrypt(byte[] content, String scrtkey, boolean decrypt) throws HongsException {
-        String enc = CoreConfig.getInstance().getProperty("core.crypto.method", "AES");
-        int    len = CoreConfig.getInstance().getProperty("core.crypto.length",  128 );
+    public static byte[] encrypt(byte[] content) throws HongsException {
+        return docrypt(content, null, false);
+    }
+
+    public static byte[] decrypt(byte[] content) throws HongsException {
+        return docrypt(content, null, true );
+    }
+
+    public static byte[] encrypt(byte[] content, String key) throws HongsException {
+        return docrypt(content, key , false);
+    }
+
+    public static byte[] decrypt(byte[] content, String key) throws HongsException {
+        return docrypt(content, key , true );
+    }
+
+   private static byte[] docrypt(byte[] content, String key, boolean dec) throws HongsException {
+        CoreConfig conf = CoreConfig.getInstance();
+        if  (  key == null  ) {
+               key = conf.getProperty("core.crypt.seckey", "HCJ");
+        }
+        String enc = conf.getProperty("core.crypt.method", "AES");
+        int    len = conf.getProperty("core.crypt.length",  128 );
 
         try {
             SecretKeySpec kspc;
@@ -61,9 +83,9 @@ public class Crypt {
             kgen = KeyGenerator.getInstance(enc);
             cphr =       Cipher.getInstance(enc);
 
-            kgen.init(len, new SecureRandom(scrtkey.getBytes(/**/)));
+            kgen.init(len, new SecureRandom(key.getBytes()));
             kspc = new SecretKeySpec(kgen.generateKey().getEncoded(), enc);
-            cphr.init(decrypt ? Cipher.DECRYPT_MODE : Cipher.ENCRYPT_MODE, kspc);
+            cphr.init(dec? Cipher.DECRYPT_MODE: Cipher.ENCRYPT_MODE, kspc);
 
             return cphr.doFinal(content);
         } catch (NoSuchAlgorithmException e) {

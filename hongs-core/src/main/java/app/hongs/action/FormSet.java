@@ -96,14 +96,7 @@ public class FormSet
     File serFile = new File(Core.VARS_PATH
                  + File.separator + "serial"
                  + File.separator + name + ".form.ser");
-    if (xmlFile.exists())
-    {
-      return xmlFile.lastModified() > serFile.lastModified();
-    }
-    else
-    {
-      return false;
-    }
+    return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();
   }
 
   @Override

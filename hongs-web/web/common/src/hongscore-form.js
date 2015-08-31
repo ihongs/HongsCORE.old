@@ -28,9 +28,12 @@ function HsForm(opts, context) {
     this._data = [];
 
     if (opts) for ( var k in opts ) {
-        if ('_'===k.substring(0, 1)
+        if ('_'===k.substring(0,1 )
         ||  this[k] !== undefined ) {
             this[k]  =  opts[k];
+        } else
+        if ('$'===k.substring(0,1)) {
+            this.rules[k.substring(1)] = opts[k];
         }
     }
 
@@ -86,7 +89,7 @@ function HsForm(opts, context) {
     }
 
     this.saveInit(saveUrl);
-    this.valiInit(/** **/);
+    this.valiInit(/*all*/);
 }
 HsForm.prototype = {
     load     : function(url, data) {
@@ -225,9 +228,12 @@ HsForm.prototype = {
         var data = this.formBox;
         var that = this;
 
-        this.formBox.attr(  "action", url  );
+        this.formBox.attr("action", url);
         this.formBox.on("submit", function() {
-            return that.verifies();
+            return that.valiExec();
+        });
+        this.formBox.on("reset" , function() {
+            return that.valiUndo();
         });
 
         if ( enc === "multipart/form-data" ) {
@@ -450,19 +456,24 @@ HsForm.prototype = {
     valiInit : function() {
         var that = this;
         this.formBox.attr("novalidate", "novalidate");
-        this.formBox.on("change", "input,select,textarea,[data-fn]",
+        this.formBox.on( "change blur", "input,select,textarea,[data-fn]",
         function() {
-            var inp = jQuery(this);
+            var inp = jQuery( this );
             that.validate(inp.attr("name") || inp.attr("data-fn"));
         });
     },
-    verifies : function() {
+    valiUndo : function() {
+        this.formBox.find(".form-group").removeClass("has-error" );
+        this.formBox.find(".help-block").   addClass("invisible" );
+        return true;
+    },
+    valiExec : function() {
         var vali = true;
         var inps = {  };
         this.formBox.find("input,select,textarea,[data-fn]").each(
         function() {
             var inp = jQuery( this );
-            var nam = inp.attr( "name" ) || inp.attr( "data-fn" );
+            var nam = inp.attr("name")||inp.attr("data-fn" );
             if (! nam) return true  ;
             if (inps[nam] === undefined) {
                 inps[nam]  =   inp  ;
@@ -497,7 +508,7 @@ HsForm.prototype = {
                 this.haserror(inp);
             }
         }
-        return true ;
+        return  true;
     },
     haserror : function(inp, err) {
         if (typeof inp == "string") {
@@ -545,8 +556,8 @@ HsForm.prototype = {
             return true;
         },
         "[pattern],[data-parttern]" : function(val, inp) {
-            var pn = inp.attr("data-pattern") || inp.attr("pattern");
-            var ms = inp.attr("data-message");
+            var pn = inp.attr("data-pattern") || inp.attr("pattern"/**/);
+            var ms = inp.attr("data-message") || inp.attr("placeholder");
             var pm = /^\/(.*)\/([gim])?$/.exec(pn);
             if (pm) {
                 pn = new RegExp(pm[1], pm[2]);
@@ -599,14 +610,20 @@ HsForm.prototype = {
             return true;
         },
         "[type=url]" : function(val) {
-            if (!/^(https?:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}[#&+_\?\/\w \.\-=]*$/i.test(val)) {
+            if (!/^(https?:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}(:\d+)?(\/[^\s]*)?$/i.test(val)) {
                 return hsGetLang("form.is.not.url");
+            }
+            return true;
+        },
+        "[type=tel]" : function(val) {
+            if (!/^(\+\d{1,3})?\d{3,}$/i.test(val)) {
+                return hsGetLang("form.is.not.tel");
             }
             return true;
         },
         "[data-validate]" : function(val, inp) {
             var fn = inp.attr("data-validate");
-            var fd = inp.data() ? inp.data(): window;
+            var fd = inp.data() ? inp.data() : window;
             try {
                 return hsGetValue(fd, fn).call(this, val, inp);
             } catch (ex) {
@@ -640,16 +657,16 @@ HsForm.prototype = {
                 "async": false,
                 "cache": false,
                 "success": function(rst) {
-                    if (rst["info"] && !jQuery.isEmptyObject(rst["info"])) {
-                        ret = true;
+                    if (rst["info" ] !== undefined) {
+                        ret = !jQuery.isEmptyObject(rst["info"]);
                     } else
-                    if (rst["list"] && rst["list"].length) {
-                        ret = true;
+                    if (rst["list" ] !== undefined) {
+                        ret = rst["list" ].length  >  0 ;
                     } else
-                    if (rst["back"] && rst["back"].length) {
-                        ret = rst["back"][0] || rst["msg"];
+                    if (rst['valid'] !== undefined) {
+                        ret = rst["valid"] || rst["msg"];
                     } else {
-                        ret = rst["ok"] /**/ || rst["msg"];
+                        rst = rst[ "ok"  ] || rst["msg"];
                     }
                 }
             });

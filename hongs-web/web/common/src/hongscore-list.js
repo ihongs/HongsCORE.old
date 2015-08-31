@@ -199,6 +199,13 @@ HsList.prototype = {
 
         if (rst.list) this.fillList(rst.list);
         if (rst.page) this.fillPage(rst.page);
+        else { // 无分页
+            if ( rst.list && rst.list.length) {
+                this.fillPage({uncertain: 1});
+            } else {
+                this.fillPage({err: 1});
+            }
+        }
 
         this.listBox.trigger("loadBack", [rst, this]);
     },
@@ -284,19 +291,25 @@ HsList.prototype = {
             case "2":
                 hsSetSerial(this._data, "page", page.pagecount || 1);
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
-                this.listBox.hide ();
+                this.listBox.hide( );
                 this.load();
                 return;
             case  1 :
             case "1":
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
-                this.listBox.hide ();
+                this.listBox.hide( );
                 return;
             default:
-                this.listBox.show ();
+                this.pageBox.empty();
+                this.listBox.show( );
         }
 
-        var i, p, t, pn, pmin, pmax, that = this;
+        if (page.uncertain/*u*/) {
+            this.pageBox.hide( );
+            return;
+        }
+
+        var i, p, t, pmin, pmax, that = this;
         p = page.page ? parseInt(page.page) : 1 ;
         t = page.pagecount ? parseInt(page.pagecount): 1;
         pmin = p - Math.floor( this.lnksPerPage / 2 );
@@ -306,8 +319,6 @@ HsList.prototype = {
         pmin = pmax - this.lnksPerPage + 1;
         if (pmin < 1) pmin = 1;
 
-        this.pageBox.empty();
-        //this.pageBox.addClass("clearfix");
         var pbox = jQuery('<ul class="pagination"></ul>').appendTo(this.pageBox);
         var btns = pbox;//jQuery('<ul class="pagination pull-left" ></ul>').appendTo(this.pageBox);
         var nums = pbox;//jQuery('<ul class="pagination pull-right"></ul>').appendTo(this.pageBox);
@@ -345,6 +356,7 @@ HsList.prototype = {
             nums.find(".page-last").addClass("lnks-next").find("a").html("&hellip;");
         }
 
+        this.pageBox.show();//.addClass("clearfix");
         this.pageBox.find("[data-pn="+p+"]").addClass("page-curr");
         this.pageBox.find("[data-pn]").on("click", function( evt ) {
             hsSetSeria(that._data, that.pageKey, jQuery(this).attr("data-pn"));

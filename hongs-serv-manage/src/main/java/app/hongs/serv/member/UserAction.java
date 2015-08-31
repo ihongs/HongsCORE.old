@@ -95,7 +95,9 @@ public class UserAction {
     @Action("unique")
     public void isUnique(ActionHelper helper)
     throws HongsException {
-        boolean rst = model.unique(helper.getRequestData());
+        boolean v = model.unique(helper.getRequestData());
+        Map rst = new HashMap();
+        rst.put("valid" , v);
         helper.reply(rst);
     }
 
