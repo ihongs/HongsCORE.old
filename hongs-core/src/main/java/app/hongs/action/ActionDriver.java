@@ -253,13 +253,13 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             Map dat  = hlpr.getResponseData();
             if (dat != null) {
                 if (0< Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                    req.setAttribute("__HONGS_RESP__", dat );
+                    req.setAttribute(DATA, dat);
                 }
 
 //              HttpServletRequest  raq = hlpr.getRequest( );
 //              HttpServletResponse rzp = hlpr.getResponse();
 //              hlpr.reinitHelper ( req , rsp );
-                hlpr.print();
+                hlpr.responed();
 //              hlpr.reinitHelper ( raq , rzp );
             }
 //      }
@@ -351,10 +351,10 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 rd = that.getRequestData( );
                 xd = that.getResponseData();
             } catch (HongsException ex) {
-                throw HongsError.common(null, ex);
+                throw HongsError.common(null , ex);
             }
             if (xd == null) {
-                xd = (Map ) req.getAttribute( "__HONGS_RESP__" );
+                xd = (Map ) req.getAttribute(DATA);
             }
             if (cf.getProperty("core.log.action.request", false)
             &&  rd != null && !rd.isEmpty()) {
@@ -422,6 +422,11 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
      * Request Attribute: 当前工作路径(类型: String)
      */
     public static final String PATH = "__HONGS_PATH__";
+
+    /**
+     * Request Attribute: 当前返回数据(类型: Object)
+     */
+    public static final String DATA = "__HONGS_DATA__";
 
     /**
      * 获得当前工作的Core

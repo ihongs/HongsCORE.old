@@ -15,10 +15,10 @@ import java.util.Set;
  * 通用上传动作
  * @author Hongs
  */
-@Action("common/upload")
-public class UploadAction {
+@Action("common/file")
+public class FileAction {
 
-    @Action("file")
+    @Action("upload")
     public void uploadFile(ActionHelper helper) throws HongsException {
         Map sd = new HashMap();
         Map rd = helper.getRequestData();
@@ -53,7 +53,7 @@ public class UploadAction {
         helper.reply(sd);
     }
 
-    @Action("image")
+    @Action("upload/image")
     public void uploadImage(ActionHelper helper) throws HongsException {
         String v = null;
         CoreConfig c = CoreConfig.getInstance();

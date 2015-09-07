@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <menu href="common/goto.act?m=demo/dl" disp="文档库测试">
+    <menu href="common/menu/cell.act?m=demo/dl" disp="文档库测试">
         <menu href="demo/dl/#demo1" disp="测试1" page="demo/dl/demo1/list.html">
         </menu>
         <menu href="demo/dl/#demo2" disp="商品" page="demo/dl/demo2/list.html">

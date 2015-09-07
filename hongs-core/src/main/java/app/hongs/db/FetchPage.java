@@ -14,14 +14,16 @@ public class FetchPage
 {
 
   private DB db;
-  
+
   private Table tb = null;
 
   private FetchCase caze;
 
   private int page =  1 ;
 
-  private int rows = 10 ;
+  private int lnks =  0 ;
+
+  private int rows = 20 ;
 
   private Map info = new HashMap();
 
@@ -35,6 +37,12 @@ public class FetchPage
     if (page2 != null && page2.equals(""))
     {
       this.setPage(Integer.parseInt(page2.toString()));
+    }
+
+    Object lnks2 = caze.getOption("lnks");
+    if (lnks2 != null && lnks2.equals(""))
+    {
+      this.setLnks(Integer.parseInt(lnks2.toString()));
     }
 
     Object rows2 = caze.getOption("rows");
@@ -82,12 +90,13 @@ public class FetchPage
     this.page = page;
   }
 
-  public void setRows(int rows) throws HongsException
+  public void setLnks(int lnks)
   {
-    if (rows == 0)
-    {
-      rows = 10;
-    }
+    this.lnks = lnks;
+  }
+
+  public void setRows(int rows)
+  {
     this.rows = rows;
   }
 
@@ -130,21 +139,35 @@ public class FetchPage
     throws HongsException
   {
     this.info.put("page", this.page);
+    this.info.put("lnks", this.lnks);
     this.info.put("rows", this.rows);
 
-    // 列表为空则不用计算了
-    if (this.info.containsKey("pagecount"))
+    // 列表为空则不用再计算了
+    if (this.info.containsKey("pagecount")
+    ||  this.info.containsKey("rowscount"))
     {
       return this.info;
     }
-    
+
+    // 指定链数则不用查全部了
+    int limit;
+    if (this.lnks > 0)
+    {
+      limit = page - (lnks / 2);
+      if (limit < 1) limit = 1 ;
+      limit = lnks + limit - 1 ;
+      limit = rows * limit + 1 ;
+    }
+    else
+    {
+      limit = 0;
+    }
+
     // 查询总行数
-    String   sql;
-    Object[] params;
-    FetchCase caze2 = this.caze.clone();
-    boolean   hasg  =  clnJoin( caze2 );
-              caze2.limit(0);
-    if (hasg)
+    String     sql;
+    Object[]   params;
+    FetchCase  caze2 = this.caze.clone().limit(limit);
+    if(clnJoin(caze2))
     {
       sql    =  "SELECT COUNT(*) AS __count__ FROM ("
              + caze2.getSQL()+") AS __table__" ;
@@ -174,14 +197,14 @@ public class FetchPage
     boolean hasg = caze.hasGroupBy();
     caze.setOrderBy("");
     caze.setSelect ("");
-    
+
     for (FetchCase caze2 : caze.joinList) {
       if( clnJoin( caze2 )) {
           hasg  =  true  ;
       }
     }
-    
+
     return hasg;
   }
-  
+
 }

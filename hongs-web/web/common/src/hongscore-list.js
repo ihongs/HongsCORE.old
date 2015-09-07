@@ -21,7 +21,7 @@ function HsList(opts, context) {
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
     this.rowsPerPage = hsGetConf("rows.per.page", 20);
-    this.lnksPerPage = hsGetConf("lnks.per.page", 10);
+    this.lnksForPage = hsGetConf("lnks.for.page", 10);
 
     this.context = context;
     this.loadBox = loadBox;
@@ -314,9 +314,9 @@ HsList.prototype = {
         t = page.pagecount ? parseInt(page.pagecount): 1;
         pmin = p - Math.floor( this.lnksPerPage / 2 );
         if (pmin < 1) pmin = 1;
-        pmax = pmin + this.lnksPerPage - 1;
+        pmax = pmin + this.lnksForPage - 1;
         if (pmax > t) pmax = t;
-        pmin = pmax - this.lnksPerPage + 1;
+        pmin = pmax - this.lnksForPage + 1;
         if (pmin < 1) pmin = 1;
 
         var pbox = jQuery('<ul class="pagination"></ul>').appendTo(this.pageBox);

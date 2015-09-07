@@ -88,8 +88,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public boolean IN_OBJECT_MODE = false;
 
     public String   idCol = "id";
-    public String[] findCols = new String[] { "wd" };
+    public String[] findCols = new String[] {"name"};
     public String[] dispCols = new String[] {"name"};
+
+    protected String idKey = "id";
+    protected String arKey = "ar";
+    protected String orKey = "or";
+    protected String xrKey = "xr";
+    protected String pageKey = "pn";
+    protected String rowsKey = "rn";
+    protected String lnksKey = "ln";
+    protected String colsKey = "sf";
+    protected String sortKey = "ob";
+    protected String findKey = "wd";
 
     public LuceneRecord(String path, final Map<String, Map> fields, final Map<String, String> talias)
     throws HongsException {
@@ -119,6 +130,17 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
         this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), conf.getProperty("core.in.trnsct.mode", false));
         this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"), conf.getProperty("core.in.object.mode", false));
+        
+        this.idKey   = conf.getProperty("fore.id.key"  , "id");
+        this.arKey   = conf.getProperty("fore.ar.key"  , "ar");
+        this.orKey   = conf.getProperty("fore.or.key"  , "or");
+        this.xrKey   = conf.getProperty("fore.xr.key"  , "xr");
+        this.pageKey = conf.getProperty("fore.page.key", "pn");
+        this.lnksKey = conf.getProperty("fore.lnks.key", "ln");
+        this.rowsKey = conf.getProperty("fore.rows.key", "rn");
+        this.colsKey = conf.getProperty("fore.cols.key", "sf");
+        this.sortKey = conf.getProperty("fore.sort.key", "ob");
+        this.findKey = conf.getProperty("fore.find.key", "wd");
     }
 
     /**
@@ -137,14 +159,14 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     /**
      * 获取数据
      *
-     * 以下参数为特殊参数, 并不像 db.Model 受配置控制(约定胜于配置):
-     * id   ID
+     * 以下参数为特殊参数, 可在 default.properties 中配置:
+     * id   ID, 仅指定单个 id 时则返回详情(info)
+     * rn   行数, 明确指定为 0 则不分页
+     * ln   分页
+     * pn   页码
      * wd   搜索
      * ob   排序
      * sf   字段
-     * pn   页码
-     * rn   每页行数
-     * ln   分页数量
      * or   多组"或"关系条件
      * ar   串联多组关系条件
      * xr   附加多组或关系, LuceneRecord 特有
@@ -167,10 +189,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
         // 获取行数, 默认依从配置
         int rn;
-        if (rd.containsKey("rn")) {
-            rn = Synt.declare(rd.get("rn"), 0);
+        if (rd.containsKey(rowsKey)) {
+            rn = Synt.declare(rd.get(rowsKey), 0);
         } else {
-            rn = CoreConfig.getInstance().getProperty("fore.rows.per.page", 10);
+            rn = CoreConfig.getInstance().getProperty("fore.rows.per.page", 20);
         }
 
         // 指定行数 0, 则走 getAll
@@ -183,15 +205,15 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
         // 获取链数, 默认依从配置
         int ln;
-        if (rd.containsKey("ln")) {
-            ln = Synt.declare(rd.get("ln"), 0);
+        if (rd.containsKey(lnksKey)) {
+            ln = Synt.declare(rd.get(lnksKey), 0);
         } else {
-            ln = CoreConfig.getInstance().getProperty("fore.lnks.per.page", 10);
+            ln = CoreConfig.getInstance().getProperty("fore.lnks.for.page", 10);
         }
 
         // 获取页码, 依此计算分页
         if (ln < 1) ln = 1; // 链数不得少于 1
-        int pn = Synt.declare(rd.get("pn"), 1);
+        int pn = Synt.declare(rd.get(pageKey), 1);
         int minPn = pn - (ln / 2 );
         if (minPn < 1)   minPn = 1;
         int maxPn = ln + minPn - 1;
@@ -869,8 +891,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Object fv = e.getValue( );
             String fn = (String) e.getKey();
 
-            if ("wd".equals(fn) || "ob".equals(fn) || "sf".equals(fn)
-            ||  "or".equals(fn) || "ar".equals(fn) || "xr".equals(fn)) {
+            if (findKey.equals(fn) || sortKey.equals(fn) || colsKey.equals(fn)
+            ||    orKey.equals(fn) ||   arKey.equals(fn) ||   xrKey.equals(fn)) {
                 continue;
             }
 
@@ -907,8 +929,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 关键词
-        if (rd.containsKey("wd")) {
-            Object fv = rd.get("wd");
+        if (rd.containsKey(findKey)) {
+            Object fv = rd.get(findKey);
             
             /**
              * 当设置了多个搜索字段时
@@ -933,9 +955,9 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 或条件
-        if (rd.containsKey("or")) {
+        if (rd.containsKey(orKey)) {
             BooleanQuery quary = new BooleanQuery( );
-            Set<Map> set = Synt.declare(rd.get("or"), Set.class);
+            Set<Map> set = Synt.declare(rd.get(orKey), Set.class);
             for(Map  map : set) {
                 quary.add(getQuery(map), BooleanClause.Occur.SHOULD);
             }
@@ -943,16 +965,16 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 附条件
-        if (rd.containsKey("xr")) {
-            Set<Map> set = Synt.declare(rd.get("xr"), Set.class);
+        if (rd.containsKey(xrKey)) {
+            Set<Map> set = Synt.declare(rd.get(xrKey), Set.class);
             for(Map  map : set) {
                 query.add(getQuery(map), BooleanClause.Occur.SHOULD);
             }
         }
 
         // 并条件
-        if (rd.containsKey("ar")) {
-            Set<Map> set = Synt.declare(rd.get("ar"), Set.class);
+        if (rd.containsKey(arKey)) {
+            Set<Map> set = Synt.declare(rd.get(arKey), Set.class);
             for(Map  map : set) {
                 query.add(getQuery(map), BooleanClause.Occur.MUST  );
             }
@@ -964,8 +986,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 有条件无排序则按相关度排序
-        if(!rd.containsKey("ob")) {
-            rd.put("ob", "-");
+        if(!rd.containsKey(sortKey)) {
+            rd.put(sortKey, "-");
         }
 
         return query;
@@ -979,8 +1001,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     protected Sort getSort(Map rd) throws HongsException {
         Set<String> ob;
-        Object xb = rd.get("ob" );
-        if (xb instanceof String)
+        Object xb = rd.get( sortKey );
+        if (xb instanceof String/**/)
         {
           ob = new LinkedHashSet(Arrays.asList(((String)xb).split("[, \\+]")));
         } else
@@ -1057,8 +1079,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     protected void ignFlds(Map rd) {
         Set<String> fs;
-        Object fz = rd.get("sf" );
-        if (fz instanceof String)
+        Object fz = rd.get( colsKey );
+        if (fz instanceof String/**/)
         {
           fs = new LinkedHashSet(Arrays.asList(((String)fz).split("[, \\+]")));
         } else
@@ -1267,6 +1289,31 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
+    /**
+     * 组织查询条件
+     *
+     * 操作符, 此键为约定不可配置, 字段名务必避开这些名词(不要使用-前缀即可):
+     * -eq 等于
+     * -ne 不等于
+     * -lt 小于
+     * -le 小于或等于
+     * -gt 大于
+     * -ge 大于或等于
+     * -in 包含
+     * -ni 不包含
+     * 以下为 Lucene 特有的操作符:
+     * -or 或匹配, 有则优先
+     * -oi 或包含, 有则优先
+     * -ai 全包含, 此为目标真子集
+     * -wt 优先度, 设定查询的权重
+     * 注意: 默认情况下查询参数不给值则忽略, 如果指定了操作符则匹配空值
+     *
+     * @param qry
+     * @param k
+     * @param v
+     * @param q
+     * @throws HongsException 
+     */
     protected void qryAdd(BooleanQuery qry, String k, Object v, AddQuery q)
     throws HongsException {
         Map m;

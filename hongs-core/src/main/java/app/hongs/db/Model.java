@@ -64,6 +64,17 @@ implements IRecord
   public Table table;
 
   /**
+   * 被搜索的字段
+   * 影响getPage/getList/filter
+   */
+  public String[] findCols = new String[] {"name"};
+
+  /**
+   * 被显示的字段
+   */
+  public String[] dispCols = new String[] {"name"};
+
+  /**
    * ID参数名
    */
   protected String idKey = "id";
@@ -85,6 +96,12 @@ implements IRecord
    * 影响getPage
    */
   protected String pageKey = "pn";
+
+  /**
+   * 链接参数名
+   * 影响getPage
+   */
+  protected String lnksKey = "ln";
 
   /**
    * 行数参数名
@@ -111,21 +128,10 @@ implements IRecord
   protected String findKey = "wd";
 
   /**
-   * 被搜索的字段
-   * 影响getPage/getList/filter
-   */
-  public String[] findCols = new String[] {"name"};
-
-  /**
-   * 被显示的字段
-   */
-  public String[] dispCols = new String[] {"name"};
-
-  /**
    * 构造方法
    *
    * 需指定该模型对应的表对象.
-   * 如传递的page,rows,cols,sort,find等参数名不同,
+   * 如传递的 id,wd,pn,ln,rn,sf,ob 等参数名不同,
    * 可在构造时分别指定;
    * 请指定被搜索的字段.
    *
@@ -142,8 +148,9 @@ implements IRecord
     CoreConfig conf = Core.getInstance(CoreConfig.class);
     this.idKey   = conf.getProperty("fore.id.key"  , "id");
     this.orKey   = conf.getProperty("fore.or.key"  , "or");
-    this.arKey   = conf.getProperty("fore.ar.key"  , "or");
+    this.arKey   = conf.getProperty("fore.ar.key"  , "ar");
     this.pageKey = conf.getProperty("fore.page.key", "pn");
+    this.lnksKey = conf.getProperty("fore.lnks.key", "ln");
     this.rowsKey = conf.getProperty("fore.rows.key", "rn");
     this.colsKey = conf.getProperty("fore.cols.key", "sf");
     this.sortKey = conf.getProperty("fore.sort.key", "ob");
@@ -677,6 +684,13 @@ implements IRecord
     {
       page = Integer.parseInt((String)rd.get(this.pageKey));
     }
+    
+    // 获取分页, 默认查总页数
+    int lnks = 0;
+    if (rd.containsKey(this.lnksKey))
+    {
+      lnks = Integer.parseInt((String)rd.get(this.lnksKey));
+    }
 
     // 获取行数, 默认依从配置
     int rows;
@@ -686,7 +700,7 @@ implements IRecord
     }
     else
     {
-      rows = CoreConfig.getInstance().getProperty("fore.rows.per.page", 10);
+      rows = CoreConfig.getInstance().getProperty("fore.rows.per.page", 20);
     }
 
     Map data = new HashMap();
@@ -696,6 +710,7 @@ implements IRecord
       caze.from (table.tableName , table.name );
       FetchPage fp = new FetchPage(caze, table);
       fp.setPage(page != 0 ? page : 1);
+      fp.setLnks(lnks >  0 ? lnks : Math.abs(lnks));
       fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
       // 行数小于 0 则不要分页信息

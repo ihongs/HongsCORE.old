@@ -1,10 +1,18 @@
 package app.hongs.cmdlet.serv;
 
+import app.hongs.Core;
 import app.hongs.HongsException;
+import app.hongs.action.ActionHelper;
+import app.hongs.action.ActionRunner;
 import app.hongs.cmdlet.CmdletHelper;
+import app.hongs.cmdlet.CmdletRunner;
 import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Text;
+import java.lang.reflect.Method;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * 常规服务
@@ -42,6 +50,8 @@ public class Common {
     }
   }
 
+  //** 测试 **/
+  
   @Cmdlet("test-text")
   public static void testText(String[] args) {
     String s = "\\\"Hello world!\", this is Hong's framework.\r\n"
@@ -98,5 +108,136 @@ public class Common {
     } catch (InterruptedException ex) {
     }
   }
+
+    //** 命令 **/
+  
+    @Cmdlet("make-uid")
+    public static void makeUID(String[] args) {
+        System.out.println(Core.getUniqueId(args.length > 0 ? args[0] : Core.SERVER_ID));
+    }
+
+    @Cmdlet("show-env")
+    public static void showENV(String[] args) {
+        Map<String, String> a = new TreeMap(new PropComparator());
+        Map<String, String> m = new HashMap(    System.getenv ());
+        int i = 0, j;
+
+        for (Map.Entry<String, String> et : m.entrySet()) {
+            String k = et.getKey(  );
+            String v = et.getValue();
+            a.put(k, v);
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
+    }
+
+    @Cmdlet("show-properties")
+    public static void showProperties(String[] args) {
+        Map<String, String> a = new TreeMap( new  PropComparator());
+        Map<String, String> m = new HashMap(System.getProperties());
+        int i = 0, j;
+
+        for (Map.Entry<String, String> et : m.entrySet()) {
+            String k = et.getKey(  );
+            String v = et.getValue();
+            a.put(k, v);
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
+    }
+
+    @Cmdlet("show-cmdlets")
+    public static void showCmdlets(String[] args) {
+        Map<String, String> a = new TreeMap(new PropComparator());
+        int i = 0, j;
+
+        for (Map.Entry<String, Method> et : CmdletRunner.getCmdlets().entrySet()) {
+            String k = et.getKey(  );
+            Method v = et.getValue();
+            a.put( k, v.getDeclaringClass().getName()+"."+v.getName() );
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
+    }
+
+    @Cmdlet("show-actions")
+    public static void showActions(String[] args) {
+        Map<String, String> a = new TreeMap(new PropComparator());
+        int i = 0, j;
+
+        for (Map.Entry<String, ActionRunner.Mathod> et : ActionRunner.getActions().entrySet()) {
+            String k = et.getKey(  );
+            ActionRunner.Mathod v = et.getValue();
+            a.put( k, v.toString() );
+            j = k.length();
+            if (i < j && j < 31) {
+                i = j;
+            }
+        }
+
+        for (Map.Entry<String, String> n : a.entrySet()) {
+            StringBuilder s = new StringBuilder();
+            s.append(n.getKey());
+            for (j = n.getKey( ).length( ); j < i; j ++) {
+                s.append(" " );
+            }   s.append("\t");
+            s.append(n.getValue());
+            System.out.println (s);
+        }
+    }
+
+    @Cmdlet("exec-action")
+    public static void execAction(String[] args) throws HongsException {
+        if (args.length == 0) {
+            System.err.println("Action name required!\r\nUsage: ACTION_NAME --request-- QUERY_STRING --context-- QUERY_STRING --session QUERY_STRING");
+            return;
+        }
+        ActionHelper a = Core.getInstance(ActionHelper.class/**/);
+        new app.hongs.action.ActionRunner(args[0], a ).doAction();
+        app.hongs.util.Data.dumps(a.getResponseData());
+    }
+
+    private static class PropComparator implements Comparator<String> {
+        @Override
+        public int compare(String s1, String s2) {
+            return s1.compareTo(s2);
+        }
+    }
 
 }

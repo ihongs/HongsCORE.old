@@ -55,11 +55,6 @@ public class ActionHelper
   private HttpServletRequest request;
 
   /**
-   * 请求字段
-   */
-  private Set<String> requestKeys = null;
-
-  /**
    * 请求数据
    */
   private Map<String, Object> requestData = null;
@@ -466,6 +461,7 @@ public class ActionHelper
       } else {
         this.contextData.put(name, value);
       }
+        this.contextData.put("__UPDATE__", System.currentTimeMillis());
     } else {
       if (value == null) {
         this.getRequest().removeAttribute(name);
@@ -507,9 +503,10 @@ public class ActionHelper
       } else {
         this.sessionData.put(name, value);
       }
+        this.sessionData.put("__UPDATE__", System.currentTimeMillis());
     } else {
       if (value == null) {
-        HttpSession sess = this.getRequest().getSession();
+        HttpSession sess = this.getRequest().getSession(/**/);
         if (null != sess) sess.removeAttribute(name);
       } else {
         HttpSession sess = this.getRequest().getSession(true);
@@ -621,8 +618,8 @@ public class ActionHelper
   /**
    * 输出内容
    * @param txt
-   * @param cst Content-Type 编码, 如 utf-8
    * @param ctt Content-Type 定义, 如 text/html
+   * @param cst Content-Type 编码, 如 utf-8
    */
   public void print(String txt, String ctt, String cst)
   {
@@ -658,25 +655,26 @@ public class ActionHelper
   }
 
   /**
-   * 输出JSON格式
+   * 输出数据
    *
    * @param dat
    */
   public void print(Object dat)
   {
-    this.print(Data.toString(dat), "application/json");
+    String  str = Data.toString( dat );
+    this.print(str,"application/json");
   }
 
+  //** 跳转及错误 **/
+
   /**
-   * 直接输出数据
+   * 返回数据
    */
-  public void print()
+  public void responed()
   {
     this.print(responseData);
     this.responseData = null;
   }
-
-  //** 跳转及错误 **/
 
   /**
    * 302重定向

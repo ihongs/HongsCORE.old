@@ -6,6 +6,14 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
 /**
  * 常用文本工具
  *
@@ -155,13 +163,15 @@ public final class Text
 
   /**
    * 转义正则符
-   * jdk1.5 中 Pattern.escape(esc) 替换有问题
+   * jdk1.5 中 Pattern.quote( s ) 替换有问题
    * 故对正则符等转换成Unicode形式来使之正常
+   * 2015/9/6: 因现已不考虑 jdk1.5 及以下版本, 恢复使用 Pattern.quote
    * @param str 原字符串
    * @return 转换了的字符串
    */
-  public static String escapeRegular(String str)
+  private static String escapeRegular(String str)
   {
+    /*
     StringBuilder sb = new StringBuilder();
          char[]   cs = str.toCharArray();
     for (char c : cs)
@@ -169,18 +179,24 @@ public final class Text
       sb.append(String.format("\\u%04x",(int)c));
     }
     return sb.toString();
+    */
+    return Pattern.quote(str);
   }
 
   /**
    * 转义转义符
    * jdk1.5 中缺少 Matcher.quoteReplacement
    * 故对转义符等前面加斜杠进行转义使之正常
+   * 2015/9/6: 因现已不考虑 jdk1.5 及以下版本, 恢复使用 Matcher.quoteReplacement
    * @param str 原字符串
    * @return 转换了的字符串
    */
-  public static String escapeReplace(String str)
+  private static String escapeReplace(String str)
   {
+    /*
     return str.replaceAll("(\\\\|\\$)","\\\\$1");
+    */
+    return Matcher.quoteReplacement(str);
   }
 
   /**
@@ -192,22 +208,20 @@ public final class Text
    */
   public static String escape(String str, String esc, String sym)
   {
+    if (sym.length() == 1 && !esc.contains(sym))
+    {
+        esc += sym;
+    }
+
     /**
      * 转换转义符里的特殊字符,
      * 偶数个转义符后加转义符.
      */
 
-    if (esc.indexOf(sym) == -1)
-        esc    +=   sym;
-
     String esc2 = Text.escapeRegular(esc);
     String sym2 = Text.escapeReplace(sym);
 
     return str.replaceAll("(["+esc2+"])", sym2+"$1");
-    /*
-    return str.replaceAll("(("+sym2+sym2+")+)?(["+esc2+"])",
-                          "$1"+Util.escapeReplace(sym)+"$3");
-    */
   }
   public static String escape(String str, String esc)
   {
@@ -227,18 +241,20 @@ public final class Text
    */
   public static String resume(String str, String esc, String sym)
   {
+    if (sym.length() == 1 && !esc.contains(sym))
+    {
+        esc += sym;
+    }
+
     /**
      * 把两个转义符换成一个,
      * 把单个转义符全删除掉.
      */
 
-    if (esc.indexOf(sym) == -1)
-        esc   +=    sym;
-
     String esc2 = Text.escapeRegular(esc);
     String sym2 = Text.escapeRegular(sym);
 
-    return str.replaceAll(sym2 + "(["+esc2+"])", "$1");
+    return str.replaceAll(sym2+"(["+esc2+"])", "$1");
   }
   public static String resume(String str, String esc)
   {
@@ -247,6 +263,50 @@ public final class Text
   public static String resume(String str)
   {
     return Text.resume(str, "'\"", "\\");
+  }
+
+  //** 缩进 **/
+
+  /**
+   * 缩进
+   * @param str
+   * @param ind
+   * @return 缩进后的文本
+   */
+  public static String indent(String str, String ind) {
+      ind = /**/escapeReplace(ind);
+      return  Pattern.compile("^", Pattern.MULTILINE)
+                     .matcher(str).replaceAll( ind  );
+  }
+
+  /**
+   * 缩进
+   * @param str
+   * @return 缩进后的文本
+   */
+  public static String indent(String str) {
+      return  indent(str, "\t");
+  }
+
+  /**
+   * 反缩进
+   * @param str
+   * @param ind
+   * @return 反缩进后的文本
+   */
+  public static String undent(String str, String ind) {
+      ind = "^"+escapeRegular(ind);
+      return  Pattern.compile(ind, Pattern.MULTILINE)
+                     .matcher(str).replaceAll(  ""  );
+  }
+
+  /**
+   * 反缩进
+   * @param str
+   * @return 反缩进后的文本
+   */
+  public static String undent(String str) {
+      return  undent(str, "\t");
   }
 
   //** 注入 **/
@@ -322,28 +382,6 @@ public final class Text
       return inject(str, rep2);
   }
 
-  //** 缩进 **/
-
-  /**
-   * 行首缩进
-   * @param str
-   * @param inds
-   * @return 缩进后的文本
-   */
-  public static String indent(String str, String inds) {
-      return Pattern.compile("^", Pattern.MULTILINE)
-                    .matcher(str).replaceAll(inds);
-  }
-
-  /**
-   * 行首缩进
-   * @param str
-   * @return 缩进后的文本
-   */
-  public static String indent(String str) {
-      return indent(str, "\t");
-  }
-
   //** 清理 **/
 
   /**
@@ -396,16 +434,18 @@ public final class Text
   }
 
   /**
-   * 清理HTML
-   * 该实现并不严谨, 对于复杂的HTML(包含JS等)不推荐使用
+   * 清理HTM
+   * 该实现并不严谨, 对于复杂的HTM(包含JSCSS等)不推荐使用
+   * @param str
+   * @return 新串
    */
-  public static String cleanHTML(String str)
+  public static String cleanHTM(String str)
   {
     Pattern pat;
     pat = Pattern.compile( "<style.*?>.*?</style>" , Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
-    str = pat.matcher(str).replaceAll("");
+    str = pat.matcher(str).replaceAll("" );
     pat = Pattern.compile("<script.*?>.*?</script>", Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
-    str = pat.matcher(str).replaceAll("");
+    str = pat.matcher(str).replaceAll("" );
     return   cleanXML(str);
   }
 
@@ -433,7 +473,7 @@ public final class Text
     if (n > 0) {  time = time % 60000;
       sb.append(n).append("m");
     }
-    
+
     float m = (float) time / 1000;
     if (0 != m || 0 == sb.length()) {
       sb.append(m).append("s");
@@ -475,6 +515,74 @@ public final class Text
     }
 
     return sb.toString();
+  }
+
+  /** 文件 **/
+
+  /**
+   * 从文件中获取所有内容
+   * @param path 文件路径
+   * @return 
+   */
+  public static String fetchFile(String path) {
+      BufferedReader br = null;
+      try {
+          br = new BufferedReader(
+               new FileReader(
+               new File(path)));
+          StringBuilder sb = new StringBuilder();
+          char[]        bs;
+          while ( true ) {
+              bs = new char[1024];
+              if( -1 != br.read(bs) ) {
+                  break;
+              }
+              sb.append(bs);
+          }
+          return sb.toString();
+      } catch (FileNotFoundException ex) {
+          throw app.hongs.HongsError.common("Can not find " + path, ex);
+      } catch (IOException ex) {
+          throw app.hongs.HongsError.common("Can not read " + path, ex);
+      } finally {
+          if (br != null) {
+              try {
+                  br.close();
+              } catch (IOException ex) {
+                  throw app.hongs.HongsError.common("Can not close " + path, ex);
+              }
+          }
+      }
+  }
+
+  /**
+   * 将内容写入指定文件中
+   * @param path 文件路径
+   * @param text 写入内容
+   * @param append 是否为追加
+   */
+  public static  void  storeFile(String path, String text, boolean append) {
+      BufferedWriter bw = null;
+      try {
+          bw = new BufferedWriter(
+               new FileWriter(
+               new File(path)));
+          if (append) {
+              bw.append(text);
+          } else {
+              bw.write (text);
+          }
+      } catch (IOException ex) {
+          throw app.hongs.HongsError.common("Can not save " + path, ex);
+      } finally {
+          if (bw != null) {
+              try {
+                  bw.close();
+              } catch (IOException ex) {
+                  throw app.hongs.HongsError.common("Can not close " + path, ex);
+              }
+          }
+      }
   }
 
 }

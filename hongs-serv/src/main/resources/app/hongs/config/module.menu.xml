@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <menu disp="模块管理" href="common/goto.act?m=module">
+    <menu disp="模块管理" href="common/menu/cell.act?m=module">
         <menu disp="表单" href="hongs/module/#unit" page="hongs/module/unit/tree.html">
             <role disp="查看表单" name="hongs/module/form/retrieve">
                 <depend>hongs/module/unit/retrieve</depend>

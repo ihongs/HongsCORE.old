@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
  * ASSOC_MERGE  : boolean     归并关联(仅限非多行关联); 作用域: FetchMore
  * FETCH_OBJECT : boolean     获取对象; 作用域: DB.fetchMore
  * page         : int|String  分页页码; 作用域: FetchPage
+ * lnks         : int|String  链接数量; 作用域: FetchPage
  * rows         : int|String  分页行数; 作用域: FetchPage
  * </pre>
  *

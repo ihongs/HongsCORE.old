@@ -13,10 +13,10 @@ import java.util.Map;
  * 通用动作
  * @author Hong
  */
-@Action("common")
-public class CommonAction {
+@Action("common/menu")
+public class MenuAction {
 
-    @Action("menu")
+    @Action("list")
     public void menu(ActionHelper helper)
     throws HongsException {
         String name  = helper.getParameter("m");
@@ -44,7 +44,7 @@ public class CommonAction {
         helper.reply(data);
     }
 
-    @Action("goto")
+    @Action("cell")
     public void jump(ActionHelper helper)
     throws HongsException {
         String m = helper.getParameter("m");
@@ -53,9 +53,9 @@ public class CommonAction {
             m = "default";
         }
         if (null == n) {
-            n  = "common/goto.act?m=" + m;
+            n = "common/menu/cell.act?m=" + m;
         } else {
-            n  = "common/goto.act?m=" + m + "&n=" + n;
+            n = "common/menu/cell.act?m=" + m + "&n=" + n;
         }
 
         MenuSet site  =  MenuSet.getInstance(m);

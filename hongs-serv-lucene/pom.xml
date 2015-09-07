@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>app.hongs</groupId>
     <artifactId>hongs-serv-lucene</artifactId>
+    <name>hongs-serv-lucene</name>
     <!--version>0.3-SNAPSHOT</version-->
     <packaging>jar</packaging>
     <parent>
@@ -61,5 +62,4 @@
             </plugin>
         </plugins>
     </build>
-    <name>hongs-serv-lucene</name>
 </project>

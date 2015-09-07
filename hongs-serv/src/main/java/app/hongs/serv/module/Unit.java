@@ -75,7 +75,9 @@ public class Unit extends Mtree {
         menu = docm.createElement("menu");
         root.appendChild ( menu );
         menu.setAttribute("disp", name);
-        menu.setAttribute("href", "common/goto.act?m=hongs/module/unit/"+id);
+        menu.setAttribute("href", "common/menu/cell.act?m=hongs/module/unit/"+id);
+        
+        List<String> pids = this.getParentIds(id);
         
         FetchCase fc = new FetchCase();
         fc.select("id,name")

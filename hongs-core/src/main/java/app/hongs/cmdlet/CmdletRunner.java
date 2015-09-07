@@ -12,9 +12,8 @@ import app.hongs.util.Clazz;
 import app.hongs.util.Data;
 import app.hongs.util.Synt;
 import app.hongs.util.Text;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -288,49 +287,9 @@ public class CmdletRunner
 
     /** 初始化核心 **/
 
-    String str;
-
-    str = (String) opts.get("request--");
-    Map req  = null;
-    if (str != null && str.length() > 0)
-    {
-        if (str.startsWith("@")) {
-            str = getContent(str.substring(1));
-        }
-        if (str.startsWith("{") && str.endsWith("}")) {
-            req = ( Map ) Data.toObject( str );
-        } else {
-            req = ActionHelper.parseParam(ActionHelper.parseQuery(str));
-        }
-    }
-
-    str = (String) opts.get("context--");
-    Map con  = null;
-    if (str != null && str.length() > 0)
-    {
-        if (str.startsWith("@")) {
-            str = getContent(str.substring(1));
-        }
-        if (str.startsWith("{") && str.endsWith("}")) {
-            con = ( Map ) Data.toObject( str );
-        } else {
-            con = ActionHelper.parseParam(ActionHelper.parseQuery(str));
-        }
-    }
-
-    str = (String) opts.get("session--");
-    Map ses  = null;
-    if (str != null && str.length() > 0)
-    {
-        if (str.startsWith("@")) {
-            str = getContent(str.substring(1));
-        }
-        if (str.startsWith("{") && str.endsWith("}")) {
-            ses = ( Map ) Data.toObject( str );
-        } else {
-            ses = ActionHelper.parseParam(ActionHelper.parseQuery(str));
-        }
-    }
+    Map req  = inid((String) opts.get("request--"));
+    Map con  = inid((String) opts.get("context--"));
+    Map ses  = inid((String) opts.get("session--"));
 
     ActionHelper helper = new ActionHelper(req, con, ses, null );
     Core.getInstance().put(ActionHelper.class.getName(), helper);
@@ -353,6 +312,29 @@ public class CmdletRunner
     });
 
     return args;
+  }
+
+  private static Map inid(String text)
+  {
+    if (text == null || text.length() == 0) {
+        return  null;
+    }
+
+        text = text.trim();
+    if (text.startsWith("@")) {
+        text = Text.fetchFile(text.substring(1));
+        text = text.replaceAll("//.*?(\\r|\\n|$)", "$1");
+        text = text.trim();
+    }
+
+    Map data;
+    if (text.startsWith("{") && text.endsWith("}")) {
+        data = (Map) Data.toObject(text);
+    } else {
+        data = ActionHelper.parseParam(ActionHelper.parseQuery(text));
+    }
+
+    return  data;
   }
 
     private static Map<String, Method> CMDLETS = null;
@@ -438,24 +420,6 @@ public class CmdletRunner
         }
 
         return acts;
-    }
-
-    private static String getContent(String path) throws HongsException {
-        File   file = new File(path);
-        Long   size = file.length( );
-        byte[] cont = new byte[size.intValue()];
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            fis.read (cont);
-            fis.close(/**/);
-        } catch (FileNotFoundException e) {
-            throw HongsException.common("Can not find " + path, e);
-        } catch (IOException e) {
-            throw HongsException.common("Can not read " + path, e);
-        }
-        String text = new String(cont);
-        text = text.replaceAll("//.*?([\\r\\n])" , "$1");
-        return text.trim( );
     }
 
 }

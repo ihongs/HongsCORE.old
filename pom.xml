@@ -12,7 +12,6 @@
         <module>hongs-core</module>
         <module>hongs-serv</module>
         <module>hongs-serv-lucene</module>
-        <module>hongs-serv-manage</module>
         <module>hongs-serv-msnger</module>
         <module>hongs-serv-system</module>
         <module>hongs-serv-server</module>

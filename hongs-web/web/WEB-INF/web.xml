@@ -123,7 +123,12 @@
     </jsp-config>
     <!-- Other Settings -->
     <session-config>
-        <session-timeout>480</session-timeout>
+        <session-timeout>43210</session-timeout>
+        <cookie-config>
+            <name>sid</name>
+            <secure>true</secure>
+            <http-only>true</http-only>
+        </cookie-config>
     </session-config>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

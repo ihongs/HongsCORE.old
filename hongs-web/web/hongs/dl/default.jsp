@@ -18,7 +18,7 @@
                lang.loadIgnrFNF(_module);
     MenuSet    site = MenuSet.getInstance(_module);
 
-    String title = lang.translate(site.getMenu("common/goto.act?m="+_module).get("disp").toString());
+    String title = lang.translate(site.getMenu("common/menu/cell.act?m="+_module).get("disp").toString());
 %>
 <!--
 Hong's Auto Info Manage

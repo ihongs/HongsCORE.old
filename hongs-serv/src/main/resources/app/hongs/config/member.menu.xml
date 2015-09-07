@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <menu disp="会员管理" href="common/goto.act?m=member">
+    <menu disp="会员管理" href="common/menu/cell.act?m=member">
         <menu disp="用户" href="hongs/member/#user" page="hongs/member/dept/tree.html">
             <role disp="查看用户" name="hongs/member/user/retrieve">
                 <depend>hongs/member/dept/retrieve</depend>
