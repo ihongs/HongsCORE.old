@@ -181,6 +181,16 @@ public class Table
   }
 
   /**
+   * 调用 FetchCase 构建查询
+   * 可用 all, one  得到结果, 以及 delete, update 操作数据
+   * @return 绑定了 db 的查询对象
+   */
+  public FetchCase fetchCase()
+  {
+    return new FetchCase().use(db).from(tableName, name);
+  }
+
+  /**
    * 插入数据
    * @param values
    * @return 插入条数

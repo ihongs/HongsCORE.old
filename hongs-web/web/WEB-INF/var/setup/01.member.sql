@@ -12,15 +12,16 @@ CREATE TABLE `a_member_dept` (
   `note` text,
   `ctime` int(11) DEFAULT NULL,
   `mtime` int(11) DEFAULT NULL,
+  `rtime` int(11) DEFAULT NULL,
   `state` tinyint(4) DEFAULT '1',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`pid`) REFERENCES `a_member_dept` (`id`) ON DELETE CASCADE
 );
 
+CREATE INDEX `IK_a_member_dept_dept` ON `a_member_dept` (`pid`);
 CREATE INDEX `IK_a_member_dept_state` ON `a_member_dept` (`state`);
 CREATE INDEX `IK_a_member_dept_ctime` ON `a_member_dept` (`ctime`);
 CREATE INDEX `IK_a_member_dept_mtime` ON `a_member_dept` (`mtime`);
-CREATE INDEX `IK_a_member_dept_dept` ON `a_member_dept` (`pid`);
 CREATE UNIQUE INDEX `UK_a_member_dept_name` ON `a_member_dept` (`name`,`pid`);
 
 INSERT INTO `a_member_dept` VALUES ('0',NULL,'ROOT','ROOT','1424075622230','1424075622230',1);
@@ -58,6 +59,7 @@ CREATE TABLE `a_member_user` (
   `password` varchar(200) DEFAULT NULL,
   `ctime` int(11) DEFAULT NULL,
   `mtime` int(11) DEFAULT NULL,
+  `rtime` int(11) DEFAULT NULL,
   `state` tinyint(4) DEFAULT '1',
   PRIMARY KEY (`id`)
 );
@@ -75,6 +77,30 @@ INSERT INTO `a_member_user` VALUES ('HXNZ0OLR00297H9H01','王五 (市场总监)'
 INSERT INTO `a_member_user` VALUES ('HXZGVRBH000XHB0601','赵六 (研发主管)',NULL,'d@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230',1);
 INSERT INTO `a_member_user` VALUES ('HXZGWPZV002I1J1601','钱七 (运维主管)',NULL,'e@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230',1);
 INSERT INTO `a_member_user` VALUES ('HY9XQN2L000WGH9Q01','孙八 (产品总监)',NULL,'f@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230',1);
+
+--
+-- 用户所属部门
+--
+
+DROP TABLE IF EXISTS `a_member_user_dept`;
+CREATE TABLE `a_member_user_dept` (
+  `user_id` char(20) NOT NULL,
+  `dept_id` char(20) NOT NULL,
+  PRIMARY KEY (`user_id`,`dept_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `a_member_user` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`dept_id`) REFERENCES `a_member_dept` (`id`) ON DELETE CASCADE
+);
+
+CREATE INDEX `IK_a_member_user_dept_user` ON `a_member_user_dept` (`user_id`);
+CREATE INDEX `IK_a_member_user_dept_dept` ON `a_member_user_dept` (`dept_id`);
+
+INSERT INTO `a_member_user_dept` VALUES ('1','0');
+INSERT INTO `a_member_user_dept` VALUES ('01I2ODRZHR00KLJOEM','0');
+INSERT INTO `a_member_user_dept` VALUES ('01I2ODSOGC00KGZCQK','HXSDROLE001REB0Q01');
+INSERT INTO `a_member_user_dept` VALUES ('HXNZ0OLR00297H9H01','HYPRZ8Q5006II04J01');
+INSERT INTO `a_member_user_dept` VALUES ('HXZGVRBH000XHB0601','HY9XXIS5000T3DD501');
+INSERT INTO `a_member_user_dept` VALUES ('HXZGWPZV002I1J1601','HYPR7S3N00BWKOZ001');
+INSERT INTO `a_member_user_dept` VALUES ('HY9XQN2L000WGH9Q01','HYPS1ROT007T1AG601');
 
 --
 -- 用户所属角色
@@ -109,25 +135,19 @@ INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/update');
 INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/delete');
 
 --
--- 用户所属部门
+-- 用户登录凭证
 --
 
-DROP TABLE IF EXISTS `a_member_user_dept`;
-CREATE TABLE `a_member_user_dept` (
+DROP TABLE IF EXISTS `a_member_user_sign`;
+CREATE TABLE `a_member_user_sign` (
   `user_id` char(20) NOT NULL,
-  `dept_id` char(20) NOT NULL,
-  PRIMARY KEY (`user_id`,`dept_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `a_member_user` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`dept_id`) REFERENCES `a_member_dept` (`id`) ON DELETE CASCADE
+  `type` char(20) NOT NULL,
+  `code` char(20) NOT NULL,
+  `ctime` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`,`type`),
+  FOREIGN KEY (`user_id`) REFERENCES `a_member_user` (`id`) ON DELETE CASCADE
 );
 
-CREATE INDEX `IK_a_member_user_dept_user` ON `a_member_user_dept` (`user_id`);
-CREATE INDEX `IK_a_member_user_dept_dept` ON `a_member_user_dept` (`dept_id`);
-
-INSERT INTO `a_member_user_dept` VALUES ('1','0');
-INSERT INTO `a_member_user_dept` VALUES ('01I2ODRZHR00KLJOEM','0');
-INSERT INTO `a_member_user_dept` VALUES ('01I2ODSOGC00KGZCQK','HXSDROLE001REB0Q01');
-INSERT INTO `a_member_user_dept` VALUES ('HXNZ0OLR00297H9H01','HYPRZ8Q5006II04J01');
-INSERT INTO `a_member_user_dept` VALUES ('HXZGVRBH000XHB0601','HY9XXIS5000T3DD501');
-INSERT INTO `a_member_user_dept` VALUES ('HXZGWPZV002I1J1601','HYPR7S3N00BWKOZ001');
-INSERT INTO `a_member_user_dept` VALUES ('HY9XQN2L000WGH9Q01','HYPS1ROT007T1AG601');
+CREATE INDEX `IK_a_member_user_sign_user` ON `a_member_user_dept` (`user_id`);
+CREATE INDEX `IK_a_member_user_sign_type` ON `a_member_user_dept` (`type`);
+CREATE INDEX `IK_a_member_user_sign_code` ON `a_member_user_dept` (`code`);

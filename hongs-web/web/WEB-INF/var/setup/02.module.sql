@@ -12,14 +12,15 @@ CREATE TABLE `a_module_unit` (
   `note` text,
   `ctime` int(11) DEFAULT NULL,
   `mtime` int(11) DEFAULT NULL,
+  `boost` int(11) DEFAULT NULL,
   `state` tinyint(4) DEFAULT '1',
   PRIMARY KEY (`id`)
 );
 
+CREATE INDEX `IK_a_module_unit_unit` ON `a_member_dept` (`pid`);
 CREATE INDEX `IK_a_module_unit_state` ON `a_module_unit` (`state`);
 CREATE INDEX `IK_a_module_unit_ctime` ON `a_module_unit` (`ctime`);
 CREATE INDEX `IK_a_module_unit_mtime` ON `a_module_unit` (`mtime`);
-CREATE INDEX `IK_a_member_dept_dept` ON `a_member_dept` (`pid`);
 CREATE UNIQUE INDEX `UK_a_module_unit_name` ON `a_module_unit` (`name`,`pid`);
 
 --
@@ -31,9 +32,11 @@ CREATE TABLE `a_module_form` (
   `id` char(20) NOT NULL,
   `unit_id` char(20) NOT NULL,
   `name` varchar(200) NOT NULL,
+  `note` text,
   `conf` text NOT NULL,
   `ctime` int(11) DEFAULT NULL,
   `mtime` int(11) DEFAULT NULL,
+  `boost` int(11) DEFAULT NULL,
   `state` tinyint(4) DEFAULT '1',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`unit_id`) REFERENCES `a_module_unit` (`id`) ON DELETE CASCADE

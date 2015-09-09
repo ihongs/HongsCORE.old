@@ -19,9 +19,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 临时工/脚手架 过滤器
- * 用于在构建应用前搭建打底处理,
- * 在页面和动作等建成后可以移除.
+ * 自动处理过滤器
+ * 
+ * <h3>初始化参数(init-param):</h3>
+ * <pre>
+ * action       默认动作地址
+ * render       默认页面地址
+ * </pre>
+ *
  * @author Hongs
  */
 public class AutoFilter implements Filter {

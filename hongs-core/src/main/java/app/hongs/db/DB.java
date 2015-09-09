@@ -996,8 +996,8 @@ public class DB
               sql += " LIMIT " + limit + " OFFSET " + start;
           } else if ("Oracle".equals(nam)) {
               sql = "SELECT * FROM (" + sql + ") WHERE rno>" + (start - 1) + " AND rno<" + (start + limit);
-//        } else if ("SQLServer".equals(nam)) {
-//            sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum>" + (start - 1) + " AND rno<" + (start + limit);
+          } else if ("SQLServer".equals(nam)) {
+              sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum>" + (start - 1) + " AND __table__.rownum<" + (start + limit);
           } else {
               throw new HongsError(0x10, "Limit not support " + nam);
           }
@@ -1155,10 +1155,10 @@ public class DB
    * @return 单条数据
    * @throws app.hongs.HongsException
    */
-  public Map fetchLess(FetchCase caze)
+  public Map  fetchLess(FetchCase caze)
     throws HongsException
   {
-    List< Map<String, Object> > rows = this.fetch(caze.getSQL(), 0, 1, caze.getParams());
+    List<Map<String, Object>> rows = this.fetch(caze.getSQL(), 0,1, caze.getParams());
     if (! rows.isEmpty() )
     {
       return rows.get( 0 );
@@ -1167,6 +1167,16 @@ public class DB
     {
       return new HashMap();
     }
+  }
+
+  /**
+   * 调用 FetchCase 构建查询
+   * 可用 all, one  得到结果, 以及 delete, update 操作数据
+   * @return 绑定了 db 的查询对象
+   */
+  public FetchCase fetchCase()
+  {
+    return new FetchCase().use(this);
   }
 
   /** 执行语句 **/

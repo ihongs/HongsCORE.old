@@ -38,6 +38,9 @@ extends Model {
       throws HongsException
     {
       String id = (String) rd.get(this.table.primaryKey);
+      if (rd.containsKey("roles")) {
+          rd.put("rtime", System.currentTimeMillis() / 1000);
+      }
       if (id == null || id.length() == 0) {
           id = this.add(rd);
       } else {

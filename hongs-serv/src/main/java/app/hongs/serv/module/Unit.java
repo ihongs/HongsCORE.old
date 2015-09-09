@@ -10,8 +10,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,7 +31,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- *
+ * 单元模型
  * @author Hongs
  */
 public class Unit extends Mtree {
@@ -65,7 +70,45 @@ public class Unit extends Mtree {
     }
 
     public void updateOrCreateMenuSet(String id, String name) throws HongsException {
-        Document docm = makeDocument();
+        List<Map> rows;
+        
+        // 1. 找出首层
+        rows = this.table.fetchCase()
+            .select("id,name")
+            .where ("pid='0'")
+            .all();
+        Set<String> unitIds = new HashSet();
+        for (Map  row  : rows) {
+            unitIds.add(row.get("id").toString());
+        }
+        
+        rows = this.db.getTable("form").fetchCase()
+            .select("id,unit_id")
+            .where ("unit_id IN (?)", unitIds)
+            .all();
+        Map<String, Set<String>> unitMap = new LinkedHashMap();
+        for (Map  row  : rows) {
+            String formId = row.get(/**/ "id").toString();
+            String unitId = row.get("unit_id").toString();
+            Set formIds;
+            if (unitMap.containsKey(unitId)) {
+                formIds=unitMap.get(unitId);
+            } else {
+                formIds=new LinkedHashSet();
+            }
+            formIds.add(formId);
+        }
+        
+        // 1. 查找首层单元 id
+        
+        // 2. 构建 document 将首层单元加入 menu
+        
+        // 3. 查找首层下的全部 form 并 include 其 menu 配置
+        
+        // 4. 
+        
+        
+         Document docm = makeDocument();
 
         Element root = docm.createElement("root");
         docm.appendChild ( root );

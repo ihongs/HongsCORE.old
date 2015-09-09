@@ -53,7 +53,7 @@ public class FileAction {
         helper.reply(sd);
     }
 
-    @Action("upload/image")
+    @Action("image/upload")
     public void uploadImage(ActionHelper helper) throws HongsException {
         String v = null;
         CoreConfig c = CoreConfig.getInstance();

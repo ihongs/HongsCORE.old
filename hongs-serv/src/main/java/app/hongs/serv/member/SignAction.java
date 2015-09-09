@@ -1,5 +1,6 @@
 package app.hongs.serv.member;
 
+import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -11,9 +12,7 @@ import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
 import app.hongs.util.Synt;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -31,15 +30,21 @@ public class SignAction {
         password = Sign.getCrypt(password);
         ah.getRequestData().put("password", password);
 
-        FetchCase fc = new FetchCase();
-        fc.select(".password, .id, .name");
-        fc.where (".username = ?", username );
-        fc.setOption("ASSOCS", new HashSet());
+        DB        db = DB.getInstance("member");
+        Table     tb;
+        FetchCase fc;
+        Map       ud;
+        Map       xd;
 
-        Table um = DB.getInstance("member").getTable("user");
-        Map   ud = um.fetchLess(fc);
+        // 验证密码
+        tb = db.getTable("user");
+        fc = new FetchCase( )
+            .from   (tb.tableName, tb.name)
+            .select (".password, .id, .name")
+            .where  (".username = ?", username);
+        ud = db.fetchLess(fc);
         if (!password.equals(ud.get("password"))) {
-            CoreLocale lang = CoreLocale.getInstance("member");
+            CoreLocale lang = CoreLocale.getInstance( "member" );
             Map m = new HashMap();
             Map e = new HashMap();
             m.put("password", new Wrong(lang.translate("core.username.or.password.invalid")));
@@ -50,26 +55,48 @@ public class SignAction {
             return;
         }
 
-        // 获取用户权限
-        User user = new User();
-        Set<String> roles = user.getRoles((String) ud.get("id"));
+        String appid = Synt.declare( ah.getParameter( "appid"), "web");
+        String token = Core.getUniqueId();
 
-        // 设置用户会话
+        // 设置登录
+        tb = db.getTable( "user_sign" );
+        tb.delete("`user_id` = ? AND `type` = ?", ud.get("id"), appid);
+        xd = new HashMap();
+        xd.put("user_id", ud.get("id"));
+        xd.put("type", appid);
+        xd.put("sign", token);
+        tb.insert(xd);
+
+        // 设置会话
         HttpSession sess = ah.getRequest().getSession(true);
         sess.setAttribute("user", ud.get( "id" ));
         sess.setAttribute("name", ud.get("name"));
-        sess.setAttribute("roles", roles);
+        sess.setAttribute("sign_code", token);
+        sess.setAttribute("sign_type", appid);
 
-        Map data = new HashMap();
-        data.put("jsessionid", sess.getId());
-        ah.reply(data);
+        // 返回数据
+        ud = new HashMap();
+        ud.put("appid", appid);
+        ud.put("token", token);
+        ud.put("jsessionid", sess.getId());
+        ah.reply(ud);
     }
 
     @Action("delete")
-    public void delete(ActionHelper ah) {
-        // 清除用户会话
-        HttpSession sess = ah.getRequest().getSession();
-        sess.invalidate( );
+    public void delete(ActionHelper ah) throws HongsException {
+        String appid = Synt.declare(ah.getParameter("appid"), "web");
+        String token = Synt.declare(ah.getParameter("token"),  ""  );
+
+        // 清除登录
+        DB.getInstance("member")
+          .getTable("user_sign")
+          .delete("`code` = ? AND `type` = ?", token, appid);
+
+        // 清除会话
+        ah.getRequest()
+          .getSession()
+          .invalidate();
+
         ah.reply("");
     }
 

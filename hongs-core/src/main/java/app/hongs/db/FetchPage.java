@@ -27,10 +27,9 @@ public class FetchPage
 
   private Map info = new HashMap();
 
-  public FetchPage(FetchCase caze, Table table) throws HongsException
+  public FetchPage(FetchCase caze, DB db) throws HongsException
   {
-    this.db    = table.db;
-    this.tb    = table;
+    this.db    = db;
     this.caze  = caze;
 
     Object page2 = caze.getOption("page");
@@ -52,15 +51,22 @@ public class FetchPage
     }
   }
 
-  public FetchPage(FetchCase caze, DB db) throws HongsException
+  public FetchPage(FetchCase caze, Table table) throws HongsException
   {
-    this.db    = db;
+    this.db    = table.db;
+    this.tb    = table;
     this.caze  = caze;
 
     Object page2 = caze.getOption("page");
     if (page2 != null && page2.equals(""))
     {
       this.setPage(Integer.parseInt(page2.toString()));
+    }
+
+    Object lnks2 = caze.getOption("lnks");
+    if (lnks2 != null && lnks2.equals(""))
+    {
+      this.setLnks(Integer.parseInt(lnks2.toString()));
     }
 
     Object rows2 = caze.getOption("rows");

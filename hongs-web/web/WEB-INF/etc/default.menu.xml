@@ -1,4 +1,5 @@
 <root>
+    <session>app.hongs.member.RoleSes</session>
     <menu href="/">
         <include>member</include>
         <include>module</include>

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 动作过滤器
+ * 动作权限过滤器
  *
  * <h3>初始化参数(init-param):</h3>
  * <pre>

@@ -357,16 +357,16 @@ public class FetchMore
             // 上级外键连接下级主键, 交换主外键
             String xk = fk; fk = pk; pk = xk;
             if (fk == null) fk = table2.primaryKey;
-        }
-        else if ("HAS_ONE".equals(tp)) {
+        } else
+        if ("HAS_ONE".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
-        }
-        else if ("HAS_MANY".equals(tp)) {
-            throw new HongsException(0x10c2, "Unsupported assoc type '"+tp+"'");
-        }
-        else if ("HAS_MORE".equals(tp)) {
-            throw new HongsException(0x10c2, "Unsupported assoc type '"+tp+"'");
+        } else
+        if ("HAS_MANY".equals(tp)) {
+            throw new HongsException(0x10c2,  "Unsupported assoc type '"+tp+"'");
+        } else
+        if ("HAS_MORE".equals(tp)) {
+            throw new HongsException(0x10c2,  "Unsupported assoc type '"+tp+"'");
         }
         else {
             throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
@@ -379,20 +379,20 @@ public class FetchMore
 
         // 转化关联类型
         byte ji;
+        if ( "LEFT".equals(jn)) {
+            ji = FetchCase.LEFT;
+        } else
+        if ("RIGHT".equals(jn)) {
+            ji = FetchCase.RIGHT;
+        } else
+        if ( "FULL".equals(jn)) {
+            ji = FetchCase.FULL;
+        } else
         if ("INNER".equals(jn)) {
             ji = FetchCase.INNER;
-        }
-        else if ("LEFT".equals(jn)) {
-            ji = FetchCase.LEFT;
-        }
-        else if ("RIGHT".equals(jn)) {
-            ji = FetchCase.RIGHT;
-        }
-        else if ("FULL".equals(jn)) {
-            ji = FetchCase.FULL;
-        }
-        else if ("CROSS".equals(jn)) {
-            throw new HongsException(0x10c4, "Unsupported assoc join '"+jn+"'");
+        } else
+        if ("CROSS".equals(jn)) {
+            throw new HongsException(0x10c4,  "Unsupported assoc join '"+jn+"'");
         }
         else {
             throw new HongsException(0x10c4, "Unrecognized assoc join '"+jn+"'");
@@ -445,18 +445,18 @@ public class FetchMore
             String xk = fk; fk = pk; pk = xk;
             if (fk == null) fk = table2.primaryKey;
             caze2.setOption("ASSOC_MULTI" , false);
-        }
-        else if ("HAS_ONE".equals(tp)) {
+        } else
+        if ("HAS_ONE".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
             caze2.setOption("ASSOC_MULTI" , false);
-        }
-        else if ("HAS_MANY".equals(tp)) {
+        } else
+        if ("HAS_MANY".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
             caze2.setOption("ASSOC_MULTI" , true );
-        }
-        else if ("HAS_MORE".equals(tp)) {
+        } else
+        if ("HAS_MORE".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
             caze2.setOption("ASSOC_MULTI" , true );

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 通用动作
+ * 通用菜单动作
  * @author Hong
  */
 @Action("common/menu")

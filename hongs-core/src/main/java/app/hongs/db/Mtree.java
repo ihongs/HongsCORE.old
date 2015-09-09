@@ -3,13 +3,16 @@ package app.hongs.db;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
+import app.hongs.util.Synt;
 
+import java.util.Iterator;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 树形模型
@@ -22,16 +25,14 @@ import java.util.Map;
  * <pre>
  * pid          获取pid 指定的一组节点
  * id[]         获取id[]指定的全部节点
- * get_id       仅获取节点的id
- * get_path     附带节点的路径
+ * with-path    附带路径, 1信息, 2仅ID
  * </pre>
  *
  * <h3>JS请求参数组合:</h3>
  * <pre>
- * 获取一层: ?pid=xxx
- * 查找节点: ?find=xxx&get_id=1
- * 获取节点: ?id=xxx&get_id=1&get_path=1
- * 获取节点: ?id[]=xxx&get_id=1&get_path=1
+ * 获取层级: ?pid=xxx
+ * 获取节点: ?id=xxx&with-path=1
+ * 查找节点: ?wd=xxx&with-path=2
  * </pre>
  *
  * @author Hong
@@ -98,7 +99,7 @@ public class Mtree extends Model
     throws HongsException
   {
     super(table);
-    
+
     CoreConfig conf = Core.getInstance(CoreConfig.class);
     this.rootId = conf.getProperty("fore.tree.root.id",  "0" );
     this.pidKey = conf.getProperty("fore.tree.pid.key", "pid");
@@ -108,7 +109,11 @@ public class Mtree extends Model
   //** 标准动作方法 **/
 
   /**
-   * <b>获取树</p>
+   * 获取列表
+   *
+   * 与 Model.getList 不同
+   * 不给 colsKey 参数时仅获取基础字段
+   * 不给 rowsKey 参数时不进行分页查询
    *
    * @param rd
    * @param caze
@@ -127,33 +132,17 @@ public class Mtree extends Model
       caze = new FetchCase();
     }
 
-    if (!caze.hasOption("ASSOCS")
-    &&  !caze.hasOption("ASSOC_TYPES")
-    &&  !caze.hasOption("ASSOC_JOINS"))
-    {
-      caze.setOption("ASSOCS", new HashSet());
-    }
+    //** 默认字段 **/
 
-    String pid = (String) rd.get(this.pidKey);
-    if (pid == null || pid.length() == 0)
+    if (!caze.hasSelect() && !rd.containsKey(this.colsKey))
     {
-      pid =  this.rootId;
-    }
+      if (!caze.hasOption("ASSOCS")
+      &&  !caze.hasOption("ASSOC_TYPES")
+      &&  !caze.hasOption("ASSOC_JOINS"))
+      {
+        caze.setOption("ASSOCS", new HashSet());
+      }
 
-    // 这些参数为约定参数
-    boolean getId   = rd.containsKey("get_id"  )
-                    && rd.get("get_id"  ).equals("1");
-    boolean getPath = rd.containsKey("get_path")
-                    && rd.get("get_path").equals("1");
-    rd.remove("get_id"  );
-    rd.remove("get_path");
-
-    if (getId)
-    {
-      caze.select(".`" + this.table.primaryKey + "`");
-    }
-    else
-    {
       caze.select(".`" + this.table.primaryKey + "`")
           .select(".`" + this.pidKey  + "`")
           .select(".`" + this.nameKey + "`");
@@ -184,44 +173,64 @@ public class Mtree extends Model
       }
     }
 
-    List list = this.getAll(rd, caze);
+    //** 查询列表 **/
 
-    if (getPath)
+    Map  data = new HashMap();
+    List list;
+    if (!rd.containsKey(this.pageKey)
+    &&  !rd.containsKey(this.lnksKey)
+    &&  !rd.containsKey(this.rowsKey))
     {
-      if (getId)
+      list = super.getAll (rd , caze);
+      data.put("list", list);
+    }
+    else
+    {
+      data = super.getList(rd , caze);
+      list = (List) data.get( "list");
+    }
+
+    //** 附带路径 **/
+
+    int    pth = Synt.declare(rd.get("with-path"), 0 );
+    String pid = Synt.declare(rd.get(this.pidKey), "");
+    if (pid.length() == 0)
+    {
+        pid = this.rootId;
+    }
+
+    if (pth == 2)
+    {
+      List path = this.getParentIds(pid);
+
+      Iterator it = list.iterator();
+      while (it.hasNext())
       {
-        List path = this.getParentIds(pid);
+        Map info = (Map)it.next();
+        String id = (String)info.get(this.table.primaryKey);
+        List subPath = new ArrayList(path);
+        info.put("path", subPath);
 
-        Iterator it = list.iterator();
-        while (it.hasNext())
-        {
-          Map info = (Map)it.next();
-          String id = (String)info.get(this.table.primaryKey);
-          List subPath = new ArrayList(path);
-          info.put("path", subPath);
-
-          subPath.addAll(this.getParentIds(id, pid));
-        }
+        subPath.addAll(this.getParentIds(id, pid));
       }
-      else
+    }
+    else
+    if (pth == 1)
+    {
+      List path = this.getParents(pid);
+
+      Iterator it = list.iterator();
+      while (it.hasNext())
       {
-        List path = this.getParents(pid);
+        Map info = (Map)it.next();
+        String id = (String)info.get(this.table.primaryKey);
+        List subPath = new ArrayList(path);
+        info.put("path", subPath);
 
-        Iterator it = list.iterator();
-        while (it.hasNext())
-        {
-          Map info = (Map)it.next();
-          String id = (String)info.get(this.table.primaryKey);
-          List subPath = new ArrayList(path);
-          info.put("path", subPath);
-
-          subPath.addAll(this.getParents(id, pid));
-        }
+        subPath.addAll(this.getParents(id, pid));
       }
     }
 
-    Map data = new HashMap();
-    data.put( "list", list );
     return data;
   }
 
@@ -281,7 +290,7 @@ public class Mtree extends Model
     String  id = super.add(data);
 
     // 将父节点的子节点数量加1
-    this.setChildsOffset(pid, 1);
+    this.chgChildsNum(pid, 1);
 
     return  id;
   }
@@ -329,14 +338,14 @@ public class Mtree extends Model
     {
       if (this.cnumKey != null)
       {
-        this.setChildsOffset(newPid,  1);
-        this.setChildsOffset(oldPid, -1);
+        this.chgChildsNum(newPid,  1);
+        this.chgChildsNum(oldPid, -1);
       }
 
       if (this.snumKey != null)
       {
         this.setSerialNum(id, -1);
-        this.setSerialOffset(oldPid, -1, ordNum, -1);
+        this.chgSerialNum(oldPid, -1, ordNum, -1);
       }
     }
 
@@ -361,7 +370,7 @@ public class Mtree extends Model
 
       if (ordNum2 > -1 && ordNum2 != ordNum)
       {
-        this.setSerialOffset(id, ordNum2 - ordNum);
+        this.chgSerialNum(id, ordNum2 - ordNum);
       }
     }
 
@@ -385,10 +394,10 @@ public class Mtree extends Model
     int i = super.del(id, caze);
 
     // 父级节点子节点数目减1
-    this.setChildsOffset(pid, -1);
+    this.chgChildsNum(pid, -1);
 
     // 弟弟节点排序数目减1
-    this.setSerialOffset(pid, -1, on, -1);
+    this.chgSerialNum(pid, -1, on, -1);
 
     // 删除全部子节点
     List ids = this.getChildIds(id);
@@ -455,36 +464,36 @@ public class Mtree extends Model
     String pid = this.getParentId(id);
     if (pid != null)
     {
+      ids.add( pid );
       if (!pid.equals(rootId))
       {
         ids.addAll(this.getParentIds(pid, rootId));
       }
-      ids.add(pid);
     }
     return ids;
+  }
+
+  public List<Map> getParents(String id, String rootId)
+    throws HongsException
+  {
+    List<Map> nds = new ArrayList<Map>();
+    Map pnd  = this.getParent(id);
+    if (pnd != null)
+    {
+      nds.add( pnd );
+      String pid = (String) pnd.get(this.pidKey);
+      if (!pid.equals(rootId))
+      {
+        nds.addAll(this.getParents(pid, rootId));
+      }
+    }
+    return nds;
   }
 
   public List<String> getParentIds(String id)
     throws HongsException
   {
     return this.getParentIds(id, this.rootId);
-  }
-
-  public List<Map> getParents(String id, String rootId)
-    throws HongsException
-  {
-    List<Map> list = new ArrayList<Map>();
-    Map info = this.getParent(id);
-    if (info != null)
-    {
-      String pid = (String)info.get(this.pidKey);
-      if (pid.equals(rootId))
-      {
-        list.addAll(this.getParents(pid, rootId));
-      }
-      list.add(info);
-    }
-    return list;
   }
 
   public List<Map> getParents(String id)
@@ -552,12 +561,6 @@ public class Mtree extends Model
     return cids;
   }
 
-  public List<String> getChildIds(String id)
-    throws HongsException
-  {
-    return this.getChildIds(id, false);
-  }
-
   public List<Map> getChilds(String id, boolean all)
     throws HongsException
   {
@@ -597,6 +600,12 @@ public class Mtree extends Model
     return list;
   }
 
+  public List<String> getChildIds(String id)
+    throws HongsException
+  {
+    return this.getChildIds(id, false);
+  }
+
   public List<Map> getChilds(String id)
     throws HongsException
   {
@@ -633,7 +642,7 @@ public class Mtree extends Model
     return Integer.parseInt(cn.toString());
   }
 
-  public int getRealChildsNum(String id, List excludeIds)
+  public int getRealChildsNum(String id, Collection excludeIds)
     throws HongsException
   {
     String sql = "SELECT COUNT(`"
@@ -695,10 +704,10 @@ public class Mtree extends Model
     this.db.execute(sql, params);
   }
 
-  public void setChildsOffset(String id, int offset)
+  public void chgChildsNum(String id, int off)
     throws HongsException
   {
-    if (this.cnumKey == null || offset == 0)
+    if (this.cnumKey == null || off == 0)
     {
       return;
     }
@@ -710,7 +719,7 @@ public class Mtree extends Model
             "` = `"
             + this.cnumKey +
             "` "
-            + (offset > 0 ? "+ "+offset : "- "+Math.abs(offset)) +
+            + (off > 0 ? "+ "+off : "- "+Math.abs(off)) +
             " WHERE `"
             + this.table.primaryKey +
             "` = ?";
@@ -747,7 +756,7 @@ public class Mtree extends Model
     return Integer.parseInt(on.toString());
   }
 
-  public int getLastSerialNum(String pid, List excludeIds)
+  public int getLastSerialNum(String pid, Collection excludeIds)
     throws HongsException
   {
     if (this.snumKey == null)
@@ -800,7 +809,7 @@ public class Mtree extends Model
     if (num < 0)
     {
       String pid = this.getParentId(id);
-      List ids = new ArrayList();
+      Set ids = new HashSet();
       ids.add(id);
       num = this.getLastSerialNum(pid, ids) + Math.abs(num);
     }
@@ -819,24 +828,24 @@ public class Mtree extends Model
     this.db.execute(sql, params);
   }
 
-  public void setSerialOffset(String id, int offset)
+  public void chgSerialNum(String id, int off)
     throws HongsException
   {
-    if (this.snumKey == null || offset == 0)
+    if (this.snumKey == null || off == 0)
     {
       return;
     }
 
     String pid = this.getParentId(id);
     int oldNum = this.getSerialNum(id);
-    int newNum = oldNum + offset;
-    if (offset < 0)
+    int newNum = oldNum + off;
+    if (off < 0)
     {
-      this.setSerialOffset(pid, +1, newNum, oldNum - 1);
+      this.chgSerialNum(pid, +1, newNum, oldNum - 1);
     }
     else
     {
-      this.setSerialOffset(pid, -1, oldNum + 1, newNum);
+      this.chgSerialNum(pid, -1, oldNum + 1, newNum);
     }
 
     String sql = "UPDATE `"
@@ -846,7 +855,7 @@ public class Mtree extends Model
             "` = `"
             + this.snumKey +
             "` "
-            + (offset > 0 ? "+ "+offset : "- "+Math.abs(offset)) +
+            + (off > 0 ? "+ "+off : "- "+Math.abs(off)) +
             " WHERE `"
             + this.table.primaryKey +
             "` = ?";
@@ -855,10 +864,10 @@ public class Mtree extends Model
     this.db.execute(sql, params);
   }
 
-  public void setSerialOffset(String pid, int offset, int pos1, int pos2)
+  public void chgSerialNum(String pid, int off, int pos1, int pos2)
     throws HongsException
   {
-    if (this.snumKey == null || offset == 0 || (pos1 < 0 && pos2 < 0))
+    if (this.snumKey == null || off == 0 || (pos1 < 0 && pos2 < 0))
     {
       return;
     }
@@ -887,7 +896,7 @@ public class Mtree extends Model
             "` = `"
             + this.snumKey +
             "` "
-            + (offset > 0 ? "+ "+offset : "- "+Math.abs(offset)) +
+            + (off > 0 ? "+ "+off : "- "+Math.abs(off)) +
             " WHERE `"
             + this.pidKey +
             "` = ?"
@@ -902,54 +911,62 @@ public class Mtree extends Model
   public void checkAndRepair(String pid)
     throws HongsException
   {
+    String sql;
+    String cid;
+    int    num = 0;
+
     if (this.cnumKey != null)
     {
-      String sql = "SELECT COUNT(`"+this.table.primaryKey+"`) AS __count__" +
-              " FROM `"+this.table.tableName+"`" +
-              " WHERE `"+this.pidKey+"` = '"+pid+"'" +
-              " GROUP BY `"+this.pidKey+"`" +
-              " LIMIT 1";
+      sql = "SELECT COUNT(`"+this.table.primaryKey  +"`) AS _count_"+
+            " FROM  `"      +this.table.tableName   +"`"+
+            " WHERE `"      +this.pidKey            +"` = '"+pid+"'"+
+            " GROUP BY `"   +this.pidKey            +"`";
       Map row = this.db.fetchOne(sql);
       if (!row.isEmpty())
       {
-        String sql2 = "UPDATE `"+this.table.tableName+"`" +
-                " SET `"+this.cnumKey+"` = '"+row.get("__count__").toString()+"'" +
-                " WHERE `"+this.table.primaryKey+"` = '"+pid+"'" +
-                " LIMIT 1";
-        this.db.execute(sql2);
+        num = Synt.declare(row.get("_count_") , num);
+        sql = "UPDATE `"    +this.table.tableName   +"`"+
+              "  SET  `"    +this.cnumKey           +"` = '"+num+"'"+
+              " WHERE `"    +this.table.primaryKey  +"` = '"+pid+"'";
+        this.db.execute(sql);
       }
     }
 
     if (this.snumKey != null)
     {
-      String sql = "SELECT `"+this.table.primaryKey+"`" +
-              " FROM `"+this.table.tableName+"`" +
-              " WHERE `"+this.pidKey+"` = '"+pid+"'" +
-              " ORDER BY `"+this.snumKey+"` ASC";
+      sql = "SELECT `"      +this.table.primaryKey  +"`"+
+            " FROM  `"      +this.table.tableName   +"`"+
+            " WHERE `"      +this.pidKey            +"` = '"+pid+"'"+
+            " ORDER BY `"   +this.snumKey           +"`";
       List rows = this.db.fetchAll(sql);
       if (!rows.isEmpty())
       {
         Iterator it = rows.iterator();
-        int i = 1;
         while (it.hasNext())
         {
           Map row = (Map)it.next();
-          String sql2 = "UPDATE `"+this.table.tableName+"`" +
-                " SET `"+this.snumKey+"` = '"+i+"'" +
-                " WHERE `"+this.table.primaryKey+"` = '"+row.get(this.table.primaryKey).toString()+"'" +
-                " LIMIT 1";
-          this.db.execute(sql2);
-          i ++;
+          cid = row.get(this.table.primaryKey).toString();
+          sql = "UPDATE `"  +this.table.tableName   +"`"+
+                "  SET  `"  +this.snumKey           +"` = '"+num+"'"+
+                " WHERE `"  +this.table.primaryKey  +"` = '"+cid+"'";
+          this.db.execute(/**/sql);
+          this.checkAndRepair(cid);
+          num ++;
         }
       }
     }
-
-    List cids = this.getChildIds(pid);
-    Iterator it = cids.iterator();
-    while (it.hasNext())
+    else
     {
-      String cid = (String)it.next();
-      this.checkAndRepair(cid);
+      List cids = this.getChildIds(pid);
+      if (!cids.isEmpty())
+      {
+        Iterator it = cids.iterator();
+        while (it.hasNext())
+        {
+          cid = (String) it.next();
+          this.checkAndRepair(cid);
+        }
+      }
     }
   }
 

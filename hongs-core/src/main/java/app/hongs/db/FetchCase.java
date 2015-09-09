@@ -55,6 +55,7 @@ import java.util.regex.Pattern;
  * 0x10b0 无法识别关联类型(JOIN)
  * 0x10b2 必须指定关联条件(FULL|LEFT|RIGHT)_JOIN
  * 0x10b4 没有指定查询表名
+ * 0x10b6 没有指定查询的库
  * </pre>
  *
  * @author Hongs
@@ -81,11 +82,11 @@ public class FetchCase
   private   String              joinExpr;
   protected Set<FetchCase>      joinList;
 
-  public static final byte      INNER = 1;
-  public static final byte       LEFT = 2;
-  public static final byte      RIGHT = 3;
-  public static final byte       FULL = 4;
-//public static final byte      CROSS = 5;
+  public    static final byte    LEFT = 1;
+  public    static final byte   RIGHT = 2;
+  public    static final byte    FULL = 3;
+  public    static final byte   INNER = 4;
+  public    static final byte   CROSS = 5;
 
   private static final Pattern p1 = Pattern
           .compile("(^|[^`\\w])\\.((\\*)|(\\w+)|`(.+?)`)");
@@ -257,7 +258,7 @@ public class FetchCase
    */
   public FetchCase limit(int limit)
   {
-    this.limits = limit == 0 ? new int[0] : new int[] {0, limit};
+    this.limits = limit == 0 ? new int[0] : new int[] {  0  , limit};
     return this;
   }
 
@@ -279,7 +280,7 @@ public class FetchCase
 
   public FetchCase join(FetchCase caze)
   {
-    caze.options = this.options;
+    caze.options  = this.options;
     this.joinList.add(caze);
     caze.joinExpr = null;
     caze.joinType = LEFT;
@@ -416,17 +417,17 @@ public class FetchCase
     {
       switch (this.joinType)
       {
-        case FetchCase.INNER: b.insert(0," INNER JOIN "); break;
         case FetchCase.LEFT : b.insert(0, " LEFT JOIN "); break;
         case FetchCase.RIGHT: b.insert(0," RIGHT JOIN "); break;
         case FetchCase.FULL : b.insert(0, " FULL JOIN "); break;
-//      case FetchCase.CROSS: b.insert(0," CROSS JOIN "); break;
+        case FetchCase.INNER: b.insert(0," INNER JOIN "); break;
+        case FetchCase.CROSS: b.insert(0," CROSS JOIN "); break;
         default: return;
       }
       if (this.joinExpr != null && this.joinExpr.length() != 0)
       {
         String s  =  this.joinExpr;
-        s = repSqlTabs( s, tn, pn);
+        s = repSQLTbls( s, tn, pn);
         b.append(" ON ").append(s);
       }
     }
@@ -437,7 +438,7 @@ public class FetchCase
     if (this.fields.length() != 0)
     {
       String s = this.fields.toString().trim();
-      s = repSqlTabs(s, tn, pn);
+      s = repSQLTbls(s, tn, pn);
       f.append(" ").append( s );
     }
 
@@ -445,7 +446,7 @@ public class FetchCase
     if (this.groups.length() != 0)
     {
       String s = this.groups.toString().trim();
-      s = repSqlTabs(s, tn, pn);
+      s = repSQLTbls(s, tn, pn);
       g.append(" ").append( s );
     }
 
@@ -453,7 +454,7 @@ public class FetchCase
     if (this.orders.length() != 0)
     {
       String s = this.orders.toString().trim();
-      s = repSqlTabs(s, tn, pn);
+      s = repSQLTbls(s, tn, pn);
       o.append(" ").append( s );
     }
 
@@ -461,7 +462,7 @@ public class FetchCase
     if (this.wheres.length() != 0)
     {
       String s = this.wheres.toString().trim();
-      s = repSqlTabs(s, tn, pn);
+      s = repSQLTbls(s, tn, pn);
       w.append(" ").append( s );
     }
 
@@ -469,7 +470,7 @@ public class FetchCase
     if (this.havins.length() != 0)
     {
       String s = this.havins.toString().trim();
-      s = repSqlTabs(s, tn, pn);
+      s = repSQLTbls(s, tn, pn);
       h.append(" ").append( s );
     }
 
@@ -492,7 +493,7 @@ public class FetchCase
    * @param pn
    * @return
    */
-  private String repSqlTabs(String s, String tn, String pn)
+  private String repSQLTbls(String s, String tn, String pn)
   {
       Matcher      m;
       StringBuffer b;
@@ -527,6 +528,35 @@ public class FetchCase
               }
           }
           m.appendReplacement(b, "$1`"+pn+"`.`"+x+"`");
+      }
+      c = m.appendTail(b);
+
+      return c.toString();
+  }
+
+  /**
+   * 替换SQL表名
+   * @param s
+   * @return
+   */
+  private String clrSQLTbls(String s)
+  {
+      Matcher      m;
+      StringBuffer b;
+      StringBuffer c = new StringBuffer(s);
+
+      m = p1.matcher(c);
+      b = new StringBuffer();
+      while (m.find()) {
+          String x;
+          x = m.group(3);
+          if (x == null) {
+              x = m.group(4);
+              if (x == null) {
+                  x = m.group(5);
+              }
+          }
+          m.appendReplacement(b, "$1`"+x+"`");
       }
       c = m.appendTail(b);
 
@@ -649,7 +679,7 @@ public class FetchCase
       if (null != c) {
           caze  = c;
       } else {
-          caze  = null; break; /* break */
+          caze  = null; break; /* ignore */
       }
     }
     return caze;
@@ -883,4 +913,84 @@ public class FetchCase
       return where;
     }
   }
+
+  //** 串联查询/操作 **/
+
+  private DB _db_ = null;
+
+  /**
+   * 指定查询要查询的库
+   * @param db
+   * @return
+   */
+  public FetchCase use(DB db)
+  {
+    _db_ =  db ;
+    return this;
+  }
+
+  /**
+   * 查询并获取全部结果
+   * @return
+   * @throws HongsException
+   */
+  public List all() throws HongsException {
+    if (_db_ == null) {
+      throw new HongsException(0x10b6);
+    }
+    return _db_.fetchMore(this);
+  }
+
+  /**
+   * 查询并获取单个结果
+   * @return
+   * @throws HongsException
+   */
+  public Map  one() throws HongsException {
+    if (_db_ == null) {
+      throw new HongsException(0x10b6);
+    }
+    return _db_.fetchLess(this);
+  }
+
+  /**
+   * 删除全部匹配的记录
+   * 注意: 会忽略 join 的条件, 有 :fn, xx.fn 的字段条件会报 SQL 错误
+   * @return
+   * @throws HongsException
+   */
+  public int  delete() throws HongsException {
+    if (_db_ == null) {
+      throw new HongsException(0x10b6);
+    }
+    return _db_.delete(tableName, /**/ clrSQLTbls(wheres.toString()), wparams.toArray());
+  }
+
+  /**
+   * 更新全部匹配的数据
+   * 注意: 会忽略 join 的条件, 有 :fn, xx.fn 的字段条件会报 SQL 错误
+   * @param dat
+   * @return
+   * @throws HongsException
+   */
+  public int  update(Map<String, Object> dat) throws HongsException {
+    if (_db_ == null) {
+      throw new HongsException(0x10b6);
+    }
+    return _db_.update(tableName, dat, clrSQLTbls(wheres.toString()), wparams.toArray());
+  }
+
+  /**
+   * 插入当前指定的数据
+   * @param dat
+   * @return
+   * @throws HongsException
+   */
+  public int  insert(Map<String, Object> dat) throws HongsException {
+    if (_db_ == null) {
+      throw new HongsException(0x10b6);
+    }
+    return _db_.insert(tableName, dat);
+  }
+
 }

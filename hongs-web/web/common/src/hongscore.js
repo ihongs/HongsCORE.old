@@ -165,9 +165,9 @@ function hsSerialArr(obj) {
         a1 = obj.split('?' , 2);
         if (a1.length > 1) obj = a1[1];
         a1 = obj.split('&');
-        for(var i = 0; i < a1.length; i++) {
-            a2 = a1[i].split('=', 2 );
-            if (a2.length < 2 || !a2[0] || !a2[1]) break;
+        for (var i = 0; i < a1.length; i ++) {
+            a2 = a1[i].split( '=' , 2 );
+            if (a2.length < 2) continue;
             arr.push({name : decodeURIComponent(a2[0]),
                       value: decodeURIComponent(a2[1])});
         }

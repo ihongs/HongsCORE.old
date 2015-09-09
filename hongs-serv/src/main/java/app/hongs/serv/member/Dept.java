@@ -27,23 +27,27 @@ extends Mtree {
         super(table);
     }
 
-  /**
-   * 添加/修改记录
-   *
-   * @param rd
-   * @return 记录ID
-   * @throws app.hongs.HongsException
-   */
-  public String save(Map rd)
-    throws HongsException
-  {
-    String id = (String)rd.get(this.table.primaryKey);
-    if (id == null || id.length() == 0)
-      id = this.add(rd);
-    else
-      this.put(rd, id);
-    return id;
-  }
+    /**
+     * 添加/修改记录
+     *
+     * @param rd
+     * @return 记录ID
+     * @throws app.hongs.HongsException
+     */
+    public String save(Map rd)
+      throws HongsException
+    {
+      String id = (String)rd.get(this.table.primaryKey);
+      if (rd.containsKey("roles")) {
+          rd.put("rtime", System.currentTimeMillis() / 1000);
+      }
+      if (id == null || id.length() == 0) {
+          id = this.add(rd);
+      } else {
+          this.put(rd , id);
+      }
+      return id;
+    }
 
     public Set<String> getRoles(String deptId)
     throws HongsException {
