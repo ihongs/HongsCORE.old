@@ -292,8 +292,8 @@ public class FetchMore
 
   /**
    * 关联查询
-   * @param table 主表
-   * @param caze 查询体
+   * @param table  主表
+   * @param caze   查询体
    * @param assocs 关联配置
    * @return 结果列表
    * @throws HongsException
