@@ -521,10 +521,10 @@ public class FetchMore
     /**
      * 关联更新
      *
-     * @param table 主表
-     * @param rows 要插入的数据
-     * @param keys 判断改变的键
-     * @param where 更新/删除范围
+     * @param table  主表
+     * @param rows   要插入的数据
+     * @param keys   判断改变的键
+     * @param where  更新/删除范围
      * @param params where 的参数
      * @throws HongsException
      */
@@ -593,7 +593,7 @@ public class FetchMore
    *
    * 关联配置中有指定 updateKeys 的话, 会调用 updateMore 进行更新
    *
-   * @param table 主表
+   * @param table  主表
    * @param assocs 关联配置
    * @param values 要插入的数据
    * @throws app.hongs.HongsException
@@ -713,9 +713,9 @@ public class FetchMore
   /**
    * 关联删除
    *
-   * @param table 主表
+   * @param table  主表
    * @param assocs 关联配置
-   * @param fid 要删除的外键
+   * @param fid    要删除的外键
    * @throws app.hongs.HongsException
    */
   public static void deleteMore(Table table, Map assocs, String fid)
