@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 数据库查询结果
+ * 获取结果
  * @author Hong
  */
 public class FetchNext {

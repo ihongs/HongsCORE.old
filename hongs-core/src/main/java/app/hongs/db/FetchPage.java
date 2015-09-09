@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 /**
  * 分页查询
- *
  * @author Hongs
  */
 public class FetchPage
@@ -106,36 +105,40 @@ public class FetchPage
     this.rows = rows;
   }
 
+  public List gotList()
+    throws HongsException
+  {
+    if (this.tb != null)
+    {
+      return this.tb.fetchMore(caze);
+    }
+    else
+    {
+      return this.db.fetchMore(caze);
+    }
+  }
+  
   public List getList()
     throws HongsException
   {
+    // 设置分页
     caze.limit((this.page - 1) * this.rows, this.rows);
 
-    // 查询列表
-    List list;
-    if (this.tb != null)
-    {
-      list = this.tb.fetchMore(caze);
-    }
-    else
-    {
-      list = this.db.fetchMore(caze);
-    }
-
     // 获取行数
+    List list = this.gotList();
     if (!list.isEmpty())
     {
-      this.info.put("err", 0); // 没有异常
+      this.info.put("err" , 0); // 没有异常
     } else
-    if (this.page == 1 )
+    if (this.page != 1 )
     {
-      this.info.put("err", 1); // 列表为空
-      this.info.put("pagecount", 0);
-      this.info.put("rowscount", 0);
+      this.info.put("err" , 2); // 页码超出
     }
     else
     {
-      this.info.put("err", 2); // 页码超出
+      this.info.put("err" , 1); // 列表为空
+      this.info.put("pagecount", 0);
+      this.info.put("rowscount", 0);
     }
 
     return list;

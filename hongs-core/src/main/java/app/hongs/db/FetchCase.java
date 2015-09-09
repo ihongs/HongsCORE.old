@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 查询结构体
+ * 查询结构及操作
  *
  * <p>
  * 字段名前, 用"."表示属于当前表, 用":"表示属于上级表.<br/>
