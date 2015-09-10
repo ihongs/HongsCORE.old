@@ -528,11 +528,11 @@ implements IRecord
       throw new HongsException(0x1097, "Can not del the resource for id '"+id+"'");
     }
 
-    // 删除子数据
-    this.table.deleteSubValues(id);
-
     // 删除主数据
     int an = this.table.delete("`"+this.table.primaryKey+"` = ?", id);
+
+    // 删除子数据
+    this.table.deleteSubValues(id);
 
     return an;
   }

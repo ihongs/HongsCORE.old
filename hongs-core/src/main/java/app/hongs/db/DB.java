@@ -551,7 +551,7 @@ public class DB
   /**
    * 通过表名获取表对象
    * 表名可以为"库名.表名"
-   * @param tableName
+   * @param tableName table 对象的 name
    * @return 指定表对象
    * @throws app.hongs.HongsException
    */
@@ -687,7 +687,7 @@ public class DB
   /**
    * 通过表名获取表模型
    * 表名可以为"库名.表名"
-   * @param tableName
+   * @param tableName table 对象的 name
    * @return 指定表模型
    * @throws app.hongs.HongsException
    */

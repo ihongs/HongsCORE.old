@@ -620,7 +620,7 @@ public class FetchMore
       {
         continue;
       }
-      if (!type.equals("HAS_ONE") && !type.equals("HAS_MANY"))
+      if (!type.equals("HAS_ONE") && !type.equals("HAS_MANY") && !type.equals("HAS_MORE"))
       {
         continue;
       }
@@ -715,10 +715,10 @@ public class FetchMore
    *
    * @param table  主表
    * @param assocs 关联配置
-   * @param fid    要删除的外键
+   * @param ids    要删除的外键
    * @throws app.hongs.HongsException
    */
-  public static void deleteMore(Table table, Map assocs, String fid)
+  public static void deleteMore(Table table, Map assocs, Object... ids)
     throws HongsException
   {
     if (assocs.isEmpty())
@@ -734,24 +734,44 @@ public class FetchMore
 
       String type = (String)config.get("type");
       String name = (String)config.get("name");
-      String realName = (String)config.get("tableName"); // 原名 realName
+      String tableName  = (String)config.get("tableName" );
       String foreignKey = (String)config.get("foreignKey");
 
-      if (!type.equals("HAS_ONE") && !type.equals("HAS_MANY"))
+      if (!type.equals("HAS_ONE") && !type.equals("HAS_MANY") && !type.equals("HAS_MORE"))
       {
-        continue;
+          continue;
       }
-      if (realName == null || realName.length() == 0)
+      if (tableName == null || tableName.length() == 0)
       {
-          realName =  name;
+          tableName  = name;
       }
 
-      Table tb = table.db.getTable(realName);
-      List  pa = new ArrayList();
-            pa.add(fid);
+      // 获取下级的下级的ID
+      Table tbl = table.db.getTable(tableName);
+      List  idx = null;
+      if (tbl.primaryKey != null)
+      {
+        List<Map> lst = table.db.fetchMore
+        (
+          new FetchCase()
+            .select ("`"+tbl.primaryKey + "`")
+            .where  ("`"+foreignKey+"`=?",ids)
+        );
+        idx = new ArrayList();
+        for ( Map row : lst )
+        {
+          idx.add(row.get(tbl.primaryKey));
+        }
+      }
 
-      // 子表伪删除同样有效
-      tb.delete("`"+foreignKey+"`=?", pa);
+      // 下级伪删除同样有效
+      tbl.delete("`"+foreignKey+"`=?",ids);
+
+      // 递归删除下级的下级
+      if (idx != null && ! idx.isEmpty() )
+      {
+        deleteMore(tbl, tbl.assocs, idx.toArray());
+      }
     }
   }
 

@@ -543,13 +543,13 @@ public class Table
    *
    * 用于Model中, Table中不自动删除关联数据
    *
-   * @param id
+   * @param ids
    * @throws app.hongs.HongsException
    */
-  public void deleteSubValues(String id)
+  public void deleteSubValues(Object... ids)
     throws HongsException
   {
-    FetchMore.deleteMore(this, assocs, id);
+    FetchMore.deleteMore(this, assocs , ids);
   }
 
   /**
