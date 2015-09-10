@@ -203,8 +203,8 @@ implements IRecord
     throws HongsException
   {
     Map sd = new LinkedHashMap();
-    sd.put("id", add(rd));
-    for (String fn : dispCols  )
+        sd.put("id", add(rd) );
+    for(String  fn : dispCols)
     {
         sd.put( fn , rd.get(fn));
     }
