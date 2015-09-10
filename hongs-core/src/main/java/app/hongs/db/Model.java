@@ -6,12 +6,13 @@ import app.hongs.HongsException;
 import app.hongs.dl.IRecord;
 import app.hongs.util.Synt;
 import app.hongs.util.Text;
+import java.util.Iterator;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -201,11 +202,11 @@ implements IRecord
   public Map create(Map rd)
     throws HongsException
   {
-    Map sd = new HashMap();
-    sd.put("id" , add(rd));
-    for(String fn : dispCols )
+    Map sd = new LinkedHashMap();
+    sd.put("id", add(rd));
+    for (String fn : dispCols  )
     {
-        sd.put(fn, rd.get(fn));
+        sd.put( fn , rd.get(fn));
     }
     return sd;
   }
@@ -250,10 +251,10 @@ implements IRecord
         ids.add   ( idz.toString());
     }
 
-    Map dat = new  HashMap  (  rd  );
-    rd.remove(this.table.primaryKey);
+    Map dat = new HashMap(rd);
+    dat.remove(this.table.primaryKey);
 
-    for (String id : ids )
+    for (String id : ids)
     {
       this.put( dat, id );
     }
