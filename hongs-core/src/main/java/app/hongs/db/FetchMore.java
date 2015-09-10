@@ -630,8 +630,6 @@ public class FetchMore
       }
 
       Table tb = table.db.getTable(realName);
-      List  pa = new ArrayList();
-            pa.add(id);
 
       // 都整理成List方便处理
       Object subValues = values.get(name);
@@ -678,18 +676,18 @@ public class FetchMore
       {
         // 填充外键
         Iterator it2 = subValues2.iterator();
-        while (it2.hasNext())
+        while  ( it2.hasNext() )
         {
-          Map subValues3=(Map)it2.next();
-          subValues3.put(foreignKey, id);
+          Map subValues3 = (Map) it2.next( );
+          subValues3.put ( foreignKey , id );
         }
 
-        updateMore(tb, subValues2, updateKeys, "`"+foreignKey+"`=?", pa);
+        updateMore(tb, subValues2, updateKeys, "`"+foreignKey+"`=?" , id);
       }
       else
       {
         // 先删除旧数据
-        tb.delete("`"+foreignKey+"`=?" , pa);
+        tb.delete("`"+foreignKey+"`=?" , id);
 
         // 再插入新数据
         Iterator it2 = subValues2.iterator();
