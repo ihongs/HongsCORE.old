@@ -106,11 +106,11 @@ public class ApisAction
 
         // 将请求数据处理之后传递
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
-        String  json = Synt.declare(req.getParameter("-api-data") , String.class);
+        String       json = Synt.declare(req.getParameter("-data"), String.class);
         if (json != null) {
             try {
-                Map send = Synt.declare(Data.toObject(json), Map.class);
-                Map data = hlpr.getRequestData();
+                Map  send = Synt.declare(Data.toObject(json), Map.class);
+                Map  data = hlpr.getRequestData();
                 data.putAll( send );
             } catch (HongsException ex) {
                 throw new ServletException(ex);
@@ -126,9 +126,9 @@ public class ApisAction
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
         if (resp != null) {
-            Boolean scok = Synt.declare(req.getParameter("-api-scok"), Boolean.class);
-            String  back = Synt.declare(req.getParameter("-api-wrap"),  String.class);
-            String  ccnv = Synt.declare(req.getParameter("-api-conv"),  String.class);
+            Boolean scok = Synt.declare(req.getParameter("-scok"), Boolean.class);
+            Boolean wrap = Synt.declare(req.getParameter("-wrap"), Boolean.class);
+            String  ccnv = Synt.declare(req.getParameter("-conv"),  String.class);
             Set     conv = Synt.declare(ccnv == null ? null : ccnv.split("[\\s\\+]+"), Set.class);
 
             // 状态总是 200
@@ -137,18 +137,30 @@ public class ApisAction
             }
 
             // 返回节点
-            if (back != null) {
-                Map map = new HashMap();
+            if (wrap != null && wrap) {
+                Map    data;
+                Object xxxx;
+                xxxx = resp.get("data" );
+                if (xxxx == null) {
+                    data = new HashMap();
+                    resp.put("data", data);
+                } else
+                if (!(xxxx instanceof Map)) {
+                    data = new HashMap();
+                    data.put("data", xxxx);
+                    resp.put("data", data);
+                } else {
+                    data = (Map) xxxx;
+                }
                 Iterator it = resp.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry et = (Map.Entry) it.next();
                     Object k = et.getKey();
-                    if (! _API_RSP.contains( k )) {
-                        map.put(k, et.getValue());
+                    if ( ! _API_RSP.contains( k )) {
+                        data.put(k, et.getValue());
                         it.remove();
                     }
                 }
-                resp.put(back, map);
             }
 
             // 转换策略
@@ -224,9 +236,10 @@ public class ApisAction
 
     private static final Set _API_RSP = new HashSet();
     static {
-        _API_RSP.add("ok" );
+        _API_RSP.add("ok");
         _API_RSP.add("err");
         _API_RSP.add("msg");
+        _API_RSP.add("data");
     }
 
     private static class Conv extends Synt.LeafNode {

@@ -54,17 +54,23 @@ public class Form extends Model {
      * @throws app.hongs.HongsException
      */
     public String save(Map rd) throws HongsException {
-        String id = (String) rd.get(this.table.primaryKey);
+        String  id = (String) rd.get(this.table.primaryKey);
+        boolean ic;
         if (id == null || id.length() == 0) {
             id = this.add(rd);
+            ic = true ;
         } else {
             this.put(rd , id);
+            ic = false;
         }
 
         // 建立菜单配置
         String name = (String) rd.get("name");
         if (name != null && !"".equals(name)) {
             updateOrCreateMenuSet( id, name );
+        }
+        if (ic) {
+          new Unit().updateOrCreateMenuSet( );
         }
 
         // 建立表单配置
@@ -75,6 +81,16 @@ public class Form extends Model {
         }
         
         return id;
+    }
+    
+    @Override
+    public int delete(Map rd) throws HongsException {
+        int n = super.delete(rd);
+        
+        // 更新单元菜单
+        new Unit().updateOrCreateMenuSet( );
+        
+        return n;
     }
 
     public void updateOrCreateMenuSet(String id, String name) throws HongsException {
@@ -210,7 +226,7 @@ public class Form extends Model {
                     Element para = docm.createElement("param");
                     item.appendChild ( para );
                     para.setAttribute("name", "lucene-fieldtype");
-                    para.setNodeValue(/*val*/ "search" /*fiel*/);
+                    para.setNodeValue(/*for*/ "search" /*field*/);
                 }
 
                 Element para = docm.createElement("param");

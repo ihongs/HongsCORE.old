@@ -33,11 +33,14 @@ function H$() {
         if (typeof(arguments[1]) !== "string") {
             if (!jQuery.isArray(arguments[1])) {
                 var c =  jQuery(arguments[1]).closest(".loadbox");
-                var d = hsSerialArr(c.data("url" ));
-                var e = hsSerialArr(c.data("data"));
-                for (var i = 0; i < e.length; i ++)
-                    d.push(e[i]);
-                arguments[1] = d;
+                var d = hsSerialArr(c.data("data"));
+                var f = hsSerialArr(c.data("hash"));
+                var e = hsSerialArr(c.data("url" ));
+                for (var i = 0; i < d.length; i ++)
+                    e.push(d[i]);
+                for (var i = 0; i < f.length; i ++)
+                    e.push(f[i]);
+                arguments[1] = e;
             }
             if (b === '@')
                 return hsGetSerias(arguments[1], arguments[0]);
@@ -124,8 +127,7 @@ function hsResponObj(rst, qut) {
                 if (rst.msg) {
                     jQuery.hsNote(rst.msg, 'alert-success');
                 }
-            }
-            else {
+            } else {
                 if (rst.msg) {
                     alert(rst.msg);
                 } else {
@@ -608,9 +610,13 @@ function hsFixPms   (uri, pms) {
     if (pms instanceof Element || pms instanceof jQuery) {
         var c = jQuery(pms).closest(".loadbox");
         var d = hsSerialArr(c.data("data"));
+        var f = hsSerialArr(c.data("hash"));
           pms = hsSerialArr(c.data("url" ));
         for (var i = 0; i < d.length; i ++) {
           pms.push(d[i]);
+        }
+        for (var i = 0; i < f.length; i ++) {
+          pms.push(f[i]);
         }
     }
     pms = hsSerialObj (pms);
@@ -998,6 +1004,19 @@ $.hsAjax = function(url, settings) {
     }
     return $.jqAjax( hsFixUri(url) , settings );
 };
+$.hsOpen = function(url, data, complete) {
+    var div = $('<div class="modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header">'
+              + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
+              + '<h4 class="modal-title">' +hsGetLang("opening")+ '</h4>'
+              + '</div><div class="modal-body openbox">'
+              + '</div></div></div></div>')
+              .css('z-index', 99999);
+    var box = div.find( '.openbox' );
+    div.modal();
+
+    box.hsLoad(url, data, complete );
+    return box;
+};
 $.hsNote = function(msg, cls, sec) {
     if (! cls) cls = "alert-info";
     if (! sec) sec = 5;
@@ -1025,19 +1044,6 @@ $.hsNote = function(msg, cls, sec) {
 
     return box;
 };
-$.hsOpen = function(url, data, complete) {
-    var div = $('<div class="modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header">'
-              + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
-              + '<h4 class="modal-title">' +hsGetLang("opening")+ '</h4>'
-              + '</div><div class="modal-body openbox">'
-              + '</div></div></div></div>')
-              .css('z-index', 99999);
-    var box = div.find( '.openbox' );
-    div.modal();
-
-    box.hsLoad(url, data, complete );
-    return box;
-};
 
 $.fn.jqLoad = $.fn.load;
 $.fn.hsLoad = function(url, data, complete) {
@@ -1048,27 +1054,41 @@ $.fn.hsLoad = function(url, data, complete) {
     if (!$.isFunction(complete)) {
         complete = function() {};
     }
-
-    this.addClass("loadbox").addClass("loading");
-    this.data("url", url).data("data", data);
-    url = hsFixUri ( url);
-    if (! data) data = [];
+    
+    /**
+     * 取锚点作为局部参数
+     * 并将数据转换为序列
+     */
+    var hsh = "";
+    var dat = data ? hsSerialArr(data): [];
+    var pos = url.indexOf('#');
+    if (pos != -1) {
+        hsh = url.substring(1+pos);
+        url = url.substring(0,pos);
+    }
+    this.data( "url" , url )
+        .data( "hash", hsh )
+        .data( "data", dat )
+        .addClass("loadbox")
+        .addClass("loading");
 
     /**
      * 为了给加载区域内传递参数
      * 通常将参数附加在请求之上
      * 但这样会导致静态页不缓存
      * 故, 如果是 html 且无参数"_=RANDOM"
-     * 则不传递参数到服务端接口
+     * 则不传递任何参数到服务端
      */
-    if (/\.html($|\?)/.test(url)
-    &&  ! hsGetParam(url , '_' )
-    &&  ! hsGetSeria(data, '_')) {
-        url  = url.replace(/\?.*$/, "");
-        data = undefined ;
+    pos = url.indexOf('.html?');
+    if (pos != -1 && !hsGetParam(url, '_') && !hsGetSeria(dat, '_')) {
+        url = url.substring(0, pos + 5);
+        dat = undefined;
+    } else if (! dat.length( )) {
+        dat = undefined;
     }
+    url = hsFixUri(url);
 
-    return $.fn.jqLoad.call(this, url, data, function() {
+    return $.fn.jqLoad.call(this, url, dat, function() {
         $(this).removeClass("loading").hsReady();
         complete.apply(this,arguments);
     });
@@ -1221,10 +1241,10 @@ $.fn.hsReady = function() {
 
     // 加载、打开、执行
     box.find("[data-load]").each(function() {
-        $(this).hsLoad($(this).attr("data-load"));
+        $(this).hsLoad($(this).attr("data-load"), $(this).attr("data-data"));
     });
     box.find("[data-open]").each(function() {
-        $(this).hsOpen($(this).attr("data-open"));
+        $(this).hsOpen($(this).attr("data-open"), $(this).attr("data-data"));
     });
     box.find("[data-eval]").each(function() {
         eval($(this).attr("data-eval"));
@@ -1511,30 +1531,32 @@ $.propHooks.choosed = {
 $(document)
 .on("ajaxError", function(evt, xhr, cnf) {
     var rst = hsResponObj(xhr);
-    if (typeof(cnf.action) === "undefined") {
+    if (typeof(cnf.funcName) === "undefined") {
         return;
     }
-    if (typeof(cnf.button) !== "undefined") {
-        $(cnf.button).trigger(cnf.action+"Error", evt, rst);
+    if (typeof(cnf.trigger ) !== "undefined") {
+        var btn = $(cnf.trigger);
+        btn.trigger(cnf.funcName+"Error", evt, rst);
     }
-    else if (HsForm !== undefined && cnf.context instanceof HsForm) {
-        cnf.context.context.trigger( cnf.action+"Error", evt, rst );
-    }
-    else if (HsList !== undefined && cnf.context instanceof HsList) {
-        cnf.context.context.trigger( cnf.action+"Error", evt, rst );
-    }
-    else if (HsTree !== undefined && cnf.context instanceof HsTree) {
-        cnf.context.context.trigger( cnf.action+"Error", evt, rst );
+    if (typeof(cnf.context ) !== "undefined") {
+        var box;
+        if ( typeof(cnf.context.context) !== "undefined") {
+            box = $(cnf.context.context);
+        } else {
+            box = $(cnf.context);
+        }
+        box.trigger(cnf.funcName+"Error", evt, rst);
     }
 })
 .on("click", "[data-toggle=hsLoad]",
 function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
+    var dat = $(this).attr("data-data");
         url = hsFixPms( url , this );
     if (box) {
         box = $(this)._hsTarget(box);
-        box.hsLoad( url );
+        box.hsLoad(url, dat);
     }
     evt.stopPropagation();
 })
@@ -1542,12 +1564,13 @@ function(evt) {
 function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
+    var dat = $(this).attr("data-data");
         url = hsFixPms( url , this );
     if (box) {
         box = $(this)._hsTarget(box);
-        box.hsOpen( url );
+        box.hsOpen(url, dat);
     } else {
-          $.hsOpen( url );
+          $.hsOpen(url, dat);
     }
     evt.stopPropagation();
 })

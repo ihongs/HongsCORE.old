@@ -27,6 +27,29 @@ public class SignAction {
         String username = Synt.declare(ah.getParameter("username"), "");
         String password = Synt.declare(ah.getParameter("password"), "");
 
+        if (username.length() == 0) {
+            CoreLocale lang = CoreLocale.getInstance( "member" );
+            Map m = new HashMap();
+            Map e = new HashMap();
+            m.put("username", new Wrong(lang.translate("core.username.can.not.be.empty")));
+            e.put("errors", new Wrongs(m).getErrors());
+            e.put("msg", lang.translate("core.sign.in.invalid"));
+            e.put("ok", false);
+            ah.reply(e);
+            return;
+        }
+        if (password.length() == 0) {
+            CoreLocale lang = CoreLocale.getInstance( "member" );
+            Map m = new HashMap();
+            Map e = new HashMap();
+            m.put("password", new Wrong(lang.translate("core.password.can.not.be.empty")));
+            e.put("errors", new Wrongs(m).getErrors());
+            e.put("msg", lang.translate("core.sign.in.invalid"));
+            e.put("ok", false);
+            ah.reply(e);
+            return;
+        }
+        
         password = Sign.getCrypt(password);
         ah.getRequestData().put("password", password);
 
@@ -55,10 +78,29 @@ public class SignAction {
             return;
         }
 
-        String appid = Synt.declare( ah.getParameter( "appid"), "web");
-        String token = Core.getUniqueId();
-
+        // 验证应用
+        String appid = Synt.declare ( ah.getParameter("appid"), "web");
+        if (!"web".equals(appid) && !"api".equals(appid)) {
+            fc = new FetchCase( )
+                .from   (tb.tableName, tb.name)
+                .select (".id")
+                .where  (".appid = ?", appid  );
+            xd = db.fetchLess(fc);
+            if (xd.isEmpty()) {
+                CoreLocale lang = CoreLocale.getInstance( "member" );
+                Map m = new HashMap();
+                Map e = new HashMap();
+                m.put("appid" , new Wrong(lang.translate("core.appid.invalid")));
+                e.put("errors", new Wrongs(m).getErrors());
+                e.put("msg", lang.translate("core.appid.invalid"));
+                e.put("ok", false);
+                ah.reply(e);
+                return;
+            }
+        }
+        
         // 设置登录
+        String token = Core.getUniqueId();
         tb = db.getTable( "user_sign" );
         tb.delete("`user_id` = ? AND `type` = ?", ud.get("id"), appid);
         xd = new HashMap();

@@ -100,7 +100,7 @@ HsForm.prototype = {
             "data"      : this._data,
             "type"      : "POST",
             "dataType"  : "json",
-            "action"    : "load",
+            "funcName"  : "load",
             "async"     : false,
             "cache"     : false,
             "context"   : this,
@@ -262,7 +262,7 @@ HsForm.prototype = {
                     "data"      : hsSerialArr(data),
                     "type"      : type || "POST",
                     "dataType"  : "json",
-                    "action"    : "save",
+                    "funcName"  : "save",
                     "async"     : false,
                     "cache"     : false,
                     "global"    : false,
@@ -654,8 +654,10 @@ HsForm.prototype = {
                 "data": data,
                 "type": "POST",
                 "dataType": "json",
+                "funcName": "verify",
                 "async": false,
                 "cache": false,
+                "context": this,
                 "success": function(rst) {
                     if (rst["info" ] !== undefined) {
                         ret = !jQuery.isEmptyObject(rst["info"]);

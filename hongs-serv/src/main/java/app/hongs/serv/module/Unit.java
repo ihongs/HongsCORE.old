@@ -3,7 +3,6 @@ package app.hongs.serv.module;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
-import app.hongs.db.FetchCase;
 import app.hongs.db.Mtree;
 import app.hongs.db.Table;
 import java.io.File;
@@ -11,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,7 +33,7 @@ import org.w3c.dom.Element;
  * @author Hongs
  */
 public class Unit extends Mtree {
-    
+
     public Unit() throws HongsException {
         this(DB.getInstance("module").getTable("unit"));
     }
@@ -63,75 +61,109 @@ public class Unit extends Mtree {
         // 建立菜单配置
         String name = (String) rd.get("name");
         if (name != null && !"".equals(name)) {
-            updateOrCreateMenuSet( id, name );
+            updateOrCreateMenuSet();
         }
 
         return id;
     }
 
-    public void updateOrCreateMenuSet(String id, String name) throws HongsException {
+    public void updateOrCreateMenuSet() throws HongsException {
         List<Map> rows;
-        
-        // 1. 找出首层
+
+        // 1. 找出首层单元及其全部子单元
         rows = this.table.fetchCase()
             .select("id,name")
             .where ("pid='0'")
             .all();
-        Set<String> unitIds = new HashSet();
-        for (Map  row  : rows) {
-            unitIds.add(row.get("id").toString());
+        Map<String, String> unitMap = new LinkedHashMap( );
+        Map<String, String> deepMap = new HashMap();
+        for (Map row : rows) {
+            String unitId = row.get(/***/"id").toString( );
+            unitMap.put(unitId,row.get("name").toString());
+            List<String> ids = this.getChildIds(unitId, true);
+            for (String  cid : ids) {
+                deepMap.put(cid, unitId);
+            }
         }
-        
+
+        // 2. 找出首层单元下的表单
         rows = this.db.getTable("form").fetchCase()
             .select("id,unit_id")
-            .where ("unit_id IN (?)", unitIds)
+            .where ("unit_id IN (?)", unitMap.keySet())
             .all();
-        Map<String, Set<String>> unitMap = new LinkedHashMap();
-        for (Map  row  : rows) {
-            String formId = row.get(/**/ "id").toString();
+        Map<String, Set<String>> formMap = new LinkedHashMap();
+        for (Map row : rows) {
+            String formId = row.get(/***/"id").toString();
             String unitId = row.get("unit_id").toString();
+
             Set formIds;
-            if (unitMap.containsKey(unitId)) {
-                formIds=unitMap.get(unitId);
+            if (formMap.containsKey(unitId)) {
+                formIds=formMap.get(unitId);
             } else {
                 formIds=new LinkedHashSet();
+                formMap.put(unitId,formIds);
             }
             formIds.add(formId);
         }
-        
-        // 1. 查找首层单元 id
-        
-        // 2. 构建 document 将首层单元加入 menu
-        
-        // 3. 查找首层下的全部 form 并 include 其 menu 配置
-        
-        // 4. 
-        
-        
-         Document docm = makeDocument();
+
+        // 3. 找出二级单元下的表单
+        rows = this.db.getTable("form").fetchCase()
+            .select("id,unit_id")
+            .where ("unit_id iN (?)", deepMap.keySet())
+            .all();
+        Map<String, Set<String>> hideMap = new LinkedHashMap();
+        for (Map row : rows) {
+            String formId = row.get(/***/"id").toString();
+            String unitId = row.get("unit_id").toString();
+            unitId = deepMap.get(unitId);
+
+            Set hideIds;
+            if (formMap.containsKey(unitId)) {
+                hideIds=hideMap.get(unitId);
+            } else {
+                hideIds=new LinkedHashSet();
+                hideMap.put(unitId,hideIds);
+            }
+            hideIds.add(formId);
+        }
+
+        Document docm = makeDocument();
 
         Element root = docm.createElement("root");
         docm.appendChild ( root );
 
         Element menu;
-        
-        menu = docm.createElement("menu");
-        root.appendChild ( menu );
-        menu.setAttribute("disp", name);
-        menu.setAttribute("href", "common/menu/cell.act?m=hongs/module/unit/"+id);
-        
-        List<String> pids = this.getParentIds(id);
-        
-        FetchCase fc = new FetchCase();
-        fc.select("id,name")
-          .where ("unit_id = ?", id);
-        List<Map> fl = this.db.getTable("form").fetchMore(fc);
-        
-        
-        
-        saveDocument(id+".menu.xml", docm);
+        Element hide;
+        Element incl;
+
+        for(Map.Entry<String, String> et : unitMap.entrySet()) {
+            String unitId   = et.getKey(  );
+            String unitName = et.getValue();
+
+            menu = docm.createElement( "menu" );
+            root.appendChild ( menu );
+            menu.setAttribute("disp", unitName);
+            menu.setAttribute("href", "common/menu/cell.act?m=hongs/module/unit/"+unitId);
+
+            for(String formId : formMap.get(unitId)) {
+                incl = docm.createElement("include");
+                incl.appendChild(docm.createTextNode("hongs/module/form/"+formId));
+            }
+
+            hide = docm.createElement( "menu" );
+            menu.appendChild ( hide );
+            hide.setAttribute("disp", unitName);
+            hide.setAttribute("href", "!hongs-module-unit-"+unitId);
+
+            for(String formId : hideMap.get(unitId)) {
+                incl = docm.createElement("include");
+                incl.appendChild(docm.createTextNode("hongs/module/form/"+formId));
+            }
+        }
+
+        saveDocument("unit.menu.xml", docm);
     }
-    
+
     private Document makeDocument() throws HongsException {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -141,9 +173,9 @@ public class Unit extends Mtree {
             throw HongsException.common(null, e);
         }
     }
-    
+
     private void saveDocument(String name, Document docm) throws HongsException {
-        File file = new File(Core.CONF_PATH+"/hongs/module/unit/"+name);
+        File file = new File(Core.CONF_PATH+"/hongs/module/"+name);
         if (!file.getParentFile().exists()) {
              file.getParentFile().mkdirs();
         }

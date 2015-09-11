@@ -20,6 +20,9 @@
                 page += "?"+data;
             }
 
+            if (href.startsWith("!")) {
+                continue;
+            }
             if (href.startsWith(path+"/#")) {
                 href = href.substring(href.indexOf('#'));
                 page = Core.BASE_HREF + "/" + page;
@@ -113,9 +116,9 @@
             })
             .click(function() {
                 var h  =  $(this).attr("data-href");
-                var p  =  $(this).attr("data-hrel");
+                var p  =  $(this).attr("data-hreq");
                 if (p) {
-                    $(this).removeAttr("data-hrel");
+                    $(this).removeAttr("data-hreq");
                     if (h.index('?') != -1 ) {
                         h += '?' + p;
                     } else {
@@ -150,12 +153,12 @@
                 var p = h.indexOf('&');
                 p = p != -1 ? h.substring(p + 1) : "" ;
                 a = $("#curr-menubar a[href='"+h+"']");
-                a.attr("data-hrel", p);
+                a.attr("data-hreq", p);
             } else {
-                a = $("#curr-menubar a").first(/****/);
+                a = $("#curr-menubar a").first();
             }
             if (a.size() == 0) {
-                a = $("#main-menubar ul.dropdown-menu a").first( );
+                a = $("#main-menubar ul.dropdown-menu a").first();
             }
             a.click();
         });

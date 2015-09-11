@@ -232,7 +232,7 @@ HsTree.prototype = {
             "data"      : data,
             "type"      : "POST",
             "dataType"  : "json",
-            "action"    : "load",
+            "funcName"  : "load",
             "async"     : false,
             "cache"     : false,
             "context"   : this,
@@ -362,11 +362,11 @@ HsTree.prototype = {
             "data"      : data,
             "type"      : "POST",
             "dataType"  : "json",
-            "action"    : "send",
-            "button"    : btn,
+            "funcName"  : "send",
             "async"     : false,
             "cache"     : false,
             "context"   : this,
+            "trigger"   : btn,
             "success"   : function(rst) {
                 this.sendBack(btn, rst, dat2);
             }

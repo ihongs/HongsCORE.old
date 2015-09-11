@@ -129,7 +129,7 @@ function HsList(opts, context) {
         }
 
         u = hsFixPms(u, loadBox);
-        that.open( n, m, u );
+        that.open(n, m, u /**/ );
     }
 
     if (openUrls) jQuery.each(openUrls, function(i, a) {
@@ -184,7 +184,7 @@ HsList.prototype = {
             "data"      : this._data,
             "type"      : "POST",
             "dataType"  : "json",
-            "action"    : "load",
+            "funcName"  : "load",
             "async"     : false,
             "cache"     : false,
             "context"   : this,
@@ -373,11 +373,11 @@ HsList.prototype = {
             "data"      : data,
             "type"      : "POST",
             "dataType"  : "json",
-            "action"    : "send",
-            "button"    : btn,
+            "funcName"  : "send",
             "async"     : false,
             "cache"     : false,
             "context"   : this,
+            "trigger"   : btn,
             "success"   : function(rst) {
                 this.sendBack(btn, rst, dat2);
             }
