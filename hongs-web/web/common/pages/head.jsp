@@ -139,7 +139,7 @@
             });
         $("#sign-out")
             .click(function() {
-                $.get(hsFixUri("hongs/member/sign/delete.act"), function() {
+                $.get(hsFixUri("manage/member/sign/delete.act"), function() {
                     location.reload();
                 });
             });

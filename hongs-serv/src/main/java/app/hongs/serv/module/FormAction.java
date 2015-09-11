@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author Hongs
  */
-@Action("hongs/module/form")
+@Action("manage/module/form")
 public class FormAction {
     
     private app.hongs.serv.module.Form model;

@@ -85,7 +85,7 @@ public class Common {
         } else {
           e++;
         }
-        CmdletHelper.printERate(100, o, e);
+        CmdletHelper.progres(100, o, e);
       }
     } catch (InterruptedException ex) {
     }
@@ -103,7 +103,7 @@ public class Common {
         } else {
           e++;
         }
-        CmdletHelper.printELeft(t, 100, o, e);
+        CmdletHelper.progres(t, 100, o, e);
       }
     } catch (InterruptedException ex) {
     }

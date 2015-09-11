@@ -280,6 +280,18 @@ public class CmdletHelper
   }
 
   /**
+   * 终止输出进度
+   * 
+   * 请将执行块包裹在 try catch 中
+   * 接获到异常或中止执行时
+   * 使用本方法可安全的切行
+   */
+  public static void progred()
+  {
+    System.err.println("");
+  }
+
+  /**
    * 输出执行进度
    *
    * 由于现在的终端(命令行)宽度普遍是80个字符,
@@ -288,7 +300,7 @@ public class CmdletHelper
    * @param scale 百分比, 0~100的浮点数
    * @param notes 说明文本
    */
-  public static void printERate(float scale, String notes)
+  public static void progres(float scale, String notes)
   {
     if (scale < 0) scale = 0;
     if (scale > 100) scale = 100;
@@ -317,7 +329,7 @@ public class CmdletHelper
     {
       sb.append(" ");
     }
-    sb.append("\r" );
+    sb.append( "\r");
 
     if (scale == 100)
     {
@@ -334,11 +346,11 @@ public class CmdletHelper
    * @param n 总条目数
    * @param ok 完成条目数
    */
-  public static void printERate(int n, int ok)
+  public static void progres(int n, int ok)
   {
     String notes = String.format("ok(%d)", ok);
     float  scale = (float)ok / n * 100;
-    printERate(scale, notes);
+    CmdletHelper.progres(scale, notes);
   }
 
   /**
@@ -347,11 +359,11 @@ public class CmdletHelper
    * @param ok 完成条目数
    * @param er 错误条目数
    */
-  public static void printERate(int n, int ok, int er)
+  public static void progres(int n, int ok, int er)
   {
     String notes = String.format("ok(%d) error(%d)", ok, er);
     float  scale = (float)(er + ok) / n * 100;
-    printERate(scale, notes);
+    CmdletHelper.progres(scale, notes);
   }
 
   /**
@@ -360,15 +372,15 @@ public class CmdletHelper
    * @param n 总条目数
    * @param ok 完成条目数
    */
-  public static void printELeft(long t, int n, int ok)
+  public static void progres(long t, int n, int ok)
   {
     float  scale = (float)ok / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
     String left2 = Text.humanTime((long) left1);
-    String left3 = String.format("ok(%d) Time left: %s",
+    String left3 = String.format("ok(%d) remaining: %s",
                                      ok, left2);
-    printERate(scale, left3);
+    CmdletHelper.progres(scale, left3);
   }
 
   /**
@@ -378,15 +390,15 @@ public class CmdletHelper
    * @param ok 完成条目数
    * @param er 错误条目数
    */
-  public static void printELeft(long t, int n, int ok, int er)
+  public static void progres(long t, int n, int ok, int er)
   {
     float  scale = (float)( er + ok ) / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
     String left2 = Text.humanTime((long) left1);
-    String left3 = String.format("ok(%d) error(%d) Time left: %s",
+    String left3 = String.format("ok(%d) error(%d) remaining: %s",
                                  ok, er, left2);
-    printERate(scale, left3);
+    CmdletHelper.progres(scale, left3);
   }
 
 }

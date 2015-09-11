@@ -56,20 +56,20 @@
         <filter-class>app.hongs.serv.AuthFilter</filter-class>
         <init-param>
             <param-name>index-page</param-name>
-            <param-value>/</param-value>
+            <param-value>/manage/</param-value>
         </init-param>
         <init-param>
             <param-name>login-page</param-name>
-            <param-value>/login.html</param-value>
+            <param-value>/manage/login.html</param-value>
         </init-param>
         <init-param>
             <param-name>exclude-urls</param-name>
-            <param-value>/hongs/member/sign/create.act;/hongs/member/sign/delete.act</param-value>
+            <param-value>/manage/member/sign/create.act;/manage/member/sign/delete.act</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
-        <url-pattern>/hongs/*</url-pattern>
+        <url-pattern>/manage/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
@@ -80,7 +80,7 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
-            <param-value>/hongs/db</param-value>
+            <param-value>/common/pages/db</param-value>
         </init-param>
     </filter>
     <filter>
@@ -88,32 +88,9 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action</param-name>
-            <param-value>/hongs/db</param-value>
-        </init-param>
-        <init-param>
-            <param-name>render</param-name>
-            <param-value>/hongs/dl</param-value>
+            <param-value>/common/pages/dl</param-value>
         </init-param>
     </filter>
-    <filter>
-        <filter-name>AutoFilter_DM</filter-name>
-        <filter-class>app.hongs.serv.AutoFilter</filter-class>
-        <init-param>
-            <param-name>action</param-name>
-            <param-value>/hongs/dm</param-value>
-        </init-param>
-        <init-param>
-            <param-name>render</param-name>
-            <param-value>/hongs/dm</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>AutoFilter_DM</filter-name>
-        <url-pattern>/hongs/dm/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
     <!-- Default Tags -->
     <jsp-config>
         <taglib>

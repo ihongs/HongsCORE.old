@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author Hongs
  */
-@Action("hongs/module/unit")
+@Action("manage/module/unit")
 public class UnitAction {
     
     private app.hongs.serv.module.Unit model;

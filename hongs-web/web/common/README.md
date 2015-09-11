@@ -44,11 +44,11 @@ data 属性缩写:
 
     <div id="member_dept_tree">
         <object class="config" name="hsTree" data="">
-            <param name="loadUrl" value="hongs/member/dept/list.act"/>
-            <param name="linkUrls#0" value="['.main-context','hongs/member/user/list.html?dept_id={ID}']"/>
-            <param name="openUrls#0" value="['.create','hongs/member/dept/form.html?pid={ID}','@']"/>
-            <param name="openUrls#1" value="['.modify','hongs/member/dept/form.html?id={ID}','@']"/>
-            <param name="sendUrls#0" value="['.delete','hongs/member/dept/delete.act','您确定要删除此部门?']"/>
+            <param name="loadUrl" value="manage/member/dept/list.act"/>
+            <param name="linkUrls#0" value="['.main-context','manage/member/user/list.html?dept_id={ID}']"/>
+            <param name="openUrls#0" value="['.create','manage/member/dept/form.html?pid={ID}','@']"/>
+            <param name="openUrls#1" value="['.modify','manage/member/dept/form.html?id={ID}','@']"/>
+            <param name="sendUrls#0" value="['.delete','manage/member/dept/delete.act','您确定要删除此部门?']"/>
             <param name="rootName" value="组织架构"/>
         </object>
         <div class="toolbox btn-group">
@@ -63,10 +63,10 @@ data 属性缩写:
 
     <div id="member_user_list">
         <object class="config" name="hsList" data="">
-            <param name="loadUrl" value="('hongs/member/user/list.act?dept_id='+H$('&dept_id',this))"/>
-            <param name="openUrls#0" value="['.create','hongs/member/user/form.html?dept_id='+H$('&dept_id',this),'@']"/>
-            <param name="openUrls#1" value="['.modify','hongs/member/user/form.html?id={ID}','@']"/>
-            <param name="sendUrls#0" value="['.delete','hongs/member/user/delete.act','您确定要删除此用户?']"/>
+            <param name="loadUrl" value="('manage/member/user/list.act?dept_id='+H$('&dept_id',this))"/>
+            <param name="openUrls#0" value="['.create','manage/member/user/form.html?dept_id='+H$('&dept_id',this),'@']"/>
+            <param name="openUrls#1" value="['.modify','manage/member/user/form.html?id={ID}','@']"/>
+            <param name="sendUrls#0" value="['.delete','manage/member/user/delete.act','您确定要删除此用户?']"/>
         </object>
         <div>
             <div class="toolbox col-md-9 btn-group">
@@ -104,8 +104,8 @@ data 属性缩写:
 
     <div id="member_user_form">
         <object class="config" name="hsForm" data="">
-            <param name="loadUrl" value="hongs/member/user/info.act"/>
-            <param name="saveUrl" value="hongs/member/user/save.act"/>
+            <param name="loadUrl" value="manage/member/user/info.act"/>
+            <param name="saveUrl" value="manage/member/user/save.act"/>
         </object>
         <form action="" method="POST">
             <input type="hidden" name="id"/>
@@ -114,7 +114,7 @@ data 属性缩写:
                 <div class="col-md-4">
                     <div class="form-group">
                         <label class="control-label">邮箱</label>
-                        <input type="email" name="username" class="form-control" required="required" data-unique="hongs/member/user/unique.act?id={id}"/>
+                        <input type="email" name="username" class="form-control" required="required" data-unique="manage/member/user/unique.act?id={id}"/>
                     </div>
                     <div class="form-group">
                         <label class="control-label">口令</label>
@@ -128,7 +128,7 @@ data 属性缩写:
                 <div class="col-md-4">
                     <div class="form-group">
                         <label class="control-label">昵称</label>
-                        <input type="text" name="name" class="form-control" required="required" data-unique="hongs/member/user/unique.act?id={id}"/>
+                        <input type="text" name="name" class="form-control" required="required" data-unique="manage/member/user/unique.act?id={id}"/>
                     </div>
                     <div class="form-group">
                         <label class="control-label">备注</label>

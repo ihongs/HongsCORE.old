@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <menu disp="会员管理" href="common/menu/cell.act?m=member">
-        <menu disp="用户" href="hongs/member/#user" page="hongs/member/dept/tree.html">
-            <role disp="查看用户" name="hongs/member/user/retrieve">
-                <depend>hongs/member/dept/retrieve</depend>
-                <action>hongs/member/user/retrieve.act</action>
+        <menu disp="用户" href="manage/member/#user" page="manage/member/dept/tree.html">
+            <role disp="查看用户" name="manage/member/user/retrieve">
+                <depend>manage/member/dept/retrieve</depend>
+                <action>manage/member/user/retrieve.act</action>
             </role>
-            <role disp="添加用户" name="hongs/member/user/create">
-                <depend>hongs/member/user/retrieve</depend>
-                <action>hongs/member/user/create.act</action>
+            <role disp="添加用户" name="manage/member/user/create">
+                <depend>manage/member/user/retrieve</depend>
+                <action>manage/member/user/create.act</action>
             </role>
-            <role disp="修改用户" name="hongs/member/user/update">
-                <depend>hongs/member/user/retrieve</depend>
-                <action>hongs/member/user/update.act</action>
+            <role disp="修改用户" name="manage/member/user/update">
+                <depend>manage/member/user/retrieve</depend>
+                <action>manage/member/user/update.act</action>
             </role>
-            <role disp="删除用户" name="hongs/member/user/delete">
-                <depend>hongs/member/user/retrieve</depend>
-                <action>hongs/member/user/delete.act</action>
+            <role disp="删除用户" name="manage/member/user/delete">
+                <depend>manage/member/user/retrieve</depend>
+                <action>manage/member/user/delete.act</action>
             </role>
-            <role disp="查看部门" name="hongs/member/dept/retrieve">
-                <depend>hongs/member/user/retrieve</depend>
-                <action>hongs/member/dept/retrieve.act</action>
+            <role disp="查看部门" name="manage/member/dept/retrieve">
+                <depend>manage/member/user/retrieve</depend>
+                <action>manage/member/dept/retrieve.act</action>
             </role>
-            <role disp="添加部门" name="hongs/member/dept/create">
-                <depend>hongs/member/dept/retrieve</depend>
-                <action>hongs/member/dept/create.act</action>
+            <role disp="添加部门" name="manage/member/dept/create">
+                <depend>manage/member/dept/retrieve</depend>
+                <action>manage/member/dept/create.act</action>
             </role>
-            <role disp="修改部门" name="hongs/member/dept/update">
-                <depend>hongs/member/dept/retrieve</depend>
-                <action>hongs/member/dept/update.act</action>
+            <role disp="修改部门" name="manage/member/dept/update">
+                <depend>manage/member/dept/retrieve</depend>
+                <action>manage/member/dept/update.act</action>
             </role>
-            <role disp="删除部门" name="hongs/member/dept/delete">
-                <depend>hongs/member/dept/retrieve</depend>
-                <action>hongs/member/dept/delete.act</action>
+            <role disp="删除部门" name="manage/member/dept/delete">
+                <depend>manage/member/dept/retrieve</depend>
+                <action>manage/member/dept/delete.act</action>
             </role>
         </menu>
     </menu>

@@ -19,7 +19,7 @@ import java.util.Set;
  * 用户动作接口
  * @author Hongs
  */
-@Action("hongs/member/user")
+@Action("manage/member/user")
 public class UserAction {
 
     private app.hongs.serv.member.User model;

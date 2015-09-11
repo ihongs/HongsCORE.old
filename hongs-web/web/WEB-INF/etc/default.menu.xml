@@ -3,6 +3,6 @@
     <menu href="/">
         <include>member</include>
         <include>module</include>
-        <include>hongs/module/data</include>
+        <include>manage/module/data</include>
     </menu>
 </root>

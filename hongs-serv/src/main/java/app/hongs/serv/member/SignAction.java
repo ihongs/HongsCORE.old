@@ -19,7 +19,7 @@ import javax.servlet.http.HttpSession;
  * 登录动作
  * @author Hongs
  */
-@Action("hongs/member/sign")
+@Action("manage/member/sign")
 public class SignAction {
 
     @Action("create")

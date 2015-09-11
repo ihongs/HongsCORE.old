@@ -143,11 +143,11 @@ public class Unit extends Mtree {
             menu = docm.createElement( "menu" );
             root.appendChild ( menu );
             menu.setAttribute("disp", unitName);
-            menu.setAttribute("href", "common/menu/cell.act?m=hongs/module/unit/"+unitId);
+            menu.setAttribute("href", "common/menu/cell.act?m=manage/module/unit/"+unitId);
 
             for(String formId : formMap.get(unitId)) {
                 incl = docm.createElement("include");
-                incl.appendChild(docm.createTextNode("hongs/module/form/"+formId));
+                incl.appendChild(docm.createTextNode("manage/module/form/"+formId));
             }
 
             hide = docm.createElement( "menu" );
@@ -157,7 +157,7 @@ public class Unit extends Mtree {
 
             for(String formId : hideMap.get(unitId)) {
                 incl = docm.createElement("include");
-                incl.appendChild(docm.createTextNode("hongs/module/form/"+formId));
+                incl.appendChild(docm.createTextNode("manage/module/form/"+formId));
             }
         }
 
@@ -175,7 +175,7 @@ public class Unit extends Mtree {
     }
 
     private void saveDocument(String name, Document docm) throws HongsException {
-        File file = new File(Core.CONF_PATH+"/hongs/module/"+name);
+        File file = new File(Core.CONF_PATH+"/manage/module/"+name);
         if (!file.getParentFile().exists()) {
              file.getParentFile().mkdirs();
         }

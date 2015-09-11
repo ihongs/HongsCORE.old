@@ -117,22 +117,22 @@ CREATE TABLE `a_member_user_role` (
 CREATE INDEX `IK_a_member_user_role_user` ON `a_member_user_role` (`user_id`);
 CREATE INDEX `IK_a_member_user_role_role` ON `a_member_user_role` (`role`);
 
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/user/retrieve');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/user/create');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/user/update');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/user/delete');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/retrieve');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/create');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/update');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/member/dept/delete');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/retrieve');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/create');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/update');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/form/delete');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/retrieve');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/create');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/update');
-INSERT INTO `a_member_user_role` VALUES ('1','hongs/module/unit/delete');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/user/retrieve');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/user/create');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/user/update');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/user/delete');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/dept/retrieve');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/dept/create');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/dept/update');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/member/dept/delete');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/form/retrieve');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/form/create');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/form/update');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/form/delete');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/unit/retrieve');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/unit/create');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/unit/update');
+INSERT INTO `a_member_user_role` VALUES ('1','manage/module/unit/delete');
 
 --
 -- 用户登录凭证

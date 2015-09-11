@@ -16,7 +16,7 @@ import java.util.Set;
  * 部门动作接口
  * @author Hongs
  */
-@Action("hongs/member/dept")
+@Action("admin/member/dept")
 public class DeptAction {
 
     private app.hongs.serv.member.Dept model;

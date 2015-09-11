@@ -102,8 +102,8 @@ public class Form extends Model {
         Element menu = docm.createElement("menu");
         root.appendChild ( menu );
         menu.setAttribute("disp", name);
-        menu.setAttribute("href", "hongs/module/data/#"+id);
-        menu.setAttribute("page", "hongs/module/data/" +id+"/main.html");
+        menu.setAttribute("href", "manage/module/data/#"+id);
+        menu.setAttribute("page", "manage/module/data/" +id+"/main.html");
         
         Element role, actn, depn;
         
@@ -111,57 +111,57 @@ public class Form extends Model {
         
         role = docm.createElement("menu");
         menu.appendChild ( role );
-        role.setAttribute("name", "hongs/module/data/" +id+"/retrieve");
+        role.setAttribute("name", "manage/module/data/" +id+"/retrieve");
         role.setAttribute("disp", "查看"+name);
         
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.setNodeValue("hongs/module/data/"+id+"/retrieve.act");
+        actn.setNodeValue("manage/module/data/"+id+"/retrieve.act");
         
         // 添加
         
         role = docm.createElement("menu");
         menu.appendChild ( role );
-        role.setAttribute("name", "hongs/module/data/" +id+"/create");
+        role.setAttribute("name", "manage/module/data/" +id+"/create");
         role.setAttribute("disp", "添加"+name);
         
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.setNodeValue("hongs/module/data/"+id+"/create.act");
+        actn.setNodeValue("manage/module/data/"+id+"/create.act");
         
         depn = docm.createElement("depend");
         role.appendChild ( depn );
-        depn.setNodeValue("hongs/module/data/"+id+"/retrieve");
+        depn.setNodeValue("manage/module/data/"+id+"/retrieve");
         
         // 修改
         
         role = docm.createElement("menu");
         menu.appendChild ( role );
-        role.setAttribute("name", "hongs/module/data/" +id+"/update");
+        role.setAttribute("name", "manage/module/data/" +id+"/update");
         role.setAttribute("disp", "修改"+name);
         
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.setNodeValue("hongs/module/data/"+id+"/update.act");
+        actn.setNodeValue("manage/module/data/"+id+"/update.act");
         
         depn = docm.createElement("depend");
         role.appendChild ( depn );
-        depn.setNodeValue("hongs/module/data/"+id+"/retrieve");
+        depn.setNodeValue("manage/module/data/"+id+"/retrieve");
         
         // 删除
         
         role = docm.createElement("menu");
         menu.appendChild ( role );
-        role.setAttribute("name", "hongs/module/data/" +id+"/delete");
+        role.setAttribute("name", "manage/module/data/" +id+"/delete");
         role.setAttribute("disp", "删除"+name);
         
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.setNodeValue("hongs/module/data/"+id+"/delete.act");
+        actn.setNodeValue("manage/module/data/"+id+"/delete.act");
         
         depn = docm.createElement("depend");
         role.appendChild ( depn );
-        depn.setNodeValue("hongs/module/data/"+id+"/retrieve");
+        depn.setNodeValue("manage/module/data/"+id+"/retrieve");
         
         // 保存
         
@@ -250,7 +250,7 @@ public class Form extends Model {
     }
     
     private void saveDocument(String name, Document docm) throws HongsException {
-        File file = new File(Core.CONF_PATH+"/hongs/module/data/"+name);
+        File file = new File(Core.CONF_PATH+"/manage/module/data/"+name);
         if (!file.getParentFile().exists()) {
              file.getParentFile().mkdirs();
         }

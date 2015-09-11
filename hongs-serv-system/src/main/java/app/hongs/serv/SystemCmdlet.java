@@ -88,14 +88,14 @@ public class SystemCmdlet {
                 for(String s : a) {
                     s = s.trim();
                     if (s.length() == 0) {
-                        CmdletHelper.printELeft(st, al, ++ok, er);
+                        CmdletHelper.progres(st, al, ++ok, er);
                         continue;
                     }
                     try {
                         db.execute(s.trim());
-                        CmdletHelper.printELeft(st, al, ++ok, er);
+                        CmdletHelper.progres(st, al, ++ok, er);
                     } catch (HongsException ex) {
-                        CmdletHelper.printELeft(st, al, ok, ++er);
+                        CmdletHelper.progres(st, al, ok, ++er);
                         e.append("\r\n").append(ex.getMessage( ));
                     }
                 }
