@@ -99,10 +99,10 @@ implements IRecord
   protected String pageKey = "pn";
 
   /**
-   * 链接参数名
+   * 分页参数名
    * 影响getPage
    */
-  protected String lnksKey = "ln";
+  protected String pagsKey = "gn";
 
   /**
    * 行数参数名
@@ -132,7 +132,7 @@ implements IRecord
    * 构造方法
    *
    * 需指定该模型对应的表对象.
-   * 如传递的 id,wd,pn,ln,rn,sf,ob 等参数名不同,
+   * 如传递的 id,wd,pn,gn,rn,sf,ob 等参数名不同,
    * 可在构造时分别指定;
    * 请指定被搜索的字段.
    *
@@ -151,7 +151,7 @@ implements IRecord
     this.orKey   = conf.getProperty("fore.or.key"  , "or");
     this.arKey   = conf.getProperty("fore.ar.key"  , "ar");
     this.pageKey = conf.getProperty("fore.page.key", "pn");
-    this.lnksKey = conf.getProperty("fore.lnks.key", "ln");
+    this.pagsKey = conf.getProperty("fore.pags.key", "gn");
     this.rowsKey = conf.getProperty("fore.rows.key", "rn");
     this.colsKey = conf.getProperty("fore.cols.key", "sf");
     this.sortKey = conf.getProperty("fore.sort.key", "ob");
@@ -687,10 +687,10 @@ implements IRecord
     }
     
     // 获取分页, 默认查总页数
-    int lnks = 0;
-    if (rd.containsKey(this.lnksKey))
+    int pags = 0;
+    if (rd.containsKey(this.pagsKey))
     {
-      lnks = Integer.parseInt((String)rd.get(this.lnksKey));
+      pags = Integer.parseInt((String)rd.get(this.pagsKey));
     }
 
     // 获取行数, 默认依从配置
@@ -711,7 +711,7 @@ implements IRecord
       caze.from (table.tableName , table.name );
       FetchPage fp = new FetchPage(caze, table);
       fp.setPage(page != 0 ? page : 1);
-      fp.setLnks(lnks >  0 ? lnks : Math.abs(lnks));
+      fp.setPags(pags >  0 ? pags : Math.abs(pags));
       fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
       // 行数小于 0 则不要分页信息

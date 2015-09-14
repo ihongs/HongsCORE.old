@@ -42,7 +42,7 @@ public class ActionRunner {
     private String action;
     private final Object   object;
     private final Method   method;
-    private final Class<?> classx;
+    private final Class<?> mclass;
     private final ActionHelper helper;
     private final Annotation[] annarr;
 
@@ -53,9 +53,9 @@ public class ActionRunner {
         }
         this.action = action;
         this.helper = helper;
-        this.classx = m.mclass;
+        this.mclass = m.mclass;
         this.method = m.method;
-        this.object = Core.getInstance(classx);
+        this.object = Core.getInstance(mclass);
         this.annarr = method.getAnnotations( );
         helper.setAttribute("__RUNNER__",this);
     }
@@ -69,17 +69,17 @@ public class ActionRunner {
     }
 
     public String getClsAnn() {
-        return classx.getAnnotation(Action.class).value();
+        return mclass.getAnnotation(Action.class).value();
     }
 
     /**
      * 获取动作名
-     * 如果有指定工作路径(ActionWarder.PATH)则返回工作动作名
+     * 如果有指定工作路径(ActionDriver.PATH)则返回工作动作名
      * @return
      * @throws HongsException
      */
     public String getAction() throws HongsException {
-        String x = (String) helper.getAttribute(app.hongs.action.ActionDriver.PATH);
+        String x = (String) helper.getAttribute(ActionDriver.PATH);
         if (x != null) { // 去除根和扩展名
             return x.substring(1, x.lastIndexOf('.'));
         } else {
@@ -87,6 +87,11 @@ public class ActionRunner {
         }
     }
 
+    /**
+     * 执行动作方法
+     * 会执行 action 方法上 annotation 指定的过滤器
+     * @throws HongsException 
+     */
     public void doAction() throws HongsException {
         // 如果超出链长度, 则终止执行
         if ( idx  >  annarr.length) {
@@ -95,13 +100,13 @@ public class ActionRunner {
         }
 
         // 如果已到达链尾, 则执行动作
-        if ( idx  == annarr.length) {
+        if ( idx ==  annarr.length) {
             doInvoke();
             return;
         }
 
         Filter actw;
-        Annotation    anno = annarr[idx ++];
+        Annotation anno = annarr[idx ++];
         if (anno instanceof Filter) {
             actw = ( Filter ) anno;
         } else {
@@ -120,13 +125,18 @@ public class ActionRunner {
         filter.invoke(helper , this, anno);
     }
 
+    /**
+     * 执行动作方法
+     * 不执行 action 方法上 annotation 指定的过滤器
+     * @throws HongsException 
+     */
     public void doInvoke() throws HongsException {
         try {
             method.invoke(object, helper);
         } catch (   IllegalAccessException e) {
-            throw new HongsException(0x110e, "Illegal access for method '"+classx.getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x110e, "Illegal access for method '"+mclass.getName()+"."+method.getName()+"(ActionHelper).");
         } catch ( IllegalArgumentException e) {
-            throw new HongsException(0x110e, "Illegal params for method '"+classx.getName()+"."+method.getName()+"(ActionHelper).");
+            throw new HongsException(0x110e, "Illegal params for method '"+mclass.getName()+"."+method.getName()+"(ActionHelper).");
         } catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
             if (ex instanceof HongsError/**/) {

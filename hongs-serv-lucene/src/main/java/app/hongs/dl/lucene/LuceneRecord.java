@@ -96,8 +96,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected String orKey = "or";
     protected String xrKey = "xr";
     protected String pageKey = "pn";
+    protected String pagsKey = "gn";
     protected String rowsKey = "rn";
-    protected String lnksKey = "ln";
     protected String colsKey = "sf";
     protected String sortKey = "ob";
     protected String findKey = "wd";
@@ -136,7 +136,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         this.orKey   = conf.getProperty("fore.or.key"  , "or");
         this.xrKey   = conf.getProperty("fore.xr.key"  , "xr");
         this.pageKey = conf.getProperty("fore.page.key", "pn");
-        this.lnksKey = conf.getProperty("fore.lnks.key", "ln");
+        this.pagsKey = conf.getProperty("fore.pags.key", "gn");
         this.rowsKey = conf.getProperty("fore.rows.key", "rn");
         this.colsKey = conf.getProperty("fore.cols.key", "sf");
         this.sortKey = conf.getProperty("fore.sort.key", "ob");
@@ -162,7 +162,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * 以下参数为特殊参数, 可在 default.properties 中配置:
      * id   ID, 仅指定单个 id 时则返回详情(info)
      * rn   行数, 明确指定为 0 则不分页
-     * ln   分页
+     * gn   分页
      * pn   页码
      * wd   搜索
      * ob   排序
@@ -204,19 +204,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 获取链数, 默认依从配置
-        int ln;
-        if (rd.containsKey(lnksKey)) {
-            ln = Synt.declare(rd.get(lnksKey), 0);
+        int gn;
+        if (rd.containsKey(pagsKey)) {
+            gn = Synt.declare(rd.get(pagsKey), 0);
         } else {
-            ln = CoreConfig.getInstance().getProperty("fore.lnks.for.page", 10);
+            gn = CoreConfig.getInstance().getProperty("fore.gags.for.page", 10);
         }
 
         // 获取页码, 依此计算分页
-        if (ln < 1) ln = 1; // 链数不得少于 1
+        if (gn < 1) gn = 1; // 链数不得少于 1
         int pn = Synt.declare(rd.get(pageKey), 1);
-        int minPn = pn - (ln / 2 );
+        int minPn = pn - (gn / 2 );
         if (minPn < 1)   minPn = 1;
-        int maxPn = ln + minPn - 1;
+        int maxPn = gn + minPn - 1;
         int limit = rn * maxPn + 1;
         int minRn = rn * (pn - 1 );
         int maxRn = rn + minRn;
@@ -261,8 +261,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         resp.put("list", list);
         resp.put("page", page);
         page.put("page", pn);
+        page.put("pags", gn);
         page.put("rows", rn);
-        page.put("lnks", ln);
         page.put("rowscount", rc);
         page.put("pagecount", pc);
         page.put("uncertain", pc > maxPn);

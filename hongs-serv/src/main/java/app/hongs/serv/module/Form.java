@@ -96,16 +96,16 @@ public class Form extends Model {
     public void updateOrCreateMenuSet(String id, String name) throws HongsException {
         Document docm = makeDocument();
 
-        Element root = docm.createElement("root");
+        Element  root = docm.createElement("root");
         docm.appendChild ( root );
 
-        Element menu = docm.createElement("menu");
+        Element  menu = docm.createElement("menu");
         root.appendChild ( menu );
         menu.setAttribute("disp", name);
         menu.setAttribute("href", "manage/module/data/#"+id);
         menu.setAttribute("page", "manage/module/data/" +id+"/main.html");
         
-        Element role, actn, depn;
+        Element  role, actn, depn;
         
         // 查看
         
@@ -171,15 +171,17 @@ public class Form extends Model {
     public void updateOrCreateFormSet(String id, List<Map> conf) throws HongsException {
         Document docm = makeDocument();
 
-        Element root = docm.createElement("root");
+        Element  root = docm.createElement("root");
         docm.appendChild ( root );
 
-        Element form = docm.createElement("form");
+        Element  form = docm.createElement("form");
         root.appendChild ( form );
         form.setAttribute("name", id);
 
+        Element  item, anum, para;
+        
         for (  Map  fiel : conf ) {
-            Element item = docm.createElement("field");
+            item = docm.createElement("field");
             form.appendChild ( item );
             String s;
             s = (String) fiel.get("__disp__");
@@ -205,7 +207,7 @@ public class Form extends Model {
 
                 // 构建枚举列表
                 if (k.equals("datalist")) {
-                    Element anum = docm.createElement("enum");
+                    anum = docm.createElement("enum");
                     root.appendChild ( anum );
                     anum.setAttribute("name", k );
                     Object x = Data.toObject( v );
@@ -222,14 +224,14 @@ public class Form extends Model {
                 }
 
                 // 识别搜索类型
-                if (k.equals("findable")) {
-                    Element para = docm.createElement("param");
+                if (k.equals("findable") && Synt.declare(v, false)) {
+                    para = docm.createElement("param");
                     item.appendChild ( para );
                     para.setAttribute("name", "lucene-fieldtype");
                     para.setNodeValue(/*for*/ "search" /*field*/);
                 }
 
-                Element para = docm.createElement("param");
+                para = docm.createElement("param");
                 item.appendChild ( para );
                 para.setAttribute("name", k);
                 para.setNodeValue(/*val*/ v);

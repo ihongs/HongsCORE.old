@@ -2,7 +2,7 @@
 <%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.db.DB"%>
-<%@page import="app.hongs.db.Mview"%>
+<%@page import="app.hongs.db.DBAssist"%>
 <%@page import="app.hongs.util.Synt"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="java.util.Set"%>
@@ -20,7 +20,7 @@
     _action = (String)request.getAttribute("form.action");
     if (_action == null) _action = "create";
 
-    Mview view = new Mview(DB.getInstance(_module).getModel(_entity));
+    DBAssist view = new DBAssist(DB.getInstance(_module).getModel(_entity));
     Map<String, Map<String, String>> flds = view.getFields();
     CoreLocale lang = CoreLocale.getInstance().clone();
                lang.loadIgnrFNF(_module);

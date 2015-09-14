@@ -8,20 +8,22 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
-//import java.util.List;
-//import java.util.regex.Pattern;
+/*
+import java.util.List;
+import java.util.regex.Pattern;
+*/
 
 /**
- * 视图工具
+ * 视图助手
  * @author Hongs
  */
-public class Mview {
+public class DBAssist {
 
     protected DB    db;
     protected Table table;
     protected Model model;
 
-    public Mview(Model model) {
+    public DBAssist(Model model) {
         this.db = model.db;
         this.model = model;
         this.table = model.table;
@@ -34,7 +36,7 @@ public class Mview {
 
     public String getNmKey()
     throws HongsException {
-        return model.findCols[0];
+        return model.dispCols.length > 0 ? model.dispCols[0] : model.findCols[0];
     }
 
     public String getTitle()
@@ -42,13 +44,15 @@ public class Mview {
         CoreLocale trns = CoreLocale.getInstance(db.name) ;
         String     disp = "table." + table.name + ".name" ;
         return trns.contains(disp) ? trns.translate(disp) : table.name;
-//        String sql = "SHOW TABLE STATUS WHERE name = ?";
-//        List<Map<String, Object>> rows = db.fetchAll(sql, table.tableName);
-//        String dsp = (String)rows.get(0).get("Comment");
-//        if (null == dsp || "".equals(dsp)) {
-//            dsp = table.name;
-//        }
-//        return dsp;
+        /*
+        String sql = "SHOW TABLE STATUS WHERE name = ?";
+        List<Map<String, Object>> rows = db.fetchAll(sql, table.tableName);
+        String dsp = (String)rows.get(0).get("Comment");
+        if (null == dsp || "".equals(dsp)) {
+            dsp = table.name;
+        }
+        return dsp;
+        */
     }
 
     public Map<String, Map<String, String>> getFields()
@@ -152,7 +156,7 @@ public class Mview {
                 name = vk;
 
                 Model hm = db.getModel(bn != null ? bn : tn);
-                Mview hb =  new  Mview(hm);
+                DBAssist hb =  new  DBAssist(hm);
                 tk   = hb.getNmKey();
                 disp = hb.getTitle();
             } else {
@@ -168,7 +172,7 @@ public class Mview {
                 name = tn + ("HAS_ONE".equals(type) ? "." : "..") + vk;
 
                 Model hm = db.getModel(bn != null ? bn : tn);
-                Mview hb =  new  Mview(hm);
+                DBAssist hb =  new  DBAssist(hm);
                 tk   =an+"."+hb.getNmKey();
                 disp =/****/ hb.getTitle();
             }

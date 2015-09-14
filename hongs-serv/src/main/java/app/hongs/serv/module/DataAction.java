@@ -15,11 +15,17 @@ public class DataAction extends LuceneAction {
     public LuceneRecord getModel(ActionHelper helper)
     throws HongsException {
         ActionRunner runner = (ActionRunner) helper.getAttribute("__RUNNER__");
-        String mod = runner.getAction(), ent; int pos;
-        mod  = mod.substring(0, mod.length() - runner.getMtdAnn().length() -1);
-        pos  = mod.lastIndexOf('/' );
-        ent  = mod.substring(pos +1);
-        mod  = mod.substring(0, pos);
+        String mod = runner.getClsAnn();
+        String mtd = runner.getMtdAnn();
+        String ent ;
+        int p0  = mod.lastIndexOf('/' );
+        int p1  = mtd.lastIndexOf('/' );
+            mod = mod.substring(0 , p0);
+        if (p1 == -1) {
+            ent = mod.substring(1 + p0);
+        } else {
+            ent = mtd.substring(0 , p1);
+        }
         return new Data(mod, ent);
     }
 }

@@ -20,7 +20,7 @@ public class FetchPage
 
   private int page =  1 ;
 
-  private int lnks =  0 ;
+  private int pags =  0 ;
 
   private int rows = 20 ;
 
@@ -37,10 +37,10 @@ public class FetchPage
       this.setPage(Integer.parseInt(page2.toString()));
     }
 
-    Object lnks2 = caze.getOption("lnks");
+    Object lnks2 = caze.getOption("pags");
     if (lnks2 != null && lnks2.equals(""))
     {
-      this.setLnks(Integer.parseInt(lnks2.toString()));
+      this.setPags(Integer.parseInt(lnks2.toString()));
     }
 
     Object rows2 = caze.getOption("rows");
@@ -62,10 +62,10 @@ public class FetchPage
       this.setPage(Integer.parseInt(page2.toString()));
     }
 
-    Object lnks2 = caze.getOption("lnks");
+    Object lnks2 = caze.getOption("pags");
     if (lnks2 != null && lnks2.equals(""))
     {
-      this.setLnks(Integer.parseInt(lnks2.toString()));
+      this.setPags(Integer.parseInt(lnks2.toString()));
     }
 
     Object rows2 = caze.getOption("rows");
@@ -95,9 +95,9 @@ public class FetchPage
     this.page = page;
   }
 
-  public void setLnks(int lnks)
+  public void setPags(int pags)
   {
-    this.lnks = lnks;
+    this.pags = pags;
   }
 
   public void setRows(int rows)
@@ -148,7 +148,7 @@ public class FetchPage
     throws HongsException
   {
     this.info.put("page", this.page);
-    this.info.put("lnks", this.lnks);
+    this.info.put("pags", this.pags);
     this.info.put("rows", this.rows);
 
     // 列表为空则不用再计算了
@@ -160,11 +160,11 @@ public class FetchPage
 
     // 指定链数则不用查全部了
     int limit;
-    if (this.lnks > 0)
+    if (this.pags > 0)
     {
-      limit = page - (lnks / 2);
+      limit = page - (pags / 2);
       if (limit < 1) limit = 1 ;
-      limit = lnks + limit - 1 ;
+      limit = pags + limit - 1 ;
       limit = rows * limit + 1 ;
     }
     else
@@ -195,8 +195,10 @@ public class FetchPage
     {
       int rc = Integer.parseInt(row.get("__count__").toString());
       int pc = (int)Math.ceil((float)rc / this.rows);
+      boolean uc = this.pags > 0 &&  rc >= limit; // 不确定的总数
       this.info.put("rowscount", rc);
       this.info.put("pagecount", pc);
+      this.info.put("uncertain", uc);
     }
 
     return this.info;

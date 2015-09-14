@@ -1,7 +1,7 @@
 <%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.db.DB"%>
-<%@page import="app.hongs.db.Mview"%>
+<%@page import="app.hongs.db.DBAssist"%>
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -16,7 +16,7 @@
     _action = (String)request.getAttribute("list.action");
     if (_action == null) _action = "list";
 
-    Mview view = new Mview(DB.getInstance(_module).getModel(_entity));
+    DBAssist view = new DBAssist(DB.getInstance(_module).getModel(_entity));
     Map<String, Map<String, String>> flds = view.getFields();
     CoreLocale lang = CoreLocale.getInstance().clone();
                lang.loadIgnrFNF(_module);

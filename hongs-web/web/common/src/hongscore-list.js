@@ -18,10 +18,10 @@ function HsList(opts, context) {
     var openUrls = hsGetValue(opts, "openUrls");
     var loadData = hsGetValue(opts, "loadData");
 
-    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
+    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
+    this.pagsForPage = hsGetConf("pags.for.page", 10);
     this.rowsPerPage = hsGetConf("rows.per.page", 20);
-    this.lnksForPage = hsGetConf("lnks.for.page", 10);
 
     this.context = context;
     this.loadBox = loadBox;
@@ -312,11 +312,11 @@ HsList.prototype = {
         var i, p, t, pmin, pmax, that = this;
         p = page.page ? parseInt(page.page) : 1 ;
         t = page.pagecount ? parseInt(page.pagecount): 1;
-        pmin = p - Math.floor( this.lnksPerPage / 2 );
+        pmin = p - Math.floor( this.pagsPerPage / 2 );
         if (pmin < 1) pmin = 1;
-        pmax = pmin + this.lnksForPage - 1;
+        pmax = pmin + this.pagsForPage - 1;
         if (pmax > t) pmax = t;
-        pmin = pmax - this.lnksForPage + 1;
+        pmin = pmax - this.pagsForPage + 1;
         if (pmin < 1) pmin = 1;
 
         var pbox = jQuery('<ul class="pagination"></ul>').appendTo(this.pageBox);
@@ -353,7 +353,7 @@ HsList.prototype = {
 
         // 页码不确定则不在末页显示为更多
         if (page.uncertain && t == pmax + 1) {
-            nums.find(".page-last").addClass("lnks-next").find("a").html("&hellip;");
+            nums.find(".page-last").addClass("page-more").find("a").html("&hellip;");
         }
 
         this.pageBox.show();//.addClass("clearfix");

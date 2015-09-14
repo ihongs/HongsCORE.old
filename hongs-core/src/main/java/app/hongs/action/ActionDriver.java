@@ -435,8 +435,8 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
      */
     public static Core getWorkCore(HttpServletRequest req) {
         Core core = (Core) req.getAttribute(ActionDriver.CORE);
-        if (core == null) {
-            core = Core.GLOBAL_CORE;
+        if (core ==  null) {
+            core  =  Core.GLOBAL_CORE ;
         } else {
             Core.THREAD_CORE.set(core);
         }

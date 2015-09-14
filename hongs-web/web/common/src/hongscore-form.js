@@ -88,8 +88,8 @@ function HsForm(opts, context) {
         formBox.find("[data-fn='"+n+"']").val(v);
     }
 
-    this.saveInit(saveUrl);
     this.valiInit(/*all*/);
+    this.saveInit(saveUrl);
 }
 HsForm.prototype = {
     load     : function(url, data) {
@@ -228,13 +228,7 @@ HsForm.prototype = {
         var data = this.formBox;
         var that = this;
 
-        this.formBox.attr("action", url);
-        this.formBox.on("submit", function() {
-            return that.valiExec();
-        });
-        this.formBox.on("reset" , function() {
-            return that.valiUndo();
-        });
+        this.formBox.attr("action"  ,  url );
 
         if ( enc === "multipart/form-data" ) {
             if (data.attr("target") == null) {
@@ -456,29 +450,35 @@ HsForm.prototype = {
     valiInit : function() {
         var that = this;
         this.formBox.attr("novalidate", "novalidate");
-        this.formBox.on( "change blur", "input,select,textarea,[data-fn]",
+        this.formBox.on( "reset", function() {
+            return that.verified();
+        });
+        this.formBox.on("submit", function() {
+            return that.verifies();
+        });
+        this.formBox.on("change blur", "input,select,textarea,[data-fn]",
         function() {
-            var inp = jQuery( this );
+            var inp = jQuery(this);
             that.validate(inp.attr("name") || inp.attr("data-fn"));
         });
     },
-    valiUndo : function() {
+    verified : function() {
         this.formBox.find(".form-group").removeClass("has-error" );
         this.formBox.find(".help-block").   addClass("invisible" );
         return true;
     },
-    valiExec : function() {
+    verifies : function() {
         var vali = true;
         var inps = {  };
         this.formBox.find("input,select,textarea,[data-fn]").each(
         function() {
-            var inp = jQuery( this );
+            var inp = jQuery(this);
             var nam = inp.attr("name")||inp.attr("data-fn" );
-            if (! nam) return true  ;
+            if (!nam) return true ;
             if (inps[nam] === undefined) {
-                inps[nam]  =   inp  ;
+                inps[nam] = inp;
             } else {
-                inps[nam].add( inp );
+                inps[nam] = inps[nam].add(inp);
             }
         });
         for(var nam in inps) {
@@ -489,7 +489,7 @@ HsForm.prototype = {
         }
         return  vali;
     },
-    validate : function(inp ) {
+    validate : function(inp) {
         if (typeof inp == "string") {
             inp = this.formBox.find('[name="' + inp + '"],[data-fn="' + inp + '"]');
         } else {

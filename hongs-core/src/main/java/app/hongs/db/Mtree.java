@@ -178,7 +178,7 @@ public class Mtree extends Model
     Map  data = new HashMap();
     List list;
     if (!rd.containsKey(this.pageKey)
-    &&  !rd.containsKey(this.lnksKey)
+    &&  !rd.containsKey(this.pagsKey)
     &&  !rd.containsKey(this.rowsKey))
     {
       list = super.getAll (rd , caze);

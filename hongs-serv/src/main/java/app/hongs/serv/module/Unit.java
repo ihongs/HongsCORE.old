@@ -127,14 +127,14 @@ public class Unit extends Mtree {
             hideIds.add(formId);
         }
 
+        //** 构建文档 **/
+
         Document docm = makeDocument();
 
-        Element root = docm.createElement("root");
+        Element  root = docm.createElement("root");
         docm.appendChild ( root );
 
-        Element menu;
-        Element hide;
-        Element incl;
+        Element  menu, hide, incl;
 
         for(Map.Entry<String, String> et : unitMap.entrySet()) {
             String unitId   = et.getKey(  );
@@ -161,7 +161,7 @@ public class Unit extends Mtree {
             }
         }
 
-        saveDocument("unit.menu.xml", docm);
+        saveDocument(docm);
     }
 
     private Document makeDocument() throws HongsException {
@@ -174,8 +174,8 @@ public class Unit extends Mtree {
         }
     }
 
-    private void saveDocument(String name, Document docm) throws HongsException {
-        File file = new File(Core.CONF_PATH+"/manage/module/"+name);
+    private void saveDocument(Document docm) throws HongsException {
+        File file = new File(Core.CONF_PATH+"/manage/module/data.menu.xml");
         if (!file.getParentFile().exists()) {
              file.getParentFile().mkdirs();
         }
