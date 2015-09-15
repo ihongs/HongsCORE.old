@@ -79,7 +79,7 @@ public class SignAction {
         }
 
         // 验证应用
-        String appid = Synt.declare ( ah.getParameter("appid"), "web");
+        String appid = Synt.declare(ah.getParameter("appid"), "web");
         if (!"web".equals(appid) && !"api".equals(appid)) {
             fc = new FetchCase( )
                 .from   (tb.tableName, tb.name)
@@ -87,7 +87,7 @@ public class SignAction {
                 .where  (".appid = ?", appid  );
             xd = db.fetchLess(fc);
             if (xd.isEmpty()) {
-                CoreLocale lang = CoreLocale.getInstance( "member" );
+                CoreLocale lang = CoreLocale.getInstance("member");
                 Map m = new HashMap();
                 Map e = new HashMap();
                 m.put("appid" , new Wrong(lang.translate("core.appid.invalid")));
@@ -106,7 +106,7 @@ public class SignAction {
         xd = new HashMap();
         xd.put("user_id", ud.get("id"));
         xd.put("type", appid);
-        xd.put("sign", token);
+        xd.put("code", token);
         tb.insert(xd);
 
         // 设置会话
