@@ -35,7 +35,7 @@ public class SystemCmdlet {
         if ( 0  < args.length ) {
             dir = args[0];
         } else {
-            dir = Core.VARS_PATH + "/setup";
+            dir = Core.DATA_PATH + "/setup";
         }
 
         List<File> fxs = new ArrayList();
@@ -80,28 +80,34 @@ public class SystemCmdlet {
                 sql = sql.replaceAll("(^|[\r\n])\\s*(--|/\\*\\!).*", "");
                 String[] a = sql.split(";\\s*[\r\n]");
 
+                /*
                 StringBuilder e = new StringBuilder();
+                */
                 long st = System.currentTimeMillis( );
                 int  al = a.length;
                 int  ok = 0;
                 int  er = 0;
                 for(String s : a) {
-                    s = s.trim();
-                    if (s.length() == 0) {
-                        CmdletHelper.progres(st, al, ++ok, er);
-                        continue;
-                    }
+                    s = s.trim( );
                     try {
-                        db.execute(s.trim());
+                        if (s.length() > 0) {
+                            db.execute( s );
+                        }
                         CmdletHelper.progres(st, al, ++ok, er);
                     } catch (HongsException ex) {
                         CmdletHelper.progres(st, al, ok, ++er);
-                        e.append("\r\n").append(ex.getMessage( ));
+                        CmdletHelper.progred();
+                        throw ex;
+                        /*
+                        e.append("\r\n").append(ex.getMessage());
+                        */
                     }
                 }
+                /*
                 if (e.length() > 0) {
                     CmdletHelper.println("Excute error:" + e);
                 }
+                */
             } catch (FileNotFoundException ex) {
                 throw HongsException.common(null, ex);
             } catch (IOException ex) {

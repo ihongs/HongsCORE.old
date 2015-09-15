@@ -93,7 +93,7 @@ public class FormSet
   {
     File xmlFile = new File(Core.CONF_PATH
                  + File.separator + name + ".form.xml");
-    File serFile = new File(Core.VARS_PATH
+    File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
                  + File.separator + name + ".form.ser");
     return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();

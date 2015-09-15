@@ -26,12 +26,12 @@ public class CmdletHelper
   /**
    * 错误消息集合
    */
-  private static String[] getErrs = new String[]
+  private static final String[] getErrs = new String[]
   {
     "Can not parse rule '%chk'",
     "Option '%opt' is required",
-    "Must have a value after the option '%opt'",
-    "There is one value at most for option '%opt'",
+    "Option '%opt' must be specified value",
+    "Option '%opt' can only have one value",
     "Value for option '%opt' must be int",
     "Value for option '%opt' must be float",
     "Value for option '%opt' must be boolean",
@@ -270,48 +270,35 @@ public class CmdletHelper
 
   /**
    * 输出辅助信息
-   * 通常为方便其他程序/进程处理, 辅助信息走标准错误, 结果数据走标准输出
-   * 如果需要输出结构化的数据供其它程序处理, 请不要使用此方法
-   * @param text
+   * 此方法通过 CoreLogger 输出到 hongs.out, 仅被用作辅助输出;
+   * 如果需要输出结构化的数据供其它程序处理, 请不要使用此方法.
+   * @param text 提示文本
    */
   public static void println(String text)
   {
-    CoreLogger.getLogger(CoreLogger.space("hongs.out")).trace(CoreLogger.envir(text));
-  }
-
-  /**
-   * 终止输出进度
-   * 
-   * 请将执行块包裹在 try catch 中
-   * 接获到异常或中止执行时
-   * 使用本方法可安全的切行
-   */
-  public static void progred()
-  {
-    System.err.println("");
+    CoreLogger.getLogger(CoreLogger.space("hongs.out"))
+              .trace/**/(CoreLogger.envir( text /**/ ));
   }
 
   /**
    * 输出执行进度
-   *
-   * 由于现在的终端(命令行)宽度普遍是80个字符,
-   * 所以请将 notes 控制在50个字符以内(一个中文字符占两位).
-   *
-   * @param scale 百分比, 0~100的浮点数
-   * @param notes 说明文本
+   * 由于大部分的终端(命令行)默认宽度普遍为 80 个字符,
+   * 故请将 text 控制在 50 个字符以内, 一个中文占两位.
+   * @param text 说明文本
+   * @param rate 完成比例, 0~100的浮点数
    */
-  public static void progres(float scale, String notes)
+  public static void progres(String text, float rate)
   {
-    if (scale < 0) scale = 0;
-    if (scale > 100) scale = 100;
-    if (notes == null) notes =  "" ;
+    if (text == null) text = "" ;
+    if (rate <    0 ) rate =   0;
+    if (rate >  100 ) rate = 100;
 
     StringBuilder sb = new StringBuilder();
     Formatter     ft = new Formatter( sb );
 
     for (int i = 0; i < 100; i += 5)
     {
-      if (scale < i + 5)
+      if (rate < i + 5)
       {
         sb.append(".");
       }
@@ -321,7 +308,7 @@ public class CmdletHelper
       }
     }
 
-    ft.format(" %6.2f%% %s", scale, notes);
+    ft.format(" %6.2f%% %s", rate, text);
 
     // 清除末尾多余的字符, 并将光标移回行首
     // 每行按最少80个字符来计算
@@ -331,7 +318,7 @@ public class CmdletHelper
     }
     sb.append( "\r");
 
-    if (scale == 100)
+    if (rate == 100)
     {
       System.err.println(sb.toString());
     }
@@ -350,7 +337,7 @@ public class CmdletHelper
   {
     String notes = String.format("ok(%d)", ok);
     float  scale = (float)ok / n * 100;
-    CmdletHelper.progres(scale, notes);
+    CmdletHelper.progres(notes, scale);
   }
 
   /**
@@ -363,7 +350,7 @@ public class CmdletHelper
   {
     String notes = String.format("ok(%d) error(%d)", ok, er);
     float  scale = (float)(er + ok) / n * 100;
-    CmdletHelper.progres(scale, notes);
+    CmdletHelper.progres(notes, scale);
   }
 
   /**
@@ -380,7 +367,7 @@ public class CmdletHelper
     String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) remaining: %s",
                                      ok, left2);
-    CmdletHelper.progres(scale, left3);
+    CmdletHelper.progres(left3, scale);
   }
 
   /**
@@ -398,7 +385,19 @@ public class CmdletHelper
     String left2 = Text.humanTime((long) left1);
     String left3 = String.format("ok(%d) error(%d) remaining: %s",
                                  ok, er, left2);
-    CmdletHelper.progres(scale, left3);
+    CmdletHelper.progres(left3, scale);
+  }
+
+  /**
+   * 终止输出进度
+   * 
+   * 请将执行块包裹在 try catch 中
+   * 接获到异常或中止执行时
+   * 使用本方法可安全的切行
+   */
+  public static void progred()
+  {
+    System.err.println("");
   }
 
 }

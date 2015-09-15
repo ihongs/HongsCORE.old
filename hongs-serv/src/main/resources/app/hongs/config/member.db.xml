@@ -12,18 +12,18 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                model="app.hongs.serv.member.User">
             <assoc type="HAS_MANY"
                    name="roles"
-                   tableName="a_member_user_role"
+                   tableName="user_role"
                    foreignKey="user_id"/>
             <assoc type="HAS_MORE"
                    name="depts"
-                   tableName="a_member_user_dept"
+                   tableName="user_dept"
                    foreignKey="user_id">
                 <assoc type="BLS_TO"
                        name="dept"
                        foreignKey="dept_id">
                     <assoc type="HAS_MANY"
                            name="roles"
-                           tableName="a_member_dept_role"
+                           tableName="dept_role"
                            foreignKey="dept_id"/>
                 </assoc>
             </assoc>
@@ -34,11 +34,16 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                model="app.hongs.serv.member.Dept">
             <assoc type="HAS_MANY"
                    name="roles"
-                   tableName="a_member_dept_role"
+                   tableName="dept_role"
                    foreignKey="dept_id"/>
         </table>
-        <table name="a_member_user_dept"/>
-        <table name="a_member_user_role"/>
-        <table name="a_member_dept_role"/>
+        <table name="user_sign"
+               tableName="a_member_user_dept"/>
+        <table name="user_dept"
+               tableName="a_member_user_dept"/>
+        <table name="user_role"
+               tableName="a_member_user_role"/>
+        <table name="dept_role"
+               tableName="a_member_dept_role"/>
     </tables>
 </db>

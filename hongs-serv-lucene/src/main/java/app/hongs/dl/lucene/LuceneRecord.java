@@ -78,7 +78,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     protected final String  dataPath;
     protected final Map<String, Map   > fields;
-    protected final Map<String, String> talias;
+    protected final Map<String, String> ftypes;
 
     protected IndexWriter   writer = null;
     protected IndexReader   reader = null;
@@ -86,10 +86,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     public boolean IN_TRNSCT_MODE = false;
     public boolean IN_OBJECT_MODE = false;
-
-    public String   idCol = "id";
-    public String[] findCols = new String[] {"name"};
-    public String[] dispCols = new String[] {"name"};
 
     protected String idKey = "id";
     protected String arKey = "ar";
@@ -102,45 +98,65 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected String sortKey = "ob";
     protected String findKey = "wd";
 
-    public LuceneRecord(String path, final Map<String, Map> fields, final Map<String, String> talias)
-    throws HongsException {
-        CoreConfig conf = CoreConfig.getInstance();
-        if (path == null) {
-            path = conf.getProperty(
-                    "core.lucene.datapath",
-                    "${VARS_PATH}/lucene") + "/test" ;
-        }
-        if (! new File(path).isAbsolute()) {
-            path = conf.getProperty(
-                    "core.lucene.datapath",
-                    "${VARS_PATH}/lucene") + "/"+path;
-        }
+    public String   idCol = "id";
+    public String[] findCols = new String[] {"name"};
+    public String[] listCols = new String[] {"name"};
 
+    public LuceneRecord(String path, final Map<String, Map> fields, final Map<String, String> ftypes)
+    throws HongsException {
+        if (path == null) {
+            path = "test";
+        }
         Map m = new HashMap();
         m.put("CORE_PATH", Core.CORE_PATH);
-        m.put("CONF_PATH", Core.CONF_PATH);
-        m.put("VARS_PATH", Core.VARS_PATH);
-        m.put("TMPS_PATH", Core.TMPS_PATH);
-        path = Text.inject(path, m);
+        m.put("CONF_PATH", Core.CORE_PATH);
+        m.put("DATA_PATH", Core.DATA_PATH);
+        path  = Text.inject(path, m);
+        if (! new File(path).isAbsolute()) {
+            path = Core.DATA_PATH +"/lucene/"+ path;
+        }
+
+        CoreConfig conf = CoreConfig.getInstance( );
 
         this.dataPath = path;
 
-        this.fields = fields != null ? fields : FormSet.getInstance("default").getForm(  "test"   );
-        this.talias = talias != null ? talias : FormSet.getInstance("default").getEnum("__types__");
+        this.fields   = fields != null ? fields : FormSet.getInstance("default").getForm(  "test"   );
+        this.ftypes   = ftypes != null ? ftypes : FormSet.getInstance("default").getEnum("__types__");
 
+        this.idKey    = conf.getProperty("fore.id.key"  , "id");
+        this.arKey    = conf.getProperty("fore.ar.key"  , "ar");
+        this.orKey    = conf.getProperty("fore.or.key"  , "or");
+        this.xrKey    = conf.getProperty("fore.xr.key"  , "xr");
+        this.pageKey  = conf.getProperty("fore.page.key", "pn");
+        this.pagsKey  = conf.getProperty("fore.pags.key", "gn");
+        this.rowsKey  = conf.getProperty("fore.rows.key", "rn");
+        this.colsKey  = conf.getProperty("fore.cols.key", "sf");
+        this.sortKey  = conf.getProperty("fore.sort.key", "ob");
+        this.findKey  = conf.getProperty("fore.find.key", "wd");
+
+        // 模式标识
         this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), conf.getProperty("core.in.trnsct.mode", false));
         this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"), conf.getProperty("core.in.object.mode", false));
-        
-        this.idKey   = conf.getProperty("fore.id.key"  , "id");
-        this.arKey   = conf.getProperty("fore.ar.key"  , "ar");
-        this.orKey   = conf.getProperty("fore.or.key"  , "or");
-        this.xrKey   = conf.getProperty("fore.xr.key"  , "xr");
-        this.pageKey = conf.getProperty("fore.page.key", "pn");
-        this.pagsKey = conf.getProperty("fore.pags.key", "gn");
-        this.rowsKey = conf.getProperty("fore.rows.key", "rn");
-        this.colsKey = conf.getProperty("fore.cols.key", "sf");
-        this.sortKey = conf.getProperty("fore.sort.key", "ob");
-        this.findKey = conf.getProperty("fore.find.key", "wd");
+
+        // 从字段配置中找 findable,listable 来填充 findCols,listCols
+        Set<String> findFields = new LinkedHashSet();
+        Set<String> listFields = new LinkedHashSet();
+        for(Map.Entry<String, Map> et : this.fields.entrySet()) {
+            Map field = et.getValue();
+            String fn = et.getKey(  );
+            if (Synt.declare(field.get("findable"), false)) {
+                findFields.add(fn);
+            }
+            if (Synt.declare(field.get("listable"), false)) {
+                listFields.add(fn);
+            }
+        }
+        if (!findFields.isEmpty()) {
+            this.findCols = findFields.toArray(new String[0]);
+        }
+        if (!listFields.isEmpty()) {
+            this.listCols = listFields.toArray(new String[0]);
+        }
     }
 
     /**
@@ -286,7 +302,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public Map create(Map rd) throws HongsException {
         Map sd = new LinkedHashMap();
             sd.put("id",    add(rd));
-        for(String  fn : dispCols) {
+        for(String  fn : listCols) {
             sd.put( fn , rd.get(fn));
         }
         return rd;
@@ -856,7 +872,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 return "stored";
             }
 
-            t = Synt.declare(talias.get(t) , t);
+            t = Synt.declare(ftypes.get(t) , t);
             if ("number".equals(t)) {
                 t = Synt.declare(fc.get("type"), "double");
             } else
@@ -931,7 +947,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         // 关键词
         if (rd.containsKey(findKey)) {
             Object fv = rd.get(findKey);
-            
+
             /**
              * 当设置了多个搜索字段时
              * 将条件整理为 +(fn1:xxx fn2:xxx)
@@ -948,7 +964,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                    fv= fw;
                 }
             }
-            
+
             for(String fk : findCols) {
                 qryAdd(quary, fk, fv, new SearchQuery( ) );
             }
@@ -1312,7 +1328,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @param k
      * @param v
      * @param q
-     * @throws HongsException 
+     * @throws HongsException
      */
     protected void qryAdd(BooleanQuery qry, String k, Object v, AddQuery q)
     throws HongsException {
@@ -1595,7 +1611,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         public void  fuzzyMinSim(Float   x) {
             this.fms = x;
         }
-        
+
         private Analyzer a = null;
         private Float    w = null;
         public void  ana(Analyzer a) {
@@ -1609,7 +1625,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         public Query add(String k, Object v) {
             try {
                 QueryParser qp = new QueryParser(k , a);
-                
+
                 String s = v.toString( );
                 if (des == null || !des) {
                     s = QueryParser.escape(s);
@@ -1623,7 +1639,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 if (phr != null) qp.setPhraseSlop (phr);
                 if (fms != null) qp.setFuzzyMinSim(fms);
                 if (fpl != null) qp.setFuzzyPrefixLength(fpl);
-                
+
                 Query  q2 = qp.parse(s);
                 if (w != null) q2.setBoost(w);
                 return q2;

@@ -5,7 +5,7 @@
 bindir=$(cd `dirname $0`; pwd)
 CORE_PATH=`dirname $bindir`
 JAVA_PATH=`command -v java`
-KLASSPATH="$CLASSPATH:$CORE_PATH/lib/*:$CORE_PATH/classes:$CORE_PATH/lib/classes:$CORE_PATH/bin/classes"
+KLASSPATH="$CLASSPATH:$CORE_PATH/lib/*:$CORE_PATH/classes:$CORE_PATH/lib/classes"
 
 # Check java is exists
 if [ '' = "$JAVA_PATH" ]
@@ -20,7 +20,8 @@ fi
 
 "$JAVA_PATH" $JAVA_OPTS \
  -classpath "$KLASSPATH"\
- -Dlog4j.configurationFile="$CORE_PATH/lib/classes/log4j2.xml"\
+ -Dlog4j.configurationFile="$CORE_PATH/etc/log4j2.xml"\
  -Dlogs.dir="$CORE_PATH/var/log" \
+ -Dtmps.dir="$CORE_PATH/var/tmp" \
  app.hongs.cmdlet.CmdletRunner $@\
  --corepath "$CORE_PATH"

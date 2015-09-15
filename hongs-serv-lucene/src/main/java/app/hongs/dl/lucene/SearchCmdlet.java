@@ -28,6 +28,7 @@ public class SearchCmdlet {
             "sf*s",
             "ob*s",
             "pn:i",
+            "gn:i",
             "rn:i"
         });
         
@@ -97,9 +98,4 @@ public class SearchCmdlet {
         }
     }
 
-    @Cmdlet("append")
-    public void append(String[] args) {
-        
-    }
-    
 }

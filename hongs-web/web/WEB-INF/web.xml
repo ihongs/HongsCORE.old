@@ -64,7 +64,7 @@
         </init-param>
         <init-param>
             <param-name>exclude-urls</param-name>
-            <param-value>/manage/member/sign/create.act;/manage/member/sign/delete.act</param-value>
+            <param-value>/manage/login.html;/manage/member/sign/create.act;/manage/member/sign/delete.act</param-value>
         </init-param>
     </filter>
     <filter-mapping>

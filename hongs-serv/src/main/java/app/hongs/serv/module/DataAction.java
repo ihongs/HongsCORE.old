@@ -11,21 +11,29 @@ import app.hongs.dl.lucene.LuceneRecord;
  * @author Hongs
  */
 public class DataAction extends LuceneAction {
+    
+    /**
+     * 获取模型对象
+     * 注意:
+     *  对象 Action 注解的命名必须为 "模型路径/实体名称"
+     *  方法 Action 注解的命名只能是 "动作名称", 不得含子级实体名称
+     * @param helper
+     * @return
+     * @throws HongsException
+     */
     @Override
     public LuceneRecord getModel(ActionHelper helper)
     throws HongsException {
         ActionRunner runner = (ActionRunner) helper.getAttribute("__RUNNER__");
-        String mod = runner.getClsAnn();
-        String mtd = runner.getMtdAnn();
+        String mod = runner.getAction();
         String ent ;
-        int p0  = mod.lastIndexOf('/' );
-        int p1  = mtd.lastIndexOf('/' );
-            mod = mod.substring(0 , p0);
-        if (p1 == -1) {
-            ent = mod.substring(1 + p0);
-        } else {
-            ent = mtd.substring(0 , p1);
-        }
+        int    pos ;
+        pos  = mod.lastIndexOf('/' );
+        mod  = mod.substring(0, pos); // 去掉动作
+        pos  = mod.lastIndexOf('/' );
+        ent  = mod.substring(1+ pos); // 实体名称 
+        mod  = mod.substring(0, pos); // 模型名称
         return new Data(mod, ent);
     }
+
 }

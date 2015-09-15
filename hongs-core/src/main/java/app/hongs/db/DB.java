@@ -288,19 +288,16 @@ public class DB
       // SQLite 数据路径处理
       if (url.startsWith("jdbc:sqlite:"))
       {
-        String uri  =  url.substring (12);
-        if (! new File(uri).isAbsolute())
-        {
-          uri = CoreConfig.getInstance().getProperty("core.sqlite.datapath", "${VARS_PATH}/sqlite") +"/"+ uri;
-        }
-
-        // 注入特定路径
+        String uri = url.substring( 12 );
         Map inj = new HashMap();
         inj.put("CORE_PATH", Core.CORE_PATH);
         inj.put("CONF_PATH", Core.CONF_PATH);
-        inj.put("VARS_PATH", Core.VARS_PATH);
-        inj.put("TMPS_PATH", Core.VARS_PATH);
+        inj.put("DATA_PATH", Core.DATA_PATH);
         uri = Text.inject(uri, inj);
+        if (! new File(uri).isAbsolute())
+        {
+          uri = Core.DATA_PATH + "/sqlite/" + uri;
+        }
         url = "jdbc:sqlite:" + uri ;
 
         if (! new File(uri).getParentFile().exists())

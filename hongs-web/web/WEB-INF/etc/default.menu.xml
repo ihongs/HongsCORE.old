@@ -1,5 +1,5 @@
 <root>
-    <session>app.hongs.member.RoleSes</session>
+    <session>app.hongs.serv.member.RoleSes</session>
     <menu href="/">
         <include>member</include>
         <include>module</include>

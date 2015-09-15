@@ -107,8 +107,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             }
 
             Core.CONF_PATH = Core.CORE_PATH + File.separator + "etc";
-            Core.VARS_PATH = Core.CORE_PATH + File.separator + "var";
-            Core.TMPS_PATH = Core.VARS_PATH + File.separator + "tmp";
+            Core.DATA_PATH = Core.CORE_PATH + File.separator + "var";
 
             //** 系统属性配置 **/
 
@@ -119,8 +118,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             m.put("BASE_PATH", Core.BASE_PATH);
             m.put("CORE_PATH", Core.CORE_PATH);
             m.put("CONF_PATH", Core.CONF_PATH);
-            m.put("VARS_PATH", Core.VARS_PATH);
-            m.put("TMPS_PATH", Core.TMPS_PATH);
+            m.put("DATA_PATH", Core.DATA_PATH);
 
             // 启动系统属性
             for (Map.Entry et : cnf.entrySet( )) {
@@ -155,8 +153,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tBASE_PATH   : ").append(Core.BASE_PATH)
                 .append("\r\n\tCORE_PATH   : ").append(Core.CORE_PATH)
                 .append("\r\n\tCONF_PATH   : ").append(Core.CONF_PATH)
-                .append("\r\n\tVARS_PATH   : ").append(Core.VARS_PATH)
-                .append("\r\n\tTMPS_PATH   : ").append(Core.TMPS_PATH)
+                .append("\r\n\tDATA_PATH   : ").append(Core.DATA_PATH)
                 .toString());
         }
 

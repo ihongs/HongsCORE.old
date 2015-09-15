@@ -37,7 +37,7 @@ public abstract class Async<T> extends CoreSerial implements Core.Destroy {
         tasks = new LinkedBlockingQueue(maxTasks);
 
         if (name != null) {
-            back  = new File(Core.VARS_PATH
+            back  = new File(Core.DATA_PATH
                   + File.separator + "serial"
                   + File.separator + name + ".async.ser");
             if (back.exists()) {

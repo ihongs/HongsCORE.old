@@ -58,8 +58,8 @@ public class UploadHelper {
         Map m = new HashMap();
         m.put("BASE_PATH", Core.BASE_PATH);
         m.put("CORE_PATH", Core.CORE_PATH);
-        m.put("VARS_PATH", Core.VARS_PATH);
-        m.put("TMPS_PATH", Core.TMPS_PATH);
+        m.put("CONF_PATH", Core.CORE_PATH);
+        m.put("DATA_PATH", Core.DATA_PATH);
         path  = Text.inject(path, m);
         if (! new File(path).isAbsolute()) {
             path = Core.BASE_PATH+"/"+path;
@@ -217,7 +217,7 @@ public class UploadHelper {
         String disp = this.getUploadPath (this.getResultPath ( ) );
         File   dist = new File(disp);
         // 原始文件与目标文件不一样才需要移动
-        if(!dist.getAbsolutePath().equals(file.getAbsoluteFile())) {
+        if(!dist.getAbsolutePath().equals(file.getAbsolutePath())) {
             file.renameTo(dist);
         }
 
@@ -231,7 +231,7 @@ public class UploadHelper {
      * @throws app.hongs.action.VerifyHelper.Wrong
      */
     public File upload(String fame) throws VerifyHelper.Wrong {
-        return upload(Core.TMPS_PATH + "/upload/" + fame, fame);
+        return upload(Core.DATA_PATH + "/upload/" + fame, fame);
     }
 
     /**

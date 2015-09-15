@@ -36,7 +36,7 @@ public class DBAssist {
 
     public String getNmKey()
     throws HongsException {
-        return model.dispCols.length > 0 ? model.dispCols[0] : model.findCols[0];
+        return model.listCols.length > 0 ? model.listCols[0] : model.findCols[0];
     }
 
     public String getTitle()

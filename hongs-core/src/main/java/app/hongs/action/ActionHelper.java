@@ -228,17 +228,9 @@ public class ActionHelper
    */
   protected final void setUploadsData(Map rd) throws HongsException {
     CoreConfig conf = CoreConfig.getInstance();
+    String     path = Core.DATA_PATH+"/upload";
 
-    Map m = new HashMap();
-    m.put("BASE_PATH", Core.BASE_PATH);
-    m.put("CORE_PATH", Core.CORE_PATH);
-    m.put("CONF_PATH", Core.CONF_PATH);
-    m.put("VARS_PATH", Core.VARS_PATH);
-    m.put("TMPS_PATH", Core.TMPS_PATH);
-    String path = conf.getProperty("core.upload.filepath", "${TMPS_PATH}/upload");
-    path = Text.inject (path, m);
-
-    // 目录不存在则创建
+    // 临时目录不存在则创建
     File df = new File (path);
     if (!df.isDirectory()) {
          df.mkdirs();
@@ -689,7 +681,7 @@ public class ActionHelper
 
   /**
    * 400错误请求
-   * @param msg 
+   * @param msg
    */
   public void error400(String msg)
   {
@@ -697,7 +689,7 @@ public class ActionHelper
     this.responseData = null;
     this.print(msg);
   }
-  
+
   /**
    * 401尚未登录
    * @param msg

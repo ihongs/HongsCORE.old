@@ -65,17 +65,6 @@ implements IRecord
   public Table table;
 
   /**
-   * 被搜索的字段
-   * 影响getPage/getList/filter
-   */
-  public String[] findCols = new String[] {"name"};
-
-  /**
-   * 被显示的字段
-   */
-  public String[] dispCols = new String[] {"name"};
-
-  /**
    * ID参数名
    */
   protected String idKey = "id";
@@ -127,6 +116,17 @@ implements IRecord
    * 影响getPage/getList/filter
    */
   protected String findKey = "wd";
+
+  /**
+   * 被搜索的字段
+   * 影响getPage/getList/filter
+   */
+  public String[] findCols = new String[] {"name"};
+
+  /**
+   * 被显示的字段
+   */
+  public String[] listCols = new String[] {"name"};
 
   /**
    * 构造方法
@@ -204,7 +204,7 @@ implements IRecord
   {
     Map sd = new LinkedHashMap();
         sd.put("id",    add(rd));
-    for(String  fn : dispCols  )
+    for(String  fn : listCols  )
     {
         sd.put( fn , rd.get(fn));
     }

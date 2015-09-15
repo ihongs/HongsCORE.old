@@ -30,7 +30,7 @@ public class RoleSet extends CoreSerial {
         int     i;
         int     j;
         
-        n = Core.VARS_PATH
+        n = Core.DATA_PATH
           + File.separator + "serial"
           + File.separator + "hongs"
           + File.separator + "roles";

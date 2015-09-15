@@ -7,12 +7,8 @@ import app.hongs.db.FetchCase;
 import app.hongs.db.Model;
 import app.hongs.dl.lucene.LuceneRecord;
 import app.hongs.util.Synt;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.lucene.document.Document;
 
 /**
@@ -23,23 +19,6 @@ public class Data extends LuceneRecord {
 
     public Data(String conf, String form) throws HongsException {
         super(conf, form);
-
-        Set<String> findFields = new LinkedHashSet();
-        Set<String> dispFields = new LinkedHashSet();
-
-        for(Map.Entry<String, Map> et : fields.entrySet()) {
-            Map field = et.getValue();
-            String fn = et.getKey(  );
-            if (Synt.declare(field.get("findable"),false)) {
-                findFields.add(fn);
-            }
-            if (Synt.declare(field.get("listable"),false)) {
-                dispFields.add(fn);
-            }
-        }
-
-        findCols = findFields.toArray(new String[0]);
-        dispCols = dispFields.toArray(new String[0]);
     }
 
     /**
@@ -128,7 +107,7 @@ public class Data extends LuceneRecord {
 
         // 拼接展示字段
         StringBuilder nm = new StringBuilder();
-        for (String fn : dispCols) {
+        for (String fn : listCols) {
             nm.append(dd.get(fn).toString()).append(' ');
         }
 
@@ -148,7 +127,7 @@ public class Data extends LuceneRecord {
         setDoc(id, doc);
     }
 
-    public void rvcr(String id) throws HongsException {
+    public void redo(String id) throws HongsException {
         Model model = DB.getInstance("module").getModel("data");
 
         Map dd;

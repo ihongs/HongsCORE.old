@@ -72,12 +72,17 @@
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>mchange-commons-java</artifactId>
-            <version>0.2.8</version>
+            <version>0.2.10</version>
         </dependency>
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
-            <version>0.9.5-pre10</version>
+            <version>0.9.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.8.11.1</version>
         </dependency>
         <dependency>
             <groupId>eu.medsea.mimeutil</groupId>

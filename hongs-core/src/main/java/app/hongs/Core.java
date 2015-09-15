@@ -31,10 +31,10 @@ import java.util.Map;
  ENVIR            标识不同运行环境(0 cmd, 1 web)
  DEBUG            标识不同调试模式(0 无 , 1 输出, 2 日志, 4 禁止错误 8 禁止调试 16 静默模式; 可使用位运算, 比如 3 表示既输出又记录)
  BASE_HREF        应用访问路径(WEB应用中为ContextPath)
+ BASE_PATH        应用目录路径(WEB应用中为RealPath(/))
  CORE_PATH        应用目录路径(WEB应用中为WEB-INF目录)
  CONF_PATH        配置文件存放目录
- VARS_PATH        数据文件存放目录
- TMPS_PATH        临时文件存放目录
+ DATA_PATH        数据文件存放目录
  SERVER_ID        服务器ID(会附在 Core.getUniqueId() 的左侧)
  注: 以上属性需要在 Servlet/Filter/Cmdlet 等初始化时进行设置.
  </pre>
@@ -344,12 +344,7 @@ extends HashMap<String, Object>
   /**
    * 数据文件存放目录
    */
-  public static String VARS_PATH;
-
-  /**
-   * 临时文件存放目录
-   */
-  public static String TMPS_PATH;
+  public static String DATA_PATH;
 
   /**
    * 服务器编号

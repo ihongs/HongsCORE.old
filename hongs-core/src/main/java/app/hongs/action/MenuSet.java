@@ -105,12 +105,12 @@ public class MenuSet
   /**
    * 全部动作
    */
-  public Set<String> actions;
+  public Set<String> actions = null;
 
   /**
    * 全部导入
    */
-  public Set<String> imports;
+  public Set<String> imports = null;
 
   /**
    * 权限名称(会话键或会话类)
@@ -128,7 +128,7 @@ public class MenuSet
   {
     File xmlFile = new File(Core.CONF_PATH
                  + File.separator + name + ".menu.xml");
-    File serFile = new File(Core.VARS_PATH
+    File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
                  + File.separator + name + ".menu.ser");
     return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();
@@ -137,6 +137,10 @@ public class MenuSet
   @Override
   protected boolean expired(long time)
   {
+    if (imports == null)
+    {
+        return  true;
+    }
     // 检查当前文件
     if (expired(name))
     {
