@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
  * <h3>初始化参数(init-param):</h3>
  * <pre>
  * config       配置名称
+ * rsname       会话名称
  * index-page   首页地址(为空则不跳转)
  * login-page   登录地址(为空则不跳转)
  * exclude-urls 不包含的URL, 可用","分割多个, 可用"*"为前后缀
@@ -59,8 +60,8 @@ public class AuthFilter
    */
   private String[][] excludeUrls;
 
-  private final Pattern IS_HTML = Pattern.compile("(text/html|text/plain)");
-  private final Pattern IS_JSON = Pattern.compile("(application/json|text/json|text/javascript)");
+  private final Pattern IS_HTML = Pattern.compile("(text/html|text/webviewhtml)");
+  private final Pattern IS_JSON = Pattern.compile("(text/json|application/json)");
 
   @Override
   public void init(FilterConfig config)
@@ -172,7 +173,14 @@ public class AuthFilter
         }
     }
 
-    Set<String> authset = siteMap.getAuthSet();
+    // 获取详细会话集合
+    Set<String> authset;
+    try {
+        authset = siteMap.getAuthSet();
+    } catch (HongsException e) {
+        throw new ServletException(e );
+    }
+
     if (null == authset) {
         if (null != loginPage) {
             doFailed(core, hlpr, (byte)1);
@@ -268,13 +276,13 @@ public class AuthFilter
   private boolean isAjax(HttpServletRequest req) {
       return req.getHeader("X-Requested-With") != null;
   }
-  
+
   private boolean isJson(HttpServletRequest req) {
       return IS_JSON.matcher(req.getHeader("Accept")).find();
   }
-  
+
   private boolean isHtml(HttpServletRequest req) {
       return IS_HTML.matcher(req.getHeader("Accept")).find();
   }
-  
+
 }

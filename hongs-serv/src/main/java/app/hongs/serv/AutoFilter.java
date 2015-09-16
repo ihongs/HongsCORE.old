@@ -77,7 +77,7 @@ public class AutoFilter implements Filter {
                     // 虚拟路径
                     req.setAttribute(ActionDriver.PATH, url);
                     // 转发请求
-                    // 由于 include 内部无法设置 Header, 而 api 又需要在外层输出, 故采用 include 方式
+                    // 由于 forward 内部无法设置 Header, 而 api 又需要在外层输出, 故采用 include 方式
                     if (ActionDriver.getRealPath((HttpServletRequest) req).endsWith(".api")) {
                         req.getRequestDispatcher(action+uri+ext).include(req, rsp);
                     } else {

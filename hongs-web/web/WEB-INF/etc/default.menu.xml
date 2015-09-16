@@ -1,8 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <session>app.hongs.serv.member.RoleSes</session>
-    <menu href="/">
-        <include>member</include>
-        <include>module</include>
-        <include>manage/module/data</include>
-    </menu>
+    <import>manage</import>
 </root>

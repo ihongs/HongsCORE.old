@@ -38,7 +38,7 @@ INSERT INTO `a_member_dept` VALUES ('HYPS1ROT007T1AG601','HYPRZ8Q5006II04J01','ä
 DROP TABLE IF EXISTS `a_member_dept_role`;
 CREATE TABLE `a_member_dept_role` (
   `dept_id` char(20) NOT NULL,
-  `role` char(100) NOT NULL,
+  `role` varchar(100) NOT NULL,
   PRIMARY KEY (`dept_id`,`role`),
   FOREIGN KEY (`dept_id`) REFERENCES `a_member_dept` (`id`)
 );
@@ -109,7 +109,7 @@ INSERT INTO `a_member_user_dept` VALUES ('HY9XQN2L000WGH9Q01','HYPS1ROT007T1AG60
 DROP TABLE IF EXISTS `a_member_user_role`;
 CREATE TABLE `a_member_user_role` (
   `user_id` char(20) NOT NULL,
-  `role` char(100) NOT NULL,
+  `role` varchar(100) NOT NULL,
   PRIMARY KEY (`user_id`,`role`),
   FOREIGN KEY (`user_id`) REFERENCES `a_member_user` (`id`) ON DELETE CASCADE
 );
@@ -141,13 +141,12 @@ INSERT INTO `a_member_user_role` VALUES ('1','manage/module/unit/delete');
 DROP TABLE IF EXISTS `a_member_user_sign`;
 CREATE TABLE `a_member_user_sign` (
   `user_id` char(20) NOT NULL,
-  `type` char(20) NOT NULL,
-  `code` char(20) NOT NULL,
+  `auth` varchar(20) NOT NULL,
+  `sess` varchar(20) NOT NULL,
   `ctime` int(11) DEFAULT NULL,
-  PRIMARY KEY (`user_id`,`type`),
+  PRIMARY KEY (`user_id`,`auth`),
   FOREIGN KEY (`user_id`) REFERENCES `a_member_user` (`id`) ON DELETE CASCADE
 );
 
 CREATE INDEX `IK_a_member_user_sign_user` ON `a_member_user_sign` (`user_id`);
-CREATE INDEX `IK_a_member_user_sign_type` ON `a_member_user_sign` (`type`);
-CREATE INDEX `IK_a_member_user_sign_code` ON `a_member_user_sign` (`code`);
+CREATE INDEX `IK_a_member_user_sign_auth` ON `a_member_user_sign` (`auth`);

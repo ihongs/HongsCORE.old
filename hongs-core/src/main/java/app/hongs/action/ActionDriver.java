@@ -276,7 +276,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
              * 时区可以记录到Session/Cookies里
              */
             String sess = conf.getProperty("core.timezone.session", "zone");
-            String zone = (String) hlpr.getSessvalue(sess);
+            String zone = (String) hlpr.getSessibute(sess);
             if (zone == null || zone.length() == 0) {
                 // 从 Cookie 里提取时区
                 Cookie[] cookies = req.getCookies();
@@ -299,7 +299,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
              * 语言可以记录到Session/Cookies里
              */
             String sess = conf.getProperty("core.language.session", "lang");
-            String lang = (String) hlpr.getSessvalue(sess);
+            String lang = (String) hlpr.getSessibute(sess);
             if (lang == null || lang.length() == 0) {
                 // 从 Cookie 里提取语言
                 Cookie[] cookies = req.getCookies();

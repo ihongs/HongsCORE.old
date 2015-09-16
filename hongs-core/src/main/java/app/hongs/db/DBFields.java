@@ -60,7 +60,7 @@ public class DBFields
         field.put("type",           md.getColumnType(i));
         field.put("size",           md.getPrecision (i));
         field.put("scale",          md.getScale(i));
-        field.put("signed",         md.isSigned(i));
+        field.put("unsigned",      !md.isSigned(i));
         field.put("required",       md.isNullable(i)
               != ResultSetMetaData.columnNullable  );
         field.put("autoIncrement",  md.isAutoIncrement(i));
@@ -68,10 +68,9 @@ public class DBFields
 
         // 在这里没什么意义的属性:
         /*
-        field.put("nullable",       md.isNullable(i));
         field.put("currency",       md.isCurrency(i));
-        field.put("writable",       md.isWritable(i));
         field.put("readOnly",       md.isReadOnly(i));
+        field.put("writable",       md.isWritable(i));
         field.put("searchable",     md.isSearchable(i));
         field.put("tableName",      md.getTableName(i));
         field.put("schemaName",     md.getSchemaName(i));

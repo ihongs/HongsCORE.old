@@ -1,0 +1,8 @@
+<root>
+    <rsname>app.hongs.serv.member.RoleSet</rsname>
+    <menu disp="管理" href="/manage">
+        <import>member</import>
+        <import>module</import>
+        <import>manage/module/data</import>
+    </menu>
+</root>

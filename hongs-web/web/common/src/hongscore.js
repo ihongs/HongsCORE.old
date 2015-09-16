@@ -409,12 +409,13 @@ function _hsGetDakey(path) {
     var i , keys = [];
     for(i = 0; i < path.length; i ++) {
         var keyn = path[i];
-        if (keyn.length == 0) {
-            keys.push(null);
-        } else
         if (keyn.substr(0, 1) == '#') {
             keys.push(parseInt(keyn.substr(1)));
-        } else {
+        } else
+        if (keyn.length == 0 && i!=0) {
+            keys.push(null);
+        } else
+        {
             keys.push(keyn);
         }
     }
@@ -1083,7 +1084,8 @@ $.fn.hsLoad = function(url, data, complete) {
     if (pos != -1 && !hsGetParam(url, '_') && !hsGetSeria(dat, '_')) {
         url = url.substring(0, pos + 5);
         dat = undefined;
-    } else if (! dat.length( )) {
+    } else
+    if (dat.length == 0) {
         dat = undefined;
     }
     url = hsFixUri(url);

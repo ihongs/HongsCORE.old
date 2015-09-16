@@ -3,8 +3,8 @@
 <db xmlns="http://hongs-core"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://hongs-core db.xsd">
-    <source link="default"/>
-    <origin link="default"/>
+    <source link="manage"/>
+    <origin link="manage"/>
     <tables>
         <table name="user"
                tableName="a_member_user"

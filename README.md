@@ -29,7 +29,7 @@
 1. 复制 etc/demo/dl.form.xml 到 etc 下并更名为 mytest.form.xml
 2. 复制 etc/demo/dl.menu.xml 到 etc 下并更名为 mytest.menu.xml
 3. 用文本编辑器打开 mytest.menu.xml 将 demo/dl 全部替换为 mytest, 并将"文档库测试"改成"我的测试"
-4. 用文本编辑器打开 default.menu.xml 在 root>menu 下加入[code]<include>mytest</include>[/code]
+4. 用文本编辑器打开 default.menu.xml 在 root>menu 下加入[code]<import>mytest</import>[/code]
 5. 按照使用方法启动服务并打开浏览器登录后, 就能在右上角下拉菜单找到"我的测试"了
 
 现在, 你可以在项目目录下创建以下文件重建页面体系

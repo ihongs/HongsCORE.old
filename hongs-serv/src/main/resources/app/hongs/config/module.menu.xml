@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
+    <rsname>@manage</rsname>
     <menu disp="模块管理" href="common/menu/cell.act?m=module">
         <menu disp="表单" href="manage/module/#unit" page="manage/module/unit/tree.html">
             <role disp="查看表单" name="manage/module/form/retrieve">

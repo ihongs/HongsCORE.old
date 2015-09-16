@@ -1,7 +1,6 @@
 package app.hongs.action;
 
 import app.hongs.Core;
-import app.hongs.CoreConfig;
 import app.hongs.CoreLocale;
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
@@ -79,13 +78,19 @@ import org.xml.sax.SAXException;
  * 0x10e1 解析文件失败
  * </pre>
  *
+ * <h3>特别注意:</h3>
+ * <p>
+ * 由于 rsname 拥有引用作用,
+ * 配置不当会导致 getRoleSet 无限循环,
+ * 规定 rsname 只可引用上级.
+ * </p>
  * @author Hongs
  */
 public class MenuSet
   extends CoreSerial
 {
 
-  private String name;
+  private final String name;
 
   /**
    * 页面路径信息
@@ -113,9 +118,9 @@ public class MenuSet
   public Set<String> imports = null;
 
   /**
-   * 权限名称(会话键或会话类)
+   * 会话名称
    */
-  public     String  session;
+  public /**/String  session = null;
 
   public MenuSet(String name)
     throws HongsException
@@ -186,16 +191,10 @@ public class MenuSet
       Document  doc = dbn.parse( is );
       root = doc.getDocumentElement();
 
-      NodeList nodes = root.getElementsByTagName("session");
-      if (nodes.getLength() > 0)
-      {
-        this.session = nodes.item(0).getTextContent();
-      }
-      else
-      {
-        CoreConfig c = CoreConfig.getInstance();
-        this.session = c.getProperty("core.default.auth.session", "roles");
-      }
+      // 角色会话名称
+      NodeList list = root.getElementsByTagName("rsname");
+            session = list.getLength( ) == 0  ? "roles"
+                    : list.item/***/(0).getTextContent( );
     }
     catch ( IOException ex)
     {
@@ -333,7 +332,7 @@ public class MenuSet
         depends.add(depend);
       }
       else
-      if ("include".equals(tagName2))
+      if ("import".equals(tagName2))
       {
         String impart = element2.getTextContent();
         MenuSet  conf = new MenuSet(impart);
@@ -480,27 +479,27 @@ public class MenuSet
   /**
    * 获取角色集合(与当前请求相关)
    * @return session 为空则返回 null
+   * @throws app.hongs.HongsException
    */
-  public Set<String> getRoleSet() {
-      Set<String> roleset;
-      if (session.contains(".")) {
-          roleset = (Set) Core.getInstance (session);
-          if (roleset == null
-          || (roleset.size( ) == 1 && roleset.contains( null ) ) ) {
-              roleset  = null;
-          }
-      } else {
-          ActionHelper help = Core.getInstance(ActionHelper.class);
-          roleset = (Set) help.getSessvalue(session);
+  public Set<String> getRoleSet() throws HongsException {
+      ActionHelper hlpr = Core.getInstance(ActionHelper.class );
+      if (session.startsWith("@")) {
+          return getInstance(session.substring(1)).getRoleSet();
+      } else
+      if (session.contains  (".")) {
+          return (Set) Core.getInstance (session);
+      } else
+      {
+          return (Set) hlpr.getSessibute(session);
       }
-      return roleset;
   }
 
   /**
    * 获取权限集合(与当前请求相关)
    * @return session 为空则返回 null
+   * @throws app.hongs.HongsException
    */
-  public Set<String> getAuthSet() {
+  public Set<String> getAuthSet() throws HongsException {
       Set<String> roleset = getRoleSet();
       if (null == roleset)  return null ;
       return getRoleAuths(roleset.toArray(new String[0]));
@@ -510,8 +509,9 @@ public class MenuSet
    * 检查角色权限(与当前请求相关)
    * @param role
    * @return 可访问则为true
+   * @throws app.hongs.HongsException
    */
-  public Boolean chkRole(String role) {
+  public boolean chkRole(String role) throws HongsException {
       Set<String> roleset = getRoleSet( );
       if (null == roleset) {
           return !roles.containsKey(role);
@@ -523,8 +523,9 @@ public class MenuSet
    * 检查动作权限(与当前请求相关)
    * @param auth
    * @return 可访问则为true
+   * @throws app.hongs.HongsException
    */
-  public Boolean chkAuth(String auth) {
+  public boolean chkAuth(String auth) throws HongsException {
       Set<String> authset = getAuthSet( );
       if (null == authset) {
           return !actions.contains (auth);
@@ -536,15 +537,16 @@ public class MenuSet
    * 检查页面权限(与当前请求相关)
    * @param name
    * @return 有一个动作可访问即返回true
+   * @throws app.hongs.HongsException
    */
-  public Boolean chkMenu(String name) {
+  public Boolean chkMenu(String name) throws HongsException {
       Set<String> rolez = getMenuRoles(name).keySet();
-      if (null == rolez || rolez.isEmpty()) {
+      if (null == rolez || rolez.isEmpty( )) {
           return  true ;
       }
 
-      Set<String> rolex = getRoleSet(/***/);
-      if (null == rolex || rolex.isEmpty()) {
+      Set<String> rolex = getRoleSet( /**/ );
+      if (null == rolex || rolex.isEmpty( )) {
           return  false;
       }
 
@@ -554,7 +556,7 @@ public class MenuSet
       }
       }
 
-          return  false;
+      /**/return  false;
   }
 
   /**
@@ -582,8 +584,10 @@ public class MenuSet
   /**
    * 获取权限列表(与当前请求相关)
    * @return
+   * @throws app.hongs.HongsException
    */
-  public  List<Map> getRoleTranslated() {
+  public  List<Map> getRoleTranslated()
+  throws HongsException {
       return getRoleTranslated(getRoleSet());
   }
 
@@ -593,7 +597,7 @@ public class MenuSet
    * @return
    */
   public  List<Map> getRoleTranslated(Set<String> rolez) {
-      if (null == rolez)rolez = new HashSet();
+      if (null==rolez)rolez = new HashSet();
       CoreLocale lang = getCurrTranslator();
       return getRoleTranslated(rolez, menus, lang);
   }
@@ -663,8 +667,10 @@ public class MenuSet
    * @param level
    * @param depth
    * @return
+   * @throws app.hongs.HongsException
    */
-  public  List<Map> getMenuTranslated(int level, int depth) {
+  public  List<Map> getMenuTranslated(int level, int depth)
+  throws HongsException {
       return getMenuTranslated(level, depth, getRoleSet( ));
   }
 
@@ -676,7 +682,7 @@ public class MenuSet
    * @return
    */
   public  List<Map> getMenuTranslated(int level, int depth, Set<String> rolez) {
-      if (null == rolez)rolez = new HashSet();
+      if (null==rolez)rolez = new HashSet();
       CoreLocale lang = getCurrTranslator();
       return getMenuTranslated(level, depth, rolez, menus, lang, 0);
   }

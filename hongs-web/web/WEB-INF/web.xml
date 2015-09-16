@@ -52,11 +52,15 @@
     </servlet-mapping>
     <!-- Auth Filter -->
     <filter>
-        <filter-name>AuthFilter</filter-name>
+        <filter-name>AuthFilter_MN</filter-name>
         <filter-class>app.hongs.serv.AuthFilter</filter-class>
         <init-param>
+            <param-name>config</param-name>
+            <param-value>manage</param-value>
+        </init-param>
+        <init-param>
             <param-name>index-page</param-name>
-            <param-value>/manage/</param-value>
+            <param-value>/manage/index.html</param-value>
         </init-param>
         <init-param>
             <param-name>login-page</param-name>
@@ -64,11 +68,11 @@
         </init-param>
         <init-param>
             <param-name>exclude-urls</param-name>
-            <param-value>/manage/login.html;/manage/member/sign/create.act;/manage/member/sign/delete.act</param-value>
+            <param-value>/manage/login.html;/manage/member/sign/create.act;/manage/member/sign/delete.act;*.api</param-value>
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>AuthFilter</filter-name>
+        <filter-name>AuthFilter_MN</filter-name>
         <url-pattern>/manage/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
@@ -102,9 +106,8 @@
     <session-config>
         <session-timeout>43210</session-timeout>
         <cookie-config>
-            <name>sid</name>
-            <secure>true</secure>
             <http-only>true</http-only>
+            <name>token</name>
         </cookie-config>
     </session-config>
     <welcome-file-list>

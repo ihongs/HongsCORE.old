@@ -145,8 +145,9 @@ public class Unit extends Mtree {
             menu.setAttribute("disp", unitName);
             menu.setAttribute("href", "common/menu/cell.act?m=manage/module/unit/"+unitId);
 
+            if (formMap.containsKey(unitId))
             for(String formId : formMap.get(unitId)) {
-                incl = docm.createElement("include");
+                incl = docm.createElement("import");
                 incl.appendChild(docm.createTextNode("manage/module/form/"+formId));
             }
 
@@ -155,11 +156,17 @@ public class Unit extends Mtree {
             hide.setAttribute("disp", unitName);
             hide.setAttribute("href", "!hongs-module-unit-"+unitId);
 
+            if (hideMap.containsKey(unitId))
             for(String formId : hideMap.get(unitId)) {
-                incl = docm.createElement("include");
+                incl = docm.createElement("import");
                 incl.appendChild(docm.createTextNode("manage/module/form/"+formId));
             }
         }
+
+        // 会话
+        incl = docm.createElement("rsname");
+        root.appendChild ( incl );
+        incl.setNodeValue("@manage");
 
         saveDocument(docm);
     }

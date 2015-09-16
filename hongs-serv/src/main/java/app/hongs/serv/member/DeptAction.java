@@ -4,9 +4,12 @@ import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
+import app.hongs.action.MenuSet;
 import app.hongs.action.anno.Action;
 import app.hongs.db.DB;
 import app.hongs.action.anno.CommitSuccess;
+import app.hongs.util.Dict;
+import app.hongs.util.Synt;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +19,7 @@ import java.util.Set;
  * 部门动作接口
  * @author Hongs
  */
-@Action("admin/member/dept")
+@Action("manage/member/dept")
 public class DeptAction {
 
     private app.hongs.serv.member.Dept model;
@@ -37,6 +40,12 @@ public class DeptAction {
     public void getInfo(ActionHelper helper)
     throws HongsException {
         Map data = model.getInfo(helper.getRequestData());
+        
+        // With all roles
+        if (Synt.declare(helper.getParameter("-with-roles"), false)) {
+            Dict.put(data, MenuSet.getInstance("manage").getRoleTranslated(), "enum", "roles..role");
+        }
+
         helper.reply(data);
     }
 
@@ -83,7 +92,7 @@ public class DeptAction {
         Map data = new HashMap();
 
         // 全部权限分组
-        List roles = Sign.getRoles("default");
+        List roles = SignKit.getRoles("default");
         data.put("role_list", roles);
 
         // 用户动作分组

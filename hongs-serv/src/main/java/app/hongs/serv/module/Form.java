@@ -163,8 +163,12 @@ public class Form extends Model {
         role.appendChild ( depn );
         depn.setNodeValue("manage/module/data/"+id+"/retrieve");
         
-        // 保存
+        // 会话
+        depn = docm.createElement("rsname");
+        root.appendChild ( depn );
+        depn.setNodeValue("@manage");
         
+        // 保存
         saveDocument(id+".form.xml", docm);
     }
     

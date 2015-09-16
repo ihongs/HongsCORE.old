@@ -53,7 +53,7 @@ extends Model {
     public String add(Map<String, Object> data) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
-            data.put("password", Sign.getCrypt((String) data.get("password")));
+            data.put("password", SignKit.getCrypt((String) data.get("password")));
         }
 
         return super.add(data);
@@ -63,7 +63,7 @@ extends Model {
     public int put(Map<String, Object> data, String id, FetchCase caze) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
-            data.put("password", Sign.getCrypt((String) data.get("password")));
+            data.put("password", SignKit.getCrypt((String) data.get("password")));
         }
 
         return super.put(data, id, caze);

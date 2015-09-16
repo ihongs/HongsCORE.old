@@ -54,7 +54,7 @@ public class UserAction {
 
         // With all roles
         if (Synt.declare(helper.getParameter("-with-roles"), false)) {
-            Dict.put(data, MenuSet.getInstance().getRoleTranslated(), "enum", "roles..role");
+            Dict.put(data, MenuSet.getInstance("manage").getRoleTranslated(), "enum", "roles..role");
         }
 
         helper.reply(data);
@@ -107,7 +107,7 @@ public class UserAction {
         Map data = new HashMap();
 
         // 全部权限分组
-        List roles = Sign.getRoles("default");
+        List roles = SignKit.getRoles("default");
         data.put("role_list", roles);
 
         // 用户动作分组

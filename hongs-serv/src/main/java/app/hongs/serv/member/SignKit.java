@@ -14,7 +14,7 @@ import java.util.Set;
  * 登录工具
  * @author Hongs
  */
-public class Sign {
+public class SignKit {
 
     public static List getRoles(String name) throws HongsException {
         List units = new ArrayList();

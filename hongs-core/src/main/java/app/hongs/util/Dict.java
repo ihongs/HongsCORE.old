@@ -350,14 +350,15 @@ public class Dict
                         .split("\\." , -1 );
     Object[] keys = new Object[keyz.length];
     int i = 0;
-    for(String keyn : keyz) {
-        if (keyn.length(  ) == 0) {
-            keys[i ++] = null;
-        } else
+    for ( String keyn : keyz) {
         if (keyn.startsWith("#")) {
-            keys[i ++] = Synt.declare(keyn.substring(1), Integer.class);
-        } else {
-            keys[i ++] = keyn;
+            keys[i++] = Synt.declare(keyn.substring(1) , 0);
+        } else
+        if (keyn.length() == 0 && i != 0) {
+            keys[i++] = null;
+        } else
+        {
+            keys[i++] = keyn;
         }
     }
     return  keys;

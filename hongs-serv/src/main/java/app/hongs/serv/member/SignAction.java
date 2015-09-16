@@ -1,12 +1,12 @@
 package app.hongs.serv.member;
 
-import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.VerifyHelper.Wrong;
 import app.hongs.action.VerifyHelper.Wrongs;
 import app.hongs.action.anno.Action;
+import app.hongs.action.anno.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
@@ -23,41 +23,18 @@ import javax.servlet.http.HttpSession;
 public class SignAction {
 
     @Action("create")
+    @Verify(conf="sign",form="form")
     public void create(ActionHelper ah) throws HongsException {
-        String username = Synt.declare(ah.getParameter("username"), "");
-        String password = Synt.declare(ah.getParameter("password"), "");
-
-        if (username.length() == 0) {
-            CoreLocale lang = CoreLocale.getInstance( "member" );
-            Map m = new HashMap();
-            Map e = new HashMap();
-            m.put("username", new Wrong(lang.translate("core.username.can.not.be.empty")));
-            e.put("errors", new Wrongs(m).getErrors());
-            e.put("msg", lang.translate("core.sign.in.invalid"));
-            e.put("ok", false);
-            ah.reply(e);
-            return;
-        }
-        if (password.length() == 0) {
-            CoreLocale lang = CoreLocale.getInstance( "member" );
-            Map m = new HashMap();
-            Map e = new HashMap();
-            m.put("password", new Wrong(lang.translate("core.password.can.not.be.empty")));
-            e.put("errors", new Wrongs(m).getErrors());
-            e.put("msg", lang.translate("core.sign.in.invalid"));
-            e.put("ok", false);
-            ah.reply(e);
-            return;
-        }
-        
-        password = Sign.getCrypt(password);
-        ah.getRequestData().put("password", password);
-
         DB        db = DB.getInstance("member");
         Table     tb;
         FetchCase fc;
         Map       ud;
         Map       xd;
+
+        String authcode = Synt.declare(ah.getParameter("appid"), "_WEB_");
+        String username = Synt.declare(ah.getParameter("username"), "");
+        String password = Synt.declare(ah.getParameter("password"), "");
+               password = SignKit.getCrypt(password);
 
         // 验证密码
         tb = db.getTable("user");
@@ -70,7 +47,7 @@ public class SignAction {
             CoreLocale lang = CoreLocale.getInstance( "member" );
             Map m = new HashMap();
             Map e = new HashMap();
-            m.put("password", new Wrong(lang.translate("core.username.or.password.invalid")));
+            m.put("password", new Wrong(lang.translate("core.password.invalid")));
             e.put("errors", new Wrongs(m).getErrors());
             e.put("msg", lang.translate("core.sign.in.invalid"));
             e.put("ok", false);
@@ -79,60 +56,64 @@ public class SignAction {
         }
 
         // 验证应用
-        String appid = Synt.declare(ah.getParameter("appid"), "web");
-        if (!"web".equals(appid) && !"api".equals(appid)) {
+        if (!authcode.startsWith("_")) {
             fc = new FetchCase( )
                 .from   (tb.tableName, tb.name)
                 .select (".id")
-                .where  (".appid = ?", appid  );
+                .where  (".id = ?", authcode);
             xd = db.fetchLess(fc);
             if (xd.isEmpty()) {
-                CoreLocale lang = CoreLocale.getInstance("member");
+                CoreLocale lang = CoreLocale.getInstance( "member" );
                 Map m = new HashMap();
                 Map e = new HashMap();
-                m.put("appid" , new Wrong(lang.translate("core.appid.invalid")));
+                m.put("platform" , new Wrong(lang.translate("core.platform.invalid")));
                 e.put("errors", new Wrongs(m).getErrors());
-                e.put("msg", lang.translate("core.appid.invalid"));
+                e.put("msg", lang.translate("core.sign.in.invalid"));
                 e.put("ok", false);
                 ah.reply(e);
                 return;
             }
         }
-        
+
+        HttpSession sess = ah.getRequest().getSession(true);
+        String  sesscode = sess.getId();
+
         // 设置登录
-        String token = Core.getUniqueId();
         tb = db.getTable( "user_sign" );
-        tb.delete("`user_id` = ? AND `type` = ?", ud.get("id"), appid);
+        tb.delete("`user_id` = ? AND `auth` = ?", ud.get("id"), authcode);
         xd = new HashMap();
         xd.put("user_id", ud.get("id"));
-        xd.put("type", appid);
-        xd.put("code", token);
+        xd.put("auth", authcode);
+        xd.put("sess", sesscode);
         tb.insert(xd);
 
         // 设置会话
-        HttpSession sess = ah.getRequest().getSession(true);
-        sess.setAttribute("user", ud.get( "id" ));
-        sess.setAttribute("name", ud.get("name"));
-        sess.setAttribute("sign_code", token);
-        sess.setAttribute("sign_type", appid);
+        sess.setAttribute("stime"   , System.currentTimeMillis());
+        sess.setAttribute("appid"   , authcode);
+        sess.setAttribute("id"      , ud.get( "id" ));
+        sess.setAttribute("name"    , ud.get("name"));
 
         // 返回数据
         ud = new HashMap();
-        ud.put("appid", appid);
-        ud.put("token", token);
-        ud.put("jsessionid", sess.getId());
+        ud.put("token", sesscode);
         ah.reply(ud);
     }
 
     @Action("delete")
     public void delete(ActionHelper ah) throws HongsException {
-        String appid = Synt.declare(ah.getParameter("appid"), "web");
-        String token = Synt.declare(ah.getParameter("token"),  ""  );
+        String authcode = (String) ah.getSessibute("authcode" );
+        String userId   = (String) ah.getSessibute( "user_id" );
+
+        if (authcode == null || userId == null) {
+            CoreLocale lang = CoreLocale.getInstance("member" );
+            ah.fault ( lang.translate("core.sign.out.invalid"));
+            return;
+        }
 
         // 清除登录
         DB.getInstance("member")
           .getTable("user_sign")
-          .delete("`code` = ? AND `type` = ?", token, appid);
+          .delete("`user_id` = ? AND `auth` = ?", userId, authcode);
 
         // 清除会话
         ah.getRequest()

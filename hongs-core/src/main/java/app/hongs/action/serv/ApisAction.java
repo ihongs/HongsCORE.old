@@ -106,7 +106,7 @@ public class ApisAction
 
         // 将请求数据处理之后传递
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
-        String       json = Synt.declare(req.getParameter("-data"), String.class);
+        String       json = Synt.declare(req.getParameter(".data"), String.class);
         if (json != null) {
             try {
                 Map  send = Synt.declare(Data.toObject(json), Map.class);
@@ -126,9 +126,9 @@ public class ApisAction
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
         if (resp != null) {
-            Boolean scok = Synt.declare(req.getParameter("-scok"), Boolean.class);
-            Boolean wrap = Synt.declare(req.getParameter("-wrap"), Boolean.class);
-            String  ccnv = Synt.declare(req.getParameter("-conv"),  String.class);
+            Boolean scok = Synt.declare(req.getParameter(".scok"), Boolean.class);
+            Boolean wrap = Synt.declare(req.getParameter(".wrap"), Boolean.class);
+            String  ccnv = Synt.declare(req.getParameter(".conv"),  String.class);
             Set     conv = Synt.declare(ccnv == null ? null : ccnv.split("[\\s\\+]+"), Set.class);
 
             // 状态总是 200

@@ -1,12 +1,11 @@
 <root>
     <!--
-    <session></session>
-    <include></include>
-    <menu href="" disp="" page="" data="">
-        <role name="" disp="">
+    <menu disp="" href="" page="" data="">
+        <role disp="" name="">
             <action></action>
             <depend></depend>
         </role>
+        <import></import>
     </menu>
     //-->
 </root>

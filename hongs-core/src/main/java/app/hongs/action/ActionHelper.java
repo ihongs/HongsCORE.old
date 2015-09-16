@@ -6,7 +6,6 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
-import app.hongs.util.Text;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -414,11 +413,15 @@ public class ActionHelper
     {
       o = new ArrayList(((Map) o).values());
     }
+    if (o instanceof Set )
+    {
+      o = new ArrayList(((Set) o));
+    }
     if (o instanceof List)
     {
-      List l = (List) o;
-      int  i = l.size();
-      o =  l.get(i + 1);
+      List a = (List) o;
+      int  i = a.size();
+      o =  a.get(i - 1);
     }
     return o.toString();
   }
@@ -469,7 +472,7 @@ public class ActionHelper
    * @param name
    * @return 当前取值, 没有则为null
    */
-  public Object getSessvalue(String name)
+  public Object getSessibute(String name)
   {
     if (this.sessionData != null) {
       return this.sessionData.get(name);
@@ -487,7 +490,7 @@ public class ActionHelper
    * @param name
    * @param value
    */
-  public void setSessvalue(String name, Object value)
+  public void setSessibute(String name, Object value)
   {
     if (this.sessionData != null) {
       if (value == null) {

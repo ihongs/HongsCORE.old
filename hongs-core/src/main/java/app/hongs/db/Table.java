@@ -645,16 +645,16 @@ public class Table
 
       String valueStr = value.toString().trim();
 
-      int type  = (Integer)column.get("type");
-      int size  = (Integer)column.get("size");
-      int scale = (Integer)column.get("scale");
+      int type = (Integer)column.get("type" );
+      int size = (Integer)column.get("size" );
+      int scle = (Integer)column.get("scale");
 
       // 判断字符串类型
       if (type == Types.CHAR  || type == Types.VARCHAR  || type == Types.LONGVARCHAR
        || type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR)
       {
         // 判断长度
-        if (valueStr.length() > size)
+        if (valueStr.length() > size  &&  0 < size)
         {
           throw sizeException(namc, valueStr, size);
         }
@@ -663,14 +663,14 @@ public class Table
       }
 
       // 判断整型数值
-      else if (type == Types.TINYINT || type == Types.INTEGER || type == Types.BIGINT || type == Types.SMALLINT)
+      else if (type == Types.INTEGER || type == Types.TINYINT || type == Types.SMALLINT || type == Types.BIGINT)
       {
         if (!valueStr.matches("^[\\-+]?[0-9]+$"))
         {
           throw intgrException(namc, valueStr);
         }
 
-        if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
+        if ((Boolean)column.get("unsigned") && valueStr.startsWith("-"))
         {
           throw usngdException(namc, valueStr);
         }
@@ -699,7 +699,7 @@ public class Table
           throw floatException(namc, valueStr);
         }
 
-        if (!(Boolean)column.get("signed") && valueStr.startsWith("-"))
+        if ((Boolean)column.get("unsigned") && valueStr.startsWith("-"))
         {
           throw usngdException(namc, valueStr);
         }
@@ -707,7 +707,7 @@ public class Table
         // 判断小数位数, 填充小数位
         StringBuilder sb = new StringBuilder();
         sb.append("#.#");
-        for (int i = 0; i < scale; i ++)
+        for (int i = 0; i < scle; i ++)
           sb.append('#');
         String sbs = sb.toString();
 
@@ -755,9 +755,9 @@ public class Table
           /**
            * 判断小数
            */
-          if (subLen > scale)
+          if (subLen > scle)
           {
-            throw scleException(namc, valueStr, size);
+            throw scleException(namc, valueStr, scle);
           }
         }
 
@@ -875,12 +875,12 @@ public class Table
   }
 
   private HongsException sizeException(String name, String value, int size) {
-    String error = "Size for column '"+name+"'("+value+") must be a less than "+size;
+    String error = "Value for column '"+name+"'("+value+") must be a less than "+size;
     return validateException(0x1082, error, name, value, String.valueOf(size));
   }
 
   private HongsException scleException(String name, String value, int scle) {
-    String error = "Value for column '"+name+"'("+value+") must be a less than "+scle;
+    String error = "Scale for column '"+name+"'("+value+") must be a less than "+scle;
     return validateException(0x1084, error, name, value, String.valueOf(scle));
   }
 
@@ -911,9 +911,8 @@ public class Table
     trans.add(fieldName);
     trans.addAll(Arrays.asList(otherParams));
 
-    HongsException ex = new HongsException(code, error+" (Table:"+name+")");
-    ex.setLocalizedOptions(trans.toArray(new String[] {}));
-    return ex;
+    return new HongsException(code, error+" (Table:"+name+")")
+         .setLocalizedOptions(trans.toArray (new String[]{}) );
   }
 
   /**

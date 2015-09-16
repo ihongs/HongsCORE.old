@@ -16,10 +16,7 @@
     <xs:element name="depend" type="xs:string"/>
 
     <!-- 包含 -->
-    <xs:element name="include" type="xs:string"/>
-
-    <!-- 会话 -->
-    <xs:element name="session" type="xs:string"/>
+    <xs:element name="import" type="xs:string"/>
 
     <!-- 角色 -->
     <xs:element name="role">
@@ -43,7 +40,7 @@
             <xs:all>
                 <xs:element ref="menu" maxOccurs="unbounded"/>
                 <xs:element ref="role" maxOccurs="unbounded"/>
-                <xs:element ref="include" maxOccurs="unbounded"/>
+                <xs:element ref="import" maxOccurs="unbounded"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -54,8 +51,7 @@
             <xs:all>
                 <xs:element ref="menu" maxOccurs="unbounded"/>
                 <xs:element ref="role" maxOccurs="unbounded"/>
-                <xs:element ref="include" maxOccurs="unbounded"/>
-                <xs:element ref="session" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="import" maxOccurs="unbounded"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
