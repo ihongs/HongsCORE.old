@@ -46,6 +46,7 @@
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
+    String wrap= "manage";
     String name= helper.getParameter("m");
     if (name == null || "".equals(name) ) {
         name = "default";
@@ -55,13 +56,13 @@
         path =  name ;
     }
 
-    MenuSet main = MenuSet.getInstance();
+    MenuSet main = MenuSet.getInstance(wrap);
     MenuSet curr = MenuSet.getInstance(name);
     List<Map> mainMenu = main.getMenuTranslated(1, 1);
     List<Map> currMenu = curr.getMenuTranslated(1, 1);
 
-    String  user = (String ) helper.getSessvalue("name");
-    Integer msgc = (Integer) helper.getSessvalue("msgc");
+    String  user = (String ) helper.getSessibute("name");
+    Integer msgc = (Integer) helper.getSessibute("msgc");
     String  msgs = msgc == null ? null : (msgc > 9 ? "9+" : Integer.toString(msgc));
 %>
 

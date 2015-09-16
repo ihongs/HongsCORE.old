@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
  * <h3>初始化参数(init-param):</h3>
  * <pre>
  * config       配置名称
- * rsname       会话名称
  * index-page   首页地址(为空则不跳转)
  * login-page   登录地址(为空则不跳转)
  * exclude-urls 不包含的URL, 可用","分割多个, 可用"*"为前后缀
