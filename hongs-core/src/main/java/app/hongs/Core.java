@@ -124,11 +124,8 @@ extends HashMap<String, Object>
    *
    * Destory对象会执行destroy方法
    * GlobalSingleton和ThreadSingleton对象不会被移除
-   *
-   * @throws java.lang.Throwable
    */
   public final void destroy()
-  throws Throwable
   {
     if (this.isEmpty())
     {
@@ -149,7 +146,14 @@ extends HashMap<String, Object>
       Object object =  et.getValue();
       if (object instanceof Destroy)
       {
-        ((Destroy) object).destroy();
+        try
+        {
+          ((Destroy) object).destroy();
+        }
+        catch (Throwable ta)
+        {
+          CoreLogger.error(ta);
+        }
       }
     }
 

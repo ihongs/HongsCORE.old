@@ -474,6 +474,12 @@ public class DB
       }
     }
 
+    if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
+    {
+      CoreLogger.trace("Close database connection, URL: "
+      + this.connection.getMetaData( ).getURL());
+    }
+
     try
     {
       this.connection.close();
@@ -485,12 +491,6 @@ public class DB
     finally
     {
       this.connection = null ;
-    }
-
-    if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
-    {
-      CoreLogger.trace("Close database connection, URL: "
-      + this.connection.getMetaData( ).getURL());
     }
   }
 

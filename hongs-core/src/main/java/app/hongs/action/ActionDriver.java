@@ -353,17 +353,14 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             CoreLogger.getLogger("hongs.log.action").debug(sb.toString());
         }
 
-        try {
-            core.destroy();
-            req.removeAttribute(CORE);
-            Core.THREAD_CORE.remove();
-            Core.ACTION_TIME.remove();
-            Core.ACTION_ZONE.remove();
-            Core.ACTION_LANG.remove();
-            Core.ACTION_NAME.remove();
-        } catch ( Throwable  e) {
-            CoreLogger.error(e);
-        }
+        // 销毁此周期内的对象
+        core.destroy();
+        req.removeAttribute(CORE);
+        Core.THREAD_CORE.remove();
+        Core.ACTION_TIME.remove();
+        Core.ACTION_ZONE.remove();
+        Core.ACTION_LANG.remove();
+        Core.ACTION_NAME.remove();
     }
 
     /**

@@ -144,7 +144,7 @@ public class CmdletRunner
     Map<String, Object> opts;
     opts = CmdletHelper.getOpts(args,
       "debug:i" ,
-      "corepath:s" , "confpath:s" , "varspath:s" , "tmpspath:s" ,
+      "corepath:s" , "confpath:s" , "datapath:s" ,
       "basepath:s" , "basehref:s" , "language:s" , "timezone:s" ,
       "request--:s", "context--:s", "session--:s", "cookies--:s"
     );
@@ -160,7 +160,7 @@ public class CmdletRunner
     Core.CORE_PATH = Synt.declare(opts.get("corepath"), System.getProperty("user.dir"));
     Core.CORE_PATH = new File(Core.CORE_PATH).getAbsolutePath();
     Core.CONF_PATH = Synt.declare(opts.get("confpath"), Core.CORE_PATH + File.separator + "etc");
-    Core.DATA_PATH = Synt.declare(opts.get("varspath"), Core.CORE_PATH + File.separator + "var");
+    Core.DATA_PATH = Synt.declare(opts.get("datapath"), Core.CORE_PATH + File.separator + "var");
     Core.BASE_PATH = Synt.declare(opts.get("basepath"), Core.CORE_PATH + File.separator + "web");
     Core.BASE_HREF = Synt.declare(opts.get("basehref"), "");
 
@@ -176,6 +176,7 @@ public class CmdletRunner
     Core.SERVER_ID = cnf.getProperty("core.server.id" , "1");
 
     Map m = new HashMap();
+    m.put("SERVER_ID", Core.SERVER_ID);
     m.put("BASE_PATH", Core.BASE_PATH);
     m.put("CORE_PATH", Core.CORE_PATH);
     m.put("CONF_PATH", Core.CONF_PATH);
@@ -299,14 +300,7 @@ public class CmdletRunner
       @Override
       public void  run()
       {
-        try
-        {
-          Core.GLOBAL_CORE.destroy();
-        }
-        catch (Throwable ex)
-        {
-          throw HongsError.common(null, ex);
-        }
+        Core.GLOBAL_CORE.destroy();
       }
     });
 
