@@ -89,24 +89,10 @@ public class ApisAction
             return;
         }
 
-        // 去前后缀
-        String acl = act.substring( 1 );
-        int pos  = acl.lastIndexOf('.');
-        if (pos != -1) {
-            acl  = acl.substring(0,pos);
-        }
-
-        // 解析路径
-        Map acx = ActionRunner.getActions();
-        if (acx.containsKey(acl) == false ) {
-            act =  parseAct(acx, acl, mts );
-        } else {
-            act =  "/" + acl + ".act";
-        }
-
         // 将请求数据处理之后传递
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
-        String       json = Synt.declare(req.getParameter(".data"), String.class);
+        String        sid = Synt.declare(req.getParameter(".token"),String.class);
+        String       json = Synt.declare(req.getParameter(".data" ),String.class);
         if (json != null) {
             try {
                 Map  send = Synt.declare(Data.toObject(json), Map.class);
@@ -120,8 +106,9 @@ public class ApisAction
         }
 
         // 将请求转发到动作处理器
-        req.getRequestDispatcher(act).include(req, rsp);
-        hlpr.reinitHelper(req, rsp);
+        act = parseAct(act, sid, mts);
+        req.getRequestDispatcher(act).include ( req, rsp);
+        hlpr.reinitHelper ( req, rsp);
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
@@ -179,8 +166,25 @@ public class ApisAction
         }
     }
 
-    private String parseAct(Map acx, String act, String... mts) {
-        String[] ats = act.split("/");
+    private String parseAct(String act, String sid, String... mts) {
+        // 去掉后缀
+        String acl = act.substring( 1 );
+        int pos  = acl.lastIndexOf('.');
+        if (pos != -1) {
+            acl  = acl.substring(0,pos);
+        }
+
+        // 是否动作
+        Map acx = ActionRunner.getActions();
+        if (acx.containsKey(acl)) {
+            act =  "/" + acl + ".act";
+            if (sid != null) {
+                act += ";jsessionid=" + sid;
+            }
+            return act;
+        }
+
+        String[] ats = acl.split("/");
         String   m   = mts[0];
         String   n   = ats[0];
         StringBuilder u = new StringBuilder();
@@ -227,8 +231,12 @@ public class ApisAction
             }
         }
 
-        if (p.length () > 0) {
-            p.replace(0, 1, "?");
+        acl = "/"+n+"/"+m+".act";
+        if (sid !=  null  ) {
+            acl += ";jsessionid=" + sid;
+        }
+        if (p.length() > 0) {
+            acl += p.replace(0, 1, "?");
         }
 
         return "/"+ n +"/"+ m + ".act" + p.toString();

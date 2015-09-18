@@ -61,8 +61,7 @@ public class DBFields
         field.put("size",           md.getPrecision (i));
         field.put("scale",          md.getScale(i));
         field.put("unsigned",      !md.isSigned(i));
-        field.put("required",       md.isNullable(i)
-              != ResultSetMetaData.columnNullable  );
+        field.put("required",       md.isNullable(i) == ResultSetMetaData.columnNoNulls);
         field.put("autoIncrement",  md.isAutoIncrement(i));
         field.put("caseSensitive",  md.isCaseSensitive(i));
 

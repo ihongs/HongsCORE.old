@@ -136,37 +136,44 @@ public class Unit extends Mtree {
 
         Element  menu, hide, incl;
 
+        // 会话
+        incl = docm.createElement("rsname");
+        root.appendChild ( incl );
+        incl.appendChild ( docm.createTextNode("@manage") );
+
         for(Map.Entry<String, String> et : unitMap.entrySet()) {
             String unitId   = et.getKey(  );
             String unitName = et.getValue();
 
-            menu = docm.createElement( "menu" );
-            root.appendChild ( menu );
-            menu.setAttribute("disp", unitName);
-            menu.setAttribute("href", "common/menu/cell.act?m=manage/module/unit/"+unitId);
+            Set<String> formSet  =  formMap.get(unitId);
+            if (null != formSet && !formSet.isEmpty( )) {
+                menu = docm.createElement( "menu" );
+                root.appendChild ( menu );
+                menu.setAttribute("disp", unitName);
+                menu.setAttribute("href", "common/menu/cell.act?m=manage/module/data&n="+unitId);
 
-            if (formMap.containsKey(unitId))
-            for(String formId : formMap.get(unitId)) {
-                incl = docm.createElement("import");
-                incl.appendChild(docm.createTextNode("manage/module/form/"+formId));
+                for(String formId : formSet) {
+                    incl = docm.createElement("import");
+                    menu.appendChild( incl );
+                    incl.appendChild(docm.createTextNode("manage/module/data/"+formId));
+                }
             }
 
-            hide = docm.createElement( "menu" );
-            menu.appendChild ( hide );
-            hide.setAttribute("disp", unitName);
-            hide.setAttribute("href", "!hongs-module-unit-"+unitId);
+            Set<String> hideSet  =  hideMap.get(unitId);
+            if (null != hideSet && !hideSet.isEmpty( )) {
+                hide = docm.createElement( "menu" );
+                root.appendChild ( hide );
+                hide.setAttribute("disp", unitName+"隐藏功能");
+                hide.setAttribute("href", "!manage-module-unit-"+unitId);
 
-            if (hideMap.containsKey(unitId))
-            for(String formId : hideMap.get(unitId)) {
-                incl = docm.createElement("import");
-                incl.appendChild(docm.createTextNode("manage/module/form/"+formId));
+                if (hideMap.containsKey(unitId))
+                for(String formId : hideSet) {
+                    incl = docm.createElement("import");
+                    hide.appendChild( incl );
+                    incl.appendChild( docm.createTextNode("manage/module/data/"+formId) );
+                }
             }
         }
-
-        // 会话
-        incl = docm.createElement("rsname");
-        root.appendChild ( incl );
-        incl.setNodeValue("@manage");
 
         saveDocument(docm);
     }

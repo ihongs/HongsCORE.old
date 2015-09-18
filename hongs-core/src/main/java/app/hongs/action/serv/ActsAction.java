@@ -146,6 +146,10 @@ public class ActsAction
         errso = "Er401";
         helper.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         break;
+      case 0x1102:
+        errso = "Er402";
+        helper.getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
+        break;
       case 0x1103:
         errso = "Er403";
         helper.getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);

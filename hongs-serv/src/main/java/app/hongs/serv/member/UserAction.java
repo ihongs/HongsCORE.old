@@ -54,7 +54,7 @@ public class UserAction {
 
         // With all roles
         if (Synt.declare(helper.getParameter("-with-roles"), false)) {
-            Dict.put(data, MenuSet.getInstance("manage").getRoleTranslated(), "enum", "roles..role");
+            Dict.put(data, MenuSet.getInstance("manage").getRoleTranslates(), "enum", "roles..role");
         }
 
         helper.reply(data);

@@ -138,7 +138,7 @@ public class DBConfig
   private static Set<String> assocAttrs = new HashSet(
   Arrays.asList( new String[] {
     "type","join","name","tableName","primaryKey","foreignKey",
-    "select","where","groupBy","having","orderBy"
+    "select","where","groupBy","havin","orderBy"
   }));
 
   public DBConfig(Document doc)

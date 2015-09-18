@@ -45,6 +45,11 @@ public class AuthFilter
   private MenuSet siteMap;
 
   /**
+   * 区域名称
+   */
+  private String pnm = null;
+
+  /**
    * 首页路径
    */
   private String indexPage = null;
@@ -74,13 +79,28 @@ public class AuthFilter
      * 获取权限配置名
      */
     s = config.getInitParameter("config");
-    try
+    if (s != null)
     {
-      this.siteMap = s == null ? MenuSet.getInstance() : MenuSet.getInstance(s);
+      try
+      {
+        this.pnm = s ;
+        this.siteMap = MenuSet.getInstance(s);
+      }
+      catch (HongsException ex)
+      {
+        throw new ServletException(ex);
+      }
     }
-    catch (HongsException ex)
+    else
     {
-      throw new ServletException(ex);
+      try
+      {
+        this.siteMap = MenuSet.getInstance( );
+      }
+      catch (HongsException ex)
+      {
+        throw new ServletException(ex);
+      }
     }
 
     /**
@@ -190,6 +210,10 @@ public class AuthFilter
             return;
         }
     } else {
+        if (siteMap.actions.contains(pnm) && !authset.contains(pnm)) {
+            doFailed(core, hlpr, (byte)2);
+            return;
+        }
         if (siteMap.actions.contains(act) && !authset.contains(act)) {
             doFailed(core, hlpr, (byte)3);
             return;
@@ -208,10 +232,15 @@ public class AuthFilter
     String uri;
     String msg;
 
+    if (2 == type) {
+        uri = Core.BASE_HREF;
+        msg = lang.translate("core.error.wr.place");
+    } else
     if (3 == type) {
         uri = this.indexPage;
         msg = lang.translate("core.error.no.power");
-    } else {
+    } else
+    {
         uri = this.loginPage;
         msg = lang.translate("core.error.no.login");
 

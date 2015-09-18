@@ -53,10 +53,10 @@ CREATE INDEX `IK_a_member_dept_role_role` ON `a_member_dept_role` (`role`);
 DROP TABLE IF EXISTS `a_member_user`;
 CREATE TABLE `a_member_user` (
   `id` char(20) NOT NULL,
+  `password` varchar(200) DEFAULT NULL,
+  `username` varchar(200) DEFAULT NULL,
   `name` varchar(200) NOT NULL,
   `note` text,
-  `username` varchar(200) DEFAULT NULL,
-  `password` varchar(200) DEFAULT NULL,
   `ctime` int(11) DEFAULT NULL,
   `mtime` int(11) DEFAULT NULL,
   `rtime` int(11) DEFAULT NULL,
@@ -70,13 +70,13 @@ CREATE INDEX `IK_a_member_user_state` ON `a_member_user` (`state`);
 CREATE INDEX `IK_a_member_user_username` ON `a_member_user` (`username`);
 CREATE UNIQUE INDEX `UK_a_member_user_username` ON `a_member_user` (`username`);
 
-INSERT INTO `a_member_user` VALUES ('1','老大 (管理员)',NULL,'abc@def.cn','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230','0',1);
-INSERT INTO `a_member_user` VALUES ('01I2ODRZHR00KLJOEM','张三 (总经理)',NULL,'a@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230','0',1);
-INSERT INTO `a_member_user` VALUES ('01I2ODSOGC00KGZCQK','李四 (技术总监)',NULL,'b@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230','0',1);
-INSERT INTO `a_member_user` VALUES ('HXNZ0OLR00297H9H01','王五 (市场总监)',NULL,'c@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230','0',1);
-INSERT INTO `a_member_user` VALUES ('HXZGVRBH000XHB0601','赵六 (研发主管)',NULL,'d@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230','0',1);
-INSERT INTO `a_member_user` VALUES ('HXZGWPZV002I1J1601','钱七 (运维主管)',NULL,'e@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230','0',1);
-INSERT INTO `a_member_user` VALUES ('HY9XQN2L000WGH9Q01','孙八 (产品总监)',NULL,'f@abc.com','9BA587D4E465F45669F19AF20CA033D9','1424075622230','1424075622230','0',1);
+INSERT INTO `a_member_user` VALUES ('1','9BA587D4E465F45669F19AF20CA033D9','abc@def.cn','老大 (管理员)',NULL,'1424075622230','1424075622230','0',1);
+INSERT INTO `a_member_user` VALUES ('01I2ODRZHR00KLJOEM','9BA587D4E465F45669F19AF20CA033D9','a@abc.com','张三 (总经理)',NULL,'1424075622230','1424075622230','0',1);
+INSERT INTO `a_member_user` VALUES ('01I2ODSOGC00KGZCQK','9BA587D4E465F45669F19AF20CA033D9','b@abc.com','李四 (技术总监)',NULL,'1424075622230','1424075622230','0',1);
+INSERT INTO `a_member_user` VALUES ('HXNZ0OLR00297H9H01','9BA587D4E465F45669F19AF20CA033D9','c@abc.com','王五 (市场总监)',NULL,'1424075622230','1424075622230','0',1);
+INSERT INTO `a_member_user` VALUES ('HXZGVRBH000XHB0601','9BA587D4E465F45669F19AF20CA033D9','d@abc.com','赵六 (研发主管)',NULL,'1424075622230','1424075622230','0',1);
+INSERT INTO `a_member_user` VALUES ('HXZGWPZV002I1J1601','9BA587D4E465F45669F19AF20CA033D9','e@abc.com','钱七 (运维主管)',NULL,'1424075622230','1424075622230','0',1);
+INSERT INTO `a_member_user` VALUES ('HY9XQN2L000WGH9Q01','9BA587D4E465F45669F19AF20CA033D9','f@abc.com','孙八 (产品总监)',NULL,'1424075622230','1424075622230','0',1);
 
 --
 -- 用户所属部门
@@ -117,6 +117,7 @@ CREATE TABLE `a_member_user_role` (
 CREATE INDEX `IK_a_member_user_role_user` ON `a_member_user_role` (`user_id`);
 CREATE INDEX `IK_a_member_user_role_role` ON `a_member_user_role` (`role`);
 
+INSERT INTO `a_member_user_role` VALUES ('1','manage');
 INSERT INTO `a_member_user_role` VALUES ('1','manage/member/user/retrieve');
 INSERT INTO `a_member_user_role` VALUES ('1','manage/member/user/create');
 INSERT INTO `a_member_user_role` VALUES ('1','manage/member/user/update');
@@ -135,18 +136,37 @@ INSERT INTO `a_member_user_role` VALUES ('1','manage/module/unit/update');
 INSERT INTO `a_member_user_role` VALUES ('1','manage/module/unit/delete');
 
 --
+-- 用户登录关联
+--
+
+DROP TABLE IF EXISTS `a_member_user_open`;
+CREATE TABLE `a_member_user_open` (
+  `user_id` char(20) NOT NULL,
+  `appid` varchar(100) NOT NULL,
+  `opnid` varchar(100) NOT NULL,
+  `ctime` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`,`appid`),
+  FOREIGN KEY (`user_id`) REFERENCES `a_member_user` (`id`) ON DELETE CASCADE
+);
+
+CREATE INDEX `IK_a_member_user_open_user` ON `a_member_user_open` (`user_id`);
+CREATE INDEX `IK_a_member_user_open_appid` ON `a_member_user_open` (`appid`);
+CREATE INDEX `IK_a_member_user_open_opnid` ON `a_member_user_open` (`opnid`);
+
+--
 -- 用户登录凭证
 --
 
 DROP TABLE IF EXISTS `a_member_user_sign`;
 CREATE TABLE `a_member_user_sign` (
   `user_id` char(20) NOT NULL,
-  `auth` varchar(20) NOT NULL,
-  `sess` varchar(20) NOT NULL,
+  `appid` varchar(100) NOT NULL,
+  `sesid` varchar(100) NOT NULL,
   `ctime` int(11) DEFAULT NULL,
-  PRIMARY KEY (`user_id`,`auth`),
+  PRIMARY KEY (`user_id`,`appid`),
   FOREIGN KEY (`user_id`) REFERENCES `a_member_user` (`id`) ON DELETE CASCADE
 );
 
 CREATE INDEX `IK_a_member_user_sign_user` ON `a_member_user_sign` (`user_id`);
-CREATE INDEX `IK_a_member_user_sign_auth` ON `a_member_user_sign` (`auth`);
+CREATE INDEX `IK_a_member_user_sign_appid` ON `a_member_user_sign` (`appid`);
+CREATE INDEX `IK_a_member_user_sign_sesid` ON `a_member_user_sign` (`sesid`);

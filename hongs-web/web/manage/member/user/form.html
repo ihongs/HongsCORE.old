@@ -43,15 +43,17 @@
 </div>
 <script type="text/javascript">
     (function($) {
+        var context = $("#member-user-form");
+        
         // 修改时口令变为选填
-        $("#member_user_form").on("loadBack", function() {
+        context.on("loadBack", function() {
             if ($(this).find("[name=id]").val()) {
                 $(this).find(":password").removeAttr("required");
             }
         });
         
         // 选择与之关联的权限
-        $("#member_user_form").on("change", "[name='roles..role']", function() {
+        context.on("change", "[name='roles..role']", function() {
             var area = $(this).closest(".form-group");
             if ($(this).prop("checked")) {
                 var rels = $(this).data("rels");

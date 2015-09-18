@@ -49,10 +49,10 @@ public class MenuAction {
     throws HongsException {
         String m = helper.getParameter("m");
         String n = helper.getParameter("n");
-        if (null == m ||  "".equals(m)) {
+        if (null == m || "".equals(m)) {
             m = "default";
         }
-        if (null == n) {
+        if (null == n || "".equals(n)) {
             n = "common/menu/cell.act?m=" + m;
         } else {
             n = "common/menu/cell.act?m=" + m + "&n=" + n;
@@ -63,9 +63,9 @@ public class MenuAction {
         if (menu != null &&  menu.containsKey("menus")) {
             Map<String, Map> menus = (Map) menu.get("menus");
             for (Map.Entry et : menus.entrySet()) {
-                String u = (String ) et.getKey();
-                if (site.chkAuth(u)) {
-                    helper.redirect(Core.BASE_HREF +"/"+ u );
+                String k = (String ) et.getKey();
+                if (site.chkAuth(k)) {
+                    helper.redirect(Core.BASE_HREF +"/"+ k );
                     return;
                 }
             }

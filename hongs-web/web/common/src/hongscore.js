@@ -1055,7 +1055,7 @@ $.fn.hsLoad = function(url, data, complete) {
     if (!$.isFunction(complete)) {
         complete = function() {};
     }
-    
+
     /**
      * 取锚点作为局部参数
      * 并将数据转换为序列
@@ -1166,7 +1166,18 @@ $.fn.hsClose = function() {
     // 恢复标签
     if (tab) {
         var idx = box.data("pre") ? box.data("pre").index() : 0;
-        tab.parent().children().eq(idx).find( "a" ).click() ;
+//      tab.parent().children().eq(idx).find( "a" ).click() ;
+        var tbs = tab.parent().children();
+        var pns = prt.parent().children();
+        if (tbs) {
+            tbs.removeClass("active")
+                      .eq(idx)
+                  .addClass("active")
+                      .show( );
+        }
+        if (pns) {
+            pns.hide().eq(idx).show();
+        }
         if (tab.has(".close").size()) {
             tab.remove();
             prt.remove();

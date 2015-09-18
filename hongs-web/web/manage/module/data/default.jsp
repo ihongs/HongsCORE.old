@@ -1,3 +1,4 @@
+<%@page import="java.util.Map"%>
 <%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.MenuSet"%>
@@ -14,11 +15,11 @@
         throw new ServletException("URL Error");
     }
 
-    CoreLocale lang = CoreLocale.getInstance().clone();
-               lang.loadIgnrFNF(_module);
-    MenuSet    site = MenuSet.getInstance(_module);
-
-    String title = lang.translate(site.getMenu("common/menu/cell.act?m="+_module).get("disp").toString());
+    CoreLocale  lang = CoreLocale.getInstance().clone();
+                              lang.loadIgnrFNF(_module);
+    MenuSet     site =     MenuSet.getInstance(_module);
+    Map         cell =            site.getMenu(_module);
+    String     title = lang.translate(cell.get("disp").toString());
 %>
 <!--
 Hong's Auto Info Manage
@@ -52,15 +53,15 @@ Hong's Auto Info Manage
         <div id="notebox"></div>
         <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="row" data-load="<%=request.getContextPath()%>/common/pages/head.jsp?m=<%=_module%>"></div>
+                <div class="row" data-load="<%=request.getContextPath()%>/manage/head.jsp?m=<%=_module%>"></div>
             </div>
         </nav>
         <div id="bodybox">
-            <div class="container tabw" id="main-context"></div>
+            <div class="container tabw" id="main-context" data-load="<%=request.getContextPath()%>/<%=_module%>"></div>
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
-                <div class="row" data-load="<%=request.getContextPath()%>/common/pages/foot.jsp?m=<%=_module%>"></div>
+                <div class="row" data-load="<%=request.getContextPath()%>/manage/foot.jsp?m=<%=_module%>"></div>
             </div>
         </nav>
     </body>

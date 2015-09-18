@@ -53,7 +53,7 @@
       <xs:attribute ref="select"/>
       <xs:attribute ref="where"/>
       <xs:attribute ref="groupBy"/>
-      <xs:attribute ref="having"/>
+      <xs:attribute ref="havin"/>
       <xs:attribute ref="orderBy"/>
       <xs:all>
         <!-- 递归关联 -->

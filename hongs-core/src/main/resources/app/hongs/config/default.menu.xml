@@ -1,6 +1,6 @@
 <root>
     <!--
-    <menu disp="" href="" page="" data="">
+    <menu disp="" href="" hrel="" icon="">
         <role disp="" name="">
             <action></action>
             <depend></depend>

@@ -254,7 +254,6 @@ HsTree.prototype = {
         }
 
         this.treeBox.trigger("loadBack", [rst, pid, this]);
-
     },
     fillList : function(list, pid) {
         var lst, nod, i, id;
@@ -426,7 +425,7 @@ HsTree.prototype = {
     select   : function(id) {
         var nod = this.getNode(id);
             id  = this.getId (nod);
-        nod.trigger("select", [ id, this ] );
+        nod.children("table").trigger("select", [ id, this ] );
 
         this.treeBox.find(".tree-curr")
             .removeClass ( "tree-curr");
@@ -435,15 +434,16 @@ HsTree.prototype = {
     toggle   : function(id) {
         var nod = this.getNode(id);
             id  = this.getId (nod);
-        nod.trigger("toggle", [ id, this ] );
+        nod.children("table").trigger("toggle", [ id, this ] );
 
         var lst = nod.children(".tree-list");
             lst.toggle();
         if (lst.size( )) {
-            nod.removeClass("tree-open tree-fold");
-            lst.is(":visible") ?
-               nod.addClass("tree-open") :
-               nod.addClass("tree-fold") ;
+            nod.removeClass("tree-open")
+               .removeClass("tree-fold");
+            lst.is(":visible")?
+               nod.addClass("tree-open"):
+               nod.addClass("tree-fold");
         } else {
             this.load(null, id);
         }
@@ -482,12 +482,12 @@ jQuery.fn.hsTree = function(opts) {
 };
 
 (function($) {
+    // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
     $(document)
-    .on("select loadBack", ".HsTree .tree-node",
-    function() {
-        // 当选中非根节点时, 开启工具按钮, 否则禁用相关按钮
-        var box = $(this).closest(".HsTree");
-        var obj =        box.data( "HsTree");
-        box.find(".for-select").prop("disabled", obj.getSid()==obj.getRid());
+    .on( "select" , ".HsTree .tree-node>table",
+    function(ev, id, obj) {
+        var box = obj.context;
+        var rid = obj.getRid( );
+        box.find(".for-select").prop("disabled", rid == id);
     });
 })(jQuery);

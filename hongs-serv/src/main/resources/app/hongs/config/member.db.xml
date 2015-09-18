@@ -39,6 +39,8 @@ xsi:schemaLocation="http://hongs-core db.xsd">
         </table>
         <table name="user_sign"
                tableName="a_member_user_sign"/>
+        <table name="user_open"
+               tableName="a_member_user_open"/>
         <table name="user_dept"
                tableName="a_member_user_dept"/>
         <table name="user_role"

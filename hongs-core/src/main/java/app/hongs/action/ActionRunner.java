@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 区间: 0x1100~0x110f
  * 0x1100 错误请求
  * 0x1101 尚未登陆
+ * 0x1102 区域错误
  * 0x1103 无权访问
  * 0x1104 无此动作
  * 0x1105 不支持此方法

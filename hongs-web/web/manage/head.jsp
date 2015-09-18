@@ -13,27 +13,23 @@
         for(Map menu : list) {
             String disp = (String) menu.get("disp");
             String href = (String) menu.get("href");
-            String page = (String) menu.get("page");
-            String data = (String) menu.get("data");
+            String hrel = (String) menu.get("hrel");
+//          String icon = (String) menu.get("icon");
 
-            if (! "".equals(data)) {
-                page += "?"+data;
-            }
-
-            if (href.startsWith("!")) {
+            if (href.startsWith( "!" )) {
                 continue;
             }
-            if (href.startsWith(path+"/#")) {
+            if (href.startsWith( path + "/#" )) {
                 href = href.substring(href.indexOf('#'));
-                page = Core.BASE_HREF + "/" + page;
+                hrel = Core.BASE_HREF + "/" + hrel;
             } else {
                 href = Core.BASE_HREF + "/" + href;
-                page = "";
+                hrel = "";
             }
 
             menus.append("<li>" )
                  .append("<a data-href=\"")
-                 .append(page)
+                 .append(hrel)
                  .append("\" href=\"")
                  .append(href)
                  .append("\">"  )
@@ -46,23 +42,26 @@
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String wrap= "manage";
-    String name= helper.getParameter("m");
-    if (name == null || "".equals(name) ) {
-        name = "default";
+    String w = helper.getParameter("w");
+    if (w == null || "".equals(w)) {
+        w = "manage";
     }
-    String path= helper.getParameter("n");
-    if (path == null || "".equals(path) ) {
-        path =  name ;
+    String m = helper.getParameter("m");
+    if (m == null || "".equals(m)) {
+        m =  w;
+    }
+    String u = helper.getParameter("u");
+    if (u == null || "".equals(u)) {
+        u =  m;
     }
 
-    MenuSet main = MenuSet.getInstance(wrap);
-    MenuSet curr = MenuSet.getInstance(name);
+    MenuSet main = MenuSet.getInstance(w);
+    MenuSet curr = MenuSet.getInstance(m);
     List<Map> mainMenu = main.getMenuTranslated(1, 1);
     List<Map> currMenu = curr.getMenuTranslated(1, 1);
 
-    String  user = (String ) helper.getSessibute("name");
-    Integer msgc = (Integer) helper.getSessibute("msgc");
+    String  user = (String ) helper.getSessibute("uname");
+    Integer msgc = (Integer) helper.getSessibute( "msgc");
     String  msgs = msgc == null ? null : (msgc > 9 ? "9+" : Integer.toString(msgc));
 %>
 
@@ -89,7 +88,7 @@
 
 <div class="collapse navbar-collapse" id="main-collapse">
     <ul class="nav navbar-nav navbar-left " id="curr-menubar">
-        <%=makeMenu(currMenu, path)%>
+        <%=makeMenu(currMenu, u)%>
     </ul>
     <ul class="nav navbar-nav navbar-right" id="main-menubar">
         <li class="dropdown">
@@ -99,7 +98,7 @@
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
-                <%=makeMenu(mainMenu, path)%>
+                <%=makeMenu(mainMenu, u)%>
                 <%if (user != null) {%>
                 <li class="divider"></li>
                 <li><a href="javascript:;" id="sign-out"><%=CoreLocale.getInstance().translate("fore.logout")%></a></li>
