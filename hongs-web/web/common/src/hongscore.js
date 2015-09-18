@@ -32,15 +32,8 @@ function H$() {
         }
         if (typeof(arguments[1]) !== "string") {
             if (!jQuery.isArray(arguments[1])) {
-                var c =  jQuery(arguments[1]).closest(".loadbox");
-                var d = hsSerialArr(c.data("data"));
-                var f = hsSerialArr(c.data("hash"));
-                var e = hsSerialArr(c.data("url" ));
-                for (var i = 0; i < d.length; i ++)
-                    e.push(d[i]);
-                for (var i = 0; i < f.length; i ++)
-                    e.push(f[i]);
-                arguments[1] = e;
+                var lb = jQuery(arguments[1]).closest(".loadbox");
+                arguments[1] = hsSerialArr(lb);
             }
             if (b === '@')
                 return hsGetSerias(arguments[1], arguments[0]);
@@ -155,43 +148,57 @@ function hsResponObj(rst, qut) {
 
 /**
  * 序列化为数组, 供发往服务器
- * @param {Object|Array|String|Elements} obj
+ * @param {String|Object|Array|Elements} obj
  * @param {Array}
  */
 function hsSerialArr(obj) {
     var arr = [];
-    if (typeof(obj) === "string") {
-        var a1, a2;
-        a1 = obj.split('#' , 2);
-        if (a1.length > 1) obj = a1[0];
-        a1 = obj.split('?' , 2);
-        if (a1.length > 1) obj = a1[1];
-        a1 = obj.split('&');
-        for (var i = 0; i < a1.length; i ++) {
-            a2 = a1[i].split( '=' , 2 );
-            if (a2.length < 2) continue;
-            arr.push({name : decodeURIComponent(a2[0]),
-                      value: decodeURIComponent(a2[1])});
-        }
+    var typ = !jQuery.isPlainObject() ? jQuery.type(obj) : "plains";
+    switch (typ) {
+        case "string":
+            var ar1, ar2, key, val, i = 0;
+            ar1 = obj.split('#' , 2);
+            if (ar1.length > 1) obj = ar1[0];
+            ar1 = obj.split('?' , 2);
+            if (ar1.length > 1) obj = ar1[1];
+            ar1 = obj.split('&');
+            for ( ; i < ar1.length ; i ++ ) {
+                ar2 = ar1[i].split('=' , 2);
+                if (ar2.length > 1) {
+                    key = decodeURIComponent (ar2[0]);
+                    val = decodeURIComponent (ar2[1]);
+                    arr.push({name: key, value: val});
+                }
+            }
+            break;
+        case "plains":
+            hsEach (obj, function(val, key) {
+                if (key.length > 0) {
+                    key = key.join('.'/**/);
+                    arr.push({name: key, value: val});
+                }
+            });
+            break;
+        case "object":
+            obj = jQuery( obj );
+            if (obj.data("url")) {
+                arr = [ ];
+                jQuery.merge(arr, hsSerialArr(obj.data("url" )));
+                jQuery.merge(arr, hsSerialArr(obj.data("hash")));
+                jQuery.merge(arr, hsSerialArr(obj.data("data")));
+            } else {
+                arr = jQuery(obj).serializeArray();
+            }
+            break;
+        case "array" :
+            arr = obj;
+            break;
     }
-    else if (jQuery.isPlainObject(obj)) {
-        hsEach(obj, function(val,key) {
-            if (key.length < 1 || val.length < 1) return;
-            arr.push({name : key.join("."),
-                      value: val});
-        });
-    }
-    else if (!jQuery.isArray(obj) && typeof(obj) === "object") {
-        arr = jQuery(obj).serializeArray();
-    }
-    else if ( obj != null ) {
-        arr = obj;
-    }
-    return arr;
+    return  arr;
 }
 /**
  * 序列化为对象, 供进一步操作(可以使用hsGetValue获取数据)
- * @param {Object|Array|String|Elements} obj
+ * @param {String|Object|Array|Elements} obj
  * @return {Object}
  */
 function hsSerialObj(obj) {
@@ -609,16 +616,8 @@ function hsFixUri   (uri) {
  */
 function hsFixPms   (uri, pms) {
     if (pms instanceof Element || pms instanceof jQuery) {
-        var c = jQuery(pms).closest(".loadbox");
-        var d = hsSerialArr(c.data("data"));
-        var f = hsSerialArr(c.data("hash"));
-          pms = hsSerialArr(c.data("url" ));
-        for (var i = 0; i < d.length; i ++) {
-          pms.push(d[i]);
-        }
-        for (var i = 0; i < f.length; i ++) {
-          pms.push(f[i]);
-        }
+        pms = jQuery(pms).closest(".loadbox");
+        pms = hsSerialArr(pms);
     }
     pms = hsSerialObj (pms);
     return uri.replace(/\$(\w+|\{.+?\})/gm , function(w) {
@@ -1324,25 +1323,6 @@ $.fn.hsInit = function(cnf) {
         h.text ( cnf.title );
     }
 
-    if (box.parent().parent().is(".panes")) {
-        var a = box.parent();
-        var b = box.parent().parent();
-        a = b.data("tabs").children().eq(a.index());
-        for(var k in cnf) {
-            var v =  cnf[k];
-            switch (k) {
-                case "title":
-                    var x = a.find("a");
-                    var y = x.find("span").not(".close");
-                    if (y.size()) {
-                        y.text(v);
-                    } else {
-                        x.text(v);
-                    }
-                    break;
-            }
-        }
-    } else
     if (box.is(".modal-body")) {
         var a = box.closest(".modal");
         for(var k in cnf) {
@@ -1357,6 +1337,24 @@ $.fn.hsInit = function(cnf) {
             }
         }
         a.modal();
+    } else
+    if (box.closest(".panes").length) {
+        var a = box.closest(".panes>*");
+        a = box.closest(".panes").data("tabs").children().eq(a.index());
+        for(var k in cnf) {
+            var v =  cnf[k];
+            switch (k) {
+                case "title":
+                    var x = a.find("a");
+                    var y = x.find("span").not(".close");
+                    if (y.size()) {
+                        y.text(v);
+                    } else {
+                        x.text(v);
+                    }
+                    break;
+            }
+        }
     }
 
     return box;

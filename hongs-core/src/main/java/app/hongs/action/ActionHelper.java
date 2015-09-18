@@ -24,6 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.http.Cookie;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +48,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
  *
  * @author Hongs
  */
-public class ActionHelper
+public class ActionHelper implements Cloneable
 {
 
   /**
@@ -67,6 +70,11 @@ public class ActionHelper
    * 会话数据
    */
   private Map<String, Object> sessionData = null;
+
+  /**
+   * 跟踪数据
+   */
+  private Map<String, String> cookiesData = null;
 
   /**
    * HttpServletResponse
@@ -94,14 +102,16 @@ public class ActionHelper
    * @param req
    * @param att
    * @param ses
+   * @param cok
    * @param out
    */
-  public ActionHelper(Map req, Map att, Map ses, PrintWriter out)
+  public ActionHelper(Map req, Map att, Map ses, Map cok, PrintWriter out)
   {
     this.request      = null;
     this.requestData  = req != null ? req : new HashMap();
     this.contextData  = att != null ? att : new HashMap();
     this.sessionData  = ses != null ? ses : new HashMap();
+    this.cookiesData  = cok != null ? cok : new HashMap();
     this.response     = null;
     this.responseWrtr = out != null ? out : new PrintWriter(System.out);
   }
@@ -508,6 +518,104 @@ public class ActionHelper
         if (null != sess) sess.setAttribute(name, value);
       }
     }
+  }
+
+  /**
+   * 获取跟踪参数
+   * @param name
+   * @return
+   */
+  public String getCookibute(String name) {
+      if (null != cookiesData) {
+          return  cookiesData.get(name);
+      }
+
+      Cookie[] cookies = this.getRequest().getCookies();
+      if (cookies == null) {
+          for (Cookie cookie : cookies) {
+              if (cookie.getName().equals(name)) {
+                  return cookie.getValue();
+              }
+          }
+      }
+      return  null;
+  }
+
+  /**
+   * 设置跟踪参数
+   * @param name
+   * @param value
+   */
+  public void setCookibute(String name, String value) {
+      setCookibute(name, value, null, null, 0, false, false);
+  }
+
+  /**
+   * 设置跟踪参数
+   * @param name
+   * @param value
+   * @param path 路径
+   * @param host 域名
+   * @param life 生命周期(秒)
+   * @param httpOnly 文档内禁读取
+   * @param httpDeny 使用安全连接
+   */
+  public void setCookibute(String name, String value,
+    String path, String host, int life, boolean httpOnly, boolean httpDeny) {
+      if (cookiesData != null) {
+          cookiesData.put(name, value);
+          return;
+      }
+
+      Cookie cookie = new Cookie(name, value);
+      if (path != null) {
+        cookie.setPath(path);
+      }
+      if (host != null) {
+          cookie.setDomain(host);
+      }
+      if (life !=  0  ) {
+          cookie.setMaxAge(life);
+      }
+      if (httpDeny) {
+          cookie.setSecure(true);
+      }
+      if (httpOnly) {
+          cookie.setHttpOnly(true);
+      }
+      getResponse().addCookie(cookie);
+  }
+
+  public void setRequestData(Map<String, Object> data) {
+    this.requestData  = data;
+  }
+  public void setContextData(Map<String, Object> data) {
+    this.contextData  = data;
+  }
+  public void setSessionData(Map<String, Object> data) {
+    this.sessionData  = data;
+  }
+  public void setCookiesData(Map<String, String> data) {
+    this.cookiesData  = data;
+  }
+
+  /**
+   * 克隆方法
+   * 用于使用 ActionRunner 时快速构建请求对象,
+   * 可用以上 setXxxxxData 在克隆之后设置参数.
+   * @return
+   */
+  @Override
+  public ActionHelper clone() {
+    ActionHelper helper;
+    try {
+      helper = (ActionHelper) super.clone();
+    } catch (CloneNotSupportedException ex) {
+      throw new HongsError(HongsError.COMMON, ex);
+    }
+    helper.responseWrtr = this.getResponseWrtr( );
+    helper.responseData = null;
+    return helper;
   }
 
   //** 返回数据 **/

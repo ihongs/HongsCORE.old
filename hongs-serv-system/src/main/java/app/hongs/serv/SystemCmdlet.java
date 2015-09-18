@@ -96,7 +96,7 @@ public class SystemCmdlet {
                         CmdletHelper.progres(st, al, ++ok, er);
                     } catch (HongsException ex) {
                         CmdletHelper.progres(st, al, ok, ++er);
-                        CmdletHelper.progred();
+                        CmdletHelper.progred( );
                         throw ex;
                         /*
                         e.append("\r\n").append(ex.getMessage());

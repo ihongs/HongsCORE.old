@@ -27,11 +27,11 @@
 
     CoreLocale lang = CoreLocale.getInstance().clone();
                lang.loadIgnrFNF(_module);
-    MenuSet    site = MenuSet.getInstance(_module);
-    FormSet    form = FormSet.getInstance(_module);
+    MenuSet    site = MenuSet.getInstance(_module+"/"+ _entity );
+    FormSet    form = FormSet.getInstance(_module+"/"+ _entity );
     Map<String, Object> flds = form.getFormTranslated( _entity );
 
-    Map    pagz  = site.getMenu(_module+"/"+_entity+"/list.jsp");
+    Map    pagz  = site.getMenu(_module+"/"+_entity+"/");
     String title = pagz == null ? "" : (String) pagz.get("disp");
            title = lang.translate(title);
 %>

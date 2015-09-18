@@ -205,9 +205,7 @@ function HsTree(opts, context) {
 
     if (loadUrl) {
         if (loadData === undefined) {
-            loadData  =  [];
-            jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
-            jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
+            loadData = hsSerialArr(loadBox);
         }
 
         // 因 load 方法没有 data 字段, 顾将参数拼接到 loadUrl 上

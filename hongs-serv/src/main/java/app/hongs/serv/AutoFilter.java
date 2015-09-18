@@ -1,6 +1,7 @@
 package app.hongs.serv;
 
 import app.hongs.Core;
+import app.hongs.HongsError;
 import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
@@ -8,8 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Comparator;
-import java.util.Set;
+import java.util.HashSet;
 import java.util.TreeSet;
+import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -20,47 +22,111 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 自动处理过滤器
- * 
+ *
  * <h3>初始化参数(init-param):</h3>
  * <pre>
- * action       默认动作地址
- * render       默认页面地址
+ * action-path  默认动作地址
+ * layout-path  默认页面地址
+ * ignore-urls  忽略的URL, 可用","分割多个, 可用"*"为前后缀
  * </pre>
+ * <p>
+ * 注意:
+ * actoin-path, layout-path 与 filter-mapping 的 url-pattern 不能有从属关系,
+ * 否则会造成死循环
+ * </p>
  *
  * @author Hongs
  */
 public class AutoFilter implements Filter {
 
     private String action;
-    private String render;
+    private String layout;
+    private String [][] ignore = null;
     private Set<String> actset = null;
+    private Set<String> layset = null;
 
     @Override
     public void init(FilterConfig cnf) {
-        action = cnf.getInitParameter("action");
-        render = cnf.getInitParameter("render");
+        action = cnf.getInitParameter("action-path");
+        layout = cnf.getInitParameter("layout-path");
         if (action == null) {
-            action = "/common";
+            action ="/common/pages";
         }
-        if (render == null) {
-            render =   action ;
+        if (layout == null) {
+            layout =  action;
         }
+
+        /**
+         * 获取不包含的URL
+         */
+        String s = cnf.getInitParameter("ignore-urls");
+        if (s != null)
+        {
+          Set<String> cu = new HashSet();
+          Set<String> su = new HashSet();
+          Set<String> eu = new HashSet();
+          for (String  u : s.split(";"))
+          {
+            u = u.trim();
+            if (u.endsWith("*")) {
+                su.add(u.substring( 0, u.length() - 2));
+            } else if(u.startsWith("*")) {
+                eu.add(u.substring( 1 ));
+            } else {
+                cu.add(u);
+            }
+          }
+          this.ignore = new String[ ][] {
+            cu.toArray( new String[0] ),
+            su.toArray( new String[0] ),
+            eu.toArray( new String[0] )
+          };
+        }
+    }
+
+    @Override
+    public void destroy() {
+        actset = null;
+        layset = null;
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
             throws IOException, ServletException {
-        String act, url, ext; int pos;
+        String url = ActionDriver.getCurrPath((HttpServletRequest) req);
 
-        // 当前路径
-        url = ActionDriver.getCurrPath((HttpServletRequest) req);
+        // 依次校验是否是需要排除的URL
+        if (ignore != null) {
+            for (String uri : ignore[0]) {
+                if (url.equals(uri)) {
+                    chain.doFilter(req , rsp);
+                    return;
+                }
+            }
+            for (String uri : ignore[1]) {
+                if (url.startsWith(uri)) {
+                    chain.doFilter(req , rsp);
+                    return;
+                }
+            }
+            for (String uri : ignore[2]) {
+                if (url.endsWith(uri)) {
+                    chain.doFilter(req , rsp);
+                    return;
+                }
+            }
+        }
 
         if (url.endsWith(".api")) {
             // 接口无需处理
         } else
         if (url.endsWith(".act")) {
-            pos  =  url.lastIndexOf( '.' );
+            String act;
+            String ext;
+            int    pos;
+
             try {
+                pos = url.lastIndexOf('.');
                 ext = url.substring(  pos);
                 act = url.substring(1,pos);
             } catch (IndexOutOfBoundsException ex) {
@@ -69,39 +135,48 @@ public class AutoFilter implements Filter {
                 return;
             }
 
-            if(!ActionRunner.getActions().containsKey(act)) {
-                for(String uri : getacts()) {
-                    if(!act.endsWith(uri)) {
-                        continue;
+            if (!ActionRunner.getActions().containsKey(act)) {
+                for(String axt : getacts()) {
+                    if (act.endsWith(axt )) {
+                        doAction(req, rsp, url, axt +  ext);
+                        return;
                     }
-                    // 虚拟路径
-                    req.setAttribute(ActionDriver.PATH, url);
-                    // 转发请求
-                    // 由于 forward 内部无法设置 Header, 而 api 又需要在外层输出, 故采用 include 方式
-                    if (ActionDriver.getRealPath((HttpServletRequest) req).endsWith(".api")) {
-                        req.getRequestDispatcher(action+uri+ext).include(req, rsp);
-                    } else {
-                        req.getRequestDispatcher(action+uri+ext).forward(req, rsp);
-                    }
-                    return;
                 }
             }
         } else {
-            File file = new File(Core.BASE_PATH + url);
-            if (!file.exists()) {
-                String uri;
+            // 默认引导页总叫 default.html
+            if ( url.endsWith("/") ) {
+                 url = url + "default.html";
+            }
 
-                uri = url.substring(url.lastIndexOf('/'));
-                if (doForwar(req, rsp, url, uri)) {
-                    return;
-                }
+            File urf = new File(Core.BASE_PATH+ url);
+            if (!urf.exists( )) {
+                boolean jsp = url.endsWith (".jsp" );
+                boolean htm = url.endsWith (".htm" )
+                           || url.endsWith (".html");
+                int     pos = url.lastIndexOf( "." );
+                String  uxl = pos ==  -1 ? url: url.substring(0, pos);
 
-                // .html 转发给 .jsp
-                if (uri.endsWith(".html")) {
-                    uri = uri.substring(0, uri.length() - 5) + ".jsp";
-                    url = url.substring(0, url.length() - 5) + ".jsp";
-                    if (doForwar(req, rsp, url, uri)) {
+                for(String uri : getlays()) {
+                    if (url.endsWith(uri )) {
+                        doLayout(req, rsp, url, uri);
                         return;
+                    }
+                    if (jsp) {
+                        continue;
+                    }
+                    if (htm) {
+                        // xxx.htm => xxx.jsp
+                        if ((uxl + ".jsp").endsWith(uri)) {
+                            doLayout(req, rsp, url, uri);
+                            return;
+                        }
+                    } else {
+                        // xxx.xxx => xxx.xxx.jsp
+                        if ((url + ".jsp").endsWith(uri)) {
+                            doLayout(req, rsp, url, uri);
+                            return;
+                        }
                     }
                 }
             }
@@ -110,18 +185,20 @@ public class AutoFilter implements Filter {
         chain.doFilter(req, rsp);
     }
 
-    private boolean doForwar(ServletRequest req, ServletResponse rsp, String url, String uri)
+    private void doAction(ServletRequest req, ServletResponse rsp, String url, String uri)
             throws ServletException, IOException {
-        File file = new File(Core.BASE_PATH +"/"+ render+uri);
-        if (file.exists()) {
-            // 虚拟路径
-            req.setAttribute(ActionDriver.PATH, url);
-            // 转发请求
-            req.getRequestDispatcher ( render + uri).forward(req, rsp);
-            return true ;
-        } else {
-            return false;
-        }
+        // 虚拟路径
+        req.setAttribute(ActionDriver.PATH, url);
+        // 转发请求
+        req.getRequestDispatcher ( action + uri).include(req, rsp);
+    }
+
+    private void doLayout(ServletRequest req, ServletResponse rsp, String url, String uri)
+            throws ServletException, IOException {
+        // 虚拟路径
+        req.setAttribute(ActionDriver.PATH, url);
+        // 转发请求
+        req.getRequestDispatcher ( layout + uri).forward(req, rsp);
     }
 
     private Set<String> getacts() {
@@ -129,19 +206,26 @@ public class AutoFilter implements Filter {
             return  actset;
         }
 
+        // 总是通过 retrieve 获取动作 class
+        // 即使无需 retrieve 也要存在 retrieve 方法才行
+        Class cls;
+        try {
+            cls = ActionRunner.getActions()
+                              .get(action.substring(1) + "/retrieve")
+                              .getMclass( );
+        } catch ( NullPointerException ex ) {
+            throw new HongsError(HongsError.COMMON,
+                 "Atuo action '" + action.substring(1) + "/retrieve' is not exists", ex);
+        }
+
         actset = new TreeSet(new Comparator<String>() {
-            public int compare(String o1, String o2) {
-                return o1.length() < o2.length() ? 1 : -1;
+            @Override
+            public int compare(String o1, String o2 ) {
+                return o1.length( ) < o2.length( ) ? 1 : -1;
             }
         });
 
-        // 使用 retrieve 动作获取 class
-        // 也就是说, 即使不对外提供 retrieve 也要存在 retrieve 方法才行
-        Class cls = ActionRunner.getActions()
-        .get(action.substring(1)+"/retrieve")
-        .getMclass();
-
-        for(Method mtd : cls.getMethods( ) ) {
+        for(Method mtd : cls.getMethods(  )) {
             Action ann = mtd.getAnnotation(Action.class);
             if (ann != null) {
                 if (!"".equals(ann.value())) {
@@ -155,8 +239,49 @@ public class AutoFilter implements Filter {
         return actset;
     }
 
-    @Override
-    public void destroy() {
+    private Set<String> getlays() {
+        if (null != layset) {
+            return  layset;
+        }
+
+        File dir = new File(Core.BASE_PATH + layout);
+        if (!dir.exists( )) {
+            throw new HongsError(HongsError.COMMON,
+                 "Atuo layout '" + layout.substring(1) + "' is not exists");
+        }
+        if (!dir.isDirectory()) {
+            throw new HongsError(HongsError.COMMON,
+                 "Atuo layout '" + layout.substring(1) + "' is not a directory");
+        }
+
+        layset = new TreeSet(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2 ) {
+                return o1.length( ) < o2.length( ) ? 1 : -1;
+            }
+        });
+
+        // 递归获取目录下所有文件
+        getlays(layset, dir, "/");
+
+        return  layset;
+    }
+
+    private void getlays(Set layset, File dx, String dn) {
+        File[] fs = dx.listFiles();
+        if (fs == null) {
+            return;
+        }
+        for ( File fx : fs ) {
+            String fn = fx.getName();
+            if (fn.startsWith (".")) {
+                continue;
+            }
+            if (fx.isDirectory(   )) {
+                getlays(layset, fx, dn + fn + "/");
+            }
+            layset.add (dn + fn);
+        }
     }
 
 }

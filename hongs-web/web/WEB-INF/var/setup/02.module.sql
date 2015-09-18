@@ -56,13 +56,13 @@ CREATE TABLE `a_module_data` (
   `id` char(20) NOT NULL,
   `form_id` char(20) NOT NULL,
   `data` text NOT NULL,
-  `ctime` int(11) DEFAULT NULL,
-  `mtime` int(11) DEFAULT NULL,
+  `ctime` bigint(15) DEFAULT NULL,
+  `etime` bigint(15) DEFAULT NULL,
   `state` tinyint(4) DEFAULT '1',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`etime`),
   FOREIGN KEY (`form_id`) REFERENCES `a_module_form` (`id`) ON DELETE CASCADE
 );
 
 CREATE INDEX `IK_a_module_data_state` ON `a_module_data` (`state`);
 CREATE INDEX `IK_a_module_data_ctime` ON `a_module_data` (`ctime`);
-CREATE INDEX `IK_a_module_data_mtime` ON `a_module_data` (`mtime`);
+CREATE INDEX `IK_a_module_data_etime` ON `a_module_data` (`etime`);

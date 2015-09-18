@@ -19,7 +19,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 
 /**
- * 记录器
+ * 搜索模型
  * @author Hongs
  */
 public class SearchRecord extends LuceneRecord {
@@ -216,7 +216,7 @@ public class SearchRecord extends LuceneRecord {
             Query q = getQuery(rd);
 
             if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("...\r\n\tQuery: "+q.toString());
+                CoreLogger.debug("SearchRecord.counts: "+q.toString());
             }
 
             TopDocs docz = finder.search(q, 500);
@@ -283,7 +283,7 @@ public class SearchRecord extends LuceneRecord {
     }
 
     static {
-        System.setProperty("java.util.Arrays.useLegacyMergeSort" , "true"); // jdk1.7加上这个后排序不会报错
+        System.setProperty("java.util.Arrays.useLegacyMergeSort", "true"); // jdk1.7加上这个后排序不会报错
     }
 
 }

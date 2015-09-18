@@ -40,9 +40,10 @@ public class UnitAction {
     public void doSave(ActionHelper helper)
     throws HongsException {
         Map data = helper.getRequestData( );
-        CoreLocale lang = CoreLocale.getInstance();
+        CoreLocale lang = CoreLocale.getInstance().clone( );
+        lang.load("module");
         String id  = model.save(data);
-        String msg = lang.translate("core.save.success");
+        String msg = lang.translate("core.save.unit.success");
         Map info = new HashMap();
         info.put( "id" , id);
         info.put("name", data.get("name") );
@@ -55,8 +56,9 @@ public class UnitAction {
     throws HongsException {
         Map data = helper.getRequestData( );
         CoreLocale lang = CoreLocale.getInstance().clone( );
+        lang.load("module");
         int    rd  = model.delete(data);
-        String msg = lang.translate("core.remove.success", Integer.toString(rd));
+        String msg = lang.translate("core.delete.unit.success", Integer.toString(rd));
         helper.reply(msg, rd);
     }
 

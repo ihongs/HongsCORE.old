@@ -248,9 +248,9 @@ public class DB
                  info.getProperty("password"));
         }
 
-        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
+        if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
         {
-          CoreLogger.debug("Connect to database(origin mode): "+name);
+          CoreLogger.trace("Connect to database(origin mode): "+name);
         }
       }
       catch (SQLException ex)
@@ -405,9 +405,9 @@ public class DB
 
         this.connection = pool.getConnection();
 
-        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
+        if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
         {
-          CoreLogger.debug("Connect to database(source mode): "+drv+" "+url);
+          CoreLogger.trace("Connect to database(source mode): "+drv+" "+url);
         }
       }
       catch (PropertyVetoException ex)
@@ -454,40 +454,43 @@ public class DB
   public void destroy()
     throws Throwable
   {
+    if (this.connection == null
+    ||  this.connection.isClosed())
+    {
+        return;
+    }
+
+    // 默认退出时提交
+    if(this.IN_TRNSCT_MODE)
+    {
+      try
+      {
+        this.commit();
+      }
+      catch (Error e)
+      {
+        this.rolbak();
+        throw e;
+      }
+    }
+
     try
     {
-      if (this.connection == null
-      ||  this.connection.isClosed())
-      {
-        return;
-      }
-
-      // 默认退出时提交
-      if(this.IN_TRNSCT_MODE)
-      {
-        try
-        {
-          this.commit();
-        }
-        catch (Error e)
-        {
-          this.rolbak();
-          throw e;
-        }
-      }
-
-      if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
-      {
-        CoreLogger.debug("Close database connection, URL: "
-          + this.connection.getMetaData().getURL());
-      }
-
       this.connection.close();
-      this.connection = null;
     }
     catch (SQLException ex)
     {
       throw new Error(new HongsException(0x1032, ex));
+    }
+    finally
+    {
+      this.connection = null ;
+    }
+
+    if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
+    {
+      CoreLogger.trace("Close database connection, URL: "
+      + this.connection.getMetaData( ).getURL());
     }
   }
 
@@ -498,6 +501,13 @@ public class DB
   public void trnsct()
   {
     this.IN_TRNSCT_MODE = true ;
+    try {
+        if (connection != null && !connection.isClosed()) {
+            this.connection.setAutoCommit(false);
+        }
+    } catch (SQLException ex) {
+        throw new HongsError(0x44, ex);
+    }
   }
 
   /**
@@ -506,15 +516,16 @@ public class DB
   @Override
   public void commit()
   {
-    if (IN_TRNSCT_MODE) {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.commit(  );
-            }
-        } catch (SQLException ex) {
-          throw new HongsError(0x44, ex);
+    if (!IN_TRNSCT_MODE) {
+        return;
+    }
+    IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
+    try {
+        if (connection != null && !connection.isClosed()) {
+            connection.commit(  );
         }
-        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
+    } catch (SQLException ex) {
+        throw new HongsError(0x44, ex);
     }
   }
 
@@ -524,15 +535,16 @@ public class DB
   @Override
   public void rolbak()
   {
-    if (IN_TRNSCT_MODE) {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.rollback();
-            }
-        } catch (SQLException ex) {
-          throw new HongsError(0x44, ex);
+    if (!IN_TRNSCT_MODE) {
+        return;
+    }
+    IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
+    try {
+        if (connection != null && !connection.isClosed()) {
+            connection.rollback();
         }
-        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
+    } catch (SQLException ex) {
+        throw new HongsError(0x44, ex);
     }
   }
 
@@ -574,7 +586,7 @@ public class DB
 
     if (!this.tableConfigs.containsKey(tableName))
     {
-      throw new app.hongs.HongsException(0x1039, "Can not find config for table '"+tableName+"'.");
+      throw new app.hongs.HongsException(0x1039, "Can not find config for table '"+this.name+"."+tableName+"'.");
     }
 
     /**
@@ -616,10 +628,9 @@ public class DB
       return tobj;
     }
 
-    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
+    if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
     {
-      app.hongs.CoreLogger.debug(
-          "DB: tableClass("+tcls+") for table("+tableName+") has been defined, try to get it");
+      CoreLogger.trace("DB: tableClass("+tcls+") for table("+this.name+"."+tableName+") has been defined, try to get it");
     }
 
     /**
@@ -710,7 +721,7 @@ public class DB
 
     if (!this.tableConfigs.containsKey(tableName))
     {
-      throw new app.hongs.HongsException(0x1039, "Can not find config for table '"+tableName+"'.");
+      throw new app.hongs.HongsException(0x1039, "Can not find config for table '"+this.name+"."+tableName+"'.");
     }
 
     /**
@@ -739,10 +750,9 @@ public class DB
       return mobj;
     }
 
-    if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
+    if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
     {
-      app.hongs.CoreLogger.debug(
-          "DB: modelClass("+mcls+") for table("+tableName+") has been defined, try to get it");
+      CoreLogger.trace("DB: modelClass("+mcls+") for table("+this.name+"."+tableName+") has been defined, try to get it");
     }
 
     /**

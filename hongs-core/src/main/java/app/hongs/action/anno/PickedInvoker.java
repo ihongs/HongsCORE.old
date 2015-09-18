@@ -94,7 +94,8 @@ public class PickedInvoker implements FilterInvoker {
             rd.put("rn", 0 );
             rd.put("sf", sf);
             rd.put("id", rsp.get( name ));
-            ActionHelper hlp = new ActionHelper(rd, null, null, helper.getResponseWrtr());
+            ActionHelper hlp = helper.clone(  );
+                         hlp.setRequestData(rd);
             ActionRunner run = new ActionRunner(pa, hlp);
                          run.doInvoke(  );
             Map sd = hlp.getRequestData();

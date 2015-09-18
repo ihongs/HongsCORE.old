@@ -161,15 +161,26 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     /**
      * 通过配置名和表单名来构建实例
+     * @param path
+     * @param conf
+     * @param form
+     * @throws HongsException
+     */
+    public LuceneRecord(String path, String conf, String form)
+    throws HongsException {
+        this( path, FormSet.getInstance(  conf   ).getForm(   form    ) ,
+                    FormSet.getInstance("default").getEnum("__types__"));
+    }
+
+    /**
+     * 通过配置名和表单名来构建实例
      * @param conf
      * @param form
      * @throws HongsException
      */
     public LuceneRecord(String conf, String form)
     throws HongsException {
-        this(conf+"/"+form,
-            FormSet.getInstance(  conf   ).getForm(   form    ) ,
-            FormSet.getInstance("default").getEnum("__types__"));
+        this( conf +"/"+ form, conf, form );
     }
 
     /**
@@ -619,6 +630,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         } catch (IOException x) {
             throw HongsException.common(null,x);
         }
+        
+        if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
+            CoreLogger.trace("Connect to lucene reader, data path: " + dataPath);
+        }
     }
 
     /**
@@ -640,6 +655,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         } catch (IOException x) {
             throw HongsException.common(null,x);
         }
+
+        if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
+            CoreLogger.trace("Connect to lucene writer, data path: " + dataPath);
+        }
     }
 
     /**
@@ -648,29 +667,39 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     @Override
     public void destroy() throws HongsException {
-        try {
-            if (writer != null) {
-                // 默认退出时提交
-                if (IN_TRNSCT_MODE) {
-                    try {
-                        commit();
-                    } catch (HongsException he) {
-                        rolbak();
-                        throw he;
-                    }
+        if (writer != null) {
+            // 默认退出时提交
+            if (IN_TRNSCT_MODE) {
+                try {
+                    commit();
+                } catch (HongsException he) {
+                    rolbak();
+                    throw he;
                 }
+            }
 
+            try {
                 writer.maybeMerge();
-                writer.close( );
-                writer  = null ;
+                writer.close();
+            } catch (IOException x) {
+                throw HongsException.common(null, x);
+            } finally {
+                writer = null;
             }
+        }
 
-            if (reader != null) {
-                reader.close( );
-                reader  = null ;
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (IOException x) {
+                throw HongsException.common(null, x);
+            } finally {
+                reader = null;
             }
-        } catch (IOException x) {
-            throw HongsException.common(null,x);
+        }
+
+        if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
+            CoreLogger.trace("Close lucene connection, data path: " + dataPath);
         }
     }
 
@@ -691,12 +720,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (writer == null) {
             return;
         }
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
         try {
             writer.commit(  );
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
     }
 
     /**
@@ -708,12 +737,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (writer == null) {
             return;
         }
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
         try {
             writer.rollback();
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
-        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got( "__IN_TRNSCT_MODE__" ), false);
     }
 
     /**

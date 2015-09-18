@@ -27,11 +27,11 @@ import javax.servlet.http.HttpServletResponse;
  *
  * <h3>初始化参数(init-param):</h3>
  * <pre>
- * config       配置名称
- * index-page   首页地址(为空则不跳转)
- * login-page   登录地址(为空则不跳转)
- * exclude-urls 不包含的URL, 可用","分割多个, 可用"*"为前后缀
- * </pre>
+ * config       菜单配置
+ * index-page   起始页(为空则不跳转)
+ * login-page   登录页(为空则不跳转)
+ * ignore-urls  忽略的URL, 可用","分割多个, 可用"*"为前后缀
+ </pre>
  *
  * @author Hongs
  */
@@ -45,24 +45,24 @@ public class AuthFilter
   private MenuSet siteMap;
 
   /**
-   * 区域名称
+   * 区域验证
    */
-  private String pnm = null;
+  private String  aut = null;
 
   /**
    * 首页路径
    */
-  private String indexPage = null;
+  private String  indexPage = null;
 
   /**
    * 登录路径
    */
-  private String loginPage = null;
+  private String  loginPage = null;
 
   /**
    * 不包含的URL
    */
-  private String[][] excludeUrls;
+  private String[][] ignoreUrls = null;
 
   private final Pattern IS_HTML = Pattern.compile("(text/html|text/webviewhtml)");
   private final Pattern IS_JSON = Pattern.compile("(text/json|application/json)");
@@ -83,7 +83,7 @@ public class AuthFilter
     {
       try
       {
-        this.pnm = s ;
+        this.aut = s ;
         this.siteMap = MenuSet.getInstance(s);
       }
       catch (HongsException ex)
@@ -124,7 +124,7 @@ public class AuthFilter
     /**
      * 获取不包含的URL
      */
-    s = config.getInitParameter("exclude-urls");
+    s = config.getInitParameter("ignore-urls");
     if (s != null)
     {
       Set<String> cu = new HashSet();
@@ -146,7 +146,7 @@ public class AuthFilter
           su.toArray(new String[0]),
           eu.toArray(new String[0])
       };
-      this.excludeUrls = u3;
+      this.ignoreUrls = u3;
     }
   }
 
@@ -155,10 +155,10 @@ public class AuthFilter
   {
     super.destroy();
 
-    siteMap     = null;
-    indexPage   = null;
-    loginPage   = null;
-    excludeUrls = null;
+    siteMap    = null;
+    indexPage  = null;
+    loginPage  = null;
+    ignoreUrls = null;
   }
 
   @Override
@@ -174,19 +174,19 @@ public class AuthFilter
     /**
      * 依次校验是否是需要排除的URL
      */
-    if (excludeUrls != null) {
-        for (String url : excludeUrls[1]) {
+    if (ignoreUrls != null) {
+        for (String url : ignoreUrls[0]) {
+            if (act.equals(url)) {
+                break DO;
+            }
+        }
+        for (String url : ignoreUrls[1]) {
             if (act.startsWith(url)) {
                 break DO;
             }
         }
-        for (String url : excludeUrls[2]) {
+        for (String url : ignoreUrls[2]) {
             if (act.endsWith(url)) {
-                break DO;
-            }
-        }
-        for (String url : excludeUrls[0]) {
-            if (act.equals(url)) {
                 break DO;
             }
         }
@@ -210,7 +210,7 @@ public class AuthFilter
             return;
         }
     } else {
-        if (siteMap.actions.contains(pnm) && !authset.contains(pnm)) {
+        if (siteMap.actions.contains(aut) && !authset.contains(aut)) {
             doFailed(core, hlpr, (byte)2);
             return;
         }

@@ -88,7 +88,7 @@ public class UserAction {
         CoreLocale lang = CoreLocale.getInstance().clone( );
         lang.load("member");
         int     rd  = model.delete(helper.getRequestData());
-        String  msg = lang.translate("core.remove.user.success", Integer.toString(rd));
+        String  msg = lang.translate("core.delete.user.success", Integer.toString(rd));
         helper.reply(msg, rd);
     }
 

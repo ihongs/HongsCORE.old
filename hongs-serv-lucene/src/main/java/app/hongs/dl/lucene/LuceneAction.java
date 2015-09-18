@@ -12,7 +12,7 @@ import app.hongs.dl.IAction;
 import java.util.Map;
 
 /**
- * Lucene 动作
+ * Lucene 模型动作
  * @author Hongs
  */
 @Action("hongs/lucene")
@@ -27,7 +27,7 @@ public class LuceneAction implements IAction {
                rd = getRqMap(helper, sr, "retrieve", rd);
         Map    sd = sr.retrieve(rd);
                sd = getRpMap(helper, sr, "retrieve", sd);
-               sr.destroy( );
+//             sr.destroy( );
         helper.reply(sd/**/);
     }
 
@@ -42,7 +42,7 @@ public class LuceneAction implements IAction {
         Map    sd = sr.create(rd);
                sd = getRpMap(helper, sr, "create", sd);
         String ss = getRpMsg(helper, sr, "create", 1 );
-               sr.destroy( );
+//             sr.destroy( );
         helper.reply(ss, sd);
     }
 
@@ -56,7 +56,7 @@ public class LuceneAction implements IAction {
                rd = getRqMap(helper, sr, "update", rd);
         int    sn = sr.update(rd);
         String ss = getRpMsg(helper, sr, "update", sn);
-               sr.destroy( );
+//             sr.destroy( );
         helper.reply(ss, sn);
     }
 
@@ -69,7 +69,7 @@ public class LuceneAction implements IAction {
                rd = getRqMap(helper, sr, "delete", rd);
         int    sn = sr.delete(rd);
         String ss = getRpMsg(helper, sr, "delete", sn);
-               sr.destroy( );
+//             sr.destroy( );
         helper.reply(ss, sn);
     }
 
@@ -91,7 +91,7 @@ public class LuceneAction implements IAction {
         pos  = mod.lastIndexOf('/' );
         mod  = mod.substring(0, pos); // 去掉动作
         pos  = mod.lastIndexOf('/' );
-        ent  = mod.substring(1+ pos); // 实体名称 
+        ent  = mod.substring(1+ pos); // 实体名称
         mod  = mod.substring(0, pos); // 模型名称
         return new LuceneRecord(mod, ent);
     }

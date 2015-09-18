@@ -146,7 +146,7 @@ public class CmdletRunner
       "debug:i" ,
       "corepath:s" , "confpath:s" , "varspath:s" , "tmpspath:s" ,
       "basepath:s" , "basehref:s" , "language:s" , "timezone:s" ,
-      "request--:s", "session--:s", "context--:s"
+      "request--:s", "context--:s", "session--:s", "cookies--:s"
     );
     args = (String[]) opts.get("");
 
@@ -288,8 +288,9 @@ public class CmdletRunner
     Map req  = inid((String) opts.get("request--"));
     Map con  = inid((String) opts.get("context--"));
     Map ses  = inid((String) opts.get("session--"));
+    Map cok  = inid((String) opts.get("cookies--"));
 
-    ActionHelper helper = new ActionHelper(req, con, ses, null );
+    ActionHelper helper = new ActionHelper(req,con,ses,cok,null);
     Core.getInstance().put(ActionHelper.class.getName(), helper);
 
     // Clean instatnces fis core at exit

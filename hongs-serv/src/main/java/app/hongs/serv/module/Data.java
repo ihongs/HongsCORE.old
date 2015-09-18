@@ -17,8 +17,13 @@ import org.apache.lucene.document.Document;
  */
 public class Data extends LuceneRecord {
 
+    String formId = null;
+    public String[] findCols = new String[] {};
+    public String[] listCols = new String[] {};
+    
     public Data(String conf, String form) throws HongsException {
-        super(conf, form);
+        super(conf +"/"+ form, conf +"/"+ form, form);
+        formId = form;
     }
 
     /**
@@ -83,8 +88,7 @@ public class Data extends LuceneRecord {
 
         // 获取旧的数据
         FetchCase fc = new FetchCase();
-        fc.select ( "data" ).where(where, param);
-        dd = model.table.fetchLess(fc);
+        dd = model.table.fetchCase().select("data").where(where, param).one();
         if(!dd.isEmpty()) {
             dd = (Map) app.hongs.util.Data.toObject(dd.get("data").toString());
         }
@@ -96,6 +100,9 @@ public class Data extends LuceneRecord {
             String fo = Synt.declare(dd.get(fn), "");
             if (   rd.containsKey( fn )) {
                 dd.put( fn , fr );
+            } else
+            if ( "id".equals(fn)) {
+                dd.put( fn , id );
             }
             if ( ! fr.equals(fo)) {
                 i += 1;
@@ -114,6 +121,7 @@ public class Data extends LuceneRecord {
         // 保存到数据库
         Map nd = new HashMap();
         nd.put( "id" , id);
+        nd.put("form_id", formId);
         nd.put("name", nm.toString( ).trim( ));
         nd.put("data", app.hongs.util.Data.toString(dd));
         model.table.update(od , where , param);
@@ -138,7 +146,7 @@ public class Data extends LuceneRecord {
             super.del(id);
         }
         dd = (Map) app.hongs.util.Data.toObject(dd.get("data").toString());
-        
+
         Document doc = new Document();
         dd.put("mtime",System.currentTimeMillis());
         dd.put(idCol , id);

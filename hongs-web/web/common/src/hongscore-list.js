@@ -168,9 +168,7 @@ function HsList(opts, context) {
 
     if (loadUrl) {
         if (loadData === undefined) {
-            loadData  =  [];
-            jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
-            jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
+            loadData = hsSerialArr( loadBox);
         }
         this.load(hsFixPms(loadUrl, loadBox), loadData);
     }

@@ -20,5 +20,9 @@ xsi:schemaLocation="http://hongs-core db.xsd">
                primaryKey="id"
                model="app.hongs.serv.module.Unit">
         </table>
+        <table name="data"
+               tableName="a_module_data"
+               primaryKey="id">
+        </table>
     </tables>
 </db>

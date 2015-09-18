@@ -38,27 +38,23 @@ function HsForm(opts, context) {
     }
 
     if (loadData === undefined) {
-        loadData  =  [];
-        jQuery.merge(loadData, hsSerialArr(loadBox.data("url" )));
-        jQuery.merge(loadData, hsSerialArr(loadBox.data("data")));
+        loadData = hsSerialArr(loadBox );
     } else {
         loadData = hsSerialArr(loadData);
     }
     if (loadUrl) {
-        loadUrl = hsFixPms(loadUrl, loadBox);
         jQuery.merge(loadData, hsSerialArr(loadUrl));
+        loadUrl  = hsFixPms(loadUrl, loadBox);
     }
 
     if (initData === undefined) {
-        initData  =  [];
-        jQuery.merge(initData, hsSerialArr(loadBox.data("url" )));
-        jQuery.merge(initData, hsSerialArr(loadBox.data("data")));
+        initData = hsSerialArr(loadBox );
     } else {
         initData = hsSerialArr(initData);
     }
     if (saveUrl) {
-        saveUrl = hsFixPms(saveUrl, loadBox);
         jQuery.merge(initData, hsSerialArr(saveUrl));
+        saveUrl  = hsFixPms(saveUrl, loadBox);
     }
 
     /**
@@ -129,6 +125,7 @@ HsForm.prototype = {
             n = jQuery(nodes[i]).attr("name");
             if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
             v = enam [n];
+            if (! n) continue;
             if (! v) v = hsGetValue(enam , n);
             datas[n] = v;
         }
@@ -170,6 +167,7 @@ HsForm.prototype = {
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr("name");
             if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
+            if (! n) continue;
             v = info [n];
             if (! v) v = hsGetValue(info , n);
             infos[n] = v;

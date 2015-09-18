@@ -145,6 +145,8 @@ textarea.form-control,
 }
 
 object.config,
+.panes>.openbox>h1,
+.panes>.openbox>h2,
 .panes>*>.openbox>h1,
 .panes>*>.openbox>h2,
 .modal-body.openbox>h1,

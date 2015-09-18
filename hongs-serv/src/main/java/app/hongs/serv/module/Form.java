@@ -54,6 +54,19 @@ public class Form extends Model {
      * @throws app.hongs.HongsException
      */
     public String save(Map rd) throws HongsException {
+        // 给字段加名字
+        String conf = (String) rd.get("conf");
+        String name = (String) rd.get("name");
+        List<Map> flds = null;
+        if (conf != null && !"".equals(conf)) {
+            flds = Synt.declare(Data.toObject(conf), List.class);
+            for (Map fld : flds) {
+                if ("".equals(fld.get("__name__"))) {
+                    fld.put("__name__", Core.getUniqueId());
+                }
+            }
+        }
+        
         String  id = (String) rd.get(this.table.primaryKey);
         boolean ic;
         if (id == null || id.length() == 0) {
@@ -64,20 +77,17 @@ public class Form extends Model {
             ic = false;
         }
 
+        // 建立表单配置
+        if (flds != null) {
+            updateOrCreateFormSet( id, flds );
+        }
+
         // 建立菜单配置
-        String name = (String) rd.get("name");
         if (name != null && !"".equals(name)) {
             updateOrCreateMenuSet( id, name );
         }
         if (ic) {
           new Unit().updateOrCreateMenuSet( );
-        }
-
-        // 建立表单配置
-        String conf = (String) rd.get("conf");
-        if (conf != null && !"".equals(conf)) {
-            List flds = Synt.declare(Data.toObject(conf), List.class);
-            updateOrCreateFormSet( id, flds );
         }
 
         return id;
@@ -183,6 +193,12 @@ public class Form extends Model {
 
         Element  item, anum, para;
 
+        item = docm.createElement("field");
+        form.appendChild(item);
+        item.setAttribute("disp", "ID");
+        item.setAttribute("name", "id");
+        item.setAttribute("type", "hidden");
+        
         for (  Map  fiel : conf ) {
             item = docm.createElement("field");
             form.appendChild ( item );
@@ -194,9 +210,9 @@ public class Form extends Model {
             s = (String) fiel.get("__type__");
             item.setAttribute("type", s);
             s = Synt.declare(fiel.get("__required__"), "");
-            item.setAttribute("type", s);
+            item.setAttribute("required", s);
             s = Synt.declare(fiel.get("__repeated__"), "");
-            item.setAttribute("type", s);
+            item.setAttribute("repeated", s);
 
             for (Object   ot : fiel.entrySet( )) {
                 Map.Entry et = (Map.Entry) ot;
