@@ -495,7 +495,7 @@ public class DB
 
     if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
     {
-      CoreLogger.trace("Connection for database '"+this.name+"' has been closed.");
+      CoreLogger.trace("Close database connection, db name: "+this.name);
     }
   }
 

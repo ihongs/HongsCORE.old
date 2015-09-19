@@ -127,7 +127,6 @@ public class MenuSet
   {
     this.name = name;
     this.init(name + ".menu");
-    app.hongs.util.Data.dumps(menus);
   }
 
   protected boolean expired(String name)
