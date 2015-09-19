@@ -153,8 +153,16 @@ function hsResponObj(rst, qut) {
  */
 function hsSerialArr(obj) {
     var arr = [];
-    var typ = !jQuery.isPlainObject() ? jQuery.type(obj) : "plains";
+    var typ = !jQuery.isPlainObject() ? jQuery.type(obj) : "dict";
     switch (typ) {
+        case  "dict" :
+            hsEach (obj, function(val, key) {
+                if (key.length > 0) {
+                    key = key.join('.'/**/);
+                    arr.push({name: key, value: val});
+                }
+            });
+            break;
         case "string":
             var ar1, ar2, key, val, i = 0;
             ar1 = obj.split('#' , 2);
@@ -171,21 +179,24 @@ function hsSerialArr(obj) {
                 }
             }
             break;
-        case "plains":
-            hsEach (obj, function(val, key) {
-                if (key.length > 0) {
-                    key = key.join('.'/**/);
-                    arr.push({name: key, value: val});
-                }
-            });
-            break;
         case "object":
             obj = jQuery( obj );
-            if (obj.data("url")) {
-                arr = [ ];
-                jQuery.merge(arr, hsSerialArr(obj.data("url" )));
-                jQuery.merge(arr, hsSerialArr(obj.data("hash")));
-                jQuery.merge(arr, hsSerialArr(obj.data("data")));
+            if (obj.data("load")) {
+                arr = [];
+                var pos ;
+                var url = obj.data("load");
+                var dat = obj.data("data");
+                pos = url.indexOf("?");
+                if (pos != -1) {
+                    jQuery.merge(arr, hsSerialArr(url.substring(pos+1)));
+                }
+                pos = url.indexOf("#");
+                if (pos != -1) {
+                    jQuery.merge(arr, hsSerialArr(url.substring(pos+1)));
+                }
+                if (dat) {
+                    jQuery.merge(arr, hsSerialArr(dat));
+                }
             } else {
                 arr = jQuery(obj).serializeArray();
             }
@@ -204,7 +215,7 @@ function hsSerialArr(obj) {
 function hsSerialObj(obj) {
     var arr = hsSerialArr(obj);
     obj = {};
-    for (var i = 0; i < arr.length; i ++) {
+    for(var i = 0; i < arr.length; i ++) {
         hsSetValue(obj, arr[i].name, arr[i].value);
     }
     return obj;
@@ -217,7 +228,7 @@ function hsSerialObj(obj) {
  */
 function hsGetSerias(arr, name) {
     var val = [];
-    for(var i = 0; i < arr.length ; i ++) {
+    for(var i = 0; i < arr.length; i ++) {
         if (arr[i]["name"] === name ) {
             val.push(arr[i]["value"]);
         }
@@ -1055,19 +1066,8 @@ $.fn.hsLoad = function(url, data, complete) {
         complete = function() {};
     }
 
-    /**
-     * 取锚点作为局部参数
-     * 并将数据转换为序列
-     */
-    var hsh = "";
     var dat = data ? hsSerialArr(data): [];
-    var pos = url.indexOf('#');
-    if (pos != -1) {
-        hsh = url.substring(1+pos);
-        url = url.substring(0,pos);
-    }
-    this.data( "url" , url )
-        .data( "hash", hsh )
+    this.data( "load", url )
         .data( "data", dat )
         .addClass("loadbox")
         .addClass("loading");
@@ -1079,6 +1079,11 @@ $.fn.hsLoad = function(url, data, complete) {
      * 故, 如果是 html 且无参数"_=RANDOM"
      * 则不传递任何参数到服务端
      */
+    var pos;
+    pos = url.indexOf(/***/"#");
+    if (pos != -1) {
+        url = url.substring(0, pos);
+    }
     pos = url.indexOf('.html?');
     if (pos != -1 && !hsGetParam(url, '_') && !hsGetSeria(dat, '_')) {
         url = url.substring(0, pos + 5);

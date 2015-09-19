@@ -1,8 +1,10 @@
 package app.hongs.db;
 
 import app.hongs.Core;
+import app.hongs.CoreLogger;
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
+import app.hongs.util.Data;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -235,7 +237,10 @@ public class DBConfig
       }
     }
 
-    //app.hongs.util.JSON.dump(this.tableConfigs);
+    if ( 0 < Core.DEBUG  &&  4 != (4 & Core.DEBUG))
+    {
+      CoreLogger.trace(Data.toString(tableConfigs));
+    }
   }
 
   /**

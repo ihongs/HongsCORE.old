@@ -39,7 +39,13 @@ public class DeptAction {
     @Action("info")
     public void getInfo(ActionHelper helper)
     throws HongsException {
-        Map data = model.getInfo(helper.getRequestData());
+        String id = helper.getParameter("id");
+        Map data;
+        if (id  != null && id.length( ) != 0) {
+            data = model.getInfo(helper.getRequestData());
+        } else {
+            data = new HashMap();
+        }
         
         // With all roles
         if (Synt.declare(helper.getParameter("-with-roles"), false)) {

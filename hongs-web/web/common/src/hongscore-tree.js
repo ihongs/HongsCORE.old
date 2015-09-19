@@ -16,7 +16,6 @@ function HsTree(opts, context) {
     var sendUrls = hsGetValue(opts, "sendUrls");
     var openUrls = hsGetValue(opts, "openUrls");
     var linkUrls = hsGetValue(opts, "linkUrls");
-    var loadData = hsGetValue(opts, "loadData");
 
     // 数据的节点属性的键
     this.idKey   = hsGetValue(opts, "idKey"  , "id"  );
@@ -195,7 +194,7 @@ function HsTree(opts, context) {
         });
     }
 
-    //** 立即加载 **/
+    //** 顶级节点 **/
 
     var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
                  +rootInfo["id"]+'"></div>')
@@ -203,20 +202,10 @@ function HsTree(opts, context) {
     this.fillInfo(rootInfo,rootBox);
     this.select  (rootInfo["id"]  );
 
+    //** 立即加载 **/
+
     if (loadUrl) {
-        if (loadData === undefined) {
-            loadData = hsSerialArr(loadBox);
-        }
-
-        // 因 load 方法没有 data 字段, 顾将参数拼接到 loadUrl 上
-        if (loadUrl.indexOf('?') < 0) {
-            loadUrl += "?";
-        } else {
-            loadUrl += "&";
-        }
-        loadUrl += jQuery.param(loadData);
-
-        this.load(loadUrl,rootInfo["id"]);
+        this.load(hsFixPms(loadUrl, loadBox), rootInfo["id"]);
     }
 }
 HsTree.prototype = {

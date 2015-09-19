@@ -46,7 +46,7 @@ public class SearchAction extends LuceneAction {
         SearchRecord sr = getModel(helper);
         Map rd = helper.getRequestData();
         Map sd = sr.counts(rd);
-        sr.destroy();
+                 sr.destroy( );
         helper.reply(sd);
     }
 

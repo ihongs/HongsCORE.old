@@ -184,6 +184,27 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     }
 
     /**
+     * 获取实例
+     * 生命周期将交由 Core 维护
+     * @param conf
+     * @param form
+     * @return
+     * @throws HongsException
+     */
+    public static LuceneRecord getInstance(String conf, String form) throws HongsException {
+        LuceneRecord inst;
+        Core   core = Core.getInstance();
+        String name = LuceneRecord.class.getName() +":"+ conf +":"+ form;
+        if (core.containsKey(name)) {
+            inst = (LuceneRecord) core.got(name);
+        } else {
+            inst = new LuceneRecord(conf , form);
+            core.put(name , inst);
+        }
+        return inst;
+    }
+
+    /**
      * 获取数据
      *
      * 以下参数为特殊参数, 可在 default.properties 中配置:
@@ -630,7 +651,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         } catch (IOException x) {
             throw HongsException.common(null,x);
         }
-        
+
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
             CoreLogger.trace("Connect to lucene reader, data path: " + dataPath);
         }
@@ -666,23 +687,33 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @throws HongsException
      */
     @Override
-    public void destroy() throws HongsException {
+    public void destroy() {
         if (writer != null) {
             // 默认退出时提交
             if (IN_TRNSCT_MODE) {
                 try {
-                    commit();
-                } catch (HongsException he) {
-                    rolbak();
-                    throw he;
+                    try {
+                        commit();
+                    } catch (Error er) {
+                        rolbak();
+                        throw er;
+                    }
+                } catch (Error e) {
+                    CoreLogger.error(e);
                 }
             }
 
+            // 退出时合并索引
             try {
                 writer.maybeMerge();
+            } catch (IOException x) {
+                CoreLogger.error(x);
+            }
+
+            try {
                 writer.close();
             } catch (IOException x) {
-                throw HongsException.common(null, x);
+                CoreLogger.error(x);
             } finally {
                 writer = null;
             }
@@ -692,7 +723,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             try {
                 reader.close();
             } catch (IOException x) {
-                throw HongsException.common(null, x);
+                CoreLogger.error(x);
             } finally {
                 reader = null;
             }
@@ -713,10 +744,9 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
     /**
      * 提交更改
-     * @throws HongsException
      */
     @Override
-    public void commit() throws HongsException {
+    public void commit() {
         if (writer == null) {
             return;
         }
@@ -724,7 +754,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             writer.commit(  );
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsError(0x43, ex);
         }
     }
 
@@ -733,7 +763,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @throws HongsException
      */
     @Override
-    public void rolbak() throws HongsException {
+    public void rolbak() {
         if (writer == null) {
             return;
         }
@@ -741,7 +771,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             writer.rollback();
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsError(0x44, ex);
         }
     }
 

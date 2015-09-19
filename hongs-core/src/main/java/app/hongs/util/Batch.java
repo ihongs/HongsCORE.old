@@ -75,15 +75,14 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
     }
 
     @Override
-    public void destroy() throws HongsException {
+    public void destroy() {
         if (!servs.isShutdown( )) {
             servs.shutdownNow( );
         }
 
         if (back == null) {
             if (!tasks.isEmpty()) {
-                throw HongsException.common(
-                    "There has "+ tasks.size() +" task(s) not run.");
+                CoreLogger.error("There has "+ tasks.size() +" task(s) not run in '"+back.getPath()+"'.");
             }
             return;
         }
@@ -106,7 +105,11 @@ public abstract class Batch<T> extends CoreSerial implements Core.Destroy {
         back = null;
 
         if (!tasks.isEmpty()) {
-            save ( file );
+            try {
+                save ( file );
+            } catch (HongsException ex) {
+                CoreLogger.error  ( ex);
+            }
         } else
         if (file.exists()) {
             file.delete();

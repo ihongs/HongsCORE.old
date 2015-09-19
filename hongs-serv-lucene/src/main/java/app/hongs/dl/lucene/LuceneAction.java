@@ -93,7 +93,7 @@ public class LuceneAction implements IAction {
         pos  = mod.lastIndexOf('/' );
         ent  = mod.substring(1+ pos); // 实体名称
         mod  = mod.substring(0, pos); // 模型名称
-        return new LuceneRecord(mod, ent);
+        return LuceneRecord.getInstance(mod, ent);
     }
 
     /**

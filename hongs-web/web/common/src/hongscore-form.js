@@ -13,9 +13,6 @@ function HsForm(opts, context) {
     var formBox  = context.find   ( "form"   );
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var saveUrl  = hsGetValue(opts, "saveUrl");
-    var loadData = hsGetValue(opts, "loadData");
-    var initData = hsGetValue(opts, "initData");
-
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
     var jdKey    = hsGetValue(opts, "jdKey", "jd"); // jd参数名, 用于判断是否要枚举表
 
@@ -37,36 +34,10 @@ function HsForm(opts, context) {
         }
     }
 
-    if (loadData === undefined) {
-        loadData = hsSerialArr(loadBox );
-    } else {
-        loadData = hsSerialArr(loadData);
-    }
+    var loadArr = hsSerialArr(loadBox);
     if (loadUrl) {
-        jQuery.merge(loadData, hsSerialArr(loadUrl));
-        loadUrl  = hsFixPms(loadUrl, loadBox);
-    }
-
-    if (initData === undefined) {
-        initData = hsSerialArr(loadBox );
-    } else {
-        initData = hsSerialArr(initData);
-    }
-    if (saveUrl) {
-        jQuery.merge(initData, hsSerialArr(saveUrl));
-        saveUrl  = hsFixPms(saveUrl, loadBox);
-    }
-
-    /**
-     * 如果存在 id 或 jd 则进行数据加载
-     * 否则调用 fillEnum 进行选项初始化
-     */
-    if (loadUrl
-    && (hsGetSeria(loadData, idKey)
-    ||  hsGetSeria(loadData, jdKey))) {
-        this.load (loadUrl, loadData);
-    } else {
-        this.fillEnum({ });
+        loadUrl = hsFixPms(loadUrl, loadArr);
+        jQuery.merge(loadArr, hsSerialArr(loadUrl));
     }
 
     /**
@@ -74,18 +45,29 @@ function HsForm(opts, context) {
      * 在打开表单窗口时, 可能指定一些参数(如父ID, 初始选中项等)
      * 这时有必要将这些参数值填写入对应的表单项, 方便初始化过程
      */
-    jQuery.merge ( loadData, initData );
     var i , n, v;
-    for(i = 0; i < loadData.length; i ++) {
-        n = loadData[i].name ;
-        v = loadData[i].value;
+    for(i = 0; i < loadArr.length; i++) {
+        n = loadArr[i].name ;
+        v = loadArr[i].value;
         if ( n === idKey && v === "0" ) continue;
         formBox.find("[name='"   +n+"']").val(v);
         formBox.find("[data-fn='"+n+"']").val(v);
     }
 
-    this.valiInit(/*all*/);
-    this.saveInit(saveUrl);
+    /**
+     * 如果存在 id 或 jd 则进行数据加载
+     * 否则调用 loadBack 进行选项初始化
+     */
+    if (loadUrl
+    && (hsGetSeria(loadArr, idKey)
+    ||  hsGetSeria(loadArr, jdKey))) {
+        this.load (loadUrl);
+    } else {
+        this.loadBack( {} );
+    }
+
+    this.valiInit(/*all*/ );
+    this.saveInit(saveUrl );
 }
 HsForm.prototype = {
     load     : function(url, data) {

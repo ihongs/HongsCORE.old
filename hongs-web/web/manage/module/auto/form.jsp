@@ -59,7 +59,7 @@
 <h2><%=lang.translate("fore."+_action+".title", title)%></h2>
 <div id="<%=_module%>-<%=_entity%>-<%=_action%>">
     <object class="config" name="hsForm" data="">
-        <param name="loadUrl" value="<%=_module%>/<%=_entity%>/retrieve.act?id=${id}&jd=1"/>
+        <param name="loadUrl" value="<%=_module%>/<%=_entity%>/retrieve.act?id=\${id}&jd=\${jd}"/>
         <param name="saveUrl" value="<%=_module%>/<%=_entity%>/<%=_action%>.act"/>
         <param name="_fill__pick" value="(hsFormFillPick)"/>
     </object>

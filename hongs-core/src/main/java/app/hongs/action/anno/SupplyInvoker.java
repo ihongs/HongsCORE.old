@@ -23,9 +23,8 @@ public class SupplyInvoker implements FilterInvoker {
     @Override
     public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
+        String jd = helper.getParameter("jd");
         Map   rsp;
-        Map   req = helper.getRequestData();
-        Object jd = req.get("jd");
 
         if ("0".equals(jd)) {
             jd  = "1";
@@ -54,11 +53,11 @@ public class SupplyInvoker implements FilterInvoker {
         // 填充数据
         try {
             SupplyHelper sup;
-            sup = new SupplyHelper().addEnumsByForm(conf, form);
-            sup.supply ( rsp , Short.parseShort(jd.toString()));
+            sup = new SupplyHelper().addEnumsByForm(conf,form);
+            sup.supply(rsp, Short.parseShort(jd));
         } catch (HongsException  ex) {
             int  ec  = ex.getCode( );
-            if  (ec != 0x10e8 && ec != 0x10e9 && ec != 0x10ea ) {
+            if  (ec != 0x10e8 && ec != 0x10e9 && ec != 0x10ea) {
                 throw  ex;
             }
         }

@@ -250,7 +250,7 @@ public class DB
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
         {
-          CoreLogger.trace("Connect to database(origin mode): "+name);
+          CoreLogger.trace("Connect to database '"+name+"' by origin mode, name: "+namc);
         }
       }
       catch (SQLException ex)
@@ -407,7 +407,7 @@ public class DB
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
         {
-          CoreLogger.trace("Connect to database(source mode): "+drv+" "+url);
+          CoreLogger.trace("Connect to database '"+name+"' by source mode, jdbc: "+drv+" "+url);
         }
       }
       catch (PropertyVetoException ex)
@@ -452,45 +452,50 @@ public class DB
 
   @Override
   public void destroy()
-    throws Throwable
   {
-    if (this.connection == null
-    ||  this.connection.isClosed())
-    {
-        return;
-    }
-
-    // 默认退出时提交
-    if(this.IN_TRNSCT_MODE)
-    {
-      try
-      {
-        this.commit();
-      }
-      catch (Error e)
-      {
-        this.rolbak();
-        throw e;
-      }
-    }
-
-    if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
-    {
-      CoreLogger.trace("Close database connection, URL: "
-      + this.connection.getMetaData( ).getURL());
-    }
-
     try
     {
+      if (this.connection == null  /***/
+      ||  this.connection.isClosed(/***/))
+      {
+        return;
+      }
+
+      // 退出自动提交
+      if(!this.connection.getAutoCommit())
+      {
+        try
+        {
+          try
+          {
+            this.commit();
+          }
+          catch (Error e)
+          {
+            this.rolbak();
+            throw e;
+          }
+        }
+        catch (Error e)
+        {
+          CoreLogger.error(e);
+        }
+      }
+
       this.connection.close();
     }
     catch (SQLException ex)
     {
-      throw new Error(new HongsException(0x1032, ex));
+      CoreLogger.error( ex);
     }
     finally
     {
       this.connection = null ;
+    }
+
+    if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
+    {
+      CoreLogger.trace("Connection for database '"+this.name+"' has been closed.");
     }
   }
 
@@ -506,7 +511,7 @@ public class DB
             this.connection.setAutoCommit(false);
         }
     } catch (SQLException ex) {
-        throw new HongsError(0x44, ex);
+        throw new HongsError(0x42, ex);
     }
   }
 
@@ -525,7 +530,7 @@ public class DB
             connection.commit(  );
         }
     } catch (SQLException ex) {
-        throw new HongsError(0x44, ex);
+        throw new HongsError(0x43, ex);
     }
   }
 

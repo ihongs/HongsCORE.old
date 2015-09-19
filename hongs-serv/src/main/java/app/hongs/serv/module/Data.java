@@ -27,6 +27,27 @@ public class Data extends LuceneRecord {
     }
 
     /**
+     * 获取实例
+     * 生命周期将交由 Core 维护
+     * @param conf
+     * @param form
+     * @return
+     * @throws HongsException
+     */
+    public static Data getInstance(String conf, String form) throws HongsException {
+        Data   inst;
+        Core   core = Core.getInstance();
+        String name = Data.class.getName() +":"+ conf +":"+ form;
+        if (core.containsKey(name)) {
+            inst = (Data) core.got(name);
+        } else {
+            inst = new Data(conf , form);
+            core.put(name , inst);
+        }
+        return inst;
+    }
+
+    /**
      * 添加文档
      * @param rd
      * @return ID
@@ -87,7 +108,6 @@ public class Data extends LuceneRecord {
         }
 
         // 获取旧的数据
-        FetchCase fc = new FetchCase();
         dd = model.table.fetchCase().select("data").where(where, param).one();
         if(!dd.isEmpty()) {
             dd = (Map) app.hongs.util.Data.toObject(dd.get("data").toString());
@@ -124,6 +144,7 @@ public class Data extends LuceneRecord {
         nd.put("form_id", formId);
         nd.put("name", nm.toString( ).trim( ));
         nd.put("data", app.hongs.util.Data.toString(dd));
+        nd.put("etime", 0);
         model.table.update(od , where , param);
         model.table.insert(nd);
 

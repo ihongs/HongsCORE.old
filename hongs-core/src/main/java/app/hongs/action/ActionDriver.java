@@ -23,7 +23,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -278,7 +277,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             String sess = conf.getProperty("core.timezone.session", "zone");
             String zone = (String)hlpr.getSessibute(sess);
             if (zone == null || zone.length() == 0) {
-                zone  = hlpr.getCookibute(sess);
+                   zone = /*str*/ hlpr.getCookibute(sess);
             }
 
             if (zone != null) {
@@ -294,9 +293,9 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             String sess = conf.getProperty("core.language.session", "lang");
             String lang = (String)hlpr.getSessibute(sess);
             if (lang == null || lang.length() == 0) {
-                lang  = hlpr.getCookibute(sess);
+                   lang = /*str*/ hlpr.getCookibute(sess);
             if (lang == null || lang.length() == 0) {
-                lang  =  req.getHeader("Accept-Language");
+                lang = req.getHeader( "Accept-Language" );
             }
             }
 
@@ -339,18 +338,18 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             if (xd == null) {
                 xd = (Map ) req.getAttribute(DATA);
             }
-            if (cf.getProperty("core.log.action.request", false)
+            if (cf.getProperty("core.trace.action.request", false)
             &&  rd != null && !rd.isEmpty()) {
               sb.append("\r\n\tRequest     : ")
                 .append(Text.indent(Data.toString(rd)).substring(1));
             }
-            if (cf.getProperty("core.log.action.results", false)
+            if (cf.getProperty("core.trace.action.results", false)
             &&  xd != null && !xd.isEmpty()) {
               sb.append("\r\n\tResults     : ")
                 .append(Text.indent(Data.toString(xd)).substring(1));
             }
 
-            CoreLogger.getLogger("hongs.log.action").debug(sb.toString());
+            CoreLogger.trace( sb.toString());
         }
 
         // 销毁此周期内的对象

@@ -16,7 +16,6 @@ function HsList(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var sendUrls = hsGetValue(opts, "sendUrls");
     var openUrls = hsGetValue(opts, "openUrls");
-    var loadData = hsGetValue(opts, "loadData");
 
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
@@ -167,10 +166,7 @@ function HsList(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        if (loadData === undefined) {
-            loadData = hsSerialArr( loadBox);
-        }
-        this.load(hsFixPms(loadUrl, loadBox), loadData);
+        this.load(hsFixPms(loadUrl, loadBox));
     }
 }
 HsList.prototype = {

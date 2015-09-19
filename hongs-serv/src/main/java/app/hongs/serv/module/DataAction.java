@@ -35,7 +35,7 @@ public class DataAction extends LuceneAction {
         pos  = mod.lastIndexOf('/' );
         ent  = mod.substring(1+ pos); // 实体名称 
         mod  = mod.substring(0, pos); // 模型名称
-        return new Data(mod, ent);
+        return Data.getInstance(mod, ent);
     }
 
 }
