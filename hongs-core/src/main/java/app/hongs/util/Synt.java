@@ -72,8 +72,8 @@ public class Synt {
      *      空字符串为 false,
      *      字符串 1,y,t,yes,true 为真,
      *      字符串 0,n,f,no,false 为假;
-     * cls 为 List,Set 时:
-     *      val 非 List,Set,Map 时构建 List,Set 后将 val 加入其下,
+     * cls 为 Array,List,Set 时:
+     *      val 非 List,Set,Map 时构建 Array,List,Set 后将 val 加入其下,
      *      val 为 Map 则取 values;
      * 但其他类型均无法转为 Map.
      * @param <T>
@@ -86,54 +86,64 @@ public class Synt {
             return null;
         }
 
+        if (Object[].class.isAssignableFrom(cls)) {
+            if (val instanceof Object[] ) {
+            } else if (val instanceof Set ) {
+                val = ((Set) val).toArray();
+            } else if (val instanceof Map ) {
+                val = ((Map) val).values ();
+            } else {
+                val = new Object[ ] { val };
+            }
+        } else
         if (List.class.isAssignableFrom(cls)) {
             if (val instanceof List) {
-            } else if (val instanceof Set) {
-                val = new ArrayList(( Set) val);
-            } else if (val instanceof Map) {
-                val = ((Map) val).values();
-            } else if (val instanceof Object[]) {
-                val = Arrays.asList(( Object[]) val);
+            } else if (val instanceof Set ) {
+                val = new ArrayList(( Set ) val);
+            } else if (val instanceof Map ) {
+                val = ((Map) val).values ();
+            } else if (val instanceof Object[] ) {
+                val = Arrays.asList(( Object[] ) val);
             } else {
-                List lst = new ArrayList();
+                List lst = new ArrayList ();
                 lst.add(val);
                 val = lst;
             }
         } else
         if ( Set.class.isAssignableFrom(cls)) {
-            if (val instanceof Set) {
+            if (val instanceof Set ) {
             } else if (val instanceof List) {
                 val = new LinkedHashSet((List) val);
             } else if (val instanceof Map ) {
                 val = new LinkedHashSet(((Map) val).values());
-            } else if (val instanceof Object[]) {
+            } else if (val instanceof Object[] ) {
                 val = new LinkedHashSet(Arrays.asList((Object[]) val));
             } else {
-                Set set = new LinkedHashSet( );
+                Set set = new LinkedHashSet();
                 set.add(val);
                 val = set;
             }
+        } else
+        if ( Map.class.isAssignableFrom(cls)) {
+            // 其他类型均无法转换为 Map
         } else {
             /**
              * 针对 servlet 的 requestMap 制定的规则, 多个值取第一个值
              */
-            if (val instanceof Object [ ]) {
-                val = ((Object [ ]) val)[0];
+            if (val instanceof Object[]) {
+                val = ((Object[]) val)[0];
             } else
-            if (val instanceof List ) {
-                val = ((List ) val).get (0);
+            if (val instanceof List) {
+                val = ((List) val).get(0);
             } else
-            if (val instanceof Map  ) {
-                val = ((Map  ) val).values().toArray()[0];
-            } else
-            if (val instanceof Collection) {
-                val = ((Collection) val/**/).toArray()[0];
+            if (val instanceof Set ) {
+                val = ((Set ) val).toArray()[0];
             }
 
-            if ( String.class.isAssignableFrom(cls)) {
+            if (String.class.isAssignableFrom(cls)) {
                 val = val.toString();
             } else
-            if ( Number.class.isAssignableFrom(cls)) {
+            if (Number.class.isAssignableFrom(cls)) {
                 if (EMPT.equals(val)) {
                     return null; // 空串视为未取值
                 }
