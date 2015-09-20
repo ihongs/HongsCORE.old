@@ -1,7 +1,7 @@
 # HongsCORE framework for Java
 
-* 文档版本: 15.05.28
-* 软件版本: 0.3.6-20150528
+* 文档版本: 15.10.20
+* 软件版本: 0.3.8-20151020
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
@@ -26,21 +26,23 @@
 
 如果你是一位前端开发人员，别去想什么 Node.js,MongoDB 等 javascript 一统前后端的方案了, 你应该做的就是把体验做好, 神马增/删/改/查/接口/权限就不用费劲考虑了, 你只需:
 
-1. 复制 etc/demo/dl.form.xml 到 etc 下并更名为 mytest.form.xml
-2. 复制 etc/demo/dl.menu.xml 到 etc 下并更名为 mytest.menu.xml
-3. 用文本编辑器打开 mytest.menu.xml 将 demo/dl 全部替换为 mytest, 并将"文档库测试"改成"我的测试"
-4. 用文本编辑器打开 default.menu.xml 在 root>menu 下加入[code]<import>mytest</import>[/code]
-5. 按照使用方法启动服务并打开浏览器登录后, 就能在右上角下拉菜单找到"我的测试"了
+1. 登录系统，点击右上角菜单，进入"模块管理"
+2. 点击左侧单元区的添加，输入名称等，点击下方提交即创建了一个单元
+3. 点击选中刚创建的单元，点击右边列表上方的创建按钮，输入表单名称
+4. 点击右侧列表的"+"可添添加字段，点击字段右上的"i"可以设置字段
+5. 完成后点击保存按钮，一个表单就设置好了
+6. 刷新页面，右上菜单就能看到刚添加的单元
+7. 点击单元，顶部菜单有表单项，尝试操作吧
 
-现在, 你可以在项目目录下创建以下文件重建页面体系
+现在，你可以在 manage/module/data 目录下添加一个以表单 ID 为名的目录，在其下添加以下文件即可重建页面体系：
 
-    mytest/default.html     索引页
-    mytest/list.html        列表页
-    mytest/list4select.html 选择页
-    mytest/form.html        创建页
-    mytest/form4update.html 修改页
+    default.html     引导页面
+    list.html        列表区块
+    list4select.html 选择区块
+    form.html        创建表单
+    form4update.html 修改表单
 
-一个简单的方法是通过 http://localhost:8080/mytest/form.html 这样的 url 来获取 html 文件, 然后存下来后在这个基础上改. 以后会增加一个按钮来比较方便的固化这个 html.
+一个简单的方法是通过 http://localhost:8080/mytest/form.html 这样的 url 来获取 html 文件, 然后存下来后在这个基础上改. 以后会增加一个按钮来比较方便的固化这个 html. 如不想使用原页面体系可在构建的 default.html 中按自定规则编码、创造。
 
 ## 后端开发
 
@@ -79,6 +81,7 @@
 
 ## 更新日志
 
+* 2015/10/20 完成模块管理功能; 更新、优化、修复其他
 * 2015/08/20 更新 create 方法的返回结构，同 retrieve[info] 避免前端需要识别不同数据结构
 * 2015/05/28 强化并首选 jetty 作为嵌入式 web 容器; 因其他容器的 jsp 版本可能与 jetty 使用的冲突, 需要去掉 jsp 相关的包方可在 tomcat 等容器下正常打开页面
 * 2015/04/24 完善 Async 并添加 Batch 异步操作类, 为异步任务和消息处理进行准备

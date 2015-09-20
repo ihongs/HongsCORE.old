@@ -115,15 +115,19 @@ public class Synt {
             }
         } else {
             /**
-             * 针对 servlet 的 requestMap 制定的规则
-             * 如果只需要一个值, 而 requestMap 是数组
-             * 则取第一个值
+             * 针对 servlet 的 requestMap 制定的规则, 多个值取第一个值
              */
-            if (val instanceof Collection) {
-                val = ((Collection) val).toArray(new String[0])[0];
-            } else
             if (val instanceof Object [ ]) {
                 val = ((Object [ ]) val)[0];
+            } else
+            if (val instanceof List ) {
+                val = ((List ) val).get (0);
+            } else
+            if (val instanceof Map  ) {
+                val = ((Map  ) val).values().toArray()[0];
+            } else
+            if (val instanceof Collection) {
+                val = ((Collection) val/**/).toArray()[0];
             }
 
             if ( String.class.isAssignableFrom(cls)) {
@@ -138,42 +142,66 @@ public class Synt {
                         val = ((Number) val).intValue();
                     } else
                     if (val instanceof String) {
+                      try {
                         val = Integer.parseInt(((String) val).trim());
+                      } catch (NumberFormatException ex) {
+                        throw new HongsError(0x46, "'" + val + "' can not cast to int");
+                      }
                     }
                 } else if (Byte.class.isAssignableFrom(cls)) {
                     if (val instanceof Number) {
                         val = ((Number) val).byteValue();
                     } else
                     if (val instanceof String) {
+                      try {
                         val = Byte.parseByte(((String) val).trim());
+                      } catch (NumberFormatException ex) {
+                        throw new HongsError(0x46, "'" + val + "' can not cast to byte");
+                      }
                     }
                 } else if (Short.class.isAssignableFrom(cls)) {
                     if (val instanceof Number) {
                         val = ((Number) val).shortValue();
                     } else
                     if (val instanceof String) {
+                      try {
                         val = Short.parseShort(((String) val).trim());
+                      } catch (NumberFormatException ex) {
+                        throw new HongsError(0x46, "'" + val + "' can not cast to short");
+                      }
                     }
                 } else if (Long.class.isAssignableFrom(cls)) {
                     if (val instanceof Number) {
                         val = ((Number) val).longValue();
                     } else
                     if (val instanceof String) {
+                      try {
                         val = Long.parseLong(((String) val).trim());
+                      } catch (NumberFormatException ex) {
+                        throw new HongsError(0x46, "'" + val + "' can not cast to long");
+                      }
                     }
                 } else if (Float.class.isAssignableFrom(cls)) {
                     if (val instanceof Number) {
                         val = ((Number) val).floatValue();
                     } else
                     if (val instanceof String) {
+                      try {
                         val = Float.parseFloat(((String) val).trim());
+                      } catch (NumberFormatException ex) {
+                        throw new HongsError(0x46, "'" + val + "' can not cast to float");
+                      }
                     }
                 } else {
                     if (val instanceof Number) {
                         val = ((Number) val).doubleValue();
                     } else
                     if (val instanceof String) {
+                      try {
                         val = Double.parseDouble(((String) val).trim());
+                      } catch (NumberFormatException ex) {
+                        throw new HongsError(0x46, "'" + val + "' can not cast to double");
+                      }
                     }
                 }
             } else
@@ -181,12 +209,14 @@ public class Synt {
                 if (val instanceof Number) {
                     val = ((Number) val).intValue() != 0;
                 } else if (val instanceof String) {
-                    String str = ((String) val).trim(  );
+                    String str = ( (String) val ).trim();
                     if (TRUE.matcher(str).matches()) {
                         val = true ;
                     } else
                     if (FAKE.matcher(str).matches()) {
                         val = false;
+                    } else {
+                        throw new HongsError(0x46, "'" + str + "' can not cast to boolean");
                     }
                 }
             }
