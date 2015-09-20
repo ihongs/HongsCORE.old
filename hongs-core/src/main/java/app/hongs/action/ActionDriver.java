@@ -11,6 +11,7 @@ import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.Filter;
@@ -20,9 +21,11 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -312,7 +315,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     }
 
     private void doFinish(Core core, ActionHelper hlpr, HttpServletRequest req) {
-        if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+        if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
             ActionHelper that = Core.getInstance(ActionHelper.class);
             HttpServletRequest R = that.getRequest();
             long time = System.currentTimeMillis(  ) - Core.ACTION_TIME.get();
@@ -322,10 +325,12 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tACTION_LANG : ").append(Core.ACTION_LANG.get())
                 .append("\r\n\tACTION_ZONE : ").append(Core.ACTION_ZONE.get())
                 .append("\r\n\tMethod      : ").append(R.getMethod())
-                .append("\r\n\tClient      : ").append(R.getRemoteAddr()).append(" ").append(R.getRemotePort())
+                .append("\r\n\tRemote      : ").append(R.getRemoteAddr())
+                                   .append(" ").append(R.getRemotePort())
+                .append("\r\n\tReqed-With  : ").append(R.getHeader("X-Requested-With"))
                 .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
-                .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
-                .append("\r\n\tObjects     : ").append(core.keySet( ).toString());
+                .append("\r\n\tObjects     : ").append(core.keySet( ).toString())
+                .append("\r\n\tRuntime     : ").append(Text.humanTime(time));
 
             // 输入输出数据, 这对调试程序非常有帮助
             Map rd, xd; CoreConfig cf = CoreConfig.getInstance();
@@ -348,8 +353,47 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
               sb.append("\r\n\tResults     : ")
                 .append(Text.indent(Data.toString(xd)).substring(1));
             }
+            
+            if (cf.getProperty("core.trace.action.context", false)) {
+              Map         map = new HashMap();
+              Enumeration<String> nms = req.getAttributeNames();
+              while (nms.hasMoreElements()) {
+                  String  nme = nms.nextElement();
+                  map.put(nme , req.getAttribute(nme));
+              }
+              if (!map.isEmpty()) {
+                sb.append("\r\n\tcontext     : ")
+                  .append(Text.indent(Data.toString(map)).substring(1));
+              }
+            }
+            
+            if (cf.getProperty("core.trace.action.session", false)) {
+              Map         map = new HashMap();
+              HttpSession ses = hlpr.getRequest().getSession( );
+              Enumeration<String> nms = ses.getAttributeNames();
+              while (nms.hasMoreElements()) {
+                  String  nme = nms.nextElement();
+                  map.put(nme , ses.getAttribute(nme));
+              }
+              if (!map.isEmpty()) {
+                sb.append("\r\n\tSession     : ")
+                  .append(Text.indent(Data.toString(map)).substring(1));
+              }
+            }
+            
+            if (cf.getProperty("core.trace.action.cookies", false)) {
+              Map         map = new HashMap();
+              Cookie[]    cks = hlpr.getRequest().getCookies( );
+              for (Cookie cke : cks) {
+                  map.put(cke.getName() , cke.getValue());
+              }
+              if (!map.isEmpty()) {
+                sb.append("\r\n\tCookies     : ")
+                  .append(Text.indent(Data.toString(map)).substring(1));
+              }
+            }
 
-            CoreLogger.trace( sb.toString());
+            CoreLogger.trace(sb.toString());
         }
 
         // 销毁此周期内的对象

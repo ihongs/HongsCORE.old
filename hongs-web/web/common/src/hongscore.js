@@ -269,7 +269,7 @@ function hsGetSeria (arr, name) {
  * @param {Array} value
  */
 function hsSetSeria (arr, name, value) {
-    hsSetSerias(arr, name, [value]);
+    hsSetSerias(arr, name, value != undefined && value != null ? [value] : []);
 }
 
 /**
@@ -327,7 +327,7 @@ function hsGetParam (url, name) {
  * @param {String} value
  */
 function hsSetParam (url, name, value) {
-    return hsSetParams(url, name, [value]);
+    return hsSetParams(url, name, value != undefined && value != null ? [value] : []);
 }
 
 /**

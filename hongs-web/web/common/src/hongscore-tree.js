@@ -205,18 +205,18 @@ function HsTree(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        this.load(hsFixPms(loadUrl, loadBox), rootInfo["id"]);
+        this.load(rootInfo["id"], hsFixPms(loadUrl, loadBox), loadBox);
     }
 }
 HsTree.prototype = {
-    load     : function(url, pid) {
-        if (url ) this._url = url;
-        if (pid ) this._pid = pid;
-        var data = {};
-        data[this.pidKey] = this._pid;
+    load     : function(pid, url, data) {
+        if (pid ) this._pid  = pid;
+        if (url ) this._url  = url;
+        if (data) this._data = hsSerialArr(data);
+        hsSetSerial(this.pidKey, this._pid);
         jQuery.hsAjax({
             "url"       : this._url ,
-            "data"      : data,
+            "data"      : this._data,
             "type"      : "POST",
             "dataType"  : "json",
             "funcName"  : "load",
@@ -368,11 +368,11 @@ HsTree.prototype = {
 
         // 更新/删除/移动
         if (data[this.idKey ] !== undefined) {
-            this.load(null, this.getPid(data[this.idKey]));
+            this.load(this.getPid(data[this.idKey]));
         }
         // 移动
         if (data[this.pidKey] !== undefined) {
-            this.load(null, /* Moved */ data[this.pidKey]);
+            this.load(/* Moved */ data[this.pidKey]);
         }
     },
 
@@ -402,9 +402,9 @@ HsTree.prototype = {
             if (evt.isDefaultPrevented()) return;
 
             if (data[that.idKey] !== undefined) {
-                that.load(null, that.getPid(data[that.idKey])); // 修改
+                that.load(that.getPid(data[that.idKey])); // 修改
             } else {
-                that.load(null, that.getSid(/* Current id */)); // 添加
+                that.load(that.getSid(/* Current id */)); // 添加
             }
         });
     },
@@ -432,7 +432,7 @@ HsTree.prototype = {
                nod.addClass("tree-open"):
                nod.addClass("tree-fold");
         } else {
-            this.load(null, id);
+            this.load(id);
         }
     },
 

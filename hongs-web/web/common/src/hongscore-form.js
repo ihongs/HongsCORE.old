@@ -34,7 +34,7 @@ function HsForm(opts, context) {
         }
     }
 
-    var loadArr = hsSerialArr(loadBox);
+    var loadArr = hsSerialArr(/***/ loadBox);
     if (loadUrl) {
         loadUrl = hsFixPms(loadUrl, loadArr);
         jQuery.merge(loadArr, hsSerialArr(loadUrl));
@@ -61,7 +61,7 @@ function HsForm(opts, context) {
     if (loadUrl
     && (hsGetSeria(loadArr, idKey)
     ||  hsGetSeria(loadArr, jdKey))) {
-        this.load (loadUrl);
+        this.load (loadUrl, loadArr);
     } else {
         this.loadBack( {} );
     }

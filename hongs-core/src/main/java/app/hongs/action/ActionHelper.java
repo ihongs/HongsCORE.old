@@ -531,7 +531,7 @@ public class ActionHelper implements Cloneable
       }
 
       Cookie[] cookies = this.getRequest().getCookies();
-      if (cookies == null) {
+      if (cookies != null) {
           for (Cookie cookie : cookies) {
               if (cookie.getName().equals(name)) {
                   return cookie.getValue();
@@ -775,6 +775,11 @@ public class ActionHelper implements Cloneable
    */
   public void responed()
   {
+    String pb  = System.getProperty("powered.by");
+    if  (  pb != null  )
+    {
+      this.response.setHeader("X-Powered-By", pb);
+    }
     this.print(responseData);
     this.responseData = null;
   }

@@ -166,7 +166,7 @@ function HsList(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        this.load(hsFixPms(loadUrl, loadBox));
+        this.load(hsFixPms(loadUrl, loadBox), loadBox);
     }
 }
 HsList.prototype = {
