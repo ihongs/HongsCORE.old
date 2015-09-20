@@ -89,42 +89,60 @@ public class ApisAction
             return;
         }
 
-        // 将请求数据处理之后传递
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
-        String        sid = Synt.declare(req.getParameter(".token"),String.class);
-        String       json = Synt.declare(req.getParameter(".data" ),String.class);
+
+        // 提取 API 特有的参数
+//      String   apd = req.getParameter(".appid");
+        String   sid = req.getParameter(".token");
+        String  json = req.getParameter(".data" );
+        String  ccnv = req.getParameter(".conv" );
+        boolean scok ;
+        try {
+            scok = Synt.declare(req.getParameter(".scok"), false);
+        } catch (HongsError er) {
+            hlpr.error400("Value for '.scok' can not be case to boolean");
+            return;
+        }
+        boolean wrap ;
+        try {
+            wrap = Synt.declare(req.getParameter(".wrap"), false);
+        } catch (HongsError er) {
+            hlpr.error400("Value for '.wrap' can not be case to boolean");
+            return;
+        }
+
+        // 将请求数据处理之后传递
         if (json != null) {
             try {
-                Map  send = Synt.declare(Data.toObject(json), Map.class);
-                Map  data = hlpr.getRequestData();
+                Map send = Synt.declare(Data.toObject(json), Map.class);
+                Map data = hlpr.getRequestData();
                 data.putAll( send );
+            } catch (HongsError er) {
+                if (er.getCode() == 0x40 || er.getCode() == 0x46) {
+                    hlpr.error400 ( "Can not parse value for '.data'" );
+                    return;
+                }
+                throw new ServletException(er);
             } catch (HongsException ex) {
                 throw new ServletException(ex);
-            } catch (HongsError er) {
-                throw new ServletException(er);
             }
         }
 
         // 将请求转发到动作处理器
         act = parseAct(act, sid, mts);
-        req.getRequestDispatcher(act).include ( req, rsp);
+        req.getRequestDispatcher(act).include(req, rsp);
         hlpr.reinitHelper ( req, rsp);
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
         if (resp != null) {
-            Boolean scok = Synt.declare(req.getParameter(".scok"), Boolean.class);
-            Boolean wrap = Synt.declare(req.getParameter(".wrap"), Boolean.class);
-            String  ccnv = Synt.declare(req.getParameter(".conv"),  String.class);
-            Set     conv = Synt.declare(ccnv == null ? null : ccnv.split("[\\s\\+]+"), Set.class);
-
             // 状态总是 200
-            if (scok != null && scok) {
+            if (scok) {
                 rsp.setStatus(javax.servlet.http.HttpServletResponse.SC_OK);
             }
 
             // 返回节点
-            if (wrap != null && wrap) {
+            if (wrap) {
                 Map    data;
                 Object xxxx;
                 xxxx = resp.get("data" );
@@ -151,6 +169,7 @@ public class ApisAction
             }
 
             // 转换策略
+            Set conv  = Synt.declare(ccnv==null ? null : ccnv.split("[\\s\\+]+"), Set.class);
             if (conv != null) {
                 Conv cnvr = new Conv();
                 boolean     all =  conv.contains( "all2str");
