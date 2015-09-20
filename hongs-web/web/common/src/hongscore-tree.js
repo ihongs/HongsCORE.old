@@ -213,7 +213,7 @@ HsTree.prototype = {
         if (pid ) this._pid  = pid;
         if (url ) this._url  = url;
         if (data) this._data = hsSerialArr(data);
-        hsSetSerial(this.pidKey, this._pid);
+        hsSetSeria(this.pidKey, this._pid);
         jQuery.hsAjax({
             "url"       : this._url ,
             "data"      : this._data,
