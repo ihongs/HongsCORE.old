@@ -28,7 +28,7 @@ import java.util.Set;
  * permit 默认调用 filter 来实现的, 可覆盖它来做资源过滤操作.<br/>
  * 可使用查询参数:
  * <code>
- * ?pn=1&rn=10&f1=123&f2.-gt=456&wd=a+b&ob=-f1+f2&sf=id+f1+f2
+ * ?pn=1&rn=10&f1=123&f2.-gt=456&wd=a+b&ob=-f1+f2&rb=id+f1+f2
  * </code>
  详见 filter 方法说明
  </p>
@@ -103,7 +103,7 @@ implements IRecord
    * 字段参数名
    * 影响getPage/getList/filter
    */
-  protected String colsKey = "sf";
+  protected String colsKey = "rb";
 
   /**
    * 排序参数名
@@ -132,7 +132,7 @@ implements IRecord
    * 构造方法
    *
    * 需指定该模型对应的表对象.
-   * 如传递的 id,wd,pn,gn,rn,sf,ob 等参数名不同,
+   * 如传递的 id,wd,pn,gn,rn,rb,ob 等参数名不同,
    * 可在构造时分别指定;
    * 请指定被搜索的字段.
    *
@@ -153,7 +153,7 @@ implements IRecord
     this.pageKey = conf.getProperty("fore.page.key", "pn");
     this.pagsKey = conf.getProperty("fore.pags.key", "gn");
     this.rowsKey = conf.getProperty("fore.rows.key", "rn");
-    this.colsKey = conf.getProperty("fore.cols.key", "sf");
+    this.colsKey = conf.getProperty("fore.cols.key", "rb");
     this.sortKey = conf.getProperty("fore.sort.key", "ob");
     this.findKey = conf.getProperty("fore.find.key", "wd");
   }
@@ -754,7 +754,7 @@ implements IRecord
    *
    * 设计目标:
    * 1) 按照cs参数设置查询字段;
-   *    限定字段列表: sf=a+b+c或sf=-a+x.b, -表示排除该字段;
+   *    限定字段列表: rb=a+b+c或rb=-a+x.b, -表示排除该字段;
    * 2) 按照ob参数设置排序方式,
    *    多个字段排序: ob=a+b+c或ob=-a+b+c, -表示该字段逆序;
    * 3) 按照wd参数设置模糊查询,
@@ -1222,52 +1222,52 @@ implements IRecord
     {
       Map map = (Map) val;
       Set set = map.keySet();
-      if (map.containsKey("-lt"))
+      if (map.containsKey("~lt"))
       {
-        set.remove("-lt");
-        Object vaz = map.get("-lt");
+        set.remove("~lt");
+        Object vaz = map.get("~lt");
         caze.where(key+" < ?", vaz);
       }
-      if (map.containsKey("-le"))
+      if (map.containsKey("~le"))
       {
-        set.remove("-le");
-        Object vaz = map.get("-le");
+        set.remove("~le");
+        Object vaz = map.get("~le");
         caze.where(key+" <= ?",vaz);
       }
-      if (map.containsKey("-gt"))
+      if (map.containsKey("~gt"))
       {
-        set.remove("-gt");
-        Object vaz = map.get("-gt");
+        set.remove("~gt");
+        Object vaz = map.get("~gt");
         caze.where(key+" > ?", vaz);
       }
-      if (map.containsKey("-ge"))
+      if (map.containsKey("~ge"))
       {
-        set.remove("-ge");
-        Object vaz = map.get("-ge");
+        set.remove("~ge");
+        Object vaz = map.get("~ge");
         caze.where(key+" >= ?",vaz);
       }
-      if (map.containsKey("-eq"))
+      if (map.containsKey("~eq"))
       {
-        set.remove("-eq");
-        Object vaz = map.get("-eq");
+        set.remove("~eq");
+        Object vaz = map.get("~eq");
         caze.where(key+" = ?", vaz);
       }
-      if (map.containsKey("-ne"))
+      if (map.containsKey("~ne"))
       {
-        set.remove("-ne");
-        Object vaz = map.get("-ne");
+        set.remove("~ne");
+        Object vaz = map.get("~ne");
         caze.where(key+" != ?",vaz);
       }
-      if (map.containsKey("-in"))
+      if (map.containsKey("~in"))
       {
-        set.remove("-in");
-        Object vaz = map.get("-in");
+        set.remove("~in");
+        Object vaz = map.get("~in");
         caze.where(key+" IN (?)", vaz);
       }
-      if (map.containsKey("-ni"))
+      if (map.containsKey("~ni"))
       {
-        set.remove("-ni");
-        Object vaz = map.get("-ni");
+        set.remove("~ni");
+        Object vaz = map.get("~ni");
         caze.where(key+" NOT IN (?)", vaz);
       }
       if (!set.isEmpty())

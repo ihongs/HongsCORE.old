@@ -25,7 +25,7 @@ public class SearchCmdlet {
             "name=s",
             "id*s",
             "wd*s",
-            "sf*s",
+            "rb*s",
             "ob*s",
             "pn:i",
             "gn:i",

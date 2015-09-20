@@ -351,7 +351,7 @@ public class Dict
     Object[] keys = new Object[keyz.length];
     int i = 0;
     for ( String keyn : keyz) {
-        if (keyn.startsWith("#")) {
+        if (keyn.startsWith("~")) {
             keys[i++] = Synt.declare(keyn.substring(1) , 0);
         } else
         if (keyn.length() == 0 && i != 0) {

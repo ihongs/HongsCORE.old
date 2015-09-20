@@ -77,22 +77,22 @@ public class PickedInvoker implements FilterInvoker {
             }
 
             // 通常只需要获取值和名字即可
-            Set sf = new HashSet();
+            Set rb = new HashSet();
             String vk = (String) mt.get("data-vk");
             String tk = (String) mt.get("data-tk");
             if (null != vk && !"".equals(vk)
             &&  null != tk && !"".equals(tk)) {
-                sf.add( vk);
-                sf.add( tk);
+                rb.add( vk);
+                rb.add( tk);
             } else {
-                sf.add("-");
+                rb.add("-");
             }
 
             // 调用关联资源的动作获取资源
             Map rd = new HashMap();
             rd.put("-for-pick", 1);
             rd.put("rn", 0 );
-            rd.put("sf", sf);
+            rd.put("rb", rb);
             rd.put("id", rsp.get( name ));
             ActionHelper hlp = helper.clone(  );
                          hlp.setRequestData(rd);

@@ -153,12 +153,12 @@ function hsResponObj(rst, qut) {
  */
 function hsSerialArr(obj) {
     var arr = [];
-    var typ = !jQuery.isPlainObject() ? jQuery.type(obj) : "dict";
+    var typ = !jQuery.isPlainObject() ? jQuery.type(obj) : "obj";
     switch (typ) {
-        case  "dict" :
-            hsEach (obj, function(val, key) {
+        case  "obj"  :
+            hsEach (obj, function (val, key) {
                 if (key.length > 0) {
-                    key = key.join('.'/**/);
+                    key = key.join('.' /**/);
                     arr.push({name: key, value: val});
                 }
             });
@@ -181,21 +181,21 @@ function hsSerialArr(obj) {
             break;
         case "object":
             obj = jQuery( obj );
-            if (obj.data("load")) {
+            if (obj.data("href")) {
                 arr = [];
                 var pos ;
-                var url = obj.data("load");
+                var url = obj.data("href");
                 var dat = obj.data("data");
                 pos = url.indexOf("?");
                 if (pos != -1) {
-                    jQuery.merge(arr, hsSerialArr(url.substring(pos+1)));
+                    hsSerialMix(arr, hsSerialArr(url.substring(pos+1)));
                 }
                 pos = url.indexOf("#");
                 if (pos != -1) {
-                    jQuery.merge(arr, hsSerialArr(url.substring(pos+1)));
+                    hsSerialMix(arr, hsSerialArr(url.substring(pos+1)));
                 }
                 if (dat) {
-                    jQuery.merge(arr, hsSerialArr(dat));
+                    hsSerialMix(arr, hsSerialArr(dat));
                 }
             } else {
                 arr = jQuery(obj).serializeArray();
@@ -206,6 +206,23 @@ function hsSerialArr(obj) {
             break;
     }
     return  arr;
+}
+/**
+ * 序列化为字典, 供快速地查找
+ * @param {String|Object|Array|Elements} obj
+ * @return {Object}
+ */
+function hsSerialDic(obj) {
+    var arr = hsSerialArr(obj);
+    obj = {};
+    for(var i = 0; i < arr.length; i ++) {
+        var k =  arr[i].name
+            .replace(/\]\[/g, ".")
+            .replace(/\[/   , ".")
+            .replace(/\]/   , "" );
+        obj[k] = arr[i].value;
+    }
+    return obj;
 }
 /**
  * 序列化为对象, 供进一步操作(可以使用hsGetValue获取数据)
@@ -219,6 +236,23 @@ function hsSerialObj(obj) {
         hsSetValue(obj, arr[i].name, arr[i].value);
     }
     return obj;
+}
+/**
+ * 将 ar2 并入 arr 中, arr 和 ar2 必须都是 SerialArr 结构
+ * @param {Array} arr
+ * @param {Array} ar2 
+ */
+function hsSerialMix(arr, ar2) {
+    var map = {};
+    for(var i =  0, j = ar2.length  ; i < j; i ++) {
+        map[ar2[i].name] = 1 ;
+    }
+    for(var i = -1, j = arr.length-1; i < j; j --) {
+        if (map[arr[j].name]) {
+            arr.splice(j , 1);
+        }
+    }
+    jQuery.merge(arr, ar2);
 }
 /**
  * 获取多个序列值
@@ -247,7 +281,7 @@ function hsSetSerias(arr, name, value) {
             arr.splice(j, 1);
         }
     }
-    for(var i = 0; i < value.length ; i ++) {
+    for(var i = 0 ; i < value.length; i ++) {
         arr.push({name: name, value: value[i]});
     }
 }
@@ -427,7 +461,7 @@ function _hsGetDakey(path) {
     var i , keys = [];
     for(i = 0; i < path.length; i ++) {
         var keyn = path[i];
-        if (keyn.substr(0, 1) == '#') {
+        if (keyn.substr(0, 1) == '~') {
             keys.push(parseInt(keyn.substr(1)));
         } else
         if (keyn.length == 0 && i!=0) {
@@ -621,6 +655,7 @@ function hsFixUri   (uri) {
 }
 /**
  * 补全URI为其设置参数
+ * 注意: 参数必须是单个的, 对多个参数如 &a[]=$a&a[]=$a 只会设置两个一样的值
  * @param {String} uri
  * @param {Object} pms 可以是 hsSerialArr 或 .loadbox 节点
  * @returns {String} 完整的URI
@@ -1067,7 +1102,7 @@ $.fn.hsLoad = function(url, data, complete) {
     }
 
     var dat = data ? hsSerialArr(data): [];
-    this.data( "load", url )
+    this.data( "href", url )
         .data( "data", dat )
         .addClass("loadbox")
         .addClass("loading");
@@ -1102,7 +1137,7 @@ $.fn.hsLoad = function(url, data, complete) {
 $.fn.hsOpen = function(url, data, complete) {
     var prt = $(this);
     var box;
-    var pre;
+    var ref;
     var tab;
 
     if (prt.is(".panes")) {
@@ -1125,7 +1160,7 @@ $.fn.hsOpen = function(url, data, complete) {
     }
 
     if (tab) {
-        pre = tab.parent().children( ).filter(".active");
+        ref = tab.parent().children( ).filter(".active");
         tab.show().find( "a" ).click();
         if (tab.find("a span").size()) {
             tab.find("a span").not(".close" /*btn*/)
@@ -1139,11 +1174,11 @@ $.fn.hsOpen = function(url, data, complete) {
             prt.empty();
         }
     } else {
-        pre = prt.contents().detach();
+        ref = prt.contents().detach();
     }
 
     box = $('<div class="openbox"></div>')
-          .appendTo(prt).data("pre", pre );
+          .appendTo(prt).data("ref", ref );
     box.hsLoad( url, data, complete );
     return box;
 };
@@ -1169,7 +1204,7 @@ $.fn.hsClose = function() {
 
     // 恢复标签
     if (tab) {
-        var idx = box.data("pre") ? box.data("pre").index() : 0;
+        var idx = box.data("ref") ? box.data("ref").index() : 0;
 //      tab.parent().children().eq(idx).find( "a" ).click() ;
         var tbs = tab.parent().children();
         var pns = prt.parent().children();
@@ -1188,8 +1223,8 @@ $.fn.hsClose = function() {
         }
     } else
     // 恢复内容
-    if (box.data( "pre" )) {
-        prt.append(box.data( "pre" )) ; box.remove();
+    if (box.data( "ref" )) {
+        prt.append(box.data( "ref" )) ; box.remove();
     } else
     // 关闭浮窗
     if (box.closest(".modal").size()) {
@@ -1660,7 +1695,7 @@ function(evt) {
             }
         });
     }
-    $(this).data("vals", vals);console.log(vals)
+    $(this).data("vals", vals);
     $(this).val ( vals );
 });
 

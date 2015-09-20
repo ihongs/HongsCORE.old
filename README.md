@@ -167,48 +167,46 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
 
 ## 请求规则
 
-支持 Content-Type 为 application/x-www-form-urlencoded, multipart/form-data 和 application/json 的请求, 数据结构为:
+支持 Content-Type 为 application/x-www-form-urlencoded, multipart/form-data 和 application/json 的请求, 组成结构为("+" 在 URL 中为空格):
 
-    f1=1&f2.-eq=2&f3.-in.=30&f3.-in.=31&t1.f4.-gt=abc&ob=-f5+f6&wd=Hello+world
+    f1=1&f2.~eq=2&f3.~in.=30&f3.~in.=31&t1.f4.~gt=abc&ob=-f5+f6&wd=Hello+world
 
 或兼容 PHP 的方式
 
-    f1=1&f2[-eq]=2&f3[-in][]=30&f3[-in][]=31&t1[f4][-gt]=abc&ob=-f5+f6&wd=Hello+world
+    f1=1&f2[~eq]=2&f3[~in][]=30&f3[~in][]=31&t1[f4][~gt]=abc&ob=-f5+f6&wd=Hello+world
 
 会转成 JSON 结构:
 
     {
         "f1": 1,
         "f2": {
-            "-eq": 2
+            "~eq": 2
         },
         "f3": {
-            "-in": [
+            "~in": [
                 30,
                 31
             ]
         },
         "t1": {
             "f4": {
-                "-gt": "abc"
+                "~gt": "abc"
             }
         },
         "ob": "-f5 f6",
         "wd": "Hello world"
     }
 
-注: "+" 在 URL 中为空格.
+其中 .~eq 这样的标识为过滤操作符, 其含义为:
 
-其中 .-eq 这样的标识为过滤操作符, 其含义为:
-
-    eq      等于
-    ne      不等于
-    gt      大于
-    ge      大于或等于
-    lt      小于
-    le      小于或等于
-    in      包含
-    ni      不包含
+    ~eq     等于
+    ~ne     不等于
+    ~gt     大于
+    ~ge     大于或等于
+    ~lt     小于
+    ~le     小于或等于
+    ~in     包含
+    ~ni     不包含
 
 有一些参数名具有特定意义, 如:
 
@@ -216,9 +214,11 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     rn      额定行数(rows cnt)
     wd      搜索字词(word)
     ob      排序字段(order by)
-    sf      查询字段(select for)
-    or      或查询
-    ar      多组或
+    rb      需求字段(reply by)
+    or      或查询(or)
+    ar      多组或(and)
+
+请避免将这些参数作为字段名.
 
 ## 响应数据
 
@@ -299,7 +299,7 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
     etime   结束时间, DATETIME,TIMESTAMP,BIGINT,INTEGER
     state   状态标识, TINYINT, 1为正常, 0为删除, 可用其他数字表示其他状态
 
-因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请尽量避开这些名称: pn,rn,wd,ob,sf,or,ar. 另, 在配置文件和 Model 中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
+因字段名可用于 URL 中作为过滤参数, 而部分参数已有特殊含义, 字段取名时请尽量避开这些名称: pn,rn,wd,ob,rb,or,ar. 另, 在配置文件和 Model 中可以重新定义这些名称, 但并不建议修改(我信奉少量的约定胜于过多的配置).
 
 # HongsCORE framework for Javascript
 

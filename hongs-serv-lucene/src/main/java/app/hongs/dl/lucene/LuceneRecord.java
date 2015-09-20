@@ -94,7 +94,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected String pageKey = "pn";
     protected String pagsKey = "gn";
     protected String rowsKey = "rn";
-    protected String colsKey = "sf";
+    protected String colsKey = "rb";
     protected String sortKey = "ob";
     protected String findKey = "wd";
 
@@ -130,7 +130,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         this.pageKey  = conf.getProperty("fore.page.key", "pn");
         this.pagsKey  = conf.getProperty("fore.pags.key", "gn");
         this.rowsKey  = conf.getProperty("fore.rows.key", "rn");
-        this.colsKey  = conf.getProperty("fore.cols.key", "sf");
+        this.colsKey  = conf.getProperty("fore.cols.key", "rb");
         this.sortKey  = conf.getProperty("fore.sort.key", "ob");
         this.findKey  = conf.getProperty("fore.find.key", "wd");
 
@@ -214,7 +214,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * pn   页码
      * wd   搜索
      * ob   排序
-     * sf   字段
+     * rb   字段
      * or   多组"或"关系条件
      * ar   串联多组关系条件
      * xr   附加多组或关系, LuceneRecord 特有
@@ -1019,7 +1019,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 query.add(quary, BooleanClause.Occur.MUST);
                 if (!(fv instanceof Map) ) {
                    Map fw = new HashMap( );
-                   fw.put("-or" , fv);
+                   fw.put("~or" , fv);
                    fv= fw;
                 }
             }
@@ -1368,19 +1368,19 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * 组织查询条件
      *
      * 操作符, 此键为约定不可配置, 字段名务必避开这些名词(不要使用-前缀即可):
-     * -eq 等于
-     * -ne 不等于
-     * -lt 小于
-     * -le 小于或等于
-     * -gt 大于
-     * -ge 大于或等于
-     * -in 包含
-     * -ni 不包含
+     * ~eq 等于
+     * ~ne 不等于
+     * ~lt 小于
+     * ~le 小于或等于
+     * ~gt 大于
+     * ~ge 大于或等于
+     * ~in 包含
+     * ~ni 不包含
      * 以下为 Lucene 特有的操作符:
-     * -or 或匹配, 有则优先
-     * -oi 或包含, 有则优先
-     * -ai 全包含, 此为目标真子集
-     * -wt 优先度, 设定查询的权重
+     * ~or 或匹配, 有则优先
+     * ~oi 或包含, 有则优先
+     * ~ai 全包含, 此为目标真子集
+     * ~wt 优先度, 设定查询的权重
      * 注意: 默认情况下查询参数不给值则忽略, 如果指定了操作符则匹配空值
      *
      * @param qry
@@ -1406,10 +1406,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 if (c.isEmpty()) {
                     return;
                 }
-                m.put("-in", c);
+                m.put("~in", c);
             } else
             {
-                m.put("-eq", v);
+                m.put("~eq", v);
             }
         }
 
@@ -1429,51 +1429,51 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             sq.fuzzyMinSim(Synt.declare(fc.get("lucene-parser-fuzzyMinSim"),   Float.class));
         }
 
-        if (m.containsKey("-wt")) {
-            Object n = m.remove("-wt");
+        if (m.containsKey("~wt")) {
+            Object n = m.remove("~wt");
             q.bst(Synt.declare(n, 1F));
         }
 
-        if (m.containsKey("-eq")) {
-            Object n = m.remove("-eq");
+        if (m.containsKey("~eq")) {
+            Object n = m.remove("~eq");
             qry.add(q.add(k, n), BooleanClause.Occur.MUST);
         }
 
-        if (m.containsKey("-ne")) {
-            Object n = m.remove("-ne");
+        if (m.containsKey("~ne")) {
+            Object n = m.remove("~ne");
             qry.add(q.add(k, n), BooleanClause.Occur.MUST_NOT);
         }
 
-        if (m.containsKey("-or")) {
-            Object n = m.remove("-or");
+        if (m.containsKey("~or")) {
+            Object n = m.remove("~or");
             qry.add(q.add(k, n), BooleanClause.Occur.SHOULD);
         }
 
-        if (m.containsKey("-in")) { // In
+        if (m.containsKey("~in")) { // In
             BooleanQuery qay = new BooleanQuery();
-            Set a = Synt.declare(m.remove("-in"), new HashSet());
+            Set a = Synt.declare(m.remove("~in"), new HashSet());
             for(Object x : a) {
                 qay.add(q.add(k, x), BooleanClause.Occur.SHOULD);
             }
             qry.add(qay, BooleanClause.Occur.MUST);
         }
 
-        if (m.containsKey("-ai")) { // All In
-            Set a = Synt.declare(m.remove("-ai"), new HashSet());
+        if (m.containsKey("~ai")) { // All In
+            Set a = Synt.declare(m.remove("~ai"), new HashSet());
             for(Object x : a) {
                 qry.add(q.add(k, x), BooleanClause.Occur.MUST);
             }
         }
 
-        if (m.containsKey("-ni")) { // Not In
-            Set a = Synt.declare(m.remove("-ni"), new HashSet());
+        if (m.containsKey("~ni")) { // Not In
+            Set a = Synt.declare(m.remove("~ni"), new HashSet());
             for(Object x : a) {
                 qry.add(q.add(k, x), BooleanClause.Occur.MUST_NOT);
             }
         }
 
-        if (m.containsKey("-oi")) { // Or In
-            Set a = Synt.declare(m.remove("-oi"), new HashSet());
+        if (m.containsKey("~oi")) { // Or In
+            Set a = Synt.declare(m.remove("~oi"), new HashSet());
             for(Object x : a) {
                 qry.add(q.add(k, x), BooleanClause.Occur.SHOULD);
             }
@@ -1484,21 +1484,21 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         Object  n, x;
         boolean l, g;
 
-        if (m.containsKey("-gt")) {
-            n = m.remove ("-gt"); l = false;
+        if (m.containsKey("~gt")) {
+            n = m.remove ("~gt"); l = false;
         } else
-        if (m.containsKey("-ge")) {
-            n = m.remove ("-ge"); l = true;
+        if (m.containsKey("~ge")) {
+            n = m.remove ("~ge"); l = true;
         } else
         {
             n = null; l = true;
         }
 
-        if (m.containsKey("-lt")) {
-            x = m.remove ("-lt"); g = false;
+        if (m.containsKey("~lt")) {
+            x = m.remove ("~lt"); g = false;
         } else
-        if (m.containsKey("-le")) {
-            x = m.remove ("-le"); g = true;
+        if (m.containsKey("~le")) {
+            x = m.remove ("~le"); g = true;
         } else
         {
             x = null; g = true;
