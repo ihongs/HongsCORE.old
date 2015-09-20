@@ -117,15 +117,15 @@ function hsResponObj(rst, qut) {
         }
         // 成功失败消息处理 (失败则直接弹对话框)
         if (! qut && ! self.HsGONE) {
-            if (! rst.ok) {
+            if (rst.ok) {
                 if (rst.msg) {
-                    alert(rst.msg);
-                } else {
-                    alert(hsGetLang("error.unkwn"));
+                    jQuery.hsNote(rst.msg, 'alert-success');
                 }
             } else {
                 if (rst.msg) {
-                    jQuery.hsNote(rst.msg, 'alert-success');
+                    alert(rst.msg); // alert-danger;
+                } else {
+                    alert(hsGetLang("error.unkwn"));
                 }
             }
         }
