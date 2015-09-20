@@ -251,9 +251,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
 //      if (!hlpr.getResponse().isCommitted()) {
             Map dat  = hlpr.getResponseData();
             if (dat != null) {
-                if (0< Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                    req.setAttribute(DATA, dat);
-                }
+                req.setAttribute( RESP, dat );
 
 //              HttpServletRequest  raq = hlpr.getRequest( );
 //              HttpServletResponse rzp = hlpr.getResponse();
@@ -341,7 +339,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 throw HongsError.common(null , ex);
             }
             if (xd == null) {
-                xd = (Map ) req.getAttribute(DATA);
+                xd = (Map ) req.getAttribute(RESP);
             }
             if (cf.getProperty("core.trace.action.request", false)
             &&  rd != null && !rd.isEmpty()) {
@@ -447,9 +445,9 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     public static final String PATH = "__HONGS_PATH__";
 
     /**
-     * Request Attribute: 当前返回数据(类型: Object)
+     * Request Attribute: 当前返回数据(类型: Map&lt;String, Object&gt;)
      */
-    public static final String DATA = "__HONGS_DATA__";
+    public static final String RESP = "__HONGS_RESP__";
 
     /**
      * 获得当前工作的Core

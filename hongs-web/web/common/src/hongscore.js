@@ -147,22 +147,14 @@ function hsResponObj(rst, qut) {
 }
 
 /**
- * 序列化为数组, 供发往服务器
+ * 序列化为数组, 供发往服务器(类似 jQuery.fn.serializeArray)
  * @param {String|Object|Array|Elements} obj
  * @param {Array}
  */
 function hsSerialArr(obj) {
     var arr = [];
-    var typ = !jQuery.isPlainObject() ? jQuery.type(obj) : "obj";
+    var typ = !jQuery.isPlainObject() ? jQuery.type(obj) : "objact";
     switch (typ) {
-        case  "obj"  :
-            hsEach (obj, function (val, key) {
-                if (key.length > 0) {
-                    key = key.join('.' /**/);
-                    arr.push({name: key, value: val});
-                }
-            });
-            break;
         case "string":
             var ar1, ar2, key, val, i = 0;
             ar1 = obj.split('#' , 2);
@@ -178,6 +170,14 @@ function hsSerialArr(obj) {
                     arr.push({name: key, value: val});
                 }
             }
+            break;
+        case "objact":
+            hsForEach(obj,function(val,key) {
+                if (key.length > 0) {
+                    key = key.join('.'/**/);
+                    arr.push({name: key, value: val});
+                }
+            });
             break;
         case "object":
             obj = jQuery( obj );
@@ -208,21 +208,31 @@ function hsSerialArr(obj) {
     return  arr;
 }
 /**
- * 序列化为字典, 供快速地查找
+ * 序列化为字典, 供快速地查找(直接使用object-key获取数据)
  * @param {String|Object|Array|Elements} obj
  * @return {Object}
  */
 function hsSerialDic(obj) {
     var arr = hsSerialArr(obj);
+    var reg = /(\.\.|\.$)/;
     obj = {};
-    for(var i = 0; i < arr.length; i ++) {
-        var k =  arr[i].name
-            .replace(/\]\[/g, ".")
-            .replace(/\[/   , ".")
-            .replace(/\]/   , "" );
-        obj[k] = arr[i].value;
+    for(var i = 0 ; i < arr.length ; i ++) {
+        var k = arr[i].name ;
+        var v = arr[i].value;
+        if (k.length == 0) continue;
+        k = k.replace(/\]\[/g, ".")
+             .replace(/\[/   , ".")
+             .replace(/\]/   , "" );
+        if (reg.test( k )) { // a.b. 或 a..b 都是数组
+            if (obj[k]===undefined) {
+                obj[k]=[ ];
+            }
+            obj[k].push(v);
+        } else {
+            obj[k]    = v ;
+        }
     }
-    return obj;
+    return  obj;
 }
 /**
  * 序列化为对象, 供进一步操作(可以使用hsGetValue获取数据)
@@ -238,9 +248,9 @@ function hsSerialObj(obj) {
     return obj;
 }
 /**
- * 将 ar2 并入 arr 中, arr 和 ar2 必须都是 SerialArr 结构
+ * 将 ar2 并入 arr 中, arr 和 ar2 必须都是 serializeArray 结构
  * @param {Array} arr
- * @param {Array} ar2 
+ * @param {Array} ar2
  */
 function hsSerialMix(arr, ar2) {
     var map = {};
@@ -566,6 +576,31 @@ function _hsSetDepth(obj, keys, val, pos) {
         }
 
         return obj;
+    }
+}
+
+/**
+ * 遍历对象或数组的全部叶子节点
+ * @param {Object,Array} data
+ * @param {Function} func
+ */
+function hsForEach(data, func) {
+    var path = [];
+    if (arguments.length>2) {
+        path = arguments[2];
+    }
+    if (jQuery.isPlainObject(data)) {
+        for (var k in data) {
+            hsForEach(data[k], func, path.concat([k]));
+        }
+    }
+    else if (jQuery.isArray (data)) {
+        for (var i = 0; i < data.length; i ++) {
+            hsForEach(data[i], func, path.concat([i]));
+        }
+    }
+    else if (path.length > 0) {
+        func(data, path);
     }
 }
 
@@ -983,31 +1018,6 @@ function hsPrsDate(text, format) {
   }
 
   return new Date(Date.parse(text2));
-}
-
-/**
- * 遍历对象或数组的全部叶子节点
- * @param {Object,Array} data
- * @param {Function} func
- */
-function hsEach(data, func) {
-    var path = [];
-    if (arguments.length>2) {
-        path = arguments[2];
-    }
-    if (jQuery.isPlainObject(data)) {
-        for (var k in data) {
-            hsEach(data[k], func, path.concat([k]));
-        }
-    }
-    else if (jQuery.isArray (data)) {
-        for (var i = 0; i < data.length; i ++) {
-            hsEach(data[i], func, path.concat([i]));
-        }
-    }
-    else {
-        func(data, path);
-    }
 }
 
 /**
