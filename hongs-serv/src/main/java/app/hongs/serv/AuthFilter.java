@@ -275,7 +275,7 @@ public class AuthFilter
         }
     }
 
-    if (isJson(req)) {
+    if (isAjax(req) || isJson(req)) {
         Map rsp = new HashMap();
             rsp.put("ok",false);
             rsp.put("msg", msg);
