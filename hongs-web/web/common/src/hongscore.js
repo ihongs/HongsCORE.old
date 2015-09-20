@@ -115,23 +115,19 @@ function hsResponObj(rst, qut) {
         if (typeof(rst.msg) === "undefined") {
             rst.msg =  "" ;
         }
-        if (! qut) {
-            if (rst.ok) {
-                if (rst.msg) {
-                    jQuery.hsNote(rst.msg, 'alert-success');
-                }
-            } else {
+        // 成功失败消息处理 (失败则直接弹对话框)
+        if (! qut && ! self.HsGONE) {
+            if (! rst.ok) {
                 if (rst.msg) {
                     alert(rst.msg);
                 } else {
                     alert(hsGetLang("error.unkwn"));
                 }
+            } else {
+                if (rst.msg) {
+                    jQuery.hsNote(rst.msg, 'alert-success');
+                }
             }
-        }
-        // 针对特定数据结构
-        if (typeof(rst['data']) !== "undefined") {
-            jQuery.extend(rst , rst['data']);
-            delete rst['data'];
         }
         // 服务器端要求跳转 (通常为未登录无权限)
         if (typeof(rst["goto"]) !== "undefined") {
@@ -140,7 +136,13 @@ function hsResponObj(rst, qut) {
             } else {
                 location.reload();
             }
+            self.HsGONE = true;
             delete rst["goto"];
+        }
+        // 针对特定数据结构
+        if (typeof(rst['data']) !== "undefined") {
+            jQuery.extend(rst , rst['data']);
+            delete rst['data'];
         }
     }
     return rst;
