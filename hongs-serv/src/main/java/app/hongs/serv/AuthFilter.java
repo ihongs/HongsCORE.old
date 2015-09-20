@@ -64,8 +64,8 @@ public class AuthFilter
    */
   private String[][] ignoreUrls = null;
 
-  private final Pattern IS_HTML = Pattern.compile("(text/html|text/webviewhtml)");
-  private final Pattern IS_JSON = Pattern.compile("(text/json|application/json)");
+  private final Pattern IS_HTML = Pattern.compile( "text/(html|plain)" );
+  private final Pattern IS_JSON = Pattern.compile("(text|application)/(x-)?(json|javascript)");
 
   @Override
   public void init(FilterConfig config)
@@ -275,7 +275,7 @@ public class AuthFilter
         }
     }
 
-    if (isAjax(req) || isJson(req)) {
+    if (isJson(req)) {
         Map rsp = new HashMap();
             rsp.put("ok",false);
             rsp.put("msg", msg);
