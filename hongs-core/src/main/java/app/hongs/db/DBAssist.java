@@ -206,7 +206,7 @@ public class DBAssist {
             }
 
             // 特定类型的不能列举和排序
-            if (!field.containsKey("findable") && listable.contains(field.get("__type__"))) {
+            if (!field.containsKey("findable") && findable.contains(field.get("__type__"))) {
                 field.put("findable", "yes");
             }
             if (!field.containsKey("listable") && listable.contains(field.get("__type__"))) {
@@ -225,6 +225,7 @@ public class DBAssist {
             }
         }
 
+        if (table.assocs != null) {
         Iterator it = table.assocs.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry et = (Map.Entry)it.next();
@@ -276,7 +277,7 @@ public class DBAssist {
             }
 
             // 特定类型的不能列举、排序
-            if (!field.containsKey("findable") && listable.contains(field.get("__type__"))) {
+            if (!field.containsKey("findable") && findable.contains(field.get("__type__"))) {
                 field.put("findable", "yes");
             }
             if (!field.containsKey("listable") && listable.contains(field.get("__type__"))) {
@@ -293,6 +294,7 @@ public class DBAssist {
             if (Synt.declare(field.get("listable"), false)) {
                 listCols.add(name);
             }
+        }
         }
 
         // 设置搜索和列举字段
