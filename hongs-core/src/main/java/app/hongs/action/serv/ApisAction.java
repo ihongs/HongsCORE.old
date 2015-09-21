@@ -131,7 +131,6 @@ public class ApisAction
         // 将请求转发到动作处理器
         act = parseAct(act, sid, mts);
         req.getRequestDispatcher(act).include(req, rsp);
-        hlpr.reinitHelper ( req, rsp);
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
