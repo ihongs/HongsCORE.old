@@ -3,6 +3,7 @@ package app.hongs.serv;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.action.ActionDriver;
+import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import java.io.File;
@@ -12,13 +13,13 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Set;
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 自动处理过滤器
@@ -37,7 +38,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Hongs
  */
-public class AutoFilter implements Filter {
+public class AutoFilter extends ActionDriver {
 
     private String action;
     private String layout;
@@ -91,9 +92,11 @@ public class AutoFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse rsp, FilterChain chain)
+    public void doFilter(Core core, ActionHelper hlpr, FilterChain chain)
             throws IOException, ServletException {
-        String url = ActionDriver.getCurrPath((HttpServletRequest) req);
+        HttpServletRequest  req = hlpr.getRequest( );
+        HttpServletResponse rsp = hlpr.getResponse();
+        String url = ActionDriver.getCurrPath( req );
 
         // 依次校验是否是需要排除的URL
         if (ignore != null) {
@@ -138,7 +141,7 @@ public class AutoFilter implements Filter {
             if (!ActionRunner.getActions().containsKey(act)) {
                 for(String axt : getacts()) {
                     if (act.endsWith(axt )) {
-                        doAction(req, rsp, url, axt +  ext);
+                        doAction( req, rsp, url, axt + ext);
                         return;
                     }
                 }
