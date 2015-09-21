@@ -490,7 +490,8 @@ public class MenuSet
    */
   public Set<String> getRoleSet() throws HongsException {
       if (session == null || session.length() == 0) {
-          throw new HongsException(0x10e2, "Can not get roles for menu: "+name);
+//        throw new HongsException(0x10e2, "Can not get roles for menu: "+name);
+          return null;
       }
       ActionHelper hlpr = Core.getInstance(ActionHelper.class );
       if (session.startsWith("@")) {
