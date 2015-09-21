@@ -79,8 +79,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected boolean IN_TRNSCT_MODE = false;
     protected boolean IN_OBJECT_MODE = false;
 
-    protected final Map<String, Map> fields;
-    protected final String           dbpath;
+    protected final Map<String, Map> fields ;
+    protected final String           dbpath ;
     protected       IndexWriter      writer = null ;
     protected       IndexReader      reader = null ;
     protected       IndexSearcher    finder = null ;
