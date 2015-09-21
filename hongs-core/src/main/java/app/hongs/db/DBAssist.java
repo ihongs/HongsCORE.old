@@ -206,13 +206,14 @@ public class DBAssist {
             }
 
             // 特定类型的不能列举和排序
-            if (!field.containsKey("findable") && findable.contains(field.get("__type__"))) {
+            String ft = Synt.declare( field.get("__type__"), "string" );
+            if (!field.containsKey("findable") && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
-            if (!field.containsKey("listable") && listable.contains(field.get("__type__"))) {
+            if (!field.containsKey("listable") && listable.contains(ft)) {
                 field.put("listable", "yes");
             }
-            if (!field.containsKey("sortable") && sortable.contains(field.get("__type__"))) {
+            if (!field.containsKey("sortable") && sortable.contains(ft)) {
                 field.put("sortable", "yes");
             }
 
@@ -277,6 +278,7 @@ public class DBAssist {
             }
 
             // 特定类型的不能列举、排序
+            String ft = Synt.declare( field.get("__type__"), "string" );
             if (!field.containsKey("findable") && findable.contains(field.get("__type__"))) {
                 field.put("findable", "yes");
             }
