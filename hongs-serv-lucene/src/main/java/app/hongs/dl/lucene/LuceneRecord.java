@@ -76,21 +76,20 @@ import org.apache.lucene.util.BytesRef;
  */
 public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
-    protected final String  dataPath;
-    protected final Map<String, Map   > fields;
-    protected final Map<String, String> ftypes;
+    protected boolean IN_TRNSCT_MODE = false;
+    protected boolean IN_OBJECT_MODE = false;
 
-    protected IndexWriter   writer = null;
-    protected IndexReader   reader = null;
-    protected IndexSearcher finder = null;
+    protected final String           datpat;
+    protected final Map<String, Map> fields;
+    protected       IndexWriter      writer = null ;
+    protected       IndexReader      reader = null ;
+    protected       IndexSearcher    finder = null ;
 
-    public boolean IN_TRNSCT_MODE = false;
-    public boolean IN_OBJECT_MODE = false;
-
-    protected String idKey = "id";
-    protected String arKey = "ar";
-    protected String orKey = "or";
-    protected String xrKey = "xr";
+    public    String   idCol = "id";
+    public    String   idKey = "id";
+    protected String   arKey = "ar";
+    protected String   orKey = "or";
+    protected String   xrKey = "xr";
     protected String pageKey = "pn";
     protected String pagsKey = "gn";
     protected String rowsKey = "rn";
@@ -98,31 +97,26 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected String sortKey = "ob";
     protected String findKey = "wd";
 
-    public String   idCol = "id";
-    public String[] findCols = new String[] {"name"};
-    public String[] listCols = new String[] {"name"};
-
-    public LuceneRecord(String path, final Map<String, Map> fields, final Map<String, String> ftypes)
+    public LuceneRecord(String datpat, final Map<String, Map> fields)
     throws HongsException {
-        if (path == null) {
-            path = "test";
+        if (datpat == null) {
+            datpat = "test";
         }
         Map m = new HashMap();
         m.put("CORE_PATH", Core.CORE_PATH);
         m.put("CONF_PATH", Core.CORE_PATH);
         m.put("DATA_PATH", Core.DATA_PATH);
-        path  = Text.inject(path, m);
-        if (! new File(path).isAbsolute()) {
-            path = Core.DATA_PATH +"/lucene/"+ path;
+        datpat  = Text.inject(datpat, m);
+        if (!new File(datpat).isAbsolute()) {
+            datpat = Core.DATA_PATH +"/lucene/"+ datpat;
         }
 
-        CoreConfig conf = CoreConfig.getInstance( );
+        this.datpat   = datpat;
+        this.fields   = fields;
 
-        this.dataPath = path;
+        CoreConfig conf = CoreConfig.getInstance();
 
-        this.fields   = fields != null ? fields : FormSet.getInstance("default").getForm(  "test"   );
-        this.ftypes   = ftypes != null ? ftypes : FormSet.getInstance("default").getEnum("__types__");
-
+        // 请求参数
         this.idKey    = conf.getProperty("fore.id.key"  , "id");
         this.arKey    = conf.getProperty("fore.ar.key"  , "ar");
         this.orKey    = conf.getProperty("fore.or.key"  , "or");
@@ -135,28 +129,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         this.findKey  = conf.getProperty("fore.find.key", "wd");
 
         // 模式标识
-        this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), conf.getProperty("core.in.trnsct.mode", false));
-        this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"), conf.getProperty("core.in.object.mode", false));
-
-        // 从字段配置中找 findable,listable 来填充 findCols,listCols
-        Set<String> findFields = new LinkedHashSet();
-        Set<String> listFields = new LinkedHashSet();
-        for(Map.Entry<String, Map> et : this.fields.entrySet()) {
-            Map field = et.getValue();
-            String fn = et.getKey(  );
-            if (Synt.declare(field.get("findable"), false)) {
-                findFields.add(fn);
-            }
-            if (Synt.declare(field.get("listable"), false)) {
-                listFields.add(fn);
-            }
-        }
-        if (!findFields.isEmpty()) {
-            this.findCols = findFields.toArray(new String[0]);
-        }
-        if (!listFields.isEmpty()) {
-            this.listCols = listFields.toArray(new String[0]);
-        }
+        this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"),
+                                        conf.getProperty("core.in.trnsct.mode", false));
+        this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"),
+                                        conf.getProperty("core.in.object.mode", false));
     }
 
     /**
@@ -168,8 +144,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     public LuceneRecord(String path, String conf, String form)
     throws HongsException {
-        this( path, FormSet.getInstance(  conf   ).getForm(   form    ) ,
-                    FormSet.getInstance("default").getEnum("__types__"));
+        this( path , FormSet.getInstance(conf).getForm(form) );
     }
 
     /**
@@ -334,7 +309,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public Map create(Map rd) throws HongsException {
         Map sd = new LinkedHashMap();
             sd.put("id",    add(rd));
-        for(String  fn : listCols) {
+        for(String  fn : getLists()) {
             sd.put( fn , rd.get(fn));
         }
         return rd;
@@ -637,13 +612,13 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
         try {
             // 索引目录不存在则先写入一个并删除
-            if (!(new File(dataPath)).exists()) {
+            if (!(new File(datpat)).exists()) {
                 connect();
                 del(add(new HashMap( )));
                 commit( );
             }
 
-            Path p = Paths.get(dataPath);
+            Path p = Paths.get(datpat);
             Directory dir = FSDirectory.open(p);
 
             reader = DirectoryReader.open (dir);
@@ -653,7 +628,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
-            CoreLogger.trace("Connect to lucene reader, data path: " + dataPath);
+            CoreLogger.trace("Connect to lucene reader, data path: " + datpat);
         }
     }
 
@@ -669,7 +644,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             IndexWriterConfig iwc = new IndexWriterConfig(getAnalyzer());
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 
-            Path d = Paths.get(dataPath);
+            Path d = Paths.get(datpat);
             Directory dir = FSDirectory.open(d);
 
             writer = new IndexWriter(dir , iwc);
@@ -678,7 +653,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
-            CoreLogger.trace("Connect to lucene writer, data path: " + dataPath);
+            CoreLogger.trace("Connect to lucene writer, data path: " + datpat);
         }
     }
 
@@ -730,7 +705,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
-            CoreLogger.trace("Close lucene connection, data path: " + dataPath);
+            CoreLogger.trace("Close lucene connection, data path: " + datpat);
         }
     }
 
@@ -904,6 +879,52 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
     }
 
+    private   Set<String> listCols = null;
+    protected Set<String> getLists() {
+        if (null != listCols) {
+            return  listCols;
+        }
+        listCols = new LinkedHashSet();
+        for(Map.Entry<String, Map> et : this.fields.entrySet()) {
+            Map field = et.getValue();
+            String fn = et.getKey(  );
+            if (Synt.declare(field.get("listable"), false)) {
+                listCols.add(fn);
+            }
+        }
+        return  listCols;
+    }
+
+    private   Set<String> findCols = null;
+    protected Set<String> getFinds() {
+        if (null != findCols) {
+            return  findCols;
+        }
+        findCols = new LinkedHashSet();
+        for(Map.Entry<String, Map> et : this.fields.entrySet()) {
+            Map field = et.getValue();
+            String fn = et.getKey(  );
+            if (Synt.declare(field.get("findable"), false)) {
+                findCols.add(fn);
+            }
+        }
+        return  findCols;
+    }
+
+    private   Map<String, String> typeMaps = null;
+    protected Map<String, String> getTypes() {
+        if (null != typeMaps) {
+            return  typeMaps;
+        }
+        try {
+            typeMaps = FormSet.getInstance( "default" )
+                              .getEnum    ("__types__");
+            return  typeMaps;
+        } catch (HongsException ex) {
+            throw new HongsError(HongsError.COMMON, ex);
+        }
+    }
+
     /**
      * 获取字段类型
      * 支持的类型有
@@ -918,6 +939,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @return
      */
     protected String getFtype(Map fc) {
+        Map<String, String> m = getTypes();
         String t = Synt.declare(fc.get("lucene-fieldtype"), String.class);
 
         // 如果未指定 lucene-fieldtype 则用 field-type 替代
@@ -931,7 +953,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 return "stored";
             }
 
-            t = Synt.declare(ftypes.get(t) , t);
+            t = Synt.declare(m.get(t) , t);
             if ("number".equals(t)) {
                 t = Synt.declare(fc.get("type"), "double");
             } else
@@ -1012,19 +1034,20 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
              * 将条件整理为 +(fn1:xxx fn2:xxx)
              */
             BooleanQuery quary;
-            if (findCols.length < 2) {
+            Set<String>  cols = getFinds();
+            if (cols.size() < 2) {
                 quary =  query;
             } else {
                 quary = new BooleanQuery();
                 query.add(quary, BooleanClause.Occur.MUST);
                 if (!(fv instanceof Map) ) {
                    Map fw = new HashMap( );
-                   fw.put("~or" , fv);
+                   fw.put("~or", fv);
                    fv= fw;
                 }
             }
 
-            for(String fk : findCols) {
+            for(String fk: cols) {
                 qryAdd(quary, fk, fv, new SearchQuery( ) );
             }
         }
