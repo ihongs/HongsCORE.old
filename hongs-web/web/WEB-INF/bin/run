@@ -2,7 +2,7 @@
 
 bindir=$(cd `dirname $0`; pwd)
 CORE_PATH=`dirname $bindir`
-JAVA_PATH="$JAVA_HOME/bin/java
+JAVA_PATH="$JAVA_HOME/bin/java"
 JAVA_OPTS="$JAVA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787"
 KLASSPATH="$CLASSPATH:$CORE_PATH/lib/*:$CORE_PATH/classes:$CORE_PATH/lib/classes"
 
@@ -13,8 +13,8 @@ then
 fi
 if [ '' = "$JAVA_PATH" ]
 then
-    echo "Java can't be found!"
-    exit 1
+    echo  "I can not find java"
+    exit  1
 fi
 
 "$JAVA_PATH" $JAVA_OPTS \
