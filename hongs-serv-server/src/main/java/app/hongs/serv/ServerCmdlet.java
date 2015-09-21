@@ -32,14 +32,15 @@ public class ServerCmdlet {
         webapp.setParentLoaderPriority( true );
 
         Server server = new Server(port);
-        /****/ server.setHandler(webapp);
+        server.setHandler(webapp);
+
         Runtime.getRuntime().addShutdownHook(new StopServer(server));
         try {
             server.start();
             server.join( );
         }
         catch (Exception ex) {
-            throw HongsException.common(null, ex);
+            throw  new  HongsException( HongsException.COMMON , ex );
         }
     }
 

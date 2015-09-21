@@ -15,7 +15,7 @@ import java.util.Map;
  * Lucene 模型动作
  * @author Hongs
  */
-@Action("hongs/lucene")
+@Action("hongs/dl/lucene")
 public class LuceneAction implements IAction {
 
     @Action("retrieve")
