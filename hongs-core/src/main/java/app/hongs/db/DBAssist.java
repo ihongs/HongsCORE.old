@@ -4,13 +4,16 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.FormSet;
+import app.hongs.action.MenuSet;
 import app.hongs.util.Synt;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 /*
@@ -28,6 +31,10 @@ public class DBAssist {
     protected Table table;
     protected Model model;
 
+    private  String nmkey;
+    private  String title;
+    private  Map<String, Map<String, String>> fields;
+
     public DBAssist(Model model) {
         this.db = model.db;
         this.model = model;
@@ -41,14 +48,41 @@ public class DBAssist {
 
     public String getNmKey()
     throws HongsException {
-        return model.listCols.length > 0 ? model.listCols[0] : model.findCols[0];
+        if (null != nmkey) {
+            return  nmkey;
+        }
+
+        getFields();
+        if (model.listCols.length > 0) {
+            nmkey = model.listCols [0];
+            return nmkey;
+        }
+        if (model.findCols.length > 0) {
+            nmkey = model.findCols [0];
+            return nmkey;
+        }
+        nmkey  =  "";
+        return nmkey;
     }
 
     public String getTitle()
     throws HongsException {
-        CoreLocale trns = CoreLocale.getInstance(db.name) ;
-        String     disp = "table." + table.name + ".name" ;
-        return trns.contains(disp) ? trns.translate(disp) : table.name;
+        if (null != title) {
+            return  title;
+        }
+
+        CoreLocale trns = CoreLocale.getInstance(db.name);
+        MenuSet    site =    MenuSet.getInstance(db.name);
+        Map        cell =       site.getMenu    (db.name+"/"+table.name+"/");
+        String     disp ;
+        if (cell != null && cell.containsKey("disp")) {
+            disp = (String) cell.get  ( "disp");
+        } else {
+            disp = "table."+table.name+".name" ;
+        }
+        title = trns.translate(disp);
+        return  title;
+
         /*
         String sql = "SHOW TABLE STATUS WHERE name = ?";
         List<Map<String, Object>> rows = db.fetchAll(sql, table.tableName);
@@ -62,23 +96,37 @@ public class DBAssist {
 
     public Map<String, Map<String, String>> getFields()
     throws HongsException {
+        if (null != fields) {
+            return  fields;
+        }
+
         CoreLocale trns = CoreLocale.getInstance(db.name);
-        Map fields = FormSet.getInstance(db.name).getFormTranslated(table.name);
+                 fields =    FormSet.getInstance(db.name)
+                           .getFormTranslated(table.name);
         if (fields == null) {
             fields =  new  LinkedHashMap();
         }
 
-        // 默认不能列举的类型
-        Set unlistable = new HashSet(Arrays.asList(Synt.declare(
+        List<String> findCols = new ArrayList();
+        List<String> listCols = new ArrayList();
+
+        // 默认可搜索的类型
+        Set findable = new HashSet(Arrays.asList(Synt.declare(
             CoreConfig.getInstance()
-           .get("core.unlistable.types"),
-                "textarea,file,image,audio,video"
+           .get("core.findable.types"),
+                "string,search,text,textarea,email,url,tel"
         ).split(",")));
         // 默认不能排序的类型
-        Set unsortable = new HashSet(Arrays.asList(Synt.declare(
+        Set sortable = new HashSet(Arrays.asList(Synt.declare(
             CoreConfig.getInstance()
-           .get("core.unsortable.types"),
-                "textarea,file,image,audio,video,form,picker"
+           .get("core.sortable.types"),
+                "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check"
+        ).split(",")));
+        // 默认可列举的类型
+        Set listable = new HashSet(Arrays.asList(Synt.declare(
+            CoreConfig.getInstance()
+           .get("core.listable.types"),
+                "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check,form,picker"
         ).split(",")));
 
         /*
@@ -156,13 +204,24 @@ public class DBAssist {
                 }
                 */
             }
-            
+
             // 特定类型的不能列举和排序
-            if (!field.containsKey("listable") && !unlistable.contains(field.get("__type__"))) {
+            if (!field.containsKey("findable") && listable.contains(field.get("__type__"))) {
+                field.put("findable", "yes");
+            }
+            if (!field.containsKey("listable") && listable.contains(field.get("__type__"))) {
                 field.put("listable", "yes");
             }
-            if (!field.containsKey("sortable") && !unsortable.contains(field.get("__type__"))) {
+            if (!field.containsKey("sortable") && sortable.contains(field.get("__type__"))) {
                 field.put("sortable", "yes");
+            }
+
+            // 提取搜索和列举字段
+            if (Synt.declare(field.get("findable"), false)) {
+                findCols.add(name);
+            }
+            if (Synt.declare(field.get("listable"), false)) {
+                listCols.add(name);
             }
         }
 
@@ -215,15 +274,30 @@ public class DBAssist {
                 field.put("data-tk", tk);
                 field.put("data-vk", vk);
             }
-            
+
             // 特定类型的不能列举、排序
-            if (!field.containsKey("listable") && !unlistable.contains(field.get("__type__"))) {
+            if (!field.containsKey("findable") && listable.contains(field.get("__type__"))) {
+                field.put("findable", "yes");
+            }
+            if (!field.containsKey("listable") && listable.contains(field.get("__type__"))) {
                 field.put("listable", "yes");
             }
-            if (!field.containsKey("sortable") && !unsortable.contains(field.get("__type__"))) {
+            if (!field.containsKey("sortable") && sortable.contains(field.get("__type__"))) {
                 field.put("sortable", "yes");
             }
+
+            // 提取搜索和列举字段
+            if (Synt.declare(field.get("findable"), false)) {
+                findCols.add(name);
+            }
+            if (Synt.declare(field.get("listable"), false)) {
+                listCols.add(name);
+            }
         }
+
+        // 设置搜索和列举字段
+        model.findCols = findCols.toArray(new String[0]);
+        model.listCols = listCols.toArray(new String[0]);
 
         return fields;
     }
