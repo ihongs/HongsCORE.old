@@ -15,9 +15,13 @@
             String href = (String) menu.get("href");
             String hrel = (String) menu.get("hrel");
 //          String icon = (String) menu.get("icon");
+            String acti = "";
 
             if (href.startsWith( "!" )) {
                 continue;
+            }
+            if (href.equals(path +"/")) {
+                acti = "class=\"active\"";
             }
             if (href.startsWith( path + "/#" )) {
                 href = href.substring(href.indexOf('#'));
@@ -27,7 +31,7 @@
                 hrel = "";
             }
 
-            menus.append("<li>" )
+            menus.append("<li " +acti+ ">")
                  .append("<a data-href=\"")
                  .append(hrel)
                  .append("\" href=\"")
@@ -140,11 +144,14 @@
         $("#sign-out")
             .click(function() {
                 $.get(hsFixUri("manage/member/sign/delete.act"), function() {
-                    location.reload();
+                    location.href = H$(".BASE_HREF")+"/manage/login.html"
                 });
             });
 
         $(function() {
+            if ($("#curr-menubar .active").size()) {
+                return;
+            }
             // Click the first available menu item
             var a;
             if (location.hash) {
