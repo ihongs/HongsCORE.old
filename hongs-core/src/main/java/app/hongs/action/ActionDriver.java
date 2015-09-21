@@ -247,19 +247,20 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         }
     }
 
-    private void doOutput(ActionHelper hlpr, HttpServletRequest req, HttpServletResponse rsp) {
-//      if (!hlpr.getResponse().isCommitted()) {
-            Map dat  = hlpr.getResponseData();
-            if (dat != null) {
-                req.setAttribute( RESP, dat );
+    private void doOutput(ActionHelper hlpr, HttpServletRequest req, HttpServletResponse rsp)
+            throws ServletException {
+//        if (hlpr.getResponse().isCommitted()) {
+//            ServletException se = new ServletException("Response is committed!");
+//            CoreLogger.error(se);
+//            throw se;
+//        }
 
-//              HttpServletRequest  raq = hlpr.getRequest( );
-//              HttpServletResponse rzp = hlpr.getResponse();
-//              hlpr.reinitHelper ( req , rsp );
-                hlpr.responed();
-//              hlpr.reinitHelper ( raq , rzp );
-            }
-//      }
+        Map dat  = hlpr.getResponseData();
+        if (dat != null) {
+            req .setAttribute(RESP, dat );
+            hlpr.reinitHelper( req, rsp );
+            hlpr.responed();
+        }
     }
 
     private void doIniter(Core core, ActionHelper hlpr, HttpServletRequest req)
@@ -351,7 +352,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
               sb.append("\r\n\tResults     : ")
                 .append(Text.indent(Data.toString(xd)).substring(1));
             }
-            
+
             if (cf.getProperty("core.trace.action.context", false)) {
               Map         map = new HashMap();
               Enumeration<String> nms = req.getAttributeNames();
@@ -364,7 +365,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                   .append(Text.indent(Data.toString(map)).substring(1));
               }
             }
-            
+
             if (cf.getProperty("core.trace.action.session", false)) {
               Map         map = new HashMap();
               HttpSession ses = hlpr.getRequest().getSession( );
@@ -378,7 +379,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                   .append(Text.indent(Data.toString(map)).substring(1));
               }
             }
-            
+
             if (cf.getProperty("core.trace.action.cookies", false)) {
               Map         map = new HashMap();
               Cookie[]    cks = hlpr.getRequest().getCookies( );
@@ -405,6 +406,19 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     }
 
     /**
+     * 执行动作
+     * 如需其他操作请覆盖此方法
+     * @param core
+     * @param hlpr
+     * @throws ServletException
+     * @throws IOException
+     */
+    protected void doAction(Core core, ActionHelper hlpr )
+    throws ServletException, IOException {
+        service( hlpr.getRequest( ), hlpr.getResponse( ) );
+    }
+
+    /**
      * 执行过滤
      * 如需其他操作请覆盖此方法
      * @param core
@@ -417,19 +431,6 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     throws ServletException, IOException {
         chn.doFilter((ServletRequest ) hlpr.getRequest( ),
                      (ServletResponse) hlpr.getResponse());
-    }
-
-    /**
-     * 执行动作
-     * 如需其他操作请覆盖此方法
-     * @param core
-     * @param hlpr
-     * @throws ServletException
-     * @throws IOException
-     */
-    protected void doAction(Core core, ActionHelper hlpr )
-    throws ServletException, IOException {
-        service( hlpr.getRequest( ), hlpr.getResponse( ) );
     }
 
     //** 静态工具函数 **/
@@ -445,7 +446,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     public static final String PATH = "__HONGS_PATH__";
 
     /**
-     * Request Attribute: 当前返回数据(类型: Map&lt;String, Object&gt;)
+     * Request Attribute: 当前返回数据(类型: Map&lt;String,Object&gt;)
      */
     public static final String RESP = "__HONGS_RESP__";
 
