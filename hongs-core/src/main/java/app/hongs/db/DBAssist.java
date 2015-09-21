@@ -1,13 +1,18 @@
 package app.hongs.db;
 
+import app.hongs.CoreConfig;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.FormSet;
+import app.hongs.util.Synt;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 /*
 import java.util.List;
 import java.util.regex.Pattern;
@@ -57,12 +62,24 @@ public class DBAssist {
 
     public Map<String, Map<String, String>> getFields()
     throws HongsException {
+        CoreLocale trns = CoreLocale.getInstance(db.name);
         Map fields = FormSet.getInstance(db.name).getFormTranslated(table.name);
         if (fields == null) {
             fields =  new  LinkedHashMap();
         }
 
-        CoreLocale trns = CoreLocale.getInstance(db.name);
+        // 默认不能列举的类型
+        Set unlistable = new HashSet(Arrays.asList(Synt.declare(
+            CoreConfig.getInstance()
+           .get("core.unlistable.types"),
+                "textarea,file,image,audio,video"
+        ).split(",")));
+        // 默认不能排序的类型
+        Set unsortable = new HashSet(Arrays.asList(Synt.declare(
+            CoreConfig.getInstance()
+           .get("core.unsortable.types"),
+                "textarea,file,image,audio,video,form,picker"
+        ).split(",")));
 
         /*
         String sql = "SHOW FULL FIELDS FROM `"+table.tableName+"`";
@@ -139,6 +156,14 @@ public class DBAssist {
                 }
                 */
             }
+            
+            // 特定类型的不能列举和排序
+            if (!field.containsKey("listable") && !unlistable.contains(field.get("__type__"))) {
+                field.put("listable", "yes");
+            }
+            if (!field.containsKey("sortable") && !unsortable.contains(field.get("__type__"))) {
+                field.put("sortable", "yes");
+            }
         }
 
         Iterator it = table.assocs.entrySet().iterator();
@@ -184,11 +209,19 @@ public class DBAssist {
 
                 field = new HashMap();
                 fields.put(name, field);
-                field.put("__type__","picker");
-                field.put("__disp__",  disp  );
+                field.put("__type__","pick");
+                field.put("__disp__", disp );
                 field.put("data-tn", tn);
                 field.put("data-tk", tk);
                 field.put("data-vk", vk);
+            }
+            
+            // 特定类型的不能列举、排序
+            if (!field.containsKey("listable") && !unlistable.contains(field.get("__type__"))) {
+                field.put("listable", "yes");
+            }
+            if (!field.containsKey("sortable") && !unsortable.contains(field.get("__type__"))) {
+                field.put("sortable", "yes");
             }
         }
 

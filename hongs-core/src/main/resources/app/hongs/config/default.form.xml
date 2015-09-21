@@ -17,9 +17,6 @@
         <value code="date">date</value>
         <value code="time">date</value>
         <value code="datetime">date</value>
-        <!-- File -->
-        <value code="file">file</value>
-        <value code="upload">file</value>
         <!-- Form -->
         <value code="form">form</value>
         <value code="picker">form</value>
@@ -28,6 +25,12 @@
         <value code="select">enum</value>
         <value code="radio">enum</value>
         <value code="check">enum</value>
+        <!-- File -->
+        <value code="file">file</value>
+        <value code="upload">file</value>
+        <value code="image">file</value>
+        <value code="audio">file</value>
+        <value code="video">file</value>
     </enum>
     <enum name="__patts__">
         <value code="email"><![CDATA[^([a-z0-9_\.\-\+]+)@([\da-z\.\-]+)\.([a-z\.]{2,6})$]]></value>

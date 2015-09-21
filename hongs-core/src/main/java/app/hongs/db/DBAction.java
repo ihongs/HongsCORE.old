@@ -9,7 +9,10 @@ import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
 import app.hongs.action.anno.CommitSuccess;
 import app.hongs.dl.IAction;
+import app.hongs.util.Synt;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -103,7 +106,7 @@ implements IAction {
      *  方法 Action 注解的命名只能是 "动作名称", 不得含子级实体名称
      * @param helper
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     protected  Model getModel(ActionHelper helper)
     throws HongsException {
@@ -114,9 +117,34 @@ implements IAction {
         pos  = mod.lastIndexOf('/' );
         mod  = mod.substring(0, pos); // 去掉动作
         pos  = mod.lastIndexOf('/' );
-        ent  = mod.substring(1+ pos); // 实体名称 
+        ent  = mod.substring(1+ pos); // 实体名称
         mod  = mod.substring(0, pos); // 模型名称
-        return DB.getInstance(mod).getModel(ent);
+        return setModel(DB.getInstance(mod).getModel(ent));
+    }
+
+    /**
+     * 对 Model 设置 findable,listable 字段
+     * @param mod
+     * @return
+     * @throws HongsException 
+     */
+    protected Model  setModel(Model mod) throws HongsException {
+        DBAssist ass = new DBAssist(mod);
+        List<String> findCols = new ArrayList();
+        List<String> listCols = new ArrayList();
+        for(Map.Entry<String, Map<String, String>> et : ass.getFields().entrySet()) {
+            String fn = et.getKey();
+            Map<String, String> ps = et.getValue();
+            if (Synt.declare(ps.get("findable"), false)) {
+                findCols.add(fn);
+            }
+            if (Synt.declare(ps.get("listable"), false)) {
+                listCols.add(fn);
+            }
+        }
+        mod.findCols = findCols.toArray(new String[0]);
+        mod.listCols = listCols.toArray(new String[0]);
+        return mod;
     }
 
     /**
@@ -126,7 +154,7 @@ implements IAction {
      * @param opr
      * @param req
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     protected  Map   getRqMap(ActionHelper helper, Model mod, String opr, Map req)
     throws HongsException {
@@ -143,7 +171,7 @@ implements IAction {
      * @param opr
      * @param rsp
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     protected  Map   getRpMap(ActionHelper helper, Model mod, String opr, Map rsp)
     throws HongsException {
@@ -160,7 +188,7 @@ implements IAction {
      * @param opr
      * @param num
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     protected String getRpMsg(ActionHelper helper, Model mod, String opr, int num)
     throws HongsException {

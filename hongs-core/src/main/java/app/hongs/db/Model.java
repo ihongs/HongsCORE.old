@@ -164,7 +164,7 @@ implements IRecord
    * 综合提取方法
    * @param rd
    * @return
-   * @throws HongsException 
+   * @throws HongsException
    */
   @Override
   public Map retrieve(Map rd)
@@ -178,7 +178,7 @@ implements IRecord
    * @param rd
    * @param caze
    * @return
-   * @throws HongsException 
+   * @throws HongsException
    */
   public Map retrieve(Map rd, FetchCase caze)
     throws HongsException
@@ -206,7 +206,10 @@ implements IRecord
         sd.put("id",    add(rd));
     for(String  fn : listCols  )
     {
+      if ( ! fn.contains( "." ))
+      {
         sd.put( fn , rd.get(fn));
+      }
     }
     return sd;
   }
@@ -554,7 +557,7 @@ implements IRecord
 
     Map rd = new HashMap();
     rd.put(table.primaryKey, id);
-        
+
     // 调用filter进行过滤
     caze = caze != null ? caze.clone() : new FetchCase();
     caze.setOption("MODEL_METHOD", "get");
@@ -685,7 +688,7 @@ implements IRecord
     {
       page = Integer.parseInt((String)rd.get(this.pageKey));
     }
-    
+
     // 获取分页, 默认查总页数
     int pags = 0;
     if (rd.containsKey(this.pagsKey))
