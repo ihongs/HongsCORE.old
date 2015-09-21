@@ -76,6 +76,7 @@ import org.xml.sax.SAXException;
  * 区间: 0x10e0~0x10e7
  * 0x10e0 配置文件不存在
  * 0x10e1 解析文件失败
+ * 0x10e2 角色无法获取
  * </pre>
  *
  * <h3>特别注意:</h3>
@@ -196,8 +197,10 @@ public class MenuSet
 
       // 角色会话名称
       NodeList list = root.getElementsByTagName("rsname");
-            session = list.getLength( ) == 0  ? "roles"
-                    : list.item/***/(0).getTextContent( );
+      if (list.getLength() != 0)
+      {
+          session = list.item(0).getTextContent();
+      }
     }
     catch ( IOException ex)
     {
@@ -486,6 +489,9 @@ public class MenuSet
    * @throws app.hongs.HongsException
    */
   public Set<String> getRoleSet() throws HongsException {
+      if (session == null || session.length() == 0) {
+          throw new HongsException(0x10e2, "Can not get roles for menu: "+name);
+      }
       ActionHelper hlpr = Core.getInstance(ActionHelper.class );
       if (session.startsWith("@")) {
           return getInstance(session.substring(1)).getRoleSet();
