@@ -79,8 +79,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected boolean IN_TRNSCT_MODE = false;
     protected boolean IN_OBJECT_MODE = false;
 
-    protected final String           datpat;
     protected final Map<String, Map> fields;
+    protected final String           dbpath;
     protected       IndexWriter      writer = null ;
     protected       IndexReader      reader = null ;
     protected       IndexSearcher    finder = null ;
@@ -97,21 +97,21 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected String sortKey = "ob";
     protected String findKey = "wd";
 
-    public LuceneRecord(String datpat, final Map<String, Map> fields)
+    public LuceneRecord(String path, final Map<String, Map> fields)
     throws HongsException {
-        if (datpat == null) {
-            datpat = "test";
+        if (path == null) {
+            path = "test";
         }
         Map m = new HashMap();
         m.put("CORE_PATH", Core.CORE_PATH);
         m.put("CONF_PATH", Core.CORE_PATH);
         m.put("DATA_PATH", Core.DATA_PATH);
-        datpat  = Text.inject(datpat, m);
-        if (!new File(datpat).isAbsolute()) {
-            datpat = Core.DATA_PATH +"/lucene/"+ datpat;
+        path  = Text.inject(path, m);
+        if (! new File(path).isAbsolute()) {
+            path = Core.DATA_PATH +"/lucene/"+ path;
         }
 
-        this.datpat   = datpat;
+        this.dbpath   = path  ;
         this.fields   = fields;
 
         CoreConfig conf = CoreConfig.getInstance();
@@ -612,13 +612,13 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
         try {
             // 索引目录不存在则先写入一个并删除
-            if (!(new File(datpat)).exists()) {
+            if (!(new File(dbpath)).exists()) {
                 connect();
                 del(add(new HashMap( )));
                 commit( );
             }
 
-            Path p = Paths.get(datpat);
+            Path p = Paths.get(dbpath);
             Directory dir = FSDirectory.open(p);
 
             reader = DirectoryReader.open (dir);
@@ -628,7 +628,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
-            CoreLogger.trace("Connect to lucene reader, data path: " + datpat);
+            CoreLogger.trace("Connect to lucene reader, data path: " + dbpath);
         }
     }
 
@@ -644,7 +644,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             IndexWriterConfig iwc = new IndexWriterConfig(getAnalyzer());
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 
-            Path d = Paths.get(datpat);
+            Path d = Paths.get(dbpath);
             Directory dir = FSDirectory.open(d);
 
             writer = new IndexWriter(dir , iwc);
@@ -653,7 +653,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
-            CoreLogger.trace("Connect to lucene writer, data path: " + datpat);
+            CoreLogger.trace("Connect to lucene writer, data path: " + dbpath);
         }
     }
 
@@ -705,7 +705,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
-            CoreLogger.trace("Close lucene connection, data path: " + datpat);
+            CoreLogger.trace("Close lucene connection, data path: " + dbpath);
         }
     }
 
@@ -939,7 +939,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @return
      */
     protected String getFtype(Map fc) {
-        Map<String, String> m = getTypes();
         String t = Synt.declare(fc.get("lucene-fieldtype"), String.class);
 
         // 如果未指定 lucene-fieldtype 则用 field-type 替代
@@ -953,7 +952,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 return "stored";
             }
 
-            t = Synt.declare(m.get(t) , t);
+            t = Synt.declare(getTypes( ).get(t), t);
             if ("number".equals(t)) {
                 t = Synt.declare(fc.get("type"), "double");
             } else
