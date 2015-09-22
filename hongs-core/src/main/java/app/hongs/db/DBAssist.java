@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
@@ -22,10 +23,10 @@ import java.util.regex.Pattern;
 */
 
 /**
- * 视图助手
+ * 数据视图助手
  * @author Hongs
  */
-public class DBAssist {
+public class DBAssist implements Core.Destroy {
 
     protected DB    db;
     protected Table table;
@@ -71,16 +72,30 @@ public class DBAssist {
             return  title;
         }
 
-        CoreLocale trns = CoreLocale.getInstance(db.name);
-        MenuSet    site =    MenuSet.getInstance(db.name);
-        Map        cell =       site.getMenu    (db.name+"/"+table.name+"/");
-        String     disp ;
-        if (cell != null && cell.containsKey("disp")) {
-            disp = (String) cell.get  ( "disp");
-        } else {
-            disp = "table."+table.name+".name" ;
-        }
-        title = trns.translate(disp);
+        do {
+            FormSet form = FormSet.getInstance(db.name);
+            Map dict = form.getForm(            table.name    );
+            if (dict != null && dict.containsKey(   "@"    )) {
+                dict  = ( Map  ) dict.get(   "@"    );
+            if (dict != null && dict.containsKey("__disp__")) {
+                title = (String) dict.get("__disp__");
+                break;
+            }
+            }
+
+            MenuSet menu = MenuSet.getInstance(db.name);
+            Map cell = menu.getMenu(db.name+"/"+table.name+"/");
+            if (cell != null && cell.containsKey(  "disp"  )) {
+                title = (String) cell.get(  "disp"  );
+                break;
+            }
+
+            title = "table." + table.name +".name";
+        } while (false);
+
+        CoreLocale trns = CoreLocale.getInstance().clone();
+                   trns.loadIgnrFNF(db.name);
+        title   =  trns.translate  (  title);
         return  title;
 
         /*
@@ -114,7 +129,7 @@ public class DBAssist {
         Set findable = new HashSet(Arrays.asList(Synt.declare(
             CoreConfig.getInstance()
            .get("core.findable.types"),
-                "string,search,text,textarea,email,url,tel"
+                "string,search,text,email,url,tel,textarea"
         ).split(",")));
         // 默认不能排序的类型
         Set sortable = new HashSet(Arrays.asList(Synt.declare(
@@ -279,13 +294,13 @@ public class DBAssist {
 
             // 特定类型的不能列举、排序
             String ft = Synt.declare( field.get("__type__"), "string" );
-            if (!field.containsKey("findable") && findable.contains(field.get("__type__"))) {
+            if (!field.containsKey("findable") && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
-            if (!field.containsKey("listable") && listable.contains(field.get("__type__"))) {
+            if (!field.containsKey("listable") && listable.contains(ft)) {
                 field.put("listable", "yes");
             }
-            if (!field.containsKey("sortable") && sortable.contains(field.get("__type__"))) {
+            if (!field.containsKey("sortable") && sortable.contains(ft)) {
                 field.put("sortable", "yes");
             }
 
@@ -304,6 +319,13 @@ public class DBAssist {
         model.listCols = listCols.toArray(new String[0]);
 
         return fields;
+    }
+
+    @Override
+    public void destroy() throws Throwable {
+        nmkey  = null;
+        title  = null;
+        fields = null;
     }
 
 }
