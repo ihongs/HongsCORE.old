@@ -66,7 +66,7 @@ public class DBAssist implements Core.Destroy {
         }
 
         getFields( );
-        
+
         if (model.listCols.length > 0) {
             nmkey = model.listCols [0];
             return nmkey;
@@ -75,7 +75,7 @@ public class DBAssist implements Core.Destroy {
             nmkey = model.findCols [0];
             return nmkey;
         }
-        
+
         nmkey  =  "";
         return nmkey;
     }
@@ -139,27 +139,34 @@ public class DBAssist implements Core.Destroy {
             fields  =  new  LinkedHashMap(  );
         }
 
-        List<String> findCols = new ArrayList();
-        List<String> listCols = new ArrayList();
+        List<String> findCols = new ArrayList(   );
+        List<String> listCols = new ArrayList(   );
 
-        // 默认可搜索的类型
-        Set findable = new HashSet(Arrays.asList(Synt.declare(
-            CoreConfig.getInstance()
-           .get("core.findable.types"),
-                "string,search,text,email,url,tel,textarea"
-        ).split(",")));
-        // 默认可列举的类型
-        Set listable = new HashSet(Arrays.asList(Synt.declare(
-            CoreConfig.getInstance()
-           .get("core.listable.types"),
-                "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check,form,picker"
-        ).split(",")));
-        // 默认不能排序的类型
-        Set sortable = new HashSet(Arrays.asList(Synt.declare(
-            CoreConfig.getInstance()
-           .get("core.sortable.types"),
-                "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check"
-        ).split(",")));
+        Map<String, String> conf = fields.get("@");
+        Set findable = null;
+        if (conf == null || !Synt.declare(conf.get("dont.auto.add.findable.fields"), false)) {
+            findable = new HashSet(Arrays.asList(Synt.declare(
+                CoreConfig.getInstance()
+               .get("core.findable.types"),
+                    "string,search,text,email,url,tel,textarea"
+            ).split(",")));
+        }
+        Set sortable = null;
+        if (conf == null || !Synt.declare(conf.get("dont.auto.add.sortable.fields"), false)) {
+            sortable = new HashSet(Arrays.asList(Synt.declare(
+                CoreConfig.getInstance()
+               .get("core.sortable.types"),
+                    "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check"
+            ).split(",")));
+        }
+        Set listable = null;
+        if (conf == null || !Synt.declare(conf.get("dont.auto.add.listable.fields"), false)) {
+            listable = new HashSet(Arrays.asList(Synt.declare(
+                CoreConfig.getInstance()
+               .get("core.listable.types"),
+                    "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check,form,picker"
+            ).split(",")));
+        }
 
         /*
         String sql = "SHOW FULL FIELDS FROM `"+table.tableName+"`";
@@ -242,13 +249,13 @@ public class DBAssist implements Core.Destroy {
 
             // 特定类型才能搜索、列举、排序
             String ft = (String) field.get("__type__");
-            if (!field.containsKey("findable") && findable.contains(ft)) {
+            if (!field.containsKey("findable") && findable != null && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
-            if (!field.containsKey("listable") && listable.contains(ft)) {
+            if (!field.containsKey("listable") && listable != null && listable.contains(ft)) {
                 field.put("listable", "yes");
             }
-            if (!field.containsKey("sortable") && sortable.contains(ft)) {
+            if (!field.containsKey("sortable") && sortable != null && sortable.contains(ft)) {
                 field.put("sortable", "yes");
             }
 
@@ -314,13 +321,13 @@ public class DBAssist implements Core.Destroy {
 
             // 特定类型才能搜索、列举、排序
             String ft = (String) field.get("__type__");
-            if (!field.containsKey("findable") && findable.contains(ft)) {
+            if (!field.containsKey("findable") && findable != null && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
-            if (!field.containsKey("listable") && listable.contains(ft)) {
+            if (!field.containsKey("listable") && listable != null && listable.contains(ft)) {
                 field.put("listable", "yes");
             }
-            if (!field.containsKey("sortable") && sortable.contains(ft)) {
+            if (!field.containsKey("sortable") && sortable != null && sortable.contains(ft)) {
                 field.put("sortable", "yes");
             }
 
