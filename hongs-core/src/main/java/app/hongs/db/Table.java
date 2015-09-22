@@ -201,7 +201,6 @@ public class Table
     String state = getField("state");
     String mtime = getField("mtime");
     String ctime = getField("ctime");
-//  String etime = getField("etime");
 
     // 存在 state 字段则自动放入默认值
     if (state != null && !values.containsKey(state))
@@ -260,47 +259,6 @@ public class Table
           values.put(ctime, time);
       }
     }
-
-    // 存在 etime 字段则自动放入结束时间
-    /*
-    if (etime != null && !values.containsKey(etime) && this.primaryKey != null)
-    {
-      Map<String, Object> valuez = new HashMap();
-      List<Object> paramz = new ArrayList(  );
-      paramz.add(values.get(this.primaryKey));
-
-      int type = (Integer)((Map)this.fields.get(etime)).get("type");
-      switch (type)
-      {
-        case Types.DATE:
-          valuez.put(etime, new Date(time));
-          values.put(etime, new Date(0));
-          paramz.add(new Date(0));
-          break;
-        case Types.TIME:
-          valuez.put(etime, new Time(time));
-          values.put(etime, new Time(0));
-          paramz.add(new Time(0));
-          break;
-        case Types.TIMESTAMP:
-          valuez.put(etime, new Timestamp(time));
-          values.put(etime, new Timestamp(0));
-          paramz.add(new Timestamp(0));
-          break;
-        case Types.INTEGER:
-          valuez.put(etime, time / 1000);
-          values.put(etime, 0);
-          paramz.add(0);
-          break;
-        default:
-          valuez.put(etime, time);
-          values.put(etime, 0);
-          paramz.add(0);
-      }
-
-      this.update(valuez, "`"+this.primaryKey+"`=? AND `"+etime+"`=?", paramz);
-    }
-    */
 
     // 整理数据
     Map mainValues = this.checkMainValues(values, true);
@@ -368,7 +326,7 @@ public class Table
     String rflag = getState("removed");
 
     // 存在 rstat 字段则将删除标识设置为1
-    if (rstat != null && rflag != null)
+    if (rstat != null && rflag != null )
     {
       Map data = new HashMap();
       data.put( rstat, rflag );
