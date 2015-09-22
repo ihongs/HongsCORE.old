@@ -327,6 +327,9 @@ public class VerifyHelper {
         public abstract Object verify(Object value) throws Wrong, Wrongs, HongsException;
     }
 
+    /**
+     * 通过校验
+     */
     public static class Pass extends Rule {
         @Override
         public Object verify(Object value) {
@@ -334,6 +337,9 @@ public class VerifyHelper {
         }
     }
 
+    /**
+     * 扔掉此值
+     */
     public static class Skip extends Rule {
         @Override
         public Object verify(Object value) {
