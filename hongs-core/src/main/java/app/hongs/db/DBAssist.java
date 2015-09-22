@@ -73,6 +73,7 @@ public class DBAssist implements Core.Destroy {
         }
 
         do {
+            // 先从表单取名字
             FormSet form = FormSet.getInstance(db.name);
             Map dict = form.getForm(            table.name    );
             if (dict != null && dict.containsKey(   "@"    )) {
@@ -83,6 +84,7 @@ public class DBAssist implements Core.Destroy {
             }
             }
 
+            // 再从菜单取名字
             MenuSet menu = MenuSet.getInstance(db.name);
             Map cell = menu.getMenu(db.name+"/"+table.name+"/");
             if (cell != null && cell.containsKey(  "disp"  )) {
@@ -90,7 +92,8 @@ public class DBAssist implements Core.Destroy {
                 break;
             }
 
-            title = "table." + table.name +".name";
+            // 最后配置取名字
+            title = "core.table."+table.name+".name";
         } while (false);
 
         CoreLocale trns = CoreLocale.getInstance().clone();
