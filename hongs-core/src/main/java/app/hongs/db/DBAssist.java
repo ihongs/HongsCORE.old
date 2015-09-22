@@ -169,12 +169,12 @@ public class DBAssist implements Core.Destroy {
                 fields.put(name, field);
             }
 
-            if (!field.containsKey("__required__") && "".equals(field.get("__required__"))) {
+            if (!field.containsKey("__required__") || "".equals(field.get("__required__"))) {
 //              field.put("__required__", "NO".equals(row.get("Null")) ? "yes" : "");
                 field.put("__required__", rqrd ? "yes" : "");
             }
 
-            if (!field.containsKey("__disp__") && "".equals(field.get("__disp__"))) {
+            if (!field.containsKey("__disp__") || "".equals(field.get("__disp__"))) {
 //              if (disp!=null && !"".equals(disp)) {
                 if (trns.containsKey(disp)) {
                     disp = trns.translate(disp);
@@ -184,26 +184,27 @@ public class DBAssist implements Core.Destroy {
                 }
             }
 
-            if (!field.containsKey("__type__") && "".equals(field.get("__type__"))) {
-                if (name.endsWith("_id") || name.equals(table.primaryKey)) {
+            if (!field.containsKey("__type__") || "".equals(field.get("__type__"))) {
+                if (name.equals(table.primaryKey) || name.endsWith("_id")) {
                     field.put("__type__", "hidden");
-                } else
-                if (type == Types.INTEGER || type == Types.TINYINT || type == Types.BIGINT || type == Types.SMALLINT
-                ||  type == Types.NUMERIC || type == Types.DECIMAL || type == Types.DOUBLE || type == Types.FLOAT) {
-                    field.put("__type__", "number");
-                } else
-                if (type == Types.LONGVARCHAR || type == Types.LONGNVARCHAR) {
-                    field.put("__type__", "textarea");
-                } else
-                if (type == Types.TIMESTAMP) {
-                    field.put("__type__", "datetime");
                 } else
                 if (type == Types.DATE) {
                     field.put("__type__", "date");
                 } else
                 if (type == Types.TIME) {
                     field.put("__type__", "time");
-                } else {
+                } else
+                if (type == Types.TIMESTAMP) {
+                    field.put("__type__", "datetime");
+                } else
+                if (type == Types.LONGVARCHAR || type == Types.LONGNVARCHAR) {
+                    field.put("__type__", "textarea");
+                } else
+                if (type == Types.INTEGER || type == Types.TINYINT || type == Types.BIGINT || type == Types.SMALLINT
+                ||  type == Types.NUMERIC || type == Types.DECIMAL || type == Types.DOUBLE || type == Types.FLOAT) {
+                    field.put("__type__", "number");
+                } else
+                {
                     field.put("__type__", "string");
                 }
                 /*
