@@ -223,8 +223,11 @@ public class DBAssist implements Core.Destroy {
                 */
             }
 
-            // 特定类型的不能列举和排序
-            String ft = Synt.declare( field.get("__type__"), "string" );
+            // 特定类型才能搜索、列举、排序
+            String ft = (String) field.get("__type__");
+            if (ft == null || "".equals(ft)) {
+                ft = "string";
+            }
             if (!field.containsKey("findable") && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
@@ -295,8 +298,11 @@ public class DBAssist implements Core.Destroy {
                 field.put("data-vk", vk);
             }
 
-            // 特定类型的不能列举、排序
-            String ft = Synt.declare( field.get("__type__"), "string" );
+            // 特定类型才能搜索、列举、排序
+            String ft = (String) field.get("__type__");
+            if (ft == null || "".equals(ft)) {
+                ft = "string";
+            }
             if (!field.containsKey("findable") && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
