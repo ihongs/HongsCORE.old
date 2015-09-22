@@ -129,6 +129,7 @@ public class Data extends LuceneRecord {
             }
         }
         if (i == 0) {
+            // 什么也没改变
             return;
         }
 
