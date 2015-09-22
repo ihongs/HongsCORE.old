@@ -275,15 +275,15 @@ public class DBAssist implements Core.Destroy {
             Map       vd = (Map ) et.getValue();
             String  type = (String) vd.get("type");
 
-            String  name, disp, tn, vk, tk, an, bn;
+            String  name, disp, ak, vk, tk, an, tn;
 
             if ("BLS_TO".equals(type)) {
-                tn   = (String) vd.get("name");
-                bn   = (String) vd.get("tableName" );
+                ak   = (String) vd.get("name");
+                tn   = (String) vd.get("tableName" );
                 vk   = (String) vd.get("foreignKey");
                 name = vk;
 
-                Model hm = db.getModel(bn != null ? bn : tn);
+                Model hm = db.getModel(tn != null ? tn : ak);
                 DBAssist hb =  new  DBAssist(hm);
                 tk   = hb.getNmKey();
                 disp = hb.getTitle();
@@ -294,12 +294,12 @@ public class DBAssist implements Core.Destroy {
 
                 Map ad = (Map) ((Map) vd.get("assocs")).values().toArray()[0];
                 an   = (String) ad.get("name");
-                tn   = (String) vd.get("name");
-                bn   = (String) ad.get("tableName" );
+                ak   = (String) vd.get("name");
+                tn   = (String) ad.get("tableName" );
                 vk   = (String) vd.get("foreignKey");
-                name = tn + ("HAS_ONE".equals(type) ? "." : "..") + vk;
+                name = ak + ("HAS_ONE".equals(type) ? "." : "..") + vk;
 
-                Model hm = db.getModel(bn != null ? bn : tn);
+                Model hm = db.getModel(tn != null ? tn : ak);
                 DBAssist hb =  new  DBAssist(hm);
                 tk   =an+"."+hb.getNmKey();
                 disp =/****/ hb.getTitle();
@@ -314,7 +314,7 @@ public class DBAssist implements Core.Destroy {
                 fields.put(name, field);
                 field.put("__type__","pick");
                 field.put("__disp__", disp );
-                field.put("data-tn", tn);
+                field.put("data-ak", ak);
                 field.put("data-tk", tk);
                 field.put("data-vk", vk);
             }

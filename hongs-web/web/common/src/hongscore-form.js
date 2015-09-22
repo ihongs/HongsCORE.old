@@ -52,6 +52,7 @@ function HsForm(opts, context) {
         if ( n === idKey && v === "0" ) continue;
         formBox.find("[name='"   +n+"']").val(v);
         formBox.find("[data-fn='"+n+"']").val(v);
+        formBox.find("[data-pn='"+n+"']").val(v);
     }
 
     /**

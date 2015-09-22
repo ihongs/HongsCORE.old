@@ -83,7 +83,7 @@
                     <%} else if ("enum".equals(type) || "select".equals(type)) {%>
                     <th data-fn="<%=name%>_disp" class="sortable"><%=disp%></th>
                     <%} else if ("form".equals(type) || "picker".equals(type)) {%>
-                    <th data-fn="<%=info.get("data-tn")%>.<%=info.get("data-tk")%>" class="sortable"><%=disp%></th>
+                    <th data-fn="<%=info.get("data-ak")%>.<%=info.get("data-tk")%>" class="sortable"><%=disp%></th>
                     <%} else if (!"primary".equals(info.get("primary")) && !"foreign".equals(info.get("foreign"))) {%>
                     <th data-fn="<%=name%>" class="sortable"><%=disp%></th>
                     <%} // End If %>

@@ -68,9 +68,9 @@
     <form name="demo3">
         <field disp="ID" name="id" type="hidden"/>
         <field disp="选择商品" name="demo2_id." type="picker" required="yes" repeated="yes">
-            <param name="data-tn">demo2</param>
+            <param name="data-ak">demo2</param>
             <param name="data-vk">id</param>
-            <param name="data-vk">name</param>
+            <param name="data-tk">name</param>
         </field>
         <field disp="姓名" name="name" type="text" required="yes"/>
         <field disp="电话" name="phone" type="number" required="yes"/>

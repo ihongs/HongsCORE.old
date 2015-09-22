@@ -63,17 +63,17 @@ public class PickedInvoker implements FilterInvoker {
             }
 
             // 提取的路径
-            String pa = (String) mt.get("data-pa");
-            String tn = (String) mt.get("data-tn");
-            if (null == tn || "".equals(tn)) {
-                tn = name.replace("_id$","");
+            String al = (String) mt.get("data-al");
+            String ak = (String) mt.get("data-ak");
+            if (null == ak || "".equals(ak)) {
+                ak = name.replace("_id$","");
             }
-            if (null == pa || "".equals(pa)) {
+            if (null == al || "".equals(al)) {
                 String c = (String) mt.get("conf");
                 String f = (String) mt.get("form");
                 if (null == c || "".equals(c)) c = conf;
-                if (null == f || "".equals(f)) f =  tn ;
-                pa  =  c + "/" + f +  "/retrieve" ;
+                if (null == f || "".equals(f)) f =  ak ;
+                al  =  c + "/" + f +  "/retrieve" ;
             }
 
             // 通常只需要获取值和名字即可
@@ -96,7 +96,7 @@ public class PickedInvoker implements FilterInvoker {
             rd.put("id", rsp.get( name ));
             ActionHelper hlp = helper.clone(  );
                          hlp.setRequestData(rd);
-            ActionRunner run = new ActionRunner(pa, hlp);
+            ActionRunner run = new ActionRunner(al, hlp);
                          run.doInvoke(  );
             Map sd = hlp.getRequestData();
 
@@ -118,12 +118,12 @@ public class PickedInvoker implements FilterInvoker {
             if (data instanceof List) {
                 MergeMore mm = new MergeMore((List) data);
                 if (rp) {
-                    mm.append((List) zd, vk, name, tn);
+                    mm.append((List) zd, vk, name, ak);
                 } else {
-                    mm.extend((List) zd, vk, name, tn);
+                    mm.extend((List) zd, vk, name, ak);
                 }
             } else {
-                ((Map) data).put(tn, zd);
+                ((Map) data).put(ak, zd);
             }
         }
     }

@@ -9,20 +9,21 @@
 
 data 属性缩写:
 
-    Form:
-        data-fn     Field name
-        data-ft     Field type
-        data-vk     Value key
-        data-tk     Text key
-        data-dk     Disp key
-        data-lk     List key
     List:
         data-fn     Field name
         data-ft     Field type
-        data-pn     Page num
+        data-pn     Page  num
         data-ob     Order by
+    Form:
+        data-fn     Field name
+        data-ft     Field type
+        data-pn     Param name
     Pick:
-        data-tn     Table name
+        data-vk     Value key
+        data-tk     Title key
+        data-ak     Assoc key
+        data-al     Assoc url // FormSet 内部用
+        data-at     Assoc act // FormSet 内部用
 
 其他非缩写 data 属性通常可按字面意思理解, data-toggle,data-target 等为 bootstrap 定义的.
 

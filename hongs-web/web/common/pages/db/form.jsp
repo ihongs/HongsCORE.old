@@ -116,15 +116,15 @@
                         <%
                             String vk = info.containsKey("data-vk") ? (String) info.get("data-vk") :  "id" ;
                             String tk = info.containsKey("data-tk") ? (String) info.get("data-tk") : "name";
-                            String tn = info.containsKey("data-tn") ? (String) info.get("data-tn") :
+                            String ak = info.containsKey("data-ak") ? (String) info.get("data-ak") :
                                       ( info.containsKey("form"   ) ? (String) info.get("form"   ) : name.replace("_id$", "") );
-                            String pu = info.containsKey("data-pu") ? (String) info.get("data-pu") :
+                            String al = info.containsKey("data-al") ? (String) info.get("data-al") :
                                       ( info.containsKey("conf"   ) ? (String) info.get("conf"   ) : _module )
-                                    + ( info.containsKey("form"   ) ? (String) info.get("form"   ) : /**/ tn )
+                                    + ( info.containsKey("form"   ) ? (String) info.get("form"   ) : /**/ ak )
                                     + "list4select.html";
                         %>
-                        <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-tn="<%=tn%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
-                        <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=pu%>"><%=lang.translate("fore.select.lebel", (String)disp)%></button>
+                        <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-ak="<%=ak%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
+                        <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=al%>"><%=lang.translate("fore.select.lebel", (String)disp)%></button>
                     <%} else {%>
                         <input class="form-control" type="<%=type%>" name="<%=name%>" value="" <%=rqrd%>/>
                     <%} // End If %>
