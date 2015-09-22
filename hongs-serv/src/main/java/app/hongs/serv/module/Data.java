@@ -20,7 +20,7 @@ public class Data extends LuceneRecord {
     String formId = null;
     public String[] findCols = new String[] {};
     public String[] listCols = new String[] {};
-    
+
     public Data(String conf, String form) throws HongsException {
         super(conf +"/"+ form, conf +"/"+ form, form);
         formId = form;
