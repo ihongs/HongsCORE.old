@@ -65,7 +65,8 @@ public class DBAssist implements Core.Destroy {
             return  nmkey;
         }
 
-        getFields();
+        getFields( );
+        
         if (model.listCols.length > 0) {
             nmkey = model.listCols [0];
             return nmkey;
@@ -74,6 +75,7 @@ public class DBAssist implements Core.Destroy {
             nmkey = model.findCols [0];
             return nmkey;
         }
+        
         nmkey  =  "";
         return nmkey;
     }
