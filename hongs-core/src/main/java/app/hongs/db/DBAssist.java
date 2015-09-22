@@ -169,12 +169,12 @@ public class DBAssist implements Core.Destroy {
                 fields.put(name, field);
             }
 
-            if (!field.containsKey("__required__")) {
+            if (!field.containsKey("__required__") && "".equals(field.get("__required__"))) {
 //              field.put("__required__", "NO".equals(row.get("Null")) ? "yes" : "");
                 field.put("__required__", rqrd ? "yes" : "");
             }
 
-            if (!field.containsKey("__disp__")) {
+            if (!field.containsKey("__disp__") && "".equals(field.get("__disp__"))) {
 //              if (disp!=null && !"".equals(disp)) {
                 if (trns.containsKey(disp)) {
                     disp = trns.translate(disp);
@@ -184,7 +184,7 @@ public class DBAssist implements Core.Destroy {
                 }
             }
 
-            if (!field.containsKey("__type__")) {
+            if (!field.containsKey("__type__") && "".equals(field.get("__type__"))) {
                 if (name.endsWith("_id") || name.equals(table.primaryKey)) {
                     field.put("__type__", "hidden");
                 } else
@@ -203,6 +203,8 @@ public class DBAssist implements Core.Destroy {
                 } else
                 if (type == Types.TIME) {
                     field.put("__type__", "time");
+                } else {
+                    field.put("__type__", "string");
                 }
                 /*
                 if (Pattern.compile("(decimal|numeric|integer|tinyint|smallint|float|double).*", Pattern.CASE_INSENSITIVE).matcher(type).matches()) {
@@ -225,9 +227,6 @@ public class DBAssist implements Core.Destroy {
 
             // 特定类型才能搜索、列举、排序
             String ft = (String) field.get("__type__");
-            if (ft == null || "".equals(ft)) {
-                ft = "string";
-            }
             if (!field.containsKey("findable") && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
@@ -300,9 +299,6 @@ public class DBAssist implements Core.Destroy {
 
             // 特定类型才能搜索、列举、排序
             String ft = (String) field.get("__type__");
-            if (ft == null || "".equals(ft)) {
-                ft = "string";
-            }
             if (!field.containsKey("findable") && findable.contains(ft)) {
                 field.put("findable", "yes");
             }
