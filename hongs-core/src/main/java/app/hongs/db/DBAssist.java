@@ -32,14 +32,26 @@ public class DBAssist implements Core.Destroy {
     protected Table table;
     protected Model model;
 
-    private  String nmkey;
-    private  String title;
-    private  Map<String, Map<String, String>> fields;
+    private  String nmkey = null;
+    private  String title = null;
+    private  Map<String, Map<String, String>> fields = null;
 
     public DBAssist(Model model) {
         this.db = model.db;
         this.model = model;
         this.table = model.table;
+    }
+
+    public CoreConfig getConf() {
+        CoreConfig conf = CoreConfig.getInstance().clone();
+        conf.loadIgnrFNF(db.name);
+        return conf;
+    }
+
+    public CoreLocale getLang() {
+        CoreLocale lang = CoreLocale.getInstance().clone();
+        lang.loadIgnrFNF(db.name);
+        return lang;
     }
 
     public String getIdKey()
@@ -73,22 +85,24 @@ public class DBAssist implements Core.Destroy {
         }
 
         do {
+            Map item;
+
             // 先从表单取名字
             FormSet form = FormSet.getInstance(db.name);
-            Map dict = form.getForm(            table.name    );
-            if (dict != null && dict.containsKey(   "@"    )) {
-                dict  = ( Map  ) dict.get(   "@"    );
-            if (dict != null && dict.containsKey("__disp__")) {
-                title = (String) dict.get("__disp__");
+            item = form.getForm(              table.name     );
+            if (item != null  && item.containsKey(   "@"    )) {
+                item  = ( Map  ) item.get(   "@"    );
+            if (item != null  && item.containsKey("__disp__")) {
+                title = (String) item.get("__disp__");
                 break;
             }
             }
 
             // 再从菜单取名字
             MenuSet menu = MenuSet.getInstance(db.name);
-            Map cell = menu.getMenu(db.name+"/"+table.name+"/");
-            if (cell != null && cell.containsKey(  "disp"  )) {
-                title = (String) cell.get(  "disp"  );
+            item = menu.getMenu(db.name +"/"+ table.name +"/");
+            if (item != null  && item.containsKey(  "disp"  )) {
+                title = (String) item.get(  "disp"  );
                 break;
             }
 
@@ -96,10 +110,8 @@ public class DBAssist implements Core.Destroy {
             title = "core.table."+table.name+".name";
         } while (false);
 
-        CoreLocale trns = CoreLocale.getInstance().clone();
-                   trns.loadIgnrFNF(db.name);
-        title   =  trns.translate  (  title);
-        return  title;
+        title = getLang().translate(title);
+        return   title ;
 
         /*
         String sql = "SHOW TABLE STATUS WHERE name = ?";
@@ -118,11 +130,11 @@ public class DBAssist implements Core.Destroy {
             return  fields;
         }
 
-        CoreLocale trns = CoreLocale.getInstance(db.name);
-                 fields =    FormSet.getInstance(db.name)
-                           .getFormTranslated(table.name);
+        CoreLocale lang = getLang();
+        fields = FormSet.getInstance(db.name)
+               .getFormTranslated(table.name);
         if (fields == null) {
-            fields =  new  LinkedHashMap();
+            fields  =  new  LinkedHashMap(  );
         }
 
         List<String> findCols = new ArrayList();
@@ -176,8 +188,8 @@ public class DBAssist implements Core.Destroy {
 
             if (!field.containsKey("__disp__") || "".equals(field.get("__disp__"))) {
 //              if (disp!=null && !"".equals(disp)) {
-                if (trns.containsKey(disp)) {
-                    disp = trns.translate(disp);
+                if (lang.containsKey(disp)) {
+                    disp = lang.translate(disp);
                     field.put("__disp__", disp);
                 } else {
                     field.put("__disp__", name);
