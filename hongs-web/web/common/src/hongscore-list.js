@@ -283,7 +283,7 @@ HsList.prototype = {
         switch (page.err) {
             case  2 :
             case "2":
-                hsSetSerial(this._data, "page", page.pagecount || 1);
+                hsSetSeria(this._data, "page", page.pagecount || 1);
                 this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
                 this.listBox.hide( );
                 this.load();
