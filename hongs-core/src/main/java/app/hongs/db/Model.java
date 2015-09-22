@@ -714,8 +714,8 @@ implements IRecord
       caze.from (table.tableName , table.name );
       FetchPage fp = new FetchPage(caze, table);
       fp.setPage(page != 0 ? page : 1);
-      fp.setPags(pags >  0 ? pags : Math.abs(pags));
-      fp.setRows(rows >  0 ? rows : Math.abs(rows));
+      fp.setPags(Math.abs(pags));
+      fp.setRows(Math.abs(rows));
 
       // 页码等于 0 则不要列表数据
       if (page != 0)
