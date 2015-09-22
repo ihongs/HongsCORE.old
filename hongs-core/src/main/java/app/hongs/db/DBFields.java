@@ -3,11 +3,12 @@ package app.hongs.db;
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.io.Serializable;
 
 /**
  * 表字段信息缓存类
@@ -24,7 +25,7 @@ public class DBFields
   implements Serializable
 {
 
-  private Table table;
+  private final Table table;
 
   public Map<String, Map> fields;
 
@@ -46,7 +47,7 @@ public class DBFields
   protected final void imports()
     throws HongsException
   {
-    this.fields = new HashMap();
+    this.fields = new LinkedHashMap();
 
     FetchNext rs = this.table.db.query("SELECT * FROM "
                  + this.table.tableName, 0, 1);
