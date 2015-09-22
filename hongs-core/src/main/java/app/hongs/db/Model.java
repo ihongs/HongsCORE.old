@@ -717,18 +717,18 @@ implements IRecord
       fp.setPags(pags >  0 ? pags : Math.abs(pags));
       fp.setRows(rows >  0 ? rows : Math.abs(rows));
 
-      // 行数小于 0 则不要分页信息
-      if (rows  > 0)
-      {
-        Map  info = fp.getPage();
-        data.put( "page", info );
-      }
-
       // 页码等于 0 则不要列表数据
       if (page != 0)
       {
         List list = fp.getList();
         data.put( "list", list );
+      }
+
+      // 行数小于 0 则不要分页信息
+      if (rows  > 0)
+      {
+        Map  info = fp.getPage();
+        data.put( "page", info );
       }
     }
     else
