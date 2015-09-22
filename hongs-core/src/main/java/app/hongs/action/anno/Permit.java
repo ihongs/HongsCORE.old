@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Filter(PermitInvoker.class)
 public @interface Permit {
-    String  role() default "";
     String  conf() default "default";
+    String  role() default "";
 }

@@ -1,5 +1,6 @@
 package app.hongs.dl.lucene;
 
+import app.hongs.Cnst;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -107,9 +108,6 @@ public class LuceneAction implements IAction {
      */
     protected  Map   getRqMap(ActionHelper helper, LuceneRecord mod, String opr, Map req)
     throws HongsException {
-        if (req.containsKey(mod.idKey)) {
-            req.put(mod.idCol, req.get(mod.idKey));
-        }
         return req;
     }
 
@@ -124,9 +122,6 @@ public class LuceneAction implements IAction {
      */
     protected  Map   getRpMap(ActionHelper helper, LuceneRecord mod,  String opr, Map rsp)
     throws HongsException {
-        if (rsp.containsKey(mod.idCol)) {
-            rsp.put(mod.idKey, rsp.get(mod.idCol));
-        }
         return rsp;
     }
 

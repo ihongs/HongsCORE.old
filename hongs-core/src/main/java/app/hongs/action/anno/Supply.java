@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Filter(SupplyInvoker.class)
 public @interface Supply {
-    String  form() default "";
     String  conf() default "default";
+    String  form() default "";
+    short   mode() default -1;
 }

@@ -28,7 +28,7 @@
 <h2><%=lang.translate("fore."+_action+".title", title)%></h2>
 <div id="<%=_module%>-<%=_entity%>-<%=_action%>">
     <object class="config" name="hsList" data="">
-        <param name="loadUrl" value="('<%=_module%>/<%=_entity%>/retrieve.act?jd=2')"/>
+        <param name="loadUrl" value="('<%=_module%>/<%=_entity%>/retrieve.act?md=2')"/>
         <param name="openUrls#0" value="['.create','<%=_module%>/<%=_entity%>/form.html','@']"/>
         <param name="openUrls#1" value="['.update','<%=_module%>/<%=_entity%>/form4update.html?<%=idKey%>={ID}','@']"/>
         <param name="sendUrls#0" value="['.delete','<%=_module%>/<%=_entity%>/delete.act','<%=lang.translate("fore.deletre.confirm", title)%>']"/>

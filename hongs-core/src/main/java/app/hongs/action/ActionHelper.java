@@ -390,8 +390,8 @@ public class ActionHelper implements Cloneable
     if (this.responseWrtr != null)
     {
         return this.responseWrtr;
-    }
-    else
+    } else
+    if (this.response/**/ != null)
     {
       try
       {
@@ -401,6 +401,9 @@ public class ActionHelper implements Cloneable
       {
         throw new HongsError(0x32, "Can not send to browser.", ex);
       }
+    } else
+    {
+        throw new HongsError(0x32, "Can not send to browser."/**/);
     }
   }
 
@@ -595,6 +598,22 @@ public class ActionHelper implements Cloneable
   }
   public void setCookiesData(Map<String, String> data) {
     this.cookiesData  = data;
+  }
+
+  /**
+   * 新建实例
+   * 用于使用 ActionRunner 时快速构建请求对象,
+   * 可用以上 setXxxxxData 在构建之后设置参数.
+   * @return
+   */
+  public static ActionHelper newInstance() {
+    Core    core = Core.getInstance();
+    String  inst = ActionHelper.class.getName();
+    if ( core.containsKey( inst ) ) {
+        return ( ( ActionHelper ) core.got( inst ) ).clone( );
+    } else {
+        return new ActionHelper(null, null, null, null, null);
+    }
   }
 
   /**

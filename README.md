@@ -1,7 +1,7 @@
 # HongsCORE framework for Java
 
 * 文档版本: 15.10.20
-* 软件版本: 0.3.8-20151020
+* 软件版本: 0.3.8-20151022
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
@@ -269,7 +269,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     // 数量信息, 在 update,delete 动作返回
     "size": 操作数量
 
-在调用 API(REST) 时, 可在 url 后加请求参数 --api-wrap=包裹其他数据的键名, 可加请求参数 --api-conv.= 来转换基本数据类型, 其取值可以为:
+在调用 API(REST) 时, 可在 url 后加请求参数 .wrap=1 将其他数据放入 data 键下, 可加请求参数 .conv.= 转换规则, 其取值可以为:
 
     all2str     全部转为字串
     num2str     数字转为字串

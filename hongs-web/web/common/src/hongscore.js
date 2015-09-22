@@ -264,7 +264,7 @@ function hsSerialMix(arr, ar2) {
             arr.splice(j , 1);
         }
     }
-    jQuery.merge(arr, ar2);
+    return jQuery.merge(arr, ar2);
 }
 /**
  * 获取多个序列值

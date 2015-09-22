@@ -3,129 +3,51 @@ package app.hongs.action.anno;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
-import app.hongs.action.FormSet;
-import app.hongs.action.anno.FilterInvoker;
-import app.hongs.action.anno.Supply;
-import app.hongs.dl.MergeMore;
-import app.hongs.util.Dict;
-import app.hongs.util.Synt;
+import app.hongs.action.PickedHelper;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * 关联选项处理
- * 需要遵守以下规则:
- * 选择字段命名必须为 XXX_id, XXX 为关联数据名, 获取到数据后将加入当前对象的 XXX 字段下
- * 资源的获取法则为
+ * 关联选择处理器
  * @author Hongs
  */
 public class PickedInvoker implements FilterInvoker {
 
     @Override
-    public void invoke(ActionHelper helper, ActionRunner runner, Annotation anno)
+    public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
-        runner.doAction();
-        Map rsp = helper.getResponseData();
+        /*Just do it*/ chains.doAction();
+        Map     rsp  = helper.getResponseData();
 
-        Supply ann  = (Supply) anno;
-        String conf = ann.conf();
-        String form = ann.form();
+        Supply  ann  = (Supply) anno;
+        String  conf = ann.conf();
+        String  form = ann.form();
 
-        FormSet cnf = FormSet.getInstance(conf);
-        Map map  = cnf.getForm(form);
-        if (map == null) return ;
+        // 识别路径
+        if (form.length() == 0 || conf.length() == 0) {
+            String s; int i;
+            s = chains.getAction( );
+            i = s.lastIndexOf ('/');
+            if (form.length() == 0)
+            form = s.substring(i+1);
+            if (conf.length() == 0)
+            conf = s.substring(0,i);
+        }
 
-        FormSet dfs = FormSet.getInstance("default");
-        Map tps  = dfs.getEnum("__types__");
-
-        Iterator it = map.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry et = (Map.Entry)it.next();
-            Map       mt = (Map ) et.getValue();
-            String  name = (String) et.getKey();
-            String  type = (String) mt.get("__type__");
-                    type = (String) tps.get(type); // 类型别名转换
-            if (! "form".equals(type)) {
-                continue;
-            }
-
-            Object  data = Dict.get(rsp , name);
-            if (null == data || "".equals(data)
-            ||  data instanceof Map && ((Map) data).isEmpty()
-            ||  data instanceof Collection && ((Collection) data).isEmpty()) {
-                continue;
-            }
-
-            // 提取的路径
-            String al = (String) mt.get("data-al");
-            String ak = (String) mt.get("data-ak");
-            if (null == ak || "".equals(ak)) {
-                ak = name.replace("_id$","");
-            }
-            if (null == al || "".equals(al)) {
-                String c = (String) mt.get("conf");
-                String f = (String) mt.get("form");
-                if (null == c || "".equals(c)) c = conf;
-                if (null == f || "".equals(f)) f =  ak ;
-                al  =  c + "/" + f +  "/retrieve" ;
-            }
-
-            // 通常只需要获取值和名字即可
-            Set rb = new HashSet();
-            String vk = (String) mt.get("data-vk");
-            String tk = (String) mt.get("data-tk");
-            if (null != vk && !"".equals(vk)
-            &&  null != tk && !"".equals(tk)) {
-                rb.add( vk);
-                rb.add( tk);
-            } else {
-                rb.add("-");
-            }
-
-            // 调用关联资源的动作获取资源
-            Map rd = new HashMap();
-            rd.put("-for-pick", 1);
-            rd.put("rn", 0 );
-            rd.put("rb", rb);
-            rd.put("id", rsp.get( name ));
-            ActionHelper hlp = helper.clone(  );
-                         hlp.setRequestData(rd);
-            ActionRunner run = new ActionRunner(al, hlp);
-                         run.doInvoke(  );
-            Map sd = hlp.getRequestData();
-
-            // 提取出数据
-            Object  zd;
-            boolean rp = Synt.declare(mt.get("__repeated__"), true);
-            if (rp) {
-                zd = sd.get("list");
-            } else if (sd.containsKey("info")) {
-                zd = sd.get("info");
-            } else {
-                zd = Dict.get( sd, "list", 0 );
-            }
-
-            if (zd == null) {
-                continue;
-            }
-
-            if (data instanceof List) {
-                MergeMore mm = new MergeMore((List) data);
-                if (rp) {
-                    mm.append((List) zd, vk, name, ak);
-                } else {
-                    mm.extend((List) zd, vk, name, ak);
-                }
-            } else {
-                ((Map) data).put(ak, zd);
+        // 填充数据
+        try {
+            PickedHelper sup ;
+            sup = new PickedHelper().addItemsByForm(conf,form);
+            sup.picked ( rsp);
+        } catch (HongsException  ex) {
+            int  ec  = ex.getCode( );
+            if  (ec != 0x10e8 && ec != 0x10e9 && ec != 0x10ea) {
+                throw  ex;
             }
         }
+
+        // 返回数据
+        helper.reply(rsp);
     }
 
 }

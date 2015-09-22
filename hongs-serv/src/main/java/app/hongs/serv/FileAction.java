@@ -22,7 +22,7 @@ public class FileAction {
     public void uploadFile(ActionHelper helper) throws HongsException {
         Map sd = new HashMap();
         Map rd = helper.getRequestData();
-        int jd = Synt.declare(rd.get("jd"), 0);
+        int md = Synt.declare(rd.get("md"), 0);
         Set<String> sk = Synt.declare(helper.getAttribute("__UPLOAD__"), Set.class);
 
         if (sk == null) {
@@ -30,7 +30,7 @@ public class FileAction {
             return;
         }
 
-        if (jd ==  2  ) {
+        if (md ==  2  ) {
             for(String pn : sk) {
                 Object pv = Dict.getParam(rd, pn);
                 if (pv == null) {

@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
@@ -134,7 +135,7 @@ public class Mtree extends Model
 
     //** 默认字段 **/
 
-    if (!caze.hasSelect() && !rd.containsKey(this.colsKey))
+    if (!caze.hasSelect() && !rd.containsKey(Cnst.RB_KEY))
     {
       if (!caze.hasOption("ASSOCS")
       &&  !caze.hasOption("ASSOC_TYPES")
@@ -177,9 +178,9 @@ public class Mtree extends Model
 
     Map  data = new HashMap();
     List list;
-    if (!rd.containsKey(this.pageKey)
-    &&  !rd.containsKey(this.pagsKey)
-    &&  !rd.containsKey(this.rowsKey))
+    if (!rd.containsKey(Cnst.PN_KEY)
+    &&  !rd.containsKey(Cnst.GN_KEY)
+    &&  !rd.containsKey(Cnst.RN_KEY))
     {
       list = super.getAll (rd , caze);
       data.put("list", list);
@@ -415,7 +416,7 @@ public class Mtree extends Model
   {
     super.filter(caze, rd);
 
-    if (!rd.containsKey(this.sortKey))
+    if (!rd.containsKey(Cnst.OB_KEY))
     {
       if (this.snumKey != null)
       {

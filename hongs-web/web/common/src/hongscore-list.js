@@ -17,10 +17,18 @@ function HsList(opts, context) {
     var sendUrls = hsGetValue(opts, "sendUrls");
     var openUrls = hsGetValue(opts, "openUrls");
 
-    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("sort.key", "sort"));
-    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("page.key", "page"));
-    this.pagsForPage = hsGetConf("pags.for.page", 10);
-    this.rowsPerPage = hsGetConf("rows.per.page", 20);
+    this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("ob.key", "ob"));
+    this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("pn.key", "pn"));
+    this.pagsKey = hsGetValue(opts, "pagsKey", hsGetConf("gn.key", "gn"));
+    this.pagsNum = hsGetValue(opts, "pagsNum", 0);
+
+    // 逐层解析分页数量
+    if (! this.pagsNum || this.pagsNum == "0") {
+        var arr = hsSerialMix(hsSerialArr(loadUrl), hsSerialArr(loadBox));
+        this.pagsNum = hsGetSeria( arr, this.pagsKey );
+    if (! this.pagsNum || this.pagsNum == "0") {
+        this.pagsNum = hsGetConf ("pags.for.page", 10);
+    }}
 
     this.context = context;
     this.loadBox = loadBox;
@@ -298,19 +306,14 @@ HsList.prototype = {
                 this.listBox.show( );
         }
 
-        if (page.uncertain/*u*/) {
-            this.pageBox.hide( );
-            return;
-        }
-
         var i, p, t, pmin, pmax, that = this;
         p = page.page ? parseInt(page.page) : 1 ;
         t = page.pagecount ? parseInt(page.pagecount): 1;
-        pmin = p - Math.floor( this.pagsForPage / 2 );
+        pmin = p - Math.floor( this.pagsNum / 2 );
         if (pmin < 1) pmin = 1;
-        pmax = pmin + this.pagsForPage - 1;
+        pmax = pmin + this.pagsNum - 1;
         if (pmax > t) pmax = t;
-        pmin = pmax - this.pagsForPage + 1;
+        pmin = pmax - this.pagsNum + 1;
         if (pmin < 1) pmin = 1;
 
         var pbox = jQuery('<ul class="pagination"></ul>').appendTo(this.pageBox);

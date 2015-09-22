@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.Cnst;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -10,6 +11,7 @@ import app.hongs.action.anno.Verify;
 import app.hongs.action.anno.CommitSuccess;
 import app.hongs.dl.IAction;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -132,8 +134,10 @@ implements IAction {
      */
     protected  Map   getRqMap(ActionHelper helper, Model mod, String opr, Map req)
     throws HongsException {
-        if (req.containsKey(mod.idKey)) {
-            req.put(mod.table.primaryKey, req.get(mod.idKey));
+        if (!Cnst.ID_KEY.equals(mod.table.primaryKey)) {
+            if (req.containsKey(Cnst.ID_KEY)) {
+                req.put(mod.table.primaryKey, req.get(Cnst.ID_KEY));
+            }
         }
         return req;
     }
@@ -149,8 +153,17 @@ implements IAction {
      */
     protected  Map   getRpMap(ActionHelper helper, Model mod, String opr, Map rsp)
     throws HongsException {
-        if (rsp.containsKey(mod.table.primaryKey)) {
-            rsp.put(mod.idKey, rsp.get(mod.table.primaryKey));
+        if (!Cnst.ID_KEY.equals(mod.table.primaryKey)) {
+            if (rsp.containsKey("info")) {
+                /**/ Map  info = (Map ) rsp.get("info");
+                info.put(Cnst.ID_KEY, info.get(mod.table.primaryKey));
+            }
+            if (rsp.containsKey("list")) {
+                List<Map> list = (List) rsp.get("list");
+            for(/**/ Map  info :  list ) {
+                info.put(Cnst.ID_KEY, info.get(mod.table.primaryKey));
+            }
+            }
         }
         return rsp;
     }

@@ -14,7 +14,7 @@ function HsForm(opts, context) {
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var saveUrl  = hsGetValue(opts, "saveUrl");
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
-    var jdKey    = hsGetValue(opts, "jdKey", "jd"); // jd参数名, 用于判断是否要枚举表
+    var mdKey    = hsGetValue(opts, "mdKey", "md"); // md参数名, 用于判断是否要枚举表
 
     if (formBox.length === 0) formBox = context;
 
@@ -56,12 +56,12 @@ function HsForm(opts, context) {
     }
 
     /**
-     * 如果存在 id 或 jd 则进行数据加载
+     * 如果存在 id 或 md 则进行数据加载
      * 否则调用 loadBack 进行选项初始化
      */
     if (loadUrl
     && (hsGetSeria(loadArr, idKey)
-    ||  hsGetSeria(loadArr, jdKey))) {
+    ||  hsGetSeria(loadArr, mdKey))) {
         this.load (loadUrl, loadArr);
     } else {
         this.loadBack( {} );

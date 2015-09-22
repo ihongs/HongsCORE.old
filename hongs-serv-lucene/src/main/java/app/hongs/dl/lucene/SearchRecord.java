@@ -1,5 +1,6 @@
 package app.hongs.dl.lucene;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreLogger;
 import app.hongs.HongsException;
@@ -37,7 +38,7 @@ public class SearchRecord extends LuceneRecord {
      */
     @Override
     public String add(Map rd) throws HongsException {
-        String id = Synt.declare(rd.get(idCol), String.class);
+        String id = Synt.declare(rd.get(Cnst.ID_KEY), String.class);
         if (id == null || id.length() == 0) {
             throw HongsException.common("Id mus be set in add");
         }

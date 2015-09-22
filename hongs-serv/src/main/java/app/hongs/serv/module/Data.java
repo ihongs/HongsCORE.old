@@ -1,5 +1,6 @@
 package app.hongs.serv.module;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
@@ -152,7 +153,7 @@ public class Data extends LuceneRecord {
         // 保存到索引库
         Document doc = new Document(  );
         dd.put("mtime",od.get("etime"));
-        dd.put(idCol , id);
+        dd.put(Cnst.ID_KEY, id);
         docAdd(doc, dd);
         setDoc(id, doc);
     }
@@ -171,7 +172,7 @@ public class Data extends LuceneRecord {
 
         Document doc = new Document();
         dd.put("mtime",System.currentTimeMillis());
-        dd.put(idCol , id);
+        dd.put(Cnst.ID_KEY, id);
         docAdd(doc, dd);
         setDoc(id, doc);
     }

@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
@@ -65,59 +66,6 @@ implements IRecord
   public Table table;
 
   /**
-   * ID参数名
-   */
-  protected String idKey = "id";
-
-  /**
-   * 或参数名
-   * 用于组合 (a = 1 OR a = 2)
-   */
-  protected String orKey = "or";
-
-  /**
-   * 并参数名
-   * 用于组合 (a = 1 OR a = 2) AND (b = 1 OR b = 2)
-   */
-  protected String arKey = "ar";
-
-  /**
-   * 页码参数名
-   * 影响getPage
-   */
-  protected String pageKey = "pn";
-
-  /**
-   * 分页参数名
-   * 影响getPage
-   */
-  protected String pagsKey = "gn";
-
-  /**
-   * 行数参数名
-   * 影响getPage
-   */
-  protected String rowsKey = "rn";
-
-  /**
-   * 字段参数名
-   * 影响getPage/getList/filter
-   */
-  protected String colsKey = "rb";
-
-  /**
-   * 排序参数名
-   * 影响getPage/getList/filter
-   */
-  protected String sortKey = "ob";
-
-  /**
-   * 搜索参数名
-   * 影响getPage/getList/filter
-   */
-  protected String findKey = "wd";
-
-  /**
    * 被搜索的字段
    * 影响getPage/getList/filter
    */
@@ -144,18 +92,6 @@ implements IRecord
   {
     this.db = table.db;
     this.table = table;
-
-    // 配置
-    CoreConfig conf = Core.getInstance(CoreConfig.class);
-    this.idKey   = conf.getProperty("fore.id.key"  , "id");
-    this.orKey   = conf.getProperty("fore.or.key"  , "or");
-    this.arKey   = conf.getProperty("fore.ar.key"  , "ar");
-    this.pageKey = conf.getProperty("fore.page.key", "pn");
-    this.pagsKey = conf.getProperty("fore.pags.key", "gn");
-    this.rowsKey = conf.getProperty("fore.rows.key", "rn");
-    this.colsKey = conf.getProperty("fore.cols.key", "rb");
-    this.sortKey = conf.getProperty("fore.sort.key", "ob");
-    this.findKey = conf.getProperty("fore.find.key", "wd");
   }
 
   //** 标准动作方法 **/
@@ -239,7 +175,7 @@ implements IRecord
   public int update(Map rd, FetchCase caze)
     throws HongsException
   {
-    Object idz = rd.get(this.idKey);
+    Object idz = rd.get(Cnst.ID_KEY);
     if (idz == null) {
         idz =  rd.get(table.primaryKey);
     }
@@ -290,7 +226,7 @@ implements IRecord
   public int delete(Map rd, FetchCase caze)
     throws HongsException
   {
-    Object idz = rd.get(this.idKey);
+    Object idz = rd.get(Cnst.ID_KEY);
     if (idz == null) {
         idz =  rd.get(table.primaryKey);
     }
@@ -396,7 +332,7 @@ implements IRecord
 
       if (columns.containsKey(field))
       {
-        if (field.equals( this.table.primaryKey) || field.equals(this.idKey))
+        if (field.equals( this.table.primaryKey) || field.equals(Cnst.ID_KEY))
         {
           caze.where(".`"+this.table.primaryKey+"` != ?", value);
         }
@@ -423,7 +359,7 @@ implements IRecord
   public String add(Map<String, Object> data)
     throws HongsException
   {
-    String id = Synt.declare(data.get(this.idKey),String.class);
+    String id = Synt.declare(data.get(Cnst.ID_KEY),String.class);
     if (id != null && id.length() != 0)
     {
       throw new HongsException(0x1091, "Add can not have a id");
@@ -616,9 +552,9 @@ implements IRecord
       caze = new FetchCase();
     }
 
-    if (rd.containsKey( idKey ))
+    if (rd.containsKey(Cnst.ID_KEY))
     {
-      rd.put(table.primaryKey, rd.get(idKey));
+      rd.put(table.primaryKey, rd.get(Cnst.ID_KEY));
     }
 
     caze.setOption("MODEL_METHOD", "getInfo");
@@ -674,9 +610,9 @@ implements IRecord
       caze = new FetchCase();
     }
 
-    if (rd.containsKey( idKey ))
+    if (rd.containsKey(Cnst.ID_KEY))
     {
-      rd.put(table.primaryKey, rd.get(idKey));
+      rd.put(table.primaryKey, rd.get(Cnst.ID_KEY));
     }
 
     caze.setOption("MODEL_METHOD", "getList");
@@ -684,23 +620,23 @@ implements IRecord
 
     // 获取页码, 默认为第一页
     int page = 1;
-    if (rd.containsKey(this.pageKey))
+    if (rd.containsKey(Cnst.PN_KEY))
     {
-      page = Integer.parseInt((String)rd.get(this.pageKey));
+      page = Integer.parseInt((String)rd.get(Cnst.PN_KEY));
     }
 
     // 获取分页, 默认查总页数
     int pags = 0;
-    if (rd.containsKey(this.pagsKey))
+    if (rd.containsKey(Cnst.GN_KEY))
     {
-      pags = Integer.parseInt((String)rd.get(this.pagsKey));
+      pags = Integer.parseInt((String)rd.get(Cnst.GN_KEY));
     }
 
     // 获取行数, 默认依从配置
     int rows;
-    if (rd.containsKey(this.rowsKey))
+    if (rd.containsKey(Cnst.RN_KEY))
     {
-      rows = Integer.parseInt((String)rd.get(this.rowsKey));
+      rows = Integer.parseInt((String)rd.get(Cnst.RN_KEY));
     }
     else
     {
@@ -783,7 +719,7 @@ implements IRecord
      * 默认只关联 BLS_TO,HAS_ONE 的表(仅能关联一个)
      * 默认只连接 LEFT  ,INNER   的表(必须满足左表)
      */
-    if (! rd.containsKey(this.colsKey)
+    if (! rd.containsKey(Cnst.RB_KEY)
     && ("getAll" .equals(rd.get("MODEL_METHOD"))
     ||  "getList".equals(rd.get("MODEL_METHOD"))
     ))
@@ -824,28 +760,29 @@ implements IRecord
       Object value = et.getValue();
 
       if (key == null || value == null
-      ||  key.equals(this.rowsKey)
-      ||  key.equals(this.pageKey))
+      ||  key.equals(Cnst.RN_KEY)
+      ||  key.equals(Cnst.PN_KEY)
+      ||  key.equals(Cnst.GN_KEY))
       {
         continue;
       }
 
       // 字段
-      if (key.equals(this.colsKey))
+      if (key.equals(Cnst.RB_KEY))
       {
         this.colsFilter(caze, value, fields);
         continue;
       }
 
       // 排序
-      if (key.equals(this.sortKey))
+      if (key.equals(Cnst.OB_KEY))
       {
         this.sortFilter(caze, value, fields);
         continue;
       }
 
       // 搜索
-      if (key.equals(this.findKey))
+      if (key.equals(Cnst.WD_KEY))
       {
         this.findFilter(caze, value, findCols);
         continue;
@@ -866,13 +803,13 @@ implements IRecord
       }
 
       // 组查询语句
-      if (key.equals(this.arKey))
-      {
-        this.packFilter(caze, value, "AND");
-      } else
-      if (key.equals(this.orKey))
+      if (key.equals(Cnst.OR_KEY))
       {
         this.packFilter(caze, value, "OR" );
+      } else
+      if (key.equals(Cnst.AR_KEY))
+      {
+        this.packFilter(caze, value, "AND");
       }
     }
   }
@@ -1225,53 +1162,53 @@ implements IRecord
     {
       Map map = (Map) val;
       Set set = map.keySet();
-      if (map.containsKey("~lt"))
+      if (map.containsKey(Cnst.LT_REL))
       {
-        set.remove("~lt");
-        Object vaz = map.get("~lt");
+        set.remove(Cnst.LT_REL);
+        Object vaz = map.get(Cnst.LT_REL);
         caze.where(key+" < ?", vaz);
       }
-      if (map.containsKey("~le"))
+      if (map.containsKey(Cnst.LE_REL))
       {
-        set.remove("~le");
-        Object vaz = map.get("~le");
+        set.remove(Cnst.LE_REL);
+        Object vaz = map.get(Cnst.LE_REL);
         caze.where(key+" <= ?",vaz);
       }
-      if (map.containsKey("~gt"))
+      if (map.containsKey(Cnst.GT_REL))
       {
-        set.remove("~gt");
-        Object vaz = map.get("~gt");
+        set.remove(Cnst.GT_REL);
+        Object vaz = map.get(Cnst.GT_REL);
         caze.where(key+" > ?", vaz);
       }
-      if (map.containsKey("~ge"))
+      if (map.containsKey(Cnst.GE_REL))
       {
-        set.remove("~ge");
-        Object vaz = map.get("~ge");
+        set.remove(Cnst.GE_REL);
+        Object vaz = map.get(Cnst.GE_REL);
         caze.where(key+" >= ?",vaz);
       }
-      if (map.containsKey("~eq"))
+      if (map.containsKey(Cnst.EQ_REL))
       {
-        set.remove("~eq");
-        Object vaz = map.get("~eq");
+        set.remove(Cnst.EQ_REL);
+        Object vaz = map.get(Cnst.EQ_REL);
         caze.where(key+" = ?", vaz);
       }
-      if (map.containsKey("~ne"))
+      if (map.containsKey(Cnst.NE_REL))
       {
-        set.remove("~ne");
-        Object vaz = map.get("~ne");
+        set.remove(Cnst.NE_REL);
+        Object vaz = map.get(Cnst.NE_REL);
         caze.where(key+" != ?",vaz);
       }
-      if (map.containsKey("~in"))
+      if (map.containsKey(Cnst.IN_REL))
       {
-        set.remove("~in");
-        Object vaz = map.get("~in");
+        set.remove(Cnst.IN_REL);
+        Object vaz = map.get(Cnst.IN_REL);
         caze.where(key+" IN (?)", vaz);
       }
-      if (map.containsKey("~ni"))
+      if (map.containsKey(Cnst.NI_REL))
       {
-        set.remove("~ni");
-        Object vaz = map.get("~ni");
-        caze.where(key+" NOT IN (?)", vaz);
+        set.remove(Cnst.NI_REL);
+        Object vaz = map.get(Cnst.NI_REL);
+        caze.where(key+" NOT IN (?)",vaz);
       }
       if (!set.isEmpty())
       {

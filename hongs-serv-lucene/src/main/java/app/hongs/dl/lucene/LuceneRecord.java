@@ -1,5 +1,6 @@
 package app.hongs.dl.lucene;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
@@ -85,18 +86,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected       IndexReader      reader = null ;
     protected       IndexSearcher    finder = null ;
 
-    public    String   idCol = "id";
-    public    String   idKey = "id";
-    protected String   arKey = "ar";
-    protected String   orKey = "or";
-    protected String   xrKey = "xr";
-    protected String pageKey = "pn";
-    protected String pagsKey = "gn";
-    protected String rowsKey = "rn";
-    protected String colsKey = "rb";
-    protected String sortKey = "ob";
-    protected String findKey = "wd";
-
     public LuceneRecord(String path, final Map<String, Map> fields)
     throws HongsException {
         if (path == null) {
@@ -111,28 +100,17 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             path = Core.DATA_PATH +"/lucene/"+ path;
         }
 
-        this.dbpath   = path  ;
-        this.fields   = fields;
-
-        CoreConfig conf = CoreConfig.getInstance();
-
-        // 请求参数
-        this.idKey    = conf.getProperty("fore.id.key"  , "id");
-        this.arKey    = conf.getProperty("fore.ar.key"  , "ar");
-        this.orKey    = conf.getProperty("fore.or.key"  , "or");
-        this.xrKey    = conf.getProperty("fore.xr.key"  , "xr");
-        this.pageKey  = conf.getProperty("fore.page.key", "pn");
-        this.pagsKey  = conf.getProperty("fore.pags.key", "gn");
-        this.rowsKey  = conf.getProperty("fore.rows.key", "rn");
-        this.colsKey  = conf.getProperty("fore.cols.key", "rb");
-        this.sortKey  = conf.getProperty("fore.sort.key", "ob");
-        this.findKey  = conf.getProperty("fore.find.key", "wd");
+        this.dbpath = path  ;
+        this.fields = fields;
 
         // 模式标识
-        this.IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"),
-                                        conf.getProperty("core.in.trnsct.mode", false));
-        this.IN_OBJECT_MODE = Synt.declare(Core.getInstance().got("__IN_OBJECT_MODE__"),
-                                        conf.getProperty("core.in.object.mode", false));
+        CoreConfig conf = CoreConfig.getInstance( );
+        this.IN_TRNSCT_MODE = Synt.declare(
+                Core.getInstance( ).got( "__IN_TRNSCT_MODE__" ),
+                conf.getProperty("core.in.trnsct.mode", false));
+        this.IN_OBJECT_MODE = Synt.declare(
+                Core.getInstance( ).got( "__IN_OBJECT_MODE__" ),
+                conf.getProperty("core.in.object.mode", false));
     }
 
     /**
@@ -202,7 +180,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     @Override
     public Map retrieve(Map rd) throws HongsException {
         // 指定单个 id 则走 getOne
-        Object id = rd.get (idCol);
+        Object id = rd.get (Cnst.ID_KEY);
         if (id != null && !(id instanceof Collection) && !(id instanceof Map)) {
             Map  data = new HashMap();
             Map  info = getOne(rd);
@@ -212,8 +190,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
         // 获取行数, 默认依从配置
         int rn;
-        if (rd.containsKey(rowsKey)) {
-            rn = Synt.declare(rd.get(rowsKey), 0);
+        if (rd.containsKey(Cnst.RN_KEY)) {
+            rn = Synt.declare(rd.get(Cnst.RN_KEY), 0);
         } else {
             rn = CoreConfig.getInstance().getProperty("fore.rows.per.page", 20);
         }
@@ -228,15 +206,15 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
         // 获取链数, 默认依从配置
         int gn;
-        if (rd.containsKey(pagsKey)) {
-            gn = Synt.declare(rd.get(pagsKey), 0);
+        if (rd.containsKey(Cnst.GN_KEY)) {
+            gn = Synt.declare(rd.get(Cnst.GN_KEY), 0);
         } else {
             gn = CoreConfig.getInstance().getProperty("fore.gags.for.page", 10);
         }
 
         // 获取页码, 依此计算分页
         if (gn < 1) gn = 1; // 链数不得少于 1
-        int pn = Synt.declare(rd.get(pageKey), 1);
+        int pn = Synt.declare(rd.get(Cnst.PN_KEY), 1);
         int minPn = pn - (gn / 2 );
         if (minPn < 1)   minPn = 1;
         int maxPn = gn + minPn - 1;
@@ -323,7 +301,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     @Override
     public int update(Map rd) throws HongsException {
-        Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
+        Set<String> ids = Synt.declare(rd.get(Cnst.ID_KEY), new HashSet());
         for(String  id  : ids) {
             put(id, rd );
         }
@@ -338,7 +316,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     @Override
     public int delete(Map rd) throws HongsException {
-        Set<String> ids = Synt.declare(rd.get(idCol), new HashSet());
+        Set<String> ids = Synt.declare(rd.get(Cnst.ID_KEY), new HashSet());
         for(String  id  : ids) {
             del(id);
         }
@@ -443,12 +421,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @throws HongsException
      */
     public String add(Map rd) throws HongsException {
-        String id = Synt.declare(rd.get(idCol), String.class);
+        String id = Synt.declare(rd.get(Cnst.ID_KEY), String.class);
         if (id != null && id.length() != 0) {
             throw HongsException.common("Id can not set in add");
         }
         id = Core.getUniqueId();
-        rd.put(idCol , id );
+        rd.put(Cnst.ID_KEY, id);
         addDoc(map2Doc(rd));
         return id;
     }
@@ -478,7 +456,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             md.putAll(rd);
             rd = md;
         }
-        rd.put(idCol, id);
+        rd.put(Cnst.ID_KEY, id);
         docAdd(doc, rd);
         setDoc(id, doc);
     }
@@ -508,7 +486,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             md.putAll(rd);
             rd = md;
         }
-        rd.put(idCol, id);
+        rd.put(Cnst.ID_KEY, id);
         docAdd(doc, rd);
         setDoc(id, doc);
     }
@@ -553,7 +531,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public void setDoc(String id, Document doc) throws HongsException {
         connect();
         try {
-            writer.updateDocument(new Term(idCol, id), doc);
+            writer.updateDocument(new Term(Cnst.ID_KEY, id), doc);
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
@@ -565,7 +543,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public void delDoc(String id) throws HongsException {
         connect();
         try {
-            writer.deleteDocuments(new Term(idCol, id));
+            writer.deleteDocuments(new Term(Cnst.ID_KEY, id));
         } catch (IOException ex) {
             throw HongsException.common(null, ex);
         }
@@ -577,7 +555,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public Document getDoc(String id) throws HongsException {
         initial();
         try {
-                Query  q    = new TermQuery(new Term(idCol, id));
+                Query  q    = new TermQuery(new Term(Cnst.ID_KEY, id));
               TopDocs  docs = finder.search(q, 1);
             ScoreDoc[] hits =   docs.scoreDocs;
             if  ( 0 != hits.length ) {
@@ -987,8 +965,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             Object fv = e.getValue( );
             String fn = (String) e.getKey();
 
-            if (findKey.equals(fn) || sortKey.equals(fn) || colsKey.equals(fn)
-            ||    orKey.equals(fn) ||   arKey.equals(fn) ||   xrKey.equals(fn)) {
+            if (Cnst.WD_KEY.equals(fn) || Cnst.OB_KEY.equals(fn) || Cnst.RB_KEY.equals(fn)
+            ||  Cnst.OR_KEY.equals(fn) || Cnst.AR_KEY.equals(fn) || Cnst.XR_KEY.equals(fn)) {
                 continue;
             }
 
@@ -1025,8 +1003,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 关键词
-        if (rd.containsKey(findKey)) {
-            Object fv = rd.get(findKey);
+        if (rd.containsKey(Cnst.WD_KEY)) {
+            Object fv = rd.get(Cnst.WD_KEY);
 
             /**
              * 当设置了多个搜索字段时
@@ -1041,7 +1019,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 query.add(quary, BooleanClause.Occur.MUST);
                 if (!(fv instanceof Map) ) {
                    Map fw = new HashMap( );
-                   fw.put("~or", fv);
+                   fw.put(Cnst.OR_REL, fv);
                    fv= fw;
                 }
             }
@@ -1052,9 +1030,9 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 或条件
-        if (rd.containsKey(orKey)) {
+        if (rd.containsKey(Cnst.OR_KEY)) {
             BooleanQuery quary = new BooleanQuery( );
-            Set<Map> set = Synt.declare(rd.get(orKey), Set.class);
+            Set<Map> set = Synt.declare(rd.get(Cnst.OR_KEY), Set.class);
             for(Map  map : set) {
                 quary.add(getQuery(map), BooleanClause.Occur.SHOULD);
             }
@@ -1062,16 +1040,16 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 附条件
-        if (rd.containsKey(xrKey)) {
-            Set<Map> set = Synt.declare(rd.get(xrKey), Set.class);
+        if (rd.containsKey(Cnst.XR_KEY)) {
+            Set<Map> set = Synt.declare(rd.get(Cnst.XR_KEY), Set.class);
             for(Map  map : set) {
                 query.add(getQuery(map), BooleanClause.Occur.SHOULD);
             }
         }
 
         // 并条件
-        if (rd.containsKey(arKey)) {
-            Set<Map> set = Synt.declare(rd.get(arKey), Set.class);
+        if (rd.containsKey(Cnst.AR_KEY)) {
+            Set<Map> set = Synt.declare(rd.get(Cnst.AR_KEY), Set.class);
             for(Map  map : set) {
                 query.add(getQuery(map), BooleanClause.Occur.MUST  );
             }
@@ -1083,8 +1061,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 有条件无排序则按相关度排序
-        if(!rd.containsKey(sortKey)) {
-            rd.put(sortKey, "-");
+        if(!rd.containsKey(Cnst.OB_KEY)) {
+            rd.put(Cnst.OB_KEY, "-");
         }
 
         return query;
@@ -1098,7 +1076,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     protected Sort getSort(Map rd) throws HongsException {
         Set<String> ob;
-        Object xb = rd.get( sortKey );
+        Object xb = rd.get(Cnst.OB_KEY);
         if (xb instanceof String/**/)
         {
           ob = new LinkedHashSet(Arrays.asList(((String)xb).split("[, \\+]")));
@@ -1176,7 +1154,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     protected void ignFlds(Map rd) {
         Set<String> fs;
-        Object fz = rd.get( colsKey );
+        Object fz = rd.get(Cnst.RB_KEY);
         if (fz instanceof String/**/)
         {
           fs = new LinkedHashSet(Arrays.asList(((String)fz).split("[, \\+]")));
@@ -1428,10 +1406,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 if (c.isEmpty()) {
                     return;
                 }
-                m.put("~in", c);
+                m.put(Cnst.IN_REL, c);
             } else
             {
-                m.put("~eq", v);
+                m.put(Cnst.EQ_REL, v);
             }
         }
 
@@ -1451,51 +1429,51 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             sq.fuzzyMinSim(Synt.declare(fc.get("lucene-parser-fuzzyMinSim"),   Float.class));
         }
 
-        if (m.containsKey("~wt")) {
-            Object n = m.remove("~wt");
+        if (m.containsKey(Cnst.WT_REL)) {
+            Object n = m.remove(Cnst.WT_REL);
             q.bst(Synt.declare(n, 1F));
         }
 
-        if (m.containsKey("~eq")) {
-            Object n = m.remove("~eq");
+        if (m.containsKey(Cnst.EQ_REL)) {
+            Object n = m.remove(Cnst.EQ_REL);
             qry.add(q.add(k, n), BooleanClause.Occur.MUST);
         }
 
-        if (m.containsKey("~ne")) {
-            Object n = m.remove("~ne");
+        if (m.containsKey(Cnst.NE_REL)) {
+            Object n = m.remove(Cnst.NE_REL);
             qry.add(q.add(k, n), BooleanClause.Occur.MUST_NOT);
         }
 
-        if (m.containsKey("~or")) {
-            Object n = m.remove("~or");
+        if (m.containsKey(Cnst.OR_REL)) {
+            Object n = m.remove(Cnst.OR_REL);
             qry.add(q.add(k, n), BooleanClause.Occur.SHOULD);
         }
 
-        if (m.containsKey("~in")) { // In
+        if (m.containsKey(Cnst.IN_REL)) { // In
             BooleanQuery qay = new BooleanQuery();
-            Set a = Synt.declare(m.remove("~in"), new HashSet());
+            Set a = Synt.declare(m.remove(Cnst.IN_REL), new HashSet());
             for(Object x : a) {
                 qay.add(q.add(k, x), BooleanClause.Occur.SHOULD);
             }
             qry.add(qay, BooleanClause.Occur.MUST);
         }
 
-        if (m.containsKey("~ai")) { // All In
-            Set a = Synt.declare(m.remove("~ai"), new HashSet());
+        if (m.containsKey(Cnst.AI_REL)) { // All In
+            Set a = Synt.declare(m.remove(Cnst.AI_REL), new HashSet());
             for(Object x : a) {
                 qry.add(q.add(k, x), BooleanClause.Occur.MUST);
             }
         }
 
-        if (m.containsKey("~ni")) { // Not In
-            Set a = Synt.declare(m.remove("~ni"), new HashSet());
+        if (m.containsKey(Cnst.NI_REL)) { // Not In
+            Set a = Synt.declare(m.remove(Cnst.NI_REL), new HashSet());
             for(Object x : a) {
                 qry.add(q.add(k, x), BooleanClause.Occur.MUST_NOT);
             }
         }
 
-        if (m.containsKey("~oi")) { // Or In
-            Set a = Synt.declare(m.remove("~oi"), new HashSet());
+        if (m.containsKey(Cnst.OI_REL)) { // Or In
+            Set a = Synt.declare(m.remove(Cnst.OI_REL), new HashSet());
             for(Object x : a) {
                 qry.add(q.add(k, x), BooleanClause.Occur.SHOULD);
             }
@@ -1506,21 +1484,21 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         Object  n, x;
         boolean l, g;
 
-        if (m.containsKey("~gt")) {
-            n = m.remove ("~gt"); l = false;
+        if (m.containsKey(Cnst.GT_REL)) {
+            n = m.remove (Cnst.GT_REL); l = false;
         } else
-        if (m.containsKey("~ge")) {
-            n = m.remove ("~ge"); l = true;
+        if (m.containsKey(Cnst.GE_REL)) {
+            n = m.remove (Cnst.GE_REL); l = true;
         } else
         {
             n = null; l = true;
         }
 
-        if (m.containsKey("~lt")) {
-            x = m.remove ("~lt"); g = false;
+        if (m.containsKey(Cnst.LT_REL)) {
+            x = m.remove (Cnst.LT_REL); g = false;
         } else
-        if (m.containsKey("~le")) {
-            x = m.remove ("~le"); g = true;
+        if (m.containsKey(Cnst.LE_REL)) {
+            x = m.remove (Cnst.LE_REL); g = true;
         } else
         {
             x = null; g = true;
