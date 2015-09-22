@@ -684,7 +684,7 @@ public class MenuSet
   }
 
   /**
-   * 获取菜单列表(与当前请求相关)
+   * 获取菜单列表(与当前请求无关)
    * @param level
    * @param depth
    * @return
