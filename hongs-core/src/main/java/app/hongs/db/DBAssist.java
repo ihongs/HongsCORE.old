@@ -248,7 +248,7 @@ public class DBAssist implements Core.Destroy {
 
         if (table.assocs != null) {
         Iterator it = table.assocs.entrySet().iterator();
-        while (it.hasNext()) {
+        while (  it.hasNext( )  ) {
             Map.Entry et = (Map.Entry)it.next();
             Map       vd = (Map ) et.getValue();
             String  type = (String) vd.get("type");
