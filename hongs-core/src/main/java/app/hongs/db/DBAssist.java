@@ -134,17 +134,17 @@ public class DBAssist implements Core.Destroy {
            .get("core.findable.types"),
                 "string,search,text,email,url,tel,textarea"
         ).split(",")));
-        // 默认不能排序的类型
-        Set sortable = new HashSet(Arrays.asList(Synt.declare(
-            CoreConfig.getInstance()
-           .get("core.sortable.types"),
-                "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check"
-        ).split(",")));
         // 默认可列举的类型
         Set listable = new HashSet(Arrays.asList(Synt.declare(
             CoreConfig.getInstance()
            .get("core.listable.types"),
                 "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check,form,picker"
+        ).split(",")));
+        // 默认不能排序的类型
+        Set sortable = new HashSet(Arrays.asList(Synt.declare(
+            CoreConfig.getInstance()
+           .get("core.sortable.types"),
+                "string,search,text,email,url,tel,number,range,onoff,date,time,datetime,enum,select,radio,check"
         ).split(",")));
 
         /*
