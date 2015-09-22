@@ -119,32 +119,9 @@ implements IAction {
         pos  = mod.lastIndexOf('/' );
         ent  = mod.substring(1+ pos); // 实体名称
         mod  = mod.substring(0, pos); // 模型名称
-        return setModel(DB.getInstance(mod).getModel(ent));
-    }
-
-    /**
-     * 对 Model 设置 findable,listable 字段
-     * @param mod
-     * @return
-     * @throws HongsException 
-     */
-    protected Model  setModel(Model mod) throws HongsException {
-        DBAssist ass = new DBAssist(mod);
-        List<String> findCols = new ArrayList();
-        List<String> listCols = new ArrayList();
-        for(Map.Entry<String, Map<String, String>> et : ass.getFields().entrySet()) {
-            String fn = et.getKey();
-            Map<String, String> ps = et.getValue();
-            if (Synt.declare(ps.get("findable"), false)) {
-                findCols.add(fn);
-            }
-            if (Synt.declare(ps.get("listable"), false)) {
-                listCols.add(fn);
-            }
-        }
-        mod.findCols = findCols.toArray(new String[0]);
-        mod.listCols = listCols.toArray(new String[0]);
-        return mod;
+        Model  mol = DB.getInstance(mod).getModel(ent);
+        new DBAssist(mol).getFields(   );
+        return mol ;
     }
 
     /**
