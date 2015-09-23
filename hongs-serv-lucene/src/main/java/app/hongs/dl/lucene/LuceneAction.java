@@ -1,6 +1,5 @@
 package app.hongs.dl.lucene;
 
-import app.hongs.Cnst;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
