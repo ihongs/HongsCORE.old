@@ -23,7 +23,7 @@ public class DBAction
 implements IAction {
 
     @Action("retrieve")
-    @Supply()
+    @Supply(conf="", form="")
     @Override
     public void retrieve(ActionHelper helper)
     throws HongsException {
@@ -36,7 +36,7 @@ implements IAction {
     }
 
     @Action("create")
-    @Verify()
+    @Verify(conf="", form="")
     @CommitSuccess
     @Override
     public void create(ActionHelper helper) throws HongsException {
@@ -50,7 +50,7 @@ implements IAction {
     }
 
     @Action("update")
-    @Verify()
+    @Verify(conf="", form="")
     @CommitSuccess
     @Override
     public void update(ActionHelper helper) throws HongsException {
