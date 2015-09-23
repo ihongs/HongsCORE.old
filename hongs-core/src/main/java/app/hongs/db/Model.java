@@ -66,13 +66,12 @@ implements IRecord
   public Table table;
 
   /**
-   * 被搜索的字段
-   * 影响getPage/getList/filter
+   * 可搜索的字段
    */
   public String[] findCols = new String[] {"name"};
 
   /**
-   * 被显示的字段
+   * 可列举的字段
    */
   public String[] listCols = new String[] {"name"};
 
@@ -788,6 +787,13 @@ implements IRecord
         continue;
       }
 
+      // 搜索字段
+      if (Arrays.asList(findCols).contains(key))
+      {
+        this.findFilter(caze, value, new String[]{key});
+        continue;
+      }
+
       // 当前表字段
       if (fields.containsKey(key))
       {
@@ -875,11 +881,14 @@ implements IRecord
     }
 
     Map<String, Set<String>> colsBuf = new HashMap();
+    Map<String, Set<String>> colsExc = new HashMap();
 
     for (String col : cols)
     {
-      col  = col.trim();
-      String tbl  =  "";
+      String  tbl = "";
+      col = col.trim();
+      boolean exc = col.startsWith("-");
+      if(exc) col = col.substring ( 1 );
 
       int pos  = col.indexOf(".");
       if (pos != -1)
@@ -888,15 +897,29 @@ implements IRecord
         col = col.substring(pos + 1);
       }
 
-      Set set  = colsBuf.get(tbl);
-      if (set == null)
+      Set set;
+      if (exc)
       {
-        set = new HashSet(  );
-        colsBuf.put(tbl, set);
+        set = colsExc.get(tbl);
+        if (set == null)
+        {
+          set = new LinkedHashSet();
+          colsExc.put(tbl,set);
+        }
+      }
+      else
+      {
+        set = colsBuf.get(tbl);
+        if (set == null)
+        {
+          set = new LinkedHashSet();
+          colsBuf.put(tbl,set);
+        }
       }
       set.add(col);
     }
 
+    // 查询的字段
     for ( Map.Entry  et : colsBuf.entrySet())
     {
       Map          cols2;
@@ -911,55 +934,113 @@ implements IRecord
         String       tx;
         String[]     ts;
 
-        tc =this.table.getAssoc(tn);
+        tc = this.table.getAssoc(tn);
         if (tc == null)
         {
           continue;
         }
 
-        tx = Table.getAssocName (tc) ;
-        ts = Table.getAssocPath (tc) ;
-        tb =  this.db.getTable  (tx) ;
-        cols2 =    tb.getFields (  ) ;
+        tx = Table.getAssocName (tc);
+        ts = Table.getAssocPath (tc);
+        tb =  this.db.getTable  (tx);
+        cols2 =    tb.getFields (  );
         tns.addAll(Arrays.asList(ts));
         tns.add   (/* current */ tn );
         caze2 = caze.gotJoin(ts).gotJoin(tn);
+
+        // 取交集
+        Set<String> colx = new LinkedHashSet( cols2.keySet() );
+        colx.retainAll(colz);
+
+        // JOIN 的必须取别名
+        Object jn = tc.get("join");
+        if (jn != null && !"".equals(jn)) {
+            for (String col : colx) {
+                caze2.select(".`"+col+"` AS `"+tn+"."+col+"`");
+            }
+        } else {
+            for (String col : colx) {
+                caze2.select(".`"+col+"`");
+            }
+        }
       }
       else
       {
         cols2 = columns;
         caze2 = caze;
+
+        Set<String> colx = new LinkedHashSet( cols2.keySet() );
+        colx.retainAll(colz);
+
+        for (String col : colx) {
+            caze2.select(".`"+col+"`");
+        }
+      }
+    }
+
+    // 排除的字段
+    for ( Map.Entry  et : colsExc.entrySet())
+    {
+      Map          cols2;
+      FetchCase    caze2;
+      Set<String>  colz = (Set) et.getValue();
+      String         tn = (String)et.getKey();
+
+      // 如果表已有指定查询字段
+      // 则不可再指定排除字段了
+      if (colsBuf.containsKey(tn))
+      {
+        continue;
       }
 
-      cols = new HashSet();
-
-      for (String col : colz)
+      if (!"".equals(tn))
       {
-        boolean mnu = col.startsWith("-");
-        if(mnu) col = col.substring ( 1 );
+        Map          tc;
+        Table        tb;
+        String       tx;
+        String[]     ts;
 
-        if (! cols2.containsKey( col ))
+        tc = this.table.getAssoc(tn);
+        if (tc == null)
         {
           continue;
         }
 
-        if (mnu)
-        {
-          if (cols.isEmpty())
-          {
-            cols.addAll(cols2.keySet());
-          }
-          cols.remove(col);
-        }
-        else
-        {
-          cols.add   (col);
+        tx = Table.getAssocName (tc);
+        ts = Table.getAssocPath (tc);
+        tb =  this.db.getTable  (tx);
+        cols2 =    tb.getFields (  );
+        tns.addAll(Arrays.asList(ts));
+        tns.add   (/* current */ tn );
+        caze2 = caze.gotJoin(ts).gotJoin(tn);
+
+        // 取差集
+        Set<String> colx = new LinkedHashSet( cols2.keySet() );
+        colx.removeAll(colz);
+
+        // JOIN 的必须取别名
+        Object jn = tc.get("join");
+        if (jn != null && !"".equals(jn)) {
+            for (String col : colx) {
+                caze2.select(".`"+col+"` AS `"+tn+"."+col+"`");
+            }
+        } else {
+            for (String col : colx) {
+                caze2.select(".`"+col+"`");
+            }
         }
       }
-
-      for (String col : cols)
+      else
       {
-        caze2.select(".`" + col + "`" );
+        cols2 = columns;
+        caze2 = caze;
+
+        Set<String> colx = new LinkedHashSet( cols2.keySet() );
+        colx.removeAll(colz);
+
+        for (String col : colx) {
+            caze2.select(".`"+col+"`");
+        }
       }
     }
   }
@@ -1007,20 +1088,11 @@ implements IRecord
     for (String col : cols)
     {
       col = col.trim();
-      boolean mnu = col.startsWith("-");
-      if(mnu) col = col.substring ( 1 );
+      boolean esc = col.startsWith("-");
+      if(esc) col = col.substring ( 1 );
 
-      int pos = col.indexOf(".");
-      if (pos == -1)
-      {
-        if (! columns.containsKey(col))
-        {
-          continue;
-        }
-
-        caze.orderBy(".`" + col + "`" + (mnu ? " DESC" : ""));
-      }
-      else
+      int pos  = col.indexOf(".");
+      if (pos != -1)
       {
         String tn = col.substring(0,  pos);
         String fn = col.substring(pos + 1);
@@ -1031,26 +1103,35 @@ implements IRecord
         String       tx;
         String[]     ts;
 
-        tc =this.table.getAssoc(tn);
+        tc = this.table.getAssoc(tn);
         if (tc == null)
         {
           continue;
         }
 
-        tx = Table.getAssocName(tc);
-        tb =  this.db.getTable (tx);
-        cs =  tb.getFields (  );
-        if (! cs.containsKey(fn))
+        tx = Table.getAssocName (tc);
+        ts = Table.getAssocPath (tc);
+        tb =  this.db.getTable  (tx);
+        cs =       tb.getFields (  );
+        if (  ! cs.containsKey  (fn))
         {
           continue;
         }
 
-        ts = Table.getAssocPath(tc);
-        tns.addAll(new HashSet(Arrays.asList(ts)));
-        tns.add(tn);
-        FetchCase cace = caze.gotJoin(ts).join(tn);
+        tns.addAll(Arrays.asList(ts));
+        tns.add   (/* current */ tn );
+        FetchCase cace = caze.gotJoin(ts).gotJoin(tn);
 
-        cace.orderBy(".`" + col + "`" + (mnu ? " DESC" : ""));
+        cace.orderBy(".`"+fn +"`"+(esc ? " DESC":""));
+      }
+      else
+      {
+        if ( ! columns.containsKey(col))
+        {
+          continue;
+        }
+
+        caze.orderBy(".`"+col+"`"+(esc ? " DESC":""));
       }
     }
   }
@@ -1268,9 +1349,9 @@ implements IRecord
       {
         if (val2 != null)
         {
-          tns.addAll(new HashSet(Arrays.asList(ts)));
-          tns.add(key);
-          caze.gotJoin(ts).join (key);
+          tns.addAll(Arrays.asList(ts));
+          tns.add   (/* current */ key);
+          caze.gotJoin(ts).gotJoin(key);
           this.mkeyFilter( caze, val2, "`"+key+"`.`"+key2+"`");
         }
       }

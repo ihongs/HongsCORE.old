@@ -89,9 +89,9 @@ public class FetchCase
   public    static final byte   CROSS = 5;
 
   private static final Pattern p1 = Pattern
-          .compile("(^|[^`\\w])\\.((\\*)|(\\w+)|`(.+?)`)");
+          .compile("(^|[^`\\w])\\.((\\*)|(\\w+)|(`.+?`))");
   private static final Pattern p2 = Pattern
-          .compile("(^|[^`\\w])\\:((\\*)|(\\w+)|`(.+?)`)");
+          .compile("(^|[^`\\w])\\:((\\*)|(\\w+)|(`.+?`))");
   private static final Pattern pf = Pattern
           .compile("^\\s*,\\s*", Pattern.CASE_INSENSITIVE);
   private static final Pattern pw = Pattern
@@ -169,7 +169,7 @@ public class FetchCase
   {
     this.tableName = tableName;
     if (this.name == null)
-    this.name = tableName;
+        this.name  = tableName;
     return this;
   }
 
@@ -508,9 +508,11 @@ public class FetchCase
               x = m.group(4);
               if (x == null) {
                   x = m.group(5);
+              } else {
+                  x = "`"+x+"`" ;
               }
           }
-          m.appendReplacement(b, "$1`"+tn+"`.`"+x+"`");
+          m.appendReplacement(b, "$1`"+tn+"`."+x);
       }
       c = m.appendTail(b);
 
@@ -525,9 +527,11 @@ public class FetchCase
               x = m.group(4);
               if (x == null) {
                   x = m.group(5);
+              } else {
+                  x = "`"+x+"`" ;
               }
           }
-          m.appendReplacement(b, "$1`"+pn+"`.`"+x+"`");
+          m.appendReplacement(b, "$1`"+pn+"`."+x);
       }
       c = m.appendTail(b);
 

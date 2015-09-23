@@ -305,6 +305,15 @@ public class FetchMore
 
     List<Map> lnks = new ArrayList(/**/);
     fetchMore(table, caze, assocs, lnks);
+
+    // Fixed in 2015/10/22
+    // 当关联表也要查全部
+    // 会导致不查主表字段
+    // 故只要未指定主表字段即取全部
+    if (!caze.hasSelect()) {
+        caze.select(".*");
+    }
+
     List rows = table.db.fetchMore(caze);
     fetchMore(table, caze,  rows , lnks);
 
@@ -348,7 +357,7 @@ public class FetchMore
 
         Map  assocs2 = (Map) assoc.get("assocs");
         Table table2 = table.db.getTable(  rn  );
-        FetchCase caze2 = caze.join(an).from(table2.tableName);
+        FetchCase caze2 = caze.gotJoin(an).from(table2.tableName);
         String fk = (String)assoc.get("foreignKey");
         String pk = (String)assoc.get("primaryKey");
 
@@ -405,6 +414,15 @@ public class FetchMore
 
         if (assocs2 != null) {
             FetchMore.fetchMore(table2, caze2, assocs2, lnks2);
+        }
+
+        // Fixed in 2015/10/22
+        // 因 JOIN 无法用 * 查询(可能导致重名), 故需要追加全部字段
+        if (!caze.hasSelect() && !caze2.hasSelect()) {
+            Set<String> cols = table2.getFields(  ).keySet(  );
+            for(String  col  : cols) {
+                caze2.select(".`"+col+"` AS `"+an+"."+col+"`");
+            }
         }
     }
   }

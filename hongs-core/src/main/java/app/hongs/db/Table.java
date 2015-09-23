@@ -433,7 +433,7 @@ public class Table
    * @return 关联表对象
    * @throws HongsException
    */
-  public Table getAssocTable(String name)
+  public Table getAssocInst(String name)
     throws HongsException
   {
     Map tc =  this.getAssoc(name);
@@ -448,12 +448,12 @@ public class Table
    * @return 关联查询体
    * @throws HongsException
    */
-  public FetchCase getAssocFetch(String name, FetchCase caze)
+  public FetchCase getAssocCase(String name, FetchCase caze)
     throws HongsException
   {
     Map tc =  this.getAssoc(name);
     if (tc == null) return  null ;
-    return caze.gotJoin(Table.getAssocPath(tc)).join(Table.getAssocName(tc));
+    return caze.gotJoin(Table.getAssocPath(tc)).gotJoin(Table.getAssocName(tc));
   }
 
   /**
@@ -482,20 +482,6 @@ public class Table
   }
 
   /**
-   * 插入子数据
-   *
-   * 用于Model中, Table中不自动删除关联数据
-   *
-   * @param values
-   * @throws app.hongs.HongsException
-   */
-  public void insertSubValues(Map values)
-    throws HongsException
-  {
-    FetchMore.insertMore(this, assocs, values);
-  }
-
-  /**
    * 删除子数据
    *
    * 用于Model中, Table中不自动删除关联数据
@@ -507,6 +493,20 @@ public class Table
     throws HongsException
   {
     FetchMore.deleteMore(this, assocs , ids);
+  }
+
+  /**
+   * 插入子数据
+   *
+   * 用于Model中, Table中不自动删除关联数据
+   *
+   * @param values
+   * @throws app.hongs.HongsException
+   */
+  public void insertSubValues(Map values)
+    throws HongsException
+  {
+    FetchMore.insertMore(this, assocs, values);
   }
 
   /**

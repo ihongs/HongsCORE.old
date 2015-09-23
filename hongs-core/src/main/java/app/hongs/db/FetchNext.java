@@ -1,6 +1,7 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
+import app.hongs.util.Dict;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -53,11 +54,13 @@ public class FetchNext {
                   Map<String, Object> row = new LinkedHashMap( );
                   if (db.IN_OBJECT_MODE) {
                     for(Map.Entry<String, Class> et : fs.entrySet()) {
-                        row.put(et.getKey(), rs.getObject(++ i, et.getValue()));
+                        //row.put(et.getKey(), rs.getObject(++ i, et.getValue()));
+                        Dict.put(row, rs.getObject(++ i, et.getValue()), (Object[])et.getKey().split("\\."));
                     }
                   } else {
                     for(Map.Entry<String, Class> et : fs.entrySet()) {
-                        row.put(et.getKey(), rs.getString(++ i));
+                        //row.put(et.getKey(), rs.getString(++ i));
+                        Dict.put(row, rs.getString(++ i), (Object[])et.getKey().split("\\."));
                     }
                   }
                   return row;
