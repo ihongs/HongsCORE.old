@@ -89,7 +89,7 @@ public class Unit extends Mtree {
         // 2. 找出首层单元下的表单
         rows = this.db.getTable("form").fetchCase()
             .select("id,unit_id")
-            .where ("unit_id IN (?)", unitMap.keySet())
+            .where ("unit_id IN (?) AND state != 0", unitMap.keySet())
             .all();
         Map<String, Set<String>> formMap = new LinkedHashMap();
         for (Map row : rows) {
