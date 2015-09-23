@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 枚举补充
+ * 权限校验
  * @author Hong
  */
 @Target(ElementType.METHOD)
