@@ -1202,7 +1202,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             String k = (String)e.getKey();
             Map    m = (Map )e.getValue();
 
-            if (Synt.declare(m.get("invisble"), false)
+            if (Synt.declare(m.get("unstored"), false)
             ||  Synt.declare(m.get("-ignore-"), false)) {
                 continue;
             }
@@ -1282,7 +1282,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             }
 
             String  t = getFtype(m);
-            boolean u = !Synt.declare(m.get("invisble"), false);
+            boolean u = !Synt.declare(m.get("unstored"), false);
             boolean s =  Synt.declare(m.get("sortable"), false);
             boolean r =  Synt.declare(m.get("__repeated__"), false);
 
