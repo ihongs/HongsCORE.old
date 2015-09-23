@@ -245,6 +245,27 @@ action 和 cmdlet 使用 \@Action 和 \@Cmdlet 注解来设置访问路径, 如�
 
 dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为字符串; 如果仅指定 all2str 则时间/日期会转为"年-月-日"格式的字符串.
 
+## 表单配置
+
+一个 xxx.form.xml 配置文件由 form,field,param,enum,value 这些节点组成, 其中比较重要的是 field 的 param 规则, 用于控制视图布局的参数有:
+
+    listable    字段可显示在列表中
+    sortable    字段可排序(枚举等类型的字段实为分组聚类)
+    findable    字段可搜索(且搜索框查询会查询此字段的值)
+    inedible    字段不在编辑页出现
+    invisble    字段不在查看页出现
+    unstored    不保存原文(针对 Lucene 特有, 可查询或排序却不能读取)
+
+每个表单可以有一个 name="@" 的字段, 该字段的名称即为此表单的名称, 其配置即表单的配置, 同样也有一些控制视图的参数:
+
+    dont.auto.add.listable.fields   告知 DBAssist 组件不要自动将字段设为可列举
+    dont.auto.add.sortable.fields   告知 DBAssist 组件不要自动将字段设为可排序
+    dont.auto.add.findable.fields   告知 DBAssist 组件不要自动将字段设为可搜索
+    dont.show.create.button         不要显示创建按钮
+    dont.show.update.button         不要显示修改按钮
+    dont.show.delete.button         不要显示删除按钮
+    dont.show.select.column         不要显示选择列
+
 ## 模型规范
 
 推荐在实体关系模型(ERM)设计上遵循规范: 表名由 "分区\_模块\_主题\_子主题" 组成, 主题可以有多级, 但推荐最多两级, 模块关系设计成类似树形拓扑的结构.
