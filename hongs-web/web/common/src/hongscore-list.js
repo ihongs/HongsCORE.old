@@ -17,6 +17,7 @@ function HsList(opts, context) {
     var sendUrls = hsGetValue(opts, "sendUrls");
     var openUrls = hsGetValue(opts, "openUrls");
 
+    // 排序, 分页等参数
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("ob.key", "ob"));
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("pn.key", "pn"));
     this.pagsKey = hsGetValue(opts, "pagsKey", hsGetConf("gn.key", "gn"));
@@ -25,9 +26,9 @@ function HsList(opts, context) {
     // 逐层解析分页数量
     if (! this.pagsNum || this.pagsNum == "0") {
         var arr = hsSerialMix(hsSerialArr(loadUrl), hsSerialArr(loadBox));
-        this.pagsNum = hsGetSeria( arr, this.pagsKey );
+        this.pagsNum = hsGetSeria(arr, this.pagsKey);
     if (! this.pagsNum || this.pagsNum == "0") {
-        this.pagsNum = hsGetConf ("pags.for.page", 10);
+        this.pagsNum = hsGetConf ("pags.for.page",5);
     }}
 
     this.context = context;
