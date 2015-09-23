@@ -16,12 +16,13 @@ public class PickedInvoker implements FilterInvoker {
     @Override
     public void invoke(ActionHelper helper, ActionRunner chains, Annotation anno)
     throws HongsException {
-        /*Just do it*/ chains.doAction();
-        Map     rsp  = helper.getResponseData();
-
-        Supply  ann  = (Supply) anno;
+        Picked  ann  = (Picked) anno;
         String  conf = ann.conf();
         String  form = ann.form();
+
+        // 执行动作
+        /*run*/ chains.doAction();
+        Map     rsp  = helper.getResponseData();
 
         // 识别路径
         if (form.length() == 0 || conf.length() == 0) {

@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Filter(SupplyInvoker.class)
+@Filter(PickedInvoker.class)
 public @interface Picked {
     String  conf() default "default";
     String  form() default "";
