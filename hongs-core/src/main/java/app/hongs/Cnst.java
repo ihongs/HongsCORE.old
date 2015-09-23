@@ -23,7 +23,7 @@ public class Cnst {
     final public static String OB_KEY =  "ob"; // 排序字段  (Order By)
 
     final public static String RB_KEY =  "rb"; // 应答字段  (Reply By)
-    
+
     final public static String OR_KEY =  "or"; // 或关系    (Or)
 
     final public static String AR_KEY =  "ar"; // 与或      (And Or)
@@ -55,5 +55,11 @@ public class Cnst {
     final public static String OR_REL = "~or"; // 或等于    (Or    , Lucene 特有)
 
     final public static String WT_REL = "~wt"; // 权重      (        Lucene 特有)
+
+    //** 其他 **/
+
+    final public static int DEF_ROWS_PER_PAGE = 20; // 默认每页行数
+
+    final public static int DEF_PAGS_FOR_PAGE =  5; // 默认分页数量
 
 }
