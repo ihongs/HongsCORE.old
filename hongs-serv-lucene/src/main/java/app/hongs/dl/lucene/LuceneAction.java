@@ -8,6 +8,7 @@ import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
 import app.hongs.action.anno.Verify;
+import app.hongs.action.anno.Picked;
 import app.hongs.action.anno.CommitSuccess;
 import app.hongs.dl.IAction;
 import java.util.Map;
@@ -20,7 +21,8 @@ import java.util.Map;
 public class LuceneAction implements IAction {
 
     @Action("retrieve")
-    @Supply()
+    @Supply(conf="", form="")
+    @Picked(conf="", form="")
     @Override
     public void retrieve(ActionHelper helper) throws HongsException {
         LuceneRecord sr = getModel(helper);
@@ -33,7 +35,7 @@ public class LuceneAction implements IAction {
     }
 
     @Action("create")
-    @Verify()
+    @Verify(conf="", form="")
     @CommitSuccess
     @Override
     public void create(ActionHelper helper) throws HongsException {
@@ -48,7 +50,7 @@ public class LuceneAction implements IAction {
     }
 
     @Action("update")
-    @Verify()
+    @Verify(conf="", form="")
     @CommitSuccess
     @Override
     public void update(ActionHelper helper) throws HongsException {
