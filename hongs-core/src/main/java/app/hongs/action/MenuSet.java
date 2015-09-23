@@ -352,6 +352,10 @@ public class MenuSet
     }
   }
 
+  public String getName() {
+      return  this.name;
+  }
+
   /**
    * 获取页面信息
    * @param name
@@ -493,15 +497,15 @@ public class MenuSet
 //        throw new HongsException(0x10e2, "Can not get roles for menu: "+name);
           return null;
       }
-      ActionHelper hlpr = Core.getInstance(ActionHelper.class );
       if (session.startsWith("@")) {
-          return getInstance(session.substring(1)).getRoleSet();
-      } else
-      if (session.contains  (".")) {
-          return (Set) Core.getInstance (session);
+          return getInstance(session.substring(1)).getRoleSet(   );
+      }
+      if (! session.contains(".")) {
+          ActionHelper hlpr = Core.getInstance(ActionHelper.class);
+          return (Set) hlpr.getSessibute(session);
       } else
       {
-          return (Set) hlpr.getSessibute(session);
+          return (Set) Core.getInstance (session);
       }
   }
 
@@ -796,4 +800,5 @@ public class MenuSet
   public static MenuSet getInstance() throws HongsException {
       return getInstance("default");
   }
+
 }

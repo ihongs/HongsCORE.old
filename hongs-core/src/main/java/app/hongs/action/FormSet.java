@@ -69,7 +69,7 @@ public class FormSet
   extends CoreSerial
 {
 
-  private String name;
+  private final String name;
 
   /**
    * 表单集合
@@ -235,6 +235,10 @@ public class FormSet
     }
   }
 
+  public String getName() {
+      return  this.name;
+  }
+  
   public Map getEnum(String name) throws HongsException {
     if (!enums.containsKey(name)) {
         throw  new HongsException(0x10eb, "Enum "+name+" in "+this.name+" is not exists");
