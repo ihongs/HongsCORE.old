@@ -747,7 +747,8 @@ implements IRecord
     /**
      * 依据设计规则, 解析请求参数, 转为查询结构
      */
-    Iterator it = rd.entrySet().iterator();
+    Iterator  it = rd.entrySet( ).iterator( );
+    List finds = Arrays.asList(this.findCols);
     Map fields = this.table.getFields();
     Map relats = this.table.relats != null
                ? this.table.relats
@@ -788,9 +789,9 @@ implements IRecord
       }
 
       // 搜索字段
-      if (Arrays.asList(findCols).contains(key))
+      if ( finds.contains   (key))
       {
-        this.findFilter(caze, value, new String[]{key});
+        this.findFilter(caze, value, new String[] { key });
         continue;
       }
 
