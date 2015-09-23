@@ -54,17 +54,19 @@ public class SupplyInvoker implements FilterInvoker {
             String s; int i;
             s = chains.getAction( );
             i = s.lastIndexOf ('/');
+            s = s.substring (0 , i);
+            i = s.lastIndexOf ('/');
             if (form.length() == 0)
-            form = s.substring(i+1);
+                form = s.substring(i + 1);
             if (conf.length() == 0)
-            conf = s.substring(0,i);
+                conf = s.substring(0 , i);
         }
 
         // 填充数据
         try {
             SupplyHelper sup;
             sup = new SupplyHelper().addEnumsByForm(conf,form);
-            sup.supply(rsp, mode);
+            sup.supply ( rsp, mode );
         } catch (HongsException  ex) {
             int  ec  = ex.getCode( );
             if  (ec != 0x10e8 && ec != 0x10e9 && ec != 0x10ea) {
