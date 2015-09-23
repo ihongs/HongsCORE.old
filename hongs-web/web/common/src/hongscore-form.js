@@ -34,10 +34,10 @@ function HsForm(opts, context) {
         }
     }
 
-    var loadArr = hsSerialArr(/***/ loadBox);
+    var loadArr = hsSerialArr(loadBox);
     if (loadUrl) {
-        loadUrl = hsFixPms(loadUrl, loadArr);
-        jQuery.merge(loadArr, hsSerialArr(loadUrl));
+        loadUrl = hsFixPms   (loadUrl  ,  loadArr);
+        loadArr = hsSerialMix(hsSerialArr(loadUrl), loadArr);
     }
 
     /**
