@@ -917,13 +917,13 @@ implements IRecord
           continue;
         }
 
-        tx = Table.getAssocName(tc);
-        ts = Table.getAssocPath(tc);
-        tb =  this.db.getTable (tx);
-        cols2 =  tb.getFields (  );
-        tns.addAll(new HashSet(Arrays.asList(ts)));
-        tns.add(tn);
-        caze2 = caze.gotJoin(ts).join(tn);
+        tx = Table.getAssocName (tc) ;
+        ts = Table.getAssocPath (tc) ;
+        tb =  this.db.getTable  (tx) ;
+        cols2 =    tb.getFields (  ) ;
+        tns.addAll(Arrays.asList(ts));
+        tns.add   (/* current */ tn );
+        caze2 = caze.gotJoin(ts).gotJoin(tn);
       }
       else
       {
