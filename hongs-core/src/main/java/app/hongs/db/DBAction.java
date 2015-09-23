@@ -39,7 +39,8 @@ implements IAction {
     @Verify(conf="", form="")
     @CommitSuccess
     @Override
-    public void create(ActionHelper helper) throws HongsException {
+    public void create(ActionHelper helper)
+    throws HongsException {
         Model   mod = getModel(helper);
         Map     req = helper.getRequestData();
                 req = getRqMap(helper, mod, "create", req);
@@ -53,7 +54,8 @@ implements IAction {
     @Verify(conf="", form="")
     @CommitSuccess
     @Override
-    public void update(ActionHelper helper) throws HongsException {
+    public void update(ActionHelper helper)
+    throws HongsException {
         Model   mod = getModel(helper);
         Map     req = helper.getRequestData();
                 req = getRqMap(helper, mod, "update", req);
@@ -65,7 +67,8 @@ implements IAction {
     @Action("delete")
     @CommitSuccess
     @Override
-    public void delete(ActionHelper helper) throws HongsException {
+    public void delete(ActionHelper helper)
+    throws HongsException {
         Model   mod = getModel(helper);
         Map     req = helper.getRequestData();
                 req = getRqMap(helper, mod, "delete", req);
