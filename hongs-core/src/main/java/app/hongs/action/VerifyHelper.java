@@ -608,6 +608,13 @@ public class VerifyHelper {
         }
     }
 
+    public static class IsPick extends Rule {
+        @Override
+        public Object verify(Object value) throws Wrongs, HongsException {
+            return value;
+        }
+    }
+
     /** 内部错误类 **/
 
     public static class Wrong extends HongsException {

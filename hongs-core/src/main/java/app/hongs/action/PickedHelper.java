@@ -72,7 +72,7 @@ public class PickedHelper {
             String  name = (String) et.getKey();
             String  type = (String) mt.get("__type__");
                     type = (String) tps.get(type); // 类型别名转换
-            if (! "form".equals ( type )) {
+            if (! "pick".equals ( type )) {
                 continue;
             }
             if (! mt.containsKey("conf")) {
