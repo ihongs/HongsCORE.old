@@ -1,5 +1,6 @@
 package app.hongs.dl.lucene;
 
+import app.hongs.Cnst;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
@@ -25,12 +26,12 @@ public class SearchAction extends LuceneAction {
          * 有指定查询条件则按匹配度排序
          */
         Map rd = helper.getRequestData();
-        Object wd = rd.get("wd");
+        Object wd = rd.get(Cnst.WD_KEY);
         if (wd != null && "".equals(wd)) {
-            List ob = Synt.declare(rd.get("ob"), List.class);
+            List ob = Synt.declare(rd.get(Cnst.OB_KEY), List.class);
             if( ob == null) {
-                ob =  new ArrayList();
-                rd.put("ob", ob);
+                ob =  new ArrayList(  );
+                rd.put(Cnst.OB_KEY, ob);
                 ob.add( 0 , "-");
             } else
             if(!ob.contains("-")) {
