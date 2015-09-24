@@ -315,7 +315,7 @@ extends HashMap<String, Object>
   //** 静态属性及方法 **/
 
   /**
-   * 运行环境(0 Cmd, 1 Web)
+   * 运行环境(0 Cmd , 1 Web )
    */
   public static byte ENVIR;
 
