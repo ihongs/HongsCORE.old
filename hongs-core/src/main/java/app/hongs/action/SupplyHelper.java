@@ -141,10 +141,17 @@ public class SupplyHelper {
             Map.Entry et = (Map.Entry) it.next();
             String   key = (String)  et.getKey();
             Map      map = (Map)   et.getValue();
-            Object   val = Dict.getParam(  info , key  );
+            Object   val = Dict.getParam(info, key);
             if (val != null) {
-                Dict.setParam(info, map.get(val), key +"_disp");
+                val  = map.get(val);
             }
+            if (val == null) {
+                val  = map.get("*"); // * 总代表其他
+            }
+            if (val == null) {
+                continue;
+            }
+            Dict.setParam(info, val, key + "_disp");
         }
     }
 
