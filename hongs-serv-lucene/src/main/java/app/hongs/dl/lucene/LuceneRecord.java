@@ -286,7 +286,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     @Override
     public Map create(Map rd) throws HongsException {
         Map sd = new LinkedHashMap();
-            sd.put("id",    add(rd));
+        sd.put(Cnst.ID_KEY, add(rd));
         for(String  fn : getLists()) {
             sd.put( fn , rd.get(fn));
         }
