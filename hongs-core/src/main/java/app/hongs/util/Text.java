@@ -312,7 +312,7 @@ public final class Text
   //** 注入 **/
 
   // 偶数个转义符$单词或{文本}
-  private static Pattern injectPattern = Pattern.compile("((?:[\\\\][\\\\])*)\\$(?:(\\w+)|\\{(.*?)\\})");
+  private static final Pattern injectPattern = Pattern.compile("((?:[\\\\][\\\\])*)\\$(?:(\\w+)|\\{(.*?)\\})");
 
   /**
    * 注入参数
