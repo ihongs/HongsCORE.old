@@ -83,7 +83,7 @@ public class Table
   protected Map assocs;
   protected Map relats;
 
-  public Table(DB db, Map tblConf)
+  public Table(DB db, Map conf)
     throws HongsException
   {
     if (db == null)
@@ -92,20 +92,20 @@ public class Table
     }
     this.db = db;
 
-    if (tblConf == null)
+    if (conf == null)
     {
-      throw new HongsException(0x1072, "Param tableConfig can not be null");
+      throw new HongsException(0x1072, "Param conf can not be null");
     }
 
-    if (!tblConf.containsKey("name"))
+    if (!conf.containsKey("name"))
     {
-      throw new HongsException(0x1074, "Table name in tableConfig can not be empty");
+      throw new HongsException(0x1074, "Table name in conf required.");
     }
-    this.name = (String)tblConf.get("name");
+    this.name = (String)conf.get("name");
 
-    if (tblConf.containsKey("tableName"))
+    if (conf.containsKey("tableName"))
     {
-      this.tableName = (String)tblConf.get("tableName");
+      this.tableName = (String)conf.get("tableName");
     }
     else
     {
@@ -121,15 +121,19 @@ public class Table
       this.tableName = this.tableName + db.tableSuffix;
     }
 
-    if (tblConf.containsKey("primaryKey"))
+    if (conf.containsKey("primaryKey"))
     {
-      this.primaryKey = (String)tblConf.get("primaryKey");
+      this.primaryKey = (String)conf.get("primaryKey");
     }
 
-    if (tblConf.containsKey("assocs"))
+    if (conf.containsKey("assocs"))
     {
-      this.assocs = (Map)tblConf.get("assocs");
-      this.relats = (Map)tblConf.get("relats");
+      this.assocs = (Map)conf.get("assocs");
+    }
+
+    if (conf.containsKey("relats"))
+    {
+      this.relats = (Map)conf.get("relats");
     }
   }
 

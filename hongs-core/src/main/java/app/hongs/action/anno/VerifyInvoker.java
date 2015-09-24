@@ -1,5 +1,6 @@
 package app.hongs.action.anno;
 
+import app.hongs.Cnst;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -51,8 +52,8 @@ public class VerifyInvoker implements FilterInvoker {
 
         // 准备数据
         Map<String, Object> dat = helper.getRequestData();
-        Object  id  = dat.get("id");
-        String  act = chains.getAction();
+        Object  id  = dat.get(Cnst.ID_KEY);
+        String  act = chains.getAction(  );
         boolean prp = mode != 1 && mode != 2;
         boolean upd = act.endsWith("/update") || (null != id && !"".equals(id));
 

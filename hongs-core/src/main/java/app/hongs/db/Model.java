@@ -138,7 +138,9 @@ implements IRecord
     throws HongsException
   {
     Map sd = new LinkedHashMap();
-        sd.put("id",    add(rd));
+    String id = add(rd);
+    sd.put( Cnst.ID_KEY    , id);
+    sd.put(table.primaryKey, id);
     for(String  fn : listCols  )
     {
       if ( ! fn.contains( "." ))

@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.Cnst;
 import app.hongs.HongsException;
 import app.hongs.dl.MergeMore;
 import app.hongs.util.Synt;
@@ -138,11 +139,11 @@ public class PickedHelper {
             }
 
             // 查询结构
-            Map rd = new HashMap();
-            rd.put(".pick", "1");
-            rd.put("rn", 0 );
-            rd.put("rb", rb);
-            rd.put("id", ms.keySet());
+            Map rd = new HashMap( );
+            rd.put( ".pick" , "1" );
+            rd.put(Cnst.RN_KEY, 0 );
+            rd.put(Cnst.RB_KEY, rb);
+            rd.put(Cnst.ID_KEY, ms.keySet());
 
             // 获取结果
             /* Get */ ah.setRequestData(rd);

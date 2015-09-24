@@ -1,5 +1,6 @@
 package app.hongs.action.serv;
 
+import app.hongs.Cnst;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionDriver;
@@ -227,7 +228,7 @@ public class ApisAction
                     if  (  a.length < 2 &&  "retrieve".equals(m )  )  {
                         mts = new String[] {"retrieve", "info", "list"};
                     }
-                    n = "id";
+                    n = Cnst.ID_KEY;
                 }
 
                 if (a.length > 1) {

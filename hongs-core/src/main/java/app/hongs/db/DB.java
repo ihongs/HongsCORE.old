@@ -166,17 +166,17 @@ public class DB
     this.modelObjects = new HashMap();
   }
 
-  public DB(DBConfig dbConf)
+  public DB(DBConfig conf)
     throws HongsException
   {
-    this.name         = dbConf.name;
-    this.source       = dbConf.source;
-    this.origin       = dbConf.origin;
-    this.tableClass   = dbConf.tableClass;
-    this.modelClass   = dbConf.modelClass;
-    this.tablePrefix  = dbConf.tablePrefix;
-    this.tableSuffix  = dbConf.tableSuffix;
-    this.tableConfigs = dbConf.tableConfigs;
+    this.name         = conf.name;
+    this.source       = conf.source;
+    this.origin       = conf.origin;
+    this.tableClass   = conf.tableClass;
+    this.modelClass   = conf.modelClass;
+    this.tablePrefix  = conf.tablePrefix;
+    this.tableSuffix  = conf.tableSuffix;
+    this.tableConfigs = conf.tableConfigs;
     this.tableObjects = new HashMap();
     this.modelObjects = new HashMap();
   }
