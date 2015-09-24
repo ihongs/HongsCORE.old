@@ -137,9 +137,8 @@ implements IRecord
   public Map create(Map rd)
     throws HongsException
   {
-    Map sd = new LinkedHashMap();
     String id = add(rd);
-    sd.put( Cnst.ID_KEY    , id);
+    Map sd = new LinkedHashMap();
     sd.put(table.primaryKey, id);
     for(String  fn : listCols  )
     {

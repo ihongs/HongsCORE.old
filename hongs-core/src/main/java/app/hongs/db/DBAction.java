@@ -122,7 +122,7 @@ implements IAction {
         ent  = mod.substring(1+ pos); // 实体名称
         mod  = mod.substring(0, pos); // 模型名称
         Model  mol = DB.getInstance(mod).getModel(ent);
-        new DBAssist(mol).getFields(   );
+        new Mview(mol).getFields(   );
         return mol ;
     }
 
@@ -184,7 +184,7 @@ implements IAction {
     throws HongsException {
         CoreLocale lang = CoreLocale.getInstance().clone();
                    lang.loadIgnrFNF( mod.db.name );
-        DBAssist   view = new DBAssist(mod);
+        Mview   view = new Mview(mod);
         return lang.translate("fore."+opr+".success", view.getTitle(), Integer.toString(num));
     }
 

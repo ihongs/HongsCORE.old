@@ -23,10 +23,10 @@ import java.util.regex.Pattern;
 */
 
 /**
- * 数据视图助手
+ * 模型视图
  * @author Hongs
  */
-public class DBAssist implements Core.Destroy {
+public class Mview implements Core.Destroy {
 
     protected DB    db;
     protected Table table;
@@ -36,7 +36,7 @@ public class DBAssist implements Core.Destroy {
     private  String title = null;
     private  Map<String, Map<String, String>> fields = null;
 
-    public DBAssist(Model model) {
+    public Mview(Model model) {
         this.db = model.db;
         this.model = model;
         this.table = model.table;
@@ -284,7 +284,7 @@ public class DBAssist implements Core.Destroy {
                 name = vk;
 
                 Model hm = db.getModel(tn != null ? tn : ak);
-                DBAssist hb =  new  DBAssist(hm);
+                Mview hb =  new  Mview(hm);
                 tk   = hb.getNmKey();
                 disp = hb.getTitle();
             } else {
@@ -300,7 +300,7 @@ public class DBAssist implements Core.Destroy {
                 name = ak + ("HAS_ONE".equals(type) ? "." : "..") + vk;
 
                 Model hm = db.getModel(tn != null ? tn : ak);
-                DBAssist hb =  new  DBAssist(hm);
+                Mview hb =  new  Mview(hm);
                 tk   =an+"."+hb.getNmKey();
                 disp =/****/ hb.getTitle();
             }
