@@ -100,7 +100,7 @@ public class Clazz {
 
     private static Set<String> getClassNamesByJar(String root, String path, boolean recu)
             throws IOException {
-        Set<String> names = new HashSet<String>();
+        Set<String> names = new HashSet();
         int         pathl = 1 + path.length();
 
         Enumeration<JarEntry> items = new JarFile(root).entries();
