@@ -751,9 +751,7 @@ public class MenuSet
                                   break;
                           }
                       }
-                      if (e) {
-                          continue;
-                      }
+                      if ( e ) continue;
                   }
               }
 
