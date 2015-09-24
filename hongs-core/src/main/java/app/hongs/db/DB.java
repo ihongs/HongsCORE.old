@@ -250,7 +250,7 @@ public class DB
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
         {
-          CoreLogger.trace("Connect to database '"+name+"' by origin mode, name: "+namc);
+          CoreLogger.trace("DB: Connect to '"+name+"' by origin mode, name: "+namc);
         }
       }
       catch (SQLException ex)
@@ -407,7 +407,7 @@ public class DB
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
         {
-          CoreLogger.trace("Connect to database '"+name+"' by source mode, jdbc: "+drv+" "+url);
+          CoreLogger.trace("DB: Connect to '"+name+"' by source mode, jdbc: "+drv+" "+url);
         }
       }
       catch (PropertyVetoException ex)
@@ -495,7 +495,7 @@ public class DB
 
     if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
     {
-      CoreLogger.trace("Close database connection, db name: "+this.name);
+      CoreLogger.trace("DB: Connection '"+name+"' has been closed");
     }
   }
 
