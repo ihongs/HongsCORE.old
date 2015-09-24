@@ -150,6 +150,8 @@ public abstract class Async<T> extends CoreSerial implements Core.Destroy {
     /**
      * 测试方法
      * @param args
+     * @throws java.io.IOException
+     * @throws app.hongs.HongsException
      */
     public static void main(String[] args) throws IOException, HongsException {
         app.hongs.cmdlet.CmdletRunner.init(args);
