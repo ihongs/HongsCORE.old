@@ -6,11 +6,11 @@ package app.hongs;
  */
 public class HongsLocalized {
 
-    private int code;
-    private String desc;
-    private String lang;
+    private final int code;
+    private final String desc;
+    private final Throwable that;
+    private String   lang;
     private String[] opts;
-    private Throwable that;
 
     public HongsLocalized(int code, String desc, Throwable that) {
         this.code = code;
