@@ -380,7 +380,7 @@ public class VerifyHelper {
                 rule.setHelper(helper);
                 rule.setParams(params);
                 rule.setValues(values);
-                rule.verify(value);
+                value = rule.verify(value);
             }   catch (Wrong w) {
                 return SKIP ;
             }
@@ -412,7 +412,7 @@ public class VerifyHelper {
                 rule.setHelper(helper);
                 rule.setParams(params);
                 rule.setValues(values);
-                rule.verify(value);
+                value = rule.verify(value);
             }   catch (Wrong w) {
                 return value;
             }
