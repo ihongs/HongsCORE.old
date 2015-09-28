@@ -32,7 +32,7 @@ public class Synt {
     }
 
     /**
-     * 取默认值(null,false,0,"" 均视为无值)
+     * 取默认值(null,false,0,"" 均视为无值, 同 javascript)
      * @param <T>
      * @param vals
      * @return
@@ -48,7 +48,7 @@ public class Synt {
         }
         return  null;
     }
-
+    
     /**
      * 确保此变量类型为 def 的类型
      * 当 val 为空时返回 def
