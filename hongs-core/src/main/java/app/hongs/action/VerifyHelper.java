@@ -129,7 +129,7 @@ public class VerifyHelper {
                     opts.put("pattern" , type );
                 }
 
-                // 将 type 转换为 isType 规则名
+                // 将 patt 转换为 isType 规则名
                 String c = rule.substring(0, 1);
                 String n = rule.substring(   1);
                 rule = "Is"+c.toUpperCase()+ n ;
@@ -456,14 +456,14 @@ public class VerifyHelper {
 
             // 正则匹配
             Map<String,String> pats = FormSet.getInstance().getEnum("__patts__");
-            String type  = Synt.declare(params.get("pattern"), "");
-            String patt  = pats.get(type);
-            if (   patt != null ) {
-                if (!Pattern.compile(patt).matcher(str).matches()) {
-                    throw new Wrong("fore.form.is.not."+type);
+            String patt  = Synt.declare(params.get("pattern"), "");
+            String patp  = pats.get(patt);
+            if (   patp != null ) {
+                if (!Pattern.compile(patp).matcher(str).matches()) {
+                    throw new Wrong("fore.form.is.not."+patt);
                 }
             } else
-            if (!"".equals(type)) {
+            if (!"".equals(patt)) {
                 if (!Pattern.compile(patt).matcher(str).matches()) {
                     throw new Wrong("fore.form.is.not.match");
                 }
