@@ -113,7 +113,7 @@ function HsTree(opts, context) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
             case "{AUTOBOX}": m =   '@';
-            default: m = n._hsTarget(m);
+            default: if ( m ) m = n._hsTarget(m);
         }
 
         var tip = n.closest(".tooltip");
