@@ -109,9 +109,9 @@ public class SystemCmdlet {
                 }
                 */
             } catch (FileNotFoundException ex) {
-                throw HongsException.common(null, ex);
+                throw new HongsException.Common(ex);
             } catch (IOException ex) {
-                throw HongsException.common(null, ex);
+                throw new HongsException.Common(ex);
             }
         }
     }
