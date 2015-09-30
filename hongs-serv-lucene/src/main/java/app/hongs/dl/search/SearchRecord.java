@@ -41,7 +41,7 @@ public class SearchRecord extends LuceneRecord {
     public String add(Map rd) throws HongsException {
         String id = Synt.declare(rd.get(Cnst.ID_KEY), String.class);
         if (id == null || id.length() == 0) {
-            throw HongsException.common("Id mus be set in add");
+            throw new HongsException.Common("Id must be set in add");
         }
         setDoc(id, map2Doc(rd));
         return id;
@@ -68,7 +68,7 @@ public class SearchRecord extends LuceneRecord {
                 if (a[0].startsWith("-")) {
                     a[0] = a[0].substring(1);
                     if (!fields.containsKey(a[0])) {
-                        throw HongsException.common("Field "+a[0]+" not exists");
+                        throw new HongsException.Common("Field "+a[0]+" not exists");
                     }
                     if (a.length > 1) {
                         if (!countx.containsKey(a[0])) {
@@ -78,7 +78,7 @@ public class SearchRecord extends LuceneRecord {
                     }
                 } else {
                     if (!fields.containsKey(a[0])) {
-                        throw HongsException.common("Field "+a[0]+" not exists");
+                        throw new HongsException.Common("Field "+a[0]+" not exists");
                     }
                     if (a.length > 1) {
                         if (!countz.containsKey(a[0])) {
@@ -270,7 +270,7 @@ public class SearchRecord extends LuceneRecord {
                 }
             }
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common(ex);
         }
 
         return total;

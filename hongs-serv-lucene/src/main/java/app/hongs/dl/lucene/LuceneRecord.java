@@ -253,7 +253,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             rc = scos.length;
             pc = (int) Math.ceil((double)rc / rn);
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common ( ex);
         }
 
         // 记录分页
@@ -356,7 +356,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
             return new HashMap(   );
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common( ex );
         }
     }
 
@@ -410,7 +410,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
             return  list;
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common(ex);
         }
     }
 
@@ -423,7 +423,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     public String add(Map rd) throws HongsException {
         String id = Synt.declare(rd.get(Cnst.ID_KEY), String.class);
         if (id != null && id.length() != 0) {
-            throw HongsException.common("Id can not set in add");
+            throw new HongsException.Common("Id can not set in add");
         }
         id = Core.getUniqueId();
         rd.put(Cnst.ID_KEY, id);
@@ -439,7 +439,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     public void set(String id, Map rd) throws HongsException {
         if (id == null || id.length() == 0) {
-            throw HongsException.common("Id must be set in put");
+            throw new HongsException.Common("Id must be set in put");
         }
         Document doc = getDoc(id);
         if (doc == null) {
@@ -469,11 +469,11 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     public void put(String id, Map rd) throws HongsException {
         if (id == null || id.length() == 0) {
-            throw HongsException.common("Id must be set in put");
+            throw new HongsException.Common("Id must be set in put");
         }
         Document doc = getDoc(id);
         if (doc == null) {
-            throw HongsException.common("Doc#"+id+" not exists");
+            throw new HongsException.Common("Doc#"+id+" not exists");
         } else {
             /**
              * 实际运行中发现
@@ -521,7 +521,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             writer.addDocument(doc);
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common(ex);
         }
         if (!IN_TRNSCT_MODE) {
             commit();
@@ -533,7 +533,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             writer.updateDocument(new Term(Cnst.ID_KEY, id), doc);
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common(ex);
         }
         if (!IN_TRNSCT_MODE) {
             commit();
@@ -545,7 +545,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             writer.deleteDocuments(new Term(Cnst.ID_KEY, id));
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common(ex);
         }
         if (!IN_TRNSCT_MODE) {
             commit();
@@ -563,8 +563,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             } else {
                 return null;
             }
-        } catch (IOException ex) {
-            throw HongsException.common(null, ex);
+        } catch (IOException e) {
+            throw new HongsException.Common(e);
         }
     }
 
@@ -602,7 +602,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             reader = DirectoryReader.open (dir);
             finder = new IndexSearcher (reader);
         } catch (IOException x) {
-            throw HongsException.common(null,x);
+            throw new HongsException.Common (x);
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
@@ -627,7 +627,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
             writer = new IndexWriter(dir , iwc);
         } catch (IOException x) {
-            throw HongsException.common(null,x);
+            throw new HongsException.Common (x);
         }
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG)) {
@@ -851,9 +851,9 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
 
             return cb.build();
         } catch (IOException ex) {
-            throw HongsException.common(null, ex);
-        } catch ( IllegalArgumentException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common(ex);
+        } catch ( IllegalArgumentException  ex) {
+            throw new HongsException.Common(ex);
         }
     }
 
@@ -899,7 +899,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                               .getEnum    ("__types__");
             return  typeMaps;
         } catch (HongsException ex) {
-            throw new HongsError(HongsError.COMMON, ex);
+            throw new HongsError.Common(ex);
         }
     }
 
@@ -1700,10 +1700,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                 if (fpl != null) qp.setFuzzyPrefixLength(fpl);
 
                 Query  q2 = qp.parse(s);
-                if (w != null) q2.setBoost(w);
+                if (w != null) q2.setBoost ( w);
                 return q2;
             } catch (ParseException ex) {
-                throw HongsError.common(null , ex);
+                throw new HongsError.Common(ex);
             }
         }
         @Override
