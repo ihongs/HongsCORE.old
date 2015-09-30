@@ -337,7 +337,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 rd = that.getRequestData( );
                 xd = that.getResponseData();
             } catch (HongsException ex) {
-                throw HongsError.common(null , ex);
+                throw new HongsError(HongsError.COMMON, ex);
             }
             if (xd == null) {
                 xd = (Map ) req.getAttribute(RESP);

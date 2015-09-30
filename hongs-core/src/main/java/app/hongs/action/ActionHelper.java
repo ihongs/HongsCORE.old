@@ -89,9 +89,13 @@ public class ActionHelper implements Cloneable
    */
   private PrintWriter /* * */ responseWrtr = null;
 
+  /**
+   * @deprecated 
+   */
   public ActionHelper()
   {
-    throw HongsError.common("Please use the ActionHelper in the coverage of the ActionDriver or CmdletRunner inside");
+    throw new HongsError(HongsError.COMMON,
+    "Please use the ActionHelper in the coverage of the ActionDriver or CmdletRunner inside");
   }
 
   /**
@@ -354,9 +358,9 @@ public class ActionHelper implements Cloneable
             uploadKeys.add(/****/ n);
         }
     } catch (FileUploadException ex) {
-        throw HongsException.common(null, ex);
+        throw new HongsException.Common(ex);
     } catch (IOException ex) {
-        throw HongsException.common(null, ex);
+        throw new HongsException.Common(ex);
     }
   }
 

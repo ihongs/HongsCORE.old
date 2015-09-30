@@ -91,42 +91,32 @@ public class HongsError extends Error implements HongsCause {
 
     /**
      * 常规错误(无需错误代码)
-     * @param desc
-     * @param cause
-     * @return 
      */
-    public static  HongsError common(String desc, Throwable cause) {
-        return new HongsError(COMMON, desc, cause);
+    public static class Common extends HongsError {
+        public Common(String desc, Throwable cause) {
+            super(COMMON, desc, cause);
+        }
+        public Common(Throwable cause) {
+            super(COMMON, cause);
+        }
+        public Common(String desc) {
+            super(COMMON, desc );
+        }
     }
 
     /**
-     * 常规错误(无需错误代码)
-     * @param desc
-     * @return 
+     * 通告错误(无需错误代码)
      */
-    public static  HongsError common(String desc ) {
-        return new HongsError(COMMON, desc, null );
-    }
-
-    /**
-     * 通知错误(解释作为翻译)
-     * 与 setLocalizedSection, setLocalizedOptions 配套使用
-     * @param desc
-     * @param cause
-     * @return 
-     */
-    public static  HongsError notice(String desc, Throwable cause) {
-        return new HongsError(NOTICE, desc, cause);
-    }
-    
-    /**
-     * 通知错误(解释作为翻译)
-     * 与 setLocalizedSection, setLocalizedOptions 配套使用
-     * @param desc
-     * @return 
-     */
-    public static  HongsError notice(String desc ) {
-        return new HongsError(NOTICE, desc, null );
+    public static class Notice extends HongsError {
+        public Notice(String desc, Throwable cause) {
+            super(COMMON, desc, cause);
+        }
+        public Notice(Throwable cause) {
+            super(COMMON, cause);
+        }
+        public Notice(String desc) {
+            super(COMMON, desc );
+        }
     }
 
 }

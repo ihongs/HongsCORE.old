@@ -541,17 +541,17 @@ public final class Text
           }
           return sb.toString();
       } catch (FileNotFoundException ex) {
-          throw app.hongs.HongsError.common("Can not find " + path, ex);
+          throw new app.hongs.HongsError.Common("Can not find " + path, ex);
       } catch (IOException ex) {
-          throw app.hongs.HongsError.common("Can not read " + path, ex);
+          throw new app.hongs.HongsError.Common("Can not read " + path, ex);
       } finally {
-          if (br != null) {
-              try {
-                  br.close();
-              } catch (IOException ex) {
-                  throw app.hongs.HongsError.common("Can not close " + path, ex);
-              }
-          }
+      if (br != null) {
+      try {
+          br.close( );
+      } catch (IOException ex) {
+          throw new app.hongs.HongsError.Common("Can not close "+ path, ex);
+      }
+      }
       }
   }
 
@@ -573,15 +573,15 @@ public final class Text
               bw.write (text);
           }
       } catch (IOException ex) {
-          throw app.hongs.HongsError.common("Can not save " + path, ex);
+          throw new app.hongs.HongsError.Common("Can not save " + path, ex);
       } finally {
-          if (bw != null) {
-              try {
-                  bw.close();
-              } catch (IOException ex) {
-                  throw app.hongs.HongsError.common("Can not close " + path, ex);
-              }
-          }
+      if (bw != null) {
+      try {
+          bw.close( );
+      } catch (IOException ex) {
+          throw new app.hongs.HongsError.Common("Can not close "+ path, ex);
+      }
+      }
       }
   }
 

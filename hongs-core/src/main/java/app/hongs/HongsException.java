@@ -1,5 +1,7 @@
 package app.hongs;
 
+import static app.hongs.HongsError.COMMON;
+
 /**
  * 通用异常类
  *
@@ -90,43 +92,33 @@ public class HongsException extends Exception implements HongsCause {
     public static  final int NOTICE = 0x1001;
 
     /**
-     * 常规异常(无需异常代码)
-     * @param desc
-     * @param cause
-     * @return
+     * 常规错误(无需错误代码)
      */
-    public static  HongsException common(String desc, Throwable cause) {
-        return new HongsException(COMMON, desc, cause);
+    public static class Common extends HongsError {
+        public Common(String desc, Throwable cause) {
+            super(COMMON, desc, cause);
+        }
+        public Common(Throwable cause) {
+            super(COMMON, cause);
+        }
+        public Common(String desc) {
+            super(COMMON, desc );
+        }
     }
 
     /**
-     * 常规异常(无需异常代码)
-     * @param desc
-     * @return
+     * 通告错误(无需错误代码)
      */
-    public static  HongsException common(String desc ) {
-        return new HongsException(COMMON, desc, null );
-    }
-
-    /**
-     * 通知异常(解释作为翻译)
-     * 与 setLocalizedSection, setLocalizedOptions 配套使用
-     * @param desc
-     * @param cause
-     * @return
-     */
-    public static  HongsException notice(String desc, Throwable cause) {
-        return new HongsException(NOTICE, desc, cause);
-    }
-
-    /**
-     * 通知异常(解释作为翻译)
-     * 与 setLocalizedSection, setLocalizedOptions 配套使用
-     * @param desc
-     * @return
-     */
-    public static  HongsException notice(String desc ) {
-        return new HongsException(NOTICE, desc, null );
+    public static class Notice extends HongsError {
+        public Notice(String desc, Throwable cause) {
+            super(COMMON, desc, cause);
+        }
+        public Notice(Throwable cause) {
+            super(COMMON, cause);
+        }
+        public Notice(String desc) {
+            super(COMMON, desc );
+        }
     }
 
 }

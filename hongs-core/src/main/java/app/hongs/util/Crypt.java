@@ -23,7 +23,7 @@ public class Crypt {
         try {
             return new String(docrypt(content.getBytes(), null, false), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common ( ex);
         }
     }
 
@@ -31,7 +31,7 @@ public class Crypt {
         try {
             return new String(docrypt(content.getBytes(), null, true ), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common ( ex);
         }
     }
 
@@ -39,7 +39,7 @@ public class Crypt {
         try {
             return new String(docrypt(content.getBytes(), key , false), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common ( ex);
         }
     }
 
@@ -47,7 +47,7 @@ public class Crypt {
         try {
             return new String(docrypt(content.getBytes(), key , true ), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common ( ex);
         }
     }
 
@@ -89,15 +89,15 @@ public class Crypt {
 
             return cphr.doFinal(content);
         } catch (NoSuchAlgorithmException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         } catch (NoSuchPaddingException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         } catch (InvalidKeyException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         } catch (IllegalBlockSizeException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         } catch (BadPaddingException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         }
     }
 

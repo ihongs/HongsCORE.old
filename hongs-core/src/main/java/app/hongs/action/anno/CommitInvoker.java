@@ -48,10 +48,9 @@ public class CommitInvoker implements FilterInvoker {
                 }
 
                 if (ex instanceof HongsException) {
-                    throw (HongsException) ex ;
-                } else {
-                    throw  HongsException.common(null, ex);
+                    throw (HongsException) /***/ ex ;
                 }
+                throw new  HongsException.Common(ex);
             }
         } finally {
             core.remove("__IN_TRNSCT_MODE__");
