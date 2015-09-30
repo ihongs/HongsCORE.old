@@ -33,14 +33,16 @@ public class Clazz {
         ClassLoader pload = Thread.currentThread().getContextClassLoader();
         String      ppath = pkgn.replace( ".", "/" );
         URL         plink = pload.getResource(ppath);
-        CoreLogger.trace  ("[INFO] PLINK: " + plink);
         Set<String> names ;
+        
+        CoreLogger.trace("Clazz package path: " + plink);
 
         if (plink != null) {
             String  proto = plink.getProtocol();
             String  proot = plink.getPath( ).replaceFirst( "/$", "" );
             proot = proot.substring(0, proot.length()-ppath.length());
-            CoreLogger.trace("[INFO] PROOT: " + proot);
+            
+            CoreLogger.trace("Clazz package root: " + proot);
 
             if ( "jar".equals(proto)) {
                 // 路径格式: file:/PATH!/
@@ -57,17 +59,18 @@ public class Clazz {
                 names = new HashSet();
             }
         } else {
-            names = new HashSet();
+            names = new HashSet( );
             URL[]   paurl = ((URLClassLoader) pload).getURLs();
 
-            if (paurl != null) for (URL pourl : paurl) {
+            if (    null != paurl)
+            for(URL pourl : paurl) {
                 String proot = pourl.getPath( );
                 // 忽略搜索: classes
                 if (proot.endsWith("/classes/")) {
                     continue;
                 }
 
-                //System.err.println("[INFO] PROOT: " + proot);
+                CoreLogger.trace("Clazz package root: " + proot);
 
                 // 路径格式: file:/PATH!/
                 int p = proot.indexOf("/") + 1 ;
