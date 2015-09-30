@@ -40,7 +40,7 @@ public class ServerCmdlet {
             server.join( );
         }
         catch (Exception ex) {
-            throw  new  HongsException( HongsException.COMMON , ex );
+            throw new HongsException.Common(ex);
         }
     }
 
@@ -66,7 +66,7 @@ public class ServerCmdlet {
             try {
                 server.stop();
             } catch (Exception ex) {
-                throw HongsError.common(null, ex);
+                throw new HongsError(HongsError.COMMON, ex);
             }
         }
 
