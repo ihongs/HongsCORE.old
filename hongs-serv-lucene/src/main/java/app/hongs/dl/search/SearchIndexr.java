@@ -1,4 +1,4 @@
-package app.hongs.dl.lucene;
+package app.hongs.dl.search;
 
 import app.hongs.Core;
 import app.hongs.CoreConfig;

@@ -1,4 +1,4 @@
-package app.hongs.dl.lucene;
+package app.hongs.dl.search;
 
 import app.hongs.Cnst;
 import app.hongs.HongsException;
@@ -6,6 +6,7 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.Supply;
+import app.hongs.dl.lucene.LuceneAction;
 import app.hongs.util.Synt;
 import java.util.ArrayList;
 import java.util.List;
