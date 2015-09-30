@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class SupplyHelper {
 
-    private Map<String, Map> enums;
+    private final Map<String, Map> enums;
 
     public SupplyHelper() {
         enums = new LinkedHashMap();

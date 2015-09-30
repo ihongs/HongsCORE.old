@@ -19,7 +19,7 @@ import java.util.Set;
  */
 public class PickedHelper {
 
-    private Map<String, Map> items;
+    private final Map<String, Map> items;
 
     public PickedHelper() {
         items = new LinkedHashMap();
