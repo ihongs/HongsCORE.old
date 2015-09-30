@@ -62,7 +62,7 @@
     MenuSet main = MenuSet.getInstance(w);
     MenuSet curr = MenuSet.getInstance(m);
     List<Map> mainMenu = main.getMenuTranslated(1, 1);
-    List<Map> currMenu = curr.getMenuTranslated(1, 1);
+    List<Map> currMenu = curr.getMenuTranslates(1, 1);
 
     String  user = (String ) helper.getSessibute("uname");
     Integer msgc = (Integer) helper.getSessibute( "msgc");
