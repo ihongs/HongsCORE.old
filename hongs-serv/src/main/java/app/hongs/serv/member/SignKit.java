@@ -41,7 +41,7 @@ public class SignKit {
             }
             return new String(pxwd);
         } catch (NoSuchAlgorithmException ex) {
-            throw HongsException.common(null, ex);
+            throw new HongsException.Common(ex);
         }
     }
 

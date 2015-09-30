@@ -184,7 +184,7 @@ public class Unit extends Mtree {
             DocumentBuilder        builder = factory.newDocumentBuilder();
             return  builder.newDocument();
         } catch (ParserConfigurationException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common ( e);
         }
     }
 
@@ -205,13 +205,13 @@ public class Unit extends Mtree {
             StreamResult sr = new StreamResult(pw);
             tr.transform(ds, sr);
         } catch (TransformerConfigurationException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         } catch (IllegalArgumentException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         } catch (TransformerException  e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         } catch (FileNotFoundException e) {
-            throw HongsException.common(null, e);
+            throw new HongsException.Common(e);
         }
     }
 
