@@ -116,7 +116,7 @@ public class PickedHelper {
             String at = (String) mt.get("data-at");
             String ak = (String) mt.get("data-ak");
             if (null == ak || "".equals(ak)) {
-                ak = fn.replace("_id$","");
+                ak = fn.replace("_id$", "");
             }
             if (null == at || "".equals(at)) {
                 String c = (String) mt.get("conf");
