@@ -1,5 +1,6 @@
 package app.hongs.util;
 
+import app.hongs.CoreLogger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -31,26 +32,27 @@ public class Clazz {
     public static Set<String> getClassNames(String pkgn, boolean recu) throws IOException {
         ClassLoader pload = Thread.currentThread().getContextClassLoader();
         String      ppath = pkgn.replace( ".", "/" );
-        URL         ppurl = pload.getResource(ppath);
-        System.err.println("[INFO] PPURL: " + ppurl);
+        URL         plink = pload.getResource(ppath);
+        CoreLogger.trace  ("[INFO] PLINK: " + plink);
         Set<String> names ;
 
-        if (ppurl != null) {
-            String  proot = ppurl.getPath(  ).replaceFirst( "/$" , "" );
-            proot = proot.substring(0, proot.length() - ppath.length());
-            System.err.println("[INFO] PROOT: " + proot);
+        if (plink != null) {
+            String  proto = plink.getProtocol();
+            String  proot = plink.getPath( ).replaceFirst( "/$", "" );
+            proot = proot.substring(0, proot.length()-ppath.length());
+            CoreLogger.trace("[INFO] PROOT: " + proot);
 
-            if ("file".equals(ppurl.getProtocol())){
-                // 路径格式: /PATH/
-                proot = proot.substring(1);
-                names = getClassNamesByDir(proot, ppath, recu);
-            } else
-            if ( "jar".equals(ppurl.getProtocol())) {
+            if ( "jar".equals(proto)) {
                 // 路径格式: file:/PATH!/
                 int b = proot.indexOf("/") + 1;
                 int e = proot.length (   ) - 2;
                 proot = proot.substring(b , e);
                 names = getClassNamesByJar(proot, ppath, recu);
+            } else
+            if ("file".equals(proto)){
+                // 路径格式: /PATH/
+                proot = proot.substring(1);
+                names = getClassNamesByDir(proot, ppath, recu);
             } else {
                 names = new HashSet();
             }
@@ -78,7 +80,7 @@ public class Clazz {
     }
 
     private static Set<String> getClassNamesByDir(String root, String path, boolean recu) {
-        Set<String> names = new HashSet<String>();
+        Set<String> names = new HashSet();
         File[]      files = new File(root + path).listFiles();
 
         for (File file : files) {
