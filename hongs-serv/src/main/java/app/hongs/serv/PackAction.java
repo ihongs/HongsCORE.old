@@ -13,8 +13,8 @@ import java.util.Map;
  * 通用打包动作
  * 可一次调用多个动作
  * 批量执行后返回数据
- * 请求格式:
- * pack.ACTION/NAME=PARAMS&pack.ACTION/NAME2#0=PARAMS&pack.ACTION/NAME2#1=PARAMS
+ * 请求格式举例:
+ * pack.ACTION/NAME=PARAMS&pack.ACTION/NAME2#0=PARAMS&pack.ACTION/NAME2#1=PARAMS&quit=1
  * PARAMS 需要 urlencode 编码
  * @author Hongs
  */
@@ -31,9 +31,9 @@ public class PackAction {
         }
         boolean quit = Synt.declare(helper.getRequestData().get("quit"), false);
 
-        Map<String, Object> rets = new HashMap();
         Map<String, Object> data = new HashMap();
-        data.put("pack", rets);
+        Map<String, Object> rets = new HashMap();
+        data.put ( "pack" , rets );
 
         for (Map.Entry<String, Object> et : acts.entrySet()) {
             String key = et.getKey(  );
