@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>hongs-serv-search</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>hongs-serv-system</artifactId>
             <version>${project.version}</version>
         </dependency>
