@@ -1637,7 +1637,7 @@ function(evt) {
     }
     evt.stopPropagation();
 })
-.on("click", ".close,.cancel,.goback",
+.on("click", ".close,.cancel",
 function(evt) {
     var box;
     do {
@@ -1645,7 +1645,8 @@ function(evt) {
         if (box.size()) {
             break;
         }
-        if ($(this).closest(".form-group,.dont-close").size()) {
+        if ($(this).is( ".close" )
+        &&  $(this).closest( ".form-group" ).size()) {
             return;
         }
         box = $(this).closest(".notebox");
@@ -1658,7 +1659,7 @@ function(evt) {
             box = box.closest(".modal");
             break;
         }
-        if ($(this).closest(/*ignore*/".alert,.modal").size()) {
+        if ($(this).closest(".alert,.modal").size()) {
             return;
         }
     } while (false);
