@@ -500,7 +500,7 @@ HsForm.prototype = {
         var grp = inp.closest(".form-group");
         var blk = grp.find   (".help-block");
         if (blk.size() == 0 ) {
-            blk = jQuery('<div class="help-block"></div>').appendTo(grp);
+            blk = jQuery('<p class="help-block"></p>').appendTo(grp);
         }
         if (err == undefined) {
             grp.removeClass("has-error");
