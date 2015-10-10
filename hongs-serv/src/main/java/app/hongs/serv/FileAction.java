@@ -1,5 +1,6 @@
 package app.hongs.serv;
 
+import app.hongs.Cnst;
 import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -22,7 +23,7 @@ public class FileAction {
     public void uploadFile(ActionHelper helper) throws HongsException {
         Map sd = new HashMap();
         Map rd = helper.getRequestData();
-        int md = Synt.declare(rd.get("md"), 0);
+        int md = Synt.declare(rd.get (Cnst.MD_KEY), 0);
         Set<String> sk = Synt.declare(helper.getAttribute("__UPLOAD__"), Set.class);
 
         if (sk == null) {
