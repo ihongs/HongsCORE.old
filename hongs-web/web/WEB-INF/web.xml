@@ -101,21 +101,38 @@
             <taglib-location>web.tld</taglib-location>
         </taglib>
     </jsp-config>
-    <!-- Other Settings -->
+    <!-- Session Sets -->
     <session-config>
         <session-timeout>43210</session-timeout>
         <cookie-config>
             <http-only>true</http-only>
         </cookie-config>
     </session-config>
+    <!-- Another Sets -->
+    <icon>
+        <small-icon>/favicon.ico</small-icon>
+        <large-icon>/favicon.ico</large-icon>
+    </icon>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
         <welcome-file>index.html</welcome-file>
         <welcome-file>default.jsp</welcome-file>
         <welcome-file>default.html</welcome-file>
     </welcome-file-list>
-    <icon>
-        <small-icon>/favicon.ico</small-icon>
-        <large-icon>/favicon.ico</large-icon>
-    </icon>
+    <error-page>
+       <error-code>404</error-code>
+       <location>/404.html</location>
+    </error-page>
+    <error-page>
+       <error-code>500</error-code>
+       <location>/500.html</location>
+    </error-page>
+    <error-page>
+       <exception-type>javax.servle.ServletException</exception-type>
+       <location>/500.html</location>
+    </error-page>
+    <error-page>
+       <exception-type>java.lang.NullPointerException</exception-type>
+       <location>/500.html</location>
+    </error-page>
 </web-app>
