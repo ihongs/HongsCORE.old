@@ -3,16 +3,6 @@
 nbproject
 nbactions*
 nb-configuration.xml
-/target/
-/hongs-web/target/
-/hongs-core/target/
-/hongs-serv/target/
-/hongs-serv-lucene/target/
-/hongs-serv-msnger/target/
-/hongs-serv-system/target/
-/hongs-serv-server/target/
-/Hongs-CORE-0.3-SNAPSHOT/
-huiyiabc
-huiyiadm
-/hongs-serv-lucene copy/target/
-/hongs-serv-search/target/
+/target
+/*/target
+/Hongs-CORE-*
