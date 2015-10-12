@@ -55,9 +55,9 @@ public class SearchAction extends LuceneAction {
     @Override
     public SearchRecord getModel(ActionHelper helper)
     throws HongsException {
-        ActionRunner runner = (ActionRunner) helper.getAttribute("__RUNNER__");
+        ActionRunner runner = (ActionRunner) helper.getAttribute(Cnst.RUNNER_ATTR);
         String ent = runner.getAction();
-        ent  = ent.substring(0, ent.length() - runner.getMtdAnn().length() -1);
+        ent  = ent.substring(0, ent.length() - runner.getMtdAnn().length() - 1);
         int    pos = ent.lastIndexOf('/');
         String mod = ent.substring(0,pos);
                ent = ent.substring(pos+1);

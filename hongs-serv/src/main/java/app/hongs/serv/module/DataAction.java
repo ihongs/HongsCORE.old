@@ -1,5 +1,6 @@
 package app.hongs.serv.module;
 
+import app.hongs.Cnst;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
@@ -26,7 +27,7 @@ public class DataAction extends LuceneAction {
     @Override
     public LuceneRecord getModel(ActionHelper helper)
     throws HongsException {
-        ActionRunner runner = (ActionRunner) helper.getAttribute("__RUNNER__");
+        ActionRunner runner = (ActionRunner) helper.getAttribute(Cnst.RUNNER_ATTR);
         String mod = runner.getAction();
         String ent ;
         int    pos ;

@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLogger;
@@ -524,7 +525,7 @@ public class DB
     if (!IN_TRNSCT_MODE) {
         return;
     }
-    IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
+    IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got(Cnst.TRNSCT_MODE), false);
     try {
         if (connection != null && !connection.isClosed()) {
             connection.commit(  );
@@ -543,7 +544,7 @@ public class DB
     if (!IN_TRNSCT_MODE) {
         return;
     }
-    IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
+    IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got(Cnst.TRNSCT_MODE), false);
     try {
         if (connection != null && !connection.isClosed()) {
             connection.rollback();
@@ -1645,9 +1646,9 @@ public class DB
     while (false);
 
     db.IN_OBJECT_MODE = Synt.declare(
-              Core.getInstance().got("__IN_OBJECT_MODE__"), db.IN_OBJECT_MODE);
+              Core.getInstance().got(Cnst.OBJECT_MODE), db.IN_OBJECT_MODE);
     db.IN_TRNSCT_MODE = Synt.declare(
-              Core.getInstance().got("__IN_TRNSCT_MODE__"), db.IN_TRNSCT_MODE);
+              Core.getInstance().got(Cnst.TRNSCT_MODE), db.IN_TRNSCT_MODE);
 
     return db;
   }

@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.CoreLocale;
@@ -196,7 +197,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         HttpServletResponse rsq = (HttpServletResponse) rsp;
 
         ActionHelper hlpr;
-        Core core = (Core) req.getAttribute( CORE );
+        Core core = (Core) req.getAttribute(Cnst.CORE_ATTR);
         if (core != null) {
             Core.THREAD_CORE.set (  core);
             hlpr = core.get(ActionHelper.class);
@@ -204,7 +205,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             /**/doAction(core, hlpr /**/);
         } else {
             core = Core.getInstance(/**/);
-            req.setAttribute(CORE , core);
+            req.setAttribute(Cnst.CORE_ATTR , core);
             hlpr = new ActionHelper( req , rsq);
             core.put ( ActionHelper.class.getName(), hlpr);
 
@@ -225,7 +226,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
         HttpServletResponse rsq = (HttpServletResponse) rsp;
 
         ActionHelper hlpr;
-        Core core = (Core) req.getAttribute( CORE );
+        Core core = (Core) req.getAttribute(Cnst.CORE_ATTR);
         if (core != null) {
             Core.THREAD_CORE.set (  core);
             hlpr = core.get(ActionHelper.class);
@@ -233,7 +234,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             /**/doFilter(core, hlpr, chn);
         } else {
             core = Core.getInstance(/**/);
-            req.setAttribute(CORE , core);
+            req.setAttribute(Cnst.CORE_ATTR , core);
             hlpr = new ActionHelper( req , rsq);
             core.put ( ActionHelper.class.getName(), hlpr);
 
@@ -257,7 +258,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
 
         Map dat  = hlpr.getResponseData();
         if (dat != null) {
-            req .setAttribute(RESP, dat );
+            req .setAttribute(Cnst.RESP_ATTR, dat);
             hlpr.reinitHelper( req, rsp );
             hlpr.responed();
         }
@@ -340,7 +341,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 throw new HongsError(HongsError.COMMON, ex);
             }
             if (xd == null) {
-                xd = (Map ) req.getAttribute(RESP);
+                xd = (Map) req.getAttribute(Cnst.RESP_ATTR);
             }
             if (cf.getProperty("core.trace.action.request", false)
             &&  rd != null && !rd.isEmpty()) {
@@ -397,7 +398,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
 
         // 销毁此周期内的对象
         core.destroy();
-        req.removeAttribute(CORE);
+        req.removeAttribute(Cnst.CORE_ATTR);
         Core.THREAD_CORE.remove();
         Core.ACTION_TIME.remove();
         Core.ACTION_ZONE.remove();
@@ -436,27 +437,12 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
     //** 静态工具函数 **/
 
     /**
-     * Request Attribute: 当前核心对象(类型: Core)
-     */
-    public static final String CORE = "__HONGS_CORE__";
-
-    /**
-     * Request Attribute: 当前工作路径(类型: String)
-     */
-    public static final String PATH = "__HONGS_PATH__";
-
-    /**
-     * Request Attribute: 当前返回数据(类型: Map&lt;String,Object&gt;)
-     */
-    public static final String RESP = "__HONGS_RESP__";
-
-    /**
      * 获得当前工作的Core
      * @param req
      * @return
      */
     public static Core getWorkCore(HttpServletRequest req) {
-        Core core = (Core) req.getAttribute(ActionDriver.CORE);
+        Core core = (Core) req.getAttribute(Cnst.CORE_ATTR);
         if (core ==  null) {
             core  =  Core.GLOBAL_CORE ;
         } else {
@@ -473,7 +459,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
      * @return
      */
     public static String getWorkPath(HttpServletRequest req) {
-        String uri = (String) req.getAttribute(ActionDriver.PATH);
+        String uri = (String) req.getAttribute(Cnst.PATH_ATTR);
         if (uri == null) {
             uri = getCurrPath(req);
         }

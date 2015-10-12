@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
@@ -58,7 +59,7 @@ public class ActionRunner {
         this.method = m.method;
         this.object = Core.getInstance(mclass);
         this.annarr = method.getAnnotations( );
-        helper.setAttribute("__RUNNER__",this);
+        helper.setAttribute(Cnst.RUNNER_ATTR, this);
     }
 
     public Object getObject() {
@@ -80,7 +81,7 @@ public class ActionRunner {
      * @throws HongsException
      */
     public String getAction() throws HongsException {
-        String x = (String) helper.getAttribute(ActionDriver.PATH);
+        String x = (String) helper.getAttribute(Cnst.PATH_ATTR);
         if (x != null) { // 去除根和扩展名
             return x.substring(1, x.lastIndexOf('.'));
         } else {

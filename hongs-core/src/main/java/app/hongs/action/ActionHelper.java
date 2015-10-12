@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreConfig;
 import app.hongs.HongsError;
@@ -281,8 +282,8 @@ public class ActionHelper implements Cloneable
          fullSizeMax = i;
     }
 
-    Set<String> uploadKeys = new HashSet( );
-    setAttribute("__UPLOAD__" , uploadKeys);
+    Set<String> uploadKeys = new HashSet();
+    setAttribute(Cnst.UPLOAD_ATTR, uploadKeys);
 
     //** 解析数据 **/
 
@@ -471,7 +472,7 @@ public class ActionHelper implements Cloneable
       } else {
         this.contextData.put(name, value);
       }
-        this.contextData.put("__UPDATE__", System.currentTimeMillis());
+        this.contextData.put(Cnst.UPDATE_ATTR, System.currentTimeMillis());
     } else {
       if (value == null) {
         this.getRequest().removeAttribute(name);
@@ -513,7 +514,7 @@ public class ActionHelper implements Cloneable
       } else {
         this.sessionData.put(name, value);
       }
-        this.sessionData.put("__UPDATE__", System.currentTimeMillis());
+        this.sessionData.put(Cnst.UPDATE_ATTR, System.currentTimeMillis());
     } else {
       if (value == null) {
         HttpSession sess = this.getRequest().getSession(/**/);

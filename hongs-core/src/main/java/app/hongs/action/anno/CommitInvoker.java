@@ -1,5 +1,6 @@
 package app.hongs.action.anno;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -21,7 +22,7 @@ public class CommitInvoker implements FilterInvoker {
         Core core = Core.getInstance();
 
         try {
-            core.put("__IN_TRNSCT_MODE__", true);
+            core.put(Cnst.TRNSCT_MODE, true);
 
                 // 开启
                 for(Object o : core.values()) {
@@ -53,7 +54,7 @@ public class CommitInvoker implements FilterInvoker {
                 throw new  HongsException.Common(ex);
             }
         } finally {
-            core.remove("__IN_TRNSCT_MODE__");
+            core.remove(Cnst.TRNSCT_MODE);
         }
     }
 }

@@ -1,5 +1,6 @@
 package app.hongs.serv;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.action.ActionDriver;
@@ -191,17 +192,17 @@ public class AutoFilter extends ActionDriver {
     private void doAction(ServletRequest req, ServletResponse rsp, String url, String uri)
             throws ServletException, IOException {
         // 虚拟路径
-        req.setAttribute(ActionDriver.PATH, url);
+        req.setAttribute(Cnst.PATH_ATTR, url);
         // 转发请求
-        req.getRequestDispatcher ( action + uri).include(req, rsp);
+        req.getRequestDispatcher(action+ uri).include(req, rsp);
     }
 
     private void doLayout(ServletRequest req, ServletResponse rsp, String url, String uri)
             throws ServletException, IOException {
         // 虚拟路径
-        req.setAttribute(ActionDriver.PATH, url);
+        req.setAttribute(Cnst.PATH_ATTR, url);
         // 转发请求
-        req.getRequestDispatcher ( layout + uri).forward(req, rsp);
+        req.getRequestDispatcher(layout+ uri).forward(req, rsp);
     }
 
     private Set<String> getacts() {

@@ -112,7 +112,7 @@ implements IAction {
      */
     protected  Model getModel(ActionHelper helper)
     throws HongsException {
-        ActionRunner runner = (ActionRunner) helper.getAttribute("__RUNNER__");
+        ActionRunner runner = (ActionRunner) helper.getAttribute(Cnst.RUNNER_ATTR);
         String mod = runner.getAction();
         String ent ;
         int    pos ;

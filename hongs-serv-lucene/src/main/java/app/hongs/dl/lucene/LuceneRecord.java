@@ -106,10 +106,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         // 模式标识
         CoreConfig conf = CoreConfig.getInstance( );
         this.IN_TRNSCT_MODE = Synt.declare(
-                Core.getInstance( ).got( "__IN_TRNSCT_MODE__" ),
+                Core.getInstance( ).got(Cnst.TRNSCT_MODE),
                 conf.getProperty("core.in.trnsct.mode", false));
         this.IN_OBJECT_MODE = Synt.declare(
-                Core.getInstance( ).got( "__IN_OBJECT_MODE__" ),
+                Core.getInstance( ).got(Cnst.OBJECT_MODE),
                 conf.getProperty("core.in.object.mode", false));
     }
 
@@ -703,7 +703,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (writer == null) {
             return;
         }
-        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got(Cnst.TRNSCT_MODE), false);
         try {
             writer.commit(  );
         } catch (IOException ex) {
@@ -720,7 +720,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (writer == null) {
             return;
         }
-        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got("__IN_TRNSCT_MODE__"), false);
+        IN_TRNSCT_MODE = Synt.declare(Core.getInstance().got(Cnst.TRNSCT_MODE), false);
         try {
             writer.rollback();
         } catch (IOException ex) {
