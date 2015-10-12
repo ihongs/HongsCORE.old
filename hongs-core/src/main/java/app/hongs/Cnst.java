@@ -56,13 +56,13 @@ public class Cnst {
 
     public static final String WT_REL = "~wt"; // 权重      (        Lucene 特有)
 
-    //** 分页 **/
+    //** 分页相关 **/
 
     public static final int DEF_ROWS_PER_PAGE = 20; // 默认每页行数
 
     public static final int DEF_PAGS_FOR_PAGE =  5; // 默认分页数量
 
-    //** 其他 **/
+    //** 请求属性 **/
 
     public static final String CORE_ATTR = "__HONGS_CORE__"; // 核心对象
 
@@ -75,6 +75,8 @@ public class Cnst {
     public static final String UPLOAD_ATTR = "__UPLOAD__"; // 上传参数键
 
     public static final String UPDATE_ATTR = "__UPDATE__"; // 更新时间戳(当会话、属性改变时设置)
+
+    //** 数据模式 **/
 
     public static final String OBJECT_MODE = "__IN_OBJECT_MODE__"; // 对象模式
 
