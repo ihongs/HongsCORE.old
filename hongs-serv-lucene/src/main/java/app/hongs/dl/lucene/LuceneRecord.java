@@ -170,7 +170,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * rb   字段
      * or   多组"或"关系条件
      * ar   串联多组关系条件
-     * xr   附加多组或关系, LuceneRecord 特有
+     * sr   附加多组"或"关系, LuceneRecord 特有
      * 请注意尽量避免将其作为字段名(id,wd除外)
      *
      * @param rd
@@ -966,7 +966,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             String fn = (String) e.getKey();
 
             if (Cnst.WD_KEY.equals(fn) || Cnst.OB_KEY.equals(fn) || Cnst.RB_KEY.equals(fn)
-            ||  Cnst.OR_KEY.equals(fn) || Cnst.AR_KEY.equals(fn) || Cnst.XR_KEY.equals(fn)) {
+            ||  Cnst.OR_KEY.equals(fn) || Cnst.AR_KEY.equals(fn) || Cnst.SR_KEY.equals(fn)) {
                 continue;
             }
 
@@ -1040,8 +1040,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         }
 
         // 附条件
-        if (rd.containsKey(Cnst.XR_KEY)) {
-            Set<Map> set = Synt.declare(rd.get(Cnst.XR_KEY), Set.class);
+        if (rd.containsKey(Cnst.SR_KEY)) {
+            Set<Map> set = Synt.declare(rd.get(Cnst.SR_KEY), Set.class);
             for(Map  map : set) {
                 query.add(getQuery(map), BooleanClause.Occur.SHOULD);
             }

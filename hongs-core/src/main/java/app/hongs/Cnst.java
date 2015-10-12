@@ -28,7 +28,7 @@ public class Cnst {
 
     public static final String AR_KEY =  "ar"; // 与或      (And Or)
 
-    public static final String XR_KEY =  "xr"; // 否或      (Lucene 特有)
+    public static final String SR_KEY =  "sr"; // 可或      (Lucene 特有)
 
     //** 关系符号 **/
 
