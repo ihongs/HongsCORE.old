@@ -74,7 +74,7 @@ public class Cnst {
 
     public static final String UPLOAD_ATTR = "__UPLOAD__"; // 上传参数键
 
-    public static final String UPDATE_ATTR = "__UPDATE__"; // 更新时间戳(当会话、属性改变时设置)
+    public static final String UPDATE_ATTR = "__UPDATE__"; // 更新时间戳(当会话、属性改变时设置更新时间戳)
 
     public static final String OBJECT_MODE = "__IN_OBJECT_MODE__"; // 对象模式
 
