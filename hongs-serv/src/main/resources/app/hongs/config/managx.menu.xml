@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <rsname>@manage</rsname>
+    <menu disp="基础管理" href="common/menu/cell.act?m=manage&amp;n=managx">
+        <import>member</import>
+        <import>module</import>
+    </menu>
+</root>

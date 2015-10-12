@@ -1,11 +1,8 @@
 <root>
     <rsname>app.hongs.serv.member.RoleSet</rsname>
-    <menu disp="管理" href="manage">
-        <role disp="登录管理后台" name="manage">
-            <action>manage</action>
-        </role>
-        <import>member</import>
-        <import>module</import>
+    <menu disp="后台" href="manage">
+        <role disp="登录管理后台" name="manage"></role>
         <import>manage/module/data</import>
+        <import>managx</import>
     </menu>
 </root>
