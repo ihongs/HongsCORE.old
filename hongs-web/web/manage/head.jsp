@@ -24,7 +24,7 @@
                 acti = "class=\"active\"";
             }
             if (href.startsWith( path + "/#" )) {
-                href = href.substring(href.indexOf('#'));
+//              href = href.substring(href.indexOf('#'));
                 hrel = Core.BASE_HREF + "/" + hrel;
             } else {
                 href = Core.BASE_HREF + "/" + href;
@@ -46,21 +46,21 @@
 %>
 <%
     ActionHelper helper = (ActionHelper) Core.getInstance(ActionHelper.class);
-    String w = helper.getParameter("w");
-    if (w == null || "".equals(w)) {
-        w = "manage";
-    }
     String m = helper.getParameter("m");
     if (m == null || "".equals(m)) {
-        m =  w;
+        m = "manage";
+    }
+    String n = helper.getParameter("n");
+    if (n == null || "".equals(n)) {
+        n =  m;
     }
     String u = helper.getParameter("u");
     if (u == null || "".equals(u)) {
         u =  m;
     }
 
-    MenuSet main = MenuSet.getInstance(w);
-    MenuSet curr = MenuSet.getInstance(m);
+    MenuSet main = MenuSet.getInstance(m);
+    MenuSet curr = MenuSet.getInstance(n);
     List<Map> mainMenu = main.getMenuTranslated(1, 1);
     List<Map> currMenu = curr.getMenuTranslates(1, 1);
 
@@ -158,6 +158,7 @@
                 // #def&x=1&y=2
                 var h = location.hash ;
                 var p = h.indexOf('&');
+                h = "<%=u%>/" + h;
                 p = p != -1 ? h.substring(p + 1) : "" ;
                 a = $("#curr-menubar a[href='"+h+"']");
                 a.attr("data-hreq", p);

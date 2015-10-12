@@ -6,14 +6,14 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     int i;
-    String _module, m, n;
+    String _module, n, u;
     _module = ActionDriver.getWorkPath(request);
     try {
         i = _module.lastIndexOf('/');
         _module = _module.substring(1, i);
         i = _module.lastIndexOf('/');
-        m = _module.substring(0 , i);
-        n = _module.substring(1 + i);
+        n = _module.substring(0 , i);
+        u = _module;
     } catch (StringIndexOutOfBoundsException e) {
         throw new ServletException("URL Error");
     }
@@ -56,7 +56,7 @@ Hong's Auto Info Manage
         <div id="notebox"></div>
         <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="row" data-load="<%=request.getContextPath()%>/manage/head.jsp?m=<%=m%>&n=<%=n%>"></div>
+                <div class="row" data-load="<%=request.getContextPath()%>/manage/head.jsp?n=<%=n%>&u=<%=u%>"></div>
             </div>
         </nav>
         <div id="bodybox" class="container">
@@ -71,7 +71,7 @@ Hong's Auto Info Manage
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
-                <div class="row" data-load="<%=request.getContextPath()%>/manage/foot.jsp?m=<%=m%>&n=<%=n%>"></div>
+                <div class="row" data-load="<%=request.getContextPath()%>/manage/foot.jsp?m=<%=n%>&u=<%=u%>"></div>
             </div>
         </nav>
     </body>
