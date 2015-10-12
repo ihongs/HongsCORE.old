@@ -1151,6 +1151,11 @@ implements IRecord
       return;
     }
 
+    if ("".equals(val))
+    {
+      return;
+    }
+
     /**
      * 也可指定只匹配其中一个可搜索字段
      */
