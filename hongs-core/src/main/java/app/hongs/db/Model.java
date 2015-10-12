@@ -1151,7 +1151,7 @@ implements IRecord
       return;
     }
 
-    if ("".equals(val))
+    if (val  == null || "".equals( val ))
     {
       return;
     }
