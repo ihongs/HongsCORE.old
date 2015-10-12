@@ -6,6 +6,12 @@ package app.hongs;
  */
 public class Cnst {
 
+    //** 分页默认 **/
+
+    public static final int    RN_DEF =   20 ; // 每页默认行数
+
+    public static final int    GN_DEF =   5  ; // 分页默认数量
+
     //** 查询参数 **/
 
     public static final String ID_KEY =  "id"; // 编号参数
@@ -55,12 +61,6 @@ public class Cnst {
     public static final String OR_REL = "~or"; // 或等于    (Or    , Lucene 特有)
 
     public static final String WT_REL = "~wt"; // 权重      (        Lucene 特有)
-
-    //** 分页相关 **/
-
-    public static final int DEF_ROWS_PER_PAGE = 20; // 默认每页行数
-
-    public static final int DEF_PAGS_FOR_PAGE =  5; // 默认分页数量
 
     //** 请求属性 **/
 

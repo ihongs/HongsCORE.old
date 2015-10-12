@@ -193,7 +193,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (rd.containsKey(Cnst.RN_KEY)) {
             rn = Synt.declare(rd.get(Cnst.RN_KEY), 0);
         } else {
-            rn = CoreConfig.getInstance().getProperty("fore.rows.per.page", Cnst.DEF_ROWS_PER_PAGE);
+            rn = CoreConfig.getInstance().getProperty("fore.rows.per.page", Cnst.RN_DEF);
         }
 
         // 指定行数 0, 则走 getAll
@@ -209,7 +209,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         if (rd.containsKey(Cnst.GN_KEY)) {
             gn = Synt.declare(rd.get(Cnst.GN_KEY), 0);
         } else {
-            gn = CoreConfig.getInstance().getProperty("fore.gags.for.page", Cnst.DEF_PAGS_FOR_PAGE);
+            gn = CoreConfig.getInstance().getProperty("fore.pags.for.page", Cnst.GN_DEF);
         }
 
         // 获取页码, 依此计算分页

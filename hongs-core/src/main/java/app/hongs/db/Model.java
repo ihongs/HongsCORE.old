@@ -640,7 +640,7 @@ implements IRecord
     }
     else
     {
-      rows = CoreConfig.getInstance().getProperty("fore.rows.per.page", Cnst.DEF_ROWS_PER_PAGE);
+      rows = CoreConfig.getInstance().getProperty("fore.rows.per.page", Cnst.RN_DEF);
     }
 
     Map data = new HashMap();
