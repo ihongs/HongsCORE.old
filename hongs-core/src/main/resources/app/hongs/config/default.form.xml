@@ -72,6 +72,7 @@
         </field>
         <field name="file" disp="文件" type="file">
             <param name="path"></param>
+            <param name="href"></param>
             <param name="name"></param>
             <param name="type"></param>
             <param name="extn"></param>
