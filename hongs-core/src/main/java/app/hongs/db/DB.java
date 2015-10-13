@@ -408,7 +408,7 @@ public class DB
 
         if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
         {
-          CoreLogger.trace("DB: Connect to '"+name+"' by source mode, jdbc: "+drv+" "+url);
+          CoreLogger.trace("DB: Connect to '"+name+"' by source mode, type: "+drv+" "+url);
         }
       }
       catch (PropertyVetoException ex)
