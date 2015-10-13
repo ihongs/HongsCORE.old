@@ -1151,6 +1151,9 @@ implements IRecord
       return;
     }
 
+    /**
+     * 空串查全部, 故不用理会
+     */
     if (val  == null || "".equals( val ))
     {
       return;
