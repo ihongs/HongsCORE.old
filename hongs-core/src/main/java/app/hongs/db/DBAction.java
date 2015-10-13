@@ -159,12 +159,12 @@ implements IAction {
         if (!Cnst.ID_KEY.equals(mod.table.primaryKey)) {
             if (rsp.containsKey("info")) {
                 /**/ Map  info = (Map ) rsp.get("info");
-                info.put(Cnst.ID_KEY, info.get(mod.table.primaryKey));
+                info.put(Cnst.ID_KEY , info.get(mod.table.primaryKey));
             }
             if (rsp.containsKey("list")) {
                 List<Map> list = (List) rsp.get("list");
             for(/**/ Map  info :  list ) {
-                info.put(Cnst.ID_KEY, info.get(mod.table.primaryKey));
+                info.put(Cnst.ID_KEY , info.get(mod.table.primaryKey));
             }
             }
         }
