@@ -192,7 +192,7 @@ public class FetchMore
      * 并根据之前的 id=>行 关系以表名为键放入列表中
      */
 
-    FetchNext rs = db.query(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
+    FetchCrsr rs = db.query(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
 
     Map     row, sub;
     List    lst;

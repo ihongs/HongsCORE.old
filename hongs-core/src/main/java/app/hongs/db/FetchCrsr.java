@@ -13,13 +13,13 @@ import java.util.Map;
  * 获取结果
  * @author Hong
  */
-public class FetchNext {
+public class FetchCrsr {
     private DB db;
     private ResultSet rs;
     private Statement ps;
     private Map<String, Class> fs = null;
 
-    protected FetchNext(DB db, Statement ps, ResultSet rs) throws HongsException {
+    protected FetchCrsr(DB db, Statement ps, ResultSet rs) throws HongsException {
         this.db = db;
         this.ps = ps;
         this.rs = rs;

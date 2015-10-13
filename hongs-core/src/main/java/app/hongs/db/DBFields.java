@@ -49,7 +49,7 @@ public class DBFields
   {
     this.fields = new LinkedHashMap();
 
-    FetchNext rs = this.table.db.query("SELECT * FROM "
+    FetchCrsr rs = this.table.db.query("SELECT * FROM "
                  + this.table.tableName, 0, 1);
     try
     {

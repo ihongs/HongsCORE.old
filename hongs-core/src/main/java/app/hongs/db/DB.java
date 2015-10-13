@@ -1031,7 +1031,7 @@ public class DB
    * @return 查询结果
    * @throws HongsException
    */
-  public FetchNext query(String sql, int start, int limit, Object... params)
+  public FetchCrsr query(String sql, int start, int limit, Object... params)
     throws HongsException
   {
     this.connect();
@@ -1066,7 +1066,7 @@ public class DB
       throw new app.hongs.HongsException(0x1043, ex);
     }
 
-    return new FetchNext(this, ps, rs);
+    return new FetchCrsr(this, ps, rs);
   }
 
   /**
@@ -1085,7 +1085,7 @@ public class DB
     List<Map<String, Object>> rows = new ArrayList();
          Map<String, Object>  row;
 
-    FetchNext rs = this.query(sql, start, limit, params);
+    FetchCrsr rs = this.query(sql, start, limit, params);
     while (( row = rs.fetch() ) != null)
     {
       rows.add(row);
@@ -1119,7 +1119,7 @@ public class DB
   public Map<String, Object> fetchOne(String sql, Object... params)
     throws HongsException
   {
-    List< Map<String, Object> > rows = this.fetch(sql, 0, 1, params);
+    List<Map<String, Object>> rows = this.fetch( sql, 0, 1, params);
     if (! rows.isEmpty( ))
     {
       return rows.get( 0 );
