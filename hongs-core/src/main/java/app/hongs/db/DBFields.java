@@ -33,9 +33,9 @@ public class DBFields
     throws HongsException
   {
     this.table = table;
-    if (table.db.name != null && table.db.name.length()!=0)
+    if (table.db.name != null && table.db.name.length() != 0)
     {
-      this.init(table.db.name +"."+ table.tableName +".df");
+      this.init( table.db.name +"."+ table.tableName +".df" );
     }
     else
     {
