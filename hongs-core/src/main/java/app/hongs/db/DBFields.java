@@ -14,7 +14,7 @@ import java.io.Serializable;
  * 表字段信息缓存类
  *
  * <p>
- * 缓存文件存放在 "WEB-INF/tmps/库名.表名.df.ser" 的文件中;
+ * 缓存文件存放在 "var/serial/库名.表名.df.ser" 的文件中;
  * 当表结构发生改变, 程序不会自动重载, 务必删除对应的缓存文件.
  * </p>
  *
