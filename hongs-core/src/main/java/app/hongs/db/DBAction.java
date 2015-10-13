@@ -184,7 +184,7 @@ implements IAction {
     throws HongsException {
         CoreLocale lang = CoreLocale.getInstance().clone();
                    lang.loadIgnrFNF( mod.db.name );
-        Mview   view = new Mview(mod);
+        Mview  view = new Mview(mod);
         return lang.translate("fore."+opr+".success", view.getTitle(), Integer.toString(num));
     }
 
