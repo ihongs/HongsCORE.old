@@ -1,6 +1,7 @@
 package app.hongs.db;
 
 import app.hongs.HongsException;
+import app.hongs.db.DB.Roll;
 import app.hongs.util.Dict;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -691,13 +692,13 @@ public class FetchCase
 
   /**
    * 获取关联的关联对象
-   * 
+   *
    * 与 getJoin 不同在于不存在的关联会自动则创建
    * 注意:
    * 命名虽与 Core.got 类似, 但意义却不同
    * Core.got 为调用原 Map 的 get, 没有则返回 null
    * FetchCase.gotJoin 相反没有则创建关联
-   * 
+   *
    * @param name
    * @return
    * @throws HongsException
@@ -938,6 +939,18 @@ public class FetchCase
   {
     _db_ =  db ;
     return this;
+  }
+
+  /**
+   * 查询并获取结果迭代
+   * @return
+   * @throws HongsException
+   */
+  public Roll rol() throws HongsException {
+    if (_db_ == null) {
+      throw new HongsException(0x10b6);
+    }
+    return _db_.queryMore(this);
   }
 
   /**

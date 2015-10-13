@@ -2,6 +2,7 @@ package app.hongs.db;
 
 import app.hongs.Core;
 import app.hongs.HongsException;
+import app.hongs.db.DB.Roll;
 import app.hongs.util.Synt;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,15 +185,15 @@ public class FetchMore
     }
 
     // 构建查询结构
-    caze.from (tableName, name)
-        .where(col+" IN (?)", ids);
+    caze.where(col + " IN (?)", ids)
+        .from (tableName , name);
+
+    // 获取关联数据
+    Roll rs = db.queryMore(caze);
 
     /**
-     * 根据 id 获取关联数据,
-     * 并根据之前的 id=>行 关系以表名为键放入列表中
+     * 根据之前的 id=>行 关系以表名为键放入列表中
      */
-
-    FetchCrsr rs = db.query(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
 
     Map     row, sub;
     List    lst;

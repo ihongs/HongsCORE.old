@@ -2,6 +2,7 @@ package app.hongs.db;
 
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
+import app.hongs.db.DB.Roll;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -49,11 +50,11 @@ public class DBFields
   {
     this.fields = new LinkedHashMap();
 
-    FetchCrsr rs = this.table.db.query("SELECT * FROM "
-                 + this.table.tableName, 0, 1);
+    Roll rs = this.table.db.query("SELECT * FROM `"
+            + this.table.tableName + "`", 0,1);
     try
     {
-      ResultSetMetaData md = rs.getReusltSet().getMetaData();
+      ResultSetMetaData md = rs.getMetaData( );
 
       for (int i = 1; i <= md.getColumnCount(); i ++)
       {
@@ -62,7 +63,8 @@ public class DBFields
         field.put("size",           md.getPrecision (i));
         field.put("scale",          md.getScale(i));
         field.put("unsigned",      !md.isSigned(i));
-        field.put("required",       md.isNullable(i) == ResultSetMetaData.columnNoNulls);
+        field.put("required",       md.isNullable(i)
+                == ResultSetMetaData.columnNoNulls );
         field.put("writable",       md.isWritable(i));
         field.put("searchable",     md.isSearchable(i));
         field.put("caseSensitive",  md.isCaseSensitive(i));

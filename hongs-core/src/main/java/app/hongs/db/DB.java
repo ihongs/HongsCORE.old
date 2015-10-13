@@ -7,6 +7,7 @@ import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.dl.ITrnsct;
+import app.hongs.util.Dict;
 import app.hongs.util.Synt;
 import app.hongs.util.Text;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -18,12 +19,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1031,7 +1034,7 @@ public class DB
    * @return 查询结果
    * @throws HongsException
    */
-  public FetchCrsr query(String sql, int start, int limit, Object... params)
+  public Roll query(String sql, int start, int limit, Object... params)
     throws HongsException
   {
     this.connect();
@@ -1066,7 +1069,7 @@ public class DB
       throw new app.hongs.HongsException(0x1043, ex);
     }
 
-    return new FetchCrsr(this, ps, rs);
+    return new Roll(this, ps, rs);
   }
 
   /**
@@ -1079,13 +1082,13 @@ public class DB
    * @return 全部数据
    * @throws app.hongs.HongsException
    */
-  public List<Map<String, Object>> fetch(String sql, int start, int limit, Object... params)
+  public List fetch(String sql, int start, int limit, Object... params)
     throws HongsException
   {
     List<Map<String, Object>> rows = new ArrayList();
          Map<String, Object>  row;
 
-    FetchCrsr rs = this.query(sql, start, limit, params);
+    Roll rs  = this.query(sql, start, limit, params);
     while (( row = rs.fetch() ) != null)
     {
       rows.add(row);
@@ -1102,7 +1105,7 @@ public class DB
    * @return 全部数据
    * @throws app.hongs.HongsException
    */
-  public List<Map<String, Object>> fetchAll(String sql, Object... params)
+  public List fetchAll(String sql, Object... params)
     throws HongsException
   {
     return this.fetch(sql, 0, 0, params);
@@ -1116,10 +1119,10 @@ public class DB
    * @return 单条数据
    * @throws app.hongs.HongsException
    */
-  public Map<String, Object> fetchOne(String sql, Object... params)
+  public Map  fetchOne(String sql, Object... params)
     throws HongsException
   {
-    List<Map<String, Object>> rows = this.fetch( sql, 0, 1, params);
+    List<Map<String, Object>> rows = this.fetch(sql, 0, 1, params);
     if (! rows.isEmpty( ))
     {
       return rows.get( 0 );
@@ -1137,11 +1140,42 @@ public class DB
    * @return 全部数据
    * @throws app.hongs.HongsException
    */
+  public Roll queryMore(FetchCase caze)
+    throws HongsException
+  {
+  boolean on_object_mode = false;
+  boolean in_obejct_mode = false;
+    try
+    {
+      if (caze.hasOption("FETCH_OBJECT"))
+      {
+          on_object_mode = true ;
+          in_obejct_mode = IN_OBJECT_MODE;
+          IN_OBJECT_MODE = caze.getOption( "FETCH_OBJECT", false );
+      }
+      return query(caze.getSQL(), caze.getStart(), caze.getLimit(), caze.getParams());
+    }
+    finally
+    {
+      if (on_object_mode)
+      {
+          IN_OBJECT_MODE = in_obejct_mode;
+      }
+    }
+  }
+
+  /**
+   * 采用查询体获取全部数据
+   * <p>注: 调fetch实现</p>
+   * @param caze
+   * @return 全部数据
+   * @throws app.hongs.HongsException
+   */
   public List fetchMore(FetchCase caze)
     throws HongsException
   {
-  boolean in_obejct_mode = false;
   boolean on_object_mode = false;
+  boolean in_obejct_mode = false;
     try
     {
       if (caze.hasOption("FETCH_OBJECT"))
@@ -1731,5 +1765,93 @@ public class DB
   throws HongsException {
       return DB.newInstance(drv, url, new Properties());
   }
+
+    /**
+     * 遍历获取结果
+     * @author Hong
+     */
+    public class Roll {
+        private DB db;
+        private Statement ps;
+        private ResultSet rs;
+        private ResultSetMetaData md;
+        private Map<String,Class> cs;
+
+        protected Roll(DB db, Statement ps, ResultSet rs) throws HongsException {
+            this.db = db;
+            this.ps = ps;
+            this.rs = rs;
+
+            try {
+                md = rs.getMetaData();
+                for (int i = 1; i <= md.getColumnCount(); i ++) {
+                    cs.put(md.getColumnLabel(i), Class.forName(md.getColumnClassName(i)));
+                }
+            } catch (SQLException ex) {
+                throw new HongsException(0x10a0, ex);
+            } catch (ClassNotFoundException ex) {
+                throw new HongsException(0x10a2, ex);
+            }
+
+            this.cs = new LinkedHashMap();
+        }
+
+        public DB getDB() {
+            return db;
+        }
+
+        public Statement getStatement() {
+            return ps;
+        }
+
+        public ResultSet getReusltSet() {
+            return rs;
+        }
+
+        public ResultSetMetaData getMetaData() {
+            return md;
+        }
+
+        public Map<String,Object> fetch() throws HongsException {
+            try {
+                if (rs.next()) {
+                    try
+                    {
+                      int i = 0;
+                      Map<String, Object> row = new LinkedHashMap( );
+                      if (db.IN_OBJECT_MODE) {
+                        for(Map.Entry<String, Class> et : cs.entrySet()) {
+                            //row.put(et.getKey(), rs.getObject(++ i, et.getValue()));
+                            Dict.put(row, rs.getObject(++ i, et.getValue()), (Object[])et.getKey().split("\\."));
+                        }
+                      } else {
+                        for(Map.Entry<String, Class> et : cs.entrySet()) {
+                            //row.put(et.getKey(), rs.getString(++ i));
+                            Dict.put(row, rs.getString(++ i), (Object[])et.getKey().split("\\."));
+                        }
+                      }
+                      return row;
+                    } catch (SQLException ex) {
+                      throw new app.hongs.HongsException(0x10a4, ex);
+                    }
+                }
+                this.close();
+            } catch (SQLException ex) {
+                this.close();
+                throw new app.hongs.HongsException(0x10a6, ex);
+            }
+            return null;
+        }
+
+        public void close() throws HongsException {
+            if (cs == null) return;
+            try {
+                db.closeResultSet(rs);
+                db.closeStatement(ps);
+            } finally {
+                cs  = null;
+            }
+        }
+    }
 
 }
