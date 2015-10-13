@@ -1205,31 +1205,42 @@ implements IRecord
       return;
     }
 
-    for (String find : vals)
+    StringBuilder sb = new StringBuilder();
+    Object[]      pa = new String[keys.length * vals.size()];
+    int           pi = 0;
+
+    sb.append("(");
+    for (String key : keys)
     {
-      /**
-       * 符号"%_^[]"在SQL LIKE中有特殊意义,
-       * 需要对这些符号进行转义;
-       * 前后加"%"用于模糊匹配.
-       */
-      find = Text.escape( find, "%_", "/" );
-      find = "%" + find + "%";
-
-      for (String key : keys)
+      if (key.indexOf('.') != -1)
       {
-        if (key.indexOf('.') != -1 )
-        {
-          String[] b = key.split("\\.", 2 );
-          key = "`"+ b[0] +"`.`"+ b[1] +"`";
-        }
-        else
-        {
-          key = ".`" + key + "`";
-        }
-
-        caze.where(key + " LIKE ? ESCAPE '/'", find);
+        String[] b = key.split("\\." , 2);
+        key = "`"+ b[0] +"`.`"+ b[1] +"`";
       }
+      else
+      {
+        key = ".`" + key + "`";
+      }
+
+      sb.append("(");
+      for (String txt : vals)
+      {
+        /**
+         * 符号 "%_[]" 在 SQL LIKE 中有特殊意义,
+         * 需要对这些符号进行转义.
+         */
+        txt = "%" + Text.escape(txt, "%_[]/", "/") + "%";
+
+        sb.append(key).append(" LIKE ? ESCAPE '/' AND ");
+        pa[ pi ++ ] = txt ;
+      }
+        sb.delete(sb.length() - 5, sb.length());
+        sb.append(") OR ");
     }
+        sb.delete(sb.length() - 4, sb.length());
+        sb.append(")"/**/);
+
+    caze.where(sb.toString(), pa );
   }
 
   /**
