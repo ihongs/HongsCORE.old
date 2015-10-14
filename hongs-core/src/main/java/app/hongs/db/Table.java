@@ -130,10 +130,18 @@ public class Table
     {
       this.assocs = (Map)conf.get("assocs");
     }
+    else
+    {
+      this.assocs = new HashMap();
+    }
 
     if (conf.containsKey("relats"))
     {
       this.relats = (Map)conf.get("relats");
+    }
+    else
+    {
+      this.relats = new HashMap();
     }
   }
 

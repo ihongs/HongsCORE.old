@@ -620,14 +620,14 @@ public class FetchMore
   public static void insertMore(Table table, Map assocs, Map values)
     throws HongsException
   {
-    if ( assocs == null || assocs.isEmpty() ) return;
+    if ( assocs == null || assocs.isEmpty( ) ) return;
 
-    String id = (String)values.get(table.primaryKey);
+    String id = (String) values.get(table.primaryKey);
 
     Iterator it = assocs.entrySet().iterator();
     while (it.hasNext())
     {
-      Map.Entry entry = (Map.Entry)it.next();
+      Map.Entry entry = (Map.Entry) it.next( );
       Map config = (Map)entry.getValue();
 
       String type = (String)config.get("type");
@@ -738,15 +738,12 @@ public class FetchMore
   public static void deleteMore(Table table, Map assocs, Object... ids)
     throws HongsException
   {
-    if (assocs.isEmpty())
-    {
-      return;
-    }
+    if ( assocs == null || assocs.isEmpty( ) ) return;
 
     Iterator it = assocs.entrySet().iterator();
     while (it.hasNext())
     {
-      Map.Entry entry = (Map.Entry)it.next();
+      Map.Entry entry = (Map.Entry) it.next( );
       Map config = (Map)entry.getValue();
 
       String type = (String)config.get("type");
