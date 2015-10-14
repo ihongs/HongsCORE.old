@@ -401,22 +401,21 @@ public class Table
     }
 
     CoreLocale conf = Core.getInstance(CoreLocale.class);
-    return conf.getProperty("core.default."+type+".format", fmt);
+    return conf.getProperty("core.default."+ type +".format", fmt );
   }
 
   protected String getField(String field)
     throws HongsException
   {
-    Map        cols = getFields();
     CoreConfig conf = Core.getInstance(CoreConfig.class);
-    field = conf.getProperty("core.table." + field + ".field", field);
-    return  cols.containsKey(field) ? field : null;
+    field = conf.getProperty("core.table."+ field +".field", field);
+    return getFields().containsKey(field) ? field : null;
   }
 
   protected String getState(String state)
   {
     CoreConfig conf = Core.getInstance(CoreConfig.class);
-    return  conf.getProperty("core.table." + state + ".state", null );
+    return  conf.getProperty("core.table."+ state +".state", null );
   }
 
   /**
