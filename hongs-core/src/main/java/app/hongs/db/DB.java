@@ -1781,6 +1781,7 @@ public class DB
             this.db = db;
             this.ps = ps;
             this.rs = rs;
+            this.cs = new LinkedHashMap();
 
             try {
                 md = rs.getMetaData();
@@ -1792,8 +1793,6 @@ public class DB
             } catch (ClassNotFoundException ex) {
                 throw new HongsException(0x10a2, ex);
             }
-
-            this.cs = new LinkedHashMap();
         }
 
         public DB getDB() {
