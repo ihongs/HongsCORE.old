@@ -202,19 +202,9 @@ public class Table
   public int insert(Map<String, Object> values)
     throws HongsException
   {
-    String state = getField("state");
     String mtime = getField("mtime");
     String ctime = getField("ctime");
-
-    // 存在 state 字段则自动放入默认值
-    if (state != null && !values.containsKey(state))
-    {
-      String s = getState("default");
-      if ( s  != null )
-      {
-        values.put(state, s);
-      }
-    }
+    String state = getField("state");
 
     long time = System.currentTimeMillis();
 
@@ -261,6 +251,16 @@ public class Table
           break;
         default:
           values.put(ctime, time);
+      }
+    }
+
+    // 存在 state 字段则自动放入默认值
+    if (state != null && !values.containsKey(state))
+    {
+      String s = getState("default");
+      if ( s  != null )
+      {
+        values.put(state, s);
       }
     }
 
