@@ -211,47 +211,13 @@ public class Table
     // 存在 mtime 字段则自动放入当前时间
     if (mtime != null && !values.containsKey(mtime))
     {
-      int type = (Integer)((Map)this.fields.get(mtime)).get("type");
-      switch (type)
-      {
-        case Types.DATE:
-          values.put(mtime, new Date(time));
-          break;
-        case Types.TIME:
-          values.put(mtime, new Time(time));
-          break;
-        case Types.TIMESTAMP:
-          values.put(mtime, new Timestamp(time));
-          break;
-        case Types.INTEGER:
-          values.put(mtime, time / 1000);
-          break;
-        default:
-          values.put(mtime, time);
-      }
+      values.put(mtime, getDtval(mtime, time));
     }
 
     // 存在 ctime 字段则自动放入当前时间
     if (ctime != null && !values.containsKey(ctime))
     {
-      int type = (Integer)((Map)this.fields.get(ctime)).get("type");
-      switch (type)
-      {
-        case Types.DATE:
-          values.put(ctime, new Date(time));
-          break;
-        case Types.TIME:
-          values.put(ctime, new Time(time));
-          break;
-        case Types.TIMESTAMP:
-          values.put(ctime, new Timestamp(time));
-          break;
-        case Types.INTEGER:
-          values.put(ctime, time / 1000);
-          break;
-        default:
-          values.put(ctime, time);
-      }
+      values.put(ctime, getDtval(ctime, time));
     }
 
     // 存在 state 字段则自动放入默认值
@@ -289,24 +255,7 @@ public class Table
     // 存在 mtime 字段则自动放入当前时间
     if (mtime != null && !values.containsKey(mtime))
     {
-      int type = (Integer)((Map)this.fields.get(mtime)).get("type");
-      switch (type)
-      {
-        case Types.DATE:
-          values.put(mtime, new Date(time));
-          break;
-        case Types.TIME:
-          values.put(mtime, new Time(time));
-          break;
-        case Types.TIMESTAMP:
-          values.put(mtime, new Timestamp(time));
-          break;
-        case Types.INTEGER:
-          values.put(mtime, time / 1000);
-          break;
-        default:
-          values.put(mtime, time);
-      }
+      values.put(mtime, getDtval(mtime, time));
     }
 
     // 整理数据
@@ -372,17 +321,41 @@ public class Table
   }
 
   /**
+   * 获取日期(时间)取值
+   * @param name
+   * @param time
+   * @return
+   */
+  protected Object getDtval(String name, long time)
+  {
+    int type = (Integer) ((Map) this.fields.get(name) ).get("type");
+    switch (type)
+    {
+      case Types.DATE:
+        return new Date(time);
+      case Types.TIME:
+        return new Time(time);
+      case Types.TIMESTAMP:
+        return new Timestamp(time);
+      case Types.INTEGER  :
+        return time / 1000;
+      default:
+        return time /****/;
+    }
+  }
+
+  /**
    * 获取日期(时间)格式
    * <p>
    * 也可在 values 中通过 __type_format__,__name__format__ 来告知格式;
-   * 其中 type 为 date,time,datetime; name 为 values 中的键.
+   * 其中的 type 为 date,time,datetime; name 为 values 中的键
    * </p>
    * @param type
    * @param name
    * @param values
    * @return
    */
-  protected String getDtfmt(String type, String name, Map values)
+  protected String getDtfmt(String name, String type, Map values)
   {
     String key;
     key = "__"+name+"_format__";
@@ -390,7 +363,7 @@ public class Table
     {
       if (values.get(key) instanceof String)
       {
-        return (String) values.remove( key );
+        return (String) values.get(key);
       }
     }
     key = "__"+type+"_format__";
@@ -398,7 +371,7 @@ public class Table
     {
       if (values.get(key) instanceof String)
       {
-        return (String) values.remove( key );
+        return (String) values.get(key);
       }
     }
 
@@ -741,7 +714,7 @@ public class Table
         {
           if (dateFormat == null)
           {
-            dateFormat = getDtfmt("date", namc, values);
+            dateFormat = getDtfmt(namc, "date", values);
           }
           SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
 
@@ -772,7 +745,7 @@ public class Table
         {
           if (timeFormat == null)
           {
-            timeFormat = getDtfmt("time", namc, values);
+            timeFormat = getDtfmt(namc, "time", values);
           }
           SimpleDateFormat sdf = new SimpleDateFormat(timeFormat);
 
@@ -803,7 +776,7 @@ public class Table
         {
           if (datetimeFormat == null)
           {
-            datetimeFormat = getDtfmt("datetime", namc, values);
+            datetimeFormat = getDtfmt(namc, "datetime", values);
           }
           SimpleDateFormat sdf = new SimpleDateFormat(datetimeFormat);
 
