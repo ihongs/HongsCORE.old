@@ -1011,9 +1011,9 @@ public class DB
           } else if ("PostgreSQL".equals(nam)) {
               sql += " LIMIT " + limit + " OFFSET " + start;
           } else if ("Oracle".equals(nam)) {
-              sql = "SELECT * FROM (" + sql + ") WHERE rno>" + (start - 1) + " AND rno<" + (start + limit);
+              sql = "SELECT * FROM (" + sql + ") WHERE rno > " + (start - 1) + " AND rno < " + (start + limit);
           } else if ("SQLServer".equals(nam)) {
-              sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum>" + (start - 1) + " AND __table__.rownum<" + (start + limit);
+              sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum > " + (start - 1) + " AND __table__.rownum < " + (start + limit);
           } else {
               throw new HongsError(0x10, "Limit not support " + nam);
           }
