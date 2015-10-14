@@ -1781,10 +1781,10 @@ public class DB
             this.db = db;
             this.ps = ps;
             this.rs = rs;
-            this.cs = new LinkedHashMap();
 
             try {
-                md = rs.getMetaData();
+                 md = rs.getMetaData(   );
+                 cs = new LinkedHashMap();
                 for (int i = 1; i <= md.getColumnCount(); i ++) {
                     cs.put(md.getColumnLabel(i), Class.forName(md.getColumnClassName(i)));
                 }
