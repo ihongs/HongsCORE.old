@@ -864,6 +864,26 @@ public class Table
    * 与 DB.getTable(String) 方法不同, 不会获取 table 配置
    * @param db
    * @param name
+   * @param tnam
+   * @param pkey
+   * @return
+   * @throws HongsException
+   */
+  public static Table newInstance(DB db, String name, String tnam, String pkey)
+    throws HongsException
+  {
+    Map map = new HashMap();
+    map.put("name" , name );
+    map.put("tableName" , tnam);
+    map.put("primaryKey", pkey);
+    Table inst = new Table(db, map);
+    return inst;
+  }
+
+  /**
+   * 与 DB.getTable(String) 方法不同, 不会获取 table 配置
+   * @param db
+   * @param name
    * @param pkey
    * @return
    * @throws HongsException
@@ -871,11 +891,7 @@ public class Table
   public static Table newInstance(DB db, String name, String pkey)
     throws HongsException
   {
-    Map map = new HashMap();
-    map.put("name" , name );
-    map.put("primaryKey", pkey);
-    Table inst = new Table(db, map);
-    return inst;
+    return Table.newInstance(db, name, name, pkey);
   }
 
   /**
@@ -888,7 +904,7 @@ public class Table
   public static Table newInstance(DB db, String name)
     throws HongsException
   {
-    return Table.newInstance(db, name, null);
+    return Table.newInstance(db, name, name, null);
   }
 
 }
