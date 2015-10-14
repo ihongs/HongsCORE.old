@@ -1,10 +1,11 @@
 
 # 更新日志
 
-* 2015/10/23 修复关联查询字表数据未获取的问题
-* 2015/10/22 将常用的参数等集中放到 app.hongs.Cnst 类中, 这样就不用总去读配置了，此部分参数本就属于约定胜于配置的，并无配置的意义
-* 2015/10/22 添加了 app.hongs.action.PickedHelper 助手类, 可以很方便的通过 ActionRunner 本地调用, 为 form 关联查询数据了
-* 2015/10/20 完成模块管理功能; 更新、优化、修复其他 NullPointException, JS 等问题
+* 2015/10/13 将 FetchNext 更名为 DB.Roll, DBAssist 改回 Mview
+* 2015/09/23 修复关联查询子表数据未获取的问题
+* 2015/09/22 将常用的参数等集中放到 app.hongs.Cnst 类中, 这样就不用总去读配置了，此部分参数本就属于约定胜于配置的，并无配置的意义
+* 2015/09/22 添加了 app.hongs.action.PickedHelper 助手类, 可以更方便的通过 ActionRunner 本地调用, 为 form 关联查询数据了
+* 2015/09/20 完成模块管理功能; 更新、优化、修复其他 NullPointException, JS 等问题
 * 2015/08/20 更新 create 方法的返回结构，同 retrieve[info] 避免前端需要识别不同数据结构
 * 2015/05/28 强化并首选 jetty 作为嵌入式 web 容器; 因其他容器的 jsp 版本可能与 jetty 使用的冲突, 需要去掉 jsp 相关的包方可在 tomcat 等容器下正常打开页面
 * 2015/04/24 完善 Async 并添加 Batch 异步操作类, 为异步任务和消息处理进行准备

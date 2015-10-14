@@ -247,24 +247,28 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
 
 ## 表单配置
 
-一个 xxx.form.xml 配置文件由 form,field,param,enum,value 这些节点组成, 其中比较重要的是 field 的 param 规则, 用于控制视图布局的参数有:
+一个 xxx.form.xml 配置文件由 form,field,param,enum,value 这些节点组成, 结构类似于 Protobuf, form 类似 Protobuf 的 message. field 有 required/repeated 对应 message 下条目的 required/optional/repeated; type 对应条目的类型, 只是更贴近HTML控件和数据库字段类型.
 
-    listable    字段可显示在列表中
+其中 field 的 param 设置中, 可用于控制视图布局的参数有:
+
     sortable    字段可排序(枚举等类型的字段实为分组聚类)
     findable    字段可搜索(且搜索框查询会查询此字段的值)
+    listable    字段可显示在列表中
     inedible    字段不在编辑页出现
     invisble    字段不在查看页出现
     unstored    不保存原文(针对 Lucene 特有, 可查询或排序却不能读取)
 
-每个表单可以有一个 name="@" 的字段, 该字段的名称即为此表单的名称, 其配置即表单的配置, 同样也有一些控制视图的参数:
+每个表单(form)可以有一个 name="@" 的字段, 该字段的名称即为此表单的名称, 其配置即表单的配置, 同样也有一些控制视图的参数:
 
-    dont.auto.add.listable.fields   告知 DBAssist 组件不要自动将字段设为可列举
-    dont.auto.add.sortable.fields   告知 DBAssist 组件不要自动将字段设为可排序
-    dont.auto.add.findable.fields   告知 DBAssist 组件不要自动将字段设为可搜索
+    dont.auto.add.listable.fields   告知 Mview 不要自动将字段设为可列举
+    dont.auto.add.sortable.fields   告知 Mview 不要自动将字段设为可排序
+    dont.auto.add.findable.fields   告知 Mview 不要自动将字段设为可搜索
     dont.show.create.button         不要显示创建按钮
     dont.show.update.button         不要显示修改按钮
     dont.show.delete.button         不要显示删除按钮
     dont.show.select.column         不要显示选择列
+
+每个枚举(enum)可以有一个 code="*" 的取值, 该取值用作"其他"选项, 当出现枚举中没有记录的值时, 将显示为"其他".
 
 ## 模型规范
 
