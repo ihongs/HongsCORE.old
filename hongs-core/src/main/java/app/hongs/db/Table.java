@@ -368,7 +368,7 @@ public class Table
    * @param values
    * @return
    */
-  protected String getFormat(String type, String name, Map values)
+  protected String getDtfmt(String type, String name, Map values)
   {
     String key;
     key = "__"+name+"_format__";
@@ -741,7 +741,7 @@ public class Table
         {
           if (dateFormat == null)
           {
-            dateFormat = getFormat("date", namc, values);
+            dateFormat = getDtfmt("date", namc, values);
           }
           SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
 
@@ -772,7 +772,7 @@ public class Table
         {
           if (timeFormat == null)
           {
-            timeFormat = getFormat("time", namc, values);
+            timeFormat = getDtfmt("time", namc, values);
           }
           SimpleDateFormat sdf = new SimpleDateFormat(timeFormat);
 
@@ -803,7 +803,7 @@ public class Table
         {
           if (datetimeFormat == null)
           {
-            datetimeFormat = getFormat("datetime", namc, values);
+            datetimeFormat = getDtfmt("datetime", namc, values);
           }
           SimpleDateFormat sdf = new SimpleDateFormat(datetimeFormat);
 
