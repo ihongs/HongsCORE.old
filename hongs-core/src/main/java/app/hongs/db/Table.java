@@ -350,11 +350,11 @@ public class Table
   protected Map getFields()
     throws HongsException
   {
-    if (this.fields == null)
+    if (null == this.fields)
     {
-        this.fields = (new DBFields(this)).fields;
+      this.fields = (new DBFields(this)).fields;
     }
-    return   fields;
+    return /**/ this.fields;
   }
 
   protected String getField(String field)
