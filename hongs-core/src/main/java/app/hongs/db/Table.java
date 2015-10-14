@@ -354,7 +354,21 @@ public class Table
     {
         this.fields = (new DBFields(this)).fields;
     }
-    return this.fields;
+    return   fields;
+  }
+
+  protected String getField(String field)
+    throws HongsException
+  {
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
+    field = conf.getProperty("core.table."+ field +".field", field);
+    return getFields().containsKey(field) ? field : null;
+  }
+
+  protected String getState(String state)
+  {
+    CoreConfig conf = Core.getInstance(CoreConfig.class);
+    return  conf.getProperty("core.table."+ state +".state", null );
   }
 
   /**
@@ -404,20 +418,6 @@ public class Table
     return conf.getProperty("core.default."+ type +".format", fmt );
   }
 
-  protected String getField(String field)
-    throws HongsException
-  {
-    CoreConfig conf = Core.getInstance(CoreConfig.class);
-    field = conf.getProperty("core.table."+ field +".field", field);
-    return getFields().containsKey(field) ? field : null;
-  }
-
-  protected String getState(String state)
-  {
-    CoreConfig conf = Core.getInstance(CoreConfig.class);
-    return  conf.getProperty("core.table."+ state +".state", null );
-  }
-
   /**
    * 获取关联信息
    * @param name 关联名
@@ -428,6 +428,31 @@ public class Table
     if (this.relats.containsKey(name))
     return (Map)this.relats.get(name);
     return null;
+  }
+
+  /**
+   * 获取关联表名
+   * @param assoc 关联信息
+   * @return 关联表名
+   */
+  protected static String getAssocName(Map assoc)
+  {
+    String tn = (String) assoc.get("tableName"); // 原名 realName
+    if  (  tn == null || tn.length() == 0)
+           tn = (String) assoc.get("name");
+    return tn;
+  }
+
+  /**
+   * 获取关联路径
+   * @param assoc 关联信息
+   * @return 关联路径
+   */
+  protected static String[] getAssocPath(Map assoc)
+  {
+    List<String> ts = (List)assoc.get("path");
+    if  (  ts == null  ) ts = new ArrayList();
+    return ts.toArray(new String[0]);
   }
 
   /**
@@ -457,31 +482,6 @@ public class Table
     Map tc =  this.getAssoc(name);
     if (tc == null) return  null ;
     return caze.gotJoin(Table.getAssocPath(tc)).gotJoin(Table.getAssocName(tc));
-  }
-
-  /**
-   * 获取关联表名
-   * @param assoc 关联信息
-   * @return 关联表名
-   */
-  protected static String getAssocName(Map assoc)
-  {
-    String tn = (String) assoc.get("tableName"); // 原名 realName
-    if  (  tn == null || tn.length() == 0)
-           tn = (String) assoc.get("name");
-    return tn;
-  }
-
-  /**
-   * 获取关联路径
-   * @param assoc 关联信息
-   * @return 关联路径
-   */
-  protected static String[] getAssocPath(Map assoc)
-  {
-    List<String> ts = (List)assoc.get("path");
-    if  (  ts == null  ) ts = new ArrayList();
-    return ts.toArray(new String[0]);
   }
 
   /**
