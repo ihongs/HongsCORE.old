@@ -306,6 +306,12 @@ public class Table
     return /**/ this.fields;
   }
 
+  /**
+   * 获取特殊字段名
+   * @param field
+   * @return
+   * @throws HongsException 
+   */
   protected String getField(String field)
     throws HongsException
   {
@@ -314,6 +320,11 @@ public class Table
     return getFields().containsKey(field) ? field : null;
   }
 
+  /**
+   * 获取基础状态值
+   * @param state
+   * @return 
+   */
   protected String getState(String state)
   {
     CoreConfig conf = Core.getInstance(CoreConfig.class);
