@@ -4,7 +4,11 @@
  * @param $ jQuery
  */
 ;(function($){
-    $.fn.datetimepicker.dates["en"] = {
+    if (!$.fn.datetimepicker) {
+        return;
+    }
+
+    $.fn.datetimepicker.dates.en = {
         months      : hsGetLang("date.LM"),//["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月", "十二月"],
         monthsShort : hsGetLang("date.SM"),//["一","二","三","四","五","六","七","八","九","十","十一","十二"],
         days        : hsGetLang("date.LE"),//["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],
@@ -24,30 +28,44 @@
 
         var that = $(this);
         var attr;
-        var opts = {
-            autoclose: true,
-            todayBtn : true,
-            todayHighlight: false
-        };
+        var opts;
 
-        // 获取位置
-        attr = that.attr("data-position");
+        // 基础配置
+        attr = that.attr("data-config" );
         if (attr) {
-            opts.pickerPosition = attr;
+            opts =  eval("{"+ attr +"}");
+        } else {
+            opts =  { };
+        }
+        if (opts.autoclose === undefined) {
+            opts.autoclose  =  true;
+        }
+        if (opts.todayBtn  === undefined) {
+            opts.todayBtn   =  true;
+        }
+        if (opts.todayHighlight === undefined) {
+            opts.todayHighlight  =  true;
         }
 
         // 获取格式
-        attr = that.attr( "data-format" );
+        attr = that.attr("data-format" );
         if (attr) {
-            opts.format = _hs2bsDF(attr );
+            opts.format = _hs2bsDF(attr);
         } else
         if (that.is(".input-date")) {
             opts.format = _hs2bsDF(hsGetLang("date.format"));
         } else
         if (that.is(".input-time")) {
             opts.format = _hs2bsDF(hsGetLang("time.format"));
-        } else {
+        } else
+        {
             opts.format = _hs2bsDF(hsGetLang("datetime.format"));
+        }
+
+        // 获取位置
+        attr = that.attr("data-position");
+        if (attr) {
+            opts.pickerPosition  =  attr ;
         }
 
         // 根据格式选择视图

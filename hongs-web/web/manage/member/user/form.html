@@ -4,7 +4,7 @@
         <param name="loadUrl" value="manage/member/user/info.act?md=0&-with-roles=1"/>
         <param name="saveUrl" value="manage/member/user/save.act"/>
     </object>
-    <form action="" method="POST">
+    <form action="" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id"/>
         <input type="hidden" name="depts.0.dept_id" data-pn="dept_id"/>
         <div class="row">
@@ -23,6 +23,11 @@
                 <div class="form-group">
                     <label class="control-label">昵称</label>
                     <input type="text" name="name" class="form-control" required="required" data-unique="manage/member/user/unique.act?id={id}"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">头像</label>
+                    <input type="file" name="head" class="form-control" required="required" data-toggle="fileinput"/>
+                    <p class="help-block"></p>
                 </div>
                 <div class="form-group">
                     <label class="control-label">备注</label>

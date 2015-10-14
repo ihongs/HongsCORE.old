@@ -66,7 +66,7 @@ public class UploadHelper {
         }
         return path;
     }
-    
+
     private String getUploadExtn(File file) {
         String name = file.getName(   );
         int pos = name.lastIndexOf('.');
@@ -82,7 +82,7 @@ public class UploadHelper {
         MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
         return  MimeUtil.getMimeTypes(file).toString();
     }
-    
+
     private void setResultName(String fame, String extn) {
         String famc = fame+"."+extn;
         int l = Core.SERVER_ID.length();
@@ -94,7 +94,7 @@ public class UploadHelper {
         }
         this.resultName = famc;
     }
-    
+
     private void chkTypeOrExtn(String type, String extn) throws VerifyHelper.Wrong {
         /**
          * 检查文件类型
@@ -189,7 +189,7 @@ public class UploadHelper {
             extn = getUploadExtn( file );
             type = getUploadType( file );
         } else {
-            file = new File(path+".txn");
+            file = new File(path+".tnp");
 
             /**
              * 从上传信息中提取类型和扩展名
@@ -199,8 +199,14 @@ public class UploadHelper {
                 try(InputStreamReader sr = new InputStreamReader(fs);
                     BufferedReader    fr = new BufferedReader   (sr))
                 {
-                    type = fr.readLine().trim();
                     extn = fr.readLine().trim();
+                    type = fr.readLine().trim();
+                    int p  = extn.lastIndexOf('.');
+                    if (p  > 1) {
+                        extn = extn.substring(p+1);
+                    } else {
+                        extn = "";
+                    }
                 }   fs.close();
             } catch (FileNotFoundException ex ) {
                 throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");

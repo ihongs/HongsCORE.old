@@ -57,6 +57,11 @@ legend {
     display: inline-block;
     vertical-align: top;
 }
+.form-group .close,
+.form-group .close:hover,
+.form-group .close:focus {
+    color: #666;
+}
 .btn.btn-default .close,
 .btn.btn-primary .close,
 .btn.btn-success .close,

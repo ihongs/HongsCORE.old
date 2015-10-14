@@ -91,7 +91,7 @@ public class ActionHelper implements Cloneable
   private PrintWriter /* * */ responseWrtr = null;
 
   /**
-   * @deprecated 
+   * @deprecated
    */
   public ActionHelper()
   {
@@ -341,17 +341,17 @@ public class ActionHelper implements Cloneable
 
                 v = Core.getUniqueId();
                 String file = path + File.separator + v + ".tmp";
-                String info = path + File.separator + v + ".txn";
+                String info = path + File.separator + v + ".tnp";
 
                 // 存储到临时文件
                 /**/FileOutputStream fos = new /**/FileOutputStream(new File( file ));
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                 BufferedInputStream  bis = new BufferedInputStream (fis.openStream());
-                Streams.copy(bis, bos, true);
+                long size = Streams.copy(bis, bos, true );
 
-                // 记录类型和名称
-                try(FileWriter fw  =  new FileWriter(info)) {
-                    fw.write(type+"\r\n"+extn+"\r\n"+name);
+                // 记录类型名称等
+                try(FileWriter fw = new FileWriter(info)) {
+                    fw.write(name.replaceAll("[\r\n]","")+"\r\n"+ type +"\r\n"+ size);
                 }
             }
 
