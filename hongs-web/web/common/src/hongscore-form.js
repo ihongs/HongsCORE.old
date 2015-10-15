@@ -195,6 +195,9 @@ HsForm.prototype = {
                        .change();
                 });
             }
+            else if (inp.attr("type") == "file" ) {
+                inp.attr("data-value",v).change();
+            }
             else {
                 inp.val(v).change();
             }
@@ -364,30 +367,63 @@ HsForm.prototype = {
     },
 
     _fill__review : function(inp, v, n, t) {
-        if (t === "enum") {
+        // 图片和链接
+        if (inp.is("img")) {
+            inp.attr("src" , v );
+            return false;
+        }
+        if (inp.is( "a" )) {
+            inp.attr("href", v );
+            return false;
+        }
+
+        // 枚举
+        if (t === "enum" ) {
             inp.data("enum", v );
             return v;
         }
-
         var a = inp.data("enum");
-          inp.removeData("enum");
-        if (! a)
-            return v;
+        if (a) {
+            var k = inp.attr("data-vk"); if (! k) k = 0;
+            var t = inp.attr("data-tk"); if (! t) t = 1;
+            var i, c, e, m = { };
+            inp.empty()
+               .removeData( "enum" );
+            if (! jQuery.isArray(v)) {
+                v  =  [v];
+            }
+            for(i == 0; i < a.length; i ++) {
+                e  = a[i];
+                m[e[k]]=e[t];
+            }
+            for(i == 0; i < v.length; i ++) {
+                c  = v[i];
+                e  = m[v[i]];
+                inp.append(jQuery('<li></li>').text(e)).attr("data-code", c);
+            }
+            return  false;
+        }
 
-        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
-        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        var i, c, b = {};
-        inp.empty( );
-        if (! jQuery.isArray(v)) {
-            v =  [v];
+        // 标签
+        if (inp.is("ul")) {
+            var v = inp.attr("data-vk"); if (! k) k = 0;
+            var t = inp.attr("data-tk"); if (! t) t = 1;
+            var i, c, e;
+            inp.empty();
+            for(i == 0; i < v.length; i ++) {
+                c  = i;
+                e  = v[i];
+                if (jQuery.isPlainObject(e)
+                ||  jQuery.isArray(e)) {
+                    c = e[k];
+                    e = e[t];
+                }
+                inp.append(jQuery('<li></li>').text(e)).data("data-code", c);
+            }
+            return  false;
         }
-        for(i == 0; i < a.length; i ++) {
-            c = a[i]; b[c[vk]] = c[tk];
-        }
-        for(i == 0; i < v.length; i ++) {
-            inp.append(jQuery('<li></li>').text(b[v[i]]));
-        }
-        return false;
+
+        return v;
     },
     _fill__htime : function(td, v, n) {
         var d1  =  new Date ();
@@ -437,7 +473,7 @@ HsForm.prototype = {
         this.formBox.on("submit", function() {
             return that.verifies();
         });
-        this.formBox.on("change blur", "input,select,textarea,[data-fn]",
+        this.formBox.on("change", "input,select,textarea,[data-fn]",
         function() {
             var inp = jQuery(this);
             that.validate(inp.attr("name") || inp.attr("data-fn"));
@@ -647,9 +683,17 @@ HsForm.prototype = {
                         ret = rst["list" ].length  >  0 ;
                     } else
                     if (rst['valid'] !== undefined) {
-                        ret = rst["valid"] || rst["msg"];
+                        if (! rst["valid"] && rst["msg"]) {
+                            ret = rst[ "msg" ];
+                        } else {
+                            ret = rst["valid"];
+                        }
                     } else {
-                        rst = rst[ "ok"  ] || rst["msg"];
+                        if (! rst[ "ok"  ] && rst["msg"]) {
+                            ret = rst[ "msg" ];
+                        } else {
+                            ret = rst[ "ok"  ];
+                        }
                     }
                 }
             });
