@@ -393,7 +393,7 @@ function hsGetValue (obj, path, def) {
     if (typeof(path) !== "string") {
         throw("hsGetValue: 'path' must be a string");
     }
-    var keys = _hsGetDakey(path);
+    var keys = _hsGetPkeys( path );
     return _hsGetPoint(obj, keys, def);
 }
 /**
@@ -465,7 +465,7 @@ function _hsGetDapth(lst, keys, def, pos) {
         return def;
     }
 }
-function _hsGetDakey(path) {
+function _hsGetPkeys(path) {
     path = path.replace(/\]\[/g, ".")
                .replace(/\[/   , ".")
                .replace(/\]/   , "" )
@@ -473,9 +473,11 @@ function _hsGetDakey(path) {
     var i , keys = [];
     for(i = 0; i < path.length; i ++) {
         var keyn = path[i];
-        if (keyn.substr(0, 1) == '~') {
+        /*
+        if (keyn.substr(0, 1) == '#') {
             keys.push(parseInt(keyn.substr(1)));
         } else
+        */
         if (keyn.length == 0 && i!=0) {
             keys.push(null);
         } else
@@ -483,7 +485,7 @@ function _hsGetDakey(path) {
             keys.push(keyn);
         }
     }
-    return keys;
+    return  keys;
 }
 /**
  * 向树对象设置值
@@ -506,8 +508,8 @@ function hsSetValue (obj, path, val) {
     if (typeof(path) !== "string") {
         throw("hsSetValue: 'path' must be a string");
     }
-    var keys = _hsGetDakey(path);
-    _hsSetPoint(obj, keys, val );
+    var keys = _hsGetPkeys(path);
+    _hsSetPoint( obj, keys, val);
 }
 /**
  * 向树对象设置值(hsSetValue的底层方法)
@@ -1175,18 +1177,20 @@ $.fn.hsOpen = function(url, data, complete) {
         ref = tab.parent().children( ).filter(".active");
         tab.show().find( "a" ).click();
         if (tab.find("a span").size()) {
-            tab.find("a span").not(".close" /*btn*/)
-                         .text(hsGetLang("loading"));
+            tab.find("a span").not(".close")
+               .text(hsGetLang( "loading" ));
         } else {
-            tab.find("a").text(hsGetLang("loading"));
+            tab.find("a")
+               .text(hsGetLang( "loading" ));
         }
         // 关闭关联的 tab
-        if (prt.children( ).size( ) ) {
-            prt.children( ).hsCloze();
+        if (prt.children().size( ) ) {
+            prt.children().hsCloze();
             prt.empty();
         }
     } else {
-        ref = prt.contents().detach();
+        ref = $('<div class="openbak"></div>').hide()
+              .append(prt.contents()).appendTo( prt );
     }
 
     box = $('<div class="openbox"></div>')
@@ -1236,7 +1240,10 @@ $.fn.hsClose = function() {
     } else
     // 恢复内容
     if (box.data( "ref" )) {
-        prt.append(box.data( "ref" )) ; box.remove();
+        var ref  = box.data("ref");
+        prt.append(ref.contents());
+        box.remove();
+        ref.remove();
     } else
     // 关闭浮窗
     if (box.closest(".modal").size()) {
@@ -1645,8 +1652,8 @@ function(evt) {
         if (box.size()) {
             break;
         }
-        if ($(this).is( ".close" )
-        &&  $(this).closest( ".form-group" ).size()) {
+        if (  $(this).is(".close")
+        &&    $(this).closest( ".form-group" ).size()) {
             return;
         }
         box = $(this).closest(".notebox");
@@ -1654,16 +1661,21 @@ function(evt) {
             box = box.closest(".alert");
             break;
         }
+        box = $(this).closest(".modal-header").next();
+        if (box.is( ".openbox"  )) {
+            box = box.closest(".modal");
+            break;
+        }
         box = $(this).closest(".openbox");
         if (box.is(".modal-body")) {
             box = box.closest(".modal");
             break;
         }
-        if ($(this).closest(".alert,.modal").size()) {
+        if (  $(this).closest(".alert,.modal").size()) {
             return;
         }
-    } while (false);
-    box.hsClose(  );
+    } while(false);
+    box.hsClose( );
     evt.stopPropagation();
 })
 .on("click", ".nav>li>a",

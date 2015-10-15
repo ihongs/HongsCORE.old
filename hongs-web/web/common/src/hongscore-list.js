@@ -593,6 +593,7 @@ jQuery.fn.hsList = function(opts) {
     function() {
         var box = $(this ).closest(".HsList" );
         box.find(".for-select,.for-checks").prop("disabled" , true );
-        box.find(".checkone" ).change(/**/);
+        box.find(".checkall").prop("choosed", false);
+        box.find(".checkone").change();
     });
 })(jQuery);

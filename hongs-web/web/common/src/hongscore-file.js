@@ -59,6 +59,43 @@
 
     $.extend($.fn.fileinput.defaults, $.fn.fileinputLocales.en);
 
+    var initialPreview = function(opts, vals) {
+        var f;
+        switch (opts.previewFileType) {
+            case "image":
+                f = function(u) {
+                    return '<img src="'+u+'" class="file-preview-image">';
+                };
+                break;
+            case "video":
+                f = function(u) {
+                    return '<video controls><source src="'+u+'"></video>';
+                };
+                break;
+            case "audio":
+                f = function(u) {
+                    return '<audio controls><source src="'+u+'"></audio>';
+                };
+                break;
+            case "flash":
+                f = function(u) {
+                    return '<object class="file-object" data="'+u+'" type="application/x-shockwave-flash"></object>';
+                };
+                break;
+            default:
+                f = function(u) {
+                    return '<object class="file-object" data="'+u+'"></object>';
+                };
+                break;
+        }
+
+        var i = 0 , j = vals.length;
+        for ( ; i < j ; i ++ ) {
+            vals[i] = f(vals[ i ] );
+        }
+        return vals;
+    };
+
     $(document).on("hsReady", function() {
         $(this).find("[data-toggle=fileinput]").each(function() {
             if ($(this).data("fileinput")) {
@@ -95,20 +132,20 @@
                 opts.previewFileType  = attr;
             }
 
-            // 预览文件
-            attr = that.attr( "data-files" );
-            if (attr) {
-                opts.initialPreview   = eval("["+ attr +"]");
-            }
-
             // 类型校验
             attr = that.attr( "data-types" );
             if (attr) {
-                opts.allowedFileTypes = eval("["+ attr +"]");
+                opts.allowedFileTypes = attr.split(",");
             }
             attr = that.attr( "data-extns" );
             if (attr) {
-                opts.allowedFileExtensions = eval("["+ attr +"]");
+                opts.allowedFileExtensions = attr.split(",");
+            }
+
+            // 预览文件
+            attr = that.attr( "data-value" );
+            if (attr) {
+                opts.initialPreview = initialPreview(opts, attr.split(","));
             }
 
             that.removeClass( "input-file" );

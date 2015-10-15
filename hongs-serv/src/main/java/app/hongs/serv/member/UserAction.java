@@ -5,6 +5,7 @@ import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.MenuSet;
+import app.hongs.action.UploadHelper;
 import app.hongs.action.anno.Action;
 import app.hongs.db.DB;
 import app.hongs.action.anno.CommitSuccess;
@@ -76,6 +77,15 @@ public class UserAction {
         if("".equals(data.get("password"))) {
             data.remove("password");
         }
+        
+        // 上传头像
+        UploadHelper.upload(
+            data,
+            new UploadHelper()
+                .setUploadName("head")
+                .setUploadHref("upload/member/head")
+                .setUploadPath("upload/member/head")
+        );
         
         CoreLocale lang = CoreLocale.getInstance().clone( );
         lang.load("member");

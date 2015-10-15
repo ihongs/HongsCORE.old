@@ -59,8 +59,10 @@ public class Synt {
      * @return
      */
     public static <T> T declare(Object val, T def) {
+        if  ( null == def) return (T)  val;
         val = declare(val, def.getClass());
-        return null == val ? def : (T) val;
+        if  ( null != val) return (T)  val;
+        else               return      def;
     }
 
     /**

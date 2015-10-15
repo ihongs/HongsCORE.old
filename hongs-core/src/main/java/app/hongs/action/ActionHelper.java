@@ -349,6 +349,11 @@ public class ActionHelper implements Cloneable
                 BufferedInputStream  bis = new BufferedInputStream (fis.openStream());
                 long size = Streams.copy(bis, bos, true );
 
+                // 如果没有则跳过
+                if (size == 0) {
+                    continue;
+                }
+
                 // 记录类型名称等
                 try(FileWriter fw = new FileWriter(info)) {
                     fw.write(name.replaceAll("[\r\n]","")+"\r\n"+ type +"\r\n"+ size);

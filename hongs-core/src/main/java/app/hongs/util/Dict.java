@@ -230,7 +230,7 @@ public class Dict
   public static <T> T getValue(Map map, T def, Object... keys)
   {
     try {
-      return Synt.declare(get(map, def , keys), def);
+      return Synt.declare(get(map, def, keys), def);
     } catch (HongsError er) {
       if (er.getCode( ) ==  0x46) {
         er = new HongsError(0x46, "Wrong type for key '"+Arrays.toString(keys)+"'", er.getCause());
@@ -250,7 +250,7 @@ public class Dict
   public static <T> T getValue(Map map, Class<T> cls, Object... keys)
   {
     try {
-      return Synt.declare(get(map, null, keys), cls);
+      return Synt.declare(get(map,null, keys), cls);
     } catch (HongsError er) {
       if (er.getCode()  ==  0x46) {
         er = new HongsError(0x46, "Wrong type for key '"+Arrays.toString(keys)+"'", er.getCause());
@@ -351,9 +351,11 @@ public class Dict
     Object[] keys = new Object[keyz.length];
     int i = 0;
     for ( String keyn : keyz) {
-        if (keyn.startsWith("~")) {
+        /*
+        if (keyn.startsWith("#")) {
             keys[i++] = Synt.declare(keyn.substring(1) , 0);
         } else
+        */
         if (keyn.length() == 0 && i != 0) {
             keys[i++] = null;
         } else

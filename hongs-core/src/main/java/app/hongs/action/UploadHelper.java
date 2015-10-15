@@ -224,6 +224,10 @@ public class UploadHelper {
         File   dist = new File(disp);
         // 原始文件与目标文件不一样才需要移动
         if(!dist.getAbsolutePath().equals(file.getAbsolutePath())) {
+            File dirt = dist.getParentFile();
+            if (!dirt.isDirectory()) {
+                 dirt.mkdirs( );
+            }
             file.renameTo(dist);
         }
 
