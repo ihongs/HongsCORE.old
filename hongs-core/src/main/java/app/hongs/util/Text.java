@@ -461,6 +461,10 @@ public final class Text
     StringBuilder sb = new StringBuilder( );
     int n;
 
+    n = (int) Math.floor(time / 604800000);
+    if (n > 0) {  time = time % 604800000;
+      sb.append(n).append("w");
+    }
     n = (int) Math.floor(time / 86400000);
     if (n > 0) {  time = time % 86400000;
       sb.append(n).append("d");
@@ -474,7 +478,7 @@ public final class Text
       sb.append(n).append("m");
     }
 
-    float m = (float) time / 1000;
+    float m = (float) time / 1000 ;
     if (0 != m || 0 == sb.length()) {
       sb.append(m).append("s");
     }
@@ -522,7 +526,7 @@ public final class Text
   /**
    * 从文件中获取所有内容
    * @param path 文件路径
-   * @return 
+   * @return
    */
   public static String fetchFile(String path) {
       BufferedReader br = null;

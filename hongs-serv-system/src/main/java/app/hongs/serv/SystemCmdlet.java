@@ -9,11 +9,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,35 +26,37 @@ import java.util.regex.Pattern;
 public class SystemCmdlet {
 
     /**
-     * 设置/更新数据库
+     * 设置数据库
      * @param args
-     * @throws HongsException 
+     * @throws HongsException
      */
     @Cmdlet("setup")
     public static void setup(String[] args) throws HongsException {
-        String dir;
-        if ( 0  < args.length ) {
-            dir = args[0];
-        } else {
-            dir = Core.DATA_PATH + "/setup";
+        if (args.length == 0) {
+            args = new String[] { Core.CORE_PATH + "/bin/_setup_" };
         }
 
         List<File> fxs = new ArrayList();
-        File[/**/] fos = new File( dir ).listFiles();
-        for (File fo : fos) {
+        File[/**/] fos = new File(args[0]).listFiles();
+        for (File  fo  : fos) {
             if (fo.isDirectory() || fo.isHidden()
             || !fo.getName( ).endsWith( ".sql" )) {
                 continue;
             }
-            fxs.add(fo );
+            fxs.add (fo);
         }
+        Collections.sort(fxs, new FileComparator());
 
-        Pattern pan = Pattern.compile("^(\\d+\\.)?(.*?)\\.sql$" ); // 文件名为 01.xxxx.sql 这样的
-        Pattern pat = Pattern.compile("^--\\s*DB:\\s*([^\\s*]+)"); // 在第一行指定适用的数据库配置
-        Collections.sort( fxs,new FileComparator());
-        for ( File  fo  : fxs ) {
-            Matcher man = pan.matcher(fo.getName());
-            if (!man.matches()) {
+        Pattern pet = Pattern.compile("^(.*?\\.)?(.*?)\\.sql$");    // 文件名为 01.xxxx.sql 这样的
+        Pattern pat = Pattern.compile("--\\s*DB:\\s*(\\S+)");       // 指定数据库
+//      Pattern pot = Pattern.compile("--\\s*TO:\\s*(\\S+)");       // 指定输出区
+        Pattern pct = Pattern.compile("--.*?[\r\n]");               // 注释
+        Pattern pxt = Pattern.compile("\\{\\{(.+?)\\}\\}");         // 日期
+        Date    dxt = new Date();
+
+        for (File fo : fxs) {
+            Matcher met = pet.matcher(fo.getName());
+            if (!met.matches()) {
                 continue;
             }
 
@@ -65,24 +68,35 @@ public class SystemCmdlet {
                 }
 
                 String  sql = new String(buff,"UTF-8");
-                String  dbn;
-                Matcher mat = pat.matcher(sql);
+                String  dbn ;
+                Matcher mat ;
+                mat = pat.matcher(sql);
                 if (mat.find()) {
-                    dbn = mat.group(1).trim( );
+                    dbn = mat.group(1).trim();
                 } else {
-                    dbn = man.group(2).trim( );
+                    dbn = met.group(2).trim();
                 }
-                DB  db  =  DB.getInstance(dbn);
+                DB  db  = DB.getInstance(dbn);
 
                 CmdletHelper.println("Run '"+fo.getName()+"' for '"+dbn+"'...");
 
-                // 清理注释并分割成单条的 SQL 语句
-                sql = sql.replaceAll("(^|[\r\n])\\s*(--|/\\*\\!).*", "");
-                String[] a = sql.split(";\\s*[\r\n]");
+                // 清理注释
+                sql = pct.matcher(sql).replaceAll("");
+
+                // 设置时间
+                Matcher      mxt = pxt.matcher( sql );
+                StringBuffer mxb = new StringBuffer();
+                while (mxt.find()) {
+                    mxt.appendReplacement(mxb, Matcher.quoteReplacement(
+                        new SimpleDateFormat(mxt.group(1)).format(dxt)));
+                }
+                mxt.appendTail(mxb);
+                sql= mxb.toString();
 
                 /*
                 StringBuilder e = new StringBuilder();
                 */
+                String[] a = sql.split(";\\s*[\r\n]");
                 long st = System.currentTimeMillis( );
                 int  al = a.length;
                 int  ok = 0;
@@ -90,8 +104,8 @@ public class SystemCmdlet {
                 for(String s : a) {
                     s = s.trim( );
                     try {
-                        if (s.length() > 0) {
-                            db.execute( s );
+                        if (0 < s.length()) {
+                            db.execute(s );
                         }
                         CmdletHelper.progres(st, al, ++ok, er);
                     } catch (HongsException ex) {
@@ -117,14 +131,24 @@ public class SystemCmdlet {
     }
 
     /**
-     * 从 form 配置创建 db 配置
-     * @param args 
+     * 清理数据库
+     * @param args
+     */
+    @Cmdlet("clean")
+    public static void clean(String[] args) throws HongsException {
+        if (args.length == 0) {
+            args = new String[] { Core.CORE_PATH + "/bin/_clean_" };
+        }
+        setup(args);
+    }
+
+    /**
+     * 从 db 构建 form 和 menu
+     * @param args
      */
     public static void build(String[] args) {
-        Map<String, Object> opts = CmdletHelper.getOpts(args,
-            "conf:s", "name:s", "help:b");
     }
-    
+
     private static class FileComparator implements Comparator<File> {
         @Override
         public int compare(File f1 , File f2) {
