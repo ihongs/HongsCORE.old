@@ -27,6 +27,13 @@ import java.text.SimpleDateFormat;
 public class SystemCmdlet {
 
     /**
+     * 从 db 构建 form 和 menu
+     * @param args
+     */
+    public static void build(String[] args) {
+    }
+
+    /**
      * 设置/维护数据库
      * @param args
      * @throws HongsException
@@ -37,50 +44,54 @@ public class SystemCmdlet {
             args = new String[] { Core.CORE_PATH + "/bin/_setup_" };
         }
 
+        Pattern pet = Pattern.compile( "^(.+?\\.)?(.*?)\\.sql$" );  // 文件名为 xx.xxxx.sql 或 xxxx.sql
+        Pattern pat = Pattern.compile("--\\s*(DB|DT):\\s*(\\S+)");  // 配置
+        Pattern pct = Pattern.compile("--.*?[\r\n]");               // 注释
+        Pattern pxt = Pattern.compile("\\{\\{(.+?)(\\|(.+?))?\\}\\}"); // 日期
+        Pattern pzt = Pattern.compile("([\\-\\+])(\\d+Y)?(\\d+M)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?$"); // 偏移
+        Date    dxt = new Date();
+        Date    dzt = dxt ;
+        Date    dst ;
+
+        // 获取目录下全部待执行的 sql 文件
         List<File> fxs = new ArrayList();
-        File[/**/] fos = new File(args[0]).listFiles();
+        File[] fos = new File(args[0]).listFiles();
         for (File  fo  : fos) {
-            if (fo.isDirectory() || fo.isHidden()
-            || !fo.getName( ).endsWith( ".sql" )) {
+            if (fo.isDirectory() || fo.isHidden( )
+            || !fo.getName( ).endsWith( ".sql" ) ) {
                 continue;
             }
             fxs.add (fo);
         }
         Collections.sort(fxs, new FileComparator());
 
-        Pattern pet = Pattern.compile("^(.+?\\.)?(.*?)\\.sql$");    // 文件名需为 xx.xxxx.sql 或 xxxx.sql
-        Pattern pat = Pattern.compile("--\\s*DB:\\s*(\\S+)");       // 操作数据库
-        Pattern pct = Pattern.compile("--.*?[\r\n]");               // 注释
-        Pattern pxt = Pattern.compile("\\{\\{(.+?)\\}\\}");         // 日期
-        Pattern pzt = Pattern.compile("\\|([\\-\\+])(\\d+Y)?(\\d+M)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?$"); // 时间偏移 yyyy/MM/dd|-1M
-        Date    dxt = new Date();
-        Date    dzt ;
-
         for (File fo : fxs) {
-            Matcher met = pet.matcher(fo.getName());
-            if (!met.matches()) {
+            Matcher met = pet.matcher( fo.getName( ) );
+            if (  ! met.matches() ) {
                 continue;
             }
 
             try {
-                byte[] buff;
-                try (FileInputStream in = new FileInputStream(fo)) {
-                    buff = new byte[ in.available( ) ];
-                    in.read(buff);
+                // 读取代码
+                byte[] buf;
+                try(FileInputStream in = new FileInputStream(fo)) {
+                    buf = new byte[ in.available( ) ];
+                    in.read(buf);
                 }
+                String  sql = new String(buf,"UTF-8");
 
-                String  sql = new String(buff,"UTF-8");
-                String  dbn ;
-                Matcher mat ;
-                mat = pat.matcher(sql);
-                if (mat.find()) {
-                    dbn = mat.group(1).trim();
-                } else {
-                    dbn = met.group(2).trim();
+                // 解析配置
+                String  dbn = met.group(2).trim();
+                Matcher mat = pat.matcher ( sql );
+                while ( mat.find() ) {
+                    String key = mat.group(1);
+                    if ("DB".equals(key)) {
+                        dbn = mat.group(2).trim();
+                    } else
+                    if ("DT".equals(key)) {
+                        dzt = count(dxt, mat.group(2).trim(), pzt);
+                    }
                 }
-                DB  db  = DB.getInstance(dbn);
-
-                CmdletHelper.println("Run '"+fo.getName()+"' for '"+dbn+"'...");
 
                 // 清理注释
                 sql = pct.matcher(sql).replaceAll("");
@@ -88,76 +99,26 @@ public class SystemCmdlet {
                 // 设置时间
                 StringBuffer sqb = new StringBuffer();
                 Matcher      mxt = pxt.matcher( sql );
-                Matcher      mzt ;
                 String       mxp ;
-                String       mzp ;
                 while (mxt.find()) {
-                    mxp = mxt.group(1);
-                    mzt = pzt.matcher(mxp);
-
-                    // 时间偏移量
-                    if (mzt.find()) {
-                        Calendar cal = Calendar.getInstance();
-                        mxp = mxp.substring(0, mzt.start( ) );
-                        mzp = mzt.group(1);
-                        boolean add = !"-".equals(mzp);
-                        int     num;
-                        mzp = mzt.group(2);
-                        if (null != mzp) {
-                            mzp = mzp.substring(0  , mzp.length( ) - 1);
-                            num = Integer.valueOf(mzp);
-                            cal.add(Calendar.YEAR  , add? num: 0 - num);
-                        }
-                        mzp = mzt.group(3);
-                        if (null != mzp) {
-                            mzp = mzp.substring(0  , mzp.length( ) - 1);
-                            num = Integer.valueOf(mzp);
-                            cal.add(Calendar.MONTH , add? num: 0 - num);
-                        }
-                        mzp = mzt.group(4);
-                        if (null != mzp) {
-                            mzp = mzp.substring(0  , mzp.length( ) - 1);
-                            num = Integer.valueOf(mzp);
-                            cal.add(Calendar.WEEK_OF_MONTH, add? num: 0 - num);
-                        }
-                        mzp = mzt.group(5);
-                        if (null != mzp) {
-                            mzp = mzp.substring(0  , mzp.length( ) - 1);
-                            num = Integer.valueOf(mzp);
-                            cal.add(Calendar.DATE  , add? num: 0 - num);
-                        }
-                        mzp = mzt.group(6);
-                        if (null != mzp) {
-                            mzp = mzp.substring(0  , mzp.length( ) - 1);
-                            num = Integer.valueOf(mzp);
-                            cal.add(Calendar.HOUR  , add? num: 0 - num);
-                        }
-                        mzp = mzt.group(7);
-                        if (null != mzp) {
-                            mzp = mzp.substring(0  , mzp.length( ) - 1);
-                            num = Integer.valueOf(mzp);
-                            cal.add(Calendar.MINUTE, add? num: 0 - num);
-                        }
-                        mzp = mzt.group(8);
-                        if (null != mzp) {
-                            mzp = mzp.substring(0  , mzp.length( ) - 1);
-                            num = Integer.valueOf(mzp);
-                            cal.add(Calendar.SECOND, add? num: 0 - num);
-                        }
-                        dzt = cal.getTime();
+                    // 时间偏移
+                    mxp = mxt.group(3);
+                    if (mxp == null) {
+                        dst =  dzt ;
                     } else {
-                        dzt = dxt;
+                        dst = count(dxt, mxp, pzt);
                     }
 
-                    // 时间格式化
+                    // 时间格式
+                    mxp = mxt.group(1);
                     if ("%S".equals(mxp)) {
-                        mxp = String.valueOf(dzt.getTime());
+                        mxp = String.valueOf(dst.getTime());
                     } else
                     if ("%s".equals(mxp)) {
-                        mxp = String.valueOf(dzt.getTime( ) / 1000);
+                        mxp = String.valueOf(dst.getTime( ) / 1000);
                     } else
                     {
-                        mxp = new SimpleDateFormat(mxp).format(dzt);
+                        mxp = new SimpleDateFormat(mxp).format(dst);
                     }
 
                     mxt.appendReplacement(sqb, Matcher.quoteReplacement(mxp));
@@ -165,10 +126,14 @@ public class SystemCmdlet {
                 mxt.appendTail(sqb);
                 sql= sqb.toString();
 
+                CmdletHelper.println("Run '"+fo.getName()+"' for '"+dbn+"'.");
+
+                // 逐条执行
                 /*
                 StringBuilder e = new StringBuilder();
                 */
                 String[] a = sql.split(";\\s*[\r\n]");
+                DB   db = DB.getInstance(dbn);
                 long st = System.currentTimeMillis( );
                 int  al = a.length;
                 int  ok = 0;
@@ -177,7 +142,7 @@ public class SystemCmdlet {
                     s = s.trim( );
                     try {
                         if (0 < s.length()) {
-                            db.execute(s );
+                            db.execute( s );
                         }
                         CmdletHelper.progres(st, al, ++ok, er);
                     } catch (HongsException ex) {
@@ -202,11 +167,72 @@ public class SystemCmdlet {
         }
     }
 
-    /**
-     * 从 db 构建 form 和 menu
-     * @param args
-     */
-    public static void build(String[] args) {
+    private static Date count(Date dxt, String mxp, Pattern pzt) {
+        Matcher mzt = pzt.matcher( mxp );
+        String  mzp ;
+
+        if (mzt.find()) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime( dxt );
+
+            // 加减符号
+            mzp = mzt.group(1);
+            boolean add = !"-".equals(mzp);
+            int     num ;
+
+            mzp = mzt.group(2);
+            if (null != mzp) {
+                mzp = mzp.substring(0  , mzp.length( ) - 1);
+                num = Integer.valueOf(mzp);
+                cal.add(Calendar.YEAR  , add? num: 0 - num);
+            }
+
+            mzp = mzt.group(3);
+            if (null != mzp) {
+                mzp = mzp.substring(0  , mzp.length( ) - 1);
+                num = Integer.valueOf(mzp);
+                cal.add(Calendar.MONTH , add? num: 0 - num);
+            }
+
+            mzp = mzt.group(4);
+            if (null != mzp) {
+                mzp = mzp.substring(0  , mzp.length( ) - 1);
+                num = Integer.valueOf(mzp);
+                cal.add(Calendar.WEEK_OF_MONTH, add? num: 0 - num);
+            }
+
+            mzp = mzt.group(5);
+            if (null != mzp) {
+                mzp = mzp.substring(0  , mzp.length( ) - 1);
+                num = Integer.valueOf(mzp);
+                cal.add(Calendar.DATE  , add? num: 0 - num);
+            }
+
+            mzp = mzt.group(6);
+            if (null != mzp) {
+                mzp = mzp.substring(0  , mzp.length( ) - 1);
+                num = Integer.valueOf(mzp);
+                cal.add(Calendar.HOUR  , add? num: 0 - num);
+            }
+
+            mzp = mzt.group(7);
+            if (null != mzp) {
+                mzp = mzp.substring(0  , mzp.length( ) - 1);
+                num = Integer.valueOf(mzp);
+                cal.add(Calendar.MINUTE, add? num: 0 - num);
+            }
+
+            mzp = mzt.group(8);
+            if (null != mzp) {
+                mzp = mzp.substring(0  , mzp.length( ) - 1);
+                num = Integer.valueOf(mzp);
+                cal.add(Calendar.SECOND, add? num: 0 - num);
+            }
+
+            return cal.getTime();
+        }
+
+        return dxt;
     }
 
     private static class FileComparator implements Comparator<File> {
