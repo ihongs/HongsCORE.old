@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -26,7 +27,7 @@ import java.util.regex.Pattern;
 public class SystemCmdlet {
 
     /**
-     * 设置数据库
+     * 设置/维护数据库
      * @param args
      * @throws HongsException
      */
@@ -47,12 +48,13 @@ public class SystemCmdlet {
         }
         Collections.sort(fxs, new FileComparator());
 
-        Pattern pet = Pattern.compile("^(.*?\\.)?(.*?)\\.sql$");    // 文件名为 01.xxxx.sql 这样的
-        Pattern pat = Pattern.compile("--\\s*DB:\\s*(\\S+)");       // 指定数据库
-//      Pattern pot = Pattern.compile("--\\s*TO:\\s*(\\S+)");       // 指定输出区
+        Pattern pet = Pattern.compile("^(.+?\\.)?(.*?)\\.sql$");    // 文件名需为 xx.xxxx.sql 或 xxxx.sql
+        Pattern pat = Pattern.compile("--\\s*DB:\\s*(\\S+)");       // 操作数据库
         Pattern pct = Pattern.compile("--.*?[\r\n]");               // 注释
         Pattern pxt = Pattern.compile("\\{\\{(.+?)\\}\\}");         // 日期
+        Pattern pzt = Pattern.compile("\\|([\\-\\+])(\\d+Y)?(\\d+M)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?$"); // 时间偏移 yyyy/MM/dd|-1M
         Date    dxt = new Date();
+        Date    dzt ;
 
         for (File fo : fxs) {
             Matcher met = pet.matcher(fo.getName());
@@ -84,14 +86,84 @@ public class SystemCmdlet {
                 sql = pct.matcher(sql).replaceAll("");
 
                 // 设置时间
+                StringBuffer sqb = new StringBuffer();
                 Matcher      mxt = pxt.matcher( sql );
-                StringBuffer mxb = new StringBuffer();
+                Matcher      mzt ;
+                String       mxp ;
+                String       mzp ;
                 while (mxt.find()) {
-                    mxt.appendReplacement(mxb, Matcher.quoteReplacement(
-                        new SimpleDateFormat(mxt.group(1)).format(dxt)));
+                    mxp = mxt.group(1);
+                    mzt = pzt.matcher(mxp);
+
+                    // 时间偏移量
+                    if (mzt.find()) {
+                        Calendar cal = Calendar.getInstance();
+                        mxp = mxp.substring(0, mzt.start( ) );
+                        mzp = mzt.group(1);
+                        boolean add = !"-".equals(mzp);
+                        int     num;
+                        mzp = mzt.group(2);
+                        if (null != mzp) {
+                            mzp = mzp.substring(0  , mzp.length( ) - 1);
+                            num = Integer.valueOf(mzp);
+                            cal.add(Calendar.YEAR  , add? num: 0 - num);
+                        }
+                        mzp = mzt.group(3);
+                        if (null != mzp) {
+                            mzp = mzp.substring(0  , mzp.length( ) - 1);
+                            num = Integer.valueOf(mzp);
+                            cal.add(Calendar.MONTH , add? num: 0 - num);
+                        }
+                        mzp = mzt.group(4);
+                        if (null != mzp) {
+                            mzp = mzp.substring(0  , mzp.length( ) - 1);
+                            num = Integer.valueOf(mzp);
+                            cal.add(Calendar.WEEK_OF_MONTH, add? num: 0 - num);
+                        }
+                        mzp = mzt.group(5);
+                        if (null != mzp) {
+                            mzp = mzp.substring(0  , mzp.length( ) - 1);
+                            num = Integer.valueOf(mzp);
+                            cal.add(Calendar.DATE  , add? num: 0 - num);
+                        }
+                        mzp = mzt.group(6);
+                        if (null != mzp) {
+                            mzp = mzp.substring(0  , mzp.length( ) - 1);
+                            num = Integer.valueOf(mzp);
+                            cal.add(Calendar.HOUR  , add? num: 0 - num);
+                        }
+                        mzp = mzt.group(7);
+                        if (null != mzp) {
+                            mzp = mzp.substring(0  , mzp.length( ) - 1);
+                            num = Integer.valueOf(mzp);
+                            cal.add(Calendar.MINUTE, add? num: 0 - num);
+                        }
+                        mzp = mzt.group(8);
+                        if (null != mzp) {
+                            mzp = mzp.substring(0  , mzp.length( ) - 1);
+                            num = Integer.valueOf(mzp);
+                            cal.add(Calendar.SECOND, add? num: 0 - num);
+                        }
+                        dzt = cal.getTime();
+                    } else {
+                        dzt = dxt;
+                    }
+
+                    // 时间格式化
+                    if ("%S".equals(mxp)) {
+                        mxp = String.valueOf(dzt.getTime());
+                    } else
+                    if ("%s".equals(mxp)) {
+                        mxp = String.valueOf(dzt.getTime( ) / 1000);
+                    } else
+                    {
+                        mxp = new SimpleDateFormat(mxp).format(dzt);
+                    }
+
+                    mxt.appendReplacement(sqb, Matcher.quoteReplacement(mxp));
                 }
-                mxt.appendTail(mxb);
-                sql= mxb.toString();
+                mxt.appendTail(sqb);
+                sql= sqb.toString();
 
                 /*
                 StringBuilder e = new StringBuilder();
@@ -128,18 +200,6 @@ public class SystemCmdlet {
                 throw new HongsException.Common(ex);
             }
         }
-    }
-
-    /**
-     * 清理数据库
-     * @param args
-     */
-    @Cmdlet("clean")
-    public static void clean(String[] args) throws HongsException {
-        if (args.length == 0) {
-            args = new String[] { Core.CORE_PATH + "/bin/_clean_" };
-        }
-        setup(args);
     }
 
     /**
