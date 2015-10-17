@@ -426,6 +426,7 @@ HsForm.prototype = {
         return v;
     },
     _fill__htime : function(td, v, n) {
+        if (v === undefined) return v;
         var d1  =  new Date ();
         var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));
         if (d1.getFullYear() == d2.getFullYear()
@@ -440,6 +441,7 @@ HsForm.prototype = {
         }
     },
     _fill__hdate : function(td, v, n) {
+        if (v === undefined) return v;
         var d1  =  new Date ();
         var d2  =  hsPrsDate(v, hsGetLang("date.format"));
         if (d1.getFullYear() == d2.getFullYear()
@@ -452,15 +454,19 @@ HsForm.prototype = {
         }
     },
     _fill__datetime : function(td, v, n) {
+        if (v === undefined) return v;
         return hsFmtDate(v, hsGetLang("datetime.format"));
     },
     _fill__date : function(td, v, n) {
+        if (v === undefined) return v;
         return hsFmtDate(v, hsGetLang("date.format"));
     },
     _fill__time : function(td, v, n) {
+        if (v === undefined) return v;
         return hsFmtDate(v, hsGetLang("time.format"));
     },
     _fill__html : function(td, v, n) {
+        if (v === undefined) return v;
         td.html(v); return false;
     },
 
