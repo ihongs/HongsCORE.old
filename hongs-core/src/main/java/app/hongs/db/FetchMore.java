@@ -364,13 +364,22 @@ public class FetchMore
 
         // 建立关联关系
         if ("BLS_TO".equals(tp)) {
-            // 上级外键连接下级主键, 交换主外键
-            String xk = fk; fk = pk; pk = xk;
-            if (fk == null) fk = table2.primaryKey;
+            // 上级外键连接下级主键
+            if (pk == null) pk = table2.primaryKey;
+            if (tn == null || tn.length() == 0) {
+                fk =         ":`"+fk+"`";
+            } else {
+                fk = "`"+tn+"`.`"+fk+"`";
+            }   pk = "`"+an+"`.`"+pk+"`";
         } else
         if ("HAS_ONE".equals(tp)) {
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
+            if (tn == null || tn.length() == 0) {
+                pk =         ":`"+pk+"`";
+            } else {
+                pk = "`"+tn+"`.`"+pk+"`";
+            }   fk = "`"+an+"`.`"+fk+"`";
         } else
         if ("HAS_MANY".equals(tp)) {
             throw new HongsException(0x10c2,  "Unsupported assoc type '"+tp+"'");
@@ -381,11 +390,6 @@ public class FetchMore
         else {
             throw new HongsException(0x10c2, "Unrecognized assoc type '"+tp+"'");
         }
-        if (tn == null || tn.length() == 0) {
-            fk =         ":`"+fk+"`";
-        } else {
-            fk = "`"+tn+"`.`"+fk+"`";
-        }   pk = "`"+an+"`.`"+pk+"`";
 
         // 转化关联类型
         byte ji;
@@ -479,7 +483,6 @@ public class FetchMore
             // 上级主键连接下级外键
             if (pk == null) pk = table .primaryKey;
             caze2.setOption("ASSOC_MULTI" , true );
-
             // 将下层数据合并到本层
             if (assocs2 != null) {
                 for(Map ass : ( Collection <Map> ) assocs2.values()) {
