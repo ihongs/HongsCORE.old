@@ -275,7 +275,7 @@ public class Mview implements Core.Destroy {
             Map       vd = (Map ) et.getValue();
             String  type = (String) vd.get("type");
 
-            String  name, disp, ak, vk, tk, an, tn;
+            String  name, disp, vk, tk, ak, ek, tn;
 
             if ("BLS_TO".equals(type)) {
                 ak   = (String) vd.get("name");
@@ -293,15 +293,15 @@ public class Mview implements Core.Destroy {
                 }
 
                 Map ad = (Map) ((Map) vd.get("assocs")).values().toArray()[0];
-                an   = (String) ad.get("name");
                 ak   = (String) vd.get("name");
+                ek   = (String) ad.get("name");
                 tn   = (String) ad.get("tableName" );
                 vk   = (String) vd.get("foreignKey");
                 name = ak + ("HAS_ONE".equals(type) ? "." : "..") + vk;
 
-                Model hm = db.getModel(tn != null ? tn : ak);
+                Model hm = db.getModel(tn != null ? tn : ek);
                 Mview hb =  new  Mview(hm);
-                tk   =an+"."+hb.getNmKey();
+                tk   =ek+"."+hb.getNmKey();
                 disp =/****/ hb.getTitle();
             }
 
@@ -315,8 +315,8 @@ public class Mview implements Core.Destroy {
                 field.put("__type__","pick");
                 field.put("__disp__", disp );
                 field.put("data-ak", ak);
-                field.put("data-tk", tk);
                 field.put("data-vk", vk);
+                field.put("data-tk", tk);
             }
 
             // 特定类型才能搜索、列举、排序
