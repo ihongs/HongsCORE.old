@@ -244,9 +244,10 @@ HsList.prototype = {
                         that.load();
                     });
                 }
-                var sn = hsGetSeria( this._data, this.sortKey );
+                var sn = hsGetSeria( this._data, this.sortKey )
+                      || hsGetParam( this._url , this.sortKey );
                 var fn = td.attr("data-ob")||td.attr("data-fn");
-                td.removeClass("sort-a-z sort-z-a");
+                 td.removeClass("sort-a-z sort-z-a");
                 if (sn ==     fn) {
                     td.addClass("sort-a-z");
                 } else
