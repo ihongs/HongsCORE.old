@@ -768,7 +768,7 @@ public class FetchMore
       List  idx = null;
       if (tbl.primaryKey != null)
       {
-        List<Map> lst = table.db.fetchMore
+        List <Map> lst = tbl.fetchMore
         (
           new FetchCase()
             .select ("`"+tbl.primaryKey + "`")
