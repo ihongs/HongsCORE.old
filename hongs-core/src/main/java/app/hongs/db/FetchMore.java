@@ -766,7 +766,8 @@ public class FetchMore
       // 获取下级的下级的ID
       Table tbl = table.db.getTable(tableName);
       List  idx = null;
-      if (tbl.primaryKey != null)
+      if (tbl.primaryKey  !=  null
+      && !tbl.primaryKey.equals(""))
       {
         List<Map> lst  =  tbl.fetchMore
         (
