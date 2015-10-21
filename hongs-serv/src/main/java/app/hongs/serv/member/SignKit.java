@@ -124,17 +124,17 @@ public class SignKit {
         long        stime = System.currentTimeMillis()/1000 ;
 
         // 设置会话
-        ss.setAttribute("usrid", usrid);
-        ss.setAttribute("appid", appid);
         ss.setAttribute("stime", stime);
+        ss.setAttribute("appid", appid);
+        ss.setAttribute("usrid", usrid);
         ss.setAttribute("uname", uname);
 
         // 返回数据
         Map sd = new HashMap();
-        sd.put("usrid", usrid);
-        sd.put("appid", appid);
-        sd.put("token", sesid);
         sd.put("stime", stime);
+        sd.put("token", sesid);
+        sd.put("appid", appid);
+        sd.put("usrid", usrid);
         sd.put("uname", uname);
 
         // 记录登录
