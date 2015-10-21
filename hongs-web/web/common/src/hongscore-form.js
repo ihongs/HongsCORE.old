@@ -644,15 +644,25 @@ HsForm.prototype = {
         },
         "[data-validate]" : function(val, inp) {
             var fn = inp.attr("data-validate");
-            var fd = inp.data() ? inp.data() : window;
             try {
-                return hsGetValue(fd, fn).call(this, val, inp);
+                if (inp.data(fn)) {
+                    inp.data(fn).call(this, val, inp);
+                } else
+                if ( window [fn]) {
+                     window [fn].call(this, val, inp);
+                } else {
+                    if (window.console.error) {
+                        window.console.error(fn+" not found!");
+                    } else {
+                        window.console.log  (fn+" not found!");
+                    }
+                }
             } catch (ex) {
                 if (window.console) {
                     if (window.console.error) {
-                        window.console.error("Call "+ fn +" error: " + ex, val, inp);
+                        window.console.error(fn+" run error: "+ex, val, inp);
                     } else {
-                        window.console.log  ("Call "+ fn +" error: " + ex, val, inp);
+                        window.console.log  (fn+" run error: "+ex, val, inp);
                     }
                 }
                 return false;

@@ -17,9 +17,9 @@ mv        "$PACK_PATH/web.xml" "$PACK_PATH/etc/"
 mv        "$PACK_PATH/web.tld" "$PACK_PATH/etc/"
 mv        "$PACK_PATH/classes" "$PACK_PATH/lib/"
 
-rm -rf    "$PACK_PATH/var/log"
+rm -rf    "$PACK_PATH/var"
+mkdir     "$PACK_PATH/var"
 mkdir     "$PACK_PATH/var/log"
-rm -rf    "$PACK_PATH/var/tmp"
 mkdir     "$PACK_PATH/var/tmp"
 
 cp -f     "$WORK_PATH/hongs-serv-server/"*.bat "$PACK_PATH/"
