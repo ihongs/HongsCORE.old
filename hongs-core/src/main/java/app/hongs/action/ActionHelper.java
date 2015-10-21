@@ -498,9 +498,9 @@ public class ActionHelper implements Cloneable
     if (this.sessionData != null) {
       return this.sessionData.get(name);
     } else {
-      HttpSession sess = this.getRequest().getSession();
-      if (null == sess) return null ;
-      return sess.getAttribute(name);
+      HttpSession ss = this.getRequest().getSession();
+      if (null != ss)  return ss.getAttribute( name );
+      return null;
     }
   }
 
@@ -522,11 +522,11 @@ public class ActionHelper implements Cloneable
         this.sessionData.put(Cnst.UPDATE_ATTR, System.currentTimeMillis());
     } else {
       if (value == null) {
-        HttpSession sess = this.getRequest().getSession(/**/);
-        if (null != sess) sess.removeAttribute(name);
+        HttpSession ss = this.getRequest().getSession(/**/);
+        if (null != ss ) ss.removeAttribute(name);
       } else {
-        HttpSession sess = this.getRequest().getSession(true);
-        if (null != sess) sess.setAttribute(name, value);
+        HttpSession ss = this.getRequest().getSession(true);
+        if (null != ss ) ss.setAttribute(name, value);
       }
     }
   }
@@ -537,19 +537,19 @@ public class ActionHelper implements Cloneable
    * @return
    */
   public String getCookibute(String name) {
-      if (null != cookiesData) {
-          return  cookiesData.get(name);
-      }
-
-      Cookie[] cookies = this.getRequest().getCookies();
-      if (cookies != null) {
-          for (Cookie cookie : cookies) {
-              if (cookie.getName().equals(name)) {
-                  return cookie.getValue();
-              }
+    if (this.cookiesData != null) {
+      return this.cookiesData.get(name);
+    } else {
+      Cookie[] cs = this.getRequest().getCookies();
+      if (cs != null) {
+        for(Cookie ce : cs /**/) {
+          if (ce.getName().equals(name)) {
+            return ce.getValue();
           }
+        }
       }
-      return  null;
+      return null;
+    }
   }
 
   /**
@@ -558,11 +558,25 @@ public class ActionHelper implements Cloneable
    * @param value
    */
   public void setCookibute(String name, String value) {
-      setCookibute(name, value, null, null, 0, false, false);
+    if (this.sessionData != null) {
+      if (value == null) {
+        this.cookiesData.remove(name);
+      } else {
+        this.cookiesData.put(name, value);
+      }
+        this.cookiesData.put(Cnst.UPDATE_ATTR, Long.toString(System.currentTimeMillis()));
+    } else {
+      if (value == null) {
+        setCookibute( name, value, Core.BASE_HREF + "/", null, /* DEL */ 0, false, false );
+      } else {
+        setCookibute( name, value, Core.BASE_HREF + "/", null, Cnst.CL_DEF, false, false );
+      }
+    }
   }
 
   /**
    * 设置跟踪参数
+   * 注意: 此方法总是操作真实 Cookie
    * @param name
    * @param value
    * @param path 路径
@@ -573,14 +587,9 @@ public class ActionHelper implements Cloneable
    */
   public void setCookibute(String name, String value,
     String path, String host, int life, boolean httpOnly, boolean httpDeny) {
-      if (cookiesData != null) {
-          cookiesData.put(name, value);
-          return;
-      }
-
       Cookie cookie = new Cookie(name, value);
       if (path != null) {
-        cookie.setPath(path);
+          cookie.setPath  (path);
       }
       if (host != null) {
           cookie.setDomain(host);
