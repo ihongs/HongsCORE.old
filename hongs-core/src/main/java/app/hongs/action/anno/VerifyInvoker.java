@@ -79,7 +79,7 @@ public class VerifyInvoker implements FilterInvoker {
                 } else {
                     ers = err.getErrors();
                 }
-                dat.put("errors", ers );
+                dat.put("errs", ers);
                 dat.put("err", "Er400");
                 dat.put("msg", CoreLocale.getInstance ( )
                         .translate("fore.form.invalid" ));

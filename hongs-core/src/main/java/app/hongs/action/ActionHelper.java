@@ -658,10 +658,10 @@ public class ActionHelper implements Cloneable
         map.put("ok", true);
     }
     if(!map.containsKey("err")) {
-        map.put("err" , "");
+        map.put("err", "" );
     }
     if(!map.containsKey("msg")) {
-        map.put("msg" , "");
+        map.put("msg", "" );
     }
     this.responseData = map;
   }
@@ -695,6 +695,22 @@ public class ActionHelper implements Cloneable
         map.put("msg", msg);
     }
     map.put("rows", rows);
+    reply(map);
+  }
+
+  /**
+   * 返回审核状态
+   * 针对 unique,exists 等
+   * @param msg
+   * @param sure
+   */
+  public void reply(String msg, boolean sure)
+  {
+    Map map = new HashMap();
+    if (null !=  msg) {
+        map.put("msg", msg);
+    }
+    map.put("sure", sure);
     reply(map);
   }
 

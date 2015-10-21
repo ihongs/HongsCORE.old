@@ -84,9 +84,7 @@ implements IAction {
         Map     req = helper.getRequestData();
                 req = getRqMap(helper, mod, "exists", req);
         boolean val = mod.exists(req);
-        Map     rst = new HashMap();
-        rst.put("valid" , val);
-        helper.reply(rst);
+        helper.reply(null, val);
     }
 
     @Action("unique")
@@ -96,9 +94,7 @@ implements IAction {
         Map     req = helper.getRequestData();
                 req = getRqMap(helper, mod, "unique", req);
         boolean val = mod.unique(req);
-        Map     rst = new HashMap();
-        rst.put("valid" , val);
-        helper.reply(rst);
+        helper.reply(null, val);
     }
 
     /**

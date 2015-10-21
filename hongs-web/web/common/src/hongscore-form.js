@@ -258,18 +258,18 @@ HsForm.prototype = {
             this.formBox.trigger(evt, [rst, this]);
 
             // 错误提示
-            if (rst.errors) {
+            if (rst.errs) {
                 this.formBox.find(".form-group").removeClass("has-error");
                 this.formBox.find(".help-block").   addClass("invisible");
-                for(var n in rst.errors) {
-                    var e =  rst.errors[n];
+                for(var n in rst.errs) {
+                    var e  = rst.errs[n];
                     this.haserror(n , e);
                 }
             } else
-            if (! rst.msg ) {
+            if (!rst.msg) {
                 alert(hsGetLang("error.unkwn"));
             }
-            if (  rst.msg ) {
+            if ( rst.msg) {
                 alert(rst.msg);
             }
         } else {
@@ -682,24 +682,18 @@ HsForm.prototype = {
                 "cache": false,
                 "context": this,
                 "success": function(rst) {
-                    if (rst["info" ] !== undefined) {
+                    if (rst["info"] !== undefined) {
                         ret = !jQuery.isEmptyObject(rst["info"]);
                     } else
-                    if (rst["list" ] !== undefined) {
-                        ret = rst["list" ].length  >  0 ;
+                    if (rst["list"] !== undefined) {
+                        ret = rst["list"].length > 0;
                     } else
-                    if (rst['valid'] !== undefined) {
-                        if (! rst["valid"] && rst["msg"]) {
-                            ret = rst[ "msg" ];
-                        } else {
-                            ret = rst["valid"];
-                        }
+                    if (rst["sure"] !== undefined) {
+                        ret = rst["sure"] ? true :
+                            ( rst["msg" ] ? rst["msg"] : false );
                     } else {
-                        if (! rst[ "ok"  ] && rst["msg"]) {
-                            ret = rst[ "msg" ];
-                        } else {
-                            ret = rst[ "ok"  ];
-                        }
+                        ret = rst[ "ok" ] ? true :
+                            ( rst["msg" ] ? rst["msg"] : false );
                     }
                 }
             });

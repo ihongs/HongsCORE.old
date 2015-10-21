@@ -87,9 +87,7 @@ public class DeptAction {
     public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean v = model.exists(helper.getRequestData());
-        Map rst = new HashMap();
-        rst.put("valid" , v);
-        helper.reply(rst);
+        helper.reply(null, v);
     }
 
     @Action("roles")

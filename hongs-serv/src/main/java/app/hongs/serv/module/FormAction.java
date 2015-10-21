@@ -66,9 +66,7 @@ public class FormAction {
     public void isUnique(ActionHelper helper)
     throws HongsException {
         boolean v = model.unique(helper.getRequestData());
-        Map rst = new HashMap();
-        rst.put("valid" , v);
-        helper.reply(rst);
+        helper.reply(null, v);
     }
 
 }

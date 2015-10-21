@@ -48,7 +48,7 @@ public class SignAction {
             Map m = new HashMap();
             Map e = new HashMap();
             m.put("username", new Wrong(lang.translate("core.username.invalid")));
-            e.put("errors", new Wrongs(m).getErrors());
+            e.put("errs", new Wrongs(m).getErrors());
             e.put("msg", lang.translate("core.sign.in.invalid"));
             e.put("ok", false);
             ah.reply(e);
@@ -59,7 +59,7 @@ public class SignAction {
             Map m = new HashMap();
             Map e = new HashMap();
             m.put("password", new Wrong(lang.translate("core.password.invalid")));
-            e.put("errors", new Wrongs(m).getErrors());
+            e.put("errs", new Wrongs(m).getErrors());
             e.put("msg", lang.translate("core.sign.in.invalid"));
             e.put("ok", false);
             ah.reply(e);
