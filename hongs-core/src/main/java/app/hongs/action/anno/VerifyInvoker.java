@@ -81,8 +81,8 @@ public class VerifyInvoker implements FilterInvoker {
                 }
                 dat.put("errors", ers );
                 dat.put("err", "Er400");
-                CoreLocale lng = CoreLocale.getInstance();
-                dat.put("msg", lng.translate("fore.form.invalid"));
+                dat.put("msg", CoreLocale.getInstance ( )
+                        .translate("fore.form.invalid" ));
             }
 
             helper.reply(dat);
