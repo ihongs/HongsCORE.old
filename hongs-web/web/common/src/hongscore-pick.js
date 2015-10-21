@@ -8,8 +8,8 @@
  * 在表单配置区域添加:
  * <param name="_fill__pick" value="(hsFormFillPick)"/>
  * 在表单选项区域添加:
- * <ul data-fn="x" data-ft="_pick" required="required"></ul>
- * <button type="button" data-toggle="hsPick" data-pick="_pick.html">Pick</button>
+ * <ul data-ft="_pick" data-fn="x" required="required"></ul>
+ * <button type="button" data-toggle="hsPick" data-target="@" data-href="x/pick.html">Pick It!</button>
  */
 
 /**
@@ -109,8 +109,8 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
     function pickOpen() {
         var tip = jQuery( this );
         tip.data("pickData", v )
-           .addClass("pickbox")
-        .toggleClass("pickmul", mul)
+           .addClass("pickbox" )
+        .toggleClass("pickmul" , mul)
         .on("saveBack", function(evt, rst) {
             if (! rst || ! rst.info) {
                 return false;
@@ -125,7 +125,7 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
             tip.hsClose();
             return false;
         })
-        .on("click", ".ensure", function() {
+        .on("click" ,  ".ensure" , function() {
             var btn = jQuery(this);
             if (! btn.closest(".openbox").is(tip)
             ||  ! pickBack())
@@ -180,13 +180,6 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
             }
         });
     };
-
-    tip.on("hsOpen" , function() {
-        box.trigger("pickOpen" );
-    });
-    tip.on("hsClose", function() {
-        box.trigger("pickClose");
-    });
 
     if (tip) {
         tip =    tip.hsOpen(url, undefined, pickOpen);
@@ -344,11 +337,7 @@ function hsListFillPick(cel, v, n) {
         if (box) {
             box = $(this)._hsTarget(box);
         } else {
-            var nav = $(this).closest(".nav");
-            if (nav.size()) {
-                var idx = $(this).closest( "li" ).index( );
-                box = nav.data("panes").children().eq(idx);
-            }
+            box =   null ;
         }
 
         // 填充区域

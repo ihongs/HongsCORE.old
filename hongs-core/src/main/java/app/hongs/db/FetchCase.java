@@ -1006,6 +1006,8 @@ public class FetchCase
 
   /**
    * 插入当前指定的数据
+   * 其实与 FetchCase 无关, 因为 insert 是没有 where 等语句的
+   * 但为保持支持的语句完整让 Table 更像 ORM 还是在这里放一个
    * @param dat
    * @return
    * @throws HongsException

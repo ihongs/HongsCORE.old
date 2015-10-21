@@ -215,8 +215,17 @@ HsList.prototype = {
     fillList : function(list) {
         var tb, tr, td, tds, cls, fns, fts, i, j, n, t, v;
         tb  = this.listBox.find("tbody"); tb.empty( );
-        tds = this.listBox.find("thead th, thead td");
+        tds = this.listBox.find("thead th,thead td" );
         cls = []; fns = []; fts = {};
+
+        // 排序
+        var sn = hsGetSerias(this._data,this.sortKey);
+        if (sn.length == 0) {
+            sn = hsGetParam (this._url ,this.sortKey);
+        } else {
+            sn = sn[0];
+        }
+
         for (i = 0; i < tds .length; i ++) {
             td = jQuery(tds[i]);
             cls.push(td.attr( "class" ));
@@ -232,7 +241,7 @@ HsList.prototype = {
                     td.append('<span class="sort-ico"></span>');
                     td.click(function( ) {
                         var td = jQuery ( this );
-                        var fn = td.attr("data-ob")||td.attr("data-fn");
+                        var fn = td.attr("data-ob") || td.attr("data-fn");
                         var sn = "";
                         if ( td.hasClass("sort-a-z")) {
                             sn = "-"+fn;
@@ -240,13 +249,11 @@ HsList.prototype = {
                         if (!td.hasClass("sort-z-a")) {
                             sn =     fn;
                         }
-                        hsSetSeria(that._data,that.sortKey, sn);
+                        hsSetSeria(that._data, that.sortKey, sn );
                         that.load();
                     });
                 }
-                var sn = hsGetSeria( this._data, this.sortKey )
-                      || hsGetParam( this._url , this.sortKey );
-                var fn = td.attr("data-ob")||td.attr("data-fn");
+                var fn = td.attr("data-ob") || td.attr("data-fn");
                  td.removeClass("sort-a-z sort-z-a");
                 if (sn ==     fn) {
                     td.addClass("sort-a-z");
@@ -256,6 +263,7 @@ HsList.prototype = {
                 }
             }
         }
+        
         for (i = 0; i < list.length; i ++) {
             tr = jQuery('<tr></tr>');
             tb.append(tr);
@@ -286,8 +294,10 @@ HsList.prototype = {
                 td.text(v);
             }
         }
-        if (typeof(this._info) !== "undefined")
+
+        if (typeof(this._info) !== "undefined") {
             delete this._info;
+        }
     },
     fillPage : function(page) {
         switch (page.err) {

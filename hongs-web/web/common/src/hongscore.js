@@ -1647,31 +1647,36 @@ function(evt) {
 .on("click", ".close,.cancel",
 function(evt) {
     var box;
+    var ths = $(this);
     do {
-        box = $(this).closest(".nav>li>a");
+        box = ths.closest(".nav>li>a");
         if (box.size()) {
-            break;
+            break ;
         }
-        if (  $(this).is(".close")
-        &&    $(this).closest( ".form-group" ).size()) {
+        if (ths.is(".close")
+        &&  ths.closest(".form-group").size()) {
             return;
         }
-        box = $(this).closest(".notebox");
-        if (box.is(".alert-body")) {
-            box = box.closest(".alert");
-            break;
-        }
-        box = $(this).closest(".modal-header").next();
+        box = ths.closest(".modal-header").next();
         if (box.is( ".openbox"  )) {
             box = box.closest(".modal");
-            break;
+            break ;
         }
-        box = $(this).closest(".openbox");
+        box = ths.closest(".notebox");
+        if (box.is(".alert-body")) {
+            box = box.closest(".alert");
+            break ;
+        }
+        box = ths.closest(".openbox");
         if (box.is(".modal-body")) {
             box = box.closest(".modal");
-            break;
+            break ;
         }
-        if (  $(this).closest(".alert,.modal").size()) {
+        if (box.size()
+        &&  box.closest(".alert,.modal").size()) {
+            break ;
+        }
+        if (ths.closest(".alert,.modal").size()) {
             return;
         }
     } while(false);

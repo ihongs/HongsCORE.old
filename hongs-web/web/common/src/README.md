@@ -1,23 +1,23 @@
 # HongsCORE framework for Javascript
 
-* 文档版本: 15.02.19
-* 软件版本: 15.02.18
+* 文档版本: 15.09.20
+* 软件版本: 0.3.8-20150922
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
 本工具集与 HongsCORE(Java) 配套使用, 使用 jQuery 作为核心辅助库, 使用 Bootstrap 作为 UI 库. 源码为 src 下以 hongs- 开头的文件, 以 hs 开头的为普通函数, 以 Hs 开头的为伪类函数, this 指向调用的容器对象.
 
-data 属性缩写:
+## 属性缩写:
 
-    List:
-        data-fn     Field name
-        data-ft     Field type
-        data-pn     Page  num
-        data-ob     Order by
     Form:
         data-fn     Field name
         data-ft     Field type
         data-pn     Param name
+    List:
+        data-fn     Field name
+        data-ft     Field type
+        data-ob     Order by
+        data-pn     Pager no
     Pick:
         data-vk     Value key
         data-tk     Title key
@@ -25,7 +25,7 @@ data 属性缩写:
         data-al     Assoc url // FormSet 内部用
         data-at     Assoc act // FormSet 内部用
 
-其他非缩写 data 属性通常可按字面意思理解, data-toggle,data-target 等为 bootstrap 定义的.
+其他非缩写 data 属性通常可按字面意思理解, data-toggle,data-target 等属性意义同 bootstrap 中相关功能.
 
 ## 环境加载
 
@@ -86,13 +86,13 @@ data 属性缩写:
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
-                        <th data-fn="id[]" data-ft="_check" class="_check">
+                        <th data-fn="id[]" data-ft="\_check" class="\_check">
                             <input type="checkbox" class="checkall" name="id[]"/>
                         </th>
                         <th data-fn="name" class="sortable">名称</th>
                         <th data-fn="username" class="sortable">账号</th>
-                        <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
-                        <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
+                        <th data-fn="mtime" data-ft="\_htime" class="\_htime sortable">修改时间</th>
+                        <th data-fn="ctime" data-ft="\_htime" class="\_htime sortable">创建时间</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -145,6 +145,7 @@ data 属性缩写:
     </div>
     <script type="text/javascript">
         (function($) {
+            // 修改时密码为选填
             $("#member_user_form").on("loadBack", function() {
                 if ($(this).find("[name=id]").val()) {
                     $(this).find(":password").removeAttr("required");

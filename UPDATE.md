@@ -1,7 +1,7 @@
 
 # 更新日志
 
-* 2015/10/13 简历 PackAction 用于一次请求多个 Action; 修复 SQL Like 生成语句问题; 将 FetchNext 更名为 DB.Roll, DBAssist 改回 Mview
+* 2015/10/13 建立 PackAction 用于一次请求多个 Action; 修复 SQL Like 生成语句问题; 将 FetchNext 更名为 DB.Roll, DBAssist 改回 Mview
 * 2015/09/23 修复关联查询子表数据未获取的问题
 * 2015/09/22 将常用的参数等集中放到 app.hongs.Cnst 类中, 这样就不用总去读配置了，此部分参数本就属于约定胜于配置的，并无配置的意义
 * 2015/09/22 添加了 app.hongs.action.PickedHelper 助手类, 可以更方便的通过 ActionRunner 本地调用, 为 form 关联查询数据了

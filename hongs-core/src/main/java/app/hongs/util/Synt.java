@@ -16,6 +16,27 @@ import java.util.regex.Pattern;
  */
 public class Synt {
 
+    private static final Number  ZERO = 0 ;
+    private static final String  EMPT = "";
+    private static final Boolean FALS = false;
+
+    /**
+     * 视为真的字符串有: 1,y,t,yes,true
+     */
+    public  static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * 视为假的字符串有: 0,n,f,no,false 和空串
+     */
+    public  static final Pattern FAKE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * 在 Each.each 里
+     * 返回 LOOP.NEXT 则排除此项
+     * 返回 LOOP.LAST 则跳出循环
+     */
+    public  static enum  LOOP  { NEXT, LAST };
+
     /**
      * 取默认值(null 视为无值)
      * @param <T>
@@ -23,7 +44,7 @@ public class Synt {
      * @return
      */
     public static <T> T defoult(T... vals) {
-        for (T  val  : vals) {
+        for (T  val :  vals) {
             if (val != null) {
                 return val ;
             }
@@ -38,7 +59,7 @@ public class Synt {
      * @return
      */
     public static <T> T defxult(T... vals) {
-        for (T  val  : vals) {
+        for (T  val :  vals) {
             if (val != null
             && !FALS.equals(val)
             && !EMPT.equals(val)
@@ -48,7 +69,7 @@ public class Synt {
         }
         return  null;
     }
-    
+
     /**
      * 确保此变量类型为 def 的类型
      * 当 val 为空时返回 def
@@ -344,19 +365,6 @@ public class Synt {
         }
         return dat.toArray();
     }
-
-    private static final Number  ZERO = 0 ;
-    private static final String  EMPT = "";
-    private static final Boolean FALS = false;
-    public  static final Pattern TRUE = Pattern.compile( "^(1|y|t|yes|true)$", Pattern.CASE_INSENSITIVE);
-    public  static final Pattern FAKE = Pattern.compile("^(|0|n|f|no|false)$", Pattern.CASE_INSENSITIVE);
-
-    /**
-     * 在 Each.each 里
-     * 返回 EACH.NEXT 则排除此项
-     * 返回 EACH.LAST 则跳出循环
-     */
-    public static enum LOOP {NEXT, LAST};
 
     public static interface Each {
         public Object each(Object v);
