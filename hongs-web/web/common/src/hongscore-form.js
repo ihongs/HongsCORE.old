@@ -212,7 +212,7 @@ HsForm.prototype = {
         var data = this.formBox;
         var that = this;
 
-        this.formBox.attr("action"  ,  url );
+        this.formBox.attr("action", hsFixUri(url));
 
         if ( enc === "multipart/form-data" ) {
             if (data.attr("target") == null) {
@@ -227,8 +227,6 @@ HsForm.prototype = {
                     that.saveBack(rst);
                 });
             }
-            // 遵循URL规则, 补全URL
-            this.formBox.attr("action", hsFixUri(url));
         } else {
             data.on("submit", function( evt ) {
                 if (evt.isDefaultPrevented()) {
