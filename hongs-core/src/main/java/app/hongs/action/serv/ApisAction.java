@@ -1,6 +1,7 @@
 package app.hongs.action.serv;
 
 import app.hongs.Cnst;
+import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionDriver;
@@ -117,8 +118,8 @@ public class ApisAction
         }
 
         // 将请求转发到动作处理器
-        act = parseAct(act, sid, mts);
-        req.getRequestDispatcher(act).include(req, rsp);
+        act = parseAct(act, sid, mts );
+        req.getRequestDispatcher(act ).include(req, rsp);
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
@@ -198,7 +199,7 @@ public class ApisAction
     }
 
     private String parseAct(String act, String sid, String... mts) {
-        // 去掉后缀
+        // 掐头去尾
         String acl = act.substring( 1 );
         int pos  = acl.lastIndexOf('.');
         if (pos != -1) {
@@ -206,11 +207,11 @@ public class ApisAction
         }
 
         // 是否动作
-        Map acx = ActionRunner.getActions();
+        Map acx = ActionRunner.getActions( );
         if (acx.containsKey(acl)) {
-            act =  "/" + acl + ".act";
+            act = /*url*/ "/" + acl + ".act";
             if (sid != null) {
-                act += ";jsessionid=" + sid;
+                act += ";jsessionid=" + sid ;
             }
             return act;
         }
@@ -262,15 +263,14 @@ public class ApisAction
             }
         }
 
-        acl = "/"+n+"/"+m+".act";
+        act = "/" + n + "/" + m + ".act";
         if (sid !=  null  ) {
-            acl += ";jsessionid=" + sid;
+            act += ";jsessionid=" + sid ;
         }
         if (p.length() > 0) {
-            acl += p.replace(0, 1, "?");
+            act += p.replace( 0, 1, "?");
         }
-
-        return "/"+ n +"/"+ m + ".act" + p.toString();
+        return act;
     }
 
     private static final Set _API_RSP = new HashSet();

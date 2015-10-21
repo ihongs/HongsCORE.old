@@ -1,7 +1,14 @@
+<%@page import="app.hongs.Cnst"%>
 <%@page import="app.hongs.Core"%>
 <%@page import="java.io.PrintStream"%>
 <%@page import="java.io.ByteArrayOutputStream"%>
-<%@page contentType="text/html" pageEncoding="UTF-8" isErrorPage="true"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" isErrorPage="true" trimDirectiveWhitespaces="true"%>
+<%
+    // 如果有内部返回, 则不要显示此页
+    if (request.getAttribute(Cnst.RESP_ATTR) != null) {
+        return;
+    }
+%>
 <!doctype html>
 <html>
     <head>
