@@ -567,9 +567,9 @@ public class ActionHelper implements Cloneable
         this.cookiesData.put(Cnst.UPDATE_ATTR, Long.toString(System.currentTimeMillis()));
     } else {
       if (value == null) {
-        setCookibute( name, value, Core.BASE_HREF + "/", null, /* DEL */ 0, false, false );
+        setCookibute(name, value, /* Del */ 0, Core.BASE_HREF + "/", null, false, false );
       } else {
-        setCookibute( name, value, Core.BASE_HREF + "/", null, Cnst.CL_DEF, false, false );
+        setCookibute(name, value, Cnst.CL_DEF, Core.BASE_HREF + "/", null, false, false );
       }
     }
   }
@@ -586,7 +586,7 @@ public class ActionHelper implements Cloneable
    * @param httpDeny 使用安全连接
    */
   public void setCookibute(String name, String value,
-    String path, String host, int life, boolean httpOnly, boolean httpDeny) {
+    int life, String path, String host, boolean httpOnly, boolean httpDeny) {
       Cookie cookie = new Cookie(name, value);
       if (path != null) {
           cookie.setPath  (path);
@@ -594,7 +594,7 @@ public class ActionHelper implements Cloneable
       if (host != null) {
           cookie.setDomain(host);
       }
-      if (life !=  0  ) {
+      if (life >=  0  ) {
           cookie.setMaxAge(life);
       }
       if (httpDeny) {
