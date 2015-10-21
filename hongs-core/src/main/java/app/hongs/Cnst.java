@@ -6,11 +6,13 @@ package app.hongs;
  */
 public class Cnst {
 
-    //** 分页默认 **/
+    //** 默认数值 **/
 
-    public static final int    GN_DEF =   5  ; // 分页默认数量
+    public static final int    GN_DEF =    5 ; // 分页默认数量
 
     public static final int    RN_DEF =   20 ; // 每页默认行数
+
+    public static final int    CL_DEF =   -1 ; // Cookie默认生命周期(秒)
 
     //** 查询参数 **/
 
