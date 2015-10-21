@@ -212,7 +212,7 @@ HsForm.prototype = {
         var data = this.formBox;
         var that = this;
 
-        this.formBox.attr("action", hsFixUri(url));
+        data.attr("action", hsFixUri( url ));
 
         if ( enc === "multipart/form-data" ) {
             if (data.attr("target") == null) {
@@ -740,7 +740,7 @@ jQuery.fn.hsForm = function(opts) {
 
 (function($) {
     $(document)
-    .on("save", "form",
+    .on("submit", "form",
     function(evt) {
         if (evt.isDefaultPrevented()) {
             return;
