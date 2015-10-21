@@ -1,7 +1,6 @@
 package app.hongs.action.serv;
 
 import app.hongs.Cnst;
-import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionDriver;
@@ -94,6 +93,7 @@ public class ApisAction
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
 
         // 提取 API 特有的参数
+//      String   aid = req.getParameter("!appid");
         String   sid = req.getParameter("!token");
         String  _dat = req.getParameter("!data");
         String  _cnv = req.getParameter("!conv");
