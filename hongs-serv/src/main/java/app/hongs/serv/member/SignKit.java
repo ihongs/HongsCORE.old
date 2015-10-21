@@ -26,7 +26,7 @@ public class SignKit {
      * 获取特征加密字符串
      * @param pswd
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     public static String getCrypt(String pswd) throws HongsException {
         try {
@@ -49,7 +49,7 @@ public class SignKit {
      * 获取 menu 配置里的 role 集合
      * @param name
      * @return
-     * @throws HongsException 
+     * @throws HongsException
      */
     public static List getRoles(String name) throws HongsException {
         List units = new ArrayList();
@@ -124,17 +124,17 @@ public class SignKit {
         long        stime = System.currentTimeMillis()/1000 ;
 
         // 设置会话
-        ss.setAttribute("stime", stime);
-        ss.setAttribute("appid", appid);
-        ss.setAttribute("usrid", usrid);
+        ss.setAttribute(  "aid", appid);
+        ss.setAttribute(  "uid", usrid);
         ss.setAttribute("uname", uname);
+        ss.setAttribute("stime", stime);
 
         // 返回数据
         Map sd = new HashMap();
-        sd.put("stime", stime);
-        sd.put("token", sesid);
+        sd.put(  "uid", usrid);
         sd.put("appid", appid);
-        sd.put("usrid", usrid);
+        sd.put("token", sesid);
+        sd.put("stime", stime);
         sd.put("uname", uname);
 
         // 记录登录

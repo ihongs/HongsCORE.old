@@ -152,7 +152,7 @@ public class RoleSet extends CoreSerial implements Set<String> {
     public static RoleSet getInstance()
     throws HongsException {
         ActionHelper ah = Core.getInstance (ActionHelper.class);
-        String id = (String)ah.getSessibute("usrid");
+        String id = (String)ah.getSessibute("uid");
         if  (  id == null  ) {
             return   null; // 未登录
         }
