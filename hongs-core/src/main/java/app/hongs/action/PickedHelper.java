@@ -140,7 +140,7 @@ public class PickedHelper {
 
             // 查询结构
             Map rd = new HashMap( );
-            rd.put( ".pick" , "1" );
+            rd.put(   "!pick", "1");
             rd.put(Cnst.RN_KEY, 0 );
             rd.put(Cnst.RB_KEY, rb);
             rd.put(Cnst.ID_KEY, ms.keySet());

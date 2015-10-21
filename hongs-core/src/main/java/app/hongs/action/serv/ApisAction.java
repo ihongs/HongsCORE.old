@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -93,39 +95,26 @@ public class ApisAction
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
 
         // 提取 API 特有的参数
-//      String   apd = req.getParameter(".appid");
-        String   sid = req.getParameter(".token");
-        String  json = req.getParameter(".data" );
-        String  ccnv = req.getParameter(".conv" );
-        boolean scok ;
-        try {
-            scok = Synt.declare(req.getParameter(".scok"), false);
-        } catch (HongsError er) {
-            hlpr.error400("Value for '.scok' can not be case to boolean");
-            return;
-        }
-        boolean wrap ;
-        try {
-            wrap = Synt.declare(req.getParameter(".wrap"), false);
-        } catch (HongsError er) {
-            hlpr.error400("Value for '.wrap' can not be case to boolean");
-            return;
-        }
+        String   sid = req.getParameter("!token");
+        String  _dat = req.getParameter("!data");
+        String  _cnv = req.getParameter("!conv");
+        String  _wap = req.getParameter("!wrap");
+        String  _sok = req.getParameter("!scok");
 
         // 将请求数据处理之后传递
-        if (json != null) {
+        if (_dat != null && _dat.length( ) != 0) {
+            Map data;
             try {
-                Map send = Synt.declare(Data.toObject(json), Map.class);
-                Map data = hlpr.getRequestData();
-                data.putAll( send );
-            } catch (HongsError er) {
-                if (er.getCode() == 0x40 || er.getCode() == 0x46) {
-                    hlpr.error400 ( "Can not parse value for '.data'" );
-                    return;
-                }
-                throw new ServletException(er);
-            } catch (HongsException ex) {
-                throw new ServletException(ex);
+                data = Synt.declare(Data.toObject(_dat), Map.class);
+            } catch (HongsError e) {
+                hlpr.error400 ( "Can not parse value for '!data'" );
+                return;
+            }
+            try {
+                hlpr.getRequestData( )
+                    .putAll (  data  );
+            } catch (HongsException e) {
+                throw new ServletException(e);
             }
         }
 
@@ -135,53 +124,78 @@ public class ApisAction
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
-        if (resp != null) {
-            // 状态总是 200
-            if (scok) {
-                rsp.setStatus(javax.servlet.http.HttpServletResponse.SC_OK);
-            }
+        if (resp == null) {
+            return;
+        }
 
-            // 返回节点
-            if (wrap) {
-                Map    data;
-                Object xxxx;
-                xxxx = resp.get("data" );
-                if (xxxx == null) {
-                    data = new HashMap();
-                    resp.put("data", data);
-                } else
-                if (!(xxxx instanceof Map)) {
-                    data = new HashMap();
-                    data.put("data", xxxx);
-                    resp.put("data", data);
-                } else {
-                    data = (Map) xxxx;
-                }
-                Iterator it = resp.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry et = (Map.Entry) it.next();
-                    Object k = et.getKey();
-                    if ( ! _API_RSP.contains( k )) {
-                        data.put(k, et.getValue());
-                        it.remove();
-                    }
-                }
+        Set conv  = null;
+        if (_cnv != null && _cnv.length( ) != 0) {
+            try {
+                conv = Synt.declare( _cnv.split("[\\s\\+]+"), Set.class );
+            } catch (HongsError e) {
+                hlpr.error400 ( "Can not parse value for '!conv'" );
+                return;
             }
+        }
 
-            // 转换策略
-            Set conv  = Synt.declare(ccnv==null ? null : ccnv.split("[\\s\\+]+"), Set.class);
-            if (conv != null) {
-                Conv cnvr = new Conv();
-                boolean     all =  conv.contains( "all2str");
-                cnvr.all  = all ?  new  Conv2Str( ) : new Conv2Obj( ) ;
-                cnvr.num  = all || conv.contains( "num2str") ? new Conv2Str(/**/) : cnvr.all;
-                cnvr.nul  = all || conv.contains("null2str") ? new ConvNull2Str() : cnvr.all;
-                cnvr.bool = conv.contains("bool2str") ? new ConvBool2Str()
-                          :(conv.contains("bool2num") ? new ConvBool2Num() : new Conv2Obj());
-                cnvr.date = conv.contains("date2mic") ? new ConvDate2Mic()
-                          :(conv.contains("date2sec") ? new ConvDate2Sec() : new Conv2Obj());
-                hlpr.reply (Synt.foreach(resp, cnvr));
+        boolean wrap;
+        try {
+            wrap = Synt.declare(_wap, false);
+        } catch (HongsError e) {
+            hlpr.error400("Value for '!wrap' can not be case to boolean");
+            return;
+        }
+
+        boolean scok;
+        try {
+            scok = Synt.declare(_sok, false);
+        } catch (HongsError e) {
+            hlpr.error400("Value for '!scok' can not be case to boolean");
+            return;
+        }
+
+        // 状态总是 200
+        if (scok) {
+            rsp.setStatus( javax.servlet.http.HttpServletResponse.SC_OK );
+        }
+
+        // 返回节点
+        if (wrap) {
+            Map    data;
+            Object doto = resp.get("data");
+            if (doto == null) {
+                data =  new HashMap( );
+                resp.put("data", data);
+            }  else {
+                try {
+                    data = (Map) doto ;
+                }   catch  (ClassCastException e) {
+                    throw new ServletException(e);
+                }
             }
+            Iterator it = resp.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry et = (Map.Entry) it.next();
+                Object k = et.getKey();
+                if ( ! _API_RSP.contains( k )) {
+                    data.put(k, et.getValue());
+                    it.remove();
+                }
+            }
+        }
+
+        // 转换策略
+        if (conv != null) {
+            Conv cnvr = new Conv();
+            boolean     all =  conv.contains( "all2str");
+            cnvr.all  = all ?  new  Conv2Str( ) : new Conv2Obj( ) ;
+            cnvr.num  = all || conv.contains( "num2str") ? new Conv2Str(/**/) : cnvr.all;
+            cnvr.nul  = all || conv.contains("null2str") ? new ConvNull2Str() : cnvr.all;
+            cnvr.bool = conv.contains("bool2str") ? new ConvBool2Str()
+                      :(conv.contains("bool2num") ? new ConvBool2Num() : new Conv2Obj());
+            cnvr.date = conv.contains("date2mic") ? new ConvDate2Mic()
+                      :(conv.contains("date2sec") ? new ConvDate2Sec() : new Conv2Obj());
+            hlpr.reply (Synt.foreach(resp, cnvr));
         }
     }
 
