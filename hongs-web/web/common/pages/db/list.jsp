@@ -41,7 +41,7 @@
             <%} // End If %>
             <button type="button" class="create btn btn-default"><%=lang.translate("fore.create", title)%></button>
             <%if (!"select".equals(_action)) {%>
-            <button type="button" class="update for-select btn btn-default"><%=lang.translate("fore.update", title)%></button>
+            <button type="button" class="update for-choose btn btn-default"><%=lang.translate("fore.update", title)%></button>
             <button type="button" class="delete for-checks btn btn-warning"><%=lang.translate("fore.delete", title)%></button>
             <%} // End If %>
         </div>

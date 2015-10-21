@@ -72,7 +72,7 @@
         <div>
             <div class="toolbox col-md-9 btn-group">
                 <button type="button" class="create btn btn-default">创建用户</button>
-                <button type="button" class="modify for-select btn btn-default">修改</button>
+                <button type="button" class="modify for-choose btn btn-default">修改</button>
                 <button type="button" class="delete for-checks btn btn-danger" >删除</button>
             </div>
             <form class="findbox col-md-3 input-group" action="" method="POST">

@@ -589,7 +589,7 @@ jQuery.fn.hsList = function(opts) {
         var siz = box.find(".checkone").length;
         var len = box.find(".checkone:checked").length;
         var ckd = siz && siz === len ? true : (len && len !== siz ? null : false);
-        box.find(".for-select").prop("disabled", len !== 1);
+        box.find(".for-choose").prop("disabled", len !== 1);
         box.find(".for-checks").prop("disabled", len === 0);
         box.find(".checkall").prop("choosed", ckd);
     })
@@ -603,7 +603,7 @@ jQuery.fn.hsList = function(opts) {
     .on("loadBack", ".HsList .listbox",
     function() {
         var box = $(this ).closest(".HsList" );
-        box.find(".for-select,.for-checks").prop("disabled" , true );
+        box.find(".for-choose,.for-checks").prop("disabled" , true );
         box.find(".checkall").prop("choosed", false);
         box.find(".checkone").change();
     });

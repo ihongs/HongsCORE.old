@@ -8,8 +8,8 @@
  * 在表单配置区域添加:
  * <param name="_fill__pick" value="(hsFormFillPick)"/>
  * 在表单选项区域添加:
- * <ul data-ft="_pick" data-fn="x" required="required"></ul>
- * <button type="button" data-toggle="hsPick" data-target="@" data-href="x/pick.html">Pick It!</button>
+ * <ul data-ft="_pick" data-fn="my_example" required="required"></ul>
+ * <button type="button" data-toggle="hsPick" data-target="@" data-href="my_example/list4select.html">Pick It!</button>
  */
 
 /**
