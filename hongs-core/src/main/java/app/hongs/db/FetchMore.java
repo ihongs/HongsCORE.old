@@ -768,10 +768,10 @@ public class FetchMore
       List  idx = null;
       if (tbl.primaryKey != null)
       {
-        List <Map> lst = tbl.fetchMore
+        List<Map> lst  =  tbl.fetchMore
         (
           new FetchCase()
-            .select ("`"+tbl.primaryKey + "`")
+            .select ("`"+ tbl.primaryKey +"`")
             .where  ("`"+foreignKey+"`=?",ids)
         );
         idx = new ArrayList();
