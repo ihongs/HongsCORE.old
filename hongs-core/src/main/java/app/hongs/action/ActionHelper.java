@@ -579,31 +579,31 @@ public class ActionHelper implements Cloneable
    * 注意: 此方法总是操作真实 Cookie
    * @param name
    * @param value
+   * @param life 生命周期(秒)
    * @param path 路径
    * @param host 域名
-   * @param life 生命周期(秒)
    * @param httpOnly 文档内禁读取
    * @param httpDeny 使用安全连接
    */
   public void setCookibute(String name, String value,
     int life, String path, String host, boolean httpOnly, boolean httpDeny) {
-      Cookie cookie = new Cookie(name, value);
+      Cookie ce = new Cookie(name, value);
       if (path != null) {
-          cookie.setPath  (path);
+          ce.setPath  (path);
       }
       if (host != null) {
-          cookie.setDomain(host);
+          ce.setDomain(host);
       }
       if (life >=  0  ) {
-          cookie.setMaxAge(life);
+          ce.setMaxAge(life);
       }
       if (httpDeny) {
-          cookie.setSecure(true);
+          ce.setSecure(true);
       }
       if (httpOnly) {
-          cookie.setHttpOnly(true);
+          ce.setHttpOnly(true);
       }
-      getResponse().addCookie(cookie);
+      getResponse().addCookie(ce);
   }
 
   public void setRequestData(Map<String, Object> data) {
