@@ -719,8 +719,9 @@ public class FetchMore
           subValues3.put(foreignKey, id);
 
           // 如果存在主键而没给定主键值,则帮其添加上唯一ID
-          if (tb.primaryKey != null && tb.primaryKey.length() != 0
-          &&  ! subValues3.containsKey(tb.primaryKey)) {
+          if (tb.primaryKey != null
+          &&  tb.primaryKey.length() != 0
+          && !subValues3.containsKey(tb.primaryKey)) {
             subValues3.put(tb.primaryKey, Core.getUniqueId());
           }
 
@@ -766,8 +767,8 @@ public class FetchMore
       // 获取下级的下级的ID
       Table tbl = table.db.getTable(tableName);
       List  idx = null;
-      if (tbl.primaryKey  !=  null
-      && !tbl.primaryKey.equals(""))
+      if (tbl.primaryKey != null
+      &&  tbl.primaryKey.length() != 0)
       {
         List<Map> lst  =  tbl.fetchMore
         (
