@@ -38,29 +38,29 @@ public class Cnst {
 
     //** 关系符号 **/
 
-    public static final String EQ_REL = "~eq"; // 等于
+    public static final String EQ_REL = "!eq"; // 等于
 
-    public static final String NE_REL = "~ne"; // 不等于
+    public static final String NE_REL = "!ne"; // 不等于
 
-    public static final String LT_REL = "~lt"; // 小于
+    public static final String LT_REL = "!lt"; // 小于
 
-    public static final String LE_REL = "~le"; // 小于或等于
+    public static final String LE_REL = "!le"; // 小于或等于
 
-    public static final String GT_REL = "~gt"; // 大于
+    public static final String GT_REL = "!gt"; // 大于
 
-    public static final String GE_REL = "~ge"; // 大于或等于
+    public static final String GE_REL = "!ge"; // 大于或等于
 
-    public static final String IN_REL = "~in"; // 包含
+    public static final String IN_REL = "!in"; // 包含
 
-    public static final String NI_REL = "~ni"; // 不包含    (Not in)
+    public static final String NI_REL = "!ni"; // 不包含    (Not in)
 
-    public static final String AI_REL = "~ai"; // 全包含    (All in, Lucene 特有)
+    public static final String AI_REL = "!ai"; // 全包含    (All in, Lucene 特有)
 
-    public static final String OI_REL = "~oi"; // 或包含    (Or  in, Lucene 特有)
+    public static final String OI_REL = "!oi"; // 或包含    (Or  in, Lucene 特有)
 
-    public static final String OR_REL = "~or"; // 或等于    (Or    , Lucene 特有)
+    public static final String OR_REL = "!or"; // 或等于    (Or    , Lucene 特有)
 
-    public static final String WT_REL = "~wt"; // 权重      (        Lucene 特有)
+    public static final String WT_REL = "!wt"; // 权重      (        Lucene 特有)
 
     //** 请求属性 **/
 
