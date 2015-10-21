@@ -12,7 +12,7 @@ public class Cnst {
 
     public static final int    RN_DEF =   20 ; // 每页默认行数
 
-    public static final int    CL_DEF =   -1 ; // Cookie Life 默认值(秒)
+    public static final int    CL_DEF =   -1 ; // 默认生命周期(秒, Cookie)
 
     //** 查询参数 **/
 
