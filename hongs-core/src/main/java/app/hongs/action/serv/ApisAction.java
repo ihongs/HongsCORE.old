@@ -93,8 +93,6 @@ public class ApisAction
         ActionHelper hlpr = ActionDriver.getWorkCore(req).get(ActionHelper.class);
 
         // 提取 API 特有的参数
-//      String   aid = req.getParameter("!appid");
-        String   sid = req.getParameter("!token");
         String  _dat = req.getParameter("!data");
         String  _cnv = req.getParameter("!conv");
         String  _wap = req.getParameter("!wrap");
@@ -118,8 +116,9 @@ public class ApisAction
         }
 
         // 将请求转发到动作处理器
-        act = parseAct(act, sid, mts );
-        req.getRequestDispatcher(act ).include(req, rsp);
+        act =       parseAct(act, mts);
+        req.getRequestDispatcher( act)
+                    .include(req, rsp);
 
         // 将应答数据格式化后传递
         Map resp  = hlpr.getResponseData();
@@ -198,7 +197,7 @@ public class ApisAction
         }
     }
 
-    private String parseAct(String act, String sid, String... mts) {
+    private String parseAct(String act, String... mts) {
         // 掐头去尾
         String acl = act.substring( 1 );
         int pos  = acl.lastIndexOf('.');
@@ -210,10 +209,7 @@ public class ApisAction
         Map acx = ActionRunner.getActions( );
         if (acx.containsKey(acl)) {
             act = /*url*/ "/" + acl + ".act";
-            if (sid != null) {
-                act += ";jsessionid=" + sid ;
-            }
-            return act;
+            return  act;
         }
 
         String[] ats = acl.split("/");
@@ -264,13 +260,10 @@ public class ApisAction
         }
 
         act = "/" + n + "/" + m + ".act";
-        if (sid !=  null  ) {
-            act += ";jsessionid=" + sid ;
-        }
         if (p.length() > 0) {
             act += p.replace( 0, 1, "?");
         }
-        return act;
+        return  act;
     }
 
     private static final Set _API_RSP = new HashSet();

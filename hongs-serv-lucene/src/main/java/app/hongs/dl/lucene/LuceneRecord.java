@@ -182,6 +182,9 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         // 指定单个 id 则走 getOne
         Object id = rd.get (Cnst.ID_KEY);
         if (id != null && !(id instanceof Collection) && !(id instanceof Map)) {
+            if ("".equals(id)) {
+                return  new HashMap(); // id 为空则不获取
+            }
             Map  data = new HashMap();
             Map  info = getOne(rd);
             data.put("info", info);

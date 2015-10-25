@@ -16,8 +16,38 @@ import java.util.Map;
 @Action("common/menu")
 public class MenuAction {
 
-    @Action("list")
+    @Action("__main__")
     public void menu(ActionHelper helper)
+    throws HongsException {
+        String m = helper.getParameter("m");
+        String n = helper.getParameter("n");
+        if (null == m || "".equals(m)) {
+            m = "default";
+        }
+        if (null == n || "".equals(n)) {
+            n = "common/menu.act?m=" + m;
+        } else {
+            n = "common/menu.act?m=" + m + "&n=" + n;
+        }
+
+        MenuSet site  =  MenuSet.getInstance(m);
+        Map<String, Map> menu = site.getMenu(n);
+        if (menu != null &&  menu.containsKey("menus")) {
+            Map<String, Map> menus = (Map) menu.get("menus");
+            for (Map.Entry et : menus.entrySet()) {
+                String k = (String ) et.getKey();
+                if (site.chkAuth(k)) {
+                    helper.redirect(Core.BASE_HREF +"/"+ k );
+                    return;
+                }
+            }
+        }
+
+        helper.redirect(Core.BASE_HREF + "/");
+    }
+
+    @Action("list")
+    public void list(ActionHelper helper)
     throws HongsException {
         String name  = helper.getParameter("m");
         String level = helper.getParameter("l");
@@ -42,36 +72,6 @@ public class MenuAction {
         Map data = new HashMap();
         data.put( "list", list );
         helper.reply(data);
-    }
-
-    @Action("cell")
-    public void jump(ActionHelper helper)
-    throws HongsException {
-        String m = helper.getParameter("m");
-        String n = helper.getParameter("n");
-        if (null == m || "".equals(m)) {
-            m = "default";
-        }
-        if (null == n || "".equals(n)) {
-            n = "common/menu/cell.act?m=" + m;
-        } else {
-            n = "common/menu/cell.act?m=" + m + "&n=" + n;
-        }
-
-        MenuSet site  =  MenuSet.getInstance(m);
-        Map<String, Map> menu = site.getMenu(n);
-        if (menu != null &&  menu.containsKey("menus")) {
-            Map<String, Map> menus = (Map) menu.get("menus");
-            for (Map.Entry et : menus.entrySet()) {
-                String k = (String ) et.getKey();
-                if (site.chkAuth(k)) {
-                    helper.redirect(Core.BASE_HREF +"/"+ k );
-                    return;
-                }
-            }
-        }
-
-        helper.redirect(Core.BASE_HREF + "/");
     }
 
 }

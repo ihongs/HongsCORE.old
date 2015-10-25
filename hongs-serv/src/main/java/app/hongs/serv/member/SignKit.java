@@ -119,23 +119,23 @@ public class SignKit {
      */
     public static Map  userSign(ActionHelper ah, String appid, String usrid, String uname)
     throws HongsException {
-        HttpSession ss    = ah.getRequest().getSession(true);
-        String      sesid = ss.getId();
+        HttpSession sd    = ah.getRequest().getSession(true);
+        String      sesid = sd.getId();
         long        stime = System.currentTimeMillis()/1000 ;
 
         // 设置会话
-        ss.setAttribute(  "aid", appid);
-        ss.setAttribute(  "uid", usrid);
-        ss.setAttribute("uname", uname);
-        ss.setAttribute("stime", stime);
+        sd.setAttribute(  "uid", usrid);
+        sd.setAttribute("appid", appid);
+        sd.setAttribute("stime", stime);
+        sd.setAttribute("uname", uname);
 
         // 返回数据
-        Map sd = new HashMap();
-        sd.put(  "uid", usrid);
-        sd.put("appid", appid);
-        sd.put("token", sesid);
-        sd.put("stime", stime);
-        sd.put("uname", uname);
+        Map rd = new HashMap();
+        rd.put(  "uid", usrid);
+        rd.put("appid", appid);
+        rd.put("ssnid", sesid);
+        rd.put("stime", stime);
+        rd.put("uname", uname);
 
         // 记录登录
         DB    db = DB.getInstance("member");
@@ -148,7 +148,7 @@ public class SignKit {
         ud.put("ctime", stime);
         tb.insert(ud);
 
-        return sd;
+        return rd;
     }
 
     /**

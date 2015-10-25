@@ -6,8 +6,11 @@ import app.hongs.HongsException;
 import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Synt;
 import java.io.File;
+import java.io.IOException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
 
 /**
  * 服务启动命令
@@ -30,6 +33,23 @@ public class ServerCmdlet {
         webapp.setContextPath (Core.BASE_HREF);
         webapp.setResourceBase(Core.BASE_PATH);
         webapp.setParentLoaderPriority( true );
+
+        // 设置会话
+        try {
+            File sd = new File( Core.DATA_PATH + "/sesion" );
+            if (!sd.exists()) {
+                 sd.mkdirs();
+            }
+            HashSessionManager sm = new HashSessionManager();
+            sm.setStoreDirectory(sd);
+//          sm.setSessionCookie("SID");
+//          sm.setSessionIdPathParameterName("sid");
+            SessionHandler     sh = new SessionHandler( sm );
+            webapp.setSessionHandler(sh);
+        }
+        catch (IOException ex) {
+            throw new HongsException.Common(ex);
+        }
 
         Server server = new Server(port);
         server.setHandler(webapp);

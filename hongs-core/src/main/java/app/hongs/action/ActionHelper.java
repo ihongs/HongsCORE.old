@@ -558,7 +558,7 @@ public class ActionHelper implements Cloneable
    * @param value
    */
   public void setCookibute(String name, String value) {
-    if (this.sessionData != null) {
+    if (this.cookiesData != null) {
       if (value == null) {
         this.cookiesData.remove(name);
       } else {

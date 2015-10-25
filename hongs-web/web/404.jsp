@@ -26,9 +26,8 @@
     <body>
         <div class="jumbotron" style="margin-top: 2em; background-color: #0071AD; color: #fff;">
             <div class="container">
-                <h1>:(</h1>
-                <p>&nbsp;</p>
-                <p>Error 404, page not found! <a href="<%=request.getContextPath()%>/" style="color: #ace;">You can click here to go home</a>.</p>
+                <h1 style="font-weight: bold;">:(</h1>
+                <p  style="font-weight: bold;">Error 404, page not found! <a href="<%=request.getContextPath()%>/" style="color: #ace;">You can click here to go home</a>.</p>
             </div>
         </div>
         <nav id="footbox" class="navbar">

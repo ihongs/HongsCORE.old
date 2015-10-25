@@ -121,8 +121,10 @@ implements IRecord
     Object id = rd.get(this.table.primaryKey);
     if (id == null || id instanceof Map || id instanceof Collection) {
       return  this.getList(rd, caze);
-    } else {
+    } else if (!"".equals (id)) {
       return  this.getInfo(rd, caze);
+    } else {
+      return  new HashMap (  );
     }
   }
 

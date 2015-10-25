@@ -2,48 +2,50 @@ package app.hongs.serv;
 
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.ActionRunner;
 import app.hongs.action.anno.Action;
 import app.hongs.util.Data;
 import app.hongs.util.Synt;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 通用打包动作
  * 可一次调用多个动作
  * 批量执行后返回数据
  * 请求格式举例:
- * pack.ACTION/NAME=PARAMS&pack.ACTION/NAME2#0=PARAMS&pack.ACTION/NAME2#1=PARAMS&quit=1
+ * /ACTION/NAME=PARAMS&/ACTION/NAME2#0=PARAMS&ACTION/NAME2#1=PARAMS&quit=1
  * PARAMS 需要 urlencode 编码
  * @author Hongs
  */
 @Action("common/pack")
 public class PackAction {
 
-    @Action("exec")
+    @Action("__main__")
     public void pack(ActionHelper helper)
     throws HongsException {
-        Map<String, Object> acts = Synt.declare(helper.getRequestData().get("pack"), Map.class);
-        if (acts == null) {
-            helper.fault("Param 'pack' is not exists!");
-            return;
-        }
-        boolean quit = Synt.declare(helper.getRequestData().get("quit"), false);
+        Map<String , Object> rets = new HashMap();
+        Map<String , Object> acts = helper.getRequestData(  );
+        boolean quit = Synt.declare(acts.get("!quit"), false);
 
-        Map<String, Object> data = new HashMap();
-        Map<String, Object> rets = new HashMap();
-        data.put ( "pack" , rets );
+        HttpServletRequest  req = helper.getRequest( );
+        HttpServletResponse rsp = helper.getResponse();
 
-        for (Map.Entry<String, Object> et : acts.entrySet()) {
-            String key = et.getKey(  );
+        for (Map.Entry<String, Object> et : acts.entrySet( )) {
             Object pms = et.getValue();
-            String act = key.replaceFirst("(\\.act|\\.api)?#.*$", key);
+            String key = et.getKey(  );
+
+            if ( ! key.startsWith("/")) {
+                continue;
+            }
 
             // 解析请求参数
             Map dat;
             if (pms instanceof Map) {
-                dat = (Map)  pms;
+                dat = ( Map )  pms;
             } else {
                 String str = pms.toString();
                 if (str.startsWith("{") && str.endsWith("}")) {
@@ -54,24 +56,32 @@ public class PackAction {
             }
 
             // 代理执行动作
-            ActionHelper hlp = helper.clone(   );
-                         hlp.setRequestData(dat);
-            ActionRunner run = new ActionRunner(act, hlp);
+            String act = key.substring(1).replace("#.*$", "");
+            helper.setRequestData ( dat );
+            helper.reply( new HashMap() );
             try {
-                run.doAction();
-            } catch (HongsException ex) {
+                req.getRequestDispatcher(act).include(req, rsp);
+            } catch (ServletException ex) {
                 if (quit) {
                     String msg = ex.getLocalizedMessage();
-                    String err ="Ex"+Integer.toHexString(ex.getCode());
-                    hlp.fault(msg, err);
+                    String err = "Er500";
+                    helper.fault(msg, err);
                 } else {
-                    throw ex;
+                    throw new HongsException.Common( ex );
+                }
+            } catch (IOException ex) {
+                if (quit) {
+                    String msg = ex.getLocalizedMessage();
+                    String err = "Er500";
+                    helper.fault(msg, err);
+                } else {
+                    throw new HongsException.Common( ex );
                 }
             }
-            rets.put(key, hlp.getResponseData());
+            rets.put(key, helper.getResponseData());
         }
 
-        helper.reply(data);
+        helper.reply(rets);
     }
 
 }

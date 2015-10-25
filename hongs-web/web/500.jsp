@@ -26,13 +26,12 @@
     <body>
         <div class="jumbotron" style="margin-top: 2em; background-color: #0071AD; color: #fff;">
             <div class="container">
-                <h1>:(</h1>
-                <p>&nbsp;</p>
-                <pre style="border: 0; color: #fff; background-color: transparent;">
+                <h1 style="font-weight: bold;">:(</h1>
+                <pre style="border: 0; color: #fff; background-color: transparent; font-weight: bold;">
 <%=exception.getLocalizedMessage().replace("<", "&lt;").replace(">", "&gt;")%>
                 </pre>
                 <% if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) { %>
-                <pre style="border: 0; color: #ddd; background-color: transparent;">
+                <pre style="border: 0; color: #ddd; background-color: transparent; font-weight: bold;">
 <%
     ByteArrayOutputStream o = new ByteArrayOutputStream();
     exception.printStackTrace(new PrintStream( o ));
