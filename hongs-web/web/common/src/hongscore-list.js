@@ -476,6 +476,12 @@ HsList.prototype = {
             .appendTo(td);
         return false;
     },
+    _fill__alink : function(td, v, n) {
+        jQuery('<a href="javascript:;"></a>')
+            .addClass("a-"+n).text(v)
+            .appendTo(td);
+        return false;
+    },
     _fill__htime : function(td, v, n) {
         var d1  =  new Date ();
         var d2  =  hsPrsDate(v, hsGetLang("datetime.format"));

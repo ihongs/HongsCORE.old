@@ -101,21 +101,21 @@ HsForm.prototype = {
         this.formBox.trigger("loadBack", [rst, this]);
     },
     fillEnum : function(enam) {
-        var nodes, datas, i, n, t, v, inp;
-        nodes = this.formBox.find("select[name],[data-fn]");
-        datas = {};
+        var nodes, enams, i, n, t, v, inp;
+        nodes = this.formBox.find("[data-fn],select[name]");
+        enams = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr("name");
-            if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
+            if (! n) n = jQuery(nodes[i]).attr("data-fn");
             v = enam [n];
             if (! n) continue;
             if (! v) v = hsGetValue(enam , n);
-            datas[n] = v;
+            enams[n] = v;
         }
 
         this._enum = enam;
-        for(n in datas) {
-            v =  datas[n];
+        for(n in enams) {
+            v =  enams[n];
             i = 1;
             inp = this.formBox.find('[name="'+n+'"]');
             if (inp.length == 0) {
@@ -145,11 +145,11 @@ HsForm.prototype = {
     },
     fillInfo : function(info) {
         var nodes, infos, i, n, t, v, inp;
-        nodes = this.formBox.find("select[name],[data-fn],input[name],textarea[name]");
+        nodes = this.formBox.find("[data-fn],input[name],select[name],textarea[name]");
         infos = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr("name");
-            if (! n) n = jQuery(nodes[i]).attr( "data-fn" );
+            if (! n) n = jQuery(nodes[i]).attr("data-fn");
             if (! n) continue;
             v = info [n];
             if (! v) v = hsGetValue(info , n);

@@ -5,7 +5,9 @@ import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Model;
 import app.hongs.db.Table;
+import app.hongs.util.Synt;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,9 +40,6 @@ extends Model {
       throws HongsException
     {
       String id = (String) rd.get(this.table.primaryKey);
-      if (rd.containsKey("roles")) {
-          rd.put("rtime", System.currentTimeMillis() / 1000);
-      }
       if (id == null || id.length() == 0) {
           id = this.add(rd);
       } else {
@@ -56,6 +55,21 @@ extends Model {
             data.put("password", SignKit.getCrypt((String) data.get("password")));
         }
 
+        // 权限限制, 仅能赋予当前登录用户所有的权限
+        if (data.containsKey("roles") ) {
+            data.put("rtime", System.currentTimeMillis(  ) / 1000 );
+            Set<String> urs = RoleSet.getInstance(  );
+            List<Map<String, String>> rs = (List) data.get("roles");
+            Iterator it = rs.iterator();
+            while (it.hasNext()) {
+                Map<String, String> rm = (Map) it.next();
+                String rn = rm.get("role");
+                if (! urs.contains(rn)) {
+                    it.remove();
+                }
+            }
+        }
+
         return super.add(data);
     }
 
@@ -64,6 +78,25 @@ extends Model {
         // 加密密码
         if (data.containsKey("password")) {
             data.put("password", SignKit.getCrypt((String) data.get("password")));
+        }
+
+        // 权限限制, 仅能赋予当前登录用户所有的权限
+        if (data.containsKey("roles") ) {
+            data.put("rtime", System.currentTimeMillis(  ) / 1000 );
+            Set<String> urs = RoleSet.getInstance(  );
+            Set<String> crs = RoleSet.getInstance(id);
+            Set<String> xrs = new HashSet();
+            xrs.addAll( crs );
+            xrs.addAll( urs );
+            List<Map<String, String>> rs = (List) data.get("roles");
+            Iterator it = rs.iterator();
+            while (it.hasNext()) {
+                Map<String, String> rm = (Map) it.next();
+                String rn = rm.get("role");
+                if (! xrs.contains(rn)) {
+                    it.remove();
+                }
+            }
         }
 
         return super.put(data, id, caze);

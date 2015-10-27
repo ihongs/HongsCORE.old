@@ -206,64 +206,64 @@ public class ApisAction
         }
 
         // 是否动作
-        Map acx = ActionRunner.getActions( );
-        if (acx.containsKey(acl)) {
-            act = /*url*/ "/" + acl + ".act";
-            return  act;
-        }
+        Map acx = ActionRunner.getActions();
+        if (acx.containsKey(acl) == false ) {
+            String[] ats = acl.split( "/" );
+            String   m   = mts[0];
+            String   n   = ats[0];
+            StringBuilder u = new StringBuilder();
+            StringBuilder p = new StringBuilder();
 
-        String[] ats = acl.split("/");
-        String   m   = mts[0];
-        String   n   = ats[0];
-        StringBuilder u = new StringBuilder();
-        StringBuilder p = new StringBuilder();
+            // 分解路径
+            u.append(n);
+            for (int i = 1; i < ats.length; i ++) {
+                String v = ats[i];
+                if (v.startsWith("!")) {
+                    String[] a = v.substring(1).split("\\!");
 
-        u.append(n);
-        for(int i = 1; i < ats.length; i ++ ) {
-            String  v = ats[i];
-            if (v.startsWith(".")) {
-                String[] a = v.substring(1).split("\\.");
-                if (a.length == 0) {
-                    continue;
-                }
-
-                /**
-                 * 最后一个总是叫 id
-                 * 且如果只有一个 id
-                 * 则把 info 放到候选方法名列表里
-                 * 并比 list 优先匹配
-                 */
-                if (i == ats.length - 1) {
-                    if  (  a.length < 2 &&  "retrieve".equals(m )  )  {
-                        mts = new String[] {"retrieve", "info", "list"};
+                    /**
+                     * 最后一个总是叫 id
+                     * 且如果只有一个 id
+                     * 则把 info 加入候选
+                     * 并比 list 优先匹配
+                     * 其他外键总叫 x_id
+                     */
+                    if (i == ats.length - 1) {
+                        if  (  a.length < 2 && "retrieve".equals( m )  ) {
+                            mts = new String[]{"retrieve", "info", "list"};
+                        }
+                        n  = /**/Cnst.ID_KEY;
+                    } else {
+                        n += "_"+Cnst.ID_KEY;
                     }
-                    n = Cnst.ID_KEY;
-                }
 
-                if (a.length > 1) {
-                    n += ".";
+                    if (a.length > 1) {
+                        n += ".";
+                    }
+                    for(String x : a) {
+                        p.append('&').append(n).append('=').append(x);
+                    }
+                } else {
+                        n  =  v ;
+                        u.append('/').append(n);
                 }
-                for(String x : a) {
-                    p.append('&').append(n).append('=').append(x);
+            }
+
+            // 逐个对比
+            n = u.toString( );
+            for (String x : mts) {
+                x = n + "/" + x ;
+                if (acx.containsKey(x)) {
+                    x = "/" + x + ".act";
+                    if (0 < p.length()) {
+                        x = x + p.replace(0, 1, "?");
+                    }
+                    return  x;
                 }
-            } else {
-                n=v;u.append('/').append(n);
             }
         }
 
-        n = u.toString(/**/);
-        for (String x : mts) {
-            if (acx.containsKey(n+"/"+x)) {
-                m = x;
-                break;
-            }
-        }
-
-        act = "/" + n + "/" + m + ".act";
-        if (p.length() > 0) {
-            act += p.replace( 0, 1, "?");
-        }
-        return  act;
+        return "/"+acl+".act";
     }
 
     private static final Set _API_RSP = new HashSet();

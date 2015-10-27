@@ -11,10 +11,14 @@ import app.hongs.db.DB;
 import app.hongs.action.anno.CommitSuccess;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.Thumbnails.Builder;
 
 /**
  * 用户动作接口
@@ -77,7 +81,7 @@ public class UserAction {
         if("".equals(data.get("password"))) {
             data.remove("password");
         }
-        
+
         // 上传头像
         UploadHelper.upload(
             data,
@@ -85,14 +89,32 @@ public class UserAction {
                 .setUploadName("head")
                 .setUploadHref("upload/member/head")
                 .setUploadPath("upload/member/head")
+                .setAllowExtns("jpg", "png", "gif" )
+                .setAllowTypes("image/jpeg", "image/png", "image/gif")
         );
-        
+
+        // 缩略头像
+        try {
+            String fn = data.get( "head" ).toString( );
+            String fm = fn.replaceFirst("\\..*?$", "");
+            Builder<File> img = Thumbnails.of(fn).outputFormat("jpg");
+            if ( ! fn.endsWith(".jpg")) {
+                img.toFile(fm +".jpg");
+            }
+            img.size(16, 16).toFile(fm +"_xs.jpg");
+            img.size(32, 32).toFile(fm +"_sm.jpg");
+            img.size(64, 64).toFile(fm +"_md.jpg");
+            img.size(96, 96).toFile(fm +"_lg.jpg");
+        } catch (IOException  ex) {
+            throw new HongsException.Common(ex);
+        }
+
         CoreLocale lang = CoreLocale.getInstance().clone( );
         lang.load("member");
-        
+
         String  id  = model.save(data);
         String  msg = lang.translate("core.save.user.success");
-        
+
         Map info = new HashMap();
         info.put( "id" , id);
         info.put("name", data.get("name"));

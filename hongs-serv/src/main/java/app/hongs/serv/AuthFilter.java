@@ -200,6 +200,11 @@ public class AuthFilter
         throw new ServletException(e );
     }
 
+    // 权限动作无前导/
+    if (act.startsWith( "/" )) {
+        act = act.substring(1);
+    }
+
     if (null == authset) {
         if (null != loginPage) {
             doFailed(core, hlpr, (byte)1);
@@ -249,6 +254,9 @@ public class AuthFilter
             String src = null;
             String qry;
 
+            if (isApi (req)) {
+                // API 模式不需要给返回地址 
+            } else
             if (isAjax(req)) {
                 src =  req.getHeader("Referer");
             } else
@@ -275,7 +283,7 @@ public class AuthFilter
         }
     }
 
-    if (isAjax(req) || isJson(req)) {
+    if (isApi(req) || isAjax(req) || isJson(req)) {
         Map rsp = new HashMap();
             rsp.put("ok",false);
             rsp.put("msg", msg);
@@ -299,6 +307,10 @@ public class AuthFilter
             hlpr.error403(msg);
         }
     }
+  }
+
+  private boolean isApi (HttpServletRequest req) {
+      return ActionDriver.getRealPath(req).endsWith(".api" );
   }
 
   private boolean isAjax(HttpServletRequest req) {

@@ -476,9 +476,9 @@ extends HashMap<String, Object>
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);
     if (s3.length() > 4) s3 = s3.substring(s3.length() - 4);
 
-    return (  new StringBuilder( )  )
+    return new StringBuilder(  )
         .append(svid).append(s1).append(s2).append(s3)
-        .toString().replace(' ', '0');
+        .toString( ).replace(' ', '0');
   }
 
   //** 核心接口 **/

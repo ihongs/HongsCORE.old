@@ -1,5 +1,7 @@
 package app.hongs.serv;
 
+import app.hongs.HongsCause;
+import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.anno.Action;
@@ -34,11 +36,11 @@ public class PackAction {
         HttpServletRequest  req = helper.getRequest( );
         HttpServletResponse rsp = helper.getResponse();
 
-        for (Map.Entry<String, Object> et : acts.entrySet( )) {
-            Object pms = et.getValue();
-            String key = et.getKey(  );
+        for (Map.Entry<String, Object> ent : acts.entrySet()) {
+            Object pms = ent.getValue();
+            String uri = ent.getKey(  );
 
-            if ( ! key.startsWith("/")) {
+            if(!uri.startsWith("/") || !uri.endsWith(".act")) {
                 continue;
             }
 
@@ -56,12 +58,23 @@ public class PackAction {
             }
 
             // 代理执行动作
-            String act = key.substring(1).replace("#.*$", "");
             helper.setRequestData ( dat );
             helper.reply( new HashMap() );
             try {
-                req.getRequestDispatcher(act).include(req, rsp);
+                req.getRequestDispatcher(uri).include(req, rsp);
             } catch (ServletException ex) {
+                if (ex.getCause() instanceof HongsCause) {
+                    HongsCause ez  = (HongsCause) ex.getCause();
+                    if (quit) {
+                        String msg =  ez.getLocalizedMessage ();
+                        String err = "Ex" + Integer.toHexString(ez.getCode());
+                        helper.fault(msg, err);
+                    } else if (ez instanceof HongsError) {
+                        throw (HongsError    ) ez;
+                    } else{
+                        throw (HongsException) ez;
+                    }
+                } else
                 if (quit) {
                     String msg = ex.getLocalizedMessage();
                     String err = "Er500";
@@ -78,7 +91,7 @@ public class PackAction {
                     throw new HongsException.Common( ex );
                 }
             }
-            rets.put(key, helper.getResponseData());
+            rets.put(uri, helper.getResponseData());
         }
 
         helper.reply(rets);

@@ -1,7 +1,9 @@
 <%@page import="app.hongs.Cnst"%>
 <%@page import="app.hongs.Core"%>
+<%@page import="app.hongs.CoreLocale"%>
 <%@page import="java.io.PrintStream"%>
 <%@page import="java.io.ByteArrayOutputStream"%>
+<%@page extends="app.hongs.action.Pagelet"%>
 <%@page contentType="text/html" pageEncoding="UTF-8" isErrorPage="true" trimDirectiveWhitespaces="true"%>
 <%
     // 如果有内部返回, 则不要显示此页
@@ -27,7 +29,7 @@
         <div class="jumbotron" style="margin-top: 2em; background-color: #0071AD; color: #fff;">
             <div class="container">
                 <h1 style="font-weight: bold;">:(</h1>
-                <p  style="font-weight: bold;">Error 404, page not found! <a href="<%=request.getContextPath()%>/" style="color: #ace;">You can click here to go home</a>.</p>
+                <p  style="font-weight: bold;"><%=CoreLocale.getInstance().translate("core.error.no.found")%>! <a href="<%=request.getContextPath()%>/" style="color: #ace;"><%=CoreLocale.getInstance().translate("core.error.go.index")%></a>.</p>
             </div>
         </div>
         <nav id="footbox" class="navbar">

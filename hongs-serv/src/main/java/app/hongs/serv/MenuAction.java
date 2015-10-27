@@ -1,6 +1,7 @@
 package app.hongs.serv;
 
 import app.hongs.Core;
+import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.MenuSet;
@@ -30,20 +31,19 @@ public class MenuAction {
             n = "common/menu.act?m=" + m + "&n=" + n;
         }
 
-        MenuSet site  =  MenuSet.getInstance(m);
-        Map<String, Map> menu = site.getMenu(n);
-        if (menu != null &&  menu.containsKey("menus")) {
-            Map<String, Map> menus = (Map) menu.get("menus");
-            for (Map.Entry et : menus.entrySet()) {
-                String k = (String ) et.getKey();
-                if (site.chkAuth(k)) {
-                    helper.redirect(Core.BASE_HREF +"/"+ k );
+            MenuSet         site =  MenuSet.getInstance( m );
+            Map<String,Map> menu =  site.getMenu( n );
+        if (menu != null && menu.containsKey("menus")) {
+            Map<String,Map> manu =  menu.get("menus");
+            for(String mn : manu.keySet (  )) {
+                if (/*?OK*/ site.chkMenu(mn)) {
+                    helper.redirect(Core.BASE_HREF +"/"+ mn);
                     return;
                 }
             }
         }
 
-        helper.redirect(Core.BASE_HREF + "/");
+        helper.error403(CoreLocale.getInstance().translate("core.error.no.power"));
     }
 
     @Action("list")

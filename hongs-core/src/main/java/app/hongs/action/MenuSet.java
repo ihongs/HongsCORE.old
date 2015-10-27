@@ -498,7 +498,7 @@ public class MenuSet
           return null;
       }
       if (session.startsWith("@")) {
-          return getInstance(session.substring(1)).getRoleSet(   );
+          return getInstance(session.substring( 1 )).getRoleSet( );
       }
       if (! session.contains(".")) {
           ActionHelper hlpr = Core.getInstance(ActionHelper.class);

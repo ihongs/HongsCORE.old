@@ -3,14 +3,13 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.util.Dict;
 import app.hongs.util.Text;
-import eu.medsea.mimeutil.MimeUtil;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import eu.medsea.mimeutil.MimeUtil;
 import org.apache.commons.fileupload.util.Streams;
 
 /**
@@ -58,9 +58,9 @@ public class UploadHelper {
         Map m = new HashMap();
         m.put("BASE_PATH", Core.BASE_PATH);
         m.put("CORE_PATH", Core.CORE_PATH);
-        m.put("CONF_PATH", Core.CORE_PATH);
+        m.put("CONF_PATH", Core.CONF_PATH);
         m.put("DATA_PATH", Core.DATA_PATH);
-        path  = Text.inject(path, m);
+        path = Text.inject(path, m);
         if (! new File(path).isAbsolute()) {
             path = Core.BASE_PATH+"/"+path;
         }
@@ -83,18 +83,6 @@ public class UploadHelper {
         return  MimeUtil.getMimeTypes(file).toString();
     }
 
-    private void setResultName(String fame, String extn) {
-        String famc = fame+"."+extn;
-        int l = Core.SERVER_ID.length();
-        if (fame.length() >= l+8) {
-            famc = fame.substring(0  , l  )
-             +"/"+ fame.substring(l  , l+4)
-             +"/"+ fame.substring(l+4, l+8)
-             +"/"+ famc;
-        }
-        this.resultName = famc;
-    }
-
     private void chkTypeOrExtn(String type, String extn) throws VerifyHelper.Wrong {
         /**
          * 检查文件类型
@@ -113,6 +101,11 @@ public class UploadHelper {
             // 扩展名不对
             throw new VerifyHelper.Wrong("fore.form.unallowed.extns", this.allowExtns.toString());
         }
+    }
+
+    private void setResultName(String fame, String extn) {
+        String famc = upname(fame) + "." + extn;
+        this.resultName = famc;
     }
 
     public String getResultPath() {
@@ -261,6 +254,25 @@ public class UploadHelper {
                 Dict.setParam(request, v, n);
             }
         }
+    }
+ 
+    /**
+     * 上传ID扩展为上传路径名
+     * 因文件系统对目录下的文件数量有限制
+     * 故按照文件ID组成规则拆解成多级目录
+     * 以使单个目录内的文件不会超出额定值
+     * @param id
+     * @return 
+     */
+    public static String upname(String id) {
+        int l = Core.SERVER_ID.length();
+        if (id.length( )  >=  l+8) {
+            id = id.substring(0  , l  ) // 服务核心ID
+           +"/"+ id.substring(l  , l+4) // 前4位36进制时间戳
+           +"/"+ id.substring(l+4, l+8) // 后4位36进制时间戳
+           +"/"+ id;
+        }
+        return   id;
     }
 
 }
