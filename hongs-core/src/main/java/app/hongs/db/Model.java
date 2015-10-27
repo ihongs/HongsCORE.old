@@ -750,77 +750,84 @@ implements IRecord
     /**
      * 依据设计规则, 解析请求参数, 转为查询结构
      */
-    Iterator  it = rd.entrySet( ).iterator( );
+
     List finds = Arrays.asList(this.findCols);
-    Map fields = this.table.getFields();
+    Map fields = this.table.getFields (  );
     Map relats = this.table.relats != null
                ? this.table.relats
-               : new HashMap();
+               : new HashMap( );
+    Object value;
+
+    // 字段
+    value = rd.get(Cnst.RB_KEY);
+    if (value != null)
+    {
+      this.colsFilter(caze, value, fields);
+    }
+
+    // 排序
+    value = rd.get(Cnst.OB_KEY);
+    if (value != null)
+    {
+      this.sortFilter(caze, value, fields);
+    }
+
+    Iterator it = rd.entrySet().iterator();
     while (it.hasNext())
     {
-      Map.Entry et = (Map.Entry)it.next();
-      String key = (String)et.getKey();
-      Object value = et.getValue();
+      Map.Entry et = (Map.Entry) it.next();
+      String key = (String) et.getKey();
+      value = et.getValue();
 
       if (key == null || value == null
       ||  key.equals(Cnst.RN_KEY)
       ||  key.equals(Cnst.PN_KEY)
-      ||  key.equals(Cnst.GN_KEY))
+      ||  key.equals(Cnst.GN_KEY)
+      ||  key.equals(Cnst.RB_KEY)
+      ||  key.equals(Cnst.OB_KEY)
+      ||  key.equals(Cnst.WD_KEY))
       {
         continue;
       }
 
-      // 字段
-      if (key.equals(Cnst.RB_KEY))
+      // 可搜索字段
+      if (finds.contains(key) && !(value instanceof Map))
       {
-        this.colsFilter(caze, value, fields);
-        continue;
-      }
-
-      // 排序
-      if (key.equals(Cnst.OB_KEY))
-      {
-        this.sortFilter(caze, value, fields);
-        continue;
-      }
-
-      // 搜索
-      if (key.equals(Cnst.WD_KEY))
-      {
-        this.findFilter(caze, value, findCols);
-        continue;
-      }
-
-      // 搜索字段
-      if ( finds.contains   (key))
-      {
-        this.findFilter(caze, value, new String[] { key });
-        continue;
+        this.findFilter(caze, value, new String[ ] {key});
       }
 
       // 当前表字段
-      if (fields.containsKey(key))
+      else if (fields.containsKey( key ))
       {
         this.mkeyFilter(caze, value, key);
-        continue;
       }
 
       // 关联表字段
-      if (relats.containsKey(key))
+      else if (relats.containsKey( key ))
       {
         this.skeyFilter(caze, value, key);
-        continue;
       }
+    }
 
-      // 组查询语句
-      if (key.equals(Cnst.OR_KEY))
-      {
-        this.packFilter(caze, value, "OR" );
-      } else
-      if (key.equals(Cnst.AR_KEY))
-      {
-        this.packFilter(caze, value, "AND");
-      }
+    // 或
+    value = rd.get(Cnst.OR_KEY);
+    if (value != null)
+    {
+      this.packFilter(caze, value, "OR" );
+    }
+
+    // 并或
+    value = rd.get(Cnst.AR_KEY);
+    if (value != null)
+    {
+      this.packFilter(caze, value, "AND");
+    }
+
+    // 搜索
+    value = rd.get(Cnst.WD_KEY);
+    if (value != null)
+    {
+      this.findFilter(caze, value, findCols);
     }
   }
 
@@ -1086,7 +1093,7 @@ implements IRecord
     if (tns == null)
     {
         tns  = new HashSet();
-        caze.setOption("ASSOCS", tns);
+//      caze.setOption("ASSOCS", tns);
     }
 
     for (String col : cols)
@@ -1352,7 +1359,8 @@ implements IRecord
     Set<String> tns = (Set<String>) caze.getOption("ASSOCS");
     if (tns == null)
     {
-        tns  = new HashSet( ); caze.setOption("ASSOCS", tns);
+        tns  = new HashSet();
+//      caze.setOption("ASSOCS", tns);
     }
 
     Map tc =  this.table.getAssoc( key );
