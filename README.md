@@ -233,7 +233,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     }
 
     // 数量信息, 在 update,delete 动作返回
-    "size": 操作数量
+    "rows": 操作行数
 
 在调用 API(REST) 时, 可在 url 后加请求参数 !wrap=1 将其他数据放入 data 键下, 可加请求参数 !conv=null2str+bool2num 等转换规则, 其取值可以为:
 
