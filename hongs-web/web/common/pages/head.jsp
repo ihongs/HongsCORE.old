@@ -2,7 +2,7 @@
 <%@page import="app.hongs.Core"%>
 <%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionHelper"%>
-<%@page import="app.hongs.action.MenuSet"%>
+<%@page import="app.hongs.action.NaviMap"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
@@ -55,8 +55,8 @@
         u =  m;
     }
 
-    MenuSet main = MenuSet.getInstance(w);
-    MenuSet curr = MenuSet.getInstance(m);
+    NaviMap main = NaviMap.getInstance(w);
+    NaviMap curr = NaviMap.getInstance(m);
     List<Map> mainMenu = main.getMenuTranslated(1, 1);
     List<Map> currMenu = curr.getMenuTranslated(1, 1);
 

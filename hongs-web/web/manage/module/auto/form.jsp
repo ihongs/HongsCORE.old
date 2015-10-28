@@ -2,7 +2,7 @@
 <%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.FormSet"%>
-<%@page import="app.hongs.action.MenuSet"%>
+<%@page import="app.hongs.action.NaviMap"%>
 <%@page import="app.hongs.util.Synt"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="java.util.HashMap"%>
@@ -31,7 +31,7 @@
 
     CoreLocale lang = CoreLocale.getInstance().clone();
                lang.loadIgnrFNF(_module);
-    MenuSet    site = MenuSet.getInstance(_module+"/"+ _entity );
+    NaviMap    site = NaviMap.getInstance(_module+"/"+ _entity );
     FormSet    form = FormSet.getInstance(_module+"/"+ _entity );
     Map<String, Object> flds = form.getFormTranslated( _entity );
 
