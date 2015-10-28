@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.MenuSet;
+import app.hongs.action.NaviMap;
 import app.hongs.action.anno.Action;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,7 @@ public class MenuAction {
             n = "common/menu.act?m=" + m + "&n=" + n;
         }
 
-            MenuSet         site =  MenuSet.getInstance( m );
+            NaviMap         site =  NaviMap.getInstance( m );
             Map<String,Map> menu =  site.getMenu( n );
         if (menu != null && menu.containsKey("menus")) {
             Map<String,Map> manu =  menu.get("menus");
@@ -68,7 +68,7 @@ public class MenuAction {
             d = Integer.parseInt(depth);
         }
 
-        List list = MenuSet.getInstance(name).getMenuTranslated(l, d);
+        List list = NaviMap.getInstance(name).getMenuTranslated(l, d);
         Map data = new HashMap();
         data.put( "list", list );
         helper.reply(data);

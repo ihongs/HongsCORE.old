@@ -176,7 +176,7 @@ public class Unit extends Mtree {
             }
         }
 
-        saveDocument(Core.CONF_PATH+"/manage/module/data"+Cnst.MENU_EXT+".xml", docm);
+        saveDocument(Core.CONF_PATH+"/manage/module/data"+Cnst.NAVI_EXT+".xml", docm);
     }
 
     private Document makeDocument() throws HongsException {

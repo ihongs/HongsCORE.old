@@ -250,9 +250,9 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
 
 ## 运行设置
 
-### 菜单配置
+### 导航配置
 
-一个 xxx.menu.xml 配置文件由 menu,role,depend,action 和 rsname,import 这些节点组成. menu 为菜单项; role 为权限角色或称权限分组; depend 为依赖的权限; action 登记权限具体的动作, 权限过滤器据此判断某个动作是否可被调用; rsname 标示权限会话的名称或单例类; import 用于引入其他菜单.
+一个 xxx.navi.xml 配置文件由 menu,role,depend,action 和 rsname,import 这些节点组成. menu 为菜单项; role 为权限角色或称权限分组; depend 为依赖的权限; action 登记权限具体的动作, 权限过滤器据此判断某个动作是否可被调用; rsname 标示权限会话的名称或单例类; import 用于引入其他导航配置.
 
 ### 表单配置
 
@@ -278,6 +278,10 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
     dont.show.checks.column         不要显示选择列
 
 另, 每个枚举(enum)可以有一个 code="\*" 的取值, 该取值用作"其他"选项, 当出现枚举中没有记录的值时, 将显示为"其他".
+
+### 数据配置
+
+一个 xxx.db.xml 配置文件由
 
 ### 模型规范
 

@@ -1,7 +1,5 @@
 package app.hongs;
 
-import static app.hongs.HongsError.COMMON;
-
 /**
  * 通用异常类
  *

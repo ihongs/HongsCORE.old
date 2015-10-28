@@ -4,7 +4,7 @@ import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.MenuSet;
+import app.hongs.action.NaviMap;
 import app.hongs.action.UploadHelper;
 import app.hongs.action.anno.Action;
 import app.hongs.db.DB;
@@ -67,7 +67,7 @@ public class UserAction {
 
         // With all roles
         if (Synt.declare(helper.getParameter("-with-roles"), false)) {
-            Dict.put(data, MenuSet.getInstance("manage").getRoleTranslates(), "enum", "roles..role");
+            Dict.put(data, NaviMap.getInstance("manage").getRoleTranslates(), "enum", "roles..role");
         }
 
         helper.reply(data);

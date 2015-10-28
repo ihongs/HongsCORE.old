@@ -35,6 +35,7 @@ public class TestDict extends TestCase {
     }
 
     @Before
+    @Override
     public void setUp() {
         dict = new HashMap();
         Map  sub1 = new HashMap();
@@ -79,6 +80,7 @@ public class TestDict extends TestCase {
     }
 
     @After
+    @Override
     public void tearDown() {
         dict.clear();
     }

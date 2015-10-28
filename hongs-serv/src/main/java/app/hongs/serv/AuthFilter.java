@@ -5,7 +5,7 @@ import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.MenuSet;
+import app.hongs.action.NaviMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -42,7 +42,7 @@ public class AuthFilter
   /**
    * 动作配置
    */
-  private MenuSet siteMap;
+  private NaviMap siteMap;
 
   /**
    * 区域验证
@@ -84,7 +84,7 @@ public class AuthFilter
       try
       {
         this.aut = s ;
-        this.siteMap = MenuSet.getInstance(s);
+        this.siteMap = NaviMap.getInstance(s);
       }
       catch (HongsException ex)
       {
@@ -95,7 +95,7 @@ public class AuthFilter
     {
       try
       {
-        this.siteMap = MenuSet.getInstance( );
+        this.siteMap = NaviMap.getInstance( );
       }
       catch (HongsException ex)
       {

@@ -28,7 +28,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * 页面导航配置.
+ * 导航配置.
  *
  * <p>
  * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;
@@ -88,7 +88,7 @@ import org.xml.sax.SAXException;
  * </p>
  * @author Hongs
  */
-public class MenuSet
+public class NaviMap
   extends CoreSerial
 {
 
@@ -124,20 +124,20 @@ public class MenuSet
    */
   public /**/String  session = null;
 
-  public MenuSet(String name)
+  public NaviMap(String name)
     throws HongsException
   {
     this.name = name;
-    this.init(name + Cnst.MENU_EXT);
+    this.init(name + Cnst.NAVI_EXT);
   }
 
   protected boolean expired(String name)
   {
     File xmlFile = new File(Core.CONF_PATH
-                 + File.separator + name + Cnst.MENU_EXT + ".xml");
+                 + File.separator + name + Cnst.NAVI_EXT + ".xml");
     File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
-                 + File.separator + name + Cnst.MENU_EXT + ".ser");
+                 + File.separator + name + Cnst.NAVI_EXT + ".ser");
     return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -153,7 +153,7 @@ public class MenuSet
 
     File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
-                 + File.separator + name + Cnst.MENU_EXT + ".ser");
+                 + File.separator + name + Cnst.NAVI_EXT + ".ser");
     load(serFile);
 
     // 检查引入文件
@@ -175,19 +175,19 @@ public class MenuSet
 
     try
     {
-        fn = Core.CONF_PATH + File.separator + name + Cnst.MENU_EXT + ".xml";
+        fn = Core.CONF_PATH + File.separator + name + Cnst.NAVI_EXT + ".xml";
         is = new FileInputStream(fn);
     }
     catch (FileNotFoundException ex)
     {
         fn = name.contains("/")
-           ? name + Cnst.MENU_EXT + ".xml"
-           : "app/hongs/config/" + name + Cnst.MENU_EXT + ".xml";
+           ? name + Cnst.NAVI_EXT + ".xml"
+           : "app/hongs/config/" + name + Cnst.NAVI_EXT + ".xml";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
             throw new app.hongs.HongsException(0x10e0,
-                "Can not find the config file '" + name + Cnst.MENU_EXT + ".xml'.");
+                "Can not find the config file '" + name + Cnst.NAVI_EXT + ".xml'.");
         }
     }
 
@@ -208,15 +208,15 @@ public class MenuSet
     }
     catch ( IOException ex)
     {
-      throw new HongsException(0x10e1, "Read '" +name+Cnst.MENU_EXT+".xml error'", ex);
+      throw new HongsException(0x10e1, "Read '" +name+Cnst.NAVI_EXT+".xml error'", ex);
     }
     catch (SAXException ex)
     {
-      throw new HongsException(0x10e1, "Parse '"+name+Cnst.MENU_EXT+".xml error'", ex);
+      throw new HongsException(0x10e1, "Parse '"+name+Cnst.NAVI_EXT+".xml error'", ex);
     }
     catch (ParserConfigurationException ex)
     {
-      throw new HongsException(0x10e1, "Parse '"+name+Cnst.MENU_EXT+".xml error'", ex);
+      throw new HongsException(0x10e1, "Parse '"+name+Cnst.NAVI_EXT+".xml error'", ex);
     }
 
     this.paths = new HashMap();
@@ -345,7 +345,7 @@ public class MenuSet
       if ("import".equals(tagName2))
       {
         String impart = element2.getTextContent();
-        MenuSet  conf = new MenuSet(impart);
+        NaviMap  conf = new NaviMap(impart);
         paths.putAll(conf.paths);
         menus.putAll(conf.menus);
         roles.putAll(conf.roles);
@@ -413,12 +413,12 @@ public class MenuSet
 
         Set set = (Set) menu.get("roles");
         if (set != null && !set.isEmpty()) {
-            authz.addAll(MenuSet.this.getRoleAuths((String[]) set.toArray(new String[0])));
+            authz.addAll(NaviMap.this.getRoleAuths((String[]) set.toArray(new String[0])));
         }
 
         Map map = (Map) menu.get("menus");
         if (map != null && !map.isEmpty()) {
-            authz.addAll(MenuSet.this.getRoleAuths((String[]) map.keySet().toArray(new String[0])));
+            authz.addAll(NaviMap.this.getRoleAuths((String[]) map.keySet().toArray(new String[0])));
         }
     }
 
@@ -786,20 +786,20 @@ public class MenuSet
 
   //** 工厂方法 **/
 
-  public static MenuSet getInstance(String name) throws HongsException {
-      String cn = MenuSet.class.getName() + ":" + name;
+  public static NaviMap getInstance(String name) throws HongsException {
+      String cn = NaviMap.class.getName() + ":" + name;
       Core core = Core.getInstance();
-      MenuSet inst;
+      NaviMap inst;
       if (core.containsKey(cn)) {
-          inst = (MenuSet) core.get( cn );
+          inst = (NaviMap) core.get( cn );
       } else {
-          inst = new MenuSet( name );
+          inst = new NaviMap( name );
           core.put( cn , inst );
       }
       return inst;
   }
 
-  public static MenuSet getInstance() throws HongsException {
+  public static NaviMap getInstance() throws HongsException {
       return getInstance("default");
   }
 

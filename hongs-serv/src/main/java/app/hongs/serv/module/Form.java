@@ -179,7 +179,7 @@ public class Form extends Model {
         depn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/retrieve"  ) );
 
         // 保存
-        saveDocument(Core.CONF_PATH+"/manage/module/data/"+id+Cnst.MENU_EXT+".xml", docm);
+        saveDocument(Core.CONF_PATH+"/manage/module/data/"+id+Cnst.NAVI_EXT+".xml", docm);
     }
 
     public void updateOrCreateFormSet(String id, List<Map> conf) throws HongsException {

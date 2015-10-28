@@ -2,7 +2,7 @@ package app.hongs.serv.member;
 
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
-import app.hongs.action.MenuSet;
+import app.hongs.action.NaviMap;
 import app.hongs.db.DB;
 import app.hongs.db.Table;
 import java.security.MessageDigest;
@@ -53,7 +53,7 @@ public class SignKit {
      */
     public static List getRoles(String name) throws HongsException {
         List units = new ArrayList();
-        MenuSet ac = new MenuSet(name);
+        NaviMap ac = new NaviMap(name);
         Map<String, Map> menus1 = ac.menus;
 
         for(Map.Entry et1 : menus1.entrySet()) {

@@ -67,12 +67,12 @@ public class Cnst {
     //** 配置扩展 **/
 
     public static final String DB_EXT = ".db"; // 数据库配置
-    
+
     public static final String DF_EXT = ".df"; // 字段表缓存
 
     public static final String FORM_EXT = ".form"; // 表单配置
 
-    public static final String MENU_EXT = ".menu"; // 菜单配置
+    public static final String NAVI_EXT = ".navi"; // 导航配置
 
     //** 请求属性 **/
 

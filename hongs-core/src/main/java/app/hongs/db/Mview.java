@@ -5,7 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.FormSet;
-import app.hongs.action.MenuSet;
+import app.hongs.action.NaviMap;
 import app.hongs.util.Synt;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class Mview implements Core.Destroy {
             }
 
             // 再从菜单取名字
-            MenuSet menu = MenuSet.getInstance(db.name);
+            NaviMap menu = NaviMap.getInstance(db.name);
             item = menu.getMenu(db.name +"/"+ table.name +"/");
             if (item != null  && item.containsKey(  "disp"  )) {
                 title = (String) item.get(  "disp"  );

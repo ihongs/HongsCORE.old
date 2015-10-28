@@ -122,7 +122,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      */
     public LuceneRecord(String path, String conf, String form)
     throws HongsException {
-        this( path , FormSet.getInstance(conf).getForm(form) );
+        this(path , FormSet.getInstance(conf).getForm(form) );
     }
 
     /**

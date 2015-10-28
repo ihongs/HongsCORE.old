@@ -39,13 +39,13 @@
         <value code="url"><![CDATA[^(\w+:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}[#&+_\?\/\w \.\-=]*$]]></value>
     </enum>
     <enum name="gender">
-        <vlaue code="-1">未知</vlaue>
         <vlaue code="1">男</vlaue>
         <vlaue code="0">女</vlaue>
+        <vlaue code="*">未知</vlaue>
     </enum>
     <enum name="sexual">
-        <value code="-1">未知</value>
         <value code="0">正常</value>
+        <value code="*">未知</value>
     </enum>
     <!--
     <enum name="demo-enum">

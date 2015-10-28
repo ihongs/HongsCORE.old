@@ -23,7 +23,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * 表单结构配置.
+ * 表单配置.
  *
  * <p>
  * 该工具会将配置数据自动缓存, 会在构建对象时核对配置的修改时间;
