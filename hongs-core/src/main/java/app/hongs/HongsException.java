@@ -85,9 +85,9 @@ public class HongsException extends Exception implements HongsCause {
         return this;
     }
 
-    public static  final int COMMON = 0x1000;
+    public static final int COMMON = 0x1000;
 
-    public static  final int NOTICE = 0x1001;
+    public static final int NOTICE = 0x1001;
 
     /**
      * 常规错误(无需错误代码)

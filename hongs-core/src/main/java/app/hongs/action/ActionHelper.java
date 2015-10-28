@@ -95,7 +95,7 @@ public class ActionHelper implements Cloneable
    */
   public ActionHelper()
   {
-    throw new HongsError(HongsError.COMMON,
+    throw new HongsError.Common(
     "Please use the ActionHelper in the coverage of the ActionDriver or CmdletRunner inside");
   }
 
@@ -647,7 +647,7 @@ public class ActionHelper implements Cloneable
     try {
       helper = (ActionHelper) super.clone();
     } catch (CloneNotSupportedException ex) {
-      throw new HongsError(HongsError.COMMON, ex);
+      throw new HongsError.Common(ex);
     }
     helper.responseWrtr = this.getResponseWrtr( );
     helper.responseData = null;

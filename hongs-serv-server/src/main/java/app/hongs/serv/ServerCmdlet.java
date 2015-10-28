@@ -86,7 +86,7 @@ public class ServerCmdlet {
             try {
                 server.stop();
             } catch (Exception ex) {
-                throw new HongsError(HongsError.COMMON, ex);
+                throw new HongsError.Common(ex);
             }
         }
 
