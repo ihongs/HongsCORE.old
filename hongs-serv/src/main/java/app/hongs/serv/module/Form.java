@@ -1,5 +1,6 @@
 package app.hongs.serv.module;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
@@ -178,7 +179,7 @@ public class Form extends Model {
         depn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/retrieve"  ) );
 
         // 保存
-        saveDocument(id+".menu.xml", docm);
+        saveDocument(Core.CONF_PATH+"/manage/module/data/"+id+Cnst.MENU_EXT+".xml", docm);
     }
 
     public void updateOrCreateFormSet(String id, List<Map> conf) throws HongsException {
@@ -257,7 +258,7 @@ public class Form extends Model {
             }
         }
 
-        saveDocument(id+".form.xml", docm);
+        saveDocument(Core.CONF_PATH+"/manage/module/data/"+id+Cnst.FORM_EXT+".xml", docm);
     }
 
     private Document makeDocument() throws HongsException {
@@ -270,8 +271,8 @@ public class Form extends Model {
         }
     }
 
-    private void saveDocument(String name, Document docm) throws HongsException {
-        File file = new File(Core.CONF_PATH+"/manage/module/data/"+name);
+    private void saveDocument(String path, Document docm) throws HongsException {
+        File file = new File(path);
         if (!file.getParentFile().exists()) {
              file.getParentFile().mkdirs();
         }

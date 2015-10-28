@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.CoreSerial;
@@ -85,17 +86,17 @@ public class FormSet
     throws HongsException
   {
     this.name = name;
-    this.init(name + ".form");
+    this.init(name + Cnst.FORM_EXT);
   }
 
   @Override
   protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                 + File.separator + name + ".form.xml");
+                 + File.separator + name + Cnst.FORM_EXT + ".xml");
     File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
-                 + File.separator + name + ".form.ser");
+                 + File.separator + name + Cnst.FORM_EXT + ".ser");
     return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -108,16 +109,19 @@ public class FormSet
 
     try
     {
-        fn = Core.CONF_PATH + File.separator + name + ".form.xml";
+        fn = Core.CONF_PATH + File.separator + name + Cnst.FORM_EXT + ".xml";
         is = new FileInputStream(fn);
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name + ".form.xml" : "app/hongs/config/" + name + ".form.xml";
+        fn = name.contains("/")
+           ? name + Cnst.FORM_EXT + ".xml"
+           : "app/hongs/config/" + name + Cnst.FORM_EXT + ".xml";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsException(0x10e8, "Can not find the formset config file '" + name + ".form.xml'.");
+            throw new app.hongs.HongsException(0x10e8,
+                "Can not find the config file '" + name + Cnst.FORM_EXT + ".xml'.");
         }
     }
 
@@ -131,15 +135,15 @@ public class FormSet
     }
     catch ( IOException ex)
     {
-      throw new HongsException(0x10e9, "Read '" +name+".form.xml error'", ex);
+      throw new HongsException(0x10e9, "Read '" +name+Cnst.FORM_EXT+".xml error'", ex);
     }
     catch (SAXException ex)
     {
-      throw new HongsException(0x10e9, "Parse '"+name+".form.xml error'", ex);
+      throw new HongsException(0x10e9, "Parse '"+name+Cnst.FORM_EXT+".xml error'", ex);
     }
     catch (ParserConfigurationException ex)
     {
-      throw new HongsException(0x10e9, "Parse '"+name+".form.xml error'", ex);
+      throw new HongsException(0x10e9, "Parse '"+name+Cnst.FORM_EXT+".xml error'", ex);
     }
 
     this.forms = new HashMap();

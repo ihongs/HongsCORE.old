@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.Cnst;
 import app.hongs.CoreSerial;
 import app.hongs.HongsException;
 import app.hongs.db.DB.Roll;
@@ -34,9 +35,9 @@ public class DBFields
     throws HongsException
   {
     this.table = table;
-    if (table.db.name != null && table.db.name.length() != 0)
+    if ( table.db.name != null && table.db.name.length() != 0 )
     {
-      this.init( table.db.name +"."+ table.tableName +".df" );
+      this.init( table.db.name +"."+ table.tableName + Cnst.DF_EXT );
     }
     else
     {

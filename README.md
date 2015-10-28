@@ -1,7 +1,7 @@
 # HongsCORE framework for Java
 
 * 文档版本: 15.09.20
-* 软件版本: 0.3.8-20150922
+* 软件版本: 0.3.8-20151026
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
@@ -126,17 +126,18 @@
     xxx.foo:bar         对应标记 @Cmdlet("xxx.foo") 的类下 @Cmdlet("bar") 的方法
     xxx.foo             对应标记 @Cmdlet("xxx.foo") 的类下 @Cmdlet("__main__") 的方法
     xxx/foo/bar.act     对应标记 @Action("xxx/foo") 的类下 @Action("bar") 的方法
-    xxx/foo.api         对应标记 @Action("xxx/foo") 的类下 @Action("retrieve,create,update或delete") 的方法(这四种动作分别对应 HTTP METHOD: GET,POST,PUT,DELETE)
+    xxx/foo.act         对应标记 @Action("xxx/foo") 的类下 @Action("__main__") 的方法
+    xxx/foo.api         对应标记 @Action("xxx/foo") 的类下 @Action("retrieve,create,update,delete") 的方法(这四种动作分别对应 HTTP METHOD: GET,POST,PUT,DELETE)
     common/auth/name.js 读取 WBE-INF/conf/name.as.xml 中 actions+session 的组合
     common/conf/name.js 读取 WEB-INF/conf/name.properties 中 fore.xxxx. 开头的配置
     common/lang/name.js 读取 WEB-INF/conf/name.xx-XX.properties 中 fore.xxxx. 开头的配置
 
-action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 WEB-INF/etc/\_begin\_.properties 中设置 core.load.serv 为 Action,Cmdlet 类, 或 xxx.foo.* 告知该包下存在 Action,Cmdlet 类, 多个类/包用";"分隔.
+action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果不指定则用类,方法名作为路径; 请在 etc/\_begin\_.properties 中设置 core.load.serv 为 Action,Cmdlet 类, 或 xxx.foo.* 告知该包下存在 Action,Cmdlet 类, 多个类/包用";"分隔.
 最后3个路径, 将扩展名 .js 换成 .json 即可得到 JSON 格式的数据; 语言配置可在 name 后加语言区域标识, 如 example.zh_CN.js 为获取 example 的中文大陆简体的 js 格式的语言配置.
 
 ### 请求规则
 
-支持 Content-Type 为 application/x-www-form-urlencoded, multipart/form-data 和 application/json 的请求, 组成结构为("+" 在 URL 中为空格):
+支持 Content-Type 为 application/x-www-form-urlencoded, multipart/form-data 和 application/json 的请求, 组成结构为("+" 在 URL 中表示空格):
 
     f1=1&f2.!eq=2&f3.!in.=30&f3.!in.=31&t1.f4.!gt=abc&ob=-f5+f6&wd=Hello+world
 
@@ -235,7 +236,7 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     // 数量信息, 在 update,delete 动作返回
     "rows": 操作行数
 
-在调用 API(REST) 时, 可在 url 后加请求参数 !wrap=1 将其他数据放入 data 键下, 可加请求参数 !conv=null2str+bool2num 等转换规则, 其取值可以为:
+在调用 API(REST) 时, 可将所有请求数据采用 JSON 或 URLEncode 编码放入 !data 参数传递; 如加请求参数 !wrap=1 可将全部返回数据放入 data 键下; 如加请求参数 !scok=1 则无论是否异常总是返回 200 状态; 可加请求参数 !conv=all2str 启用数据转换规则, 其取值可以为:
 
     all2str     全部转为字串
     num2str     数字转为字串
@@ -249,9 +250,13 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
 
 ## 运行设置
 
+### 菜单配置
+
+一个 xxx.menu.xml 配置文件由 menu,role,depend,action 和 rsname,import 这些节点组成. menu 为菜单项; role 为权限角色或称权限分组; depend 为依赖的权限; action 登记权限具体的动作, 权限过滤器据此判断某个动作是否可被调用; rsname 标示权限会话的名称或单例类; import 用于引入其他菜单.
+
 ### 表单配置
 
-一个 xxx.form.xml 配置文件由 form,field,param,enum,value 这些节点组成, 结构类似于 Protobuf, form 类似 Protobuf 的 message. field 有 required/repeated 对应 message 下条目的 required/optional/repeated; type 对应条目的类型, 只是更贴近HTML控件和数据库字段类型.
+一个 xxx.form.xml 配置文件由 form,field,param,enum,value 这些节点组成, 结构类似于 Protobuf, form 类似 Protobuf 的 message. field 有 required/repeated 对应 Protobuf message 下条目的 required/optional/repeated; type 对应条目的类型, 只是更贴近HTML控件和数据库字段类型.
 
 其中 field 的 param 设置中, 可用于控制视图布局的参数有:
 
@@ -270,13 +275,9 @@ dete2mic 或 date2sec 搭配 all2str 则将转换后的时间戳数字再转为�
     dont.show.create.button         不要显示创建按钮
     dont.show.update.button         不要显示修改按钮
     dont.show.delete.button         不要显示删除按钮
-    dont.show.select.column         不要显示选择列
+    dont.show.checks.column         不要显示选择列
 
-每个枚举(enum)可以有一个 code="\*" 的取值, 该取值用作"其他"选项, 当出现枚举中没有记录的值时, 将显示为"其他".
-
-### 菜单配置
-
-一个 xxx.menu.xml 配置文件由 menu,role,depend,action 和 rsname,import 这些节点组成. menu 为菜单项; role 为权限角色或称权限分组; depend 为依赖的权限; action 登记权限具体的动作, 权限过滤器据此判断某个动作是否可被调用; rsname 记录权限会话的名称或单例类; import 用于引入其他菜单.
+另, 每个枚举(enum)可以有一个 code="\*" 的取值, 该取值用作"其他"选项, 当出现枚举中没有记录的值时, 将显示为"其他".
 
 ### 模型规范
 

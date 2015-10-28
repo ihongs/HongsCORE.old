@@ -1,5 +1,6 @@
 package app.hongs.serv.module;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
@@ -175,7 +176,7 @@ public class Unit extends Mtree {
             }
         }
 
-        saveDocument(docm);
+        saveDocument(Core.CONF_PATH+"/manage/module/data"+Cnst.MENU_EXT+".xml", docm);
     }
 
     private Document makeDocument() throws HongsException {
@@ -188,8 +189,8 @@ public class Unit extends Mtree {
         }
     }
 
-    private void saveDocument(Document docm) throws HongsException {
-        File file = new File(Core.CONF_PATH+"/manage/module/data.menu.xml");
+    private void saveDocument(String path, Document docm) throws HongsException {
+        File file = new File(path);
         if (!file.getParentFile().exists()) {
              file.getParentFile().mkdirs();
         }

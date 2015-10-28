@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreLogger;
 import app.hongs.CoreSerial;
@@ -59,17 +60,17 @@ public class DBConfig
     throws HongsException
   {
     this.name = name;
-    this.init(name+".db");
+    this.init(name+Cnst.DB_EXT);
   }
 
   @Override
   protected boolean expired(long time)
   {
     File xmlFile = new File(Core.CONF_PATH
-                 + File.separator + name + ".db.xml");
+                 + File.separator + name + Cnst.DB_EXT + ".xml");
     File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
-                 + File.separator + name + ".db.ser");
+                 + File.separator + name + Cnst.DB_EXT + ".ser");
     if (xmlFile.exists())
     {
       return xmlFile.lastModified() > serFile.lastModified();
@@ -90,16 +91,19 @@ public class DBConfig
 
     try
     {
-        fn = Core.CONF_PATH + File.separator + name + ".db.xml";
+        fn = Core.CONF_PATH + File.separator + name + Cnst.DB_EXT + ".xml";
         is = new FileInputStream(fn);
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name + ".db.xml" : "app/hongs/config/" + name + ".db.xml";
+        fn = name.contains("/")
+           ? name + Cnst.DB_EXT + ".xml"
+           : "app/hongs/config/" + name + Cnst.DB_EXT + ".xml";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsError(0x2a, "Can not find the source config file '" + name + ".db.xml'.");
+            throw new app.hongs.HongsError(0x2a,
+                "Can not find the config file '" + name + Cnst.DB_EXT + ".xml'.");
         }
     }
 

@@ -1,5 +1,6 @@
 package app.hongs.action;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.CoreSerial;
@@ -127,16 +128,16 @@ public class MenuSet
     throws HongsException
   {
     this.name = name;
-    this.init(name + ".menu");
+    this.init(name + Cnst.MENU_EXT);
   }
 
   protected boolean expired(String name)
   {
     File xmlFile = new File(Core.CONF_PATH
-                 + File.separator + name + ".menu.xml");
+                 + File.separator + name + Cnst.MENU_EXT + ".xml");
     File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
-                 + File.separator + name + ".menu.ser");
+                 + File.separator + name + Cnst.MENU_EXT + ".ser");
     return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();
   }
 
@@ -152,7 +153,7 @@ public class MenuSet
 
     File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
-                 + File.separator + name + ".menu.ser");
+                 + File.separator + name + Cnst.MENU_EXT + ".ser");
     load(serFile);
 
     // 检查引入文件
@@ -174,16 +175,19 @@ public class MenuSet
 
     try
     {
-        fn = Core.CONF_PATH + File.separator + name + ".menu.xml";
+        fn = Core.CONF_PATH + File.separator + name + Cnst.MENU_EXT + ".xml";
         is = new FileInputStream(fn);
     }
     catch (FileNotFoundException ex)
     {
-        fn = name.contains("/") ? name + ".menu.xml" : "app/hongs/config/" + name + ".menu.xml";
+        fn = name.contains("/")
+           ? name + Cnst.MENU_EXT + ".xml"
+           : "app/hongs/config/" + name + Cnst.MENU_EXT + ".xml";
         is = this.getClass().getClassLoader().getResourceAsStream(fn);
         if (  is  ==  null )
         {
-            throw new app.hongs.HongsException(0x10e0, "Can not find the menuset config file '" + name + ".menu.xml'.");
+            throw new app.hongs.HongsException(0x10e0,
+                "Can not find the config file '" + name + Cnst.MENU_EXT + ".xml'.");
         }
     }
 
@@ -204,15 +208,15 @@ public class MenuSet
     }
     catch ( IOException ex)
     {
-      throw new HongsException(0x10e1, "Read '" +name+".menu.xml error'", ex);
+      throw new HongsException(0x10e1, "Read '" +name+Cnst.MENU_EXT+".xml error'", ex);
     }
     catch (SAXException ex)
     {
-      throw new HongsException(0x10e1, "Parse '"+name+".menu.xml error'", ex);
+      throw new HongsException(0x10e1, "Parse '"+name+Cnst.MENU_EXT+".xml error'", ex);
     }
     catch (ParserConfigurationException ex)
     {
-      throw new HongsException(0x10e1, "Parse '"+name+".menu.xml error'", ex);
+      throw new HongsException(0x10e1, "Parse '"+name+Cnst.MENU_EXT+".xml error'", ex);
     }
 
     this.paths = new HashMap();
