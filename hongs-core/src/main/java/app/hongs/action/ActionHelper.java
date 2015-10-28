@@ -43,7 +43,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
  * <p>
  * 通过 getRequestData,getParameter,getAttribute,getSessValue
  * 来获取请求/容器/会话; 通过 reply 来通知前端动作的成功或失败
- </p>
+ * </p>
  *
  * @author Hongs
  */
@@ -364,9 +364,9 @@ public class ActionHelper implements Cloneable
             uploadKeys.add(/****/ n);
         }
     } catch (FileUploadException ex) {
-        throw new HongsException.Common(ex);
+        throw new HongsException(0x1110, ex);
     } catch (IOException ex) {
-        throw new HongsException.Common(ex);
+        throw new HongsException(0x1110, ex);
     }
   }
 

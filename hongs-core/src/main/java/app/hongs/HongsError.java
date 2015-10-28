@@ -109,13 +109,13 @@ public class HongsError extends Error implements HongsCause {
      */
     public static class Notice extends HongsError {
         public Notice(String desc, Throwable cause) {
-            super(COMMON, desc, cause);
+            super(NOTICE, desc, cause);
         }
         public Notice(Throwable cause) {
-            super(COMMON, cause);
+            super(NOTICE, cause);
         }
         public Notice(String desc) {
-            super(COMMON, desc );
+            super(NOTICE, desc );
         }
     }
 
