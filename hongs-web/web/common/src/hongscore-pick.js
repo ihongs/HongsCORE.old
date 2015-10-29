@@ -2,11 +2,11 @@
 /**
  * 组合选择工具之用法:
  * 在选择列表配置添加:
- * <param name="_fill__pick" value="(hsListFillPick)"/>
+ * data-data-0="_fill__pick:(hsListFillPick)"
  * 在选择列表头部添加:
  * <td data-ft="_pick"><input type="checkbox" class="checkall"/></td>
  * 在表单配置区域添加:
- * <param name="_fill__pick" value="(hsFormFillPick)"/>
+ * data-data-0="_fill__pick:(hsFormFillPick)"
  * 在表单选项区域添加:
  * <ul data-ft="_pick" data-fn="my_example" required="required"></ul>
  * <button type="button" data-toggle="hsPick" data-target="@" data-href="my_example/list4select.html">Pick It!</button>
