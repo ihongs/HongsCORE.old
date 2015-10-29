@@ -213,9 +213,10 @@ ref 通常没有, 无访问权限而需要跳转时才会设置. 其他数据通
         ...
     ],
 
-    // 单元信息, 在 retrieve,info,create 动作返回
-    "info": {
-        "字段": "取值",
+    // 分页信息, 在 retrieve,list 动作返回
+    "page": {
+        "pagecount": 总的页数,
+        "rowscount": 当前行数,
         ...
     }
 
@@ -228,10 +229,9 @@ ref 通常没有, 无访问权限而需要跳转时才会设置. 其他数据通
         ...
     }
 
-    // 分页信息, 在 retrieve,list 动作返回
-    "page": {
-        "pagecount": 总的页数,
-        "rowscount": 当前行数,
+    // 单元信息, 在 retrieve,info,create 动作返回
+    "info": {
+        "字段": "取值",
         ...
     }
 
