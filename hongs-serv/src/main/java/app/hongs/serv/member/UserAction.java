@@ -139,6 +139,41 @@ public class UserAction {
         helper.reply(null, v);
     }
 
+    @Action("mine/save")
+    public void doUpdate(ActionHelper helper)
+    throws HongsException {
+        Map data = helper.getRequestData();
+        data.put("id", helper.getSessibute("uid"));
+
+        // 验证原始密码
+        String pw = (String) data.get("password");
+        String po = (String) data.get("passolde");
+        if (pw != null && !"".equals(pw)) {
+
+            Map rd = new HashMap();
+            Map ed = new HashMap();
+            rd.put("errs", ed);
+            rd.put("ok", false);
+            rd.put("msg", CoreLocale.getInstance().translate("fore.form.invalid"));
+
+            if (po != null && !"".equals(po)) {
+                Map row = DB.getInstance("member").getTable("user").fetchCase()
+                    .where ("id = ?", data.get("id"))
+                    .select("password")
+                    .one();
+                if (!po.equals(row.get("password"))) {
+                    ed.put("passolde", "旧密码不正确");
+                    helper.reply(rd);
+                }
+            } else {
+                    ed.put("passolde", "请填写旧密码");
+                    helper.reply(rd);
+            }
+        }
+
+        doSave(helper);
+    }
+
     @Action("roles")
     public void getRoles(ActionHelper helper)
     throws HongsException {

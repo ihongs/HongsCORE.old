@@ -4,12 +4,15 @@
 <%@page import="app.hongs.action.FormSet"%>
 <%@page import="app.hongs.action.NaviMap"%>
 <%@page import="app.hongs.util.Synt"%>
+<%@page import="java.util.Iterator"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="java.util.HashMap"%>
 ﻿<%@page import="java.util.Set"%>
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page pageEncoding="UTF-8"%>
+<%@page contentType="text/html"%>
+<%@page trimDirectiveWhitespaces="true"%>
 <%
     int i;
     String _module, _entity;
@@ -31,60 +34,45 @@
 
     CoreLocale lang = CoreLocale.getInstance().clone();
                lang.loadIgnrFNF(_module);
-    NaviMap    site = NaviMap.getInstance(_module+"/"+ _entity );
-    FormSet    form = FormSet.getInstance(_module+"/"+ _entity );
-    Map<String, Object> flds = form.getFormTranslated( _entity );
+    NaviMap    site = NaviMap.getInstance(_module+"/"+_entity);
+    FormSet    form = FormSet.getInstance(_module+"/"+_entity);
+    Map        menu = site.getMenu(_module +"/"+ _entity +"/");
+    Map        flds = form.getFormTranslated(_entity );
 
-    Map    pagz  = site.getMenu(_module+"/"+_entity+"/");
-    String title = pagz == null ? "" : (String) pagz.get("disp");
-           title = lang.translate(title);
-
-    Map<String, String[]> data = new HashMap();
-    data.putAll(request.getParameterMap());
-    if (data.containsKey("id") == false ) {
-        data.put("id", new String[] {"0"});
-    }
-
-    Set hide = new HashSet();
-    CoreConfig conf = CoreConfig.getInstance( );
-    hide.add(conf.getProperty("core.table.ctime.field", "ctime"));
-    hide.add(conf.getProperty("core.table.mtime.field", "mtime"));
-    hide.add(conf.getProperty("core.table.etime.field", "etime"));
-    hide.add(conf.getProperty("core.table.state.field", "state"));
+    String nm = menu == null ? "" : (String) menu.get( "disp");
+           nm = lang.translate(nm);
+    String id = _module +"-"+ _entity +"-"+  _action  ;
+    String at = " id=\""+ id +"\"";
 %>
 <!-- 表单 -->
-<object class="config" name="hsInit" data="">
-    <param name="width" value="600px"/>
-</object>
-<h2><%=lang.translate("fore."+_action+".title", title)%></h2>
-<div id="<%=_module%>-<%=_entity%>-<%=_action%>">
-    <object class="config" name="hsForm" data="">
-        <param name="loadUrl" value="<%=_module%>/<%=_entity%>/retrieve.act?id=\${id}&md=\${md}"/>
-        <param name="saveUrl" value="<%=_module%>/<%=_entity%>/<%=_action%>.act"/>
-        <param name="_fill__pick" value="(hsFormFillPick)"/>
-    </object>
+<h2><%=lang.translate("fore."+_action+".title", nm)%></h2>
+<div<%=at%>>
     <form action="" method="POST">
         <div class="row">
             <div class="col-md-6 center-block">
                 <%
-                app.hongs.util.Data.dumps(flds);
-                for(Map.Entry et : flds.entrySet()) {
-                    Map    info = (Map ) et.getValue();
-                    String name = (String) et.getKey();
-                    String type = (String) info.get("__type__");
-                    String disp = (String) info.get("__disp__");
-                    String rqrd = Synt.declare(info.get("__required__"), false) ? "required=\"required\"" : "";
-                    String rptd = Synt.declare(info.get("__repeated__"), false) ? "multiple=\"multiple\"" : "";
+                Iterator it = flds.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry et = (Map.Entry)it.next( );
+                    Map     info = (Map ) et.getValue( );
+                    String  name = (String) et.getKey( );
+                    
+                    if ("@".equals(name)
+                    ||  Synt.declare(info.get("inedible"), false)) {
+                        continue ;
+                    }
+
+                    String  type = (String) info.get("__type__");
+                    String  disp = (String) info.get("__disp__");
+                    String  rqrd = Synt.declare(info.get("__required__"), false) ? "required=\"required\"" : "";
+                    String  rptd = Synt.declare(info.get("__repeated__"), false) ? "multiple=\"multiple\"" : "";
+                    
                     if (!"".equals(rptd)) {
                         rptd += " size=\"3\"";
                         name += ".";
                     }
-
-                    if ("yes".equals(info.get("hideInForm")) || hide.contains(name)) {
-                        continue ;
-                    }
-                 %>
-                <%if ("hidden".equals(type) || data.get(name) != null) {%>
+                %>
+                <%if ("hidden".equals(type)) {%>
                     <input type="hidden" name="<%=name%>" value="<%="form_id".equals(name)?_entity:""%>"/>
                 <%} else if ("checkbag".equals(type)) {%>
                     <h3><%=disp%></h3>
@@ -94,7 +82,7 @@
                         <label class="control-label"><%=disp%></label>
                         <%if ("textarea".equals(type)) {%>
                             <textarea class="form-control" name="<%=name%>" <%=rqrd%>></textarea>
-                        <%} else if ("string".equals(type) || "text".equals(type) || "tel".equals(type) || "url".equals(type) || "email".equals(type)) {%>
+                        <%} else if ("string".equals(type) || "text".equals(type) || "email".equals(type) || "url".equals(type) || "tel".equals(type)) {%>
                             <%
                                 String extr = "";
                                 if ("string".equals(type)) type = "text";
@@ -124,7 +112,7 @@
                             <div class="radio"    data-fn="<%=name%>" data-ft="_radio" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>"></div>
                         <%} else if ("enum".equals(type) || "select".equals(type)) {%>
                             <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>><option value="">--<%=lang.translate("fore.select.lebel")%>--</option></select>
-                        <%} else if ("form".equals(type) || "picker".equals(type)) {%>
+                        <%} else if ("pick".equals(type) || "picker".equals(type)) {%>
                             <%
                                 String vk = info.containsKey("data-vk") ? (String) info.get("data-vk") :  "id" ;
                                 String tk = info.containsKey("data-tk") ? (String) info.get("data-tk") : "name";
@@ -136,9 +124,9 @@
                                         + "list4select.html";
                             %>
                             <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-ak="<%=ak%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
-                            <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=al%>"><%=lang.translate("fore.select.lebel", (String)disp)%></button>
+                            <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=al%>"><%=lang.translate("fore.select.lebel", disp)%></button>
                         <%} else {%>
-                            <input class="form-control" type="<%=type%>" name="<%=name%>" value="" <%=rqrd%>/>
+                            <input class="form-control" <%="type=\""+type+"\" name=\""+name+"\" "+rqrd%>/>
                         <%} // End If %>
                     </div>
                 <%} // Edn If %>
@@ -151,3 +139,14 @@
         </div>
     </form>
 </div>
+<script type="text/javascript">
+(function($) {
+    var context = $("#<%=id%>");
+    
+    context.hsForm({
+        loadUrl: "<%=_module%>/<%=_entity%>/retrieve.act?id=\${id}&md=\${md}",
+        saveUrl: "<%=_module%>/<%=_entity%>/<%=_action%>.act",
+        _fill__pick: hsFormFillPick
+    });
+})( jQuery );
+</script>

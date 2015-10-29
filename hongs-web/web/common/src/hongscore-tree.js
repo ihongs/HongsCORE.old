@@ -46,6 +46,8 @@ function HsTree(opts, context) {
         }
     }
 
+    loadUrl = hsFixPms(loadUrl, loadBox);
+
     var that = this;
     var m, n, u;
 
@@ -185,6 +187,14 @@ function HsTree(opts, context) {
         });
     }
 
+    //** 顶级节点 **/
+
+    var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
+                 +rootInfo["id"]+'"></div>')
+                 .appendTo(treeBox);
+    this.fillInfo(rootInfo,rootBox);
+    this.select  (rootInfo["id"]  );
+
     //** 搜索服务 **/
 
     if (findBox.length) {
@@ -194,18 +204,10 @@ function HsTree(opts, context) {
         });
     }
 
-    //** 顶级节点 **/
-
-    var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
-                 +rootInfo["id"]+'"></div>')
-                 .appendTo(treeBox);
-    this.fillInfo(rootInfo,rootBox);
-    this.select  (rootInfo["id"]  );
-
     //** 立即加载 **/
 
     if (loadUrl) {
-        this.load(rootInfo["id"], hsFixPms(loadUrl, loadBox), loadBox);
+        this.load(rootInfo["id"], loadUrl, loadBox);
     }
 }
 HsTree.prototype = {
@@ -465,7 +467,7 @@ HsTree.prototype = {
 };
 
 jQuery.fn.hsTree = function(opts) {
-    return this._hsConstr(opts, HsTree);
+    return this._hsModule(HsTree, opts);
 };
 
 (function($) {

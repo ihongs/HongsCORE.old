@@ -1,9 +1,8 @@
-<h2>${DO}用户</h2>
-<div id="member-user-form">
-    <object class="config" name="hsForm" data="">
-        <param name="loadUrl" value="manage/member/user/info.act?md=0&-with-roles=1"/>
-        <param name="saveUrl" value="manage/member/user/save.act"/>
-    </object>
+<h2>{DO}用户</h2>
+<div id="member-user-form"
+     data-module="hsForm"
+     data-load-url="manage/member/user/info.act?md=0&-with-roles=1"
+     data-save-url="manage/member/user/save.act">
     <form action="" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id"/>
         <input type="hidden" name="depts.0.dept_id" data-pn="dept_id"/>

@@ -36,8 +36,10 @@ function HsForm(opts, context) {
 
     var loadArr = hsSerialArr(loadBox);
     if (loadUrl) {
-        loadUrl = hsFixPms   (loadUrl  ,  loadArr);
-        loadArr = hsSerialMix(hsSerialArr(loadUrl), loadArr);
+        loadUrl = hsFixPms(loadUrl, loadArr);
+    }
+    if (saveUrl) {
+        saveUrl = hsFixPms(loadUrl, loadArr);
     }
 
     /**
@@ -265,10 +267,10 @@ HsForm.prototype = {
                 }
             } else
             if (!rst.msg) {
-                 rst.msg  =  hsGetLang( 'error.unkwn' , '');
+                 rst.msg  =  hsGetLang('error.unkwn' , '');
             }
             if ( rst.msg) {
-                jQuery.hsNote(rst.msg, 'alert-warning', -1);
+                jQuery.hsNote(rst.msg, 'alert-danger', -1);
             }
         } else {
             var evt = jQuery.Event("saveBack");
@@ -745,7 +747,7 @@ HsForm.prototype = {
 };
 
 jQuery.fn.hsForm = function(opts) {
-    return this._hsConstr(opts, HsForm);
+    return this._hsModule(HsForm, opts);
 };
 
 (function($) {

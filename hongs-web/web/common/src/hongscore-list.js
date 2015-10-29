@@ -21,15 +21,19 @@ function HsList(opts, context) {
     this.sortKey = hsGetValue(opts, "sortKey", hsGetConf("ob.key", "ob"));
     this.pageKey = hsGetValue(opts, "pageKey", hsGetConf("pn.key", "pn"));
     this.pagsKey = hsGetValue(opts, "pagsKey", hsGetConf("gn.key", "gn"));
-    this.pagsNum = hsGetValue(opts, "pagsNum", 0);
+    this.rowsKey = hsGetValue(opts, "rowsKey", hsGetConf("pn.key", "rn"));
+    this.pagsNum = hsGetValue(opts, "pagsKey", "");
 
     // 逐层解析分页数量
-    if (! this.pagsNum || this.pagsNum == "0") {
-        var arr = hsSerialMix(hsSerialArr(loadUrl), hsSerialArr(loadBox));
-        this.pagsNum = hsGetSeria(arr, this.pagsKey);
-    if (! this.pagsNum || this.pagsNum == "0") {
-        this.pagsNum = hsGetConf ("pags.for.page",5);
-    }}
+    var arr = hsSerialMix(hsSerialArr(loadUrl), hsSerialArr(loadBox));
+    this.pagsNum = hsGetSeria(arr, this.pagsKey) || this.pagsNum;
+    this.rowsNum = hsGetSeria(arr, this.rowsKey);
+    if (this.pagsNum == "") {
+        this.pagsNum = hsGetConf("pags.for.page", 5 );
+    }
+    if (this.rowsNum == "") {
+        this.pagsNum = hsGetConf("pags.for.page", 20);
+    }
 
     this.context = context;
     this.loadBox = loadBox;
@@ -44,6 +48,8 @@ function HsList(opts, context) {
             this[k]  =  opts[k];
         }
     }
+
+    loadUrl = hsFixPms(loadUrl, loadBox);
 
     var that = this;
     var m, n, u;
@@ -175,7 +181,7 @@ function HsList(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        this.load(hsFixPms(loadUrl, loadBox), loadBox);
+        this.load(loadUrl, loadBox);
     }
 }
 HsList.prototype = {
@@ -263,7 +269,7 @@ HsList.prototype = {
                 }
             }
         }
-        
+
         for (i = 0; i < list.length; i ++) {
             tr = jQuery('<tr></tr>');
             tb.append(tr);
@@ -570,7 +576,7 @@ function hsListFillItem(list) {
 }
 
 jQuery.fn.hsList = function(opts) {
-    return this._hsConstr(opts, HsList);
+    return this._hsModule(HsList, opts);
 };
 
 (function($) {

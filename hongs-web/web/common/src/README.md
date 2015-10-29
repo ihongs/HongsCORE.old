@@ -41,41 +41,21 @@
 
 注: 将以上代码加入 head 中, 注意 link 的 href 和 script 的 src 路径; 这里用 base 定义了基础路径, 以下的相对路径均基于此.
 
-## HsTree 树型组件的用法
-
-    <div id="member_dept_tree">
-        <object class="config" name="hsTree" data="">
-            <param name="loadUrl" value="manage/member/dept/list.act"/>
-            <param name="linkUrls#0" value="['.main-context','manage/member/user/list.html?dept_id={ID}']"/>
-            <param name="openUrls#0" value="['.create','manage/member/dept/form.html?pid={ID}','@']"/>
-            <param name="openUrls#1" value="['.modify','manage/member/dept/form.html?id={ID}','@']"/>
-            <param name="sendUrls#0" value="['.delete','manage/member/dept/delete.act','您确定要删除此部门?']"/>
-            <param name="rootName" value="组织架构"/>
-        </object>
-        <div class="toolbox btn-group">
-            <button type="button" class="create btn btn-default">添加部门</button>
-            <button type="button" class="modify for-select btn btn-default">修改</button>
-            <button type="button" class="delete for-select btn btn-danger" >删除</button>
-        </div>
-        <div class="treebox"></div>
-    </div>
-
 ## HsList 列表组件的用法
 
-    <div id="member_user_list">
-        <object class="config" name="hsList" data="">
-            <param name="loadUrl" value="('manage/member/user/list.act?dept_id='+H$('&dept_id',this))"/>
-            <param name="openUrls#0" value="['.create','manage/member/user/form.html?dept_id='+H$('&dept_id',this),'@']"/>
-            <param name="openUrls#1" value="['.modify','manage/member/user/form.html?id={ID}','@']"/>
-            <param name="sendUrls#0" value="['.delete','manage/member/user/delete.act','您确定要删除此用户?']"/>
-        </object>
+    <div id="member-user-list"
+         data-module="hsList"
+         data-load-url="manage/member/user/list.act?dept_id=${dept_id}"
+         data-open-urls-0="['.create','manage/member/user/form.html?dept_id=${dept_id}','@']"
+         data-open-urls-1="['.modify','manage/member/user/form.html?id={ID}','@']"
+         data-send-urls-0="['.delete','manage/member/user/delete.act','您确定要删除此用户?']">
         <div>
-            <div class="toolbox col-md-9 btn-group">
+            <div class="toolbox col-md-8 btn-group">
                 <button type="button" class="create btn btn-default">创建用户</button>
                 <button type="button" class="modify for-choose btn btn-default">修改</button>
-                <button type="button" class="delete for-checks btn btn-danger" >删除</button>
+                <button type="button" class="delete for-checks btn btn-warning">删除</button>
             </div>
-            <form class="findbox col-md-3 input-group" action="" method="POST">
+            <form class="findbox col-md-4 input-group" action="" method="POST">
                 <input type="search" name="wd" class="form-control input-search"/>
                 <span class="input-group-btn">
                     <button type="submit" class="btn btn-default">查找</button>
@@ -86,13 +66,13 @@
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
-                        <th data-fn="id[]" data-ft="\_check" class="\_check">
+                        <th data-fn="id[]" data-ft="_check" class="_check">
                             <input type="checkbox" class="checkall" name="id[]"/>
                         </th>
                         <th data-fn="name" class="sortable">名称</th>
                         <th data-fn="username" class="sortable">账号</th>
-                        <th data-fn="mtime" data-ft="\_htime" class="\_htime sortable">修改时间</th>
-                        <th data-fn="ctime" data-ft="\_htime" class="\_htime sortable">创建时间</th>
+                        <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
+                        <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -101,55 +81,49 @@
         <div class="pagebox"></div>
     </div>
 
+## HsTree 树型组件的用法
+
+    <div id="member-dept-tree"
+         data-module="hsTree"
+         data-load-url="manage/member/dept/list.act"
+         data-link-urls-0="['.main-context','manage/member/user/list.html?dept_id={ID}']"
+         data-open-urls-0="['.create','manage/member/dept/form.html?pid={ID}','@']"
+         data-open-urls-1="['.modify','manage/member/dept/form.html?id={ID}','@']"
+         data-send-urls-0="['.delete','manage/member/dept/delete.act','您确定要删除此部门?']"
+         data-root-name="组织架构">
+        <div class="toolbox btn-group">
+            <button type="button" class="create btn btn-default">添加</button>
+            <button type="button" class="modify for-select btn btn-default">修改</button>
+            <button type="button" class="delete for-select btn btn-warning">删除</button>
+        </div>
+        <div class="treebox"></div>
+   </div>
+
 ## HsForm 表单组件的用法
 
-    <div id="member_user_form">
-        <object class="config" name="hsForm" data="">
-            <param name="loadUrl" value="manage/member/user/info.act"/>
-            <param name="saveUrl" value="manage/member/user/save.act"/>
-        </object>
+    <h2>{DO}部门</h2>
+    <div id="member-dept-form"
+         data-module="hsForm"
+         data-load-url="manage/member/dept/info.act"
+         data-save-url="manage/member/dept/save.act">
         <form action="" method="POST">
             <input type="hidden" name="id"/>
-            <input type="hidden" name="depts.0.dept_id" data-pn="dept_id"/>
+            <input type="hidden" name="pid"/>
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-6 center-block">
                     <div class="form-group">
-                        <label class="control-label">邮箱</label>
-                        <input type="email" name="username" class="form-control" required="required" data-unique="manage/member/user/unique.act?id={id}"/>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">口令</label>
-                        <input type="password" name="password" class="form-control" required="required" data-relate="passcode"/>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">重复口令</label>
-                        <input type="password" name="passcode" class="form-control" required="required" data-repeat="password" data-message="请重复输入口令" placeholder="请重复输入口令"/>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label class="control-label">昵称</label>
-                        <input type="text" name="name" class="form-control" required="required" data-unique="manage/member/user/unique.act?id={id}"/>
+                        <label class="control-label">名称</label>
+                        <input type="text" name="name" class="form-control" required="required"/>
                     </div>
                     <div class="form-group">
                         <label class="control-label">备注</label>
                         <textarea name="note" class="form-control"></textarea>
                     </div>
+                    <div>
+                        <button type="submit" class="ensure btn btn-primary">提交</button>
+                        <button type="button" class="cancel btn btn-link">取消</button>
+                    </div>
                 </div>
-            </div>
-            <div>
-            <button type="submit" class="ensure btn btn-primary">提交</button>
-            <button type="button" class="cancel btn btn-link">取消</button>
             </div>
         </form>
     </div>
-    <script type="text/javascript">
-        (function($) {
-            // 修改时密码为选填
-            $("#member_user_form").on("loadBack", function() {
-                if ($(this).find("[name=id]").val()) {
-                    $(this).find(":password").removeAttr("required");
-                }
-            });
-        })(jQuery);
-    </script>

@@ -1,14 +1,10 @@
-<h2>${DO}表单</h2>
-<div id="hongs-module-form" class="cols-form">
-    <object class="config" name="hsCols" data="">
-    </object>
+<h2>{DO}表单</h2>
+<div id="hongs-module-form" class="cols-form" data-module="hsCols">
     <div class="row clearfix">
         <div class="col-md-6">
-            <div>
-                <object class="config" name="hsForm" data="">
-                    <param name="loadUrl" value="manage/module/form/info.act"/>
-                    <param name="saveUrl" value="manage/module/form/save.act"/>
-                </object>
+            <div data-module="hsForm"
+                 data-load-url="manage/module/form/info.act"
+                 data-save-url="manage/module/form/save.act">
                 <form class="record-form">
                     <input type="hidden" name="id"/>
                     <input type="hidden" name="unit_id" data-pn="unit_id"/>
@@ -24,9 +20,7 @@
                     </div>
                 </form>
             </div>
-            <div>
-                <object class="config" name="hsForm" data="">
-                </object>
+            <div data-module="hsForm">
                 <form class="target-form">
                     <div class="form-group" data-type="line">
                         <legend class="clearfix" data-valtype="text">
@@ -162,7 +156,7 @@
             </form>
         </div>
     </div>
-    
+
     <div style="display:none;">
         <div class="widget-pane widget-pane-line">
             <div class="form-group">
@@ -375,7 +369,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">

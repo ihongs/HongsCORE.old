@@ -1,9 +1,8 @@
-<h2>${DO}部门</h2>
-<div id="member-dept-form">
-    <object class="config" name="hsForm" data="">
-        <param name="loadUrl" value="manage/member/dept/info.act"/>
-        <param name="saveUrl" value="manage/member/dept/save.act"/>
-    </object>
+<h2>{DO}部门</h2>
+<div id="member-dept-form"
+     data-module="hsForm"
+     data-load-url="manage/member/dept/info.act"
+     data-save-url="manage/member/dept/save.act">
     <form action="" method="POST">
         <input type="hidden" name="id"/>
         <input type="hidden" name="pid"/>

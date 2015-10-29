@@ -1434,9 +1434,9 @@ $.fn.hsInit = function(cnf) {
         cnf.title = h.text();
     }
     if (cnf.title) {
-        cnf.title = H$("&id", box)?
-            hsGetLang(cnf.title, {'DO':cnf.update||hsGetLang("form.update")}):
-            hsGetLang(cnf.title, {'DO':cnf.create||hsGetLang("form.create")});
+        cnf.title = H$("&id" , box )?
+            cnf.title.replace('{DO}', cnf.update || hsGetLang("form.update")):
+            cnf.title.replace('{DO}', cnf.create || hsGetLang("form.create"));
     }
     if (h.length ) {
         h.text ( cnf.title );

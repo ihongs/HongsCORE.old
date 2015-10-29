@@ -1,3 +1,3 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page pageEncoding="UTF-8" contentType="text/html" trimDirectiveWhitespaces="true"%>
 <% request.setAttribute("form.action", "update"); %>
 <%@include file="form.jsp"%>

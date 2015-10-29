@@ -1,37 +1,32 @@
-<%@page import="java.util.Map"%>
 <%@page import="app.hongs.CoreLocale"%>
 <%@page import="app.hongs.action.ActionDriver"%>
 <%@page import="app.hongs.action.NaviMap"%>
+<%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page pageEncoding="UTF-8"%>
+<%@page contentType="text/html"%>
+<%@page trimDirectiveWhitespaces="true"%>
 <%
     int i;
-    String _module, n, u;
+    String _module, _entity;
     _module = ActionDriver.getWorkPath(request);
-    try {
-        i = _module.lastIndexOf('/');
-        _module = _module.substring(1, i);
-        i = _module.lastIndexOf('/');
-        n = _module.substring(0 , i);
-        u = _module;
-    } catch (StringIndexOutOfBoundsException e) {
-        throw new ServletException("URL Error");
-    }
+    i = _module.lastIndexOf('/');
+    _module = _module.substring(1, i);
+    i = _module.lastIndexOf('/');
+    _entity = _module.substring(i+ 1);
+    _module = _module.substring(0, i);
 
-    CoreLocale  lang = CoreLocale.getInstance().clone();
-                              lang.loadIgnrFNF(_module);
-    NaviMap     site =     NaviMap.getInstance(_module);
-    Map         cell =        site.getMenu    (_module + "/");
-    String     title = lang.translate(cell.get("disp").toString());
+    CoreLocale lang = CoreLocale.getInstance().clone();
+               lang.loadIgnrFNF(_module);
+    NaviMap    site = NaviMap.getInstance(_module+"/"+_entity);
+    Map        menu = site.getMenu(_module +"/"+ _entity +"/");
+
+    String nm = menu == null ? "" : (String) menu.get( "disp");
 %>
-<!--
-Hong's Auto Info Manage
-自动信息管理
-//-->
 <!doctype html>
 <html>
     <head>
-        <title>HongsCORE::<%=title%></title>
+        <title>HongsCORE::<%=nm%></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <base href="<%=request.getContextPath()%>/">
@@ -60,7 +55,7 @@ Hong's Auto Info Manage
         <div id="notebox"></div>
         <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="row" data-load="manage/head.jsp?n=<%=n%>&u=<%=u%>"></div>
+                <div class="row" data-load="manage/head.jsp?m=<%=_module%>&n=<%=_entity%>"></div>
             </div>
         </nav>
         <div id="bodybox" class="container">
@@ -69,13 +64,13 @@ Hong's Auto Info Manage
                     <li class="active"><a href="javascript:;">加载中...</a></li>
                 </ul>
                 <div class="panes">
-                    <div class="openbox" data-load="<%=_module%>/list.html"></div>
+                    <div class="openbox" data-load="<%=_module%>/<%=_entity%>/list.html"></div>
                 </div>
             </div>
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
-                <div class="row" data-load="manage/foot.jsp?m=<%=n%>&u=<%=u%>"></div>
+                <div class="row" data-load="manage/foot.jsp?m=<%=_module%>&n=<%=_entity%>"></div>
             </div>
         </nav>
     </body>
