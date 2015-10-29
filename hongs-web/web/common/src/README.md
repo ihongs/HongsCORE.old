@@ -1,7 +1,7 @@
 # HongsCORE framework for Javascript
 
 * 文档版本: 15.09.20
-* 软件版本: 0.3.8-20150922
+* 软件版本: 0.3.8-20151030
 * 设计作者: 黄弘(Kevin Hongs)
 * 技术支持: kevin.hongs@gmail.com
 
