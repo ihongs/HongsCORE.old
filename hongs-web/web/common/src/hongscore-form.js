@@ -265,10 +265,10 @@ HsForm.prototype = {
                 }
             } else
             if (!rst.msg) {
-                alert(hsGetLang("error.unkwn"));
+                 rst.msg  =  hsGetLang( 'error.unkwn' , '');
             }
             if ( rst.msg) {
-                alert(rst.msg);
+                jQuery.hsNote(rst.msg, 'alert-warning', -1);
             }
         } else {
             var evt = jQuery.Event("saveBack");
@@ -279,7 +279,7 @@ HsForm.prototype = {
             this.loadBox.hsClose();
 
             // 完成提示
-            if (  rst.msg ) {
+            if ( rst.msg) {
                 jQuery.hsNote(rst.msg, 'alert-success');
             }
         }

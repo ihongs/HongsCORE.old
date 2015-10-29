@@ -271,7 +271,7 @@ public class ApisAction
         _API_RSP.add("ok");
         _API_RSP.add("err");
         _API_RSP.add("msg");
-        _API_RSP.add("goto");
+        _API_RSP.add("ref");
         _API_RSP.add("data");
     }
 

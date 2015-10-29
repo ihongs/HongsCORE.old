@@ -198,12 +198,13 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
         "ok": true成功 false失败,
         "err": "错误代码",
         "msg": "响应消息",
+        "ref": "跳转地址",
         其他...
     }
 
-其他数据通常有:
+ref 通常没有, 无访问权限而需要跳转时才会设置. 其他数据通常有:
 
-    // 列表数据, 在 retrieve,list 动作返回
+    // 列表信息, 在 retrieve,list 动作返回
     "list": [
         {
             "字段": "取值",
@@ -212,13 +213,13 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
         ...
     ],
 
-    // 信息单元, 在 retrieve,info,create 动作返回
+    // 单元信息, 在 retrieve,info,create 动作返回
     "info": {
         "字段": "取值",
         ...
     }
 
-    // 枚举列表, 在 retrieve,list,info 动作返回
+    // 枚举信息, 在 retrieve,list,info 动作返回
     "enum": {
         "字段": [
             ["取值", "名称"],
@@ -230,11 +231,21 @@ action 和 cmdlet 使用 @Action 和 @Cmdlet 注解来设置访问路径, 如果
     // 分页信息, 在 retrieve,list 动作返回
     "page": {
         "pagecount": 总的页数,
-        "rowscount": 当前行数
+        "rowscount": 当前行数,
+        ...
+    }
+
+    // 错误信息, 在 create,update 动作返回
+    "errs": {
+        "字段": "错误",
+        ...
     }
 
     // 数量信息, 在 update,delete 动作返回
     "rows": 操作行数
+
+    // 验证信息, 在 unique,exists 动作返回
+    "sure": 验证真假
 
 在调用 API(REST) 时, 可将所有请求数据采用 JSON 或 URLEncode 编码放入 !data 参数传递; 如加请求参数 !wrap=1 可将全部返回数据放入 data 键下; 如加请求参数 !scok=1 则无论是否异常总是返回 200 状态; 可加请求参数 !conv=all2str 启用数据转换规则, 其取值可以为:
 

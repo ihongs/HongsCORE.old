@@ -65,10 +65,11 @@ function H$() {
 /**
  * 标准化返回对象
  * @param {Object|String} rst JSON对象/JSON文本或错误消息
- * @param {Boolean} qut 静默, 不显示消息
+ * @param {Boolean} qut 不显示消息, 忽略 msg
+ * @param {Boolean} pus 不进行跳转, 忽略 ref
  * @return {Object}
  */
-function hsResponObj(rst, qut) {
+function hsResponObj(rst, qut, pus) {
     if (typeof(rst.responseText) !== "undefined") {
         rst  = rst.responseText;
     }
@@ -116,28 +117,29 @@ function hsResponObj(rst, qut) {
             rst.msg =  "" ;
         }
         // 成功失败消息处理 (失败则直接弹对话框)
-        if (! qut && ! self.HsGONE) {
+        if (! qut) {
             if (rst.ok) {
                 if (rst.msg) {
                     jQuery.hsNote(rst.msg, 'alert-success');
                 }
             } else {
                 if (rst.msg) {
-                    alert(rst.msg); // alert-danger;
+                    jQuery.hsNote(rst.msg, 'alert-warning', -1);
                 } else {
-                    alert(hsGetLang("error.unkwn"));
+                    rst.msg  =  hsGetLang( 'error.unkwn'  );
+                    jQuery.hsNote(rst.msg, 'alert-warning', -1);
                 }
             }
         }
         // 服务器端要求跳转 (通常为未登录无权限)
-        if (typeof(rst["goto"]) !== "undefined") {
-            if/**/(rst["goto"]) {
-                location.assign(rst["goto"]);
-            } else {
-                location.reload();
+        if (! pus) {
+            if (typeof(rst.ref) !== "undefined") {
+                if (rst.ref) {
+                    location.assign(rst.ref);
+                } else {
+                    location.reload(  );
+                }
             }
-            self.HsGONE = true;
-            delete rst["goto"];
         }
         // 针对特定数据结构
         if (typeof(rst['data']) !== "undefined") {
@@ -1088,6 +1090,12 @@ $.hsNote = function(msg, cls, sec) {
     var btn = div.find( "button" );
     var box = div.find(".notebox").append(msg);
     var ctr = $("#notebox").append(div).show();
+
+    // 模态提示框
+    if (sec == -1 ) {
+        div.modal();
+        return  box;
+    }
 
     div.slideDown(200);
     btn.click(function() {
