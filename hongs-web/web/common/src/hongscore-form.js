@@ -39,7 +39,7 @@ function HsForm(opts, context) {
         loadUrl = hsFixPms(loadUrl, loadArr);
     }
     if (saveUrl) {
-        saveUrl = hsFixPms(loadUrl, loadArr);
+        saveUrl = hsFixPms(saveUrl, loadArr);
     }
 
     /**
@@ -62,8 +62,8 @@ function HsForm(opts, context) {
      * 否则调用 loadBack 进行选项初始化
      */
     if (loadUrl
-    && (hsGetSeria(loadArr, idKey)
-    ||  hsGetSeria(loadArr, mdKey))) {
+    && (hsGetParam(loadUrl, idKey)
+    ||  hsGetParam(loadUrl, mdKey))) {
         this.load (loadUrl, loadArr);
     } else {
         this.loadBack( {} );
