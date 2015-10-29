@@ -181,7 +181,7 @@ function HsList(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        this.load(loadUrl, loadBox);
+        this.load(loadUrl, findBox);
     }
 }
 HsList.prototype = {
@@ -310,13 +310,13 @@ HsList.prototype = {
             case  2 :
             case "2":
                 hsSetSeria(this._data, "page", page.pagecount || 1);
-                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.outof')+'</div>');
+                this.pageBox.empty().append('<div class="alert alert-info">'+hsGetLang('list.outof')+'</div>');
                 this.listBox.hide( );
                 this.load();
                 return;
             case  1 :
             case "1":
-                this.pageBox.empty().append('<div class="alert alert-warning">'+hsGetLang('list.empty')+'</div>');
+                this.pageBox.empty().append('<div class="alert alert-info">'+hsGetLang('list.empty')+'</div>');
                 this.listBox.hide( );
                 return;
             default:

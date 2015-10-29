@@ -106,9 +106,8 @@ textarea.form-control,
     left: 0;
     top: 0;
 }
-#notebox .alert {
-    margin: 0 auto 1px auto;
-    width: 600px;
+#notebox .alert, .modal>.alert {
+    margin: 0;
 }
 
 #headbox ul.nav {

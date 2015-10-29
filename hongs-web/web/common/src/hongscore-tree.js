@@ -190,10 +190,10 @@ function HsTree(opts, context) {
     //** 顶级节点 **/
 
     var  rootBox = jQuery('<div class="tree-node tree-root" id="tree-node-'
-                 +rootInfo["id"]+'"></div>')
+                 +rootInfo.id+'"></div>')
                  .appendTo(treeBox);
     this.fillInfo(rootInfo,rootBox);
-    this.select  (rootInfo["id"]  );
+    this.select  (rootInfo.id);
 
     //** 搜索服务 **/
 
@@ -207,7 +207,7 @@ function HsTree(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        this.load(rootInfo["id"], loadUrl, loadBox);
+        this.load(rootInfo.id, loadUrl);
     }
 }
 HsTree.prototype = {

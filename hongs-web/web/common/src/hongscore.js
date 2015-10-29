@@ -124,10 +124,9 @@ function hsResponObj(rst, qut, pus) {
                 }
             } else {
                 if (rst.msg) {
-                    jQuery.hsNote(rst.msg, 'alert-danger', -1);
+                    /*err*/ alert(rst.msg);
                 } else {
-                    rst.msg  =  hsGetLang( 'error.unkwn' , '');
-                    jQuery.hsNote(rst.msg, 'alert-danger', -1);
+                    /*err*/ alert(hsGetLang('error.unkwn'));
                 }
             }
         }
@@ -1067,24 +1066,23 @@ $.hsAjax = function(url, settings) {
     return $.jqAjax( hsFixUri(url) , settings );
 };
 $.hsOpen = function(url, data, complete) {
-    var div = $('<div class="modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header">'
+    var div = $('<div class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header">'
               + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
-              + '<h4 class="modal-title">' +hsGetLang("opening")+ '</h4>'
+              + '<h4 class="modal-title">'+hsGetLang("opening")+'</h4>'
               + '</div><div class="modal-body openbox">'
               + '</div></div></div></div>')
               .css('z-index', 99999);
     var box = div.find( '.openbox' );
-    div.modal();
-
     box.hsLoad(url, data, complete );
-    return box;
+    div.modal();
+    return  box;
 };
 $.hsNote = function(msg, cls, sec) {
     if (! cls) cls = "alert-info";
     if (! sec) sec = 5;
 
     var div = $('<div class="alert alert-dismissable">'
-              + '<button type="button" class="close">&times;</button>'
+              + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
               + '<div class="alert-body notebox"></div></div>')
              .addClass(cls);
     var box = div.find(".notebox").append(msg);
@@ -1092,29 +1090,30 @@ $.hsNote = function(msg, cls, sec) {
 
     // 模态消息
     if (sec == -1 ) {
-        div.wrap('<div class="modal"></div>' )
-           .wrap('<div class="modal-dialog"></div>');
+        div.wrap('<div class="modal fade"></div>')
         div = div.closest ( ".modal" );
-        btn.click(function( ) {
-            div.modal("hide");
-            div.remove();
+        div.on("hide.bs.modal",
+                  function() {
+            div.remove(/****/);
+        });
+        btn.click(function() {
+            div.modal ("hide");
         });
         div.modal();
         return  box;
     }
 
     // 消息容器
-    var ctr = $("#notebox");
-    if (ctr.length  ==  0 ) {
+    var ctr = $( "#notebox"  );
+    if (ctr.length  ==  0) {
         ctr = $('<div id="notebox"></div>')
                 .prependTo( document.body );
     }
-    ctr.show( ).append(div);
+    ctr.show().append(div);
 
     // 延时消失
-    div.slideDown(200);
     btn.click ( function() {
-        div.slideUp( 200 , function() {
+        div.fadeOut(1000 , function() {
             div.remove(  );
             if (ctr.children().size() == 0) {
                 ctr.hide();
@@ -1324,9 +1323,9 @@ $.fn.hsReady = function() {
 
     // 组件化
     box.find("[data-module]").each( function() {
-        var prnt = $(this).parent (  );
-        var func = $(this).attr("data-module");
+        var prnt = $(this);
         var opts = $(this)._hsConfig();
+        var func = $(this).attr("data-module");
         if (typeof(prnt[func]) === "function") {
             prnt[func]( opts );
         }
@@ -1428,7 +1427,7 @@ $.fn.hsInit = function(cnf) {
     var box = $(this);
 
     // 自动提取标题, 替换编辑文字
-    // 如主键不叫id, 打开编辑页面, 则需加上id=1
+    // 如主键不叫id, 打开编辑页面, 则需加上id=0
     var h = box.children("h1,h2,h3");
     if (h.length ) {
         cnf.title = h.text();
@@ -1536,7 +1535,7 @@ $.fn._hsTarget = function(selr) {
 $.fn._hsConfig = function() {
     var that = this.get(0);
     var conf = this.data();
-    var nreg = /^data-data-\d+$/;
+    var nreg = /^data-\d+$/;
     var treg = /-\d+$/;
     var freg = /-\w/g ;
     var frep = function(n) {
