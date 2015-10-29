@@ -124,10 +124,10 @@ function hsResponObj(rst, qut, pus) {
                 }
             } else {
                 if (rst.msg) {
-                    jQuery.hsNote(rst.msg, 'alert-warning', -1);
+                    jQuery.hsNote(rst.msg, 'alert-danger', -1);
                 } else {
-                    rst.msg  =  hsGetLang( 'error.unkwn'  );
-                    jQuery.hsNote(rst.msg, 'alert-warning', -1);
+                    rst.msg  =  hsGetLang( 'error.unkwn' , '');
+                    jQuery.hsNote(rst.msg, 'alert-danger', -1);
                 }
             }
         }
@@ -1087,26 +1087,41 @@ $.hsNote = function(msg, cls, sec) {
               + '<button type="button" class="close">&times;</button>'
               + '<div class="alert-body notebox"></div></div>')
              .addClass(cls);
-    var btn = div.find( "button" );
     var box = div.find(".notebox").append(msg);
-    var ctr = $("#notebox").append(div).show();
+    var btn = div.find( "button" );
 
-    // 模态提示框
+    // 模态消息
     if (sec == -1 ) {
+        div.wrap('<div class="modal"></div>' )
+           .wrap('<div class="modal-dialog"></div>');
+        div = div.closest ( ".modal" );
+        btn.click(function( ) {
+            div.modal("hide");
+            div.remove();
+        });
         div.modal();
         return  box;
     }
 
+    // 消息容器
+    var ctr = $("#notebox");
+    if (ctr.length  ==  0 ) {
+        ctr = $('<div id="notebox"></div>')
+                .prependTo( document.body );
+    }
+    ctr.show( ).append(div);
+
+    // 延时消失
     div.slideDown(200);
-    btn.click(function() {
-        div.slideUp(200, function() {
-            div.remove();
+    btn.click ( function() {
+        div.slideUp( 200 , function() {
+            div.remove(  );
             if (ctr.children().size() == 0) {
                 ctr.hide();
             }
         });
     });
-    setTimeout(function() {
+    setTimeout( function() {
         btn.click();
     } , sec * 1000);
 
@@ -1303,17 +1318,19 @@ $.fn.hsReady = function() {
     });
 
     // 初始化
-    if (! box.children("object.config[name=hsInit]").size()) {
+    if (! box.children("[data-module=hsInit]").size()) {
         $(this).hsInit();
     }
 
-    box.find("object.config").each(function( ) {
-        var prnt = $(this).parent();
-        var func = $(this).attr("name");
-        var opts = $(this)._hsConfig( );
-        if (typeof(prnt[func]) === "function")
+    // 组件化
+    box.find("[data-module]").each( function() {
+        var prnt = $(this).parent (  );
+        var func = $(this).attr("data-module");
+        var opts = $(this)._hsConfig();
+        if (typeof(prnt[func]) === "function") {
             prnt[func]( opts );
-    }).remove();
+        }
+    });
 
     // 在加载前触发事件
     box.trigger("hsReady");
@@ -1366,6 +1383,41 @@ $.fn.hsTadd = function(flg) {
     } else {
         return [tab, $(box.data("tabs")).children( ).eq(tab.index())];
     }
+};
+
+// 国际化
+$.fn.hsI18n = function(rep) {
+    var box = $(this);
+    var lng;
+
+    if (box.attr("placeholder")) {
+        lng = box.attr("placeholder");
+        lng = hsGetLang(lng, rep);
+        box.attr("placeholder" , lng);
+    }
+    if (box.attr("title")) {
+        lng = box.attr("title");
+        lng = hsGetLang(lng, rep);
+        box.attr("title" , lng);
+    }
+    if (box.attr("alt")) {
+        lng = box.attr("alt");
+        lng = hsGetLang(lng, rep);
+        box.attr("alt" , lng);
+    }
+
+    if (box.attr("data-i18n")) {
+        lng = box.attr("data-i18n");
+        lng = hsGetLang(lng, rep);
+        box.text ( lng );
+    } else
+    if ($(this).text()) {
+        lng = box.text();
+        lng = hsGetLang(lng, rep);
+        box.text ( lng );
+    }
+
+    return box;
 };
 
 // 初始化
@@ -1427,96 +1479,6 @@ $.fn.hsInit = function(cnf) {
     return box;
 };
 
-// 国际化
-$.fn.hsI18n = function(rep) {
-    var box = $(this);
-    var lng;
-
-    if (box.attr("placeholder")) {
-        lng = box.attr("placeholder");
-        lng = hsGetLang(lng, rep);
-        box.attr("placeholder" , lng);
-    }
-    if (box.attr("title")) {
-        lng = box.attr("title");
-        lng = hsGetLang(lng, rep);
-        box.attr("title" , lng);
-    }
-    if (box.attr("alt")) {
-        lng = box.attr("alt");
-        lng = hsGetLang(lng, rep);
-        box.attr("alt" , lng);
-    }
-
-    if (box.attr("data-i18n")) {
-        lng = box.attr("data-i18n");
-        lng = hsGetLang(lng, rep);
-        box.text ( lng );
-    } else
-    if ($(this).text()) {
-        lng = box.text();
-        lng = hsGetLang(lng, rep);
-        box.text ( lng );
-    }
-
-    return box;
-};
-
-$.fn._hsConfig = function() {
-    var obj = {};
-    var arr = this.find("param");
-    for(var i = 0; i < arr.length; i ++) {
-        var n = jQuery(arr[i]).attr("name" );
-        var v = jQuery(arr[i]).attr("value");
-        n = $.trim(n);
-        v = $.trim(v);
-        switch (v.substring(0, 2)) {
-        case "S:": // String
-            v = v.substring(2);
-            break;
-        case "I:": // Integer
-            v = v.substring(2);
-            v =  parseInt  (v);
-            break;
-        case "F:": // Float
-        case "N:": // Number
-            v = v.substring(2);
-            v =  parseFloat(v);
-            break;
-        case "B:": // Boolean
-            v = v.substring(2);
-            v = !/(false|not|no|f|n|0|)/i.test(v);
-            break;
-        default:
-            (function () {
-                if ( /^(\[.*\]|\{.*\})$/ .test(v))
-                    v = eval('('+v+')');
-                else  if  ( /^(\(.*\))$/ .test(v))
-                    v = eval(v );
-            }).call(this.get(0));
-        }
-        if (n) {
-            // IE 对相同 name 的 param 只取一个
-            // 故需要加编号(#)来表示数组
-            n = n.replace(/#.*$/ , ".");
-            hsSetValue(obj, n, v);
-        };
-    }
-
-    // 由于 jQuery.fn.data 在 object 无效
-    // 故从 conf 属性里提取额外配置
-    this.each(function() {
-        var c = this["conf"];
-        if (c !== undefined) {
-            for(var n in c ) {
-                var v  = c[n];
-                hsSetValue(obj, n, v);
-            }
-        }
-    });
-
-    return obj;
-};
 $.fn._hsTarget = function(selr) {
     var elem = this;
     var flag = selr.charAt(0);
@@ -1570,7 +1532,63 @@ $.fn._hsTarget = function(selr) {
             return $(selr);
     }
 };
-$.fn._hsConstr = function(opts, func) {
+
+$.fn._hsConfig = function() {
+    var that = this.get(0);
+    var conf = this.data();
+    var nreg = /^data-data-\d+$/;
+    var treg = /-\d+$/;
+    var freg = /-\w/g ;
+    var frep = function(n) {
+        return n.substring(1).toUpperCase();
+    };
+    var vrep = function(v) {
+        if ( /^(\[.*\]|\{.*\})$/.test( v ))
+            v = eval('('+v+')');
+        else  if  ( /^(\(.*\))$/.test( v ))
+            v = eval(    v    );
+        return v;
+    };
+    this.each( function( ) {
+        var a = this.attributes;
+        var j = a.length;
+        var i = 0;
+        for ( ; i < j; i ++ ) {
+            var n = a[i].name ;
+            if (n.substring(0 , 5) == 'data-') {
+                n = n.substring(5);
+            } else {
+                continue;
+            }
+            var v = a[i].value;
+            if (nreg.test(n)) {
+                var o = v.indexOf(':');
+                n = v.substring(0 , o);
+                v = v.substring(1 + o);
+                n = jQuery.trim(n);
+                v = jQuery.trim(v);
+                v = vrep.call(that, v);
+                hsSetValue(conf, n, v);
+            } else
+            if (treg.test(n)) {
+                n = n.replace(treg,  ''  );
+                n = n.replace(freg, frep );
+                if (conf[n] === undefined) {
+                    conf[n] = [];
+                }
+                v = vrep.call(that, v);
+                 conf[n].push(v);
+            } else {
+                n = n.replace(freg, frep );
+                v = vrep.call(that, v);
+                 conf[n]=/**/ v ;
+            }
+        }
+    });
+    return  conf;
+};
+
+$.fn._hsModule = function(func, opts) {
     var elem = this;
     var name = func.name || /^function (\w+)/.exec(func.toString())[1];
     var inst = elem.data(name);
