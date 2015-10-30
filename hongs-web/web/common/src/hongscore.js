@@ -1478,6 +1478,72 @@ $.fn.hsInit = function(cnf) {
     return box;
 };
 
+$.fn._hsConfig = function() {
+    var that = this.get(0);
+    var conf = this.data();
+    var nreg = /^data-\d+$/;
+    var treg = /-\d+$/;
+    var freg = /-\w/g ;
+    var frep = function(n) {
+        return n.substring(1).toUpperCase();
+    };
+    var vrep = function(v) {
+        if ( /^(\{.*\}|\[.*\])$/.test( v )) {
+            v = eval('('+v+')');
+        } else if ( /^(\(.*\))$/.test( v )) {
+            v = eval(    v    );
+        }
+        return  v;
+    };
+    var mrep = function(v) {
+        if (!/^(\{.*\})$/.test( v )) {
+                v  = '{'+v+'}' ;
+        }
+        return  eval('('+v+')');
+    };
+    this.each( function( ) {
+        var a = this.attributes;
+        var j = a.length;
+        var i = 0;
+        for ( ; i < j; i ++ ) {
+            var n = a[i].name ;
+            if (n.substring(0 , 5) == 'data-') {
+                n = n.substring(5);
+            } else {
+                continue;
+            }
+            var v = a[i].value;
+            if ('data' == n ) {
+                v = mrep.call(that, v);
+                jQuery.extend(conf, v);
+            } else
+            if (nreg.test(n)) {
+                var o = v.indexOf(':');
+                n = v.substring(0 , o);
+                v = v.substring(1 + o);
+                n = jQuery.trim(n);
+                v = jQuery.trim(v);
+                v = vrep.call(that, v);
+                hsSetValue(conf, n, v);
+            } else
+            if (treg.test(n)) {
+                n = n.replace(treg,  ''  );
+                n = n.replace(freg, frep );
+                if (conf[n] === undefined) {
+                    conf[n] = [];
+                }
+                v = vrep.call(that, v);
+                 conf[n].push(v);
+            } else {
+                n = n.replace(freg, frep );
+                v = vrep.call(that, v);
+                 conf[n]  =   v ;
+            }
+        }
+    });
+    return  conf;
+};
+
 $.fn._hsTarget = function(selr) {
     var elem = this;
     var flag = selr.charAt(0);
@@ -1530,61 +1596,6 @@ $.fn._hsTarget = function(selr) {
         default :
             return $(selr);
     }
-};
-
-$.fn._hsConfig = function() {
-    var that = this.get(0);
-    var conf = this.data();
-    var nreg = /^data-\d+$/;
-    var treg = /-\d+$/;
-    var freg = /-\w/g ;
-    var frep = function(n) {
-        return n.substring(1).toUpperCase();
-    };
-    var vrep = function(v) {
-        if ( /^(\[.*\]|\{.*\})$/.test( v ))
-            v = eval('('+v+')');
-        else  if  ( /^(\(.*\))$/.test( v ))
-            v = eval(    v    );
-        return v;
-    };
-    this.each( function( ) {
-        var a = this.attributes;
-        var j = a.length;
-        var i = 0;
-        for ( ; i < j; i ++ ) {
-            var n = a[i].name ;
-            if (n.substring(0 , 5) == 'data-') {
-                n = n.substring(5);
-            } else {
-                continue;
-            }
-            var v = a[i].value;
-            if (nreg.test(n)) {
-                var o = v.indexOf(':');
-                n = v.substring(0 , o);
-                v = v.substring(1 + o);
-                n = jQuery.trim(n);
-                v = jQuery.trim(v);
-                v = vrep.call(that, v);
-                hsSetValue(conf, n, v);
-            } else
-            if (treg.test(n)) {
-                n = n.replace(treg,  ''  );
-                n = n.replace(freg, frep );
-                if (conf[n] === undefined) {
-                    conf[n] = [];
-                }
-                v = vrep.call(that, v);
-                 conf[n].push(v);
-            } else {
-                n = n.replace(freg, frep );
-                v = vrep.call(that, v);
-                 conf[n]=/**/ v ;
-            }
-        }
-    });
-    return  conf;
 };
 
 $.fn._hsModule = function(func, opts) {

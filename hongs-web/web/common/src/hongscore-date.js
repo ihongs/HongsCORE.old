@@ -3,7 +3,7 @@
  * Huang Hong <ihongs@live.cn>
  * @param $ jQuery
  */
-;(function($){
+(function($){
     if (!$.fn.datetimepicker) {
         return;
     }
@@ -30,12 +30,19 @@
         var attr;
         var opts;
 
+        var mrep = function(v) {
+            if (!/^(\{.*\})$/.test( v )) {
+                    v  = '{'+v+'}' ;
+            }
+            return  eval('('+v+')');
+        };
+
         // 基础配置
         attr = that.attr("data-config" );
         if (attr) {
-            opts =  eval("{"+ attr +"}");
+            opts = mrep.call(this, attr);
         } else {
-            opts =  { };
+            opts = {};
         }
         if (opts.autoclose === undefined) {
             opts.autoclose  =  true;

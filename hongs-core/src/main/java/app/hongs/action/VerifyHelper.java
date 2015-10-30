@@ -685,6 +685,32 @@ public class VerifyHelper {
             }
             return sb.toString().trim();
         }
+
+        /**
+         * 转换为响应数据结构
+         * @param mode 0错误消息 1单层Map 2复合Map
+         * @return
+         * @throws HongsException
+         */
+        public Map toReply(byte mode) throws HongsException {
+            Map data = new HashMap();
+            data.put( "ok" , false );
+            if (mode != 1 && mode != 2 ) {
+                data.put("err", "Er400");
+                data.put("msg", this.getLocalizedMessage());
+            } else {
+                Map errs;
+                if (mode == 2) {
+                    errs = this.getErrmap();
+                } else {
+                    errs = this.getErrors();
+                }
+                data.put("errs", errs  );
+                data.put("err", "Er400");
+                data.put("msg", CoreLocale.getInstance().translate("fore.form.invalid"));
+            }
+            return data;
+        }
     }
 
 }

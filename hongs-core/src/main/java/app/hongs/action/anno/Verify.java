@@ -15,6 +15,7 @@ import java.lang.annotation.Target;
 public @interface Verify {
     String  conf() default "default";
     String  form() default "";
-    short   mode() default -1;
+    byte    mode() default -1;
+    byte    save() default -1;
     boolean tidy() default false;
 }

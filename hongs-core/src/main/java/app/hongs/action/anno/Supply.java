@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
 public @interface Supply {
     String  conf() default "default";
     String  form() default "";
-    short   mode() default -1;
+    byte    mode() default -1;
 }

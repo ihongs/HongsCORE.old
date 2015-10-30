@@ -19,6 +19,9 @@
         cancelLabel     : hsGetLang('file.cancel'),
         cancelTitle     : hsGetLang('file.cancel.title'),
         dropZoneTitle   : hsGetLang('file.drop.to.here'),
+        msgSizeTooLarge         : hsGetLang('file.invalid.size'),
+        msgInvalidFileType      : hsGetLang('file.invalid.type'),
+        msgInvalidFileExtension : hsGetLang('file.invalid.extn'),
 
         fileActionSettings: {
             removeTitle : hsGetLang('file.remove'),
@@ -35,7 +38,6 @@
         msgSelected             : '{n} {files} selected',
         msgZoomTitle            : 'View details',
         msgZoomModalHeading     : 'Detailed Preview',
-        msgSizeTooLarge         : 'File "{name}" (<b>{size} KB</b>) exceeds maximum allowed upload size of <b>{maxSize} KB</b>.',
         msgFilesTooLess         : 'You must select at least <b>{n}</b> {files} to upload.',
         msgFilesTooMany         : 'Number of files selected for upload <b>({n})</b> exceeds maximum allowed limit of <b>{m}</b>.',
         msgFileSecured          : 'Security restrictions prevent reading the file "{name}".',
@@ -46,8 +48,6 @@
         msgUploadAborted        : 'The file upload was aborted',
         msgValidationError      : 'File Upload Error',
         msgFoldersNotAllowed    : 'Drag & drop files only! Skipped {n} dropped folder(s).',
-        msgInvalidFileType      : 'Invalid type for file "{name}". Only "{types}" files are supported.',
-        msgInvalidFileExtension : 'Invalid extension for file "{name}". Only "{extensions}" files are supported.',
 
         msgImageWidthSmall      : 'Width of image file "{name}" must be at least {size} px.',
         msgImageHeightSmall     : 'Height of image file "{name}" must be at least {size} px.',
@@ -106,33 +106,41 @@
             var attr;
             var opts;
 
+            var mrep = function(v) {
+                if (!/^(\{.*\})$/.test( v )) {
+                        v  = '{'+v+'}' ;
+                }
+                return  eval('('+v+')');
+            };
+
             // 基础配置
             attr = that.attr("data-config" );
             if (attr) {
-                opts =  eval("{"+ attr +"}");
+                opts = mrep.call(this, attr);
             } else {
-                opts =  { };
-            }
-            if (opts.showCaption === undefined) {
-                opts.showCaption  =  false;
+                opts = {};
             }
             if (opts.showRemove  === undefined) {
                 opts.showRemove   =  false;
             }
+            if (opts.showCancel  === undefined) {
+                opts.showCancel   =  false;
+            }
             if (opts.showUpload  === undefined) {
                 opts.showUpload   =  false;
+            }
+            if (opts.showCaption === undefined) {
+                opts.showCaption  =  false;
             }
             if (opts.browseClass === undefined) {
                 opts.browseClass  =  "btn btn-default form-control";
             }
 
-            // 预览类型
+            // 类型配置
             attr = that.attr( "data-type"  );
             if (attr) {
                 opts.previewFileType  = attr;
             }
-
-            // 类型校验
             attr = that.attr( "data-types" );
             if (attr) {
                 opts.allowedFileTypes = attr.split(",");
@@ -142,7 +150,7 @@
                 opts.allowedFileExtensions = attr.split(",");
             }
 
-            // 预览文件
+            // 初始配置
             attr = that.attr( "data-value" );
             if (attr) {
                 opts.initialPreview = initialPreview(opts, attr.split(","));

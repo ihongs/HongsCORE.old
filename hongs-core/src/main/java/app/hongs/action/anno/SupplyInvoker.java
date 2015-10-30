@@ -26,10 +26,10 @@ public class SupplyInvoker implements FilterInvoker {
         Supply  ann  = (Supply) anno;
         String  form = ann.form();
         String  conf = ann.conf();
-        short   mode = ann.mode();
+        byte    mode = ann.mode();
 
         if (mode == -1) {
-            mode = Synt.declare(helper.getParameter("md"), (short) -1);
+            mode = Synt.declare(helper.getParameter("md"), (byte) -1);
         }
 
         // 为 0 则不执行, 仅取 enum 数据
