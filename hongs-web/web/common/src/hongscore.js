@@ -1389,6 +1389,17 @@ $.fn.hsI18n = function(rep) {
     var box = $(this);
     var lng;
 
+    if (box.attr("data-i18n")) {
+        lng = box.attr("data-i18n");
+        lng = hsGetLang(lng, rep);
+        box.text( lng );
+    } else
+    if ($(this).text()) {
+        lng = box.text( );
+        lng = hsGetLang(lng, rep);
+        box.text( lng );
+    }
+
     if (box.attr("alt")) {
         lng = box.attr("alt");
         lng = hsGetLang(lng, rep);
@@ -1403,17 +1414,6 @@ $.fn.hsI18n = function(rep) {
         lng = box.attr("placeholder");
         lng = hsGetLang(lng, rep);
         box.attr("placeholder" , lng);
-    }
-
-    if (box.attr("data-i18n")) {
-        lng = box.attr("data-i18n");
-        lng = hsGetLang(lng, rep);
-        box.text( lng );
-    } else
-    if ($(this).text()) {
-        lng = box.text( );
-        lng = hsGetLang(lng, rep);
-        box.text( lng );
     }
 
     return box;
