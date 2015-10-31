@@ -1408,12 +1408,12 @@ $.fn.hsI18n = function(rep) {
     if (box.attr("data-i18n")) {
         lng = box.attr("data-i18n");
         lng = hsGetLang(lng, rep);
-        box.text ( lng );
+        box.text( lng );
     } else
     if ($(this).text()) {
-        lng = box.text();
+        lng = box.text( );
         lng = hsGetLang(lng, rep);
-        box.text ( lng );
+        box.text( lng );
     }
 
     return box;
