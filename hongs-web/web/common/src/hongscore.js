@@ -1389,20 +1389,20 @@ $.fn.hsI18n = function(rep) {
     var box = $(this);
     var lng;
 
-    if (box.attr("placeholder")) {
-        lng = box.attr("placeholder");
+    if (box.attr("alt")) {
+        lng = box.attr("alt");
         lng = hsGetLang(lng, rep);
-        box.attr("placeholder" , lng);
+        box.attr("alt" , lng);
     }
     if (box.attr("title")) {
         lng = box.attr("title");
         lng = hsGetLang(lng, rep);
         box.attr("title" , lng);
     }
-    if (box.attr("alt")) {
-        lng = box.attr("alt");
+    if (box.attr("placeholder")) {
+        lng = box.attr("placeholder");
         lng = hsGetLang(lng, rep);
-        box.attr("alt" , lng);
+        box.attr("placeholder" , lng);
     }
 
     if (box.attr("data-i18n")) {
