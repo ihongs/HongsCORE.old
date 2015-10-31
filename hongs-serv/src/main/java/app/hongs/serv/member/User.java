@@ -1,11 +1,12 @@
 package app.hongs.serv.member;
 
+import app.hongs.serv.manage.Sign;
+import app.hongs.serv.manage.RoleSet;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Model;
 import app.hongs.db.Table;
-import app.hongs.util.Synt;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +53,7 @@ extends Model {
     public String add(Map<String, Object> data) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
-            data.put("password", SignKit.getCrypt((String) data.get("password")));
+            data.put("password", Sign.getCrypt((String) data.get("password")));
         }
 
         // 权限限制, 仅能赋予当前登录用户所有的权限
@@ -77,7 +78,7 @@ extends Model {
     public int put(Map<String, Object> data, String id, FetchCase caze) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
-            data.put("password", SignKit.getCrypt((String) data.get("password")));
+            data.put("password", Sign.getCrypt((String) data.get("password")));
         }
 
         // 权限限制, 仅能赋予当前登录用户所有的权限

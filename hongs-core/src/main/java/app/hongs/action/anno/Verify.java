@@ -17,5 +17,5 @@ public @interface Verify {
     String  form() default "";
     byte    mode() default -1;
     byte    save() default -1;
-    boolean tidy() default false;
+    boolean clean() default false;
 }

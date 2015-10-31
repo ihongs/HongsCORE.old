@@ -35,7 +35,7 @@ public class VerifyInvoker implements FilterInvoker {
         String  conf = ann.conf();
         byte    mode = ann.mode();
         byte    mods = ann.save();
-        boolean tidy = ann.tidy();
+        boolean tidy = ann.clean();
 
         // 准备数据
         Map<String, Object> dat = helper.getRequestData();

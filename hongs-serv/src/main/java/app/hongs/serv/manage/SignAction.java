@@ -1,4 +1,4 @@
-package app.hongs.serv.member;
+package app.hongs.serv.manage;
 
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
@@ -10,6 +10,7 @@ import app.hongs.action.anno.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
+import app.hongs.serv.member.UserAction;
 import app.hongs.util.Synt;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,17 +21,17 @@ import javax.servlet.http.HttpSession;
  * 登录动作
  * @author Hongs
  */
-@Action("manage/member/sign")
+@Action("manage/sign")
 public class SignAction {
 
     @Action("create")
-    @Verify(conf="sign",form="form")
+    @Verify(conf="sign",form="sign")
     public void create(ActionHelper ah) throws HongsException {
         String appid    = Synt.declare(ah.getParameter("appid"), "_WEB_");
         String place    = Synt.declare(ah.getParameter("place"),    "");
         String username = Synt.declare(ah.getParameter("username"), "");
         String password = Synt.declare(ah.getParameter("password"), "");
-               password = SignKit.getCrypt(password);
+               password = Sign.getCrypt(password);
 
         DB        db = DB.getInstance("member");
         Table     tb = db.getTable("user");
@@ -77,7 +78,7 @@ public class SignAction {
             return;
         }
 
-        ah.reply(SignKit.userSign(ah, appid, usrid, uname));
+        ah.reply(Sign.userSign(ah, appid, usrid, uname));
     }
 
     @Action("delete")
@@ -102,4 +103,49 @@ public class SignAction {
         ah.reply("");
     }
 
+    @Action("user/update")
+    @Verify(conf="sign",form="info",save=1,clean=true)
+    public void doUpdate(ActionHelper helper)
+    throws HongsException {
+        Map rd = helper.getRequestData();
+        String id = (String) helper.getSessibute("uid");
+
+        // 禁止危险修改
+        rd.put("id", id);
+        rd.remove("roles");
+        rd.remove("rtime");
+        rd.remove("mtime");
+        rd.remove("ctime");
+        rd.remove("state");
+
+        // 验证原始密码
+        String pw = (String) rd.get("password");
+        String po = (String) rd.get("passolde");
+        if (pw != null && !"".equals(pw)) {
+            Map xd = new HashMap();
+            Map ed = new HashMap();
+            xd.put("errs", ed);
+            xd.put("ok", false);
+            xd.put("msg", CoreLocale.getInstance().translate("fore.form.invalid"));
+            if (po != null && !"".equals(po)) {
+                Map row = DB.getInstance("member").getTable("user").fetchCase()
+                    .where ("id = ?", id)
+                    .select( "password" )
+                    .one();
+                po = Sign.getCrypt(po);
+                if (! po.equals(row.get("password")) ) {
+                    ed.put("passolde", "旧密码不正确");
+                    helper.reply(xd);
+                    return;
+                }
+            } else {
+                    ed.put("passolde", "请填写旧密码");
+                    helper.reply(xd);
+                    return;
+            }
+        }
+
+        UserAction ua = new UserAction();
+        ua.doSave(helper);
+    }
 }

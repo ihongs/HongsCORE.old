@@ -16,7 +16,7 @@ import java.util.Map;
 @Action("manage/module/form")
 public class FormAction {
     
-    private app.hongs.serv.module.Form model;
+    private final Form model;
 
     public FormAction() throws HongsException {
         model = (Form) DB.getInstance("module").getModel("form");
@@ -39,27 +39,27 @@ public class FormAction {
     @Action("save")
     public void doSave(ActionHelper helper)
     throws HongsException {
-        Map data = helper.getRequestData( );
-        CoreLocale lang = CoreLocale.getInstance().clone( );
-        lang.load("module");
-        String id  = model.save(data);
-        String msg = lang.translate("core.save.form.success");
-        Map info = new HashMap();
+        Map  data = helper.getRequestData();
+        String id = model.save(data);
+        Map  info = new HashMap();
         info.put( "id" , id);
         info.put("name", data.get("name") );
-        helper.reply(msg, info );
+        CoreLocale  lang = CoreLocale.getInstance().clone( );
+                    lang.load("module");
+        String ms = lang.translate("core.save.form.success");
+        helper.reply(ms, info);
     }
 
     @Action("delete")
     @CommitSuccess
     public void doDelete(ActionHelper helper)
     throws HongsException {
-        Map data = helper.getRequestData( );
-        CoreLocale lang = CoreLocale.getInstance().clone( );
-        lang.load("module");
-        int    rd  = model.delete(data);
-        String msg = lang.translate("core.delete.form.success", Integer.toString(rd));
-        helper.reply(msg, rd);
+        Map  data = helper.getRequestData();
+        int  rows = model.delete(data );
+        CoreLocale  lang = CoreLocale.getInstance().clone( );
+                    lang.load("module");
+        String ms = lang.translate("core.delete.form.success", Integer.toString(rows));
+        helper.reply(ms, rows);
     }
 
     @Action("unique")

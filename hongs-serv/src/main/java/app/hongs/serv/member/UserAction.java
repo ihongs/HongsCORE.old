@@ -1,6 +1,5 @@
 package app.hongs.serv.member;
 
-import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 
@@ -27,7 +25,7 @@ import net.coobird.thumbnailator.Thumbnails.Builder;
 @Action("manage/member/user")
 public class UserAction {
 
-    private app.hongs.serv.member.User model;
+    private final User model;
 
     public UserAction()
     throws HongsException {
@@ -37,54 +35,53 @@ public class UserAction {
     @Action("list")
     public void getList(ActionHelper helper)
     throws HongsException {
-        Map data = model.getList(helper.getRequestData());
+        Map rd = helper.getRequestData();
+        rd = model.getList(rd);
 
         // Remove the password field, don't show password in page
-        List<Map> list = (List)data.get("list");
+        List<Map> list = (List) rd.get("list");
         for (Map  info :  list) {
             info.remove("password");
         }
 
-        helper.reply(data);
+        helper.reply(rd);
     }
 
     @Action("info")
     public void getInfo(ActionHelper helper)
     throws HongsException {
+        Map rd = helper.getRequestData();
         String id = helper.getParameter("id");
-        Map data;
-        if (id  != null && id.length( ) != 0) {
-            data = model.getInfo(helper.getRequestData());
+        String wr = helper.getParameter("-with-roles");
+
+        if ( id != null && id.length() != 0 ) {
+            rd = model.getInfo(rd);
         } else {
-            data = new HashMap();
+            rd =  new  HashMap(  );
         }
 
         // Remove the password field, don't show password in page
-        Map info  = (Map) data.get("info");
+        Map info  = (Map) rd.get("info");
         if (info != null) {
             info.remove("password");
         }
 
         // With all roles
-        if (Synt.declare(helper.getParameter("-with-roles"), false)) {
-            Dict.put(data, NaviMap.getInstance("manage").getRoleTranslates(), "enum", "roles..role");
+        if (Synt.declare(wr, false)) {
+            List rs = NaviMap.getInstance("manage").getRoleTranslated();
+            Dict.put(rd, rs, "enum", "roles..role");
         }
 
-        helper.reply(data);
+        helper.reply(rd);
     }
 
     @Action("save")
     public void doSave(ActionHelper helper)
     throws HongsException {
-        Map data = helper.getRequestData( );
-        // Ignore empty password in update
-        if("".equals(data.get("password"))) {
-            data.remove("password");
-        }
+        Map rd = helper.getRequestData();
 
         // 上传头像
-        UploadHelper.upload(
-            data,
+        UploadHelper.upload(rd,
             new UploadHelper()
                 .setUploadName("head")
                 .setUploadHref("upload/member/head")
@@ -95,7 +92,7 @@ public class UserAction {
 
         // 缩略头像
         try {
-            String fn = data.get( "head" ).toString( );
+            String fn = rd.get( "head" ).toString( );
             String fm = fn.replaceFirst("\\..*?$", "");
             Builder<File> img = Thumbnails.of(fn).outputFormat("jpg");
             if ( ! fn.endsWith(".jpg")) {
@@ -109,88 +106,43 @@ public class UserAction {
             throw new HongsException.Common(ex);
         }
 
-        CoreLocale lang = CoreLocale.getInstance().clone( );
-        lang.load("member");
+        // Ignore empty password in update
+        if ("".equals(rd.get("password"))) {
+            rd.remove("password" );
+        }
 
-        String  id  = model.save(data);
-        String  msg = lang.translate("core.save.user.success");
+        String id = model.save(rd);
 
-        Map info = new HashMap();
-        info.put( "id" , id);
-        info.put("name", data.get("name"));
-        helper.reply(msg , info);
+        rd = new HashMap();
+        rd.put( "id" , id);
+        rd.put("name", rd.get("name"));
+        rd.put("head", rd.get("head"));
+        rd.put("username", rd.get("username"));
+
+        CoreLocale  ln = CoreLocale.getInstance().clone( );
+                    ln.load("member" );
+        String ms = ln.translate("core.save.user.success");
+        helper.reply(ms, rd);
     }
 
     @Action("delete")
     @CommitSuccess
     public void doDelete(ActionHelper helper)
     throws HongsException {
-        CoreLocale lang = CoreLocale.getInstance().clone( );
-        lang.load("member");
-        int     rd  = model.delete(helper.getRequestData());
-        String  msg = lang.translate("core.delete.user.success", Integer.toString(rd));
-        helper.reply(msg, rd);
+        Map rd = helper.getRequestData();
+        int rn = model.delete(rd);
+        CoreLocale  ln = CoreLocale.getInstance().clone( );
+                    ln.load("member" );
+        String ms = ln.translate("core.delete.user.success", Integer.toString(rn));
+        helper.reply(ms, rn);
     }
 
     @Action("unique")
     public void isUnique(ActionHelper helper)
     throws HongsException {
-        boolean v = model.unique(helper.getRequestData());
-        helper.reply(null, v);
+        Map rd = helper.getRequestData();
+        boolean rv = model.unique(rd);
+        helper.reply("", rv);
     }
 
-    @Action("mine/save")
-    public void doUpdate(ActionHelper helper)
-    throws HongsException {
-        Map data = helper.getRequestData();
-        data.put("id", helper.getSessibute("uid"));
-
-        // 验证原始密码
-        String pw = (String) data.get("password");
-        String po = (String) data.get("passolde");
-        if (pw != null && !"".equals(pw)) {
-
-            Map rd = new HashMap();
-            Map ed = new HashMap();
-            rd.put("errs", ed);
-            rd.put("ok", false);
-            rd.put("msg", CoreLocale.getInstance().translate("fore.form.invalid"));
-
-            if (po != null && !"".equals(po)) {
-                Map row = DB.getInstance("member").getTable("user").fetchCase()
-                    .where ("id = ?", data.get("id"))
-                    .select("password")
-                    .one();
-                if (!po.equals(row.get("password"))) {
-                    ed.put("passolde", "旧密码不正确");
-                    helper.reply(rd);
-                }
-            } else {
-                    ed.put("passolde", "请填写旧密码");
-                    helper.reply(rd);
-            }
-        }
-
-        doSave(helper);
-    }
-
-    @Action("roles")
-    public void getRoles(ActionHelper helper)
-    throws HongsException {
-        Map data = new HashMap();
-
-        // 全部权限分组
-        List roles = SignKit.getRoles("default");
-        data.put("role_list", roles);
-
-        // 用户动作分组
-        String id = helper.getParameter("id");
-        if (id != null) {
-            app.hongs.serv.member.User model2 = Core.getInstance(app.hongs.serv.member.User.class);
-            Set rolez = model2.getRoles(id);
-            data.put("roles", rolez);
-        }
-
-        helper.reply(data);
-    }
 }

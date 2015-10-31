@@ -1,4 +1,4 @@
-package app.hongs.serv.member;
+package app.hongs.serv.manage;
 
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
@@ -18,7 +18,7 @@ import javax.servlet.http.HttpSession;
  * 登录工具
  * @author Hongs
  */
-public class SignKit {
+public class Sign {
 
     private static final byte[] pazz = {'A','B','C','D','E','F','1','2','3','4','5','6','7','8','9','0'};
 

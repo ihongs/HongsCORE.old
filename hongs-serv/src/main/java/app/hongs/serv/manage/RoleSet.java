@@ -1,4 +1,4 @@
-package app.hongs.serv.member;
+package app.hongs.serv.manage;
 
 import app.hongs.Core;
 import app.hongs.CoreSerial;

@@ -9,6 +9,6 @@ package app.hongs.serv.manage;
  *
  * @author Hongs
  */
-public class SerialAction {
+public class CacheAction {
     
 }
