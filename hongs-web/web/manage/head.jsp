@@ -143,7 +143,7 @@
             });
         $("#sign-out")
             .click(function() {
-                $.get(hsFixUri("manage/member/sign/delete.act"), function() {
+                $.get(hsFixUri("manage/sign/delete.act"), function() {
                     location.href = H$(".BASE_HREF")+"/manage/login.html"
                 });
             });
