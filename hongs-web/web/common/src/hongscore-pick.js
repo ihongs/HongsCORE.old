@@ -332,10 +332,11 @@ function hsListFillPick(cel, v, n) {
     $(document)
     .on("click", "[data-toggle=hsPick]",
     function() {
-        var url = $(this).attr("data-href") || $(this).attr("href");
         var box = $(this).attr("data-target");
+        var url = $(this).attr("data-href")
+               || $(this).attr("href");
         if (box) {
-            box = $(this)._hsTarget(box);
+            box = $(this).hsFind(box);
         } else {
             box =   null ;
         }

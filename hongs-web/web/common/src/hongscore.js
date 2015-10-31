@@ -1324,7 +1324,7 @@ $.fn.hsReady = function() {
     // 组件化
     box.find("[data-module]").each( function() {
         var prnt = $(this);
-        var opts = $(this)._hsConfig();
+        var opts = $(this).hsData();
         var func = $(this).attr("data-module");
         if (typeof(prnt[func]) === "function") {
             prnt[func]( opts );
@@ -1353,7 +1353,7 @@ $.fn.hsTabs = function(rel) {
     var box = $(this);
     if (! rel) {
         if (box.attr("data-tabs")) {
-            rel = _hsTarget(this, box.attr("data-tabs"));
+            rel = box.hsFind(box.attr("data-tabs"));
             /***/ rel.addClass( "panes");
         } else {
             rel = box.siblings(".panes");
@@ -1478,7 +1478,7 @@ $.fn.hsInit = function(cnf) {
     return box;
 };
 
-$.fn._hsConfig = function() {
+$.fn.hsData = function() {
     var that = this.get(0);
     var conf = this.data();
     var nreg = /^data-\d+$/;
@@ -1543,60 +1543,60 @@ $.fn._hsConfig = function() {
     });
     return  conf;
 };
+$.fn._hsConfig = $.fn.hsData; // 兼容旧版命名
 
-$.fn._hsTarget = function(selr) {
+$.fn.hsFind = function(selr) {
     var elem = this;
     var flag = selr.charAt(0);
     var salr = selr.substr(1);
     switch (flag) {
-        case '>':
-        case '~':
-        case '+':
-        case ':':
-            return salr ? $(selr, elem) : elem;
-        case '$':
-            return salr ? $(salr, elem) : elem;
-        case '%':
-            do {
-                var x;
-                x = elem.closest(".loadbox");
-                if (x.size()) {
-                    elem = x;
-                    break;
-                }
-                x = elem.closest(".openbox");
-                if (x.size()) {
-                    elem = x;
-                    break;
-                }
-                elem = document;
-            } while (false);
-            return salr ? $(salr, elem) : elem;
         case '@':
             do {
                 var x;
-                x = elem.closest(".panes");
-                if (x.size()) {
-                    elem = x;
-                    break;
-                }
+                x = elem.closest( ".panes" );
+                if (x.size()) { elem = x; break; }
                 x = elem.closest(".openbox");
-                if (x.size()) {
-                    elem = x;
-                    break;
-                }
+                if (x.size()) { elem = x; break; }
                 x = elem.closest(".loadbox");
-                if (x.size()) {
-                    elem = x;
-                    break;
-                }
+                if (x.size()) { elem = x; break; }
                 elem = document;
             } while (false);
             return salr ? $(salr, elem) : elem;
+        case '&':
+            do {
+                var x;
+                x = elem.closest(".loadbox");
+                if (x.size()) { elem = x; break; }
+                x = elem.closest(".openbox");
+                if (x.size()) { elem = x; break; }
+                elem = document;
+            } while (false);
+            return salr ? $(salr, elem) : elem;
+        case ' ':
+            return elem.find(salr);
+        case '.':
+        case ':':
+        case '[':
+            return elem.find(selr);
+        case '<':
+            return salr  ===  ''  ?
+                   elem.parent  ():
+                   elem.closest (salr);
+        case '>':
+            return elem.children(salr);
+        case '~':
+            return elem.siblings(salr);
+        case '+':
+            return elem.next(salr);
+        case '-':
+            return elem.prev(salr);
+        case '*':
+            return $(salr);
         default :
             return $(selr);
     }
 };
+$.fn._hsTarget = $.fn.hsFind; // 兼容旧版命名
 
 $.fn._hsModule = function(func, opts) {
     var elem = this;
@@ -1659,9 +1659,9 @@ function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
     var dat = $(this).attr("data-data");
-        url = hsFixPms( url , this );
+        url = hsFixPms(url, this);
     if (box) {
-        box = $(this)._hsTarget(box);
+        box = $(this).hsFind(box);
         box.hsLoad(url, dat);
     }
     evt.stopPropagation();
@@ -1671,9 +1671,9 @@ function(evt) {
     var box = $(this).attr("data-target");
     var url = $(this).attr("data-href");
     var dat = $(this).attr("data-data");
-        url = hsFixPms( url , this );
+        url = hsFixPms(url, this);
     if (box) {
-        box = $(this)._hsTarget(box);
+        box = $(this).hsFind(box);
         box.hsOpen(url, dat);
     } else {
           $.hsOpen(url, dat);

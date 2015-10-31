@@ -801,9 +801,9 @@ jQuery.fn.hsForm = function(opts) {
 
         var box = $(this).attr("data-target");
         var url = $(this).attr("data-href");
-            url = hsFixPms( url , this );
+            url = hsFixPms(url, this);
         if (box) {
-            box = $(this)._hsTarget(box);
+            box = $(this).hsFind(box);
             box.hsOpen(url, func);
         } else {
               $.hsOpen(url, func);

@@ -115,8 +115,8 @@ function HsList(opts, context) {
         switch (m) {
             case "{CONTEXT}": m = context; break;
             case "{LOADBOX}": m = loadBox; break;
-            case "{AUTOBOX}": m =   '@';
-            default: if ( m ) m = n._hsTarget(m);
+            case "{AUTOBOX}": m = '@';
+            default: if ( m ) m = n.hsFind(m);
         }
 
         var t = n.closest(".tooltip");
