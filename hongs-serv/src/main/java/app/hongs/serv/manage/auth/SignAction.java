@@ -1,4 +1,4 @@
-package app.hongs.serv.manage;
+package app.hongs.serv.manage.auth;
 
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
@@ -31,7 +31,7 @@ public class SignAction {
         String place    = Synt.declare(ah.getParameter("place"),    "");
         String username = Synt.declare(ah.getParameter("username"), "");
         String password = Synt.declare(ah.getParameter("password"), "");
-               password = Sign.getCrypt(password);
+               password = AuthKit.getCrypt(password);
 
         DB        db = DB.getInstance("member");
         Table     tb = db.getTable("user");
@@ -41,25 +41,25 @@ public class SignAction {
         // 验证密码
         fc = new FetchCase( )
             .from   (tb.tableName)
-            .select ("password, id, name")
+            .select ("password, id, name, head, mtime")
             .where  ("username = ?", username);
         ud = db.fetchLess(fc);
-        if ( ud.isEmpty  (  )) {
+        if ( ud.isEmpty() ) {
             CoreLocale lang = CoreLocale.getInstance( "member" );
             Map m = new HashMap();
             Map e = new HashMap();
-            m.put("username", new Wrong(lang.translate("core.username.invalid")));
+            m.put("username", new Wrong("core.username.invalid").setLocalizedSection("member"));
             e.put("errs", new Wrongs(m).getErrors());
             e.put("msg", lang.translate("core.sign.in.invalid"));
             e.put("ok", false);
             ah.reply(e);
             return;
         }
-        if (!password.equals(ud.get("password"))) {
+        if (! password.equals(ud.get("password")) ) {
             CoreLocale lang = CoreLocale.getInstance( "member" );
             Map m = new HashMap();
             Map e = new HashMap();
-            m.put("password", new Wrong(lang.translate("core.password.invalid")));
+            m.put("password", new Wrong("core.password.invalid").setLocalizedSection("member"));
             e.put("errs", new Wrongs(m).getErrors());
             e.put("msg", lang.translate("core.sign.in.invalid"));
             e.put("ok", false);
@@ -69,6 +69,8 @@ public class SignAction {
 
         String usrid = ud.get( "id" ).toString();
         String uname = ud.get("name").toString();
+        String uhead = ud.get("head").toString();
+        long   utime = Synt.declare(ud.get("mtime"), 0L) * 1000;
 
         // 验证区域
         Set rs = RoleSet.getInstance(usrid);
@@ -78,7 +80,7 @@ public class SignAction {
             return;
         }
 
-        ah.reply(Sign.userSign(ah, appid, usrid, uname));
+        ah.reply(AuthKit.userSign(ah, appid, usrid, uname, uhead, utime));
     }
 
     @Action("delete")
@@ -132,7 +134,7 @@ public class SignAction {
                     .where ("id = ?", id)
                     .select( "password" )
                     .one();
-                po = Sign.getCrypt(po);
+                po = AuthKit.getCrypt(po);
                 if (! po.equals(row.get("password")) ) {
                     ed.put("passolde", "旧密码不正确");
                     helper.reply(xd);
@@ -148,4 +150,5 @@ public class SignAction {
         UserAction ua = new UserAction();
         ua.doSave(helper);
     }
+
 }

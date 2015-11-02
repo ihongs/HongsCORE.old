@@ -1,4 +1,4 @@
-package app.hongs.serv.manage;
+package app.hongs.serv.manage.auth;
 
 import app.hongs.Core;
 import app.hongs.CoreSerial;

@@ -1,5 +1,6 @@
-package app.hongs.serv.manage;
+package app.hongs.serv.manage.auth;
 
+import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.NaviMap;
@@ -9,6 +10,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +21,7 @@ import javax.servlet.http.HttpSession;
  * 登录工具
  * @author Hongs
  */
-public class Sign {
+public class AuthKit {
 
     private static final byte[] pazz = {'A','B','C','D','E','F','1','2','3','4','5','6','7','8','9','0'};
 
@@ -33,11 +36,12 @@ public class Sign {
             MessageDigest m = MessageDigest.getInstance("MD5");
             byte[] pzwd = m.digest(pswd.getBytes());
             byte[] pxwd = new byte[pzwd.length * 2];
-            int i = 0, j = 0;
-            for ( ; i < pzwd.length; i ++) {
+            int i = 0;
+            int j = 0;
+            for (; i < pzwd.length; i++) {
                 byte pzbt = pzwd[i];
-                pxwd[j++] = pazz[pzbt >>> 4 & 0xf ];
-                pxwd[j++] = pazz[pzbt /***/ & 0xf ];
+                pxwd[j++] = pazz[pzbt >>> 4 & 15];
+                pxwd[j++] = pazz[pzbt & 15];
             }
             return new String(pxwd);
         } catch (NoSuchAlgorithmException ex) {
@@ -109,15 +113,49 @@ public class Sign {
     }
 
     /**
+     * 检查并清理不合规的权限设置数据
+     * 操作人员无法增减自己没有的权限
+     * @param list 权限设置数据
+     * @param uid 用户ID
+     * @throws HongsException
+     */
+    public static void clnRoles(List<Map> list, String uid) throws HongsException {
+        if ("1".equals(Core.getInstance(ActionHelper.class).getSessibute("uid"))) {
+            return; // 超级管理员可以更改任何人的权限, 即使自己没有
+        }
+
+            Set<String> urs = RoleSet.getInstance(   );
+        if (uid != null) {
+            Set<String> crs = RoleSet.getInstance(uid);
+            Set<String> xrs = new HashSet();
+            xrs.addAll( crs );
+            xrs.addAll( urs );
+            urs = xrs;
+        }
+
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            Map    rm = (Map   ) it.next( );
+            String rn = (String) rm.get ("role");
+            if (! urs.contains ( rn)) {
+                it.remove();
+            }
+        }
+    }
+
+    /**
      * 自运营登录
      * @param ah
      * @param appid
      * @param usrid
-     * @param uname
+     * @param uname 名称
+     * @param uhead 头像
+     * @param utime 用户信息更新时间
      * @return
      * @throws HongsException
      */
-    public static Map  userSign(ActionHelper ah, String appid, String usrid, String uname)
+    public static Map userSign(ActionHelper ah, String appid, String usrid,
+            String uname, String uhead, long utime)
     throws HongsException {
         HttpSession sd    = ah.getRequest().getSession(true);
         String      sesid = sd.getId();
@@ -128,14 +166,18 @@ public class Sign {
         sd.setAttribute("appid", appid);
         sd.setAttribute("stime", stime);
         sd.setAttribute("uname", uname);
+        sd.setAttribute("uhead", uname);
+        sd.setAttribute("utime", uname);
 
         // 返回数据
         Map rd = new HashMap();
         rd.put(  "uid", usrid);
         rd.put("appid", appid);
-        rd.put("ssnid", sesid);
+        rd.put("sesid", sesid);
         rd.put("stime", stime);
         rd.put("uname", uname);
+        rd.put("uhead", uhead);
+        rd.put("utime", utime);
 
         // 记录登录
         DB    db = DB.getInstance("member");
@@ -156,11 +198,14 @@ public class Sign {
      * @param ah
      * @param appid
      * @param opnid
-     * @param uname
+     * @param uname 名称
+     * @param uhead 头像
+     * @param utime 用户信息更新时间
      * @return
      * @throws HongsException
      */
-    public static Map  openSign(ActionHelper ah, String appid, String opnid, String uname)
+    public static Map openSign(ActionHelper ah, String appid, String opnid,
+            String uname, String uhead, long utime)
     throws HongsException {
         DB    db = DB.getInstance("member");
         Table tb = db.getTable("user_open");
@@ -188,7 +233,7 @@ public class Sign {
             db.getTable("user_open").insert(ud );
         }
 
-        return userSign(ah, appid, usrid, uname);
+        return userSign(ah, appid, usrid, uname, uhead, utime);
     }
 
 }

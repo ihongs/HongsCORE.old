@@ -113,7 +113,7 @@ public class Form extends Model {
         Element  menu = docm.createElement("menu");
         root.appendChild ( menu );
         menu.setAttribute("disp", name);
-        menu.setAttribute("href", "manage/module/data/"+id+"/");
+        menu.setAttribute("href", "manage/data/"+id+"/");
 
         Element  role, actn, depn;
 
@@ -126,60 +126,60 @@ public class Form extends Model {
 
         role = docm.createElement("role");
         menu.appendChild ( role );
-        role.setAttribute("name", "manage/module/data/" +id+"/retrieve");
+        role.setAttribute("name", "manage/data/" +id+"/retrieve");
         role.setAttribute("disp", "查看"+name);
 
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/retrieve.act") );
+        actn.appendChild ( docm.createTextNode("manage/data/"+id+"/retrieve.act") );
 
         // 添加
 
         role = docm.createElement("role");
         menu.appendChild ( role );
-        role.setAttribute("name", "manage/module/data/" +id+"/create");
+        role.setAttribute("name", "manage/data/" +id+"/create");
         role.setAttribute("disp", "添加"+name);
 
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/create.act") );
+        actn.appendChild ( docm.createTextNode("manage/data/"+id+"/create.act") );
 
         depn = docm.createElement("depend");
         role.appendChild ( depn );
-        depn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/retrieve"  ) );
+        depn.appendChild ( docm.createTextNode("manage/data/"+id+"/retrieve"  ) );
 
         // 修改
 
         role = docm.createElement("role");
         menu.appendChild ( role );
-        role.setAttribute("name", "manage/module/data/" +id+"/update");
+        role.setAttribute("name", "manage/data/" +id+"/update");
         role.setAttribute("disp", "修改"+name);
 
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/update.act") );
+        actn.appendChild ( docm.createTextNode("manage/data/"+id+"/update.act") );
 
         depn = docm.createElement("depend");
         role.appendChild ( depn );
-        depn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/retrieve"  ) );
+        depn.appendChild ( docm.createTextNode("manage/data/"+id+"/retrieve"  ) );
 
         // 删除
 
         role = docm.createElement("role");
         menu.appendChild ( role );
-        role.setAttribute("name", "manage/module/data/" +id+"/delete");
+        role.setAttribute("name", "manage/data/" +id+"/delete");
         role.setAttribute("disp", "删除"+name);
 
         actn = docm.createElement("action");
         role.appendChild ( actn );
-        actn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/delete.act") );
+        actn.appendChild ( docm.createTextNode("manage/data/"+id+"/delete.act") );
 
         depn = docm.createElement("depend");
         role.appendChild ( depn );
-        depn.appendChild ( docm.createTextNode("manage/module/data/"+id+"/retrieve"  ) );
+        depn.appendChild ( docm.createTextNode("manage/data/"+id+"/retrieve"  ) );
 
         // 保存
-        saveDocument(Core.CONF_PATH+"/manage/module/data/"+id+Cnst.NAVI_EXT+".xml", docm);
+        saveDocument(Core.CONF_PATH+"/manage/data/"+id+Cnst.NAVI_EXT+".xml", docm);
     }
 
     public void updateOrCreateFormSet(String id, List<Map> conf) throws HongsException {
@@ -258,7 +258,7 @@ public class Form extends Model {
             }
         }
 
-        saveDocument(Core.CONF_PATH+"/manage/module/data/"+id+Cnst.FORM_EXT+".xml", docm);
+        saveDocument(Core.CONF_PATH+"/manage/data/"+id+Cnst.FORM_EXT+".xml", docm);
     }
 
     private Document makeDocument() throws HongsException {

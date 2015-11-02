@@ -1,4 +1,4 @@
-package app.hongs.serv.module;
+package app.hongs.serv.manage.auto;
 
 import app.hongs.Cnst;
 import app.hongs.Core;

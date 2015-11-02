@@ -35,12 +35,20 @@ public class MenuAction {
             Map<String,Map> menu =  site.getMenu( n );
         if (menu != null && menu.containsKey("menus")) {
             Map<String,Map> manu =  menu.get("menus");
-            for(String mn : manu.keySet (  )) {
-                if (/*?OK*/ site.chkMenu(mn)) {
+                String mu = null ;
+            for(String mn : manu.keySet()) {
+                if (site.chkMenu(mn)) {
                     helper.redirect(Core.BASE_HREF +"/"+ mn);
                     return;
                 }
+                if (mu == null) {
+                    mu  =  mn ;
+                }
             }
+                if (mu != null) {
+                    helper.redirect(Core.BASE_HREF +"/"+ mu);
+                    return;
+                }
         }
 
         helper.error403(CoreLocale.getInstance().translate("core.error.no.power"));

@@ -84,12 +84,12 @@
         <filter-class>app.hongs.serv.AutoFilter</filter-class>
         <init-param>
             <param-name>action-path</param-name>
-            <param-value>/manage/module/auto</param-value>
+            <param-value>/manage/auto</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>AutoFilter_MD</filter-name>
-        <url-pattern>/manage/module/data/*</url-pattern>
+        <url-pattern>/manage/data/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>

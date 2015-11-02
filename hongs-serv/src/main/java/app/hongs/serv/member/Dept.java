@@ -5,6 +5,8 @@ import app.hongs.db.DB;
 import app.hongs.db.Mtree;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
+import app.hongs.serv.manage.auth.AuthKit;
+import app.hongs.util.Synt;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,27 @@ extends Mtree {
           this.put(rd , id);
       }
       return id;
+    }
+
+    @Override
+    public String add(Map data) throws HongsException {
+        // 权限限制, 仅能赋予当前登录用户所有的权限
+        if (data.containsKey("roles") ) {
+            AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class), null );
+        }
+
+        return super.add(data);
+    }
+
+    @Override
+    public int put(Map data, String id, FetchCase caze) throws HongsException {
+        // 权限限制, 仅能赋予当前登录用户所有的权限
+        if (data.containsKey("roles") ) {
+            data.put("rtime", System.currentTimeMillis() / 1000);
+            AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class),  id  );
+        }
+
+        return super.put(data, id, caze);
     }
 
     public Set<String> getRoles(String deptId)

@@ -6,8 +6,8 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.NaviMap;
 import app.hongs.action.UploadHelper;
 import app.hongs.action.anno.Action;
-import app.hongs.db.DB;
 import app.hongs.action.anno.CommitSuccess;
+import app.hongs.db.DB;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
 import java.io.File;
@@ -80,30 +80,32 @@ public class UserAction {
     throws HongsException {
         Map rd = helper.getRequestData();
 
-        // 上传头像
-        UploadHelper.upload(rd,
-            new UploadHelper()
-                .setUploadName("head")
-                .setUploadHref("upload/member/head")
-                .setUploadPath("upload/member/head")
-                .setAllowExtns("jpg", "png", "gif" )
-                .setAllowTypes("image/jpeg", "image/png", "image/gif")
-        );
+        if (rd.containsKey("head")) {
+            // 上传头像
+            UploadHelper.upload(rd,
+                new UploadHelper()
+                    .setUploadName("head")
+                    .setUploadHref("upload/member/head")
+                    .setUploadPath("upload/member/head")
+                    .setAllowExtns("jpg", "png", "gif" )
+                    .setAllowTypes("image/jpeg", "image/png", "image/gif")
+            );
 
-        // 缩略头像
-        try {
-            String fn = rd.get( "head" ).toString( );
-            String fm = fn.replaceFirst("\\..*?$", "");
-            Builder<File> img = Thumbnails.of(fn).outputFormat("jpg");
-            if ( ! fn.endsWith(".jpg")) {
-                img.toFile(fm +".jpg");
+            // 缩略头像
+            try {
+                String fn = rd.get( "head" ).toString( );
+                String fm = fn.replaceFirst("\\..*?$", "");
+                Builder<File> img = Thumbnails.of(fn).outputFormat("jpg");
+                if ( ! fn.endsWith(".jpg")) {
+                    img.toFile(fm +".jpg");
+                }
+                img.size(16, 16).toFile(fm +"_xs.jpg");
+                img.size(32, 32).toFile(fm +"_sm.jpg");
+                img.size(64, 64).toFile(fm +"_md.jpg");
+                img.size(96, 96).toFile(fm +"_lg.jpg");
+            } catch (IOException  ex) {
+                throw new HongsException.Common(ex);
             }
-            img.size(16, 16).toFile(fm +"_xs.jpg");
-            img.size(32, 32).toFile(fm +"_sm.jpg");
-            img.size(64, 64).toFile(fm +"_md.jpg");
-            img.size(96, 96).toFile(fm +"_lg.jpg");
-        } catch (IOException  ex) {
-            throw new HongsException.Common(ex);
         }
 
         // Ignore empty password in update

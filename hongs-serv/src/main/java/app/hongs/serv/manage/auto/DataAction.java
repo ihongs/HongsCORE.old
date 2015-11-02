@@ -1,4 +1,4 @@
-package app.hongs.serv.module;
+package app.hongs.serv.manage.auto;
 
 import app.hongs.Cnst;
 import app.hongs.HongsException;
@@ -12,7 +12,7 @@ import app.hongs.dl.lucene.LuceneRecord;
  * 数据存储动作
  * @author Hongs
  */
-@Action("manage/module/auto")
+@Action("manage/auto")
 public class DataAction extends LuceneAction {
     
     /**

@@ -151,12 +151,12 @@ public class Unit extends Mtree {
                 menu = docm.createElement( "menu" );
                 root.appendChild ( menu );
                 menu.setAttribute("disp", unitName);
-                menu.setAttribute("href", "common/menu/cell.act?m=manage/module/data&n="+unitId);
+                menu.setAttribute("href", "common/menu.act?m=manage/data&n="+unitId);
 
                 for(String formId : formSet) {
                     incl = docm.createElement("import");
                     menu.appendChild( incl );
-                    incl.appendChild(docm.createTextNode("manage/module/data/"+formId));
+                    incl.appendChild(docm.createTextNode("manage/data/"+formId));
                 }
             }
 
@@ -165,18 +165,18 @@ public class Unit extends Mtree {
                 hide = docm.createElement( "menu" );
                 root.appendChild ( hide );
                 hide.setAttribute("disp", unitName+"隐藏功能");
-                hide.setAttribute("href", "!manage-module-unit-"+unitId);
+                hide.setAttribute("href", "!manage-data-"+unitId);
 
                 if (hideMap.containsKey(unitId))
                 for(String formId : hideSet) {
                     incl = docm.createElement("import");
                     hide.appendChild( incl );
-                    incl.appendChild( docm.createTextNode("manage/module/data/"+formId) );
+                    incl.appendChild( docm.createTextNode("manage/data/"+formId) );
                 }
             }
         }
 
-        saveDocument(Core.CONF_PATH+"/manage/module/data"+Cnst.NAVI_EXT+".xml", docm);
+        saveDocument(Core.CONF_PATH+"/manage/data"+Cnst.NAVI_EXT+".xml", docm);
     }
 
     private Document makeDocument() throws HongsException {

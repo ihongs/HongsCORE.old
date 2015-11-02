@@ -1,14 +1,13 @@
 package app.hongs.serv.member;
 
-import app.hongs.serv.manage.Sign;
-import app.hongs.serv.manage.RoleSet;
 import app.hongs.HongsException;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Model;
 import app.hongs.db.Table;
+import app.hongs.serv.manage.auth.AuthKit;
+import app.hongs.util.Synt;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,22 +52,12 @@ extends Model {
     public String add(Map<String, Object> data) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
-            data.put("password", Sign.getCrypt((String) data.get("password")));
+            data.put("password", AuthKit.getCrypt((String) data.get("password")));
         }
 
         // 权限限制, 仅能赋予当前登录用户所有的权限
         if (data.containsKey("roles") ) {
-            data.put("rtime", System.currentTimeMillis(  ) / 1000 );
-            Set<String> urs = RoleSet.getInstance(  );
-            List<Map<String, String>> rs = (List) data.get("roles");
-            Iterator it = rs.iterator();
-            while (it.hasNext()) {
-                Map<String, String> rm = (Map) it.next();
-                String rn = rm.get("role");
-                if (! urs.contains(rn)) {
-                    it.remove();
-                }
-            }
+            AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class), null );
         }
 
         return super.add(data);
@@ -78,26 +67,13 @@ extends Model {
     public int put(Map<String, Object> data, String id, FetchCase caze) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
-            data.put("password", Sign.getCrypt((String) data.get("password")));
+            data.put("password", AuthKit.getCrypt((String) data.get("password")));
         }
 
         // 权限限制, 仅能赋予当前登录用户所有的权限
         if (data.containsKey("roles") ) {
-            data.put("rtime", System.currentTimeMillis(  ) / 1000 );
-            Set<String> urs = RoleSet.getInstance(  );
-            Set<String> crs = RoleSet.getInstance(id);
-            Set<String> xrs = new HashSet();
-            xrs.addAll( crs );
-            xrs.addAll( urs );
-            List<Map<String, String>> rs = (List) data.get("roles");
-            Iterator it = rs.iterator();
-            while (it.hasNext()) {
-                Map<String, String> rm = (Map) it.next();
-                String rn = rm.get("role");
-                if (! xrs.contains(rn)) {
-                    it.remove();
-                }
-            }
+            data.put("rtime", System.currentTimeMillis() / 1000);
+            AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class),  id  );
         }
 
         return super.put(data, id, caze);
