@@ -667,7 +667,6 @@ function hsGetLang  (key, rep) {
  * @return {Boolean} 是(true)否(false)有权访问
  */
 function hsChkUri   (uri) {
-    uri= hsFixUri   (uri);
     if (typeof(HsAUTH[uri]) !== "undefined") {
         return HsAUTH[uri];
     }
