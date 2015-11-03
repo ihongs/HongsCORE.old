@@ -354,6 +354,23 @@ implements IRecord
   /**
    * 添加记录
    *
+   * 由于获取自增 id 在各数据库中的获取方式不同
+   * 故如需要自增 id 请自行扩展本类并重写此方法
+   * 配置文件中用 model 来指定新的模型类
+   *
+   * MySQL,SQLite add 方法主体改造:
+    data.remove(this.table.primaryKey );
+    // 存入主数据
+    this.table.insert          ( data );
+    // 查询自增ID, MySQL: last_insert_id() SQLite: last_insert_rowid()
+    Map  rd = this.db.fetchOne ("SELECT last_insert_id() AS id");
+    id = rd.get("id").toString (      );
+    data.put(this.table.primaryKey, id);
+    // 存入子数据
+    this.table.insertSubValues ( data );
+   *
+   * 或对 DB,Table,Model 同步改造, 使用 PreparedStatement.getGeneratedKeys 获取
+   *
    * @param data
    * @return 记录ID
    * @throws app.hongs.HongsException
@@ -361,10 +378,10 @@ implements IRecord
   public String add(Map<String, Object> data)
     throws HongsException
   {
-    String id = Synt.declare(data.get(Cnst.ID_KEY),String.class);
+    String id = Synt.declare(data.get(Cnst.ID_KEY), String.class);
     if (id != null && id.length() != 0)
     {
-      throw new HongsException(0x1091, "Add can not have a id");
+      throw new HongsException (0x1091, "Add can not have a id" );
     }
 
     id = Core.getUniqueId();
