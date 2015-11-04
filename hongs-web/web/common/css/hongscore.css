@@ -87,6 +87,10 @@ textarea.form-control,
     cursor: pointer;
 }
 
+.breadcrumb .close {
+    display: none;
+}
+
 .center-block {
     float: none;
 }

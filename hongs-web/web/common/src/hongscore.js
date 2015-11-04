@@ -1182,15 +1182,15 @@ $.fn.hsOpen = function(url, data, complete) {
         tab = prt[0];
         prt = prt[1];
     } else
-    if (prt.is( ".nav" )) {
+    if (prt.is(".tabs" )) {
         prt = prt.hsTadd(url );
         tab = prt[0];
         prt = prt[1];
     } else
     if (prt.parent().is(".panes")) {
-        tab = prt.parent().data( "tabs").children().eq(prt.index());
+        tab = prt.parent().data("tabs" ).children().eq(prt.index());
     } else
-    if (prt.parent().is( ".nav" )) {
+    if (prt.parent().is(".tabs" )) {
         tab = prt;
         prt = prt.parent().data("panes").children().eq(tab.index());
     }
@@ -1226,9 +1226,9 @@ $.fn.hsClose = function() {
     var tab;
 
     if (prt.parent().is(".panes")) {
-        tab = prt.parent().data( "tabs").children().eq(prt.index());
+        tab = prt.parent().data("tabs" ).children().eq(prt.index());
     } else
-    if (prt.parent().is( ".nav" )) {
+    if (prt.parent().is(".tabs" )) {
         tab = prt;
         prt = prt.parent().data("panes").children().eq(tab.index());
         box = prt.children(  ).first(  );
@@ -1691,7 +1691,7 @@ function(evt) {
     var box;
     var ths = $(this);
     do {
-        box = ths.closest(".nav>li>a");
+        box = ths.closest(".tabs>li>a");
         if (box.size()) {
             break ;
         }
@@ -1725,16 +1725,21 @@ function(evt) {
     box.hsClose( );
     evt.stopPropagation();
 })
-.on("click", ".nav>li>a",
+.on("click", ".tabs > li > a",
 function(evt) {
-    var tab = $( this ).parent( );
-    var nav = tab.closest(".nav");
-    var pns = nav.data ( "panes");
-    var idx = tab.index( );
+    var tab = $( this ).parent(  );
+    var nav = tab.closest(".tabs");
+    var pns = nav.data   ("panes");
+    var idx = tab.index  ();
     nav.children().removeClass("active")
             .eq (idx).addClass("active").show();
     if (pns) {
         pns.children( ).hide( ).eq(idx ).show();
+    }
+    if (nav.is(".breadcrumb")) {
+        tab.nextAll ( ).each( function(  ) {
+            $(this).find(".close").click();
+        });
     }
     evt.stopPropagation();
 })
