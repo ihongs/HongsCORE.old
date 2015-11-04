@@ -102,84 +102,103 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
         }
 
         fil.call(form, box , v, n, "data");
-        box.trigger( "change" );
+        box.trigger("change");
         return true;
     }
 
     function pickOpen() {
-        var tip = jQuery( this );
-        tip.data("pickData", v )
-           .addClass("pickbox" )
-        .toggleClass("pickmul" , mul)
-        .on("saveBack", function(evt, rst) {
-            if (! rst || ! rst.info) {
-                return false;
-            }
-            if (! rst.info[vk] /**/) {
-                rst.info[vk] = $(this).find(".pick-name,[name]").val();
-            }
-            if (! pickItem(rst.info[vk], rst.info[tk]) || ! pickBack()) {
-                return false;
-            }
-            
-            tip.hsClose();
-            return false;
-        })
-        .on("click" ,  ".ensure" , function() {
-            var btn = jQuery(this);
-            if (! btn.closest(".openbox").is(tip)
-            ||  ! pickBack())
-                return false;
-
-            tip.hsClose();
-            return false;
-        })
-        .on("change", ".checkone", function() {
-            var chk = jQuery(this);
-            if (chk.closest(".HsList").data("HsList")._info)
-                return;
-
-            var val = chk.val();
-            var txt;
-            var inf;
-
-            do {
-                if (! chk.prop("checked") ) break;
-
-                // 获取额外数据
-                inf = chk.data();
-                if (! inf  ) {
-                    inf = chk.attr("data-data");
-                    if (inf) {
-                        inf = eval('('+inf+')');
-                    }  else  {
-                        inf = null;
-                    }
-                }
-
-                txt = chk.attr("data-name");
-                if (txt) break;
-                txt = chk.closest("tr").find(".name").text();
-                if (txt) break;
-
-                var thd = chk.closest("table").find("thead");
-                var tds = chk.closest( "tr"  ).find( "td"  );
-                var idx;
-
-                idx = thd.find("[data-ft=name]").index();
-                if (idx != -1) txt = tds.eq(idx).text( );
-                if (txt) break;
-                idx = thd.find("[data-fn=name]").index();
-                if (idx != -1) txt = tds.eq(idx).text( );
-            }
-            while (false);
-
-            if (pickItem( val, txt, inf  ) === false) {
-                chk.prop("checked", false);
-                return false;
-            }
-        });
+        var tip = jQuery(this);
+        tip.data("pickData", v)
+           .addClass("pickbox")
+        .toggleClass("pickmul", mul)
+        .on("click"   , ".checkone", checks)
+        .on("click"   , ".ensure"  , ensure)
+        .on("saveBack", ".create"  , create);
     };
+
+    function checks() {
+        var chk = jQuery(this);
+        if (chk.closest(".HsList").data("HsList")._info) {
+            return;
+        }
+        if (chk.closest(".openbox").is ( tip ) == false) {
+            return;
+        }
+
+        var val = chk.val();
+        var txt;
+        var inf;
+
+        do {
+            if (! chk.prop("checked") ) break;
+
+            // 获取额外数据
+            inf = chk.data();
+            if (! inf  ) {
+                inf = chk.attr("data-data");
+                if (inf) {
+                    inf = eval('('+inf+')');
+                }  else  {
+                    inf = null;
+                }
+            }
+
+            txt = chk.attr("data-name");
+            if (txt) break;
+            txt = chk.closest("tr").find(".name").text();
+            if (txt) break;
+
+            var thd = chk.closest("table").find("thead");
+            var tds = chk.closest( "tr"  ).find( "td"  );
+            var idx;
+
+            idx = thd.find("[data-ft=name]").index();
+            if (idx != -1) txt = tds.eq(idx).text( );
+            if (txt) break;
+            idx = thd.find("[data-fn=name]").index();
+            if (idx != -1) txt = tds.eq(idx).text( );
+        }
+        while (false);
+
+        if (pickItem( val, txt, inf  ) === false) {
+            chk.prop("checked", false);
+            return false;
+        }
+    }
+
+    function ensure() {
+        var btn = jQuery(this);
+        if (! btn.closest(".openbox").is(tip)) {
+            return;
+        }
+
+        if (! pickBack()) {
+            return false;
+        }
+
+        tip.hsClose();
+        return false ;
+    }
+
+    function create(evt, rst) {
+        var btn = jQuery(this);
+        if (! btn.closest(".openbox").is(tip)) {
+            return;
+        }
+
+        if (! rst || ! rst.info /*||!rst.info[vk]*/) {
+            return false;
+        }
+        if (! pickItem(rst.info[vk], rst.info[tk]) ) {
+            return false;
+        }
+        if (! pickBack()) {
+            return false;
+        }
+
+        tip.hsClose();
+        return false ;
+    }
 
     if (tip) {
         tip =    tip.hsOpen(url, undefined, pickOpen);
@@ -332,11 +351,10 @@ function hsListFillPick(cel, v, n) {
     $(document)
     .on("click", "[data-toggle=hsPick]",
     function() {
+        var url = $(this).attr("data-href") || $(this).attr("href");
         var box = $(this).attr("data-target");
-        var url = $(this).attr("data-href")
-               || $(this).attr("href");
         if (box) {
-            box = $(this).hsFind(box);
+            box = $(this)._hsTarget(box);
         } else {
             box =   null ;
         }

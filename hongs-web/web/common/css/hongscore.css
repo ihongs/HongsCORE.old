@@ -106,7 +106,8 @@ textarea.form-control,
     left: 0;
     top: 0;
 }
-#notebox .alert, .modal>.alert {
+#notebox .alert,
+.modal > .alert {
     margin: 0;
 }
 
@@ -345,4 +346,18 @@ object.config,
 ul.pickbox {
     padding-left: 0;
     margin-bottom: 0;
+}
+
+/** 适配 **/
+
+@media (min-width: 768px) {
+    #notebox {
+        width: 600px;
+        margin-left: -300px;
+        left: 50%;
+    }
+    .modal > .alert {
+        width: 600px;
+        margin: 0 auto;
+    }
 }

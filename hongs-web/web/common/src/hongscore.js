@@ -1073,8 +1073,7 @@ $.hsOpen = function(url, data, complete) {
               + '<button type="button" class="close" aria-label="Close" data-dismiss="modal">&times;</button>'
               + '<h4 class="modal-title">'+hsGetLang("opening")+'</h4>'
               + '</div><div class="modal-body openbox">'
-              + '</div></div></div></div>')
-              .css('z-index' , 99999);
+              + '</div></div></div></div>');
     var box = div.find ( '.openbox' );
     box.hsLoad( url, data, complete );
     div.on("hide.bs.modal",function() {
@@ -1083,9 +1082,9 @@ $.hsOpen = function(url, data, complete) {
     div.modal();
     return  box;
 };
-$.hsNote = function(msg, cls, sec, ctr) {
-    if (! sec) sec = 5;
+$.hsNote = function(msg, cls, sec) {
     if (! cls) cls = "alert-info";
+    if (! sec) sec = 5;
 
     var div = $('<div class="alert alert-dismissable fade in">'
               + '<button type="button" class="close" aria-label="Close" data-dismiss="alert">&times;</button>'
@@ -1108,16 +1107,14 @@ $.hsNote = function(msg, cls, sec, ctr) {
     }
 
     // 消息容器
-    if (! ctr) {
-        ctr = $( '#notebox' );
-        if (ctr.length === 0) {
-            ctr = $('<div id="notebox"></div>')
-               .prependTo(document.body).hide();
-        }
+    var ctr = $('#notebox');
+    if (ctr.length === 0) {
+        ctr = $('<div id="notebox"></div>')
+           .prependTo(document.body).hide();
     }
-    ctr.show( ).append( div );
+    ctr.show( ).append(div);
 
-    div.on("close.bs.modal", function( ) {
+    div.on("close.bs.alert", function( ) {
         div.remove(  );
         if (ctr.children().size() === 0) {
             ctr.hide();

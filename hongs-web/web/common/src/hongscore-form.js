@@ -10,19 +10,16 @@ function HsForm(opts, context) {
     context.addClass( "HsForm" );
 
     var loadBox  = context.closest(".loadbox");
-    var noteBox  = context.find   (".notebox");
     var formBox  = context.find   ( "form"   );
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var saveUrl  = hsGetValue(opts, "saveUrl");
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
     var mdKey    = hsGetValue(opts, "mdKey", "md"); // md参数名, 用于判断是否要枚举表
 
-    if (noteBox.length === 0) noteBox = undefined ;
-    if (formBox.length === 0) formBox =  context  ;
+    if (!formBox.length) formBox = context;
 
     this.context = context;
     this.loadBox = loadBox;
-    this.noteBox = noteBox;
     this.formBox = formBox;
     this._url  = "";
     this._data = [];
@@ -263,13 +260,13 @@ HsForm.prototype = {
 
             // 错误提示
             if (rst.errs) {
-                this.haserror( rst.errs );
+                this.seterror( rst.errs );
             } else
             if (!rst.msg) {
-                 rst.msg  = hsGetLang( 'error.unkwn' );
+                 rst.msg  =  hsGetLang('error.unkwn');
             }
             if ( rst.msg) {
-                jQuery.hsNote(rst.msg, 'alert-danger' , 0, this.noteBox);
+                jQuery.hsNote(rst.msg, 'alert-danger', -1);
             }
         } else {
             var evt = jQuery.Event("saveBack");
@@ -281,7 +278,7 @@ HsForm.prototype = {
 
             // 完成提示
             if ( rst.msg) {
-                jQuery.hsNote(rst.msg, 'alert-success', 0, this.noteBox);
+                jQuery.hsNote(rst.msg, 'alert-success', 0);
             }
         }
     },
@@ -478,7 +475,7 @@ HsForm.prototype = {
         this.formBox.on("submit", function() {
             return that.verifies();
         });
-        this.formBox.on("change", "input,select,textarea,[data-fn]",
+        this.formBox.on("change","input,select,textarea,[data-fn]",
         function() {
             var inp = jQuery(this);
             that.validate(inp.attr("name") || inp.attr("data-fn"));
@@ -490,6 +487,7 @@ HsForm.prototype = {
         return true;
     },
     verifies : function() {
+        this.verified();
         var vali = true;
         var inps = {  };
         this.formBox.find("input,select,textarea,[data-fn]").each(
@@ -503,15 +501,23 @@ HsForm.prototype = {
                 inps[nam] = inps[nam].add(inp);
             }
         });
-        for(var nam in inps) {
+        for(var nam in inps ) {
             var val = this.validate(inps[nam]);
             if (val == false) {
                 vali = false;
             }
         }
+        if ( !  vali ) {
+            jQuery.hsNote(hsGetLang('form.invalid'), 'alert-danger', -1);
+        }
         return  vali;
     },
     validate : function(inp) {
+        if (inp === undefined) {
+            this.verifies( );
+            return;
+        }
+
         if (typeof inp == "string") {
             inp = this.formBox.find('[name="' + inp + '"],[data-fn="' + inp + '"]');
         } else {
@@ -532,14 +538,16 @@ HsForm.prototype = {
         }
         return  true;
     },
+    seterror : function(err) {
+        this.verified(   );
+        for (var n in err) {
+             var e  = err[n  ];
+            this.haserror(n,e);
+        }
+    },
     haserror : function(inp, err) {
         if (err === undefined && jQuery.isPlainObject(inp)) {
-            this.formBox.find(".form-group").removeClass("has-error");
-            this.formBox.find(".help-block").   addClass("invisible");
-            for (var n in inp) {
-                 var e  = inp[n];
-                this.haserror(n , e);
-            }
+            this.invalids(inp);
             return;
         }
 
