@@ -207,7 +207,7 @@ function HsTree(opts, context) {
     //** 立即加载 **/
 
     if (loadUrl) {
-        this.load(rootInfo.id, loadUrl);
+        this.load(rootInfo.id, loadUrl, []);
     }
 }
 HsTree.prototype = {

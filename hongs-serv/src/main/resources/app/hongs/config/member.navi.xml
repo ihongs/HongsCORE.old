@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <rsname>@manage</rsname>
-    <menu disp="用户" href="manage/#member" hrel="manage/member/dept/tree.html">
+    <menu disp="用户" href="manage/member/" hrel="manage/member/dept/tree.html">
         <role disp="查看用户" name="manage/member/user/retrieve">
             <depend>manage</depend>
             <depend>manage/member/dept/retrieve</depend>

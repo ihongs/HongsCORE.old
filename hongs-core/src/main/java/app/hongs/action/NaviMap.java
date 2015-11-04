@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -600,185 +601,239 @@ public class NaviMap
     return lang;
   }
 
+  public List<Map> getRoleTranslates()
+  throws HongsException {
+      return getRoleTranslates(1, 1);
+  }
+
+  public List<Map> getRoleTranslated()
+  throws HongsException {
+      return getRoleTranslated(1, 1);
+  }
+
+  public List<Map> getRoleTranslated(Set<String> rolez) {
+      return getRoleTranslated(1, 1, rolez);
+  }
+
   /**
    * 获取权限列表(与当前权限无关)
+   * @param index
+   * @param depth
    * @return
    * @throws app.hongs.HongsException
    */
-  public  List<Map> getRoleTranslates()
+  public List<Map> getRoleTranslates(int index, int depth)
   throws HongsException {
-      return getRoleTranslated( null  );
+      return getRoleTranslated(index, depth, null );
   }
 
   /**
    * 获取权限列表(与当前权限有关)
+   * @param index
+   * @param depth
    * @return
    * @throws app.hongs.HongsException
    */
-  public  List<Map> getRoleTranslated()
+  public List<Map> getRoleTranslated(int index, int depth)
   throws HongsException {
-      Set<String> rolez = getRoleSet( );
-      if (null == rolez)  rolez = new HashSet();
-      return getRoleTranslated( rolez );
+      Set<String> rolez = getRoleSet();
+      if (null == rolez) rolez = new HashSet();
+      return getRoleTranslated(index, depth, rolez);
   }
 
   /**
    * 获取权限列表(与指定权限有关)
+   * @param index
+   * @param depth
    * @param rolez 指定权限
    * @return
    */
-  public  List<Map> getRoleTranslated(Set<String> rolez) {
+  public List<Map> getRoleTranslated(int index, int depth, Set<String> rolez) {
+      Map menuz = menus;
+      if (  0  != index) {
+          List <Map> menux = new ArrayList(menus.values( ) );
+          if (menux.isEmpty()) {
+              return menux ;
+          }
+          menuz = (Map) (menux.get(index - 1)).get("menus" );
+      }
       CoreLocale lang = getCurrTranslator();
-      return getRoleTranslated(rolez, menus, lang);
+      return getRoleTranslated(menuz, rolez, lang, depth, 0);
   }
 
-  private List<Map> getRoleTranslated(Set<String> rolez, Map<String, Map> menus, CoreLocale lang) {
+  protected List<Map> getRoleTranslated(Map<String, Map> menus, Set<String> rolez, CoreLocale lang, int j, int i) {
       List<Map> list = new ArrayList( );
 
-      for(Map.Entry item : menus.entrySet() ) {
+      if (menus==null || (j != 0 && j <= i)) {
+          return list;
+      }
+
+      for(Map.Entry item : menus.entrySet()) {
           Map v = (Map) item.getValue();
-          Map m = (Map) v.get ("menus");
-          Set r = (Set) v.get ("roles");
+          Map m = (Map) v.get("menus" );
+          Set r = (Set) v.get("roles" );
 
           if (r != null && !r.isEmpty()) {
-            List<Map> lizt = new ArrayList( );
+              List<Map> lizt = new ArrayList();
 
-            String h = (String) item.getKey();
-            String s = (String) v.get("disp");
-            String z; Set<String> x;
+              for (String n : (Set<String>) r) {
+                  if (rolez != null && !rolez.contains(n)) {
+                      continue;
+                  }
 
-            for( String n : (Set<String>) r ) {
-                if (rolez != null && !rolez.contains(n)) {
-                    continue;
-                }
+                  v = getRole(n);
+                  String s = (String) v.get("disp");
+                  Set    x = (Set) v.get("depends");
 
-                v = getRole(n);
-                z = (String) v.get ("disp");
-                x = (Set<String>) v.get("depends");
+                  // 没有指定 disp 则用 name 获取
+                  if (/**/ "".equals(s)) {
+                      s = "core.role." + n;
+                  }
+                  s = lang.translate(s);
 
-                // 没有指定 disp 则用 name 获取
-                if ("".equals(z)) {
-                    z = "core.role." + n ;
-                }   z = lang.translate(z);
+                  Map role = new HashMap();
+                  role.put("name", n);
+                  role.put("disp", s);
+                  role.put("rels", x);
+                  lizt.add(role);
+              }
 
-                Map role = new HashMap( );
-                role.put("name", n);
-                role.put("disp", z);
-                role.put("rels", x);
-                lizt.add( role );
-            }
+              if (! lizt.isEmpty( ) ) {
+                  List   l = getRoleTranslated(m, rolez, lang, j, i + 1);
+                  String h = (String) item.getKey();
+                  String p = (String) v.get("hrel");
+                  String d = (String) v.get("icon");
+                  String s = (String) v.get("disp");
 
-            if (! lizt.isEmpty()) {
-                // 没有指定 disp 则用 href 获取
-                if ("".equals(s)) {
-                    s = "core.role." + h ;
-                }   s = lang.translate(s);
+                  // 没有指定 disp 则用 href 获取
+                  if (/**/ "".equals(s)) {
+                      s = "core.role." + h;
+                  }
+                  s = lang.translate(s);
 
-                Map menu = new HashMap( );
-                menu.put("list", lizt);
-                menu.put("href", h);
-                menu.put("disp", s);
-                list.add( menu );
-            }
-          }
-
-          // 拉平菜单
-          if (m != null && !m.isEmpty()) {
-            list.addAll(getRoleTranslated(rolez, m, lang));
+                  Map menu = new HashMap();
+                  menu.put("href", h);
+                  menu.put("hrel", p);
+                  menu.put("icon", d);
+                  menu.put("disp", s);
+                  menu.put("subs", l);
+                  menu.put("rols", lizt  );
+                  list.add( menu);
+              }
           }
       }
 
       return list;
   }
 
+  public List<Map> getMenuTranslates()
+  throws HongsException {
+      return getMenuTranslates(1, 1);
+  }
+
+  public List<Map> getMenuTranslated()
+  throws HongsException {
+      return getMenuTranslated(1, 1);
+  }
+
+  public List<Map> getMenuTranslated(Set<String> rolez) {
+      return getMenuTranslated(1, 1, rolez);
+  }
+
   /**
    * 获取菜单列表(与当前请求无关)
-   * @param level
+   * @param index
    * @param depth
    * @return
    * @throws app.hongs.HongsException
    */
-  public  List<Map> getMenuTranslates(int level, int depth)
+  public List<Map> getMenuTranslates(int index, int depth)
   throws HongsException {
-      return getMenuTranslated(level, depth, null );
+      return getMenuTranslated(index, depth, null );
   }
 
   /**
    * 获取菜单列表(与当前请求相关)
-   * @param level
+   * @param index
    * @param depth
    * @return
    * @throws app.hongs.HongsException
    */
-  public  List<Map> getMenuTranslated(int level, int depth)
+  public List<Map> getMenuTranslated(int index, int depth)
   throws HongsException {
       Set<String> rolez = getRoleSet();
       if (null == rolez)  rolez = new HashSet(/**/);
-      return getMenuTranslated(level, depth, rolez);
+      return getMenuTranslated(index, depth, rolez);
   }
 
   /**
    * 获取菜单列表(与当前请求相关)
-   * @param level
+   * @param index
    * @param depth
    * @param rolez
    * @return
    */
-  public  List<Map> getMenuTranslated(int level, int depth, Set<String> rolez) {
+  public List<Map> getMenuTranslated(int index, int depth, Set<String> rolez) {
+      Map menuz = menus;
+      if (  0  != index) {
+          List <Map> menux = new ArrayList(menus.values( ) );
+          if (menux.isEmpty()) {
+              return menux ;
+          }
+          menuz = (Map) (menux.get(index - 1)).get("menus" );
+      }
       CoreLocale lang = getCurrTranslator();
-      return getMenuTranslated(level, depth, rolez, menus, lang, 0);
+      return getMenuTranslated(menuz, rolez, lang, depth, 0);
   }
 
-  private List<Map> getMenuTranslated(int level, int depth, Set<String> rolez, Map<String, Map> menus, CoreLocale lang, int i) {
+  protected List<Map> getMenuTranslated(Map<String, Map> menus, Set<String> rolez, CoreLocale lang, int j, int i) {
       List <Map> list = new ArrayList( );
 
-      if (  null == menus || level + depth <= i ) {
+      if (menus==null || (j != 0 && j <= i)) {
           return list;
       }
 
-      FOR:for (Map.Entry item : menus.entrySet()) {
-          Map  v = (Map) item.getValue();
-          Map  m = (Map) v.get ("menus");
-          List l = getMenuTranslated(level, depth, rolez, m, lang, i + 1);
+      for(Map.Entry item : menus.entrySet()) {
+          Map v = (Map) item.getValue();
+          Map m = (Map) v.get("menus" );
 
-          if ( level  <=  i ) {
-              String h = (String) item.getKey ( );
+          String h = (String) item.getKey();
 
-              // 页面下的任意一个动作有权限即认为是可访问的
-              if (null != rolez) {
-                  Set<String> z = getMenuRoles(h).keySet();
-                  if ( ! z.isEmpty(  ) ) {
-                      boolean e = true ;
-                      for (String x : z) {
-                          if (rolez.contains(x) ) {
-                              e = false;
-                                  break;
-                          }
+          // 页面下的任意一个动作有权限即认为是可访问的
+          if (null != rolez) {
+              Set<String> z = getMenuRoles(h).keySet();
+              if (!z.isEmpty()) {
+                  boolean e = true ;
+                  for (String x : z) {
+                      if (rolez.contains(x)) {
+                          e = false;
+                          break;
                       }
-                      if ( e ) continue;
+                  }
+                  if (e) {
+                      continue;
                   }
               }
-
-              String p = (String) v.get("hrel");
-              String d = (String) v.get("icon");
-              String s = (String) v.get("disp");
-
-              // 没有指定 disp 则用 href 获取
-              if ("".equals(s)) {
-                  s = "core.menu." + h ;
-              }   s = lang.translate(s);
-
-              Map menu = new HashMap();
-              menu.put("href", h);
-              menu.put("hrel", p);
-              menu.put("icon", d);
-              menu.put("disp", s);
-              menu.put("list", l);
-
-              list.add(menu);
-          } else {
-              list.addAll(l);
           }
+
+          List   l = getMenuTranslated(m, rolez, lang, j, i + 1);
+          String p = (String) v.get("hrel");
+          String d = (String) v.get("icon");
+          String s = (String) v.get("disp");
+
+          // 没有指定 disp 则用 href 获取
+          if (/**/ "".equals(s)) {
+              s = "core.menu." + h;
+          }
+          s = lang.translate(s);
+
+          Map menu = new HashMap();
+          menu.put("href", h);
+          menu.put("hrel", p);
+          menu.put("icon", d);
+          menu.put("disp", s);
+          menu.put("subs", l);
+          list.add( menu);
       }
 
       return list;

@@ -1,8 +1,8 @@
 <root>
     <rsname>app.hongs.serv.manage.auth.RoleSet</rsname>
-    <menu disp="后台" href="manage">
+    <menu disp="后台" href="common/menu.act?m=manage">
         <role disp="登录管理后台" name="manage"></role>
         <import>manage/data</import>
-        <import>managx</import>
+        <import>manage.base</import>
     </menu>
 </root>

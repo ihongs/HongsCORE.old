@@ -61,8 +61,8 @@
 
     NaviMap main = NaviMap.getInstance(m);
     NaviMap curr = NaviMap.getInstance(n);
-    List<Map> mainMenu = main.getMenuTranslated(1, 1);
-    List<Map> currMenu = curr.getMenuTranslates(1, 1);
+    List<Map> mainMenu = main.getMenuTranslated();
+    List<Map> currMenu = curr.getMenuTranslates();
 
     String  user = (String ) helper.getSessibute("uname");
     Integer msgc = (Integer) helper.getSessibute( "msgc");

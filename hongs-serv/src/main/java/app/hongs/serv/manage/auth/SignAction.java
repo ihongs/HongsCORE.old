@@ -67,9 +67,9 @@ public class SignAction {
             return;
         }
 
-        String usrid = ud.get( "id" ).toString();
-        String uname = ud.get("name").toString();
-        String uhead = ud.get("head").toString();
+        String usrid = (String) ud.get( "id" );
+        String uname = (String) ud.get("name");
+        String uhead = (String) ud.get("head");
         long   utime = Synt.declare(ud.get("mtime"), 0L) * 1000;
 
         // 验证区域
