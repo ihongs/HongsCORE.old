@@ -10,16 +10,19 @@ function HsForm(opts, context) {
     context.addClass( "HsForm" );
 
     var loadBox  = context.closest(".loadbox");
+    var noteBox  = context.find   (".notebox");
     var formBox  = context.find   ( "form"   );
     var loadUrl  = hsGetValue(opts, "loadUrl");
     var saveUrl  = hsGetValue(opts, "saveUrl");
     var idKey    = hsGetValue(opts, "idKey", "id"); // id参数名, 用于判断编辑还是创建
     var mdKey    = hsGetValue(opts, "mdKey", "md"); // md参数名, 用于判断是否要枚举表
 
-    if (formBox.length === 0) formBox = context;
+    if (noteBox.length === 0) noteBox = undefined ;
+    if (formBox.length === 0) formBox =  context  ;
 
     this.context = context;
     this.loadBox = loadBox;
+    this.noteBox = noteBox;
     this.formBox = formBox;
     this._url  = "";
     this._data = [];
@@ -256,21 +259,17 @@ HsForm.prototype = {
         if (rst.ok === false) {
             var evt = jQuery.Event("saveFail");
             this.formBox.trigger(evt, [rst, this]);
+            if (evt.isDefaultPrevented( )) return ;
 
             // 错误提示
             if (rst.errs) {
-                this.formBox.find(".form-group").removeClass("has-error");
-                this.formBox.find(".help-block").   addClass("invisible");
-                for(var n in rst.errs) {
-                    var e  = rst.errs[n];
-                    this.haserror(n , e);
-                }
+                this.haserror( rst.errs );
             } else
             if (!rst.msg) {
-                 rst.msg  =  hsGetLang('error.unkwn' , '');
+                 rst.msg  = hsGetLang( 'error.unkwn' );
             }
             if ( rst.msg) {
-                jQuery.hsNote(rst.msg, 'alert-danger', -1);
+                jQuery.hsNote(rst.msg, 'alert-danger' , 0, this.noteBox);
             }
         } else {
             var evt = jQuery.Event("saveBack");
@@ -282,88 +281,9 @@ HsForm.prototype = {
 
             // 完成提示
             if ( rst.msg) {
-                jQuery.hsNote(rst.msg, 'alert-success');
+                jQuery.hsNote(rst.msg, 'alert-success', 0, this.noteBox);
             }
         }
-    },
-
-    _fill__select : function(inp, v, n, t) {
-        if (t !== "enum")  return v;
-        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
-        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        for (var i = 0; i < v.length; i ++) {
-            var opt = jQuery('<option></option>');
-            opt.val (hsGetValue(v[i], vk))
-               .text(hsGetValue(v[i], tk))
-               .data("data", v[i]);
-            inp.append(opt);
-        }
-        inp.change().click(); // multiple 必须触发 click 才初始化
-    },
-    _fill__radio : function(inp, v, n, t) {
-        if (t !== "enum") return v;
-        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
-        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        for(var i = 0; i < v.length; i ++) {
-            var lab = jQuery('<label><input type="radio"/><span></span></label>');
-            lab.find("input").attr("name", n).data(v[i])
-                             .val (hsGetValue(v[i], vk));
-            lab.find("span" ).text(hsGetValue(v[i], tk));
-            inp.append(lab);
-        }
-        inp.find(":radio").first().change();
-    },
-    _fill__check : function(inp, v, n, t) {
-        if (t !== "enum") return v;
-        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
-        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        for(var i = 0; i < v.length; i ++) {
-            var lab = jQuery('<label><input type="checkbox"/><span></span></label>');
-            lab.find("input").attr("name", n).data(v[i])
-                             .val (hsGetValue(v[i], vk));
-            lab.find("span" ).text(hsGetValue(v[i], tk));
-            inp.append(lab);
-        }
-        inp.find(":checkbox").first().change();
-    },
-    _fill__checkbag : function(inp, v, n, t) {
-        if (t !== "enum") return v;
-
-        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
-        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
-        var vl = inp.attr("data-vl"); if(!vl) vl = 0; // Value List
-        var tl = inp.attr("data-tl"); if(!tl) tl = 1; // Title Line
-        var bc = this._fill__checkbag_body_class || "checkbox";
-        var ic = this._fill__checkbag_item_class || "col-md-6";
-
-        if (v !== undefined) {
-        for(var i = 0; i < v.length; i ++) {
-            var u = v[ i ][vl];
-            var s = v[ i ][tl];
-            var set = jQuery('<fieldset>'
-                            +'<legend class="dropdown-toggle">'
-                            +'<input type="checkbox" class="checkall dropdown-deny"/>'
-                            +'&nbsp;<span></span><b class="caret"></b>'
-                            +'</legend>'
-                            +'<div class="dropdown-body '+bc+'"></div>'
-                            +'</fieldset>');
-            set.find("span").first().text(s);
-            inp.append(set );
-            set = set.find ( "div" );
-
-            for(var j = 0; j < u.length; j ++) {
-                var w = u[ j ];
-                var lab = jQuery('<label class="'+ic+'"><input type="checkbox"/>'
-                                +'<span></span></label>');
-                lab.find("input").attr("name", n).data(w)
-                                 .val (hsGetValue(w, vk));
-                lab.find("span" ).text(hsGetValue(w, tk));
-                set.append(lab);
-            }
-        }}
-
-        inp.find(":checkbox").first().change();
-        inp.hsReady();
     },
 
     _fill__review : function(inp, v, n, t) {
@@ -425,6 +345,85 @@ HsForm.prototype = {
 
         return v;
     },
+    _fill__select : function(inp, v, n, t) {
+        if (t !== "enum")  return v;
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        for (var i = 0; i < v.length; i ++) {
+            var opt = jQuery('<option></option>');
+            opt.val (hsGetValue(v[i], vk))
+               .text(hsGetValue(v[i], tk))
+               .data("data", v[i]);
+            inp.append(opt);
+        }
+        inp.change().click(); // multiple 必须触发 click 才初始化
+    },
+    _fill__radio : function(inp, v, n, t) {
+        if (t !== "enum") return v;
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        for(var i = 0; i < v.length; i ++) {
+            var lab = jQuery('<label><input type="radio"/><span></span></label>');
+            lab.find("input").attr("name", n).data(v[i])
+                             .val (hsGetValue(v[i], vk));
+            lab.find("span" ).text(hsGetValue(v[i], tk));
+            inp.append(lab);
+        }
+        inp.find(":radio").first().change();
+    },
+    _fill__check : function(inp, v, n, t) {
+        if (t !== "enum") return v;
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        for(var i = 0; i < v.length; i ++) {
+            var lab = jQuery('<label><input type="checkbox"/><span></span></label>');
+            lab.find("input").attr("name", n).data(v[i])
+                             .val (hsGetValue(v[i], vk));
+            lab.find("span" ).text(hsGetValue(v[i], tk));
+            inp.append(lab);
+        }
+        inp.find(":checkbox").first().change();
+    },
+    _fill__checkset : function(inp, v, n, t) {
+        if (t !== "enum") return v;
+
+        var vk = inp.attr("data-vk"); if(!vk) vk = 0;
+        var tk = inp.attr("data-tk"); if(!tk) tk = 1;
+        var vl = inp.attr("data-vl"); if(!vl) vl = 0; // Value List
+        var tl = inp.attr("data-tl"); if(!tl) tl = 1; // Title Line
+        var bc = this._fill__checkset_body_class || "checkbox";
+        var ic = this._fill__checkset_item_class || "col-md-6";
+
+        if (v !== undefined) {
+        for(var i = 0; i < v.length; i ++) {
+            var u = v[ i ][vl];
+            var s = v[ i ][tl];
+            var set = jQuery('<fieldset>'
+                            +'<legend class="dropdown-toggle">'
+                            +'<input type="checkbox" class="checkall dropdown-deny"/>'
+                            +'&nbsp;<span></span><b class="caret"></b>'
+                            +'</legend>'
+                            +'<div class="dropdown-body '+bc+'"></div>'
+                            +'</fieldset>');
+            set.find("span").first().text(s);
+            inp.append(set );
+            set = set.find ( "div" );
+
+            for(var j = 0; j < u.length; j ++) {
+                var w = u[ j ];
+                var lab = jQuery('<label class="'+ic+'"><input type="checkbox"/>'
+                                +'<span></span></label>');
+                lab.find("input").attr("name", n).data(w)
+                                 .val (hsGetValue(w, vk));
+                lab.find("span" ).text(hsGetValue(w, tk));
+                set.append(lab);
+            }
+        }}
+
+        inp.find(":checkbox").first().change();
+        inp.hsReady();
+    },
+
     _fill__htime : function(td, v, n) {
         if (v === undefined) return v;
         var d1  =  new Date ();
@@ -534,6 +533,16 @@ HsForm.prototype = {
         return  true;
     },
     haserror : function(inp, err) {
+        if (err === undefined && jQuery.isPlainObject(inp)) {
+            this.formBox.find(".form-group").removeClass("has-error");
+            this.formBox.find(".help-block").   addClass("invisible");
+            for (var n in inp) {
+                 var e  = inp[n];
+                this.haserror(n , e);
+            }
+            return;
+        }
+
         if (typeof inp == "string") {
             inp = this.formBox.find('[name="'+inp+'"],[data-fn="'+inp+'"]');
         } else {

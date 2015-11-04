@@ -128,10 +128,11 @@ extends Model {
          * 如果有指定dept_id
          * 则关联a_member_user_dept来约束范围
          */
-        if (req.containsKey("dept_id")) {
+        Object deptId = req.get("dept_id");
+        if (null != deptId && !"".equals(deptId)) {
             caze.join ("a_member_user_dept", "depts")
                 .on   (".user_id = :id")
-                .where( "dept_id = ?", req.get("dept_id"));
+                .where(".dept_id IN (?)",deptId);
         }
     }
 

@@ -201,6 +201,10 @@ object.config,
 .listbox .time {
     width: 6em;
 }
+.listbox .id {
+    width: 10em;
+    font-family: Consolas,Menlo,Monaco,"Courier New",monospace;
+}
 
 .listbox thead .sortable {
     cursor: pointer;

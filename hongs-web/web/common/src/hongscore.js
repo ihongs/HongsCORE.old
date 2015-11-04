@@ -124,19 +124,22 @@ function hsResponObj(rst, qut, pus) {
                 }
             } else {
                 if (rst.msg) {
-                    /*err*/ alert(rst.msg);
+                    alert(rst.msg/*alert-wraning*/);
                 } else {
-                    /*err*/ alert(hsGetLang('error.unkwn'));
+                    alert(hsGetLang('error.unkwn'));
                 }
             }
         }
         // 服务器端要求跳转 (通常为未登录无权限)
         if (! pus) {
             if (typeof(rst.ref) !== "undefined") {
+                if (rst.msg) {
+                    if (qut) alert (rst.msg);
+                }
                 if (rst.ref) {
                     location.assign(rst.ref);
                 } else {
-                    location.reload(  );
+                    location.reload();
                 }
             }
         }
@@ -1065,37 +1068,39 @@ $.hsAjax = function(url, settings) {
     return $.jqAjax( hsFixUri(url) , settings );
 };
 $.hsOpen = function(url, data, complete) {
-    var div = $('<div class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header">'
-              + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
+    var div = $('<div class="modal fade in"><div class="modal-dialog">'
+              + '<div class="modal-content"><div class="modal-header">'
+              + '<button type="button" class="close" aria-label="Close" data-dismiss="modal">&times;</button>'
               + '<h4 class="modal-title">'+hsGetLang("opening")+'</h4>'
               + '</div><div class="modal-body openbox">'
               + '</div></div></div></div>')
-              .css('z-index', 99999);
-    var box = div.find( '.openbox' );
-    box.hsLoad(url, data, complete );
+              .css('z-index' , 99999);
+    var box = div.find ( '.openbox' );
+    box.hsLoad( url, data, complete );
+    div.on("hide.bs.modal",function() {
+        div.remove();
+    });
     div.modal();
     return  box;
 };
-$.hsNote = function(msg, cls, sec) {
-    if (! cls) cls = "alert-info";
+$.hsNote = function(msg, cls, sec, ctr) {
     if (! sec) sec = 5;
+    if (! cls) cls = "alert-info";
 
-    var div = $('<div class="alert alert-dismissable">'
-              + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
+    var div = $('<div class="alert alert-dismissable fade in">'
+              + '<button type="button" class="close" aria-label="Close" data-dismiss="alert">&times;</button>'
               + '<div class="alert-body notebox"></div></div>')
              .addClass(cls);
     var box = div.find(".notebox").append(msg);
-    var btn = div.find( "button" );
 
     // 模态消息
-    if (sec == -1 ) {
-        div.wrap('<div class="modal fade"></div>')
-        div = div.closest ( ".modal" );
-        div.on("hide.bs.modal",
-                  function() {
+    if (sec === -1) {
+        div.wrap('<div class="modal fade in"></div>');
+        div  =  div.closest(".modal");
+        div.on("hide.bs.modal" , function() {
             div.remove(/****/);
         });
-        btn.click(function() {
+        div.find(".close").click(function() {
             div.modal ("hide");
         });
         div.modal();
@@ -1103,27 +1108,26 @@ $.hsNote = function(msg, cls, sec) {
     }
 
     // 消息容器
-    var ctr = $( "#notebox"  );
-    if (ctr.length  ==  0) {
-        ctr = $('<div id="notebox"></div>')
-                .prependTo( document.body );
+    if (! ctr) {
+        ctr = $( '#notebox' );
+        if (ctr.length === 0) {
+            ctr = $('<div id="notebox"></div>')
+               .prependTo(document.body).hide();
+        }
     }
-    ctr.show().append(div);
+    ctr.show( ).append( div );
 
-    // 延时消失
-    btn.click ( function() {
-        div.fadeOut(1000 , function() {
-            div.remove(  );
-            if (ctr.children().size() == 0) {
-                ctr.hide();
-            }
-        });
+    div.on("close.bs.modal", function( ) {
+        div.remove(  );
+        if (ctr.children().size() === 0) {
+            ctr.hide();
+        }
     });
     setTimeout( function() {
-        btn.click();
-    } , sec * 1000);
-
-    return box;
+        div.alert("close");
+    } , sec  *  1000 );
+    div.alert();
+    return  box;
 };
 
 $.fn.jqLoad = $.fn.load;
@@ -1268,11 +1272,11 @@ $.fn.hsClose = function() {
     } else
     // 关闭浮窗
     if (box.closest(".modal").size()) {
-        box.closest(".modal").modal("hide").remove();
+        box.closest(".modal").modal ("hide");
     } else
     // 关闭通知
     if (box.closest(".alert").size()) {
-        box.closest(".alert") /* destroy */.remove();
+        box.closest(".alert").remove(/****/);
     }
 
     return box;
@@ -1425,6 +1429,11 @@ $.fn.hsInit = function(cnf) {
     }
     var box = $(this);
 
+    // 标题上的设置作用在其容器上
+    if (box.is("h1,h2,h3")) {
+        box = box.parent();
+    }
+
     // 自动提取标题, 替换编辑文字
     // 如主键不叫id, 打开编辑页面, 则需加上id=0
     var h = box.children("h1,h2,h3");
@@ -1445,11 +1454,12 @@ $.fn.hsInit = function(cnf) {
         for(var k in cnf) {
             var v =  cnf[k];
             switch (k) {
-                case "title":
-                    a.find(".modal-title" ).text( v );
-                    break;
                 case "modal":
-                    a.find(".modal-dialog").addClass("modal-"+v);
+                    v = "modal-" + v ;
+                    a.find(".modal-dialog").addClass(v);
+                    break;
+                case "title":
+                    a.find(".modal-title" ).text/**/(v);
                     break;
             }
         }

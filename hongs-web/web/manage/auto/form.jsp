@@ -76,7 +76,7 @@
                     <input type="hidden" name="<%=name%>" value="<%="form_id".equals(name)?_entity:""%>"/>
                 <%} else if ("checkbag".equals(type)) {%>
                     <h3><%=disp%></h3>
-                    <div class="form-group" data-ft="_checkbag" data-fn="<%=name%>" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>" <%=rqrd%>></div>
+                    <div class="form-group" data-ft="_checkset" data-fn="<%=name%>" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>" <%=rqrd%>></div>
                 <%} else {%>
                     <div class="form-group">
                         <label class="control-label"><%=disp%></label>

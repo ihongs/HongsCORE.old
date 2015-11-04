@@ -102,10 +102,11 @@ extends Mtree {
          * 如果有指定user_id
          * 则关联a_member_user_dept来约束范围
          */
-        if (req.containsKey("user_id")) {
+        Object userId = req.get("user_id");
+        if (null != userId && !"".equals(userId)) {
             caze.join ("a_member_user_dept", "users")
                 .on   (".dept_id = :id")
-                .where(".user_id IN (?)", req.get("user_id"));
+                .where(".user_id IN (?)",userId);
         }
     }
 
