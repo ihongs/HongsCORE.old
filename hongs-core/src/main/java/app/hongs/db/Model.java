@@ -424,7 +424,7 @@ implements IRecord
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x1092, "ID can not be empty for put");
+      throw new HongsException (0x1092, "ID can not be empty for put");
     }
 
     // 调用setFileter进行校验
@@ -432,7 +432,7 @@ implements IRecord
     caze.setOption("MODEL_METHOD", "put");
     if (!this.permit(caze, id))
     {
-      throw new HongsException(0x1096, "Can not put the resource for id '"+id+"'");
+      throw new HongsException (0x1096, "Can not put for id '"+id+"'");
     }
 
     // 更新主数据
@@ -476,7 +476,7 @@ implements IRecord
   {
     if (id == null || id.length() == 0)
     {
-      throw new HongsException(0x1093, "ID can not be empty for del");
+      throw new HongsException (0x1093, "ID can not be empty for del");
     }
 
     // 调用setFileter进行校验
@@ -484,11 +484,11 @@ implements IRecord
     caze.setOption("MODEL_METHOD", "del");
     if (!this.permit(caze, id))
     {
-      throw new HongsException(0x1097, "Can not del the resource for id '"+id+"'");
+      throw new HongsException (0x1097, "Can not del for id '"+id+"'");
     }
 
     // 删除主数据
-    int an = this.table.delete("`"+this.table.primaryKey+"` = ?", id);
+    int an = this.table.delete ("`"+this.table.primaryKey+"` = ?", id);
 
     // 删除子数据
     this.table.deleteSubValues(id);

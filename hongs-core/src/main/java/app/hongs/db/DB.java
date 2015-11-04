@@ -845,7 +845,7 @@ public class DB
     DB.checkSQLParams(sb, paramz);
     sql = sb.toString();
 
-    PreparedStatement ps  = this.prepareStatement(  sql  );
+    PreparedStatement ps = this.prepareStatement(sql);
 
     /**
      * 遍历params以执行PreparedStatement.setObject
@@ -933,25 +933,6 @@ public class DB
   }
 
   /**
-   * 取消Statement
-   * @param ps
-   * @throws HongsException
-   */
-  public void cancelStatement(Statement ps)
-    throws HongsException
-  {
-    try
-    {
-      if (ps == null || ps.isClosed()) return;
-      ps.cancel();
-    }
-    catch (SQLException ex)
-    {
-      throw new app.hongs.HongsException(0x1033, ex);
-    }
-  }
-
-  /**
    * 关闭Statement
    * @param ps
    * @throws HongsException
@@ -992,40 +973,6 @@ public class DB
   //** 查询语句 **/
 
   /**
-   * 分页方法
-   * 已改为使用 JDBC 的 setFetchSize,setMaxRows,absolute 等方法;
-   * 另, 请不要在 update,delete 中使用 limit 至少 MySQL 是可以的,
-   * 您要更新/删除的记录应该是明确的, 应该能够通过 where 做出限定的.
-   * @deprecated
-   * @param sql
-   * @param start
-   * @param limit
-   * @return
-   */
-  public String limit(String sql, int start, int limit) {
-      try {
-          Connection con = connect();
-          String nam = con.getMetaData().getDatabaseProductName();
-          if ("MySQL".equals(nam)) {
-              sql += " LIMIT " + start + "," + limit;
-          } else if ("PostgreSQL".equals(nam)) {
-              sql += " LIMIT " + limit + " OFFSET " + start;
-          } else if ("Oracle".equals(nam)) {
-              sql = "SELECT * FROM (" + sql + ") WHERE rno > " + (start - 1) + " AND rno < " + (start + limit);
-          } else if ("SQLServer".equals(nam)) {
-              sql = "SELECT * FROM (" + sql + ") AS __table__ WHERE __table__.rownum > " + (start - 1) + " AND __table__.rownum < " + (start + limit);
-          } else {
-              throw new HongsError(0x10, "Limit not support " + nam);
-          }
-      } catch (HongsException ex) {
-          throw new HongsError(0x10, ex);
-      } catch (SQLException ex) {
-          throw new HongsError(0x10, ex);
-      }
-      return sql;
-  }
-
-  /**
    * 查询方法
    * @param sql
    * @param start
@@ -1045,7 +992,7 @@ public class DB
       List      paramz = new ArrayList(Arrays.asList(params));
       DB.checkSQLParams(sb, paramz);
       DB.mergeSQLParams(sb, paramz);
-      app.hongs.CoreLogger.debug("DB.query: " + sb.toString());
+      app.hongs.CoreLogger.debug("DB.query: "+ sb.toString());
     }
 
     PreparedStatement ps = this.prepareStatement(sql, params);
