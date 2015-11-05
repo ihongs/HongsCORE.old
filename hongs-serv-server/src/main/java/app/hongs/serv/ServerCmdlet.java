@@ -1,12 +1,16 @@
 package app.hongs.serv;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.HongsError;
 import app.hongs.HongsException;
+import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Synt;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.server.session.HashSessionManager;
@@ -19,13 +23,36 @@ import org.eclipse.jetty.server.session.SessionHandler;
 @Cmdlet("server")
 public class ServerCmdlet {
 
+    private static File PPID;
+
     @Cmdlet("start")
     public static void start(String[] args) throws HongsException {
         int port = args.length > 0 ? Synt.declare(args[0], 8080) : 8080;
 
-        String conf = Core.CORE_PATH + File.separator + "web.xml";
-        if(!(new File(conf)).exists()) {
-               conf = Core.CONF_PATH + File.separator + "web.xml";
+        // 进程检查
+        if (port != 8080) {
+            PPID  = new File(Core.DATA_PATH +"/server."+ port +".pid" );
+        } else {
+            PPID  = new File(Core.DATA_PATH +"/server.pid");
+        }
+        if (PPID.exists()) {
+            CmdletHelper.println("Process already exists!");
+            return;
+        }
+        try {
+            String     pid = ManagementFactory.getRuntimeMXBean()
+                            .getName().split("@", 2)[0];
+            FileWriter dip = new FileWriter(PPID, true);
+            dip.write( pid );
+            dip.close(     );
+        }
+        catch (IOException e) {
+            throw new HongsException.Common(e);
+        }
+
+        String conf = Core.CORE_PATH + File.separator +"web.xml";
+        if ( ! ( new  File(conf) ).exists( ) ) {
+               conf = Core.CONF_PATH + File.separator +"web.xml";
         }
 
         WebAppContext webapp = new WebAppContext();
@@ -41,26 +68,29 @@ public class ServerCmdlet {
                  sd.mkdirs();
             }
             HashSessionManager sm = new HashSessionManager();
-            sm.setStoreDirectory(sd);
-//          sm.setSessionCookie("SID");
-//          sm.setSessionIdPathParameterName("sid");
-            SessionHandler     sh = new SessionHandler( sm );
+            sm.setHttpOnly( true  ); sm.setLazyLoad( true  );
+            sm.setSessionCookie/*rameterNa*/(Cnst.CSID_KEY );
+            sm.setSessionIdPathParameterName(Cnst.PSID_KEY );
+            sm.setStoreDirectory(/**/sd);
+            SessionHandler/**/ sh = new SessionHandler( sm );
             webapp.setSessionHandler(sh);
         }
-        catch (IOException ex) {
-            throw new HongsException.Common(ex);
+        catch (IOException e) {
+            throw new HongsException.Common(e);
         }
 
-        Server server = new Server(port);
+        Server server;
+        server = new Server(port);
         server.setHandler(webapp);
 
-        Runtime.getRuntime().addShutdownHook(new StopServer(server));
+        // 停止机制
+        Runtime.getRuntime( ).addShutdownHook(new StopServer(server));
         try {
             server.start();
             server.join( );
         }
-        catch (Exception ex) {
-            throw new HongsException.Common(ex);
+        catch (  Exception e) {
+            throw new HongsException.Common(e);
         }
     }
 
@@ -87,6 +117,8 @@ public class ServerCmdlet {
                 server.stop();
             } catch (Exception ex) {
                 throw new HongsError.Common(ex);
+            } finally {
+                PPID.delete();
             }
         }
 

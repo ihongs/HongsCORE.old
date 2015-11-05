@@ -1,9 +1,8 @@
 #!/bin/bash
 
-bindir=$(cd `dirname $0`; pwd)
-CORE_PATH=`dirname $bindir`
+CURR_PATH=$(cd `dirname $0`; pwd)
+CORE_PATH=` dirname $CURR_PATH`
 JAVA_PATH="$JAVA_HOME/bin/java"
-#JAVA_OPTS="$JAVA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787"
 KLASSPATH="$CLASSPATH:$CORE_PATH/lib/*:$CORE_PATH/classes:$CORE_PATH/lib/classes"
 
 # find java
