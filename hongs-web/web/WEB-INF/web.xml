@@ -104,9 +104,11 @@
     <!-- Session Sets -->
     <session-config>
         <session-timeout>43210</session-timeout>
-        <!--cookie-config>
+        <cookie-config>
+            <name>_</name>
+            <path>/</path>
             <http-only>true</http-only>
-        </cookie-config-->
+        </cookie-config>
     </session-config>
     <!-- Another Sets -->
     <icon>

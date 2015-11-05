@@ -68,9 +68,9 @@ public class ServerCmdlet {
                  sd.mkdirs();
             }
             HashSessionManager sm = new HashSessionManager();
-            sm.setHttpOnly( true  ); sm.setLazyLoad( true  );
-            sm.setSessionCookie/*rameterNa*/(Cnst.CSID_KEY );
-            sm.setSessionIdPathParameterName(Cnst.PSID_KEY );
+//          sm.setHttpOnly( true  ); sm.setLazyLoad( true  );
+//          sm.setSessionCookie/*rameterNa*/(Cnst.CSID_KEY );
+//          sm.setSessionIdPathParameterName(Cnst.PSID_KEY );
             sm.setStoreDirectory(/**/sd);
             SessionHandler/**/ sh = new SessionHandler( sm );
             webapp.setSessionHandler(sh);

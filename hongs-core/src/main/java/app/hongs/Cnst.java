@@ -76,10 +76,10 @@ public class Cnst {
 
     //** 会话参数 **/
 
-    public static final String CSID_KEY =  "$";
+//  public static final String CSID_KEY =  "_";
 
-    public static final String PSID_KEY =  "$";
-    
+//  public static final String PSID_KEY =  "_";
+
     //** 请求属性 **/
 
     public static final String CORE_ATTR = "__HONGS_CORE__"; // 核心对象
