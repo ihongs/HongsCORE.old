@@ -2,6 +2,7 @@
 <root>
     <rsname>@manage</rsname>
     <menu disp="基础管理" href="common/menu.act?m=manage.base">
+        <menu disp="概要" href="manage/"></menu>
         <import>member</import>
         <import>module</import>
     </menu>

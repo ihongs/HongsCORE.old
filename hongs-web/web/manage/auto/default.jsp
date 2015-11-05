@@ -55,22 +55,25 @@
         <div id="notebox"></div>
         <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="row" data-load="manage/head.jsp?m=<%=_module%>&n=<%=_entity%>"></div>
+                <div class="row" data-load="manage/head.jsp?n=<%=_module%>&u=<%=_module%>/<%=_entity%>"></div>
             </div>
         </nav>
         <div id="bodybox" class="container">
-            <div id="main-context">
-                <ul class="nav nav-tabs tabs">
-                    <li class="active"><a href="javascript:;">加载中...</a></li>
-                </ul>
-                <div class="panes">
-                    <div class="openbox" data-load="<%=_module%>/<%=_entity%>/list.html"></div>
-                </div>
+            <ol class="breadcrumb tabs row">
+                <li class="active">
+                    <a href="javascript:;">
+                        <i class="glyphicon glyphicon-folder-open" style="margin-right: 0.5em;"></i>
+                        <b>加载中...</b>
+                    </a>
+                </li>
+            </ol>
+            <div class="panes">
+                <div class="openbox" data-load="<%=_module%>/<%=_entity%>/list.html"></div>
             </div>
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
-                <div class="row" data-load="manage/foot.jsp?m=<%=_module%>&n=<%=_entity%>"></div>
+                <div class="row" data-load="manage/foot.jsp?n=<%=_module%>&u=<%=_module%>/<%=_entity%>"></div>
             </div>
         </nav>
     </body>

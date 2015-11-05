@@ -38,11 +38,11 @@
 
     String nm = menu == null ? "" : (String) menu.get( "disp");
            nm = lang.translate(nm);
-    String id = _module +"-"+ _entity +"-"+  _action  ;
+    String id = (_module +"-"+ _entity +"-"+ _action ).replace('/', '-');
     String at = " id=\""+ id +"\"";
 %>
 <h2><%=lang.translate("fore."+_action+".title", nm)%></h2>
-<div<%=at%>>
+<div<%=at%> class="row">
     <div>
         <div class="toolbox col-md-9 btn-group">
             <%if ( "select".equals(_action)) {%>
@@ -127,7 +127,7 @@
     var context = $("#<%=id%>");
 
     context.hsList({
-        loadUrl : "<%=_module%>/<%=_entity%>/retrieve.act?md=2"
+        loadUrl : "<%=_module%>/<%=_entity%>/retrieve.act?md=2",
         openUrls: [
             ['.create', '<%=_module%>/<%=_entity%>/form.html?id=0', '@'],
             ['.update', '<%=_module%>/<%=_entity%>/form4update.html?md=1&id={ID}', '@']

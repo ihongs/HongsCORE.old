@@ -1197,13 +1197,13 @@ $.fn.hsOpen = function(url, data, complete) {
 
     if (tab) {
         ref = tab.parent().children( ).filter(".active");
-        tab.show().find( "a" ).click();
-        if (tab.find("a span").size()) {
-            tab.find("a span").not(".close")
-               .text(hsGetLang( "loading" ));
+        tab.show( ).find("a").click( );
+        if (tab.find("a b,a span").size()) {
+            tab.find("a b,a span").not(".close")
+               .text(hsGetLang("loading"));
         } else {
             tab.find("a")
-               .text(hsGetLang( "loading" ));
+               .text(hsGetLang("loading"));
         }
         // 关闭关联的 tab
         if (prt.children().size( ) ) {
@@ -1470,7 +1470,7 @@ $.fn.hsInit = function(cnf) {
             switch (k) {
                 case "title":
                     var x = a.find("a");
-                    var y = x.find("span").not(".close");
+                    var y = x.find("b,span").not(".close");
                     if (y.size()) {
                         y.text(v);
                     } else {
@@ -1568,7 +1568,7 @@ $.fn.hsFind = function(selr) {
                 elem = document;
             } while (false);
             return salr ? $(salr, elem) : elem;
-        case '&':
+        case '%':
             do {
                 var x;
                 x = elem.closest(".loadbox");
@@ -1706,11 +1706,14 @@ function(evt) {
             ths.removeAttr("data-href" );
             pne.hsOpen( ref );
         }
+    }
         // 联动关闭
         if (nav.is(".breadcrumb")) {
-            pne.hsCloze();
+            tab.nextAll().find("a").each(
+            function( ) {
+                $(this).hsClose( );
+            });
         }
-    }
     evt.stopPropagation();
 })
 .on("click", ".close,.cancel",

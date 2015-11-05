@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>模块管理</title>
+        <title>HongsCORE::模块管理</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <base href="../../">
@@ -33,8 +33,18 @@
                 <div class="row" data-load="manage/head.jsp?n=manage.base&u=manage/module"></div>
             </div>
         </nav>
-        <div id="bodybox">
-            <div class="container" id="main-context" data-load="manage/module/unit/tree.html"></div>
+        <div id="bodybox" class="container">
+            <ol class="breadcrumb tabs row">
+                <li class="active">
+                    <a href="javascript:;">
+                        <i class="glyphicon glyphicon-folder-open" style="margin-right: 0.5em;"></i>
+                        <b>加载中...</b>
+                    </a>
+                </li>
+            </ol>
+            <div class="panes">
+                <div data-load="manage/module/unit/tree.html"></div>
+            </div>
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">

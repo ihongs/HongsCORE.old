@@ -6,7 +6,9 @@
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
 <%@page extends="app.hongs.action.Pagelet"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html"%>
+<%@page pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true"%>
 <%!
     StringBuilder makeMenu(List<Map> list, String path) {
         StringBuilder menus = new StringBuilder();
@@ -56,7 +58,7 @@
     }
     String u = helper.getParameter("u");
     if (u == null || "".equals(u)) {
-        u =  m;
+        u =  n;
     }
 
     NaviMap main = NaviMap.getInstance(m);
@@ -76,7 +78,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" href="<%=request.getContextPath()%>/manage/">
         <span style="color:#800; font-size: 0.90em;" class="glyphicon glyphicon-fire"></span>
         <span style="color:#b00">H</span>
         <span style="color:#b22">o</span>
@@ -144,7 +146,7 @@
         $("#sign-out")
             .click(function() {
                 $.get(hsFixUri("manage/sign/delete.act"), function() {
-                    location.href = H$(".BASE_HREF")+"/manage/login.html"
+                    location.href = hsFixUri("manage/login.html");
                 });
             });
 

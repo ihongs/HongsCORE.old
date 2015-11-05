@@ -41,100 +41,98 @@
 
     String nm = menu == null ? "" : (String) menu.get( "disp");
            nm = lang.translate(nm);
-    String id = _module +"-"+ _entity +"-"+  _action  ;
+    String id = (_module +"-"+ _entity +"-"+ _action ).replace('/', '-');
     String at = " id=\""+ id +"\"";
 %>
 <!-- 表单 -->
 <h2><%=lang.translate("fore."+_action+".title", nm)%></h2>
-<div<%=at%>>
+<div<%=at%> class="row">
     <form action="" method="POST">
-        <div class="row">
-            <div class="col-md-6 center-block">
-                <%
-                Iterator it = flds.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry et = (Map.Entry)it.next( );
-                    Map     info = (Map ) et.getValue( );
-                    String  name = (String) et.getKey( );
-                    
-                    if ("@".equals(name)
-                    ||  Synt.declare(info.get("inedible"), false)) {
-                        continue ;
-                    }
+        <div class="col-md-6 center-block">
+            <%
+            Iterator it = flds.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry et = (Map.Entry)it.next( );
+                Map     info = (Map ) et.getValue( );
+                String  name = (String) et.getKey( );
 
-                    String  type = (String) info.get("__type__");
-                    String  disp = (String) info.get("__disp__");
-                    String  rqrd = Synt.declare(info.get("__required__"), false) ? "required=\"required\"" : "";
-                    String  rptd = Synt.declare(info.get("__repeated__"), false) ? "multiple=\"multiple\"" : "";
-                    
-                    if (!"".equals(rptd)) {
-                        rptd += " size=\"3\"";
-                        name += ".";
-                    }
-                %>
-                <%if ("hidden".equals(type)) {%>
-                    <input type="hidden" name="<%=name%>" value="<%="form_id".equals(name)?_entity:""%>"/>
-                <%} else if ("checkbag".equals(type)) {%>
-                    <h3><%=disp%></h3>
-                    <div class="form-group" data-ft="_checkset" data-fn="<%=name%>" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>" <%=rqrd%>></div>
-                <%} else {%>
-                    <div class="form-group">
-                        <label class="control-label"><%=disp%></label>
-                        <%if ("textarea".equals(type)) {%>
-                            <textarea class="form-control" name="<%=name%>" <%=rqrd%>></textarea>
-                        <%} else if ("string".equals(type) || "text".equals(type) || "email".equals(type) || "url".equals(type) || "tel".equals(type)) {%>
-                            <%
-                                String extr = "";
-                                if ("string".equals(type)) type = "text";
-                                if (info.containsKey("size")) extr += " size=\""+info.get("size").toString()+"\""; 
-                                if (info.containsKey("minlength")) extr += " minlength=\""+info.get("minlength").toString()+"\"";
-                                if (info.containsKey("maxlength")) extr += " maxlength=\""+info.get("maxlength").toString()+"\"";
-                                if (info.containsKey("pattern")) extr += " pattern=\""+info.get("pattern").toString()+"\"";
-                            %>
-                            <input class="form-control" type="text" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
-                        <%} else if ("number".equals(type) || "range".equals(type)) {%>
-                            <%
-                                String extr = "";
-                                if (info.containsKey("step")) extr += " step=\""+info.get("min").toString()+"\"";
-                                if (info.containsKey("min")) extr += " min=\""+info.get("min").toString()+"\"";
-                                if (info.containsKey("max")) extr += " max=\""+info.get("max").toString()+"\"";
-                            %>
-                            <input class="form-control" type="number" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
-                        <%} else if ("date".equals(type)) {%>
-                            <input class="form-control input-date" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
-                        <%} else if ("time".equals(type)) {%>
-                            <input class="form-control input-time" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
-                        <%} else if ("datetime".equals(type)) {%>
-                            <input class="form-control input-datetime" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
-                        <%} else if ("check".equals(type)) {%>
-                            <div class="checkbox" data-fn="<%=name%>" data-ft="_check" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>"></div>
-                        <%} else if ("radio".equals(type)) {%>
-                            <div class="radio"    data-fn="<%=name%>" data-ft="_radio" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>"></div>
-                        <%} else if ("enum".equals(type) || "select".equals(type)) {%>
-                            <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>><option value="">--<%=lang.translate("fore.select.lebel")%>--</option></select>
-                        <%} else if ("pick".equals(type) || "picker".equals(type)) {%>
-                            <%
-                                String vk = info.containsKey("data-vk") ? (String) info.get("data-vk") :  "id" ;
-                                String tk = info.containsKey("data-tk") ? (String) info.get("data-tk") : "name";
-                                String ak = info.containsKey("data-ak") ? (String) info.get("data-ak") :
-                                          ( info.containsKey("form"   ) ? (String) info.get("form"   ) : name.replace("_id$", "") );
-                                String al = info.containsKey("data-al") ? (String) info.get("data-al") :
-                                          ( info.containsKey("conf"   ) ? (String) info.get("conf"   ) : _module )
-                                        + ( info.containsKey("form"   ) ? (String) info.get("form"   ) : /**/ ak )
-                                        + "list4select.html";
-                            %>
-                            <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-ak="<%=ak%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
-                            <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=al%>"><%=lang.translate("fore.select.lebel", disp)%></button>
-                        <%} else {%>
-                            <input class="form-control" <%="type=\""+type+"\" name=\""+name+"\" "+rqrd%>/>
-                        <%} // End If %>
-                    </div>
-                <%} // Edn If %>
-                <%} // End For%>
-                <div>
-                    <button type="submit" class="ensure btn btn-primary"><%=lang.translate("fore.ensure")%></button>
-                    <button type="button" class="cancel btn btn-link"   ><%=lang.translate("fore.cancel")%></button>
+                if ("@".equals(name)
+                ||  Synt.declare(info.get("inedible"), false)) {
+                    continue ;
+                }
+
+                String  type = (String) info.get("__type__");
+                String  disp = (String) info.get("__disp__");
+                String  rqrd = Synt.declare(info.get("__required__"), false) ? "required=\"required\"" : "";
+                String  rptd = Synt.declare(info.get("__repeated__"), false) ? "multiple=\"multiple\"" : "";
+
+                if (!"".equals(rptd)) {
+                    rptd += " size=\"3\"";
+                    name += ".";
+                }
+            %>
+            <%if ("hidden".equals(type)) {%>
+                <input type="hidden" name="<%=name%>" value="<%="form_id".equals(name)?_entity:""%>"/>
+            <%} else if ("checkbag".equals(type)) {%>
+                <h3><%=disp%></h3>
+                <div class="form-group" data-ft="_checkset" data-fn="<%=name%>" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>" <%=rqrd%>></div>
+            <%} else {%>
+                <div class="form-group">
+                    <label class="control-label"><%=disp%></label>
+                    <%if ("textarea".equals(type)) {%>
+                        <textarea class="form-control" name="<%=name%>" <%=rqrd%>></textarea>
+                    <%} else if ("string".equals(type) || "text".equals(type) || "email".equals(type) || "url".equals(type) || "tel".equals(type)) {%>
+                        <%
+                            String extr = "";
+                            if ("string".equals(type)) type = "text";
+                            if (info.containsKey("size")) extr += " size=\""+info.get("size").toString()+"\""; 
+                            if (info.containsKey("minlength")) extr += " minlength=\""+info.get("minlength").toString()+"\"";
+                            if (info.containsKey("maxlength")) extr += " maxlength=\""+info.get("maxlength").toString()+"\"";
+                            if (info.containsKey("pattern")) extr += " pattern=\""+info.get("pattern").toString()+"\"";
+                        %>
+                        <input class="form-control" type="text" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
+                    <%} else if ("number".equals(type) || "range".equals(type)) {%>
+                        <%
+                            String extr = "";
+                            if (info.containsKey("step")) extr += " step=\""+info.get("min").toString()+"\"";
+                            if (info.containsKey("min")) extr += " min=\""+info.get("min").toString()+"\"";
+                            if (info.containsKey("max")) extr += " max=\""+info.get("max").toString()+"\"";
+                        %>
+                        <input class="form-control" type="number" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
+                    <%} else if ("date".equals(type)) {%>
+                        <input class="form-control input-date" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
+                    <%} else if ("time".equals(type)) {%>
+                        <input class="form-control input-time" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
+                    <%} else if ("datetime".equals(type)) {%>
+                        <input class="form-control input-datetime" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
+                    <%} else if ("check".equals(type)) {%>
+                        <div class="checkbox" data-fn="<%=name%>" data-ft="_check" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>"></div>
+                    <%} else if ("radio".equals(type)) {%>
+                        <div class="radio"    data-fn="<%=name%>" data-ft="_radio" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>"></div>
+                    <%} else if ("enum".equals(type) || "select".equals(type)) {%>
+                        <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>><option value="">--<%=lang.translate("fore.select.lebel")%>--</option></select>
+                    <%} else if ("pick".equals(type) || "picker".equals(type)) {%>
+                        <%
+                            String vk = info.containsKey("data-vk") ? (String) info.get("data-vk") :  "id" ;
+                            String tk = info.containsKey("data-tk") ? (String) info.get("data-tk") : "name";
+                            String ak = info.containsKey("data-ak") ? (String) info.get("data-ak") :
+                                      ( info.containsKey("form"   ) ? (String) info.get("form"   ) : name.replace("_id$", "") );
+                            String al = info.containsKey("data-al") ? (String) info.get("data-al") :
+                                      ( info.containsKey("conf"   ) ? (String) info.get("conf"   ) : _module )
+                                    + ( info.containsKey("form"   ) ? (String) info.get("form"   ) : /**/ ak )
+                                    + "list4select.html";
+                        %>
+                        <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-ak="<%=ak%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
+                        <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=al%>"><%=lang.translate("fore.select.lebel", disp)%></button>
+                    <%} else {%>
+                        <input class="form-control" <%="type=\""+type+"\" name=\""+name+"\" "+rqrd%>/>
+                    <%} // End If %>
                 </div>
+            <%} // Edn If %>
+            <%} // End For%>
+            <div>
+                <button type="submit" class="ensure btn btn-primary"><%=lang.translate("fore.ensure")%></button>
+                <button type="button" class="cancel btn btn-link"   ><%=lang.translate("fore.cancel")%></button>
             </div>
         </div>
     </form>
