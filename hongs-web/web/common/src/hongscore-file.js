@@ -137,28 +137,51 @@
             }
 
             // 类型配置
-            attr = that.attr( "data-type"  );
+            attr = that.attr("data-type" );
             if (attr) {
                 opts.previewFileType  = attr;
             }
-            attr = that.attr( "data-types" );
+            attr = that.attr("data-types");
             if (attr) {
                 opts.allowedFileTypes = attr.split(",");
             }
-            attr = that.attr( "data-extns" );
+            attr = that.attr("data-extns");
             if (attr) {
                 opts.allowedFileExtensions = attr.split(",");
             }
 
             // 初始配置
-            attr = that.attr( "data-value" );
+            attr = that.attr("data-value");
             if (attr) {
                 opts.initialPreview = initialPreview(opts, attr.split(","));
             }
 
-            that.removeClass( "input-file" );
-//              .removeClass("form-control");
+            that.removeClass("input-file");
             that.fileinput(opts);
+        });
+    });
+
+    $(document).on("loadBack", ".HsForm", function() {
+        $(this).find("[data-toggle=fileinput]").each(function() {
+            if(!$(this).data("fileinput")) {
+                return;
+            }
+
+            var that = $(this);
+            var opts = {};
+            var attr;
+
+            attr = that.attr("data-type" );
+            if (attr) {
+                opts.previewFileType = attr ;
+            }
+
+            attr = that.attr("data-value");
+            if (attr) {
+                opts.initialPreview  = initialPreview(opts, attr.split(","));
+            }
+
+            that.fileinput("refresh" , opts);
         });
     });
 })(jQuery);

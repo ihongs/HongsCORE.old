@@ -41,6 +41,7 @@ public class DeptAction {
         Map rd = helper.getRequestData();
         String id = helper.getParameter("id");
         String wr = helper.getParameter("-with-roles");
+        String ud = (String)helper.getSessibute("uid");
 
         if ( id != null && id.length() != 0 ) {
             rd = model.getInfo(rd);
@@ -49,7 +50,9 @@ public class DeptAction {
         }
 
         if (Synt.declare(wr, false)) {
-            List rs = NaviMap.getInstance("manage").getRoleTranslated();
+            List rs =  ! "1".equals(ud) ?
+                    NaviMap.getInstance("manage").getRoleTranslated(0, 0):
+                    NaviMap.getInstance("manage").getRoleTranslated(0, 0, null);
             Dict.put(rd, rs, "enum", "roles..role");
         }
 

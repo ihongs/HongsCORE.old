@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -603,16 +602,16 @@ public class NaviMap
 
   public List<Map> getRoleTranslates()
   throws HongsException {
-      return getRoleTranslates(1, 1);
+      return getRoleTranslates(0, 0);
   }
 
   public List<Map> getRoleTranslated()
   throws HongsException {
-      return getRoleTranslated(1, 1);
+      return getRoleTranslated(0, 0);
   }
 
   public List<Map> getRoleTranslated(Set<String> rolez) {
-      return getRoleTranslated(1, 1, rolez);
+      return getRoleTranslated(0, 0, rolez);
   }
 
   /**
@@ -673,53 +672,55 @@ public class NaviMap
           Map m = (Map) v.get("menus" );
           Set r = (Set) v.get("roles" );
 
-          if (r != null && !r.isEmpty()) {
-              List<Map> lizt = new ArrayList();
+          List<Map> rolz = new ArrayList();
+          List<Map> subz = getRoleTranslated(m, rolez, lang, j, i + 1);
 
-              for (String n : (Set<String>) r) {
-                  if (rolez != null && !rolez.contains(n)) {
-                      continue;
-                  }
-
-                  v = getRole(n);
-                  String s = (String) v.get("disp");
-                  Set    x = (Set) v.get("depends");
-
-                  // 没有指定 disp 则用 name 获取
-                  if (/**/ "".equals(s)) {
-                      s = "core.role." + n;
-                  }
-                  s = lang.translate(s);
-
-                  Map role = new HashMap();
-                  role.put("name", n);
-                  role.put("disp", s);
-                  role.put("rels", x);
-                  lizt.add(role);
+          if (r != null) for (String n : (Set<String>) r) {
+              if (rolez != null && ! rolez.contains(n)  ) {
+                  continue;
               }
 
-              if (! lizt.isEmpty( ) ) {
-                  List   l = getRoleTranslated(m, rolez, lang, j, i + 1);
-                  String h = (String) item.getKey();
-                  String p = (String) v.get("hrel");
-                  String d = (String) v.get("icon");
-                  String s = (String) v.get("disp");
+              Map    o = getRole(n);
+              Set    x = (Set) o.get("depends");
+              String s = (String) o.get("disp");
 
-                  // 没有指定 disp 则用 href 获取
-                  if (/**/ "".equals(s)) {
-                      s = "core.role." + h;
-                  }
-                  s = lang.translate(s);
-
-                  Map menu = new HashMap();
-                  menu.put("href", h);
-                  menu.put("hrel", p);
-                  menu.put("icon", d);
-                  menu.put("disp", s);
-                  menu.put("subs", l);
-                  menu.put("rols", lizt  );
-                  list.add( menu);
+              // 没有指定 disp 则用 name 获取
+              if (/**/"".equals(s)) {
+                  s = "core.role." + n;
               }
+              s = lang.translate(s);
+
+              Map role = new HashMap();
+              role.put("name", n);
+              role.put("disp", s);
+              role.put("rels", x);
+              rolz.add(role);
+          }
+
+          if (! rolz.isEmpty()) {
+              String h = (String) item.getKey();
+              String p = (String) v.get("hrel");
+              String d = (String) v.get("icon");
+              String s = (String) v.get("disp");
+
+              // 没有指定 disp 则用 href 获取
+              if (/**/"".equals(s)) {
+                  s = "core.role." + h;
+              }
+              s = lang.translate(s);
+
+              Map menu = new HashMap();
+              menu.put("href", h);
+              menu.put("hrel", p);
+              menu.put("icon", d);
+              menu.put("disp", s);
+              menu.put("rols", rolz  );
+              list.add(menu);
+          }
+
+          // 拉平下级
+          if (! subz.isEmpty()) {
+              list.addAll(subz);
           }
       }
 
@@ -816,7 +817,7 @@ public class NaviMap
               }
           }
 
-          List   l = getMenuTranslated(m, rolez, lang, j, i + 1);
+          List<Map> subz = getMenuTranslated(m, rolez, lang, j, i + 1);
           String p = (String) v.get("hrel");
           String d = (String) v.get("icon");
           String s = (String) v.get("disp");
@@ -832,7 +833,7 @@ public class NaviMap
           menu.put("hrel", p);
           menu.put("icon", d);
           menu.put("disp", s);
-          menu.put("subs", l);
+          menu.put("subs", subz  );
           list.add( menu);
       }
 

@@ -87,16 +87,25 @@ textarea.form-control,
     cursor: pointer;
 }
 
-.breadcrumb .close {
-    display: none;
-}
-
 .center-block {
     float: none;
 }
 
+.breadcrumb .close {
+    display: none;
+}
+
 .checkbox label {
     padding-right: 15px;
+}
+
+.file-preview-frame .file-preview-image,
+.file-preview-frame video,
+.file-preview-frame audio,
+.file-preview-frame object {
+    width: auto;
+    height: 160px;
+    max-width: 100%;
 }
 
 /** 布局 **/
@@ -153,7 +162,6 @@ textarea.form-control,
     padding: 0;
 }
 
-object.config,
 .panes>.openbox>h1,
 .panes>.openbox>h2,
 .panes>*>.openbox>h1,

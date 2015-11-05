@@ -1231,7 +1231,7 @@ $.fn.hsClose = function() {
     if (prt.parent().is(".tabs" )) {
         tab = prt;
         prt = prt.parent().data("panes").children().eq(tab.index());
-        box = prt.children(  ).first(  );
+        box = prt.children( ".openbox" ); // Get the following boxes
     }
 
     // 触发事件
@@ -1366,19 +1366,19 @@ $.fn.hsTabs = function(rel) {
     }
     return box;
 };
-$.fn.hsTadd = function(flg) {
+$.fn.hsTadd = function(ref) {
     var box = $(this);
     var tab ;
-    if (! flg) {
-        tab = []; flg = '';
+    if (! ref) {
+        ref = '';
+        tab = [];
     } else {
-        tab = box.find("[data-for='"+flg+"']").closest("li");
+        tab = box.find("[data-hrel='"+ ref +"']").closest("li");
     }
     if (! tab.length) {
-        tab = $( '<li><a href="javascript:;"><span></span>'
-            + '<span class="close">&times;</span></a></li>');
-        tab.attr('data-for', flg).appendTo(box);
-        return [tab, $( '<div></div>'  ).appendTo(box.data("panes"))];
+        tab = $('<li><a href="javascript:;"><span></span><span class="close">&times;</span></a></li>');
+        tab.appendTo ( box ).find( 'a' ).attr('data-hrel', ref);
+        return [tab, $(  '<div></div>' ).appendTo(box.data("panes"))];
     } else {
         return [tab, $(box.data("tabs")).children( ).eq(tab.index())];
     }
@@ -1686,6 +1686,33 @@ function(evt) {
     }
     evt.stopPropagation();
 })
+.on("click", ".tabs > li > a",
+function(evt) {
+    var ths = $(this);
+    var tab = ths.parent();
+    var nav = tab.parent();
+    var idx = tab.index( );
+    var pns = nav.data("panes");
+    nav.children().removeClass("active");
+    tab.show(/*cur*/).addClass("active");
+    if (pns) {
+        var pne = pns.children().eq(idx);
+        pns.children().hide();pne.show();
+        // 延迟加载
+        if (pne.is(":empty" )
+        &&  ths.is("[data-href]")) {
+            var ref;
+            ref = ths.attr("data-href" );
+            ths.removeAttr("data-href" );
+            pne.hsOpen( ref );
+        }
+        // 联动关闭
+        if (nav.is(".breadcrumb")) {
+            pne.hsCloze();
+        }
+    }
+    evt.stopPropagation();
+})
 .on("click", ".close,.cancel",
 function(evt) {
     var box;
@@ -1725,28 +1752,10 @@ function(evt) {
     box.hsClose( );
     evt.stopPropagation();
 })
-.on("click", ".tabs > li > a",
-function(evt) {
-    var tab = $( this ).parent(  );
-    var nav = tab.closest(".tabs");
-    var pns = nav.data   ("panes");
-    var idx = tab.index  ();
-    nav.children().removeClass("active")
-            .eq (idx).addClass("active").show();
-    if (pns) {
-        pns.children( ).hide( ).eq(idx ).show();
-    }
-    if (nav.is(".breadcrumb")) {
-        tab.nextAll ( ).each( function(  ) {
-            $(this).find(".close").click();
-        });
-    }
-    evt.stopPropagation();
-})
 .on("click", ".dropdown-toggle",
 function(evt) {
-    if ($(evt.target).is(".dropdown-deny"))return;
-    var body = $(this).siblings(".dropdown-body");
+    if ($(evt.target).is(".dropdown-deny")) return;
+    var body = $(this).siblings(".dropdown-body" );
     if (body.size() == 0) return;
     var cont = $(this).parent( );
     cont.toggleClass( "dropup" );
