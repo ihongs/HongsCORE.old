@@ -1709,7 +1709,7 @@ function(evt) {
     }
         // 联动关闭
         if (nav.is(".breadcrumb")) {
-            tab.nextAll().find("a").each(
+            tab.nextAll( ).find("a").each(
             function( ) {
                 $(this).hsClose( );
             });
