@@ -78,15 +78,15 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="<%=request.getContextPath()%>/manage/">
-        <span style="color:#800; font-size: 0.90em;" class="glyphicon glyphicon-fire"></span>
-        <span style="color:#b00">H</span>
-        <span style="color:#b22">o</span>
-        <span style="color:#b44">n</span>
-        <span style="color:#b66">g</span>
-        <span style="color:#b88">s</span>
-        <span style="color:#faa">C</span>
-        <span style="color:#fbb">O</span>
+    <a class="navbar-brand" style="font-weight: bolder;" href="<%=request.getContextPath()%>/manage/">
+        <span style="color:#f00;" class="glyphicon glyphicon-fire"></span>
+        <span style="color:#833">H</span>
+        <span style="color:#722">o</span>
+        <span style="color:#611">n</span>
+        <span style="color:#722">g</span>
+        <span style="color:#833">s</span>
+        <span style="color:#eaa">C</span>
+        <span style="color:#ebb">O</span>
         <span style="color:#fcc">R</span>
         <span style="color:#fdd">E</span>
     </a>
