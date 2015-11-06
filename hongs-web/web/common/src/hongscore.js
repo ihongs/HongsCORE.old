@@ -1290,7 +1290,7 @@ $.fn.hsCloze = function() {
 $.fn.hsReady = function() {
     var box = $(this);
 
-    // 为避免在 chrome 等浏览器中显示空白间隔, 清除全部空白文本节点
+    // 为避免 chrome 等浏览器中显示空白间隔, 清除全部独立的空白文本节点
     box.find("*").contents().filter(function() {
         return this.nodeType === 3 && /^\s+$/.test(this.nodeValue);
     }).remove();
@@ -1306,14 +1306,14 @@ $.fn.hsReady = function() {
         $(this).toggleClass("invisible", ! u );
     });
 
-    // 选项卡
-    box.find(".tabs,[data-tabs]").each(function() {
-        $(this).hsTabs();
-    });
-
     // 国际化
     box.find(".i18n,[data-i18n]").each(function() {
         $(this).hsI18n();
+    });
+
+    // 选项卡
+    box.find("[data-toggle=hsTabs]").each(function() {
+        $(this).hsTabs();
     });
 
     // 初始化
@@ -1352,13 +1352,15 @@ $.fn.hsReady = function() {
 $.fn.hsTabs = function(rel) {
     var box = $(this);
     if (! rel) {
-        if (box.attr("data-tabs")) {
-            rel = box.hsFind(box.attr("data-tabs"));
+        rel = box.attr("data-target");
+        if (rel) {
+            rel = box.hsFind  ( rel );
             /***/ rel.addClass( "panes");
         } else {
             rel = box.siblings(".panes");
         }
     }
+    box.addClass( "tabs" );
     rel.data( "tabs", box);
     box.data("panes", rel);
     if (box.has(".active").size() === 0) {
