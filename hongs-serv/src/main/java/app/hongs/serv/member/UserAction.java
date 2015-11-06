@@ -97,15 +97,14 @@ public class UserAction {
 
             // 缩略头像
             try {
-                String fn = Core.BASE_PATH+"/"+ rd.get("head").toString();
-                String fm = fn.replaceFirst("\\..*?$", "");
+                String fn = Core.BASE_PATH +"/"+ rd.get("head").toString();
+                String fm = fn.replaceFirst("\\.[^\\.]+$" , "");
                 if ( ! fn.endsWith(".jpg")) {
                     Thumbnails.of(fn).scale(1.00).outputFormat("jpg").toFile(fm +".jpg");
                 }
-                Thumbnails.of(fn).size(16, 16).outputFormat("jpg").toFile(fm +"_xs.jpg");
-                Thumbnails.of(fn).size(32, 32).outputFormat("jpg").toFile(fm +"_sm.jpg");
-                Thumbnails.of(fn).size(64, 64).outputFormat("jpg").toFile(fm +"_md.jpg");
                 Thumbnails.of(fn).size(96, 96).outputFormat("jpg").toFile(fm +"_lg.jpg");
+                Thumbnails.of(fn).size(64, 64).outputFormat("jpg").toFile(fm +"_md.jpg");
+                Thumbnails.of(fn).size(32, 32).outputFormat("jpg").toFile(fm +"_sm.jpg");
             } catch (IOException  ex) {
                 throw new HongsException.Common(ex);
             }

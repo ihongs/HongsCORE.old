@@ -11,9 +11,21 @@
                     <input type="hidden" name="conf"/>
                     <div class="form-group" data-type="text">
                         <label class="control-label clearfix" style="display: block;">
-                            <span>表单名称</span>
+                            <span>名称</span>
                         </label>
-                        <input class="form-control" name="name" type="text" placeholder="输入名字用以识别这个表单"/>
+                        <input class="form-control" name="name" type="text" required="required" placeholder="输入名字用以识别这个表单"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label clearfix" style="display: block">
+                            <span>权重</span>
+                        </label>
+                        <input class="form-control" name="snum" type="number" required="required" value="0"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label clearfix" style="display: block">
+                            <span>备注</span>
+                        </label>
+                        <textarea class="form-control" name="snum"></textarea>
                     </div>
                     <div class="invisible">
                         <button type="submit"/>
@@ -388,3 +400,8 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 </div>
+<!-- cols util -->
+<link rel="stylesheet" type="text/css" href="manage/module/cols.css"/>
+<script type="text/javascript" src="manage/module/cols.js"></script>
+<script type="text/javascript" src="common/jquery-ui.min.js"></script>
+<script type="text/javascript" src="compon/json2/json2.min.js"></script>

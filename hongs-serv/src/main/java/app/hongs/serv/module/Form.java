@@ -113,14 +113,15 @@ public class Form extends Model {
         Element  menu = docm.createElement("menu");
         root.appendChild ( menu );
         menu.setAttribute("disp", name);
-        menu.setAttribute("href", "manage/data/"+id+"/");
+        menu.setAttribute("href", "manage/data/#"+id);
+        menu.setAttribute("hrel", "manage/data/" +id+"/main.html");
 
         Element  role, actn, depn;
 
         // 会话
-        depn = docm.createElement("rsname");
-        root.appendChild ( depn );
-        depn.appendChild ( docm.createTextNode("@manage") );
+        role = docm.createElement("rsname");
+        root.appendChild ( role );
+        role.appendChild ( docm.createTextNode("@manage") );
 
         // 查看
 
@@ -273,8 +274,9 @@ public class Form extends Model {
 
     private void saveDocument(String path, Document docm) throws HongsException {
         File file = new File(path);
-        if (!file.getParentFile().exists()) {
-             file.getParentFile().mkdirs();
+        File fold = file.getParentFile();
+        if (!fold.exists()) {
+             fold.mkdirs();
         }
 
         TransformerFactory tf = TransformerFactory.newInstance();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <rsname>@manage</rsname>
-    <menu disp="模块" href="manage/module/" hrel="manage/module/unit/tree.html">
+    <menu disp="模块" href="manage/#module" hrel="manage/module/unit/tree.html">
         <role disp="查看表单" name="manage/module/form/retrieve">
             <depend>manage</depend>
             <depend>manage/module/unit/retrieve</depend>

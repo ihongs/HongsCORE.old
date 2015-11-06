@@ -36,7 +36,7 @@
                lang.loadIgnrFNF(_module);
     NaviMap    site = NaviMap.getInstance(_module+"/"+_entity);
     FormSet    form = FormSet.getInstance(_module+"/"+_entity);
-    Map        menu = site.getMenu(_module +"/"+ _entity +"/");
+    Map        menu = site.getMenu(_module +"/#"+ _entity);
     Map        flds = form.getFormTranslated(_entity );
 
     String nm = menu == null ? "" : (String) menu.get( "disp");

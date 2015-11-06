@@ -136,6 +136,17 @@ legend {
 #headbox ul.nav>li.active {
     font-weight: bolder;
 }
+#headbox li.headico a {
+    padding-right: 0;
+}
+#headbox span.headimg {
+    width: 32px;
+    height: 32px;
+    border-radius: 32px;
+    margin-top: -6px;
+    margin-bottom: -9px;
+    display: inline-block;
+}
 
 #footbox.navbar  {
     margin-top: 0;

@@ -1212,7 +1212,7 @@ $.fn.hsOpen = function(url, data, complete) {
         }
     } else {
         ref = $('<div class="openbak"></div>').hide()
-              .append(prt.contents()).appendTo( prt );
+            .append( prt.contents() ).appendTo( prt );
     }
 
     box = $('<div class="openbox"></div>')
@@ -1317,7 +1317,12 @@ $.fn.hsReady = function() {
     });
 
     // 初始化
-    if (! box.children("[data-module=hsInit]").size()) {
+    box.find("[data-toggle=hsInit]").each(function() {
+        $(this).hsInit();
+    });
+
+    // 初始化
+    if (! box.children("[data-toggle=hsInit],[data-module=hsInit]").size()) {
         $(this).hsInit();
     }
 
@@ -1344,6 +1349,41 @@ $.fn.hsReady = function() {
     box.find("[data-eval]").each(function() {
         eval($(this).attr("data-eval"));
     });
+
+    return box;
+};
+
+// 国际化
+$.fn.hsI18n = function(rep) {
+    var box = $(this);
+    var lng;
+
+    if (box.attr("data-i18n")) {
+        lng = box.attr("data-i18n");
+        lng = hsGetLang(lng, rep);
+        box.text( lng );
+    } else
+    if ($(this).text()) {
+        lng = box.text( );
+        lng = hsGetLang(lng, rep);
+        box.text( lng );
+    }
+
+    if (box.attr("alt")) {
+        lng = box.attr("alt");
+        lng = hsGetLang(lng, rep);
+        box.attr("alt" , lng);
+    }
+    if (box.attr("title")) {
+        lng = box.attr("title");
+        lng = hsGetLang(lng, rep);
+        box.attr("title" , lng);
+    }
+    if (box.attr("placeholder")) {
+        lng = box.attr("placeholder");
+        lng = hsGetLang(lng, rep);
+        box.attr("placeholder" , lng);
+    }
 
     return box;
 };
@@ -1386,45 +1426,10 @@ $.fn.hsTadd = function(ref) {
     }
 };
 
-// 国际化
-$.fn.hsI18n = function(rep) {
-    var box = $(this);
-    var lng;
-
-    if (box.attr("data-i18n")) {
-        lng = box.attr("data-i18n");
-        lng = hsGetLang(lng, rep);
-        box.text( lng );
-    } else
-    if ($(this).text()) {
-        lng = box.text( );
-        lng = hsGetLang(lng, rep);
-        box.text( lng );
-    }
-
-    if (box.attr("alt")) {
-        lng = box.attr("alt");
-        lng = hsGetLang(lng, rep);
-        box.attr("alt" , lng);
-    }
-    if (box.attr("title")) {
-        lng = box.attr("title");
-        lng = hsGetLang(lng, rep);
-        box.attr("title" , lng);
-    }
-    if (box.attr("placeholder")) {
-        lng = box.attr("placeholder");
-        lng = hsGetLang(lng, rep);
-        box.attr("placeholder" , lng);
-    }
-
-    return box;
-};
-
 // 初始化
 $.fn.hsInit = function(cnf) {
     if (cnf ===  undefined) {
-        cnf =  {/**/};
+        cnf = $(this).hsData();
     }
     var box = $(this);
 
@@ -1464,9 +1469,11 @@ $.fn.hsInit = function(cnf) {
         }
         a.modal();
     } else
-    if (box.closest(".panes").length) {
+    if (box.parent(".panes").size()
+    ||  box.parent().parent(".panes").size()) {
         var a = box.closest(".panes>*");
-        a = box.closest(".panes").data("tabs").children().eq(a.index());
+            a = box.closest(".panes"  )
+                   .data("tabs").children( ).eq(a.index());
         for(var k in cnf) {
             var v =  cnf[k];
             switch (k) {
@@ -1511,6 +1518,9 @@ $.fn.hsData = function() {
     };
     this.each( function( ) {
         var a = this.attributes;
+        if (a === undefined ) {
+            return;
+        }
         var j = a.length;
         var i = 0;
         for ( ; i < j; i ++ ) {
@@ -1570,7 +1580,7 @@ $.fn.hsFind = function(selr) {
                 elem = document;
             } while (false);
             return salr ? $(salr, elem) : elem;
-        case '%':
+        case '&':
             do {
                 var x;
                 x = elem.closest(".loadbox");

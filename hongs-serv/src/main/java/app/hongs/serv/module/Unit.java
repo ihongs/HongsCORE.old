@@ -10,12 +10,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -62,118 +58,88 @@ public class Unit extends Mtree {
         // 建立菜单配置
         String name = (String) rd.get("name");
         if (name != null && !"".equals(name)) {
-            updateOrCreateMenuSet();
+            updateOrCreateMenuSet( id, name );
+            updateOrCreateMenuSet(  );
         }
 
         return id;
     }
 
-    public void updateOrCreateMenuSet() throws HongsException {
-        List<Map> rows;
-
-        // 1. 找出首层单元及其全部子单元
-        rows = this.table.fetchCase()
-            .select("id,name")
-            .where ("pid='0'")
-            .all();
-        Map<String, String> unitMap = new LinkedHashMap( );
-        Map<String, String> deepMap = new HashMap();
-        for (Map row : rows) {
-            String unitId = row.get(/***/"id").toString( );
-            unitMap.put(unitId,row.get("name").toString());
-            List<String> ids = this.getChildIds(unitId, true);
-            for (String  cid : ids) {
-                deepMap.put(cid, unitId);
-            }
-        }
-
-        // 2. 找出首层单元下的表单
-        rows = this.db.getTable("form").fetchCase()
-            .select("id,unit_id")
-            .where ("unit_id IN (?) AND state != 0", unitMap.keySet())
-            .all();
-        Map<String, Set<String>> formMap = new LinkedHashMap();
-        for (Map row : rows) {
-            String formId = row.get(/***/"id").toString();
-            String unitId = row.get("unit_id").toString();
-
-            Set formIds;
-            if (formMap.containsKey(unitId)) {
-                formIds=formMap.get(unitId);
-            } else {
-                formIds=new LinkedHashSet();
-                formMap.put(unitId,formIds);
-            }
-            formIds.add(formId);
-        }
-
-        // 3. 找出二级单元下的表单
-        rows = this.db.getTable("form").fetchCase()
-            .select("id,unit_id")
-            .where ("unit_id iN (?)", deepMap.keySet())
-            .all();
-        Map<String, Set<String>> hideMap = new LinkedHashMap();
-        for (Map row : rows) {
-            String formId = row.get(/***/"id").toString();
-            String unitId = row.get("unit_id").toString();
-            unitId = deepMap.get(unitId);
-
-            Set hideIds;
-            if (formMap.containsKey(unitId)) {
-                hideIds=hideMap.get(unitId);
-            } else {
-                hideIds=new LinkedHashSet();
-                hideMap.put(unitId,hideIds);
-            }
-            hideIds.add(formId);
-        }
-
-        //** 构建文档 **/
-
+    public void updateOrCreateMenuSet(String id, String name) throws HongsException {
         Document docm = makeDocument();
 
         Element  root = docm.createElement("root");
         docm.appendChild ( root );
 
-        Element  menu, hide, incl;
+        Element  menu = docm.createElement("menu");
+        root.appendChild ( menu );
+        menu.setAttribute("disp", name);
+        menu.setAttribute("href", "manage/data/"+id+"/");
+
+        Element  incl;
 
         // 会话
         incl = docm.createElement("rsname");
         root.appendChild ( incl );
         incl.appendChild ( docm.createTextNode("@manage") );
 
-        for(Map.Entry<String, String> et : unitMap.entrySet()) {
-            String unitId   = et.getKey(  );
-            String unitName = et.getValue();
+        List<Map> rows;
 
-            Set<String> formSet  =  formMap.get(unitId);
-            if (null != formSet && !formSet.isEmpty( )) {
-                menu = docm.createElement( "menu" );
-                root.appendChild ( menu );
-                menu.setAttribute("disp", unitName);
-                menu.setAttribute("href", "common/menu.act?m=manage/data&n="+unitId);
+        // 单元下的表单
+        rows = this.db.getTable("form").fetchCase()
+            .select("id").where("unit_id = ?" , id)
+            .all();
+        for (Map row : rows) {
+            String fid = row.get("id").toString();
+            incl = docm.createElement( "import" );
+            menu.appendChild( incl );
+            incl.appendChild( docm.createTextNode("manage/data/"+fid) );
+        }
 
-                for(String formId : formSet) {
-                    incl = docm.createElement("import");
-                    menu.appendChild( incl );
-                    incl.appendChild(docm.createTextNode("manage/data/"+formId));
-                }
-            }
+        // 保存
+        saveDocument(Core.CONF_PATH+"/manage/data/"+id+Cnst.NAVI_EXT+".xml", docm);
+    }
 
-            Set<String> hideSet  =  hideMap.get(unitId);
-            if (null != hideSet && !hideSet.isEmpty( )) {
-                hide = docm.createElement( "menu" );
-                root.appendChild ( hide );
-                hide.setAttribute("disp", unitName+"隐藏功能");
-                hide.setAttribute("href", "!manage-data-"+unitId);
+    public void updateOrCreateMenuSet() throws HongsException {
+        Document docm = makeDocument();
 
-                if (hideMap.containsKey(unitId))
-                for(String formId : hideSet) {
-                    incl = docm.createElement("import");
-                    hide.appendChild( incl );
-                    incl.appendChild( docm.createTextNode("manage/data/"+formId) );
-                }
-            }
+        Element  root = docm.createElement("root");
+        docm.appendChild ( root );
+
+        Element  incl;
+
+        // 会话
+        incl = docm.createElement("rsname");
+        root.appendChild ( incl );
+        incl.appendChild ( docm.createTextNode("@manage") );
+
+        List<Map> rows;
+
+        // 全部一级单元
+        rows = this.table.fetchCase( )
+            .select("id").where("pid  = 0")
+            .all();
+        for (Map row : rows) {
+            String uid = row.get("id").toString();
+            incl = docm.createElement( "import" );
+            root.appendChild( incl );
+            incl.appendChild( docm.createTextNode("manage/data/"+uid) );
+        }
+
+        Element  menu = docm.createElement("menu");
+        root.appendChild ( menu );
+        menu.setAttribute("disp", "");
+        menu.setAttribute("href", "!manage/data/");
+
+        // 一级以下单元
+        rows = this.table.fetchCase( )
+            .select("id").where("pid != 0")
+            .all();
+        for (Map row : rows) {
+            String uid = row.get("id").toString();
+            incl = docm.createElement( "import" );
+            menu.appendChild( incl );
+            incl.appendChild( docm.createTextNode("manage/data/"+uid) );
         }
 
         saveDocument(Core.CONF_PATH+"/manage/data"+Cnst.NAVI_EXT+".xml", docm);
@@ -191,8 +157,9 @@ public class Unit extends Mtree {
 
     private void saveDocument(String path, Document docm) throws HongsException {
         File file = new File(path);
-        if (!file.getParentFile().exists()) {
-             file.getParentFile().mkdirs();
+        File fold = file.getParentFile();
+        if (!fold.exists()) {
+             fold.mkdirs();
         }
 
         TransformerFactory tf = TransformerFactory.newInstance();

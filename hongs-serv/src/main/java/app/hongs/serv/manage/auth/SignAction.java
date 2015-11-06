@@ -10,6 +10,7 @@ import app.hongs.action.anno.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
+import app.hongs.serv.member.User;
 import app.hongs.serv.member.UserAction;
 import app.hongs.util.Synt;
 import java.util.HashMap;
@@ -107,13 +108,13 @@ public class SignAction {
 
     @Action("user/update")
     @Verify(conf="sign",form="info",save=1,clean=true)
-    public void doUpdate(ActionHelper helper)
+    public void mineUpdate(ActionHelper helper)
     throws HongsException {
         Map rd = helper.getRequestData();
         String id = (String) helper.getSessibute("uid");
 
         // 禁止危险修改
-        rd.put("id", id);
+        rd.put( "id", id );
         rd.remove("roles");
         rd.remove("rtime");
         rd.remove("mtime");
@@ -149,6 +150,17 @@ public class SignAction {
 
         UserAction ua = new UserAction();
         ua.doSave(helper);
+    }
+
+    @Action("user/retrieve")
+    public void mineRetrieve(ActionHelper helper)
+    throws HongsException {
+        Map rd = helper.getRequestData();
+        String id = (String) helper.getSessibute("uid");
+        rd.put( "id", id );
+
+        UserAction ua = new UserAction();
+        ua.getInfo(helper);
     }
 
 }

@@ -166,8 +166,8 @@ public class AuthKit {
         sd.setAttribute("appid", appid);
         sd.setAttribute("stime", stime);
         sd.setAttribute("uname", uname);
-        sd.setAttribute("uhead", uname);
-        sd.setAttribute("utime", uname);
+        sd.setAttribute("uhead", uhead);
+        sd.setAttribute("utime", utime);
 
         // 返回数据
         Map rd = new HashMap();

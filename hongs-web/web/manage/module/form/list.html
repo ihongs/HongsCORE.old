@@ -1,19 +1,19 @@
 <div id="hongs-module-list"
      data-module="hsList"
-     data-load-url="manage/module/form/list.act?unit_id=${unit_id}"
+     data-load-url="manage/module/form/list.act?unit_id=${unit_id}&ob=snum"
      data-open-urls-0="['.create','manage/module/form/form.html?unit_id=${unit_id}','@']"
      data-open-urls-1="['.modify','manage/module/form/form.html?id={ID}','@']"
      data-send-urls-0="['.delete','manage/module/form/delete.act','您确定要删除此表单?']">
     <div>
-        <div class="toolbox col-md-9 btn-group">
+        <div class="toolbox col-md-8 btn-group">
             <button type="button" class="create btn btn-default">创建表单</button>
             <button type="button" class="modify for-choose btn btn-default">修改</button>
             <button type="button" class="delete for-checks btn btn-warning">删除</button>
         </div>
-        <form class="findbox col-md-3 input-group" action="" method="POST">
+        <form class="findbox col-md-4 input-group" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>
             <span class="input-group-btn">
-                <button type="submit" class="btn btn-default">查找</button>
+                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
             </span>
         </form>
     </div>
@@ -24,8 +24,9 @@
                     <th data-fn="id[]" data-ft="_check" class="_check">
                         <input type="checkbox" class="checkall" name="id[]"/>
                     </th>
-                    <th data-fn="unit.name" class="sortable">单元</th>
                     <th data-fn="name" class="sortable">名称</th>
+                    <th data-fn="snum" class="sortable">权重</th>
+                    <th data-fn="dcnt">数据总量</th>
                     <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
                     <th data-fn="ctime" data-ft="_htime" class="_htime sortable">创建时间</th>
                 </tr>

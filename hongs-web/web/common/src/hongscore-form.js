@@ -576,6 +576,10 @@ HsForm.prototype = {
                 if (!val) {
                     return hsGetLang("form.requires");
                 }
+            } else if (inp.is(":file")) {
+                if (!val && !inp.data("value")) {
+                    return hsGetLang("form.required");
+                }
             } else if (inp.is(":checkbox,:radio" )) {
                 if (!inp.filter(":checked").length) {
                     return hsGetLang("form.requires");

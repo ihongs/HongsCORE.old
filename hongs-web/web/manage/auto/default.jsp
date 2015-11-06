@@ -17,7 +17,7 @@
     _module = _module.substring(0, i);
 
     CoreLocale lang = CoreLocale.getInstance().clone();
-               lang.loadIgnrFNF(_module);
+               lang.loadIgnrFNF( _module+"/"+_entity );
     NaviMap    site = NaviMap.getInstance(_module+"/"+_entity);
     Map        menu = site.getMenu(_module +"/"+ _entity +"/");
 
@@ -55,25 +55,15 @@
         <div id="notebox"></div>
         <nav id="headbox" class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="row" data-load="manage/head.jsp?n=<%=_module%>&u=<%=_module%>/<%=_entity%>"></div>
+                <div class="row" data-load="manage/head.jsp?n=<%=_module%>/<%=_entity%>"></div>
             </div>
         </nav>
-        <div id="bodybox" class="container">
-            <ol class="breadcrumb row" data-toggle="hsTabs">
-                <li class="active">
-                    <a href="javascript:;">
-                        <i class="glyphicon glyphicon-folder-open" style="margin-right: 0.5em;"></i>
-                        <b>加载中...</b>
-                    </a>
-                </li>
-            </ol>
-            <div class="panes">
-                <div class="openbox" data-load="<%=_module%>/<%=_entity%>/list.html"></div>
-            </div>
+        <div id="bodybox">
+            <div class="container" id="main-context">加载中...</div>
         </div>
         <nav id="footbox" class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
-                <div class="row" data-load="manage/foot.jsp?n=<%=_module%>&u=<%=_module%>/<%=_entity%>"></div>
+                <div class="row" data-load="manage/foot.jsp?n=<%=_module%>/<%=_entity%>"></div>
             </div>
         </nav>
     </body>

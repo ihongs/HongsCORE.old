@@ -13,7 +13,7 @@
         <form class="findbox col-md-4 input-group" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>
             <span class="input-group-btn">
-                <button type="submit" class="btn btn-default">查找</button>
+                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
             </span>
         </form>
     </div>
@@ -24,7 +24,7 @@
                     <th data-fn="id[]" data-ft="_check" class="_check">
                         <input type="checkbox" class="checkall" name="id[]"/>
                     </th>
-                    <th data-fn="head">头像</th>
+                    <th data-fn="head" style="width:35px;">头像</th>
                     <th data-fn="name" class="sortable">名称</th>
                     <th data-fn="username" class="sortable">账号</th>
                     <th data-fn="mtime" data-ft="_htime" class="_htime sortable">修改时间</th>
@@ -57,15 +57,26 @@
 
         viewImg.modal("hide");
 
-        context.data("_fill_head", function(c, v, n) {
-            $('<a href="javascript:;"><img src="'+v+'" style="height:21px;"/></a>')
-            .appendTo(c)
-            .click(function() {
-                var v = $(this).find("img").attr("src");
-                viewImg.find(".modal-body div").empty()
-                     .append('<img src="'+v+'" style="max-width:100%;margin:0px auto;"/>');
-                viewImg.modal("show");
-            });
+        context.data("_fill_head" , function(c, v, n) {
+            if (!v) {
+                var u =    "common/img/head_icon_sm.jpg" ;
+                $('<a href="javascript:;">'
+                 +'<span style="background-image:url('+u+');'
+                 +'display:inline-block;width:32px;height:32px;border-radius:32px;margin-top:-5px;margin-bottom:-10px;"/></a>')
+                .appendTo(c);
+            } else {
+                var u = v.replace(/\.[^\.]+$/, "_sm.jpg");
+                $('<a href="javascript:;" data-href="'+v+'">'
+                 +'<span style="background-image:url('+u+');'
+                 +'display:inline-block;width:32px;height:32px;border-radius:32px;margin-top:-5px;margin-bottom:-10px;"/></a>')
+                .appendTo(c)
+                .click( function( ) {
+                    var v = $(this).attr("data-href");
+                    viewImg.find(".modal-body div").empty()
+                           .append('<img src="'+v+'" style="max-width:100%;margin:0px auto;"/>');
+                    viewImg.modal("show");
+                });
+            }
             return;
         });
     })(jQuery);

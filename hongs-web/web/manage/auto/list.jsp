@@ -33,7 +33,7 @@
                lang.loadIgnrFNF(_module);
     NaviMap    site = NaviMap.getInstance(_module+"/"+_entity);
     FormSet    form = FormSet.getInstance(_module+"/"+_entity);
-    Map        menu = site.getMenu(_module +"/"+ _entity +"/");
+    Map        menu = site.getMenu(_module +"/#"+ _entity);
     Map        flds = form.getFormTranslated(_entity );
 
     String nm = menu == null ? "" : (String) menu.get( "disp");
@@ -41,7 +41,7 @@
     String id = (_module +"-"+ _entity +"-"+ _action ).replace('/', '-');
     String at = " id=\""+ id +"\"";
 %>
-<h2><%=lang.translate("fore."+_action+".title", nm)%></h2>
+<h2 data-module="hsInit"><%=lang.translate("fore."+_action+".title", nm)%></h2>
 <div<%=at%> class="row">
     <div>
         <div class="toolbox col-md-9 btn-group">

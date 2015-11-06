@@ -5,12 +5,22 @@
 <%@page import="app.hongs.action.NaviMap"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
+<%@page import="java.util.regex.Pattern"%>
 <%@page extends="app.hongs.action.Pagelet"%>
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true"%>
 <%!
     StringBuilder makeMenu(List<Map> list, String path) {
+        // 针对 data 的特殊逻辑
+        Pattern patt = Pattern.compile("^manage/data/[^/]+$");
+        String  pret ;
+        if (patt.matcher(path).matches()) {
+            pret = "manage/data/#";
+        } else {
+            pret = path + "/#";
+        }
+
         StringBuilder menus = new StringBuilder();
         for(Map menu : list) {
             String disp = (String) menu.get("disp");
@@ -25,15 +35,15 @@
             if (href.equals(path +"/")) {
                 acti = "class=\"active\"";
             }
-            if (href.startsWith( path + "/#" )) {
-//              href = href.substring(href.indexOf('#'));
-                hrel = Core.BASE_HREF + "/" + hrel;
+            if (href.startsWith( pret)) {
+                href = path+"/#"+href.substring(pret.length());
+                hrel = Core.BASE_HREF +"/"+ hrel;
             } else {
-                href = Core.BASE_HREF + "/" + href;
+                href = Core.BASE_HREF +"/"+ href;
                 hrel = "";
             }
 
-            menus.append("<li " +acti+ ">")
+            menus.append("<li "+ acti +">")
                  .append("<a data-href=\"")
                  .append(hrel)
                  .append("\" href=\"")
@@ -67,8 +77,15 @@
     List<Map> currMenu = curr.getMenuTranslates();
 
     String  user = (String ) helper.getSessibute("uname");
+    String  head = (String ) helper.getSessibute("uhead");
     Integer msgc = (Integer) helper.getSessibute( "msgc");
     String  msgs = msgc == null ? null : (msgc > 9 ? "9+" : Integer.toString(msgc));
+    
+    if (head != null && !"".equals(head)) {
+        head = head.replaceFirst("\\.[^\\.]+$","_sm.jpg");
+    } else {
+        head = "common/img/head_icon_sm.jpg";
+    }
 %>
 
 <div class="navbar-header">
@@ -97,10 +114,19 @@
         <%=makeMenu(currMenu, u)%>
     </ul>
     <ul class="nav navbar-nav navbar-right" id="main-menubar">
+        <li class="headico">
+            <a href="javascript:;" data-toggle="hsOpen" data-href="manage/uinfo.html">
+                <span class="headimg" style="background-image:url(<%=head%>);"></span>
+            </a>
+        </li>
         <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                <%if (user != null) {%><%=user%><%} else {%><span class="glyphicon glyphicon-gift"></span><%}%>
-                <%if (msgs != null) {%><span class="badge"><%=msgs%></span><%}%>
+            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+                <%if (user != null) {%>
+                <span <%/*uname*/%>><%=user%></span>
+                <%} /* End If */%>
+                <%if (msgs != null) {%>
+                <span class="badge"><%=msgs%></span>
+                <%} /* End If */%>
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
@@ -108,7 +134,7 @@
                 <%if (user != null) {%>
                 <li class="divider"></li>
                 <li><a href="javascript:;" id="sign-out"><%=CoreLocale.getInstance().translate("fore.logout")%></a></li>
-                <%} // End If%>
+                <%} /* End If */%>
             </ul>
         </li>
     </ul>
