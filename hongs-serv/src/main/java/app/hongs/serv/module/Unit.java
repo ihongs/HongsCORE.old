@@ -167,10 +167,12 @@ public class Unit extends Mtree {
             Transformer tr = tf.newTransformer();
             DOMSource   ds = new DOMSource(docm);
             tr.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+            tr.setOutputProperty(OutputKeys.METHOD  , "xml"  );
             tr.setOutputProperty(OutputKeys.INDENT  , "yes"  );
+            tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4"); 
 
-            PrintWriter  pw = new PrintWriter(new FileOutputStream(file));
-            StreamResult sr = new StreamResult(pw);
+            PrintWriter  pw = new PrintWriter (new FileOutputStream(file));
+            StreamResult sr = new StreamResult( pw  );
             tr.transform(ds, sr);
         } catch (TransformerConfigurationException e) {
             throw new HongsException.Common(e);

@@ -138,7 +138,8 @@ public class NaviMap
     File serFile = new File(Core.DATA_PATH
                  + File.separator + "serial"
                  + File.separator + name + Cnst.NAVI_EXT + ".ser");
-    return xmlFile.exists() && xmlFile.lastModified() > serFile.lastModified();
+    return ! xmlFile.exists(   ) || ! serFile.exists(   )
+          || xmlFile.lastModified() > serFile.lastModified();
   }
 
   @Override

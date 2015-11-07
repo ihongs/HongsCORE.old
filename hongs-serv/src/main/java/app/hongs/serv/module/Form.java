@@ -239,7 +239,7 @@ public class Form extends Model {
                         Element valu = docm.createElement("value");
                         anum.appendChild ( valu );
                         valu.setAttribute("code", Synt.declare(di.get(0), ""));
-                        valu.setNodeValue(/*txt*/ Synt.declare(di.get(1), ""));
+                        valu.appendChild ( docm.createTextNode(Synt.declare(di.get(1), "")) );
                     }
                     continue;
                 }
@@ -249,13 +249,13 @@ public class Form extends Model {
                     para = docm.createElement("param");
                     item.appendChild ( para );
                     para.setAttribute("name", "lucene-fieldtype");
-                    para.setNodeValue(/*for*/ "search" /*field*/);
+                    para.appendChild ( docm.createTextNode("search") );
                 }
 
                 para = docm.createElement("param");
                 item.appendChild ( para );
                 para.setAttribute("name", k);
-                para.setNodeValue(/*val*/ v);
+                para.appendChild ( docm.createTextNode(v) );
             }
         }
 
@@ -284,10 +284,12 @@ public class Form extends Model {
             Transformer tr = tf.newTransformer();
             DOMSource   ds = new DOMSource(docm);
             tr.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+            tr.setOutputProperty(OutputKeys.METHOD  , "xml"  );
             tr.setOutputProperty(OutputKeys.INDENT  , "yes"  );
+            tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
-            PrintWriter  pw = new PrintWriter(new FileOutputStream(file));
-            StreamResult sr = new StreamResult(pw);
+            PrintWriter  pw = new PrintWriter (new FileOutputStream(file));
+            StreamResult sr = new StreamResult( pw  );
             tr.transform(ds, sr);
         } catch (TransformerConfigurationException e) {
             throw new HongsException.Common(e);
