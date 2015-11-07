@@ -708,7 +708,7 @@ HsForm.prototype = {
                 "data": data,
                 "type": "POST",
                 "dataType": "json",
-                "funcName": "verify",
+                "funcName": "vali",
                 "async": false,
                 "cache": false,
                 "context": this,
