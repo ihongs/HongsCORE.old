@@ -1652,8 +1652,7 @@ $.propHooks.choosed = {
 
 //** Global Events **/
 
-$(document)
-.on("ajaxError", function(evt, xhr, cnf) {
+$(document).ajaxError(function(evt, xhr, cnf) {
     var rst = hsResponObj(xhr,true,true);
     if (typeof(cnf.funcName) === "undefined") {
         return;
@@ -1671,7 +1670,9 @@ $(document)
         }
         box.trigger(cnf.funcName+"Error", evt, rst);
     }
-})
+});
+
+$(document)
 .on("click", "[data-toggle=hsLoad]",
 function(evt) {
     var box = $(this).attr("data-target");
