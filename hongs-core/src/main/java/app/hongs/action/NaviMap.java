@@ -502,14 +502,13 @@ public class NaviMap
           return null;
       }
       if (session.startsWith("@")) {
-          return getInstance(session.substring( 1 )).getRoleSet( );
-      }
-      if (! session.contains(".")) {
-          ActionHelper hlpr = Core.getInstance(ActionHelper.class);
-          return (Set) hlpr.getSessibute(session);
+          return getInstance(session.substring( 1 )).getRoleSet();
+      } else
+      if (session.startsWith("!")) {
+          return (Set) Core.getInstance( session.substring( 1 ) );
       } else
       {
-          return (Set) Core.getInstance (session);
+          return (Set) Core.getInstance( ActionHelper.class ).getSessibute(session);
       }
   }
 
