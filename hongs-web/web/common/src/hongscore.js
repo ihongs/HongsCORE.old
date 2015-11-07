@@ -1654,7 +1654,7 @@ $.propHooks.choosed = {
 
 $(document)
 .on("ajaxError", function(evt, xhr, cnf) {
-    var rst = hsResponObj(xhr);
+    var rst = hsResponObj(xhr,true,true);
     if (typeof(cnf.funcName) === "undefined") {
         return;
     }
