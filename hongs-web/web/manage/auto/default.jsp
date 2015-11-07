@@ -50,6 +50,18 @@
         <script type="text/javascript" src="common/src/hongscore-pick.js"></script>
         <script type="text/javascript" src="common/src/hongscore-date.js"></script>
         <script type="text/javascript" src="common/src/hongscore-file.js"></script>
+        <script type="text/javascript">
+            $(document).on("noMenu", function() {
+                $('#main-context').empty().append(
+                    '<div class="alert alert-info"><p>'
+                  + ':( 糟糕! 这里什么也没有, <a href="manage/">换个地方</a>瞧瞧去?'
+                  + '</p></div>'
+                );
+                setTimeout(function() {
+                    location.href = hsFixUri("manage/");
+                } , 3000);
+            });
+        </script>
     </head>
     <body>
         <div id="notebox"></div>

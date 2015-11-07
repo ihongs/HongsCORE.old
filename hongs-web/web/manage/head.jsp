@@ -180,6 +180,10 @@
             if ($("#curr-menubar .active").size()) {
                 return;
             }
+            if ($("#curr-menubar li").size() == 0) {
+                $( document ).trigger ( "noMenu" );
+                return;
+            }
             // Click the first available menu item
             var a;
             if (location.hash) {
