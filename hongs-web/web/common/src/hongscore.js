@@ -141,6 +141,7 @@ function hsResponObj(rst, qut, pus) {
                 } else {
                     location.reload();
                 }
+                throw new Exception("Exit!");
             }
         }
         // 针对特定数据结构
@@ -1653,7 +1654,7 @@ $.propHooks.choosed = {
 //** Global Events **/
 
 $(document).ajaxError(function(evt, xhr, cnf) {
-    var rst = hsResponObj(xhr,true,true);
+    var rst = hsResponObj(xhr);
     if (typeof(cnf.funcName) === "undefined") {
         return;
     }
