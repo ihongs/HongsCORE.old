@@ -19,6 +19,8 @@ public class Synt {
     private static final Number  ZERO = 0 ;
     private static final String  EMPT = "";
     private static final Boolean FALS = false;
+    private static final Pattern MEXP = Pattern.compile("\\s*:\\s*");
+    private static final Pattern SEXP = Pattern.compile("\\s*[,\\+\\s]\\s*");
 
     /**
      * 视为真的字符串有: 1,y,t,yes,true
@@ -263,6 +265,92 @@ public class Synt {
         }   catch  (ClassCastException ex) {
             throw new HongsError(0x46, ex);
         }
+    }
+
+    /**
+     * 确保此变量为 List 类型
+     * 本方法用于请求处理参数
+     * 与 declare(Object, T) 不同
+     * 当数据为字符串时
+     * 空串会返回空 List
+     * 否则按","或"+"或空格等拆分
+     * @param val
+     * @return
+     */
+    public static List declist(Object val) {
+        if (val == null) {
+            return null;
+        }
+        if (val instanceof String) {
+            String   s = ((String) val).trim();
+            if ("".equals(s)) {
+                return new ArrayList( );
+            }
+            String[] a = SEXP.split (s);
+            return Arrays.asList(a);
+        }
+        return declare(val, List.class);
+    }
+
+    /**
+     * 确保此变量为 Set  类型
+     * 本方法用于请求处理参数
+     * 与 declare(Object, T) 不同
+     * 当数据为字符串时
+     * 空串会返回空 Set
+     * 否则按","或"+"或空格等拆分
+     * @param val
+     * @return
+     */
+    public static Set declset(Object val) {
+        if (val == null) {
+            return null;
+        }
+        if (val instanceof String) {
+            String   s = ((String) val).trim();
+            if ("".equals(s)) {
+                return new LinkedHashSet();
+            }
+            String[] a = SEXP.split (s);
+            List   b = Arrays.asList(a);
+            return new LinkedHashSet(b);
+        }
+        return declare(val, Set.class );
+    }
+
+    /**
+     * 确保此变量为 Map  类型
+     * 本方法用于请求处理参数
+     * 与 declare(Object, T) 不同
+     * 当数据为字符串时
+     * 空串会返回空 Map
+     * 否则按","或"+"或空格等拆分
+     * 然后按":"拆分键值
+     * @param val
+     * @return
+     */
+    public static Map declmap(Object val) {
+        if (val == null) {
+            return null;
+        }
+        if (val instanceof String) {
+            String   s = ((String) val).trim();
+            if ("".equals(s)) {
+                return new LinkedHashMap();
+            }
+            String[] a = SEXP.split (s);
+            Map m = new LinkedHashMap();
+            for (String   b : a) {
+                 String[] c = MEXP.split(b);
+                if (1==c.length) {
+                    m.put(c[0] , c[0] );
+                } else {
+                    m.put(c[0] , c[1] );
+                }
+            }
+            return m;
+        }
+        return declare(val, Map.class );
     }
 
     /**
