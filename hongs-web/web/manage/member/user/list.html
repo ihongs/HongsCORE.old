@@ -8,7 +8,7 @@
         <div class="toolbox col-md-8 btn-group">
             <button type="button" class="create btn btn-default">创建用户</button>
             <button type="button" class="modify for-choose btn btn-default">修改</button>
-            <button type="button" class="delete for-checks btn btn-warning">删除</button>
+            <button type="button" class="delete for-checks btn btn-warning" title="删除"><span class="glyphicon glyphicon-trash"></span></button>
         </div>
         <form class="findbox col-md-4 input-group" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>
@@ -62,13 +62,13 @@
                 var u =    "common/img/head_icon_sm.jpg" ;
                 $('<a href="javascript:;">'
                  +'<span style="background-image:url('+u+');'
-                 +'display:inline-block;width:32px;height:32px;border-radius:32px;margin-top:-5px;margin-bottom:-10px;"/></a>')
+                 +'display:inline-block;width:32px;height:32px;border-radius:32px;margin-top:-5px;margin-bottom:-10px;background-position:center;background-repeat:no-repeat;"/></a>')
                 .appendTo(c);
             } else {
                 var u = v.replace(/\.[^\.]+$/, "_sm.jpg");
                 $('<a href="javascript:;" data-href="'+v+'">'
                  +'<span style="background-image:url('+u+');'
-                 +'display:inline-block;width:32px;height:32px;border-radius:32px;margin-top:-5px;margin-bottom:-10px;"/></a>')
+                 +'display:inline-block;width:32px;height:32px;border-radius:32px;margin-top:-5px;margin-bottom:-10px;background-position:center;background-repeat:no-repeat;"/></a>')
                 .appendTo(c)
                 .click( function( ) {
                     var v = $(this).attr("data-href");

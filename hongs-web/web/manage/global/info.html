@@ -1,16 +1,275 @@
-<!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
-</html>
+<div id="manage-info">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-fire"></span> 系统负载</div>
+                <div class="panel-body sys-info-box" style="height:200px"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-tint"></span> 内存消耗</div>
+                <div class="panel-body mem-info-box" style="height:200px"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-globe"></span> 网站目录</div>
+                <div class="panel-body base-dir-pie" style="height:200px"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-oil"></span> 数据目录</div>
+                <div class="panel-body data-dir-pie" style="height:200px"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-cog"></span> 配置目录</div>
+                <div class="panel-body conf-dir-pie" style="height:200px"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-off"></span> 系统目录</div>
+                <div class="panel-body core-dir-pie" style="height:200px"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="page-header">
+            <h2>维护命令 <small>一些常用的快捷命令</small></h2>
+        </div>
+        <div class="nav nav-pills">
+            <button type="button" class="btn btn-default" style="margin-right: 1em;">清除序列缓存</button>
+            <button type="button" class="btn btn-default" style="margin-right: 1em;">清除会话数据</button>
+            <button type="button" class="btn btn-default" style="margin-right: 1em;">清除上传数据</button>
+            <button type="button" class="btn btn-default" style="margin-right: 1em;">清除临时文件</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="compon/echarts/echarts.js"></script>
+<script type="text/javascript">
+    (function($) {
+        function setPieOption(a, legendData, seriesData) {
+            var b  = a[1].replace(/([A-Z])/g, "$1 ")
+                         .replace(/ \d*$/, "")+"B";
+            legendData.push(a[2]+"("+b+")");
+            seriesData.push({
+                    name  : a[2]+"("+b+")" ,
+                    value : a[0]
+                });
+        }
+
+        function getPieOption(data, title) {
+            var legendData = [];
+            var seriesDat0 = [];
+            var seriesDat1 = [];
+
+            for(var k in data) {
+                if (k != '#' && k != '$') {
+                    continue;
+                }
+                setPieOption(data[ k ], legendData, seriesDat0);
+            }
+
+            for(var k in data) {
+                if (k == '#' || k == '$' || k == '@' || k == '.' || k == '!') {
+                    continue;
+                }
+                setPieOption(data[ k ], legendData, seriesDat1);
+            }
+
+            if (data["!"][0] != 0) {
+                setPieOption(data["!"], legendData, seriesDat1);
+            }
+
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                toolbox: {
+                    show : false,
+                    feature : {
+                        mark : {show: true},
+                        magicType : {
+                            show: true,
+                            type: ['pie', 'bar']
+                        },
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : false,
+                legend: {
+                    orient : 'vertical',
+                    x : 'left',
+                    data:legendData
+                },
+                series: [
+                    {
+                        itemStyle : {
+                            normal : {
+                                label : {
+                                    show : false
+                                },
+                                labelLine : {
+                                    show : false
+                                }
+                            }
+                        },
+                        center : ['82%', '50%'],
+
+                        name:title+'所在磁盘',
+                        type:'pie',
+                        selectedMode: 'single',
+                        radius : [ 0, 50],
+
+                        data:seriesDat0
+                    },
+                    {
+                        itemStyle : {
+                            normal : {
+                                label : {
+                                    show : false
+                                },
+                                labelLine : {
+                                    show : false
+                                }
+                            }
+                        },
+                        center : ['82%', '50%'],
+
+                        name:title+'对应目录',
+                        type:'pie',
+                        radius : [60, 80],
+
+                        data:seriesDat1
+                    }
+                ]
+            };
+
+            return option;
+        }
+
+        function getLneOption(data, title, ctime) {
+            var legendData = [];
+            var seriesData = [];
+            var  xAxisData = [];
+
+            for(var k in data) {
+                var a  = data[k];
+                legendData.push(a[2]);
+                seriesData.push({
+                    name:a[2],
+                    type:'line',
+                    smooth:true,
+                    itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                    data:[a[0]]
+                });
+                 xAxisData.push(hsFmtDate(ctime, "HH:mm:ss"));
+            }
+
+            var option = {
+                tooltip : {
+                    trigger: 'axis'
+                },
+                toolbox: {
+                    show : false,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                legend: {
+                    data:legendData
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        boundaryGap : false,
+                        data : xAxisData
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value'
+                    }
+                ],
+                series : seriesData
+            };
+
+            return option;
+        }
+
+        require.config({
+            paths: {
+                echarts: hsFixUri('compon/echarts')
+            }
+        });
+        require(
+            [
+                'echarts',
+                'echarts/theme/sakura',
+                'echarts/chart/line',
+                'echarts/chart/pie'
+            ],
+            function (ec, et) {
+                $.hsAjax({
+                    url: "manage/info/retrieve.act",
+                    dataType: "json",
+                    success: function(rst) {
+                        var box;
+                        var opts;
+                        var chart;
+                        var context = $("#manage-info");
+
+                        // 系统信息
+                        box  = context.find(".sys-info-box")[0];
+                        opts = getLneOption(rst.info.sys_info, "负载", rst.info.now_msec);
+                        chart = ec.init(box, et);
+                        chart.setOption(opts);
+
+                        // 网站目录
+                        box  = context.find(".mem-info-box")[0];
+                        opts = getLneOption(rst.info.mem_info, "内存", rst.info.now_msec);
+                        chart = ec.init(box, et);
+                        chart.setOption(opts);
+
+                        // 网站目录
+                        box  = context.find(".base-dir-pie")[0];
+                        opts = getPieOption(rst.info.base_dir, "网站");
+                        chart = ec.init(box, et);
+                        chart.setOption(opts);
+
+                        // 数据目录
+                        box  = context.find(".data-dir-pie")[0];
+                        opts = getPieOption(rst.info.data_dir, "数据");
+                        chart = ec.init(box, et);
+                        chart.setOption(opts);
+
+                        // 配置目录
+                        box  = context.find(".conf-dir-pie")[0];
+                        opts = getPieOption(rst.info.conf_dir, "配置");
+                        chart = ec.init(box, et);
+                        chart.setOption(opts);
+
+                        // 核心目录
+                        box  = context.find(".core-dir-pie")[0];
+                        opts = getPieOption(rst.info.core_dir, "系统");
+                        chart = ec.init(box, et);
+                        chart.setOption(opts);
+                    }
+                });
+            }
+        );
+    })(jQuery);
+</script>

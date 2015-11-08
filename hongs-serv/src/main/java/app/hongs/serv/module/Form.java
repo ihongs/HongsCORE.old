@@ -66,6 +66,8 @@ public class Form extends Model {
                     fld.put("__name__", Core.getUniqueId());
                 }
             }
+            conf = Data.toString(flds);
+            rd.put("conf", conf);
         }
         
         String  id = (String) rd.get(this.table.primaryKey);

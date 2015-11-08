@@ -146,6 +146,8 @@ legend {
     margin-top: -6px;
     margin-bottom: -9px;
     display: inline-block;
+    background-position:center;
+    background-repeat:no-repeat;
 }
 
 #footbox.navbar  {

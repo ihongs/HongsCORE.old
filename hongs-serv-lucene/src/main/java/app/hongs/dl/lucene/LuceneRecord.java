@@ -12,7 +12,7 @@ import app.hongs.dl.ITrnsct;
 import app.hongs.util.Data;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +95,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         m.put("CORE_PATH", Core.CORE_PATH);
         m.put("CONF_PATH", Core.CORE_PATH);
         m.put("DATA_PATH", Core.DATA_PATH);
-        path  = Text.inject(path, m);
+        path  = Tool.inject(path, m);
         if (! new File(path).isAbsolute()) {
             path = Core.DATA_PATH +"/lucene/"+ path;
         }
@@ -1078,19 +1078,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @throws HongsException
      */
     protected Sort getSort(Map rd) throws HongsException {
-        Set<String> ob;
         Object xb = rd.get(Cnst.OB_KEY);
-        if (xb instanceof String/**/)
-        {
-          ob = new LinkedHashSet(Arrays.asList(((String)xb).split("[, \\+]")));
-        } else
-        if (xb instanceof Collection)
-        {
-          ob = new LinkedHashSet((Collection)xb);
-        } else
-        {
-          ob = new LinkedHashSet();
-        }
+        Set<String> ob = xb != null
+                  ? Synt.declset ( xb )
+                  : new LinkedHashSet();
 
         List<SortField> of = new ArrayList();
 
@@ -1156,21 +1147,12 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @param rd
      */
     protected void ignFlds(Map rd) {
-        Set<String> fs;
         Object fz = rd.get(Cnst.RB_KEY);
-        if (fz instanceof String/**/)
-        {
-          fs = new LinkedHashSet(Arrays.asList(((String)fz).split("[, \\+]")));
-        } else
-        if (fz instanceof Collection)
-        {
-          fs = new LinkedHashSet((Collection)fz);
-        } else
-        {
-          fs = new LinkedHashSet();
-        }
+        Set<String> fs = fz != null
+                  ? Synt.declset ( fz )
+                  : new LinkedHashSet();
 
-        if (!fs.isEmpty()) {
+        if (fs != null && !fs.isEmpty()) {
             Set<String> cf = new HashSet();
             Set<String> sf = new HashSet();
             for (String fn : fs) {

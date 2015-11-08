@@ -51,13 +51,13 @@
             <button type="button" class="create btn btn-default"><%=lang.translate("fore.create", nm)%></button>
             <%if (!"select".equals(_action)) {%>
             <button type="button" class="update for-choose btn btn-default"><%=lang.translate("fore.update", nm)%></button>
-            <button type="button" class="delete for-checks btn btn-warning"><%=lang.translate("fore.delete", nm)%></button>
+            <button type="button" class="delete for-checks btn btn-warning" title="<%=lang.translate("fore.delete", nm)%>"><span class="glyphicon glyphicon-trash"></span></button>
             <%} // End If %>
         </div>
         <form class="findbox col-md-3 input-group" action="" method="POST">
             <input type="search" name="wd" class="form-control input-search"/>
             <span class="input-group-btn">
-                <button type="submit" class="btn btn-default"><%=lang.translate("fore.search", nm)%></button>
+                <button type="submit" class="btn btn-default" title="<%=lang.translate("fore.search", nm)%>"><span class="glyphicon glyphicon-search"></span></button>
             </span>
         </form>
     </div>
