@@ -23,7 +23,7 @@ import java.io.IOException;
  *
  * @author Hongs
  */
-public final class Text
+public final class Tool
 {
 
   //** 进制 **/
@@ -106,7 +106,7 @@ public final class Text
    */
   public static String to36Hex(long num)
   {
-    return Text.toXHex(num, _36Hex);
+    return Tool.toXHex(num, _36Hex);
   }
 
   /**
@@ -116,7 +116,7 @@ public final class Text
    */
   public static String to26Hex(long num)
   {
-    return Text.toYHex(num, _26Hex);
+    return Tool.toYHex(num, _26Hex);
   }
 
   public static long asXHex(String str, char[] arr) {
@@ -218,18 +218,18 @@ public final class Text
      * 偶数个转义符后加转义符.
      */
 
-    String esc2 = Text.escapeRegular(esc);
-    String sym2 = Text.escapeReplace(sym);
+    String esc2 = Tool.escapeRegular(esc);
+    String sym2 = Tool.escapeReplace(sym);
 
     return str.replaceAll("(["+esc2+"])", sym2+"$1");
   }
   public static String escape(String str, String esc)
   {
-    return Text.escape(str, esc, "\\");
+    return Tool.escape(str, esc, "\\");
   }
   public static String escape(String str)
   {
-    return Text.escape(str, "'\"", "\\");
+    return Tool.escape(str, "'\"", "\\");
   }
 
   /**
@@ -251,18 +251,18 @@ public final class Text
      * 把单个转义符全删除掉.
      */
 
-    String esc2 = Text.escapeRegular(esc);
-    String sym2 = Text.escapeRegular(sym);
+    String esc2 = Tool.escapeRegular(esc);
+    String sym2 = Tool.escapeRegular(sym);
 
     return str.replaceAll(sym2+"(["+esc2+"])", "$1");
   }
   public static String resume(String str, String esc)
   {
-    return Text.resume(str, esc, "\\");
+    return Tool.resume(str, esc, "\\");
   }
   public static String resume(String str)
   {
-    return Text.resume(str, "'\"", "\\");
+    return Tool.resume(str, "'\"", "\\");
   }
 
   //** 缩进 **/
