@@ -9,7 +9,7 @@ import app.hongs.HongsException;
 import app.hongs.dl.ITrnsct;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.beans.PropertyVetoException;
 import java.io.File;
@@ -297,7 +297,7 @@ public class DB
         inj.put("CORE_PATH", Core.CORE_PATH);
         inj.put("CONF_PATH", Core.CONF_PATH);
         inj.put("DATA_PATH", Core.DATA_PATH);
-        uri = Text.inject(uri, inj);
+        uri = Tool.inject(uri, inj);
         if (! new File(uri).isAbsolute())
         {
           uri = Core.DATA_PATH + "/sqlite/" + uri;
@@ -1270,7 +1270,7 @@ public class DB
 
     /** 组织语句 **/
 
-    String sql = "INSERT INTO `" + Text.escape(table, "`") + "`";
+    String sql = "INSERT INTO `" + Tool.escape(table, "`") + "`";
     List params2 = new ArrayList();
     String fs = "", vs = "";
 
@@ -1281,7 +1281,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      fs += "`" + Text.escape(field, "`") + "`, ";
+      fs += "`" + Tool.escape(field, "`") + "`, ";
       vs += "?, ";
     }
 
@@ -1314,7 +1314,7 @@ public class DB
 
     /** 组织语言 **/
 
-    String sql = "UPDATE `" + Text.escape(table, "`") + "` SET ";
+    String sql = "UPDATE `" + Tool.escape(table, "`") + "` SET ";
     List params2 = new ArrayList();
 
     Iterator it = values.entrySet().iterator();
@@ -1324,7 +1324,7 @@ public class DB
       String field = (String)entry.getKey();
       params2.add((Object)entry.getValue());
 
-      sql += "`" + Text.escape(field, "`") + "` = ?, ";
+      sql += "`" + Tool.escape(field, "`") + "` = ?, ";
     }
 
     sql = sql.substring(0, sql.length()  - 2);
@@ -1358,7 +1358,7 @@ public class DB
   {
     /** 组织语句 **/
 
-    String sql = "DELETE FROM `" + Text.escape(table, "`") + "`";
+    String sql = "DELETE FROM `" + Tool.escape(table, "`") + "`";
 
     if (where != null && where.length() != 0)
     {
@@ -1379,7 +1379,7 @@ public class DB
    */
   public static String quoteField(String field)
   {
-    return "`" + Text.escape(field, "`") + "`";
+    return "`" + Tool.escape(field, "`") + "`";
   }
 
   /**
@@ -1389,7 +1389,7 @@ public class DB
    */
   public static String quoteValue(String value)
   {
-    return "'" + Text.escape(value, "'") + "'";
+    return "'" + Tool.escape(value, "'") + "'";
   }
 
   /**

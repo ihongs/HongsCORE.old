@@ -11,7 +11,7 @@ import app.hongs.cmdlet.anno.Cmdlet;
 import app.hongs.util.Clazz;
 import app.hongs.util.Data;
 import app.hongs.util.Synt;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 
 import java.io.File;
 import java.io.IOException;
@@ -133,7 +133,7 @@ public class CmdletRunner
       if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
       {
           CmdletHelper.println("Total exec time: "
-          +(Text.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
+          +(Tool.humanTime(System.currentTimeMillis()-Core.STARTS_TIME)));
       }
     }
   }
@@ -188,7 +188,7 @@ public class CmdletRunner
         String v = (String)et.getValue();
         if (k.startsWith("begin.")) {
             k = k.substring(6  );
-            v = Text.inject(v,m);
+            v = Tool.inject(v,m);
             System.setProperty(k,v);
         }
     }
@@ -200,7 +200,7 @@ public class CmdletRunner
         String v = (String)et.getValue();
         if (k.startsWith("debug.")) {
             k = k.substring(6  );
-            v = Text.inject(v,m);
+            v = Tool.inject(v,m);
             System.setProperty(k,v);
         }
     }
@@ -315,7 +315,7 @@ public class CmdletRunner
 
         text = text.trim();
     if (text.startsWith("@")) {
-        text = Text.fetchFile(text.substring(1));
+        text = Tool.fetchFile(text.substring(1));
         text = text.replaceAll("//.*?(\\r|\\n|$)", "$1");
         text = text.trim();
     }

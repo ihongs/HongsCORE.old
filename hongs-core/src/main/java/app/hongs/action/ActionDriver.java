@@ -9,7 +9,7 @@ import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Data;
 import app.hongs.util.Synt;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -129,7 +129,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 String v = (String)et.getValue();
                 if (k.startsWith("begin.")) {
                     k = k.substring(6  );
-                    v = Text.inject(v,m);
+                    v = Tool.inject(v,m);
                     System.setProperty(k,v);
                 }
             }
@@ -141,7 +141,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 String v = (String)et.getValue();
                 if (k.startsWith("debug.")) {
                     k = k.substring(6  );
-                    v = Text.inject(v,m);
+                    v = Tool.inject(v,m);
                     System.setProperty(k,v);
                 }
             }
@@ -178,7 +178,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             long time = System.currentTimeMillis() - Core.STARTS_TIME;
             CoreLogger.debug(new StringBuilder("...")
                 .append("\r\n\tSERVER_ID   : ").append(Core.SERVER_ID)
-                .append("\r\n\tRuntime     : ").append(Text.humanTime(time))
+                .append("\r\n\tRuntime     : ").append(Tool.humanTime(time))
                 .append("\r\n\tObjects     : ").append(core.keySet().toString())
                 .toString());
         }
@@ -330,7 +330,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tReqed-With  : ").append(R.getHeader("X-Requested-With"))
                 .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
                 .append("\r\n\tObjects     : ").append(core.keySet( ).toString())
-                .append("\r\n\tRuntime     : ").append(Text.humanTime(time));
+                .append("\r\n\tRuntime     : ").append(Tool.humanTime(time));
 
             // 输入输出数据, 这对调试程序非常有帮助
             Map rd, xd; CoreConfig cf = CoreConfig.getInstance();
@@ -346,12 +346,12 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
             if (cf.getProperty("core.trace.action.request", false)
             &&  rd != null && !rd.isEmpty()) {
               sb.append("\r\n\tRequest     : ")
-                .append(Text.indent(Data.toString(rd)).substring(1));
+                .append(Tool.indent(Data.toString(rd)).substring(1));
             }
             if (cf.getProperty("core.trace.action.results", false)
             &&  xd != null && !xd.isEmpty()) {
               sb.append("\r\n\tResults     : ")
-                .append(Text.indent(Data.toString(xd)).substring(1));
+                .append(Tool.indent(Data.toString(xd)).substring(1));
             }
 
             if (cf.getProperty("core.trace.action.context", false)) {
@@ -363,7 +363,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
               }
               if (!map.isEmpty()) {
                 sb.append("\r\n\tcontext     : ")
-                  .append(Text.indent(Data.toString(map)).substring(1));
+                  .append(Tool.indent(Data.toString(map)).substring(1));
               }
             }
 
@@ -377,7 +377,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
               }
               if (!map.isEmpty()) {
                 sb.append("\r\n\tSession     : ")
-                  .append(Text.indent(Data.toString(map)).substring(1));
+                  .append(Tool.indent(Data.toString(map)).substring(1));
               }
             }
 
@@ -389,7 +389,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
               }
               if (!map.isEmpty()) {
                 sb.append("\r\n\tCookies     : ")
-                  .append(Text.indent(Data.toString(map)).substring(1));
+                  .append(Tool.indent(Data.toString(map)).substring(1));
               }
             }
 

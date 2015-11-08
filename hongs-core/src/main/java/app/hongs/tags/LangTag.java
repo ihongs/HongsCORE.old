@@ -1,7 +1,7 @@
 package app.hongs.tags;
 
 import app.hongs.CoreLocale;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +61,10 @@ public class LangTag extends TagSupport implements DynamicAttributes {
       && ! "".equals(this.esc)
       && ! "no".equals(this.esc)) {
         if ("yes".equals(this.esc)) {
-          str = Text.escape(str);
+          str = Tool.escape(str);
         }
         else {
-          str = Text.escape(str, this.esc);
+          str = Tool.escape(str, this.esc);
         }
       }
 

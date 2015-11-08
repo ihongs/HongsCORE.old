@@ -6,7 +6,7 @@ import app.hongs.CoreConfig;
 import app.hongs.HongsException;
 import app.hongs.dl.IRecord;
 import app.hongs.util.Synt;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 import java.util.Iterator;
 import java.util.Arrays;
 import java.util.Collection;
@@ -884,19 +884,8 @@ implements IRecord
       return;
     }
 
-    Set<String> cols;
-    if (val instanceof String)
-    {
-      cols = new LinkedHashSet(Arrays.asList(((String)val).split("[, \\+]")));
-    } else
-    if (val instanceof Collection)
-    {
-      cols = new LinkedHashSet((Collection)val);
-    } else
-    {
-      return;
-    }
-    if (cols.isEmpty())
+    Set<String> cols  = Synt.declset(val);
+    if (cols == null || cols.isEmpty( ) )
     {
       return;
     }
@@ -1089,19 +1078,8 @@ implements IRecord
       return;
     }
 
-    Set<String> cols;
-    if (val instanceof String)
-    {
-      cols = new LinkedHashSet(Arrays.asList(((String)val).split("[ ,\\+]")));
-    } else
-    if (val instanceof Collection)
-    {
-      cols = new LinkedHashSet((Collection)val);
-    } else
-    {
-      return;
-    }
-    if (cols.isEmpty())
+    Set<String> cols  = Synt.declset(val);
+    if (cols == null || cols.isEmpty( ) )
     {
       return;
     }
@@ -1258,7 +1236,7 @@ implements IRecord
          * 符号 "%_[]" 在 SQL LIKE 中有特殊意义,
          * 需要对这些符号进行转义.
          */
-        txt = "%" + Text.escape(txt, "%_[]/", "/") + "%";
+        txt = "%" + Tool.escape(txt, "%_[]/", "/") + "%";
 
         sb.append(key).append(" LIKE ? ESCAPE '/' AND ");
         pa[ pi ++ ] = txt ;

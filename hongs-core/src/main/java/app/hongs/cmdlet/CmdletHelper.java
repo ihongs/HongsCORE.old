@@ -2,7 +2,7 @@ package app.hongs.cmdlet;
 
 import app.hongs.CoreLogger;
 import app.hongs.HongsError;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -364,7 +364,7 @@ public class CmdletHelper
     float  scale = (float)ok / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Text.humanTime((long) left1);
+    String left2 = Tool.humanTime((long) left1);
     String left3 = String.format("Ok(%d) TL: %s",
                                      ok, left2);
     CmdletHelper.progres(left3, scale);
@@ -382,7 +382,7 @@ public class CmdletHelper
     float  scale = (float)( er + ok ) / n * 100;
     t = System.currentTimeMillis() - t;
     float  left1 = t / scale * 100 - t;
-    String left2 = Text.humanTime((long) left1);
+    String left2 = Tool.humanTime((long) left1);
     String left3 = String.format("Ok(%d) Er(%d) TL: %s",
                                  ok, er, left2);
     CmdletHelper.progres(left3, scale);

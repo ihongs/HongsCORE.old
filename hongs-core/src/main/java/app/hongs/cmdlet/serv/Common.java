@@ -7,7 +7,7 @@ import app.hongs.action.ActionRunner;
 import app.hongs.cmdlet.CmdletHelper;
 import app.hongs.cmdlet.CmdletRunner;
 import app.hongs.cmdlet.anno.Cmdlet;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,19 +34,19 @@ public class Common {
         System.out.println(opts.get("to-16hex") + " to 16 Hex: "+Long.toHexString((Long) opts.get("to-16hex")));
     }
     if (opts.containsKey("to-26hex")) {
-        System.out.println(opts.get("to-26hex") + " to 26 Hex: "+app.hongs.util.Text.to26Hex((Long) opts.get("to-26hex")));
+        System.out.println(opts.get("to-26hex") + " to 26 Hex: "+app.hongs.util.Tool.to26Hex((Long) opts.get("to-26hex")));
     }
     if (opts.containsKey("to-36hex")) {
-        System.out.println(opts.get("to-36hex") + " to 36 Hex: "+app.hongs.util.Text.to36Hex((Long) opts.get("to-36hex")));
+        System.out.println(opts.get("to-36hex") + " to 36 Hex: "+app.hongs.util.Tool.to36Hex((Long) opts.get("to-36hex")));
     }
     if (opts.containsKey("as-16hex")) {
         System.out.println(opts.get("as-16hex") + " as 16 Hex: "+Long.parseLong((String) opts.get("as-16hex"), 16));
     }
     if (opts.containsKey("as-26hex")) {
-        System.out.println(opts.get("as-36hex") + " as 26 Hex: "+app.hongs.util.Text.as26Hex((String) opts.get("as-26hex")));
+        System.out.println(opts.get("as-36hex") + " as 26 Hex: "+app.hongs.util.Tool.as26Hex((String) opts.get("as-26hex")));
     }
     if (opts.containsKey("as-36hex")) {
-        System.out.println(opts.get("as-36hex") + " as 36 Hex: "+app.hongs.util.Text.as36Hex((String) opts.get("as-36hex")));
+        System.out.println(opts.get("as-36hex") + " as 36 Hex: "+app.hongs.util.Tool.as36Hex((String) opts.get("as-36hex")));
     }
   }
 
@@ -57,9 +57,9 @@ public class Common {
     String s = "\\\"Hello world!\", this is Hong's framework.\r\n"
              + "\\\"世界您好！\"，这是弘的框架。\"\r\n";
     CmdletHelper.println("source: " + s );
-    String s1 = Text.escape(s);
+    String s1 = Tool.escape(s);
     CmdletHelper.println("escape: " + s1);
-    String s2 = Text.resume(s1);
+    String s2 = Tool.resume(s1);
     CmdletHelper.println("resume: " + s2);
   }
 

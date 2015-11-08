@@ -1,6 +1,6 @@
 package app.hongs;
 
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -464,13 +464,13 @@ extends HashMap<String, Object>
     long n;
 
     n = System.currentTimeMillis();
-    String s1 = String.format("%8s", Text.to36Hex(n));
+    String s1 = String.format("%8s", Tool.to36Hex(n));
 
     n = Thread.currentThread().getId();
-    String s2 = String.format("%4s", Text.to36Hex(n));
+    String s2 = String.format("%4s", Tool.to36Hex(n));
 
     n = (long) ( Math.random() * 1679615 ); //36^4-1
-    String s3 = String.format("%4s", Text.to36Hex(n));
+    String s3 = String.format("%4s", Tool.to36Hex(n));
 
     if (s1.length() > 8) s1 = s1.substring(s1.length() - 8);
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);

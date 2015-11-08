@@ -2,7 +2,7 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.util.Dict;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -60,7 +60,7 @@ public class UploadHelper {
         m.put("CORE_PATH", Core.CORE_PATH);
         m.put("CONF_PATH", Core.CONF_PATH);
         m.put("DATA_PATH", Core.DATA_PATH);
-        path = Text.inject(path, m);
+        path = Tool.inject(path, m);
         if (! new File(path).isAbsolute()) {
             path = Core.BASE_PATH+"/"+path;
         }

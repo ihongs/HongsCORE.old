@@ -5,7 +5,7 @@ import app.hongs.CoreConfig;
 import app.hongs.HongsError;
 import app.hongs.action.ActionDriver;
 import app.hongs.action.ActionHelper;
-import app.hongs.util.Text;
+import app.hongs.util.Tool;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -238,7 +238,7 @@ public class ConfAction
     private String makeConf(String name, String key, String def)
     {
       String value = this.conf.getProperty(key, def);
-      value = Text.escape(value);
+      value = Tool.escape(value);
       return "\t\"" + name + "\":\"" + value + "\",\r\n";
     }
 
