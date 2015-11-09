@@ -130,7 +130,8 @@
         loadUrl : "<%=_module%>/<%=_entity%>/retrieve.act?md=2",
         openUrls: [
             ['.create', '<%=_module%>/<%=_entity%>/form.html?id=0', '@'],
-            ['.update', '<%=_module%>/<%=_entity%>/form4update.html?md=1&id={ID}', '@']
+            ['.update', '<%=_module%>/<%=_entity%>/form4edit.html?md=1&id={ID}', '@'],
+            ['.review', '<%=_module%>/<%=_entity%>/form4view.html?md=1&id={ID}', '@']
         ],
         sendUrls: [
             ['.delete', '<%=_module%>/<%=_entity%>/delete.act', '<%=lang.translate("fore.delete.confirm", nm)%>']

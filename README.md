@@ -62,10 +62,11 @@
 现在，你可以在 manage/data 目录下添加一个以表单 ID 为名的目录，在其下添加以下文件即可重建页面体系：
 
     default.html     引导页面
-    list.html        列表区块
-    list4select.html 选择区块
     form.html        创建表单
-    form4update.html 修改表单
+    form4edit.html   编辑表单
+    form4view.html   查看表单
+    list.html        列表区块
+    list4pick.html   选择区块
 
 一个简单的方法是通过 http://localhost:8080/mytest/form.html 这样的 url 来获取 html 文件, 然后存下来后在这个基础上改. 以后会增加一个按钮来比较方便的固化这个 html. 如不想使用原页面体系可在构建的 default.html 中按自定规则编码。
 
