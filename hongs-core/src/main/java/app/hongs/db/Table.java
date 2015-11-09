@@ -212,7 +212,7 @@ public class Table
   {
     String mtime = getField("mtime");
     String ctime = getField("ctime");
-    String state = getField("state");
+    String rstat = getField("state");
 
     long time = System.currentTimeMillis();
 
@@ -228,13 +228,13 @@ public class Table
       values.put(ctime, getDtval(ctime, time));
     }
 
-    // 存在 state 字段则自动放入默认值
-    if (state != null && !values.containsKey(state))
+    // 存在 rstat 字段则自动放入默认值
+    if (rstat != null && !values.containsKey(rstat))
     {
       String s = getState("default");
       if ( s  != null )
       {
-        values.put(state, s);
+        values.put(rstat, s);
       }
     }
 
