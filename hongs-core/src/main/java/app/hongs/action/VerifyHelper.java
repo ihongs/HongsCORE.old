@@ -642,7 +642,7 @@ public class VerifyHelper {
         private final Map<String, Wrong> wrongs;
 
         public Wrongs(Map<String, Wrong> wrongs) {
-            super(HongsException.NOTICE, "fore.form.invalid");
+            super(0x1100 , "fore.form.invalid"); // 0x1100 对应 HTTP 400 错误
             this.setLocalizedSection("default");
             this.wrongs = wrongs;
         }
@@ -677,11 +677,11 @@ public class VerifyHelper {
         public String getLocalizedMessage() {
             StringBuilder sb = new StringBuilder();
             try {
-                for(Map.Entry<String, String> et : getErrors().entrySet()) {
+                for (Map.Entry<String, String> et : getErrors().entrySet()) {
                     sb.append(et.getValue()).append("\r\n");
                 }
             } catch (HongsException ex) {
-                throw new HongsError.Common(ex);
+                throw new HongsError.Common ( ex );
             }
             return sb.toString().trim();
         }
