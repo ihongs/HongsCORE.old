@@ -527,9 +527,9 @@ HsForm.prototype = {
             if (!inp.is(key)) {
                 continue;
             }
-            var err = this.rules[key].call(this, inp.val(), inp);
+            var err  =  this.rules[key].call(this, inp.val(), inp);
             if (err !== true) {
-                err = inp.attr("data-message") || err || hsGetLang("form.haserror");
+                err  = err || inp.attr("data-message") || hsGetLang("form.haserror");
                 this.haserror(inp, err);
                 return false;
             } else {
