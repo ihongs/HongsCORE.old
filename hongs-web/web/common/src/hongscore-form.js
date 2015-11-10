@@ -31,6 +31,9 @@ function HsForm(opts, context) {
         } else
         if ('$'===k.substring(0,1)) {
             this.rules[k.substring(1)] = opts[k];
+        } else
+        if (':'===k.substring(0,1)) {
+            this.rmsgs[k.substring(1)] = opts[k];
         }
     }
 
@@ -571,22 +574,19 @@ HsForm.prototype = {
         }
     },
     geterror : function(inp, err, rep) {
-        var key = "data-"+ err.replace(".","-")+"-message" ;
-        var msg = inp.attr(key) || inp.attr("data-message");
+        var msg = err.replace(/^form\./, "").replace(/\./g, "-");
+            msg = "data-"+ msg+"-error";
+            msg = inp.attr(msg)
+               || inp.attr("data-error");
         if (msg) {
-            if (this.rmsgs[msg]) {
-                msg = this.rmsgs[msg];
-            }
-        } else {
-            if (this.rmsgs[err]) {
-                msg = this.rmsgs[err];
-            } else {
-                msg =  "form." + err ;
-            }
+            err = msg;
+        }
+        if (this.rmsgs[err]) {
+            err = this.rmsgs[err];
         }
 
         // 放入字段标签
-        var lab = inp.data("label");
+        var lab = inp.attr("data-label");
         if (lab == null) {
             lab = inp.closest(".form-group")
                      .find(".control-label")
@@ -599,11 +599,14 @@ HsForm.prototype = {
                     rap[i + "" ] = rep[i];
                 }
                 rep = rap;
+            } else
+            if (rep == null) {
+                rep = { };
             }
             rep._ = hsGetLang(lab);
         }
 
-        return hsGetLang(msg, rep);
+        return hsGetLang(err, rep);
     },
     rmsgs : {
     },
@@ -636,9 +639,8 @@ HsForm.prototype = {
             }
             return true;
         },
-        "[pattern],[data-parttern]" : function(val, inp) {
-            var pn = inp.attr("data-pattern") || inp.attr("pattern"/**/);
-            var ms = inp.attr("data-message") || inp.attr("placeholder");
+        "[pattern],[data-pattern]" : function(val, inp) {
+            var pn = inp.attr("pattern") || inp.attr("data-pattern");
             var pm = /^\/(.*)\/([gim])?$/.exec(pn);
             if (pm) {
                 pn = new RegExp(pm[1], pm[2]);
@@ -646,7 +648,7 @@ HsForm.prototype = {
                 pn = new RegExp(pn);
             }
             if (! pn.test(val)) {
-               return this.geterror(inp, ms);
+               return this.geterror(inp, "form.is.not.match");
             }
             return true;
         },
