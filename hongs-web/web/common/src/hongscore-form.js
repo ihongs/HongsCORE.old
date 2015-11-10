@@ -529,7 +529,7 @@ HsForm.prototype = {
             }
             var err  =  this.rules[key].call(this, inp.val(), inp);
             if (err !== true) {
-                err  = err || inp.attr("data-message") || hsGetLang("form.haserror");
+                err  =  err || hsGetLang ( "form.haserror" );
                 this.haserror(inp, err);
                 return false;
             } else {
@@ -570,31 +570,68 @@ HsForm.prototype = {
             blk.text(err);
         }
     },
+    geterror : function(inp, err, rep) {
+        var key = "data-"+ err.replace(".","-")+"-message" ;
+        var msg = inp.attr(key) || inp.attr("data-message");
+        if (msg) {
+            if (this.rmsgs[msg]) {
+                msg = this.rmsgs[msg];
+            }
+        } else {
+            if (this.rmsgs[err]) {
+                msg = this.rmsgs[err];
+            } else {
+                msg =  "form." + err ;
+            }
+        }
+
+        // 放入字段标签
+        var lab = inp.data("label");
+        if (lab == null) {
+            lab = inp.closest(".form-group")
+                     .find(".control-label")
+                     .text();
+        }
+        if (lab) {
+            if(jQuery.isArray(rep)) {
+                var rap = {};
+                for(var i = 0; i < rep.length; i ++) {
+                    rap[i + "" ] = rep[i];
+                }
+                rep = rap;
+            }
+            rep._ = hsGetLang(lab);
+        }
+
+        return hsGetLang(msg, rep);
+    },
+    rmsgs : {
+    },
     rules : {
         "[required],[data-required]" : function(val, inp) {
             if (inp.is("select")) {
                 if (!val) {
-                    return hsGetLang("form.requires");
+                    return this.geterror(inp, "form.requires");
                 }
             } else if (inp.is(":file")) {
                 if (!val && !inp.data("value")) {
-                    return hsGetLang("form.required");
+                    return this.geterror(inp, "form.required");
                 }
             } else if (inp.is(":checkbox,:radio" )) {
                 if (!inp.filter(":checked").length) {
-                    return hsGetLang("form.requires");
+                    return this.geterror(inp, "form.requires");
                 }
             } else if (inp.is(".checkbox")) {
                 if (!inp. find (":checked").length) {
-                    return hsGetLang("form.requires");
+                    return this.geterror(inp, "form.requires");
                 }
             } else if (inp.is(  "ul,div" )) {
                 if (!inp. find (":hidden" ).length) {
-                    return hsGetLang("form.requires");
+                    return this.geterror(inp, "form.requires");
                 }
             } else {
                 if (!val) {
-                    return hsGetLang("form.required");
+                    return this.geterror(inp, "form.required");
                 }
             }
             return true;
@@ -609,59 +646,59 @@ HsForm.prototype = {
                 pn = new RegExp(pn);
             }
             if (! pn.test(val)) {
-               return hsGetLang(ms);
+               return this.geterror(inp, ms);
             }
             return true;
         },
         "[maxlength],[data-maxlength]" : function(val, inp) {
             var max = inp.attr("maxlength") || inp.attr("data-maxlength");
             if (val.length > max) {
-                return hsGetLang("form.gt.maxlength", [max]);
+                return this.geterror(inp, "form.gt.maxlength", [max]);
             }
             return true;
         },
         "[minlength],[data-minlength]" : function(val, inp) {
             var min = inp.attr("minlength") || inp.attr("data-minlength");
             if (val.length < min) {
-                return hsGetLang("form.lt.minlength", [min]);
+                return this.geterror(inp, "form.lt.minlength", [min]);
             }
             return true;
         },
         "[max],[data-max]" : function(val, inp) {
             var max = inp.attr("max") || inp.attr("data-max");
             if (val > max) {
-                return hsGetLang("form.lt.min", [max]);
+                return this.geterror(inp, "form.lt.min", [max]);
             }
             return true;
         },
         "[min],[data-min]" : function(val, inp) {
             var min = inp.attr("min") || inp.attr("data-min");
             if (val < min) {
-                return hsGetLang("form.lt.min", [min]);
+                return this.geterror(inp, "form.lt.min", [min]);
             }
             return true;
         },
-        "[type=number]" : function(val) {
+        "[type=number]" : function(val, inp) {
             if (!/^-?[0-9]*(\.[0-9]+)?$/.test(val)) {
-                return hsGetLang("form.is.not.number");
+                return this.geterror(inp, "form.is.not.number");
             }
             return true;
         },
-        "[type=email]" : function(val) {
+        "[type=email]" : function(val, inp) {
             if (!/^([a-z0-9_\.\-\+]+)@([\da-z\.\-]+)\.([a-z\.]{2,6})$/i.test(val)) {
-                return hsGetLang("form.is.not.email");
+                return this.geterror(inp, "form.is.not.email");
             }
             return true;
         },
-        "[type=url]" : function(val) {
+        "[type=url]" : function(val, inp) {
             if (!/^(https?:\/\/)?[\da-z\.\-]+\.[a-z\.]{2,6}(:\d+)?(\/[^\s]*)?$/i.test(val)) {
-                return hsGetLang("form.is.not.url");
+                return this.geterror(inp, "form.is.not.url");
             }
             return true;
         },
-        "[type=tel]" : function(val) {
+        "[type=tel]" : function(val, inp) {
             if (!/^(\+\d{1,3})?\d{3,}$/i.test(val)) {
-                return hsGetLang("form.is.not.tel");
+                return this.geterror(inp, "form.is.not.tel");
             }
             return true;
         },
@@ -735,7 +772,7 @@ HsForm.prototype = {
             if (typeof ret === "string") {
                 return ret;
             } else if (! ret) {
-                return hsGetLang("form.is.not.unique");
+                return this.geterror(inp, "form.is.not.unique");
             }
             return true;
         },
@@ -744,7 +781,15 @@ HsForm.prototype = {
             if (typeof ret === "string") {
                 return ret;
             } else if (! ret) {
-                return hsGetLang("form.is.not.exists");
+                return this.geterror(inp, "form.is.not.exists");
+            }
+            return true;
+        },
+        "[data-repeat]" : function(val, inp) {
+            var fn = inp.attr("data-repeat");
+            var fd = this.formBox.find("[name=" + fn + "]");
+            if (fd.val() != val) {
+                return this.geterror(inp, "form.is.not.repeat");
             }
             return true;
         },
@@ -753,14 +798,6 @@ HsForm.prototype = {
             var fd = this.formBox.find("[name=" + fn + "]");
             if (fd.val()) {
                 this.validate(fd);
-            }
-            return true;
-        },
-        "[data-repeat]" : function(val, inp) {
-            var fn = inp.attr("data-repeat");
-            var fd = this.formBox.find("[name=" + fn + "]");
-            if (fd.val() != val) {
-                return hsGetLang("form.is.not.repeat");
             }
             return true;
         }
