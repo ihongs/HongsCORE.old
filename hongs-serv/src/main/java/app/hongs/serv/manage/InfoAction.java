@@ -53,28 +53,26 @@ public class InfoAction {
         }
 
         // 系统信息
-        if ( rb == null || rb.contains("sys_info") ) {
-            OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-            Map  sys = new HashMap();
-            rsp.put("sys_info", sys);
-            double avg = os.getSystemLoadAverage();
-            sys.put("load" , new Object[] {avg, String.valueOf(avg), "负载"});
-        }
+        if ( rb == null || rb.contains("run_info") ) {
+            Map  inf = new HashMap();
+            rsp.put("run_info", inf);
 
-        // 内存情况
-        if ( rb == null || rb.contains("mem_info") ) {
+            OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
             MemoryMXBean mm = ManagementFactory.getMemoryMXBean();
             MemoryUsage  nm = mm.getNonHeapMemoryUsage();
             MemoryUsage  hm = mm.getHeapMemoryUsage();
-            Map  mem = new HashMap();
-            rsp.put("mem_info", mem);
+
+            double avg = os.getSystemLoadAverage();
             long stk = nm.getUsed( );
             long use = hm.getUsed( );
             long max = hm.getMax(  );
-            long fre = max - use;
-            mem.put("free" , new Object[] {fre, Tool.humanSize(fre), "空闲"});
-            mem.put("used" , new Object[] {use, Tool.humanSize(use), "堆　"});
-            mem.put("nonh" , new Object[] {stk, Tool.humanSize(stk), "栈　"});
+            long fre = max - use - stk;
+            
+            inf.put("load" , new Object[] {avg, String.valueOf(avg), "负载"});
+            inf.put("size" , new Object[] {max, Tool.humanSize(max), "全部"});
+            inf.put("free" , new Object[] {fre, Tool.humanSize(fre), "空闲"});
+            inf.put("used" , new Object[] {use, Tool.humanSize(use), "已用"});
+            inf.put("uses" , new Object[] {stk, Tool.humanSize(stk), "非堆"});
         }
 
         // 磁盘情况

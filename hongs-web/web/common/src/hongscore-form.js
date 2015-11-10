@@ -739,8 +739,8 @@ HsForm.prototype = {
                 "v" : val
             };
             if (! url) url = inp.attr("data-verify");
-            url = url.replace(/\{(.*?)\}/g, function(x, n) {
-                return obj.find("[name='" +n+ "']").val( ) || "";
+            url = url.replace(/\$\{(.*?)\}/g,function(x, n) {
+                return obj.find("[name='"+n+"']").val( ) || "";
             });
             jQuery.hsAjax({
                 "url": url,
