@@ -221,6 +221,8 @@ public class VerifyHelper {
             try {
                 data = rule.verify(data);
             } catch (Wrong  w) {
+                // 设置字段标签
+                w.setLocalizedSegment( (String) rule.params.get("__disp__") );
                 failed(wrongz, w , name);
                 data =  SKIP;
                 break;
@@ -281,12 +283,14 @@ public class VerifyHelper {
         int n, c = data2.size();
         n = Synt.declare(params.get("minrepeat"), 0);
         if (n != 0 && c < n) {
-            failed(wrongz, new Wrong("fore.form.lt.minrepeat", String.valueOf(n), String.valueOf(c)), name);
+            failed(wrongz, new Wrong("fore.form.lt.minrepeat", String.valueOf(n), String.valueOf(c))
+                    .setLocalizedSegment((String) params.get("__disp__")), name);
             return SKIP;
         }
         n = Synt.declare(params.get("maxrepeat"), 0);
         if (n != 0 && c > n) {
-            failed(wrongz, new Wrong("fore.form.gt.maxrepeat", String.valueOf(n), String.valueOf(c)), name);
+            failed(wrongz, new Wrong("fore.form.gt.maxrepeat", String.valueOf(n), String.valueOf(c))
+                    .setLocalizedSegment((String) params.get("__disp__")), name);
             return SKIP;
         }
 
@@ -618,6 +622,8 @@ public class VerifyHelper {
     /** 内部错误类 **/
 
     public static class Wrong extends HongsException {
+        String name = null;
+
         public Wrong(Throwable cause, String desc, String... prms) {
             super(HongsException.NOTICE, desc, cause);
             this.setLocalizedSection("default");
@@ -630,16 +636,32 @@ public class VerifyHelper {
             this.setLocalizedOptions(prms);
         }
 
+        public Wrong  setLocalizedSegment(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public String getLocalizedSegment() {
+            return name;
+        }
+
         @Override
         public String getLocalizedMessage() {
-            CoreLocale trns = CoreLocale.getInstance(  getLocalizedSection());
-            String/**/ desx = trns.translate(getDesc(),getLocalizedOptions());
-            return desx;
+            CoreLocale trns = CoreLocale.getInstance(getLocalizedSection());
+            String [ ] rep1 = getLocalizedOptions( );
+            Map<String, String> rep2 = new HashMap();
+            for( int i = 0; i < rep1.length; i ++  ) {
+                rep2.put(String.valueOf(i), rep1[i]);
+            }
+            if ( null != name ) {
+                rep2.put("_" , trns.translate(name));
+            }
+            return trns.translate(getDesc( ), rep2 );
         }
     }
 
     public static class Wrongs extends HongsException {
-        private final Map<String, Wrong> wrongs;
+        protected final Map<String, Wrong> wrongs;
 
         public Wrongs(Map<String, Wrong> wrongs) {
             super(0x1100 , "fore.form.invalid"); // 0x1100 对应 HTTP 400 错误
