@@ -745,9 +745,10 @@ function hsFmtNum(num, len, dec, sep, dot) {
   }
 
   // 四舍五入
-  var o = hsParseInt(num);
+  var o = parseInt(num);
+  if (isNaN(o) ) o = 0 ;
   var p = Math.pow(10, dec);
-  num = (Math.round(o * p) / p).toString();
+  num = ( Math.round(o * p) / p ).toString();
 
   var a = num.split(".", 2);
   if (a.length < 2) {
