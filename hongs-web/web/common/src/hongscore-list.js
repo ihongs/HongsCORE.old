@@ -49,7 +49,9 @@ function HsList(opts, context) {
         }
     }
 
-    loadUrl = hsFixPms(loadUrl, loadBox);
+    if (loadUrl) {
+        loadUrl = hsFixPms(loadUrl, loadBox);
+    }
 
     var that = this;
     var m, n, u;
