@@ -149,15 +149,17 @@ HsForm.prototype = {
         delete this._enum;
     },
     fillInfo : function(info) {
-        var nodes, infos, i, n, t, v, inp;
+        var nodes, infos, i, n, t, v, inp, fts, fvs;
         nodes = this.formBox.find("[data-fn],input[name],select[name],textarea[name]");
-        infos = {};
+        infos = {}; fts = {}; fvs = {};
         for(i = 0; i < nodes.length; i ++) {
             n = jQuery(nodes[i]).attr("name");
             if (! n) n = jQuery(nodes[i]).attr("data-fn");
             if (! n) continue;
             v = info [n];
             if (! v) v = hsGetValue(info , n);
+            fts[n] = jQuery(nodes[i]).attr("data-ft");
+            fvs[n] = jQuery(nodes[i]).attr("data-fv");
             infos[n] = v;
         }
 
@@ -170,21 +172,32 @@ HsForm.prototype = {
                 i = 0;
                 inp = this.formBox.find('[data-fn="'+n+'"]');
             }
+            
+            // 替换默认值
+            if (typeof(v) == "undefined") {
+                v = fvs[n];
+            }
 
             if (typeof(this["_fill_"+n]) !== "undefined") {
                 v = this["_fill_"+n].call(this, inp, v, n, "info");
-            }
+            } else
             // 按类型填充
-            else if (inp.attr("data-ft")) {
-                t =  inp.attr("data-ft");
+            if (typeof(fts[n]) !== "undefined") {
+                t = fts[n];
             if (typeof(this["_fill_"+t]) !== "undefined") {
                 v = this["_fill_"+t].call(this, inp, v, n, "info");
             }}
-            if (! v && (v !== 0 || v !== "")) continue;
+
+            // 无值不处理
+            if ( ! v && (v !== 0 || v !== "") ) {
+                continue;
+            }
 
             if (i == 0) {
                 v = this._fill__review(inp, v, n, "info");
-                if (! v && (v !== 0 || v !== "")) continue;
+                if ( ! v && ( v !== 0 || v !== "" )) {
+                    continue;
+                }
                 if (inp.is("input,select,textarea")) {
                     inp.val (v);
                 } else {

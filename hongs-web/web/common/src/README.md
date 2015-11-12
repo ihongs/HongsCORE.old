@@ -10,12 +10,14 @@
 ## 属性缩写:
 
     Form:
+        data-pn     Param name
         data-fn     Field name
         data-ft     Field type
-        data-pn     Param name
+        data-fv     Default value
     List:
         data-fn     Field name
         data-ft     Field type
+        data-fv     Default value
         data-ob     Order by
         data-pn     Pager no
     Pick:

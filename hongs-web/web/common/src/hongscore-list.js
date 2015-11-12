@@ -221,10 +221,10 @@ HsList.prototype = {
         this.listBox.trigger("loadBack", [rst, this]);
     },
     fillList : function(list) {
-        var tb, tr, td, tds, cls, fns, fts, i, j, n, t, v;
+        var tb, tr, td, tds, cls, fns, fts, fvs, i, j, n, t, v;
         tb  = this.listBox.find("tbody"); tb.empty( );
         tds = this.listBox.find("thead th,thead td" );
-        cls = []; fns = []; fts = {};
+        cls = []; fns = []; fts = {}; fvs = {};
 
         // 排序
         var sn = hsGetSerias(this._data,this.sortKey);
@@ -238,8 +238,11 @@ HsList.prototype = {
             td = jQuery(tds[i]);
             cls.push(td.attr( "class" ));
             fns.push(td.attr("data-fn"));
-            if (     td.attr("data-ft")) {
+            if (td.attr("data-ft")) {
                 fts [td.attr("data-fn")] = td.attr("data-ft");
+            }
+            if (td.attr("data-fv")) {
+                fvs [td.attr("data-fn")] = td.attr("data-fv");
             }
 
             // 排序
@@ -284,7 +287,7 @@ HsList.prototype = {
 
                 n = fns[j];
                 if (!n) continue;
-                v = hsGetValue(list[i] , n) || "";
+                v = hsGetValue(list[i] , n ) || fvs[n] || "" ;
 
                 // 按名称填充
                 if (typeof(this["_fill_"+n]) !== "undefined") {
@@ -293,7 +296,7 @@ HsList.prototype = {
                 } else
                 // 按类型填充
                 if (typeof(fts[n]) !== "undefined") {
-                    t =  fts[n];
+                    t = fts[n];
                 if (typeof(this["_fill_"+t]) !== "undefined") {
                     v = this["_fill_"+t].call(this, td, v, n);
                     if(!v) continue;
