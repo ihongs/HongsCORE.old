@@ -164,17 +164,16 @@ HsForm.prototype = {
         }
 
         this._info = info;
-        for(n in infos) {
-            v =  infos[n];
-            i = 1;
-            inp = this.formBox.find('[name="'+n+'"]');
-            if (inp.length == 0) {
-                i = 0;
-                inp = this.formBox.find('[data-fn="'+n+'"]');
+        for( n in infos ) {
+             v  = infos[ n ];
+            inp = this.formBox.find('[name="'    +n+'"]');
+             i  = inp.length;
+            if (i === 0 ) {
+            inp = this.formBox.find('[data-fn="' +n+'"]');
             }
-            
-            // 替换默认值
-            if (typeof(v) == "undefined") {
+
+            // 默认值替换
+            if (typeof(v) === "undefined") {
                 v = fvs[n];
             }
 
@@ -188,35 +187,35 @@ HsForm.prototype = {
                 v = this["_fill_"+t].call(this, inp, v, n, "info");
             }}
 
+            // 预览值填充
+            if (i === 0 ) {
+                v = this._fill__review(inp, v, n, "info");
+            }
+
             // 无值不处理
-            if ( ! v && (v !== 0 || v !== "") ) {
+            if (typeof(v) === "undefined") {
                 continue;
             }
 
-            if (i == 0) {
-                v = this._fill__review(inp, v, n, "info");
-                if ( ! v && ( v !== 0 || v !== "" )) {
-                    continue;
-                }
+            if (i === 0 ) {
                 if (inp.is("input,select,textarea")) {
                     inp.val (v);
                 } else {
                     inp.text(v);
                 }
-            }
-            else if (inp.attr("type") == "checkbox"
-                 ||  inp.attr("type") == "radio") {
+            } else
+            if (inp.attr("type") == "checkbox"
+            ||  inp.attr("type") == "radio") {
                 jQuery.each(! jQuery.isArray(v) ? [v] : v ,
                 function(i, u) {
-                    inp.filter("[value='"+u+"']")
-                       .prop  ("checked" , true )
-                       .change();
+                    inp.filter ("[value='"+u+"']")
+                       .prop   ("checked" , true )
+                       .change (  );
                 });
-            }
-            else if (inp.attr("type") == "file" ) {
-                inp.attr("data-value",v).change();
-            }
-            else {
+            } else
+            if (inp.attr("type") == "file" ) {
+                inp.attr("data-value", v).change();
+            } else {
                 inp.val(v).change();
             }
         }
