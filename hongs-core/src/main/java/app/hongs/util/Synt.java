@@ -1,5 +1,6 @@
 package app.hongs.util;
 
+import app.hongs.CoreLogger;
 import app.hongs.HongsError;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,22 +74,6 @@ public class Synt {
     }
 
     /**
-     * 确保此变量类型为 def 的类型
-     * 当 val 为空时返回 def
-     * 其他说明请参见 declare(Object, Class)
-     * @param <T>
-     * @param val
-     * @param def
-     * @return
-     */
-    public static <T> T declare(Object val, T def) {
-        if  ( null == def) return (T)  val;
-        val = declare(val, def.getClass());
-        if  ( null != val) return (T)  val;
-        else               return      def;
-    }
-
-    /**
      * 确保此变量类型为 cls 类型
      * string,number(int,long...) 类型间可互转;
      * cls 为 Boolean  时:
@@ -100,6 +85,7 @@ public class Synt {
      *      val 非 List,Set,Map 时构建 Array,List,Set 后将 val 加入其下,
      *      val 为 Map 则取 values;
      * 但其他类型均无法转为 Map.
+     * 通常针对外部数据
      * @param <T>
      * @param val
      * @param cls
@@ -264,6 +250,44 @@ public class Synt {
             return (T) val;
         }   catch  (ClassCastException ex) {
             throw new HongsError(0x46, ex);
+        }
+    }
+
+    /**
+     * 确保此变量类型为 def 的类型
+     * val 为空时则返回 def
+     * 其他的说明请参见 declare(val, cls)
+     * 通常针对外部数据
+     * @param <T>
+     * @param val
+     * @param def
+     * @return
+     */
+    public static <T> T declare(Object val, T def) {
+        if  ( null == def) return (T)  val;
+        val = declare(val, def.getClass());
+        if  ( null != val) return (T)  val;
+        else               return      def;
+    }
+
+    /**
+     * 同 decalare(val, def)
+     * 但转换不了则返回 def 而不抛出错误
+     * 通常针对内部数据
+     * @param <T>
+     * @param val
+     * @param def
+     * @return
+     */
+    public static <T> T asserts(Object val, T def) {
+        try {
+            return declare(val, def);
+        } catch (HongsError ex) {
+            CoreLogger.getLogger(
+                       Synt.class.toString()
+                               + ".asserts")
+                      .trace(ex.toString( ));
+            return def;
         }
     }
 

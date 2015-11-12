@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.Properties;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -1717,12 +1719,13 @@ public class DB
      * 遍历获取结果
      * @author Hong
      */
-    public class Roll {
+    public class Roll implements Iterator<Map<String,Object>> {
         private DB db;
         private Statement ps;
         private ResultSet rs;
         private ResultSetMetaData md;
         private Map<String,Class> cs;
+        private Map<String,Object> r = null;
 
         protected Roll(DB db, Statement ps, ResultSet rs) throws HongsException {
             this.db = db;
@@ -1797,6 +1800,24 @@ public class DB
             } finally {
                 cs  = null;
             }
+        }
+
+        @Override
+        public boolean hasNext() {
+            try {
+                r = fetch();
+                return r != null;
+            } catch (HongsException ex) {
+                throw new HongsError.Common(ex);
+            }
+        }
+
+        @Override
+        public Map<String,Object> next() {
+            if (r == null) {
+                hasNext( );
+            }
+            return r;
         }
     }
 

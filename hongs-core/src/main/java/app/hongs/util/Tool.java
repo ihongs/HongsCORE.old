@@ -18,7 +18,7 @@ import java.io.IOException;
  * 常用文本工具
  *
  * <p>
- * 用于引用/编码或清理文本, 转换数值进制等.
+ * 用于引用/编码或清理文本, 转换数值进制等
  * </p>
  *
  * @author Hongs

@@ -550,7 +550,7 @@ HsForm.prototype = {
     },
     haserror : function(inp, err) {
         if (err === undefined && jQuery.isPlainObject(inp)) {
-            this.invalids(inp);
+            this.seterror(inp);
             return;
         }
 

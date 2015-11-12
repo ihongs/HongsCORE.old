@@ -50,7 +50,7 @@ public class MergeMore
           int j  = keys.length - i;
           String[] keyz = new String[j];
           System.arraycopy(keys,i, keyz,0,j);
-          
+
           // 往下递归一层
           this.mapped(map, (List) obj, keyz);
 
@@ -134,16 +134,22 @@ public class MergeMore
     return map;
   }
 
-  public void append(List<Map> rows, Map<Object, List> map, String col, String sub)
+  /**
+   * 一对多关联
+   * @param iter 数据迭代
+   * @param map 映射表
+   * @param col 关联键
+   * @param sub 子键, 不可以为空
+   */
+  public void append(Iterator iter, Map<Object, List> map, String col, String sub)
   {
     Map     row, raw;
     List    lst;
     Object  rid;
 
-    Iterator rs = rows.iterator();
-    while (rs.hasNext())
+    while (iter.hasNext())
     {
-      raw = ( Map  ) rs.next(   );
+      raw = ( Map  ) iter.next( );
       rid =          raw.get(col);
       lst = ( List ) map.get(rid);
 
@@ -172,21 +178,32 @@ public class MergeMore
     }
   }
 
-  public void append(List<Map> rows, String key, String col, String sub)
+  public void append(List<Map> rows, Map<Object, List > map, String col, String sub)
   {
-    append(rows, mapped(key), col, sub);
+    append(rows.iterator(), map, col, sub);
   }
 
-  public void extend(List<Map> rows, Map<Object, List> map, String col, String sub)
+  public void append(List<Map> rows, String key, String col, String sub)
+  {
+    append(rows, mapped ( key ), col, sub);
+  }
+
+  /**
+   * 一对一关联
+   * @param iter 数据迭代
+   * @param map 映射表
+   * @param col 关联键
+   * @param sub 子键, 为空并到行
+   */
+  public void extend(Iterator iter, Map<Object, List> map, String col, String sub)
   {
     Map     row, raw;
     List    lst;
     Object  rid;
 
-    Iterator rs = rows.iterator();
-    while (rs.hasNext())
+    while (iter.hasNext())
     {
-      raw = ( Map  ) rs.next(   );
+      raw = ( Map  ) iter.next( );
       rid =          raw.get(col);
       lst = ( List ) map.get(rid);
 
@@ -214,14 +231,19 @@ public class MergeMore
     }
   }
 
+  public void extend(List<Map> rows, Map<Object, List > map, String col, String sub)
+  {
+    extend(rows.iterator(), map, col, sub);
+  }
+
   public void extend(List<Map> rows, String key, String col, String sub)
   {
-    extend(rows, mapped(key), col, sub);
+    extend(rows, mapped ( key ), col, sub);
   }
 
   public void extend(List<Map> rows, String key, String col)
   {
-    extend(rows, mapped(key), col,null);
+    extend(rows, mapped ( key ), col,null);
   }
 
 }

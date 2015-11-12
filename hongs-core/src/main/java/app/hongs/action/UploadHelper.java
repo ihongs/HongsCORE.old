@@ -175,20 +175,22 @@ public class UploadHelper {
         }
         path = this.getUploadPath(path);
         File file = new File(path);
-        String type , extn;
-        FileInputStream fs;
+        File temp = null;
+        String type;
+        String extn;
 
         if (file.exists()) {
             extn = getUploadExtn( file );
             type = getUploadType( file );
         } else {
-            file = new File(path+".tnp");
+            temp = new File(path+".tnp");
 
             /**
              * 从上传信息中提取类型和扩展名
              */
             try {
-                fs = new FileInputStream(file );
+                FileInputStream fs;
+                fs = new FileInputStream(temp );
                 try(InputStreamReader sr = new InputStreamReader(fs);
                     BufferedReader    fr = new BufferedReader   (sr))
                 {
@@ -217,11 +219,14 @@ public class UploadHelper {
         File   dist = new File(disp);
         // 原始文件与目标文件不一样才需要移动
         if(!dist.getAbsolutePath().equals(file.getAbsolutePath())) {
-            File dirt = dist.getParentFile();
+            File dirt  =  dist.getParentFile();
             if (!dirt.isDirectory()) {
                  dirt.mkdirs( );
             }
             file.renameTo(dist);
+            if ( temp !=  null) {
+                 temp.delete( );
+            }
         }
 
         return dist;
@@ -255,14 +260,14 @@ public class UploadHelper {
             }
         }
     }
- 
+
     /**
      * 上传ID扩展为上传路径名
      * 因文件系统对目录下的文件数量有限制
      * 故按照文件ID组成规则拆解成多级目录
      * 以使单个目录内的文件不会超出额定值
      * @param id
-     * @return 
+     * @return
      */
     public static String upname(String id) {
         int l = Core.SERVER_ID.length();
