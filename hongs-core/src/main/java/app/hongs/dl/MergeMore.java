@@ -28,7 +28,7 @@ public class MergeMore
    * @param map
    * @param keys
    */
-  private void mapped(Map<Object, List> map, List rows, String... keys)
+  private void maping(Map<Object, List> map, List rows, String... keys)
   {
     Iterator it = rows.iterator();
     W:while (it.hasNext())
@@ -39,12 +39,12 @@ public class MergeMore
       // 获取id值
       for (int i = 0; i < keys.length; i ++)
       {
-        if (obj instanceof Map)
+        if (obj instanceof Map )
         {
           obj = ((Map)obj).get(keys[i]);
         }
         else
-        if (obj instanceof Collection )
+        if (obj instanceof List)
         {
           // 切割子键数组
           int j  = keys.length - i;
@@ -52,7 +52,7 @@ public class MergeMore
           System.arraycopy(keys,i, keyz,0,j);
 
           // 往下递归一层
-          this.mapped(map, (List) obj, keyz);
+          this.maping(map, (List) obj, keyz);
 
           continue W;
         }
@@ -63,7 +63,7 @@ public class MergeMore
       }
       if (obj == null)
       {
-          continue W;
+          continue;
       }
 
       /**
@@ -124,13 +124,26 @@ public class MergeMore
   /**
    * 获取关联ID和行
    *
+   * @param keys
+   * @return 
+   */
+  public Map<Object, List> maping(String... keys)
+  {
+    Map<Object, List> map = new HashMap();
+    maping(map, rows, keys);
+    return map;
+  }
+
+  /**
+   * 获取关联ID和行
+   *
    * @param key 使用"."分割的键
    * @return
    */
   public Map<Object, List> mapped(String key)
   {
     Map<Object, List> map = new HashMap();
-    mapped(map, rows, key.split( "\\." ));
+    maping(map, rows, key.split( "\\." ));
     return map;
   }
 

@@ -46,38 +46,33 @@ public class FetchMore
    * 获取关联ID和行
    *
    * @param map
-   * @param key
+   * @param keys
    */
-  private void mapped(Map<String, List> map, String... key)
+  private void maping(Map<String, List> map, List rows, String... keys)
   {
-    Iterator it = this.rows.iterator();
+    Iterator it = rows.iterator();
     W:while (it.hasNext())
     {
       Object row = it.next();
-      Object sid = row;
+      Object obj = row;
 
       // 获取id值
-      for (int i = 0; i < key.length; i ++)
+      for (int i = 0; i < keys.length; i ++)
       {
-        if (sid instanceof Map)
+        if (obj instanceof Map )
         {
-          sid = ((Map)sid).get(key[i]);
+          obj = ((Map)obj).get(keys[i]);
         }
         else
-        if (sid instanceof List)
+        if (obj instanceof List)
         {
-          List rowz = this.rows;
-          this.rows = (List)sid;
-
           // 切割子键数组
-          int j = key.length - i ;
+          int j = keys.length - i ;
           String[] keyz = new String[j];
-          System.arraycopy(key, i, keyz, 0, j);
+          System.arraycopy(keys,i, keyz,0,j);
 
           // 往下递归一层
-          this.mapped(map, keyz);
-
-          this.rows = rowz;
+          this.maping(map, (List) obj, keyz);
 
           continue W;
         }
@@ -86,28 +81,35 @@ public class FetchMore
           continue W;
         }
       }
-      if (sid == null)
+      if (obj == null)
       {
-          continue W;
+          continue;
       }
 
       // 登记行
-      if (map.containsKey(sid))
+      String str = obj.toString( );
+      if (map.containsKey(str))
       {
-        map.get(sid.toString()).add(row);
+        map.get(str ).add(row);
       }
       else
       {
-        List lst = new ArrayList(  );
-        map.put(sid.toString(), lst);
+        List lst = new ArrayList();
+        map.put(str , lst);
         lst.add(row);
       }
     }
   }
 
+  public Map<String, List> maping(String... keys) {
+    Map<String, List> map = new HashMap();
+    maping(map, rows, keys);
+    return map;
+  }
+
   public Map<String, List> mapped(String key) {
     Map<String, List> map = new HashMap();
-    mapped(map, key.split("\\."));
+    maping(map, rows, key.split( "\\." ));
     return map;
   }
 
