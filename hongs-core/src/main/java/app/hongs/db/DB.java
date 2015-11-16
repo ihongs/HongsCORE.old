@@ -869,14 +869,6 @@ public class DB
 
   /**
    * 当需要在prepareStatement时设定参数, 可重载该方法
-   * <p>
-   * 如需要单条获取, 可使用以下代码:
-   * <code>
-   * ps = this.connection.prepareStatement(sql,
-   *        ResultSet.TYPE_FORWARD_ONLY,
-   *        ResultSet.CONCUR_READ_ONLY);
-   * ps.setFetchSize(Integer.MIN_VALUE);
-   * </code>
    * 异常代码为: 0x1041
    * </p>
    * @param sql
@@ -902,16 +894,6 @@ public class DB
 
   /**
    * 当需要在createStatement时设定参数, 可重载该方法
-   * <p>
-   * 如需要单条获取, 可使用以下代码:
-   * <code>
-   * ps = this.connection.createStatement(
-   *        ResultSet.TYPE_FORWARD_ONLY,
-   *        ResultSet.CONCUR_READ_ONLY);
-   * ps.setFetchSize(Integer.MIN_VALUE);
-   * </code>
-   * 异常代码为: 0x1041
-   * </p>
    * @return Statement对象
    * @throws HongsException
    */
@@ -973,6 +955,44 @@ public class DB
   //** 查询语句 **/
 
   /**
+   * 分页方法
+   * 已改为使用 JDBC 的 setFetchSize,setMaxRows,absolute 等方法;
+   * 另, 请不要在 update,delete 中使用 limit 至少 MySQL 是可以的,
+   * 您要更新/删除的记录应该是明确的, 应该能够通过 where 做出限定的.
+   * @deprecated
+   * @param sql
+   * @param start
+   * @param limit
+   * @return
+   */
+  public String limit(String sql, int start, int limit) {
+      try {
+          String dpn = connect(   )
+                     .getMetaData()
+                     .getDatabaseProductName()
+                     .toUpperCase();
+          if ("SQLITE".equals(dpn) || "MYSQL".equals(dpn)) {
+              sql += " LIMIT " + start + /***/ ", " + limit;
+          } else
+          if ("POSTGRESQL".equals(dpn)) {
+              sql += " LIMIT " + limit + " OFFSET " + start;
+          } else
+          if ("ORACLE".equals(dpn)) {
+              sql  = "SELECT * FROM (SELECT *, ROWNUM AS OFFSET FROM (" + sql + ") AS _T_ WHERE ROWNUM <= " + (start + limit) + ") WHERE OFFSET >= " + (start + 1);
+          } else {
+              CoreLogger.getLogger( DB.class.getName( ) + ".limit" )
+                                  .debug("Limit not support " + dpn);
+              throw new HongsError(0x10, "Limit not support " + dpn);
+          }
+      } catch (HongsException  ex) {
+          throw new HongsError(0x10, ex);
+      } catch (  SQLException  ex) {
+          throw new HongsError(0x10, ex);
+      }
+      return sql;
+  }
+
+  /**
    * 查询方法
    * @param sql
    * @param start
@@ -984,6 +1004,16 @@ public class DB
   public Roll query(String sql, int start, int limit, Object... params)
     throws HongsException
   {
+    try
+    {
+      sql   = this.limit(sql, start, limit);
+      start = limit = 0 ;
+    }
+    catch (HongsError er)
+    {
+      // 如果以上分页失败, 则启用下方的方式
+    }
+
     this.connect();
 
     if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
@@ -1196,22 +1226,19 @@ public class DB
       app.hongs.CoreLogger.debug("DB.execute: " + sb.toString());
     }
 
-    /**
-     * 获取PreparedStatement对象
-     */
     PreparedStatement ps = this.prepareStatement(sql, params);
 
     try
     {
-      return ps.execute(  );
+      return ps.execute(/****/);
     }
-    catch (SQLException ex)
+    catch (  SQLException  ex )
     {
       throw new app.hongs.HongsException(0x104a, ex);
     }
     finally
     {
-      this.closeStatement(ps);
+      this.closeStatement( ps );
     }
   }
 
@@ -1242,13 +1269,13 @@ public class DB
     {
       return ps.executeUpdate();
     }
-    catch (SQLException ex)
+    catch (  SQLException  ex )
     {
       throw new app.hongs.HongsException(0x104e, ex);
     }
     finally
     {
-      this.closeStatement(ps);
+      this.closeStatement( ps );
     }
   }
 
@@ -1805,7 +1832,7 @@ public class DB
             try {
                 r = fetch();
                 return r != null;
-            } catch (HongsException ex) {
+            } catch (HongsException ex ) {
                 throw new HongsError.Common(ex);
             }
         }
