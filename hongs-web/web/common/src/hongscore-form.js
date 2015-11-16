@@ -106,117 +106,120 @@ HsForm.prototype = {
         this.formBox.trigger("loadBack", [rst, this]);
     },
     fillEnum : function(enam) {
-        var nodes, enams, i, n, t, v, inp;
-        nodes = this.formBox.find("[data-fn],select[name]");
-        enams = {};
-        for(i = 0; i < nodes.length; i ++) {
-            n = jQuery(nodes[i]).attr("name");
-            if (! n) n = jQuery(nodes[i]).attr("data-fn");
-            v = enam [n];
-            if (! n) continue;
-            if (! v) v = hsGetValue(enam , n);
-            enams[n] = v;
+        var fds, fns, fts, i, n, t, v;
+        fds = this.formBox.find("[data-fn],select[name]");
+        fns = {}; fts = {};
+        for(i = 0; i < fds.length; i ++) {
+            n = jQuery(fds[i]).attr("name");
+            if (! n) {
+                n  = jQuery(fds[i]).attr("data-fn");
+            }
+            if (! n) {
+                continue;
+            }
+            fns[n] =  n ;
+            fts[n] = jQuery(fds[i]).attr("data-ft");
         }
 
-        this._enum = enam;
-        for(n in enams) {
-            v =  enams[n];
-            i = 1;
-            inp = this.formBox.find('[name="'+n+'"]');
-            if (inp.length == 0) {
-                i = 0;
-                inp = this.formBox.find('[data-fn="'+n+'"]');
+        this._enum =  enam;
+        for (n in fns) {
+                v  =  hsGetValue(enam, n);
+            if (v === undefined) {
+                v  =  enam[n];
             }
 
-            if (typeof(this["_fill_"+n]) !== "undefined") {
-                v = this["_fill_"+n].call(this, inp, v, n, "enum");
+                i = this.formBox.find('[name="'   +n+'"]');
+            if (i.length === 0 ) {
+                i = this.formBox.find('[data-fn="'+n+'"]');
             }
+
+            // 按名称填充
+            if (typeof(this["_fill_"+n]) !== "undefined" ) {
+                v = this["_fill_"+n].call(this, i, v, n, "enum");
+            } else
             // 按类型填充
-            else if (inp.attr("data-ft")) {
-                t =  inp.attr("data-ft");
-            if (typeof(this["_fill_"+t]) !== "undefined") {
-                v = this["_fill_"+t].call(this, inp, v, n, "enum");
+            if (typeof(fts[n]) !== "undefined") {
+                t = fts[n];
+            if (typeof(this["_fill_"+t]) !== "undefined" ) {
+                v = this["_fill_"+t].call(this, i, v, n, "enum");
             }}
-            if (! v) continue;
 
-            if (i == 0) {
-                this._fill__review(inp, v, n, "enum");
+            if (typeof( v/**/) === "undefined") {
+                continue;
             }
-            else if (inp.prop("tagName") == "SELECT") {
-                this._fill__select(inp, v, n, "enum");
+
+            if (i.is("select")) {
+                this._fill__select(i, v, n, "enum");
+            } else {
+                this._fill__review(i, v, n, "enum");
             }
         }
         delete this._enum;
     },
     fillInfo : function(info) {
-        var nodes, infos, i, n, t, v, inp, fts, fvs;
-        nodes = this.formBox.find("[data-fn],input[name],select[name],textarea[name]");
-        infos = {}; fts = {}; fvs = {};
-        for(i = 0; i < nodes.length; i ++) {
-            n = jQuery(nodes[i]).attr("name");
-            if (! n) n = jQuery(nodes[i]).attr("data-fn");
-            if (! n) continue;
-            v = info [n];
-            if (! v) v = hsGetValue(info , n);
-            fts[n] = jQuery(nodes[i]).attr("data-ft");
-            fvs[n] = jQuery(nodes[i]).attr("data-fv");
-            infos[n] = v;
+        var fds, fns, fts, fvs, i, n, t, v;
+        fds = this.formBox.find("[data-fn],input[name],select[name],textarea[name]");
+        fns = {}; fts = {}; fvs = {};
+        for(i = 0 ; i < fds.length ; i ++ ) {
+            n = jQuery(fds[i]).attr("name");
+            if (! n) {
+                n  = jQuery(fds[i]).attr("data-fn");
+            }
+            if (! n) {
+                continue;
+            }
+            fns[n] =  n ;
+            fts[n] = jQuery(fds[i]).attr("data-ft");
+            fvs[n] = jQuery(fds[i]).attr("data-fv");
         }
 
-        this._info = info;
-        for( n in infos ) {
-             v  = infos[ n ];
-            inp = this.formBox.find('[name="'    +n+'"]');
-             i  = inp.length;
-            if (i === 0 ) {
-            inp = this.formBox.find('[data-fn="' +n+'"]');
-            }
+        this._info =  info;
+        for (n in fns) {
+                v  =  hsGetValue(info, n);
+            if (v === undefined) {
+                v  =  info[n];
+            if (v === undefined || v === null || v === "") {
+                v  =  fvs [n];
+            }}
 
-            // 默认值替换
-            if (typeof(v) === "undefined") {
-                v = fvs[n];
-            }
+                i = this.formBox.find('[name="'   +n+'"]');
+            if (i.length === 0 ) {
+                i = this.formBox.find('[data-fn="'+n+'"]');
+            if (typeof(fts[n]) === "undefined") {
+                fts[n] = "_review";
+            }}
 
-            if (typeof(this["_fill_"+n]) !== "undefined") {
-                v = this["_fill_"+n].call(this, inp, v, n, "info");
+            // 按名称填充
+            if (typeof(this["_fill_"+n]) !== "undefined" ) {
+                v = this["_fill_"+n].call(this, i, v, n, "info");
             } else
             // 按类型填充
             if (typeof(fts[n]) !== "undefined") {
                 t = fts[n];
-            if (typeof(this["_fill_"+t]) !== "undefined") {
-                v = this["_fill_"+t].call(this, inp, v, n, "info");
+            if (typeof(this["_fill_"+t]) !== "undefined" ) {
+                v = this["_fill_"+t].call(this, i, v, n, "info");
             }}
 
-            // 预览值填充
-            if (i === 0 ) {
-                v = this._fill__review(inp, v, n, "info");
-            }
-
-            // 无值不处理
-            if (typeof(v) === "undefined") {
+            if (typeof( v/**/) === "undefined") {
                 continue;
             }
 
-            if (i === 0 ) {
-                if (inp.is("input,select,textarea")) {
-                    inp.val (v);
-                } else {
-                    inp.text(v);
-                }
-            } else
-            if (inp.attr("type") == "checkbox"
-            ||  inp.attr("type") == "radio") {
+            if (i.attr("type") == "checkbox"
+            ||  i.attr("type") == "radio") {
                 jQuery.each(! jQuery.isArray(v) ? [v] : v ,
-                function(i, u) {
-                    inp.filter ("[value='"+u+"']")
-                       .prop   ("checked" , true )
-                       .change (  );
+                function(j, u) {
+                    i.filter ("[value='"+u+"']")
+                     .prop   ("checked" , true )
+                     .change ( );
                 });
             } else
-            if (inp.attr("type") == "file" ) {
-                inp.attr("data-value", v).change();
+            if (i.attr("type") == "file" ) {
+                i.attr("data-value", v).change();
+            } else
+            if (i.is  ("input,select,textarea")) {
+                i.val (v).change( );
             } else {
-                inp.val(v).change();
+                i.text(v);
             }
         }
         delete this._info;
@@ -299,16 +302,6 @@ HsForm.prototype = {
     },
 
     _fill__review : function(inp, v, n, t) {
-        // 图片和链接
-        if (inp.is("img")) {
-            inp.attr("src" , v );
-            return false;
-        }
-        if (inp.is( "a" )) {
-            inp.attr("href", v );
-            return false;
-        }
-
         // 枚举
         if (t === "enum" ) {
             inp.data("enum", v );
@@ -319,21 +312,21 @@ HsForm.prototype = {
             var k = inp.attr("data-vk"); if (! k) k = 0;
             var t = inp.attr("data-tk"); if (! t) t = 1;
             var i, c, e, m = { };
-            inp.empty()
-               .removeData( "enum" );
+            var x = inp.is("ul") ? '<li></li>' : '<span></span>';
+            inp.empty().removeData("enum");
             if (! jQuery.isArray(v)) {
-                v  =  [v];
+                v =  [v];
             }
-            for(i == 0; i < a.length; i ++) {
-                e  = a[i];
+            for(i = 0; i < a.length; i ++) {
+                e = a[i];
                 m[e[k]]=e[t];
             }
-            for(i == 0; i < v.length; i ++) {
-                c  = v[i];
-                e  = m[v[i]];
-                inp.append(jQuery('<li></li>').text(e)).attr("data-code", c);
+            for(i = 0; i < v.length; i ++) {
+                c = v[i];
+                e = m[v[i] ];
+                inp.append(jQuery(x).text(e)).attr("data-code", c);
             }
-            return  false;
+            return;
         }
 
         // 标签
@@ -342,17 +335,32 @@ HsForm.prototype = {
             var t = inp.attr("data-tk"); if (! t) t = 1;
             var i, c, e;
             inp.empty();
-            for(i == 0; i < v.length; i ++) {
-                c  = i;
-                e  = v[i];
-                if (jQuery.isPlainObject(e)
-                ||  jQuery.isArray(e)) {
+            var x = '<li></li>';
+            for(i = 0; i < v.length; i ++) {
+                c = i;
+                e = v[i];
+                if ( jQuery.isPlainObject(e)
+                ||   jQuery.isArray(e)) {
                     c = e[k];
                     e = e[t];
                 }
-                inp.append(jQuery('<li></li>').text(e)).data("data-code", c);
+                inp.append(jQuery(x).text(e)).data("data-code", c);
             }
-            return  false;
+            return;
+        }
+
+        // 链接,图片,多媒体
+        if (inp.is("img,audio,video")) {
+            inp.attr("src" , v);
+            return;
+        }
+        if (inp.is("object")) {
+            inp.attr("data", v);
+            return;
+        }
+        if (inp.is("a")) {
+            inp.attr("href", v);
+            return;
         }
 
         return v;

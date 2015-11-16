@@ -10,7 +10,6 @@ import app.hongs.action.anno.Verify;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Table;
-import app.hongs.serv.member.User;
 import app.hongs.serv.member.UserAction;
 import app.hongs.util.Synt;
 import java.util.HashMap;

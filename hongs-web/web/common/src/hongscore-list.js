@@ -283,22 +283,30 @@ HsList.prototype = {
             for (j = 0; j < fns .length; j ++) {
                 td = jQuery('<td></td>');
                 td.attr("class", cls[j]);
-                tr.append(td);
+                td.appendTo(tr);
 
-                n = fns[j];
-                if (!n) continue;
-                v = hsGetValue(list[i] , n ) || fvs[n] || "" ;
+                n  =  fns[j];
+                if ( ! n ) {
+                    continue;
+                }
+
+                v  =  hsGetValue(list[i], n);
+                if (v === undefined || v === null || v === "") {
+                    v  =  list[i][n];
+                if (v === undefined || v === null || v === "") {
+                    v  =  fvs [n];
+                }}
 
                 // 按名称填充
-                if (typeof(this["_fill_"+n]) !== "undefined") {
-                    v = this["_fill_"+n].call(this, td, v, n);
+                if (typeof(this["_fill_" +n]) !== "undefined") {
+                    v = this["_fill_" +n].call(this, td, v, n);
                     if(!v) continue;
                 } else
                 // 按类型填充
                 if (typeof(fts[n]) !== "undefined") {
                     t = fts[n];
-                if (typeof(this["_fill_"+t]) !== "undefined") {
-                    v = this["_fill_"+t].call(this, td, v, n);
+                if (typeof(this["_fill_" +t]) !== "undefined") {
+                    v = this["_fill_" +t].call(this, td, v, n);
                     if(!v) continue;
                 }}
 
@@ -444,8 +452,10 @@ HsList.prototype = {
     },
 
     getRow   : function(o) {
-        return o.closest("tr,.itembox").find(".checkone")
-                .filter (  ":checkbox,:radio,:hidden"   );
+        return jQuery(o)
+                .closest("tr,.itembox")
+                .find   ( ".checkone" )
+                .filter ( ":checkbox,:radio,:hidden" );
     },
     getAll   : function() {
         var cks = this.context.find(".checkone").filter(":checked");

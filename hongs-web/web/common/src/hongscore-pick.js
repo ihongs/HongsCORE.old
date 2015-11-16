@@ -95,6 +95,16 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
     }
 
     function pickBack() {
+        // 未选警告
+        if (jQuery.isEmptyObject(v)) {
+            var msg  = box.data("unpickedError" );
+            if (msg != "!") {
+                alert( msg  ?  hsGetLang(  msg  ):
+                      hsGetLang("pick.unpicked"));
+                return;
+            }
+        }
+
         var evt = jQuery.Event("pickBack");
         box.trigger(evt, [v, tip]);
         if (evt.isDefaultPrevented()) {
@@ -111,9 +121,11 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
         tip.data("pickData", v)
            .addClass("pickbox")
         .toggleClass("pickmul", mul)
-        .on("click"   , ".checkone", checks)
+        .on("change"  , ".checkone", checks)
         .on("click"   , ".ensure"  , ensure)
         .on("saveBack", ".create"  , create);
+        // 初始选中
+        tip.find(".checkone").val(Object.keys(v));
     };
 
     function checks() {
