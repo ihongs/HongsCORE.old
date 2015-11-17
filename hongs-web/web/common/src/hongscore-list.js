@@ -291,11 +291,12 @@ HsList.prototype = {
                 }
 
                 v  =  hsGetValue(list[i], n);
-                if (v === undefined || v === null || v === "") {
+                if (v === undefined) {
                     v  =  list[i][n];
+                }
                 if (v === undefined || v === null || v === "") {
                     v  =  fvs [n];
-                }}
+                }
 
                 // 按名称填充
                 if (typeof(this["_fill_" +n]) !== "undefined") {

@@ -100,7 +100,9 @@ HsForm.prototype = {
         if (rst["enum"]) this.fillEnum(rst["enum"]);
         if (rst["info"]) this.fillInfo(rst["info"]);
         else if (rst.list && rst.list[0]) {
-            this.fillInfo (  rst.list[0]); // retrieve 可能仅提供 list
+            this.fillInfo (  rst.list[0]);  // 可能仅提供 list
+        } else {
+            this.fillInfo ( {} );           // 空也要执行 fill
         }
 
         this.formBox.trigger("loadBack", [rst, this]);
@@ -178,9 +180,10 @@ HsForm.prototype = {
                 v  =  hsGetValue(info, n);
             if (v === undefined) {
                 v  =  info[n];
+            }
             if (v === undefined || v === null || v === "") {
                 v  =  fvs [n];
-            }}
+            }
 
                 i = this.formBox.find('[name="'   +n+'"]');
             if (i.length === 0 ) {
@@ -728,19 +731,21 @@ HsForm.prototype = {
             var fn = inp.attr("data-validate");
             try {
                 if (inp.data(fn)) {
-                    inp.data(fn).call(this, val, inp);
+                    return inp.data(fn).call(this, val, inp);
                 } else
                 if ( window [fn]) {
-                     window [fn].call(this, val, inp);
-                } else {
+                    return  window [fn].call(this, val, inp);
+                } else
+                if ( window.console ) {
                     if (window.console.error) {
                         window.console.error(fn+" not found!");
                     } else {
                         window.console.log  (fn+" not found!");
                     }
                 }
+                return false;
             } catch (ex) {
-                if (window.console) {
+                if ( window.console ) {
                     if (window.console.error) {
                         window.console.error(fn+" run error: "+ex, val, inp);
                     } else {
@@ -809,17 +814,17 @@ HsForm.prototype = {
         },
         "[data-repeat]" : function(val, inp) {
             var fn = inp.attr("data-repeat");
-            var fd = this.formBox.find("[name=" + fn + "]");
-            if (fd.val() != val) {
+            var fd = this.formBox.find(  "[name=" + fn + "]"  );
+            if (fd.val( ) != val) {
                 return this.geterror(inp, "form.is.not.repeat");
             }
             return true;
         },
         "[data-relate]" : function(val, inp) {
             var fn = inp.attr("data-relate");
-            var fd = this.formBox.find("[name=" + fn + "]");
-            if (fd.val()) {
-                this.validate(fd);
+            var fd = this.formBox.find(  "[name=" + fn + "]"  );
+            if (fd.val( ) != "" ) {
+                this.validate(fn);
             }
             return true;
         }

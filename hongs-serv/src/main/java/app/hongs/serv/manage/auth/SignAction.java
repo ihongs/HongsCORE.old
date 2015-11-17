@@ -41,10 +41,10 @@ public class SignAction {
         // 验证密码
         fc = new FetchCase( )
             .from   (tb.tableName)
-            .select ("password, id, name, head, mtime")
+            .select ("password, id, name, head, mtime, state")
             .where  ("username = ?", username);
         ud = db.fetchLess(fc);
-        if ( ud.isEmpty() ) {
+        if ( ud.isEmpty(  ) ) {
             CoreLocale lang = CoreLocale.getInstance( "member" );
             Map m = new HashMap();
             Map e = new HashMap();
@@ -55,7 +55,7 @@ public class SignAction {
             ah.reply(e);
             return;
         }
-        if (! password.equals(ud.get("password")) ) {
+        if (! password.equals( ud.get("password") )) {
             CoreLocale lang = CoreLocale.getInstance( "member" );
             Map m = new HashMap();
             Map e = new HashMap();
@@ -70,13 +70,21 @@ public class SignAction {
         String usrid = (String) ud.get( "id" );
         String uname = (String) ud.get("name");
         String uhead = (String) ud.get("head");
-        long   utime = Synt.declare(ud.get("mtime"), 0L) * 1000;
+        int    state = Synt.asserts(ud.get("state"), 0 ) ;
+        long   utime = Synt.asserts(ud.get("mtime"), 0L) * 1000 ;
+
+        // 验证状态
+        if (state != 1) {
+            CoreLocale lang = CoreLocale.getInstance( "member" );
+            ah.fault(lang.translate( "core.sign.state.invalid"));
+            return;
+        }
 
         // 验证区域
         Set rs = RoleSet.getInstance(usrid);
         if (0 != place.length() && !rs.contains(place)) {
-            CoreLocale lang = CoreLocale.getInstance("member" );
-            ah.fault ( lang.translate("core.sign.uri.invalid"));
+            CoreLocale lang = CoreLocale.getInstance( "member" );
+            ah.fault(lang.translate( "core.sign.place.invalid"));
             return;
         }
 

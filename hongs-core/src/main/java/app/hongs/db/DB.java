@@ -955,44 +955,6 @@ public class DB
   //** 查询语句 **/
 
   /**
-   * 分页方法
-   * 已改为使用 JDBC 的 setFetchSize,setMaxRows,absolute 等方法;
-   * 另, 请不要在 update,delete 中使用 limit 至少 MySQL 是可以的,
-   * 您要更新/删除的记录应该是明确的, 应该能够通过 where 做出限定的.
-   * @deprecated
-   * @param sql
-   * @param start
-   * @param limit
-   * @return
-   */
-  public String limit(String sql, int start, int limit) {
-      try {
-          String dpn = connect(   )
-                     .getMetaData()
-                     .getDatabaseProductName()
-                     .toUpperCase();
-          if ("SQLITE".equals(dpn) || "MYSQL".equals(dpn)) {
-              sql += " LIMIT " + start + /***/ ", " + limit;
-          } else
-          if ("POSTGRESQL".equals(dpn)) {
-              sql += " LIMIT " + limit + " OFFSET " + start;
-          } else
-          if ("ORACLE".equals(dpn)) {
-              sql  = "SELECT * FROM (SELECT *, ROWNUM AS OFFSET FROM (" + sql + ") AS _T_ WHERE ROWNUM <= " + (start + limit) + ") WHERE OFFSET >= " + (start + 1);
-          } else {
-              CoreLogger.getLogger( DB.class.getName( ) + ".limit" )
-                                  .debug("Limit not support " + dpn);
-              throw new HongsError(0x10, "Limit not support " + dpn);
-          }
-      } catch (HongsException  ex) {
-          throw new HongsError(0x10, ex);
-      } catch (  SQLException  ex) {
-          throw new HongsError(0x10, ex);
-      }
-      return sql;
-  }
-
-  /**
    * 查询方法
    * @param sql
    * @param start
@@ -1004,17 +966,31 @@ public class DB
   public Roll query(String sql, int start, int limit, Object... params)
     throws HongsException
   {
-    try
-    {
-      sql   = this.limit(sql, start, limit);
-      start = limit = 0 ;
+    /**
+     * 由于 SQLite 等不支持 absolute 方法
+     * 故对这样的库采用组织语句的分页查询
+     */
+    if (limit == 0) {
+        this.connect();
+    }   else   try  {
+        String dpn =
+        this.connect()
+        .getMetaData()
+        .getDatabaseProductName()
+        .toUpperCase();
+        if ("SQLITE".equals(dpn)) {
+            sql += " LIMIT ?,?";
+            Object[] paramz = new Object[params.length + 2];
+            System.arraycopy(params, 0, paramz, 0, params.length);
+            paramz[params.length + 0] = start;
+            paramz[params.length + 1] = limit;
+            params = paramz;
+            start  = 0;
+            limit  = 0;
+        }
+    } catch (SQLException ex) {
+        throw new HongsError(0x10, ex);
     }
-    catch (HongsError er)
-    {
-      // 如果以上分页失败, 则启用下方的方式
-    }
-
-    this.connect();
 
     if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG))
     {
