@@ -54,7 +54,8 @@ public class Form extends Model {
      * @return 记录ID
      * @throws app.hongs.HongsException
      */
-    public String save(Map rd) throws HongsException {
+    @Override
+    public String set(Map rd) throws HongsException {
         // 给字段加名字
         String conf = (String) rd.get("conf");
         String name = (String) rd.get("name");
@@ -76,7 +77,7 @@ public class Form extends Model {
             id = this.add(rd);
             ic = true ;
         } else {
-            this.put(rd , id);
+            this.put(id , rd);
             ic = false;
         }
 

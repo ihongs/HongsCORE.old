@@ -64,7 +64,7 @@ public class DeptAction {
     public void doSave(ActionHelper helper)
     throws HongsException {
         Map rd = helper.getRequestData();
-        String id = model.save(rd);
+        String id = model.set(rd);
         
         rd = new HashMap();
         rd.put( "id" , id);

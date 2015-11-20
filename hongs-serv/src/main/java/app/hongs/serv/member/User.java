@@ -29,34 +29,16 @@ extends Model {
         super(table);
     }
 
-    /**
-     * 添加/修改记录
-     *
-     * @param rd
-     * @return 记录ID
-     * @throws app.hongs.HongsException
-     */
-    public String save(Map rd)
-      throws HongsException
-    {
-      String id = (String) rd.get(this.table.primaryKey);
-      if (id == null || id.length() == 0) {
-          id = this.add(rd);
-      } else {
-          this.put(rd , id);
-      }
-      return id;
-    }
-
     @Override
-    public String add(Map<String, Object> data) throws HongsException {
+    public String add(Map data) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
             data.put("password", AuthKit.getCrypt((String) data.get("password")));
         }
 
         // 权限限制, 仅能赋予当前登录用户所有的权限
-        if (data.containsKey("roles") ) {
+        if (data.containsKey( "roles"  )) {
+            data.put("rtime", System.currentTimeMillis() / 1000);
             AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class), null );
         }
 
@@ -64,19 +46,19 @@ extends Model {
     }
 
     @Override
-    public int put(Map<String, Object> data, String id, FetchCase caze) throws HongsException {
+    public int put(String id, Map data, FetchCase caze) throws HongsException {
         // 加密密码
         if (data.containsKey("password")) {
             data.put("password", AuthKit.getCrypt((String) data.get("password")));
         }
 
         // 权限限制, 仅能赋予当前登录用户所有的权限
-        if (data.containsKey("roles") ) {
+        if (data.containsKey( "roles"  )) {
             data.put("rtime", System.currentTimeMillis() / 1000);
             AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class),  id  );
         }
 
-        return super.put(data, id, caze);
+        return super.put(id, data, caze);
     }
 
     public Set<String> getRoles(String userId)

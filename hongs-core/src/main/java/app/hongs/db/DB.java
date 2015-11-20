@@ -114,6 +114,11 @@ public class DB
   public String name;
 
   /**
+   * 关联库
+   */
+  protected DB  link  =  null;
+
+  /**
    * 表类
    */
   protected String tableClass;
@@ -183,6 +188,17 @@ public class DB
     this.tableConfigs = conf.tableConfigs;
     this.tableObjects = new HashMap();
     this.modelObjects = new HashMap();
+
+    /**
+     * 当有指定 link 而又没指定 source 和 origin 时
+     * 则直接用 link 库进行连接
+     */
+    if (conf.link != null && ! "".equals(conf.link)
+    && (source == null || source.isEmpty( ))
+    && (origin == null || origin.isEmpty()))
+    {
+        this.link  = /**/ DB.getInstance(conf.link);
+    }
   }
 
   public Connection connect()
@@ -190,6 +206,19 @@ public class DB
   {
     TOP: do
     {
+
+    /**
+     * 如上 link 描述, 直接使用关联对象连接
+     */
+    if (  this.link  != null)
+    {
+      this.connection = this.link.connect();
+      if (0 < Core.DEBUG && 4 != (4 & Core.DEBUG))
+      {
+        CoreLogger.trace("DB: Connect to '"+name+"' link '"+this.link.name+"'");
+      }
+      break;
+    }
 
     try
     {

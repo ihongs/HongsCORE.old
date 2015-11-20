@@ -119,6 +119,7 @@ public class Mtree extends Model
    * @param rd
    * @param caze
    * @return 树列表
+   * @throws app.hongs.HongsException
    */
   @Override
   public Map getList(Map rd, FetchCase caze)
@@ -240,6 +241,7 @@ public class Mtree extends Model
    *
    * @param rd
    * @return 树列表
+   * @throws app.hongs.HongsException
    */
   @Override
   public Map getList(Map rd)
@@ -253,80 +255,80 @@ public class Mtree extends Model
   /**
    * 添加节点
    *
-   * @param data
+   * @param rd
    * @return 节点ID
    * @throws app.hongs.HongsException
    */
   @Override
-  public String add(Map data)
+  public String add(Map rd)
     throws HongsException
   {
-    if (data == null)
+    if (rd == null)
     {
-      data = new HashMap();
+      rd = new HashMap( );
     }
 
-    String pid = (String)data.get(this.pidKey);
+    String pid = (String) rd.get(this.pidKey);
 
     // 默认加到根节点下
     if (pid == null || pid.length() == 0)
     {
-      pid = this.rootId;
-      data.put(this.pidKey, pid);
+      pid =  this.rootId ;
+      rd.put(this.pidKey , pid);
     }
 
     // 默认添加到末尾
-    if (!data.containsKey(this.snumKey))
+    if (!rd.containsKey(this.snumKey))
     {
-      int num = this.getLastSerialNum(pid);
-      data.put(this.snumKey, num + 1);
+      int num = this.getLastSerialNum(pid) +1;
+      rd.put(this.snumKey, num);
     }
 
     // 默认没有子节点
-    if (!data.containsKey(this.cnumKey))
+    if (!rd.containsKey(this.cnumKey))
     {
-      data.put(this.cnumKey, "0");
+      rd.put(this.cnumKey, "0");
     }
 
-    String  id = super.add(data);
+    String id = super.add(rd);
 
     // 将父节点的子节点数量加1
     this.chgChildsNum(pid, 1);
 
-    return  id;
+    return id;
   }
 
   /**
    * 更新节点
    *
    * @param id
-   * @param data
+   * @param rd
    * @return 节点ID
    * @throws app.hongs.HongsException
    */
   @Override
-  public int put(Map data, String id, FetchCase caze)
+  public int put(String id, Map rd, FetchCase caze)
     throws HongsException
   {
-    if (data == null)
+    if (rd == null)
     {
-      data = new HashMap();
+      rd = new HashMap( );
     }
 
     /**
      * 如有指定bid(BeforeID)
      * 则将新的pid(ParentID)重设为其pid
      */
-    String bid = (String)data.get(this.bidKey);
-    if (null != bid && !"".equals(bid))
+    String bid = (String) rd.get(this.bidKey);
+    if (bid != null && bid.length() != 0)
     {
-      data.put(this.pidKey,this.getParentId(bid));
+      rd.put(this.pidKey, this.getParentId(bid));
     }
 
-    String newPid = (String)data.get(this.pidKey);
+    String newPid = (String) rd.get(this.pidKey);
     String oldPid = this.getParentId (id);
     int    ordNum = this.getSerialNum(id);
-    int    i = super.put (data, id, caze);
+    int    i = super.put( id, rd , caze );
 
     /**
      * 如果有指定新的pid且不同于旧的pid, 则
@@ -384,6 +386,7 @@ public class Mtree extends Model
    * @param id
    * @param caze
    * @return 删除条数
+   * @throws app.hongs.HongsException
    */
   @Override
   public int del(String id, FetchCase caze)
@@ -461,8 +464,8 @@ public class Mtree extends Model
   public List<String> getParentIds(String id, String rootId)
     throws HongsException
   {
-    List<String> ids = new ArrayList<String>();
-    String pid = this.getParentId(id);
+    List<String> ids = new ArrayList();
+    String pid = this.getParentId(id );
     if (pid != null)
     {
       ids.add( pid );
@@ -477,8 +480,8 @@ public class Mtree extends Model
   public List<Map> getParents(String id, String rootId)
     throws HongsException
   {
-    List<Map> nds = new ArrayList<Map>();
-    Map pnd  = this.getParent(id);
+    List<Map> nds = new ArrayList();
+    Map pnd  = this.getParent( id );
     if (pnd != null)
     {
       nds.add( pnd );

@@ -40,7 +40,7 @@ public class UnitAction {
     public void doSave(ActionHelper helper)
     throws HongsException {
         Map  data = helper.getRequestData();
-        String id = model.save(data);
+        String id = model.set(data);
         Map  info = new HashMap();
         info.put( "id" , id);
         info.put("name", data.get("name") );

@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,6 +84,20 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected       IndexWriter      writer = null ;
     protected       IndexReader      reader = null ;
     protected       IndexSearcher    finder = null ;
+
+    // 这些功能参数不能作为查询字段
+    protected final static Set<String> _funcs = new HashSet();
+    static {
+        _funcs.add(Cnst.PN_KEY);
+        _funcs.add(Cnst.GN_KEY);
+        _funcs.add(Cnst.RN_KEY);
+        _funcs.add(Cnst.OB_KEY);
+        _funcs.add(Cnst.RB_KEY);
+        _funcs.add(Cnst.WD_KEY);
+        _funcs.add(Cnst.OR_KEY);
+        _funcs.add(Cnst.AR_KEY);
+        _funcs.add(Cnst.SR_KEY);
+    }
 
     public LuceneRecord(String path, final Map<String, Map> fields)
     throws HongsException {
@@ -182,7 +195,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         // 指定单个 id 则走 getOne
         Object id = rd.get (Cnst.ID_KEY);
         if (id != null && !(id instanceof Collection) && !(id instanceof Map)) {
-            if ("".equals(id)) {
+            if ( "".equals( id ) ) {
                 return  new HashMap(); // id 为空则不获取
             }
             Map  data = new HashMap();
@@ -963,13 +976,14 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
     protected Query getQuery(Map rd) throws HongsException {
         BooleanQuery query = new BooleanQuery();
 
-        for(Object o : rd.entrySet()) {
+        for (Object o : rd.entrySet()) {
             Map.Entry e = (Map.Entry) o;
             Object fv = e.getValue( );
             String fn = (String) e.getKey();
 
-            if (Cnst.WD_KEY.equals(fn) || Cnst.OB_KEY.equals(fn) || Cnst.RB_KEY.equals(fn)
-            ||  Cnst.OR_KEY.equals(fn) || Cnst.AR_KEY.equals(fn) || Cnst.SR_KEY.equals(fn)) {
+            // 功能型参数不在这里处理
+            if (fn == null || fv == null
+            ||  _funcs.contains( fn )) {
                 continue;
             }
 

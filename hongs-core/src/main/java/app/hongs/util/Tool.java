@@ -442,9 +442,9 @@ public final class Tool
   public static String cleanHTM(String str)
   {
     Pattern pat;
-    pat = Pattern.compile( "<style.*?>.*?</style>" , Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
+    pat = Pattern.compile( "<style.*?>.*?</style>" , Pattern.CASE_INSENSITIVE|Pattern.MULTILINE|Pattern.DOTALL);
     str = pat.matcher(str).replaceAll("" );
-    pat = Pattern.compile("<script.*?>.*?</script>", Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
+    pat = Pattern.compile("<script.*?>.*?</script>", Pattern.CASE_INSENSITIVE|Pattern.MULTILINE|Pattern.DOTALL);
     str = pat.matcher(str).replaceAll("" );
     return   cleanXML(str);
   }

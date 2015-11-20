@@ -22,16 +22,19 @@ import java.util.Set;
  * 基础模型
  *
  * <p>
- * 当要使用 save(add,put),create(add),update(put),delete(del) 时请确保表有配置主键.<br/>
- * 基础动作方法: getList,getInfo,create,update,delete 扩展动作方法: exists,unique
- * 通常它们被动作类直接调用; 基础模型方法: get,add,put,del 一般改写只需覆盖它们即可;
+ * 当您需要使用 create,add,update,put,delete,del 等时请确保表有主键.<br/>
+ * 基础动作方法: retrieve,create,update,delete
+ * 扩展动作方法: unique,exists
+ * 通常它们被动作类直接调用;
+ * 基础模型方法: get,add,put,del
+ * 一般改写只需覆盖它们即可;
  * filter, permit 分别用于获取和更改数据等常规操作时进行过滤,
  * permit 默认调用 filter 来实现的, 可覆盖它来做资源过滤操作.<br/>
- * 可使用查询参数:
+ * retrieve 可使用查询参数:
  * <code>
  * ?pn=1&rn=10&f1=123&f2.-gt=456&wd=a+b&ob=-f1+f2&rb=id+f1+f2
  * </code>
- 详见 filter 方法说明
+ * 详见 filter 方法说明
  </p>
  *
  * <h3>异常代码:</h3>
@@ -74,6 +77,22 @@ implements IRecord
    * 可列举的字段
    */
   public String[] listCols = new String[] {"name"};
+
+  /**
+   * 不查询的字段
+   */
+  protected final static Set<String> funcKeys;
+  static {
+    funcKeys = new HashSet( );
+    funcKeys.add(Cnst.PN_KEY);
+    funcKeys.add(Cnst.GN_KEY);
+    funcKeys.add(Cnst.RN_KEY);
+    funcKeys.add(Cnst.OB_KEY);
+    funcKeys.add(Cnst.RB_KEY);
+    funcKeys.add(Cnst.WD_KEY);
+    funcKeys.add(Cnst.OR_KEY);
+    funcKeys.add(Cnst.AR_KEY);
+  }
 
   /**
    * 构造方法
@@ -197,7 +216,7 @@ implements IRecord
 
     for (String id : ids)
     {
-      this.put( dat, id );
+      this.put( id , dat);
     }
 
     return ids.size();
@@ -352,46 +371,68 @@ implements IRecord
   //** 标准模型方法 **/
 
   /**
+   * 保存记录
+   * 有 id 则修改, 无 id 则添加
+   * @param rd
+   * @return
+   * @throws HongsException
+   */
+  public String set(Map rd)
+    throws HongsException
+  {
+    String id = (String) rd.get(this.table.primaryKey);
+    if (id == null || id.length() == 0)
+    {
+      id = this.add(rd);
+    }
+    else
+    {
+      this.put(id , rd);
+    }
+    return id;
+  }
+
+  /**
    * 添加记录
-   *
-   * 由于获取自增 id 在各数据库中的获取方式不同
-   * 故如需要自增 id 请自行扩展本类并重写此方法
-   * 配置文件中用 model 来指定新的模型类
-   *
-   * MySQL,SQLite add 方法主体改造:
-    data.remove(this.table.primaryKey );
+
+ 由于获取自增 id 在各数据库中的获取方式不同
+ 故如需要自增 id 请自行扩展本类并重写此方法
+ 配置文件中用 model 来指定新的模型类
+
+ MySQL,SQLite add 方法主体改造:
+    rd.remove(this.table.primaryKey );
     // 存入主数据
-    this.table.insert          ( data );
+    this.table.insert          ( rd );
     // 查询自增ID, MySQL: last_insert_id() SQLite: last_insert_rowid()
     Map  rd = this.db.fetchOne ("SELECT last_insert_id() AS id");
-    id = rd.get("id").toString (      );
-    data.put(this.table.primaryKey, id);
+    id = rd.get("id").toString (    );
+    rd.put(this.table.primaryKey, id);
     // 存入子数据
-    this.table.insertSubValues ( data );
+    this.table.insertSubValues ( rd );
+
+ 或对 DB,Table,Model 同步改造, 使用 PreparedStatement.getGeneratedKeys 获取
    *
-   * 或对 DB,Table,Model 同步改造, 使用 PreparedStatement.getGeneratedKeys 获取
-   *
-   * @param data
+   * @param rd
    * @return 记录ID
    * @throws app.hongs.HongsException
    */
-  public String add(Map<String, Object> data)
+  public String add(Map rd)
     throws HongsException
   {
-    String id = Synt.declare(data.get(Cnst.ID_KEY), String.class);
+    String id = Synt.declare(rd.get(Cnst.ID_KEY), String.class );
     if (id != null && id.length() != 0)
     {
-      throw new HongsException (0x1091, "Add can not have a id" );
+      throw new HongsException (0x1091, "Add can not have a id");
     }
 
     id = Core.getUniqueId();
-    data.put(this.table.primaryKey, id);
+    rd.put(this.table.primaryKey, id);
 
     // 存入主数据
-    this.table.insert/* new */ ( data );
+    this.table.insert/* new */ ( rd );
 
     // 存入子数据
-    this.table.insertSubValues ( data );
+    this.table.insertSubValues ( rd );
 
     return id;
   }
@@ -399,27 +440,27 @@ implements IRecord
   /**
    * 更新记录
    *
+   * @param rd
    * @param id
-   * @param data
    * @return 更新条数
    * @throws app.hongs.HongsException
    */
-  public int put(Map<String, Object> data, String id)
+  public int put(String id, Map rd)
     throws HongsException
   {
-    return this.put(data, id, null);
+    return this.put(id, rd, null);
   }
 
   /**
    * 更新记录
    *
+   * @param rd
    * @param id
    * @param caze
-   * @param data
    * @return 更新条数
    * @throws app.hongs.HongsException
    */
-  public int put(Map<String, Object> data, String id, FetchCase caze)
+  public int put(String id, Map rd, FetchCase caze)
     throws HongsException
   {
     if (id == null || id.length() == 0)
@@ -427,7 +468,7 @@ implements IRecord
       throw new HongsException (0x1092, "ID can not be empty for put");
     }
 
-    // 调用setFileter进行校验
+    // 校验此操作
     caze = caze != null ? caze.clone() : new FetchCase();
     caze.setOption("MODEL_METHOD", "put");
     if (!this.permit(caze, id))
@@ -436,12 +477,12 @@ implements IRecord
     }
 
     // 更新主数据
-    data.remove(this.table.primaryKey );
-    int an = this.table.update ( data , this.table.primaryKey + " = ?", id);
+    rd.remove(this.table.primaryKey );
+    int an = this.table.update ( rd , "`"+this.table.primaryKey+"` = ?", id);
 
     // 更新子数据
-    data.put(this.table.primaryKey, id);
-    this.table.insertSubValues ( data );
+    rd.put(this.table.primaryKey, id);
+    this.table.insertSubValues ( rd );
 
     return an;
   }
@@ -479,7 +520,7 @@ implements IRecord
       throw new HongsException (0x1093, "ID can not be empty for del");
     }
 
-    // 调用setFileter进行校验
+    // 校验此操作
     caze = caze != null ? caze.clone() : new FetchCase();
     caze.setOption("MODEL_METHOD", "del");
     if (!this.permit(caze, id))
@@ -491,7 +532,7 @@ implements IRecord
     int an = this.table.delete ("`"+this.table.primaryKey+"` = ?", id);
 
     // 删除子数据
-    this.table.deleteSubValues(id);
+    this.table.deleteSubValues (id);
 
     return an;
   }
@@ -793,21 +834,15 @@ implements IRecord
     while (it.hasNext())
     {
       Map.Entry et = (Map.Entry) it.next();
-      String key = (String) et.getKey();
-      value = et.getValue();
+      String   key = (String) et.getKey( );
+             value = et.getValue( );
 
-      if (key == null || value == null
-      ||  key.equals(Cnst.RN_KEY)
-      ||  key.equals(Cnst.PN_KEY)
-      ||  key.equals(Cnst.GN_KEY)
-      ||  key.equals(Cnst.RB_KEY)
-      ||  key.equals(Cnst.OB_KEY)
-      ||  key.equals(Cnst.WD_KEY))
+      if (key == null || funcKeys.contains(key))
       {
         continue;
       }
 
-      // 可搜索字段
+      // 可搜索字段 (用 !eq 仍可精确匹配)
       if (finds.contains(key) && !(value instanceof Map))
       {
         this.findFilter(caze, value, new String[ ] {key});
@@ -1241,11 +1276,11 @@ implements IRecord
         sb.append(key).append(" LIKE ? ESCAPE '/' AND ");
         pa[ pi ++ ] = txt ;
       }
-        sb.delete(sb.length() - 5, sb.length());
-        sb.append(") OR ");
+      sb.delete(sb.length() - 5, sb.length());
+      sb.append(") OR ");
     }
-        sb.delete(sb.length() - 4, sb.length());
-        sb.append(")"/**/);
+    sb.delete(sb.length() - 4, sb.length());
+    sb.append(")"/**/);
 
     caze.where(sb.toString(), pa );
   }
@@ -1337,6 +1372,9 @@ implements IRecord
         if (! "".equals(val) && null  !=  val)
         {
             caze.where(key + " = ?" , val);
+        } else
+        if (null == val) {
+            caze.where(key + " IS NULL"  );
         }
     }
   }
@@ -1365,7 +1403,7 @@ implements IRecord
     Table    tb =  this.db.getTable (tn);
     Map      cs = tb.getFields();
 
-    Map<String, Object>  vs = (Map) val ;
+    Map<String, Object>  vs  =  Synt.declare( val, Map.class );
     for (Map.Entry et2 : vs.entrySet( ))
     {
       String key2 = (String)et2.getKey();

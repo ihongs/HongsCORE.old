@@ -56,6 +56,8 @@ public class DBConfig
 
   protected String name;
 
+  public    String link;
+
   public DBConfig(String name)
     throws HongsException
   {
@@ -109,6 +111,7 @@ public class DBConfig
 
     DBConfig cp = parseByStream(is);
 
+    this.link         = cp.link;
     this.source       = cp.source;
     this.origin       = cp.origin;
     this.dbClass      = cp.dbClass;
@@ -163,15 +166,16 @@ public class DBConfig
       throw new app.hongs.HongsException(0x1065, "Can not find root element in config document.");
     }
 
-    String link;
+    String attr;
+    this.link = null;
     this.dbClass = "";
     this.tableClass = "";
     this.modelClass = "";
     this.tablePrefix = "";
     this.tableSuffix = "";
-    this.source = new HashMap<String, String>();
-    this.origin = new HashMap<String, String>();
-    this.tableConfigs = new HashMap<String, Map>();
+    this.source = new HashMap();
+    this.origin = new HashMap();
+    this.tableConfigs = new HashMap();
 
     NodeList childs = root.getChildNodes();
     for (int i = 0; i < childs.getLength(); i ++)
@@ -187,32 +191,33 @@ public class DBConfig
 
       if (tagName.equals("config"))
       {
-        link = getAttribute(element, "link", null);
-        if (link != null)
+        attr = getAttribute(element, "link", null);
+        if (attr != null)
         {
-          DBConfig conf = new DBConfig(link);
+          DBConfig conf = new DBConfig(attr);
+          link  =  attr ;
           dbClass = conf.dbClass;
           tableClass = conf.tableClass;
           modelClass = conf.modelClass;
           tablePrefix = conf.tablePrefix;
           tableSuffix = conf.tableSuffix;
         }
-        else
-        {
-          dbClass = getAttribute(element, "dbClass", "");
-          tableClass = getAttribute(element, "tableClass", "");
-          modelClass = getAttribute(element, "modelClass", "");
-          tablePrefix = getAttribute(element, "tablePrefix", "");
-          tableSuffix = getAttribute(element, "tableSuffix", "");
-        }
+//      else
+//      {
+          dbClass = getAttribute(element, "dbClass", dbClass);
+          tableClass = getAttribute(element, "tableClass", tableClass);
+          modelClass = getAttribute(element, "modelClass", modelClass);
+          tablePrefix = getAttribute(element, "tablePrefix", tablePrefix);
+          tableSuffix = getAttribute(element, "tableSuffix", tablePrefix);
+//      }
       }
       else
       if (tagName.equals("source"))
       {
-        link = getAttribute(element, "link", null);
-        if (link != null)
+        attr = getAttribute(element, "link", null);
+        if (attr != null)
         {
-          DBConfig conf = new DBConfig(link);
+          DBConfig conf = new DBConfig(attr);
           this.source = conf.source;
         }
         else
@@ -223,10 +228,10 @@ public class DBConfig
       else
       if (tagName.equals("origin"))
       {
-        link = getAttribute(element, "link", null);
-        if (link != null)
+        attr = getAttribute(element, "link", null);
+        if (attr != null)
         {
-          DBConfig conf = new DBConfig(link);
+          DBConfig conf = new DBConfig(attr);
           this.origin = conf.origin;
         }
         else

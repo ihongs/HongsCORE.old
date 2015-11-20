@@ -220,7 +220,7 @@ public class AuthKit {
 
             ud  =  new HashMap( );
             ud.put("name", uname);
-            db.getModel("user").put( ud, usrid );
+            db.getModel("user").put(usrid , ud );
         } else {
             ud  =  new HashMap( );
             ud.put("name", uname);

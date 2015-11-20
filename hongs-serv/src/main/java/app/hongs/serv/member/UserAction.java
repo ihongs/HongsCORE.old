@@ -11,13 +11,11 @@ import app.hongs.action.anno.CommitSuccess;
 import app.hongs.db.DB;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.Thumbnails.Builder;
 
 /**
  * 用户动作接口
@@ -112,10 +110,10 @@ public class UserAction {
 
         // Ignore empty password in update
         if ("".equals(rd.get("password"))) {
-            rd.remove("password" );
+            rd.remove("password");
         }
 
-        String id = model.save(rd);
+        String id = model.set(rd);
 
         rd = new HashMap();
         rd.put( "id" , id);

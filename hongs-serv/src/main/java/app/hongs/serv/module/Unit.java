@@ -47,12 +47,13 @@ public class Unit extends Mtree {
      * @return 记录ID
      * @throws app.hongs.HongsException
      */
-    public String save(Map rd) throws HongsException {
+    @Override
+    public String set(Map rd) throws HongsException {
         String id = (String) rd.get(this.table.primaryKey);
         if (id == null || id.length() == 0) {
             id = this.add(rd);
         } else {
-            this.put(rd , id);
+            this.put(id , rd);
         }
 
         // 建立菜单配置

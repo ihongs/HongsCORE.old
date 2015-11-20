@@ -1,5 +1,6 @@
 package app.hongs.serv;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
@@ -79,11 +80,11 @@ public class AuthFilter
      * 获取权限配置名
      */
     s = config.getInitParameter("config");
-    if (s != null)
+    if ( null != s)
     {
+      this.aut = s;
       try
       {
-        this.aut = s ;
         this.siteMap = NaviMap.getInstance(s);
       }
       catch (HongsException ex)
@@ -192,6 +193,14 @@ public class AuthFilter
         }
     }
 
+    /**
+     * 调试模式超级管理员无限制
+     */
+    if (Core.DEBUG  >  0
+    &&  Cnst.ADM_UID.equals(hlpr.getSessibute(Cnst.UID_SES))) {
+        break;
+    }
+
     // 获取详细会话集合
     Set<String> authset;
     try {
@@ -255,7 +264,7 @@ public class AuthFilter
             String qry;
 
             if (isApi (req)) {
-                // API 模式不需要给返回地址 
+                // API 模式不需要给返回地址
             } else
             if (isAjax(req)) {
                 src =  req.getHeader("Referer");
