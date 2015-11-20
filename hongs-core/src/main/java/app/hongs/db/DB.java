@@ -207,6 +207,19 @@ public class DB
     TOP: do
     {
 
+    try
+    {
+      if (this.connection != null
+      && !this.connection.isClosed())
+      {
+        break;
+      }
+    }
+    catch (SQLException ex)
+    {
+      throw new HongsException(0x1031 , ex);
+    }
+
     /**
      * 如上 link 描述, 直接使用关联对象连接
      */
@@ -220,20 +233,7 @@ public class DB
       break;
     }
 
-    try
-    {
-      if (this.connection != null
-      && !this.connection.isClosed())
-      {
-        break;
-      }
-    }
-    catch (SQLException ex)
-    {
-      throw new HongsException(0x1031, ex);
-    }
-
-    Exception ez = null;
+    Exception ez  = null;
 
     /** 使用外部数据源 **/
 

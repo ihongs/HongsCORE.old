@@ -1,11 +1,10 @@
 package app.hongs.tags;
 
+import app.hongs.Core;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
-
-import app.hongs.Core;
 
 /**
  * 唯一ID生成器

@@ -1,12 +1,10 @@
 package app.hongs.tags;
 
+import app.hongs.CoreConfig;
+import app.hongs.util.Tool;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
-
-import app.hongs.Core;
-import app.hongs.CoreConfig;
-import app.hongs.util.Tool;
 
 /**
  * 配置信息读取标签

@@ -16,7 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- *
+ * 测试 app.hongs.util.Dict
  * @author Hongs
  */
 public class TestDict extends TestCase {
@@ -91,7 +91,7 @@ public class TestDict extends TestCase {
         List   y;
         Set    z;
 
-        Data.dumps(dict);
+        //Data.dumps(dict);
 
         x = Dict.get(dict, null, "sub1", "key1");
         assertEquals("xx", x);
@@ -134,7 +134,7 @@ public class TestDict extends TestCase {
         x = Dict.get(dict, null, "sub1", "sub3", null, "a");
         assertEquals(y, x);
 
-        Data.dumps(dict);
+        //Data.dumps(dict);
     }
 
 }
