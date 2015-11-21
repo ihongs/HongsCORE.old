@@ -327,7 +327,7 @@ public class ActionDriver extends HttpServlet implements Servlet, Filter {
                 .append("\r\n\tMethod      : ").append(R.getMethod())
                 .append("\r\n\tRemote      : ").append(R.getRemoteAddr())
                                    .append(" ").append(R.getRemotePort())
-                .append("\r\n\tReqed-With  : ").append(R.getHeader("X-Requested-With"))
+                .append("\r\n\tQuest-With  : ").append(R.getHeader("X-Requested-With"))
                 .append("\r\n\tUser-Agent  : ").append(R.getHeader("User-Agent"))
                 .append("\r\n\tObjects     : ").append(core.keySet( ).toString())
                 .append("\r\n\tRuntime     : ").append(Tool.humanTime(time));

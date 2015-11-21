@@ -65,8 +65,12 @@ public class AuthFilter
    */
   private String[][] ignoreUrls = null;
 
+  /**
+   * 环境检测正则
+   */
   private final Pattern IS_HTML = Pattern.compile( "text/(html|plain)" );
   private final Pattern IS_JSON = Pattern.compile("(text|application)/(x-)?(json|javascript)");
+  private final Pattern IS_AJAX = Pattern.compile("(AJAX|XMLHTTP)" , Pattern.CASE_INSENSITIVE);
 
   @Override
   public void init(FilterConfig config)
@@ -264,7 +268,7 @@ public class AuthFilter
             String qry;
 
             if (isApi (req)) {
-                // API 模式不需要给返回地址
+                // API 模式无需返回地址
             } else
             if (isAjax(req)) {
                 src =  req.getHeader("Referer");
@@ -319,19 +323,22 @@ public class AuthFilter
   }
 
   private boolean isApi (HttpServletRequest req) {
-      return ActionDriver.getRealPath(req).endsWith(".api" );
+      return ActionDriver.getRealPath(req).endsWith(".api");
   }
 
   private boolean isAjax(HttpServletRequest req) {
-      return req.getHeader("X-Requested-With") != null;
+      String x  = req.getHeader("X-Requested-With");
+      return x == null ? false : IS_AJAX.matcher(x).find( );
   }
 
   private boolean isJson(HttpServletRequest req) {
-      return IS_JSON.matcher(req.getHeader("Accept")).find();
+      String a  = req.getHeader("Accept");
+      return a == null ? false : IS_JSON.matcher(a).find( );
   }
 
   private boolean isHtml(HttpServletRequest req) {
-      return IS_HTML.matcher(req.getHeader("Accept")).find();
+      String a  = req.getHeader("Accept");
+      return a == null ? false : IS_HTML.matcher(a).find( );
   }
 
 }
