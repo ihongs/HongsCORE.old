@@ -144,8 +144,8 @@ extends Model {
         Object deptId = req.get("dept_id");
         if (null != deptId && !"".equals(deptId)) {
             caze.join ("a_member_user_dept", "depts")
-                .on   (".user_id = :id")
-                .where(".dept_id IN (?)",deptId);
+                .on   ("`user_id` = `user`.`id`")
+                .where("`dept_id` IN (?)",deptId);
         }
     }
 

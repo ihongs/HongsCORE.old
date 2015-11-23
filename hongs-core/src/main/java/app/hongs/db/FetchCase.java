@@ -26,6 +26,16 @@ import java.util.regex.Pattern;
  * setOption用于登记特定查询选项, 以备组织查询结构的过程中读取.
  * </p>
  *
+ * <p>
+ * [2015/11/24 00:28]
+ * 已解决加表名前缀的问题,
+ * 只需给字段名按照正常的SQL规范包裹上"`",
+ * 便可以识别为当前表字段;
+ * 上级表请使用上级表别名;
+ * 且兼容上面旧的前缀规则.
+ * 以下 select,where,havin,groupBy,orderBy,on 均可仅用"`"包裹字段, 而不需要".:"前缀.
+ * </p>
+ *
  * <h3>将SQL语句拆解成以下对应部分:</h3>
  * <pre>
  * fields         SELECT    field1, field2...
@@ -90,13 +100,13 @@ public class FetchCase
   public    static final byte   CROSS = 5;
 
   private static final Pattern p0 = Pattern
-          .compile("(^|[^:\\.])(`.+?`)");
+          .compile("(?<=^\\s*|[,%/\\*\\+\\-\\=\\>\\<\\(]\\*|(OR|AND|TOP|DISTINCT)\\s+)(?:\\*|`.+?`)(?!\\.(?:\\*|\\w+|`.+?`))");
   private static final Pattern p1 = Pattern
-          .compile("(^|[^`\\w])\\.((\\*)|(\\w+)|(`.+?`))");
+          .compile("(?<![`\\w])\\.(?:(\\*)|(\\w+)|(`.+?`))");
   private static final Pattern p2 = Pattern
-          .compile("(^|[^`\\w])\\:((\\*)|(\\w+)|(`.+?`))");
+          .compile("(?<![`\\w])\\:(?:(\\*)|(\\w+)|(`.+?`))");
   private static final Pattern pf = Pattern
-          .compile("^\\s*,\\s*", Pattern.CASE_INSENSITIVE);
+          .compile("^\\s*,\\s*"/*...*/, Pattern.CASE_INSENSITIVE);
   private static final Pattern pw = Pattern
           .compile("^\\s*(AND|OR)\\s+", Pattern.CASE_INSENSITIVE);
 
@@ -503,45 +513,54 @@ public class FetchCase
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
+      // 给字段加上表名前缀
+      if (! this.joinList.isEmpty() || this.joinType != 0) {
+
+      x = "`"+tn+"`.$0";
       m = p0.matcher(c);
       b = new StringBuffer();
-      while (m.find()) {
-          x = m.group(2);
-          m.appendReplacement(b, "$1`"+tn+"`."+x);
+      while ( m.find( )) {
+          m.appendReplacement(b, x);
       }
       c = m.appendTail(b);
 
-      m = p1.matcher(c);
-      b = new StringBuffer();
-      while (m.find()) {
-          x = m.group(3);
-          if (x == null) {
-              x = m.group(4);
-              if (x == null) {
-                  x = m.group(5);
-              } else {
-                  x = "`"+x+"`" ;
-              }
-          }
-          m.appendReplacement(b, "$1`"+tn+"`."+x);
-      }
-      c = m.appendTail(b);
+      } // End if p0
 
-      if (pn == null) return c.toString();
+      // 给上级字段加上表名
+      if (pn != null) {
 
       m = p2.matcher(c);
       b = new StringBuffer();
-      while (m.find()) {
-          x = m.group(3);
+      while ( m.find( )) {
+          x = m.group(1);
           if (x == null) {
-              x = m.group(4);
+              x = m.group(2);
               if (x == null) {
-                  x = m.group(5);
+                  x = m.group(3);
               } else {
                   x = "`"+x+"`" ;
               }
           }
-          m.appendReplacement(b, "$1`"+pn+"`."+x);
+          m.appendReplacement(b, "`"+pn+"`."+x);
+      }
+      c = m.appendTail(b);
+
+      } // End if p1
+
+      // 给当前字段加上表名
+      m = p1.matcher(c);
+      b = new StringBuffer();
+      while ( m.find( )) {
+          x = m.group(1);
+          if (x == null) {
+              x = m.group(2);
+              if (x == null) {
+                  x = m.group(3);
+              } else {
+                  x = "`"+x+"`" ;
+              }
+          }
+          m.appendReplacement(b, "`"+tn+"`."+x);
       }
       c = m.appendTail(b);
 
@@ -560,17 +579,18 @@ public class FetchCase
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
+      // 去掉字段的表名前缀
       m = p1.matcher(c);
       b = new StringBuffer();
       while (m.find()) {
-          x = m.group(3);
+          x = m.group(1);
           if (x == null) {
-              x = m.group(4);
+              x = m.group(2);
               if (x == null) {
-                  x = m.group(5);
+                  x = m.group(3);
               }
           }
-          m.appendReplacement(b, "$1`"+x+"`");
+          m.appendReplacement(b, "`"+x+"`");
       }
       c = m.appendTail(b);
 

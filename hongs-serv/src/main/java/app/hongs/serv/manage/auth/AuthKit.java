@@ -7,7 +7,6 @@ import app.hongs.action.ActionHelper;
 import app.hongs.action.NaviMap;
 import app.hongs.db.DB;
 import app.hongs.db.Table;
-import app.hongs.serv.member.Dept;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;

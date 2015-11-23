@@ -84,8 +84,8 @@ extends Mtree {
         Object userId = req.get("user_id");
         if (null != userId && !"".equals(userId)) {
             caze.join ("a_member_user_dept", "users")
-                .on   (".dept_id = :id")
-                .where(".user_id IN (?)",userId);
+                .on   ("`dept_id` = `dept`.`id`")
+                .where("`user_id` IN (?)",userId);
         }
     }
 
