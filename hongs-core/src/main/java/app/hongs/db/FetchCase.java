@@ -100,7 +100,8 @@ public class FetchCase
   public    static final byte   CROSS = 5;
 
   private static final Pattern p0 = Pattern
-          .compile("(?<=^\\s*|[,%/\\*\\+\\-\\=\\>\\<\\(]\\*|(OR|AND|TOP|DISTINCT)\\s+)(?:\\*|`.+?`)(?!\\.(?:\\*|\\w+|`.+?`))");
+          .compile("(?<=^\\s*|[,%/\\*\\+\\-\\=\\>\\<\\(]\\*|(OR|AND|TOP|DISTINCT)\\s+)(?:\\*|`.+?`)(?!\\.(?:\\*|\\w+|`.+?`))",
+                                        Pattern.CASE_INSENSITIVE);
   private static final Pattern p1 = Pattern
           .compile("(?<![`\\w])\\.(?:(\\*)|(\\w+)|(`.+?`))");
   private static final Pattern p2 = Pattern
