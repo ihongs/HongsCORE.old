@@ -82,7 +82,7 @@ public class FileAction {
         CoreConfig c = CoreConfig.getInstance();
         String t , e , u , p;
         t = c.getProperty("fore.upload.image.types", "image/jpeg,image/png,image/gif,image/bmp");
-        e = c.getProperty("fore.upload.image.extns", "jpg,png,gif,bmp");
+        e = c.getProperty("fore.upload.image.extns", "jpeg,jpg,png,gif,bmp");
         u = c.getProperty("core.upload.image.path" , "upload/image");
         p = c.getProperty("core.upload.image.href" , "upload/image");
 

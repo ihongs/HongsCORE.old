@@ -26,7 +26,7 @@ public class RoleSet extends CoreSerial implements Set<String> {
     public Set<String>  roles;
     public int          rtime;
 
-    public RoleSet(String userId) throws HongsException {
+    private RoleSet(String userId) throws HongsException {
         this.userId = userId;
 
         String  n;
@@ -57,16 +57,22 @@ public class RoleSet extends CoreSerial implements Set<String> {
         FetchCase fc;
         Map       rs;
         int       rt;
+        int       st;
 
         db = DB.getInstance("member");
 
         tb = db.getTable("user");
         fc = new FetchCase( )
-                .select (".rtime")
+                .select (".rtime, .state")
                 .where  (".id = ?",userId)
                 .from   (tb.tableName, tb.name);
         rs = db.fetchLess(fc);
         rt = Synt.declare(rs.get( "rtime" ), 0);
+        st = Synt.declare(rs.get( "state" ), 0);
+        if (st <=   0 ) {
+            rtime = 0 ; // 删除或锁定
+            return;
+        }
         if (rt > rtime) {
             load(f, 1); // 从库表加载
             return;
@@ -75,7 +81,7 @@ public class RoleSet extends CoreSerial implements Set<String> {
         tb = db.getTable("dept");
         td = db.getTable("user_dept");
         fc = new FetchCase( )
-                .select (".rtime")
+                .select (".rtime, .state")
                 .orderBy(".rtime DESC")
                 .from   (tb.tableName, tb.name);
               fc.join   (td.tableName, td.name)
@@ -84,6 +90,11 @@ public class RoleSet extends CoreSerial implements Set<String> {
                 .where  (".user_id = ?",userId);
         rs = db.fetchLess(fc);
         rt = Synt.declare(rs.get( "rtime" ), 0);
+        st = Synt.declare(rs.get( "state" ), 0);
+        if (st <=   0 ) {
+            rtime = 0 ; // 删除或锁定
+            return;
+        }
         if (rt > rtime) {
             load(f, 1); // 从库表加载
             return;
@@ -139,13 +150,16 @@ public class RoleSet extends CoreSerial implements Set<String> {
 
     public static RoleSet getInstance(String userId)
     throws HongsException {
-        String  k = RoleSet.class.getName()+":"+userId;
+        String  k = RoleSet.class.getName() +":"+ userId ;
         Core    c = Core.getInstance( );
         if (c.containsKey(k)) {
             return (RoleSet) c.get( k );
         }
         RoleSet s = new RoleSet(userId);
-        c.put(k,s); // 缓存
+        if (s.rtime ==   0  ) {
+            s = null;   // 状态不对
+        }
+        c.put(k,s);     // 缓存对象
         return  s ;
     }
 

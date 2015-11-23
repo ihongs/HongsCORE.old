@@ -1,11 +1,13 @@
 package app.hongs.serv.manage.auth;
 
+import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.NaviMap;
 import app.hongs.db.DB;
 import app.hongs.db.Table;
+import app.hongs.serv.member.Dept;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -83,8 +85,9 @@ public class AuthKit {
 
                 Map<String, Map> menus3 = (Map<String, Map>) menu2.get("menus");
                 for(Map.Entry et3 : menus3.entrySet()) {
-                    Map menu3 = (Map) et3.getValue();
-                    if (!menu3.containsKey("roles")) {
+                    Map menu3 = (Map) et3.getValue( );
+                    if (! menu3.containsKey("roles" )
+                    ||  "".equals(menu3.get("disp") )) {
                         continue;
                     }
 
@@ -141,6 +144,52 @@ public class AuthKit {
                 it.remove();
             }
         }
+    }
+
+    /**
+     * 检查并清理不合规的部门设置数据
+     * 操作人员无法增减自己不在的部门
+     * @param list 权限设置数据
+     * @param uid 用户ID
+     * @throws HongsException
+     */
+    public static void clnDepts(List<Map> list, String uid) throws HongsException {
+        if ("1".equals(Core.getInstance(ActionHelper.class).getSessibute("uid"))) {
+            return; // 超级管理员可以更改任何人的部门, 即使自己没有
+        }
+
+            Set uds = getDepts(null );
+        if (uid != null) {
+            Set xds = getDepts( uid );
+            uds.addAll(xds);
+        }
+
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            Map    rm = (Map   ) it.next( );
+            String rn = (String) rm.get ("dept_id");
+            if (! uds.contains ( rn)) {
+                it.remove();
+            }
+        }
+    }
+
+    public static Set getDepts(String uid) throws HongsException {
+        if (uid == null) {
+            uid = (String) Core.getInstance ( ActionHelper.class )
+                               .getSessibute( Cnst.UID_SES /***/ );
+        }
+
+        Table rel = DB.getInstance("member").getTable("user_dept");
+        List<Map> lst = rel.fetchCase()
+            .where  ("user_id = ?",uid)
+            .select ("dept_id")
+            .all    ();
+        Set set = new HashSet();
+        for(Map row : lst) {
+            set.add(row.get("dept_id"));
+        }
+        return set;
     }
 
     /**

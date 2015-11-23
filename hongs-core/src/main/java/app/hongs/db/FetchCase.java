@@ -77,7 +77,7 @@ public class FetchCase
 
   protected List<Object>        wparams;
   protected List<Object>        hparams;
-  protected Map<String,Object>  options;
+  protected Map<String, Object> options;
 
   private   byte                joinType;
   private   String              joinExpr;
@@ -89,6 +89,8 @@ public class FetchCase
   public    static final byte   INNER = 4;
   public    static final byte   CROSS = 5;
 
+  private static final Pattern p0 = Pattern
+          .compile("(^|[^:\\.])(`.+?`)");
   private static final Pattern p1 = Pattern
           .compile("(^|[^`\\w])\\.((\\*)|(\\w+)|(`.+?`))");
   private static final Pattern p2 = Pattern
@@ -176,7 +178,7 @@ public class FetchCase
 
   /**
    * 追加查询字段
-   * 必须包含当前表字段, 必须在当前表字段前加".";
+   * 必须包含当前表字段, 必须在当前表字段前加"."
    * @param fields
    * @return 当前查询结构对象
    */
@@ -202,7 +204,7 @@ public class FetchCase
 
   /**
    * 追加分组字段
-   * 必须包含当前表字段, 必须在当前表字段前加".";
+   * 必须包含当前表字段, 必须在当前表字段前加"."
    * @param fields
    * @return 当前查询结构对象
    */
@@ -228,7 +230,7 @@ public class FetchCase
 
   /**
    * 追加排序字段
-   * 必须包含当前表字段, 必须在当前表字段前加".";
+   * 必须包含当前表字段, 必须在当前表字段前加"."
    * @param fields
    * @return 当前查询结构对象
    */
@@ -371,7 +373,7 @@ public class FetchCase
          .append(pf.matcher(o).replaceFirst(""));
     }
 
-    // 限额(不同数据库的限额方式不一样, 在 DB.limit 中实现)
+    // 限额, 不同库不同方式, 就不在此处理了
 //    if (this.limits.length > 0)
 //    {
 //      sql.append(" LIMIT ?, ?");
@@ -497,13 +499,21 @@ public class FetchCase
   private String repSQLTbls(String s, String tn, String pn)
   {
       Matcher      m;
+      String       x;
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
+
+      m = p0.matcher(c);
+      b = new StringBuffer();
+      while (m.find()) {
+          x = m.group(2);
+          m.appendReplacement(b, "$1`"+tn+"`."+x);
+      }
+      c = m.appendTail(b);
 
       m = p1.matcher(c);
       b = new StringBuffer();
       while (m.find()) {
-          String x;
           x = m.group(3);
           if (x == null) {
               x = m.group(4);
@@ -522,7 +532,6 @@ public class FetchCase
       m = p2.matcher(c);
       b = new StringBuffer();
       while (m.find()) {
-          String x;
           x = m.group(3);
           if (x == null) {
               x = m.group(4);
@@ -547,13 +556,13 @@ public class FetchCase
   private String clrSQLTbls(String s)
   {
       Matcher      m;
+      String       x;
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
       m = p1.matcher(c);
       b = new StringBuffer();
       while (m.find()) {
-          String x;
           x = m.group(3);
           if (x == null) {
               x = m.group(4);

@@ -29,7 +29,8 @@
 //          String icon = (String) menu.get("icon");
             String acti = "";
 
-            if (href.startsWith( "!" )) {
+            if (disp.equals/**/(  ""  )
+            ||  href.startsWith( "!" )) {
                 continue;
             }
             if (href.equals(path +"/")) {
@@ -80,7 +81,7 @@
     String  head = (String ) helper.getSessibute("uhead");
     Integer msgc = (Integer) helper.getSessibute( "msgc");
     String  msgs = msgc == null ? null : (msgc > 9 ? "9+" : Integer.toString(msgc));
-    
+
     if (head != null && !"".equals(head)) {
         head = head.replaceFirst("\\.[^\\.]+$","_sm.jpg");
     } else {

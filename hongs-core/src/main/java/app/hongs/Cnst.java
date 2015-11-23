@@ -80,6 +80,8 @@ public class Cnst {
 
     public static final String  ADM_UID =  "1";
 
+    public static final String  ADM_GID =  "0";
+
 //  public static final String CSID_KEY =  "_";
 
 //  public static final String PSID_KEY =  "_";

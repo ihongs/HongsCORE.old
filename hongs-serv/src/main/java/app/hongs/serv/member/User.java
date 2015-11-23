@@ -1,6 +1,9 @@
 package app.hongs.serv.member;
 
+import app.hongs.Cnst;
+import app.hongs.Core;
 import app.hongs.HongsException;
+import app.hongs.action.ActionHelper;
 import app.hongs.db.DB;
 import app.hongs.db.FetchCase;
 import app.hongs.db.Model;
@@ -38,8 +41,22 @@ extends Model {
 
         // 权限限制, 仅能赋予当前登录用户所有的权限
         if (data.containsKey( "roles"  )) {
-            data.put("rtime", System.currentTimeMillis() / 1000);
-            AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class), null );
+            data.put( "rtime", System.currentTimeMillis( ) / 1000 );
+            List list = Synt.declare(data.get("roles"), List.class);
+            AuthKit.clnRoles(list, null);
+            if ( list.isEmpty() ) {
+                throw new HongsException.Notice("分组设置错误, 请重试");
+            }
+        }
+
+        // 部门限制, 仅能指定当前登录用户下属的部门
+        if (data.containsKey( "depts"  )) {
+            data.put( "rtime", System.currentTimeMillis( ) / 1000 );
+            List list = Synt.declare(data.get("depts"), List.class);
+            AuthKit.clnDepts(list, null);
+            if ( list.isEmpty() ) {
+                throw new HongsException.Notice("部门设置错误, 请重试");
+            }
         }
 
         return super.add(data);
@@ -54,8 +71,22 @@ extends Model {
 
         // 权限限制, 仅能赋予当前登录用户所有的权限
         if (data.containsKey( "roles"  )) {
-            data.put("rtime", System.currentTimeMillis() / 1000);
-            AuthKit.clnRoles( Synt.declare(data.get("roles"), List.class),  id  );
+            data.put( "rtime", System.currentTimeMillis( ) / 1000 );
+            List list = Synt.declare(data.get("roles"), List.class);
+            AuthKit.clnRoles(list,  id );
+            if ( list.isEmpty() ) {
+                throw new HongsException.Notice("分组设置错误, 请重试");
+            }
+        }
+
+        // 部门限制, 仅能指定当前登录用户下属的部门
+        if (data.containsKey( "depts"  )) {
+            data.put( "rtime", System.currentTimeMillis( ) / 1000 );
+            List list = Synt.declare(data.get("depts"), List.class);
+            AuthKit.clnDepts(list,  id );
+            if ( list.isEmpty() ) {
+                throw new HongsException.Notice("部门设置错误, 请重试");
+            }
         }
 
         return super.put(id, data, caze);
@@ -116,6 +147,39 @@ extends Model {
                 .on   (".user_id = :id")
                 .where(".dept_id IN (?)",deptId);
         }
+    }
+
+    @Override
+    protected boolean permit(FetchCase caze, String id)
+    throws HongsException {
+        if (!super.permit(caze, id)) {
+            return false;
+        }
+
+        // 超级管理员可操作任何用户
+        ActionHelper helper = Core.getInstance(ActionHelper.class);
+        String uid = (String) helper.getSessibute ( Cnst.UID_SES );
+        if (Cnst.ADM_UID.equals( uid )) {
+            return true;
+        }
+
+        // 超级管理组可操作任何用户
+        Set set = AuthKit.getDepts(uid);
+        if (set.contains(Cnst.ADM_GID)) {
+            return true;
+        }
+
+        // 仅能操作下级部门的用户
+        Set cur = AuthKit.getDepts( id);
+        Set cld ; Dept dpt = new Dept();
+        for(Object gid : set) {
+            cld = new HashSet(dpt.getChildIds((String) gid, true));
+            if (cld.retainAll(cur)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
