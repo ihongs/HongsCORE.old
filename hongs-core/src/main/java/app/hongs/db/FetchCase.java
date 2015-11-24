@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +27,11 @@ import java.util.regex.Pattern;
  *
  * <p>
  * [2015/11/24 00:28]
- * 已解决加表名前缀的问题,
- * 只需给字段名按照正常的SQL规范包裹上"`",
- * 便可以识别为当前表字段;
+ * 已解决加表名前缀的问题;
  * 上级表请使用上级表别名;
  * 且兼容上面旧的前缀规则.
- * 以下 select,where,havin,groupBy,orderBy,on 均可仅用"`"包裹字段, 而不需要".:"前缀.
+ * 以下 select,where,havin,groupBy,orderBy,on 均可.
+ * 注意: 代码中将 pl 中的 \\w 换成 \\d 可处理非 "`" 包裹的列
  * </p>
  *
  * <h3>将SQL语句拆解成以下对应部分:</h3>
@@ -99,17 +97,23 @@ public class FetchCase
   public    static final byte   INNER = 4;
   public    static final byte   CROSS = 5;
 
-  private static final Pattern p0 = Pattern
-          .compile("(?<=^\\s*|[,%/\\*\\+\\-\\=\\>\\<\\(]\\*|\\s?(?:OR|AND|TOP|DISTINCT)\\s+)(?:\\*|`.+?`)(?!\\.(?:\\*|\\w+|`.+?`))",
-                                        Pattern.CASE_INSENSITIVE);
   private static final Pattern p1 = Pattern
           .compile("(?<![`\\w])\\.(?:(\\*)|(\\w+)|(`.+?`))");
   private static final Pattern p2 = Pattern
-          .compile("(?<![`\\w])\\:(?:(\\*)|(\\w+)|(`.+?`))");
+          .compile("(?<![`\\w])[\\.:!](?:(\\*)|(\\w+)|(`.+?`))");
   private static final Pattern pf = Pattern
-          .compile("^\\s*,\\s*"/*...*/, Pattern.CASE_INSENSITIVE);
+          .compile("^\\s*,\\s*"/*...*/,Pattern.CASE_INSENSITIVE);
   private static final Pattern pw = Pattern
-          .compile("^\\s*(AND|OR)\\s+", Pattern.CASE_INSENSITIVE);
+          .compile("^\\s*(AND|OR)\\s+",Pattern.CASE_INSENSITIVE);
+
+  private static final Pattern p0 = Pattern
+          .compile("(\\*|\\w+|`.+?`|'.+?')\\s*");
+  private static final Pattern pl = Pattern // 后面不跟字段可跟别名
+          .compile("AS|NULL|TRUE|FALSE|\\d+"
+                     , Pattern.CASE_INSENSITIVE);
+  private static final Pattern pk = Pattern // 后面可跟字段的关键词
+          .compile("IN|IS|ON|OR|AND|NOT|TOP|WHEN|THEN|ELSE|LIKE|DISTINCT"
+                     , Pattern.CASE_INSENSITIVE);
 
   //** 构造 **/
 
@@ -456,6 +460,14 @@ public class FetchCase
       f.append(" ").append( s );
     }
 
+    // 条件
+    if (this.wheres.length() != 0)
+    {
+      String s = this.wheres.toString().trim();
+      s = repSQLTbls(s, tn, pn);
+      w.append(" ").append( s );
+    }
+
     // 分组
     if (this.groups.length() != 0)
     {
@@ -464,20 +476,13 @@ public class FetchCase
       g.append(" ").append( s );
     }
 
-    // 排序
-    if (this.orders.length() != 0)
+    // 下级
+    for  ( FetchCase caze : this.joinList)
     {
-      String s = this.orders.toString().trim();
-      s = repSQLTbls(s, tn, pn);
-      o.append(" ").append( s );
-    }
-
-    // 条件
-    if (this.wheres.length() != 0)
-    {
-      String s = this.wheres.toString().trim();
-      s = repSQLTbls(s, tn, pn);
-      w.append(" ").append( s );
+      if ( caze.joinType != 0 )
+      {
+        caze.getSQLDeep(t,f, g,o, w,h, tn);
+      }
     }
 
     // 过滤
@@ -488,15 +493,12 @@ public class FetchCase
       h.append(" ").append( s );
     }
 
-    // 追加子级查询片段
-    Iterator it = this.joinList.iterator( );
-    while (it.hasNext())
+    // 排序
+    if (this.orders.length() != 0)
     {
-      FetchCase caze = (FetchCase)it.next();
-      if (0  != caze.joinType)
-      {
-        caze.getSQLDeep(t, f, g,o, w,h, tn);
-      }
+      String s = this.orders.toString().trim();
+      s = repSQLTbls(s, tn, pn);
+      o.append(" ").append( s );
     }
   }
 
@@ -514,21 +516,60 @@ public class FetchCase
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
-      // 给字段加上表名前缀
       if (! this.joinList.isEmpty() || this.joinType != 0) {
 
-      x = "`"+tn+"`.$0";
       m = p0.matcher(c);
       b = new StringBuffer();
+      String z = "`"+tn+"`.$0";
+      int  i, j, k = -1, l = c.length();
       while ( m.find( )) {
-          m.appendReplacement(b, x);
+          // 以 .|(   结尾的要跳过
+          i = m.end ( );
+          if ( i <  l ) {
+              char r = c.charAt( i/**/ );
+              if ( r == '.' || r == '(') {
+                   k = i;
+                  continue;
+              }
+          }
+          // 以 .|:|! 开头的要跳过
+          j = m.start();
+          if ( j >  0 ) {
+              char r = c.charAt( j - 1 );
+              if ( r == '.' || r == ':' || r == '!' ) {
+                   k = i;
+                  continue;
+              }
+          }
+          /**
+           * 保留字和字符串跳过, 但不设置偏移 k
+           * 跳过 AS 以及数字等
+           * 紧挨前一字段要跳过, 但要注意乘号 *
+           * 对字段则添加表前缀
+           */
+          x = m.group(1);
+          if (x.startsWith("'")) {
+              // Pass
+          } else
+          if (pk.matcher(x).matches()) {
+              // Pass
+          } else
+          if (pl.matcher(x).matches()) {
+              k  = i;
+          } else
+          if (k == j) {
+              if (x.startsWith( "*" )) {
+                  continue;
+              }
+              k  = i;
+          } else {
+              k  = i;
+              m.appendReplacement(b,z);
+          }
       }
       c = m.appendTail(b);
 
       } // End if p0
-
-      // 给上级字段加上表名
-      if (pn != null) {
 
       m = p2.matcher(c);
       b = new StringBuffer();
@@ -542,26 +583,17 @@ public class FetchCase
                   x = "`"+x+"`" ;
               }
           }
-          m.appendReplacement(b, "`"+pn+"`."+x);
-      }
-      c = m.appendTail(b);
-
-      } // End if p1
-
-      // 给当前字段加上表名
-      m = p1.matcher(c);
-      b = new StringBuffer();
-      while ( m.find( )) {
-          x = m.group(1);
-          if (x == null) {
-              x = m.group(2);
-              if (x == null) {
-                  x = m.group(3);
-              } else {
-                  x = "`"+x+"`" ;
-              }
+          switch (c.charAt(m.start())) {
+              case '.' :
+                  m.appendReplacement(b, "`"+tn+"`."+x);
+                  break;
+              case ':' :
+                  m.appendReplacement(b, "`"+pn+"`."+x);
+                  break;
+              case '!' :
+                  m.appendReplacement(b, /* Alias */ x);
+                  break;
           }
-          m.appendReplacement(b, "`"+tn+"`."+x);
       }
       c = m.appendTail(b);
 
@@ -580,7 +612,6 @@ public class FetchCase
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
-      // 去掉字段的表名前缀
       m = p1.matcher(c);
       b = new StringBuffer();
       while (m.find()) {
@@ -589,9 +620,11 @@ public class FetchCase
               x = m.group(2);
               if (x == null) {
                   x = m.group(3);
+              } else {
+                  x = "`"+x+"`" ;
               }
           }
-          m.appendReplacement(b, "`"+x+"`");
+          m.appendReplacement(b, x);
       }
       c = m.appendTail(b);
 

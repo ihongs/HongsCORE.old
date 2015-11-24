@@ -33,6 +33,6 @@ public class TestCore {
     // TODO add test methods here.
     // The methods must be annotated with annotation @TestCore. For example:
     //
-    // @TestCore
+    // @Test
     // public void hello() {}
 }
