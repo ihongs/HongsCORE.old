@@ -541,28 +541,25 @@ public class FetchCase
                   continue;
               }
           }
-          /**
-           * 保留字和字符串跳过, 但不设置偏移 k
-           * 跳过 AS 以及数字等
-           * 紧挨前一字段要跳过, 但要注意乘号 *
-           * 对字段则添加表前缀
-           */
           x = m.group(1);
           if (x.startsWith("'")) {
-              // Pass
+              // 跳过字符串不偏移
+          } else
+          if (x.startsWith("*")&&k==j) {
+              // 跳过乘法运算符号
           } else
           if (pk.matcher(x).matches()) {
-              // Pass
+              // 跳过保留字不偏移
           } else
           if (pl.matcher(x).matches()) {
+              // 跳过别名和数字等
               k  = i;
           } else
           if (k == j) {
-              if (x.startsWith( "*" )) {
-                  continue;
-              }
+              // 紧挨前字段要跳过
               k  = i;
           } else {
+              // 为字段添加表前缀
               k  = i;
               m.appendReplacement(b,z);
           }
