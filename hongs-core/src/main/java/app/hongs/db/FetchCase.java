@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  * 已解决加表名前缀的问题;
  * 上级表请使用上级表别名;
  * 且兼容上面旧的前缀规则.
- * 以下 select,where,havin,groupBy,orderBy,on 均可.
+ * 以下 select,where,groupBy,havin,orderBy,on 均可.
  * 代码中将 pl 中的 \\d 换成 \\w 不处理非 "`" 包裹的列
  * </p>
  *
