@@ -101,7 +101,7 @@ public class Synt {
             } else if (val instanceof Set ) {
                 val = ((Set) val).toArray();
             } else if (val instanceof Map ) {
-                val = ((Map) val).values ();
+                val = ((Map) val).values( ).toArray();
             } else {
                 val = new Object[ ] { val };
             }
@@ -111,9 +111,9 @@ public class Synt {
             } else if (val instanceof Set ) {
                 val = new ArrayList(( Set ) val);
             } else if (val instanceof Map ) {
-                val = ((Map) val).values ();
+                val = new ArrayList(((Map ) val).values());
             } else if (val instanceof Object[] ) {
-                val = Arrays.asList(( Object[] ) val);
+                val = Arrays.asList(( Object[] ) val /**/);
             } else {
                 List lst = new ArrayList ();
                 lst.add(val);
