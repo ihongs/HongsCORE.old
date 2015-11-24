@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * 上级表请使用上级表别名;
  * 且兼容上面旧的前缀规则.
  * 以下 select,where,havin,groupBy,orderBy,on 均可.
- * 注意: 代码中将 pl 中的 \\d 换成 \\w 不处理非 "`" 包裹的列
+ * 代码中将 pl 中的 \\d 换成 \\w 不处理非 "`" 包裹的列
  * </p>
  *
  * <h3>将SQL语句拆解成以下对应部分:</h3>
