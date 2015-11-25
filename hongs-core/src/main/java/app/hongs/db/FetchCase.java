@@ -547,7 +547,7 @@ public class FetchCase
               // 跳过字符串不偏移
           } else
           if (x.startsWith("*")&&k==j) {
-              // 跳过乘法运算符号
+              // 跳过乘号且不偏移
           } else
           if (pk.matcher(x).matches()) {
               // 跳过保留字不偏移
