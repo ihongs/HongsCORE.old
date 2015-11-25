@@ -1,6 +1,7 @@
 
 # 更新日志
 
+* 2015/11/24 FetchCase 中组织 SQL 语句不再需要加 "." 前缀即可在关联查询中自动为字段添加当前表别名
 * 2015/10/30 取消了 object.config 来初始化组件的方式, 改为 data-* 的配置方式
 * 2015/10/13 建立 PackAction 用于一次请求多个 Action; 修复 SQL Like 生成语句问题; 将 FetchNext 更名为 DB.Roll, DBAssist 改回 Mview
 * 2015/09/23 修复关联查询子表数据未获取的问题
