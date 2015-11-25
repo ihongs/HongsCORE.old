@@ -516,13 +516,14 @@ public class FetchCase
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
-      if (! this.joinList.isEmpty() || this.joinType != 0) {
+      if (!this.joinList.isEmpty() || this.joinType != 0) {
 
       m = p0.matcher(c);
       b = new StringBuffer();
       String y = "`" +tn+ "`.$0";
       int i , j, k = -1, l = c.length( );
-      while ( m.find( )) {System.out.println(m.group());
+      while ( m.find( )) {
+//        System.out.println(m.group() );
           // 以 .|(|{ 结尾的要跳过
           i = m.end ( );
           if ( i <  l ) {
