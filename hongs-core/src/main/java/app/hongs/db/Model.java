@@ -1433,10 +1433,10 @@ implements IRecord
   throws HongsException
   {
     StringBuilder ws = new StringBuilder();
-    FetchCase     cx = new FetchCase();
+    FetchCase cx = new FetchCase();
+    cx.joinList  = caze.joinList;
     cx.wparams   = caze.wparams ;
     cx.options   = caze.options ;
-    cx.joinList  = caze.joinList;
     Set<Map> set = Synt.declare(val, Set.class);
     for(Map  map : set)
     {

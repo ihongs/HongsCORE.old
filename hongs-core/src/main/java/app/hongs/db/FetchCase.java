@@ -1,5 +1,6 @@
 package app.hongs.db;
 
+import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.db.DB.Roll;
 import app.hongs.util.Dict;
@@ -30,8 +31,9 @@ import java.util.regex.Pattern;
  * 已解决加表名前缀的问题;
  * 上级表请使用上级表别名;
  * 且兼容上面旧的前缀规则.
- * 以下 select,where,groupBy,havin,orderBy,on 均可.
- * 代码中将 pl 中的 \\d 换成 \\w 不处理非 "`" 包裹的列
+ * 增加了表示别名的前缀"!", 单纯统计行数须写 COUNT(!*).
+ * 以下 select,where,groupBy,havin,orderBy,on 均可如此.
+ * 本类处理一般的查询尚可, 过于复杂的 SQL 语句不用为好.
  * </p>
  *
  * <h3>将SQL语句拆解成以下对应部分:</h3>
@@ -87,8 +89,8 @@ public class FetchCase
   protected List<Object>        hparams;
   protected Map<String, Object> options;
 
-  private   byte                joinType;
-  private   String              joinExpr;
+  protected byte                joinType;
+  protected String              joinExpr;
   protected Set<FetchCase>      joinList;
 
   public    static final byte    LEFT = 1;
@@ -97,22 +99,23 @@ public class FetchCase
   public    static final byte   INNER = 4;
   public    static final byte   CROSS = 5;
 
-  private static final Pattern p1 = Pattern
-          .compile("(?<![`\\w])\\.(?:(\\*)|(\\w+)|(`.+?`))");
-  private static final Pattern p2 = Pattern
-          .compile("(?<![`\\w])[\\.:!](?:(\\*)|(\\w+)|(`.+?`))");
-  private static final Pattern pf = Pattern
-          .compile("^\\s*,\\s*"/*...*/,Pattern.CASE_INSENSITIVE);
+  private static final Pattern pc = Pattern
+          .compile("(?<![`\\w])[\\.:!](`.+?`|\\w+|\\*)");
+  private static final Pattern ps = Pattern
+          .compile("^\\s*,\\s*"/*...*/, Pattern.CASE_INSENSITIVE);
   private static final Pattern pw = Pattern
-          .compile("^\\s*(AND|OR)\\s+",Pattern.CASE_INSENSITIVE);
+          .compile("^\\s*(AND|OR)\\s+", Pattern.CASE_INSENSITIVE);
 
   private static final Pattern p0 = Pattern
-          .compile("(\\*|\\w+|`.+?`|'.+?')\\s*");
-  private static final Pattern pl = Pattern // 后面不跟字段可跟别名
-          .compile("AS|NULL|TRUE|FALSE|\\d+"
+          .compile("('.+?'|`.+?`|\\w+|\\*|\\))\\s*");
+  // 后面不跟字段可跟别名
+  // 此处 \\d\\w 分别表示 是否 处理没有 "`" 包裹的列
+  private static final Pattern p1 = Pattern
+          .compile("AS|END|NULL|TRUE|FALSE|\\)|\\d.*"
                      , Pattern.CASE_INSENSITIVE);
-  private static final Pattern pk = Pattern // 后面可跟字段的关键词
-          .compile("IN|IS|ON|OR|AND|NOT|TOP|WHEN|THEN|ELSE|LIKE|DISTINCT"
+  // 后面可跟字段的关键词
+  private static final Pattern p2 = Pattern
+          .compile("IN|IS|ON|OR|AND|NOT|TOP|CASE|WHEN|THEN|ELSE|LIKE|ESCAPE|BETWEEN|DISTINCT"
                      , Pattern.CASE_INSENSITIVE);
 
   //** 构造 **/
@@ -132,7 +135,7 @@ public class FetchCase
     this.limits     = new int[0];
     this.wparams    = new ArrayList();
     this.hparams    = new ArrayList();
-    this.options    = new HashMap();
+    this.options    = new  HashMap ();
     this.joinType   = 0 ;
     this.joinExpr   = "";
     this.joinList   = new LinkedHashSet();
@@ -145,22 +148,25 @@ public class FetchCase
   @Override
   public FetchCase clone()
   {
-    FetchCase caze  = new FetchCase();
-    caze.tableName  = this.tableName ;
-    caze.name       = this.name ;
-    caze.fields     = new StringBuilder(this.fields);
-    caze.wheres     = new StringBuilder(this.wheres);
-    caze.groups     = new StringBuilder(this.groups);
-    caze.havins     = new StringBuilder(this.havins);
-    caze.orders     = new StringBuilder(this.orders);
-    caze.limits     = this.limits;
+    try {
+    FetchCase caze  = (FetchCase)  super.clone( );
+    caze.fields     = new StringBuilder( this.fields );
+    caze.wheres     = new StringBuilder( this.wheres );
+    caze.groups     = new StringBuilder( this.groups );
+    caze.havins     = new StringBuilder( this.havins );
+    caze.orders     = new StringBuilder( this.orders );
+    caze.limits     = this.limits.clone( );
     caze.wparams    = new ArrayList(this.wparams);
     caze.hparams    = new ArrayList(this.hparams);
     caze.options    = new  HashMap (this.options);
-    caze.joinType   = this.joinType;
-    caze.joinExpr   = this.joinExpr;
+    caze.joinType   = 0 ;
+    caze.joinExpr   = "";
     caze.joinList   = new LinkedHashSet(this.joinList);
     return caze;
+    }
+    catch (CloneNotSupportedException ex) {
+        throw  new  HongsError.Common(ex);
+    }
   }
 
   //** 查询 **/
@@ -348,7 +354,7 @@ public class FetchCase
     if (f.length() != 0)
     {
       sql.append( " " )
-         .append(pf.matcher(f).replaceFirst(""));
+         .append(ps.matcher(f).replaceFirst(""));
     }
     else
     {
@@ -371,7 +377,7 @@ public class FetchCase
     if (g.length() != 0)
     {
       sql.append(" GROUP BY ")
-         .append(pf.matcher(g).replaceFirst(""));
+         .append(ps.matcher(g).replaceFirst(""));
     }
 
     // 过滤
@@ -385,7 +391,7 @@ public class FetchCase
     if (o.length() != 0)
     {
       sql.append(" ORDER BY ")
-         .append(pf.matcher(o).replaceFirst(""));
+         .append(ps.matcher(o).replaceFirst(""));
     }
 
     // 限额, 不同库不同方式, 就不在此处理了
@@ -414,12 +420,11 @@ public class FetchCase
         throw new Error( new HongsException(0x10b4) );
     }
 
-    // 表名/替换
+    // 表名
     String tn;
     StringBuilder b = new StringBuilder();
     b.append("`").append(this.tableName ).append("`");
-    if (this.name != null
-    &&  this.name.length() != 0
+    if (this.name != null &&  this.name.length() != 0
     && !this.name.equals(this.tableName))
     {
       b.append(" AS `").append(this.name).append("`");
@@ -445,7 +450,7 @@ public class FetchCase
       if (this.joinExpr != null && this.joinExpr.length() != 0)
       {
         String s  =  this.joinExpr;
-        s = repSQLTbls( s, tn, pn);
+        s = addSQLTbls( s, tn, pn);
         b.append(" ON ").append(s);
       }
     }
@@ -456,7 +461,7 @@ public class FetchCase
     if (this.fields.length() != 0)
     {
       String s = this.fields.toString().trim();
-      s = repSQLTbls(s, tn, pn);
+      s = addSQLTbls(s, tn, pn);
       f.append(" ").append( s );
     }
 
@@ -464,7 +469,7 @@ public class FetchCase
     if (this.wheres.length() != 0)
     {
       String s = this.wheres.toString().trim();
-      s = repSQLTbls(s, tn, pn);
+      s = addSQLTbls(s, tn, pn);
       w.append(" ").append( s );
     }
 
@@ -472,7 +477,7 @@ public class FetchCase
     if (this.groups.length() != 0)
     {
       String s = this.groups.toString().trim();
-      s = repSQLTbls(s, tn, pn);
+      s = addSQLTbls(s, tn, pn);
       g.append(" ").append( s );
     }
 
@@ -489,7 +494,7 @@ public class FetchCase
     if (this.havins.length() != 0)
     {
       String s = this.havins.toString().trim();
-      s = repSQLTbls(s, tn, pn);
+      s = addSQLTbls(s, tn, pn);
       h.append(" ").append( s );
     }
 
@@ -497,7 +502,7 @@ public class FetchCase
     if (this.orders.length() != 0)
     {
       String s = this.orders.toString().trim();
-      s = repSQLTbls(s, tn, pn);
+      s = addSQLTbls(s, tn, pn);
       o.append(" ").append( s );
     }
   }
@@ -509,88 +514,79 @@ public class FetchCase
    * @param pn
    * @return
    */
-  private String repSQLTbls(String s, String tn, String pn)
+  private String addSQLTbls(String s, String tn, String pn)
   {
+      // 没有关联表则直接去掉前缀
+      if (this.joinList.isEmpty()
+      &&  this.joinType  ==  0  ) {
+          return delSQLTbls( s  );
+      }
+
       Matcher      m;
-      String       x;
+      String       x, y, z;
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
-      if (!this.joinList.isEmpty() || this.joinType != 0) {
-
+      z = "`"+tn+"`.$0";
       m = p0.matcher(c);
       b = new StringBuffer();
-      String y = "`" +tn+ "`.$0";
-      int i , j, k = -1, l = c.length( );
+      int i , j, k = -1, l = c.length();
       while ( m.find( )) {
-//        System.out.println(m.group() );
+//        System.out.println(m.group());
           // 以 .|(|{ 结尾的要跳过
-          i = m.end ( );
-          if ( i <  l ) {
-              char r = c.charAt( i/**/ );
+          j = m.end ( );
+          if ( j <  l ) {
+              char r = c.charAt(j/**/);
               if ( r == '.' || r == '(' || r == '{' ) {
-                   k = i;
+                   k = j;
                   continue;
               }
           }
           // 以 .|:|! 开头的要跳过
-          j = m.start();
-          if ( j >  0 ) {
-              char r = c.charAt( j - 1 );
+          i = m.start();
+          if ( i >  0 ) {
+              char r = c.charAt(i - 1);
               if ( r == '.' || r == ':' || r == '!' ) {
-                   k = i;
+                   k = j;
                   continue;
               }
           }
           x = m.group(1);
-          if (x.startsWith("'")) {
-              // 跳过字符串不偏移
+          if (x.startsWith("'")/*ST*/) {
+              // 字符串后不跟字段
+              k  = j;
           } else
-          if (x.startsWith("*")&&k==j) {
+          if (x.startsWith("*")&&k==i) {
               // 跳过乘号且不偏移
           } else
-          if (pk.matcher(x).matches()) {
+          if (p2.matcher(x).matches()) {
               // 跳过保留字不偏移
           } else
-          if (pl.matcher(x).matches()) {
+          if (p1.matcher(x).matches()) {
               // 跳过别名和数字等
-              k  = i;
+              k  = j;
           } else
-          if (k == j) {
+          if (k == i) {
               // 紧挨前字段要跳过
-              k  = i;
+              k  = j;
           } else {
               // 为字段添加表前缀
-              k  = i;
-              m.appendReplacement(b,y);
+              k  = j;
+              m.appendReplacement(b,z);
           }
       }
       c = m.appendTail(b);
 
-      } // End if p0
-
-      m = p2.matcher(c);
+      x = "$1";
+      y = "`"+pn+"`.$1";
+      z = "`"+tn+"`.$1";
+      m = pc.matcher(c);
       b = new StringBuffer();
       while ( m.find( )) {
-          x = m.group(1);
-          if (x == null) {
-              x = m.group(2);
-              if (x == null) {
-                  x = m.group(3);
-              } else {
-                  x = "`"+x+"`" ;
-              }
-          }
           switch (c.charAt(m.start())) {
-              case '.' :
-                  m.appendReplacement(b, "`"+tn+"`."+x);
-                  break;
-              case ':' :
-                  m.appendReplacement(b, "`"+pn+"`."+x);
-                  break;
-              case '!' :
-                  m.appendReplacement(b, /* Alias */ x);
-                  break;
+              case '.': m.appendReplacement(b, z); break;
+              case ':': m.appendReplacement(b, y); break;
+              case '!': m.appendReplacement(b, x); break;
           }
       }
       c = m.appendTail(b);
@@ -603,25 +599,17 @@ public class FetchCase
    * @param s
    * @return
    */
-  private String clrSQLTbls(String s)
+  private String delSQLTbls(String s)
   {
       Matcher      m;
       String       x;
       StringBuffer b;
       StringBuffer c = new StringBuffer(s);
 
-      m = p1.matcher(c);
+      x = "$1";
+      m = pc.matcher(c);
       b = new StringBuffer();
-      while (m.find()) {
-          x = m.group(1);
-          if (x == null) {
-              x = m.group(2);
-              if (x == null) {
-                  x = m.group(3);
-              } else {
-                  x = "`"+x+"`" ;
-              }
-          }
+      while ( m.find( )) {
           m.appendReplacement(b, x);
       }
       c = m.appendTail(b);
@@ -1048,7 +1036,7 @@ public class FetchCase
     if (_db_ == null) {
       throw new HongsException(0x10b6);
     }
-    return _db_.delete(tableName, /**/ clrSQLTbls(wheres.toString()), wparams.toArray());
+    return _db_.delete(tableName, delSQLTbls(wheres.toString()), wparams.toArray());
   }
 
   /**
@@ -1062,7 +1050,7 @@ public class FetchCase
     if (_db_ == null) {
       throw new HongsException(0x10b6);
     }
-    return _db_.update(tableName, dat, clrSQLTbls(wheres.toString()), wparams.toArray());
+    return _db_.update(tableName, dat, delSQLTbls(wheres.toString()), wparams.toArray());
   }
 
   /**
