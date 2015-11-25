@@ -108,8 +108,7 @@ public class FetchCase
 
   private static final Pattern p0 = Pattern
           .compile("('.+?'|`.+?`|\\w+|\\*|\\))\\s*");
-  // 后面不跟字段可跟别名
-  // 此处 \\d\\w 分别表示 是否 处理没有 "`" 包裹的列
+  // 后面不跟字段可跟别名, \\d 换成 \\w 则不处理没 "`" 包裹的字段
   private static final Pattern p1 = Pattern
           .compile("AS|END|NULL|TRUE|FALSE|\\)|\\d.*"
                      , Pattern.CASE_INSENSITIVE);
