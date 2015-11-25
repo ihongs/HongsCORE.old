@@ -520,14 +520,14 @@ public class FetchCase
 
       m = p0.matcher(c);
       b = new StringBuffer();
-      String z = "`"+tn+"`.$0";
-      int  i, j, k = -1, l = c.length();
-      while ( m.find( )) {
-          // 以 .|(   结尾的要跳过
+      String y = "`" +tn+ "`.$0";
+      int i , j, k = -1, l = c.length( );
+      while ( m.find( )) {System.out.println(m.group());
+          // 以 .|(|{ 结尾的要跳过
           i = m.end ( );
           if ( i <  l ) {
               char r = c.charAt( i/**/ );
-              if ( r == '.' || r == '(') {
+              if ( r == '.' || r == '(' || r == '{' ) {
                    k = i;
                   continue;
               }
@@ -561,7 +561,7 @@ public class FetchCase
           } else {
               // 为字段添加表前缀
               k  = i;
-              m.appendReplacement(b,z);
+              m.appendReplacement(b,y);
           }
       }
       c = m.appendTail(b);
