@@ -7,7 +7,7 @@ public class IsNumber extends Rule {
     @Override
     public Object verify(Object value) throws Wrong {
         // 类型转换
-        String  type = Synt.declare(params.get("type"), "");
+        String type = Synt.declare(params.get("type"), "");
         Number  num;
         try {
             if ( "byte".equals(type)) {
@@ -25,8 +25,8 @@ public class IsNumber extends Rule {
             if ("float".equals(type)) {
                 num = Synt.declare(value, 0.0 );
             } else {
-                type= "double";
                 num = Synt.declare(value, 0.0D);
+               type = "double";
             }
         } catch (HongsError er) {
             throw new Wrong("fore.form.conv.to."+type+".failed");
