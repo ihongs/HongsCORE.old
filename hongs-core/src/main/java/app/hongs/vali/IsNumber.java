@@ -7,7 +7,7 @@ public class IsNumber extends Rule {
     @Override
     public Object verify(Object value) throws Wrong {
         // 类型转换
-        String type = Synt.declare(params.get("type"), "");
+        String  type = Synt.declare(params.get("type"), "");
         Number  num;
         try {
             if ( "byte".equals(type)) {
