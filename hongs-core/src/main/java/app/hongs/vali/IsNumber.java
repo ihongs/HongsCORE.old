@@ -25,8 +25,8 @@ public class IsNumber extends Rule {
             if ("float".equals(type)) {
                 num = Synt.declare(value, 0.0 );
             } else {
-                num = Synt.declare(value, 0.0D);
                type = "double";
+                num = Synt.declare(value, 0.0D);
             }
         } catch (HongsError er) {
             throw new Wrong("fore.form.conv.to."+type+".failed");
