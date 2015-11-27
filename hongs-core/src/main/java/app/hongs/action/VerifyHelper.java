@@ -1,10 +1,18 @@
 package app.hongs.action;
 
-import app.hongs.CoreLocale;
-import app.hongs.HongsError;
 import app.hongs.HongsException;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
+import app.hongs.vali.Default;
+import app.hongs.vali.Norepeat;
+import app.hongs.vali.Optional;
+import app.hongs.vali.Repeated;
+import app.hongs.vali.Required;
+import app.hongs.vali.Rule;
+import app.hongs.vali.Vali;
+import static app.hongs.vali.Rule.SKIP;
+import app.hongs.vali.Wrong;
+import app.hongs.vali.Wrongs;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,8 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * 数据校验助手
@@ -33,9 +39,9 @@ import java.util.regex.Pattern;
  * error.Ex10f6=执行规则方法时发生异常
  * </pre>
  */
-public class VerifyHelper {
+public class VerifyHelper implements Vali {
 
-    private Map<String, List<Rule>> rules;
+    private final Map<String, List<Rule>> rules;
     private boolean update;
     private boolean prompt;
 
@@ -43,6 +49,7 @@ public class VerifyHelper {
         rules = new LinkedHashMap();
     }
 
+    @Override
     public VerifyHelper addRule(String name, Rule... rule) {
         List rulez = rules.get(name);
         if (rulez == null) {
@@ -135,7 +142,7 @@ public class VerifyHelper {
                 rule = "Is"+c.toUpperCase()+ n ;
             }
             if (! rule.contains(".") ) {
-                rule = this.getClass().getName()+"$"+rule;
+                rule = "app.hongs.vali." + rule;
             }
 
             Rule inst;
@@ -165,19 +172,24 @@ public class VerifyHelper {
         return this;
     }
 
+    @Override
     public boolean isUpdate() {
         return update;
     }
+    @Override
     public boolean isPrompt() {
         return prompt;
     }
+    @Override
     public void isUpdate(boolean update) {
         this.update = update;
     }
+    @Override
     public void isPrompt(boolean prompt) {
         this.prompt = prompt;
     }
 
+    @Override
     public Map verify(Map values) throws Wrongs, HongsException {
         Map<String, Object> valuez = new LinkedHashMap();
         Map<String, Wrong > wrongz = new LinkedHashMap();
@@ -246,12 +258,34 @@ public class VerifyHelper {
 
     private Object repeat(List<Rule> rulez, Object data, String name, Map values, Map wrongz, Map params)
     throws HongsException {
-        Collection data2 = new ArrayList();
+        // 是否必须不同的值
+        Collection data2;
+        if (Synt.declare(params.get("distrinct"), false)) {
+            data2 = new LinkedHashSet();
+        } else {
+            data2 = new ArrayList(/**/);
+        }
+
+        // 可设置 disregard 为某个要忽略的值
+        // 页面中 checkbox  如果不选代表清空
+        // 可以加 hidden    值设为要忽略的值
+        // 默认对 null      忽略
+        Object disregard = params.get("disregard" );
 
         // 将后面的规则应用于每一个值
         if (data instanceof Collection) {
             int i3 = 0;
             for(Object data3 : ( Collection ) data) {
+                if (disregard != null) {
+                    if (disregard.equals( data3 ) ) {
+                        continue;
+                    }
+                } else {
+                    if (data3 == null) {
+                        continue;
+                    }
+                }
+
                 String name3 = name + "." + (i3 ++);
                 data3 = verify(rulez, data3, name3, values, wrongz);
                 if (data3 !=  SKIP ) {
@@ -264,6 +298,17 @@ public class VerifyHelper {
             for(Object i3 : ( ( Map ) data).entrySet()) {
                 Map.Entry e3 = (Map.Entry) i3;
                 Object data3 = e3.getValue( );
+
+                if (disregard != null) {
+                    if (disregard.equals( data3 ) ) {
+                        continue;
+                    }
+                } else {
+                    if (data3 == null) {
+                        continue;
+                    }
+                }
+
                 String name3 = name +"."+ ( (String) e3.getKey( ) );
                 data3 = verify(rulez, data3, name3, values, wrongz);
                 if (data3 !=  SKIP ) {
@@ -272,11 +317,6 @@ public class VerifyHelper {
                     return SKIP;
                 }
             }
-        }
-
-        // 值是否需是不同的
-        if (Synt.declare(params.get("distrinct"), false)) {
-            data2 = new LinkedHashSet( data2 );
         }
 
         // 多个值的数量限制
@@ -306,432 +346,6 @@ public class VerifyHelper {
             String n = et.getKey(   );
             Wrong  e = et.getValue( );
             wrongz.put(name+"."+n, e);
-        }
-    }
-
-    //** 顶级校验器 **/
-
-    public static final Object SKIP = new Object();
-
-    public static abstract class Rule {
-        protected Map params = null;
-        protected Map values = null;
-        protected VerifyHelper helper;
-
-        public void setParams(Map params) {
-            this.params = params;
-        }
-        public void setValues(Map values) {
-            this.values = values;
-        }
-        public void setHelper(VerifyHelper helper) {
-            this.helper = helper;
-        }
-
-        public abstract Object verify(Object value) throws Wrong, Wrongs, HongsException;
-    }
-
-    /**
-     * 通过校验
-     */
-    public static class Pass extends Rule {
-        @Override
-        public Object verify(Object value) {
-            return value;
-        }
-    }
-
-    /**
-     * 扔掉此值
-     */
-    public static class Skip extends Rule {
-        @Override
-        public Object verify(Object value) {
-            return SKIP ;
-        }
-    }
-
-    public static class Required extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong {
-            if (value == null) {
-                if (helper.isUpdate()) {
-                    return SKIP;
-                }
-                throw new Wrong("fore.form.required");
-            }
-            if ("".equals(value)) {
-                throw new Wrong("fore.form.required");
-            }
-            if ((value instanceof List) && ((List) value).isEmpty()) {
-                throw new Wrong("fore.form.requreid");
-            }
-            if ((value instanceof Set ) && ((Set ) value).isEmpty()) {
-                throw new Wrong("fore.form.requreid");
-            }
-            if ((value instanceof Map ) && ((Map ) value).isEmpty()) {
-                throw new Wrong("fore.form.requreid");
-            }
-            return value;
-        }
-    }
-
-    public static class Optional extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong {
-            try {
-                Required rule = new Required();
-                rule.setHelper(helper);
-                rule.setParams(params);
-                rule.setValues(values);
-                value = rule.verify(value);
-            }   catch (Wrong w) {
-                return SKIP ;
-            }
-            return value;
-        }
-    }
-
-    public static class Repeated extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong {
-            if (value instanceof Object[ ] ) {
-                return Arrays.asList((Object[]) value);
-            }
-            if (value instanceof Collection) {
-                return value;
-            }
-            if (value instanceof Map) {
-                return value;
-            }
-            throw new Wrong("fore.form.repeated");
-        }
-    }
-
-    public static class Norepeat extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong {
-            try {
-                Repeated rule = new Repeated();
-                rule.setHelper(helper);
-                rule.setParams(params);
-                rule.setValues(values);
-                value = rule.verify(value);
-            }   catch (Wrong w) {
-                return value;
-            }
-            throw new Wrong("fore.form.norepeat");
-        }
-    }
-
-    public static class Default extends Rule {
-        @Override
-        public Object verify(Object value) {
-            if (/**/ value  ==  null  || Synt.declare(params.get("alwayset"), false)) { // 无论有没有都设置
-                if (helper.isUpdate() && Synt.declare(params.get("increate"), false)) { // 仅创建的时候设置
-                    return SKIP;
-                }
-                value = params.get("default");
-                if ( "$now".equals( value ) ) {
-                    value = new java.util.Date();
-                }
-            }
-            return value;
-        }
-    }
-
-    //** 类型校验器 **/
-
-    public static class IsString extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong, HongsException {
-            String str = Synt.declare(value, "");
-
-            // 长度限制
-            int len;
-            len = Synt.declare(params.get("minlength"), 0);
-            if (len > 0 && len > str.length()) {
-                throw new Wrong("fore.form.lt.minlength", Integer.toString(len));
-            }
-            len = Synt.declare(params.get("maxlength"), 0);
-            if (len > 0 && len < str.length()) {
-                throw new Wrong("fore.form.lt.maxlength", Integer.toString(len));
-            }
-
-            // 正则匹配
-            Map<String,String> pats = FormSet.getInstance().getEnum("__patts__");
-            String patt  = Synt.declare(params.get("pattern"), "");
-            String patp  = pats.get(patt);
-            if (   patp != null ) {
-                if (!Pattern.compile(patp).matcher(str).matches()) {
-                    throw new Wrong("fore.form.is.not."+patt);
-                }
-            } else
-            if (!"".equals(patt)) {
-                if (!Pattern.compile(patt).matcher(str).matches()) {
-                    throw new Wrong("fore.form.is.not.match");
-                }
-            }
-
-            return str;
-        }
-    }
-
-    public static class IsNumber extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong {
-            // 类型转换
-            String type = Synt.declare(params.get("type"), "");
-            Number  num;
-            try {
-                if ( "byte".equals(type)) {
-                    num = Synt.declare(value, ( byte) 0);
-                } else
-                if ("short".equals(type)) {
-                    num = Synt.declare(value, (short) 0);
-                } else
-                if (  "int".equals(type)) {
-                    num = Synt.declare(value, 0 );
-                } else
-                if ( "long".equals(type)) {
-                    num = Synt.declare(value, 0L);
-                } else
-                if ("float".equals(type)) {
-                    num = Synt.declare(value, 0.0 );
-                } else {
-                    type= "double";
-                    num = Synt.declare(value, 0.0D);
-                }
-            } catch (HongsError er) {
-                throw new Wrong("fore.form.conv.to."+type+".failed");
-            }
-
-            // 最大最小值
-            Double m;
-            m = Synt.declare(params.get("min"), Double.class);
-            if (m != null && m > num.doubleValue()) {
-                throw new Wrong("fore.form.lt.min", Double.toString(m));
-            }
-            m = Synt.declare(params.get("max"), Double.class);
-            if (m != null && m < num.doubleValue()) {
-                throw new Wrong("fore.form.lt.max", Double.toString(m));
-            }
-
-            return num;
-        }
-    }
-
-    public static class IsDate extends Rule {
-        @Override
-        public Object verify(Object value) {
-            return value;
-        }
-    }
-
-    public static class IsFile extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong {
-            if (value == null || "".equals(value)) {
-                return   null; // 允许为空
-            }
-
-            String name = Synt.declare(params.get("name"), String.class);
-            if (name == null || "".equals(name)) {
-                name = Synt.declare(params.get("__name__"), "");
-            }
-
-            UploadHelper u = new UploadHelper();
-            u.setUploadName(name);
-            String x;
-            x = (String) params.get( "href" );
-            if (x != null) u.setUploadHref(x);
-            x = (String) params.get( "path" );
-            if (x != null) u.setUploadPath(x);
-            x = (String) params.get( "type" );
-            if (x != null) u.setAllowTypes(x.split(","));
-            x = (String) params.get( "extn" );
-            if (x != null) u.setAllowExtns(x.split(","));
-
-            x = (String) params.get( "temp" );
-            if (x != null && !"".equals( x )) {
-                u.upload(x, value.toString());
-            } else {
-                u.upload(   value.toString());
-            }
-
-            return u.getResultHref();
-        }
-    }
-
-    public static class IsEnum extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrong, HongsException {
-            if (value == null || "".equals(value)) {
-                return   null; // 允许为空
-            }
-
-            String conf = Synt.declare(params.get("conf"), String.class);
-            String name = Synt.declare(params.get("enum"), String.class);
-            if (conf == null || "".equals(conf)) {
-                conf = Synt.declare(params.get("__conf__"), "");
-            }
-            if (name == null || "".equals(name)) {
-                name = Synt.declare(params.get("__name__"), "");
-            }
-
-            Map data = FormSet.getInstance(conf).getEnum(name);
-            if (! data.containsKey( value.toString() ) ) {
-                throw new Wrong("fore.form.not.in.enum");
-            }
-            return  value;
-        }
-    }
-
-    public static class IsForm extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrongs, HongsException {
-            if (value == null || "".equals(value)) {
-                return   null; // 允许为空
-            }
-
-            String conf = Synt.declare(params.get("conf"), String.class);
-            String name = Synt.declare(params.get("form"), String.class);
-            if (conf == null || "".equals(conf)) {
-                conf = Synt.declare(params.get("__conf__"), "");
-            }
-            if (name == null || "".equals(name)) {
-                name = Synt.declare(params.get("__name__"), "");
-            }
-
-            Map data = Synt.declare(value , Map.class);
-            VerifyHelper hlpr = new VerifyHelper();
-            hlpr.addRulesByForm(conf, name );
-            hlpr.isUpdate(helper.isUpdate());
-            hlpr.isPrompt(helper.isPrompt());
-            return hlpr.verify(data);
-        }
-    }
-
-    public static class IsPick extends Rule {
-        @Override
-        public Object verify(Object value) throws Wrongs, HongsException {
-            return value;
-        }
-    }
-
-    /** 内部错误类 **/
-
-    public static class Wrong extends HongsException {
-        String name = null;
-
-        public Wrong(Throwable cause, String desc, String... prms) {
-            super(HongsException.NOTICE, desc, cause);
-            this.setLocalizedSection("default");
-            this.setLocalizedOptions(prms);
-        }
-
-        public Wrong(String desc, String... prms) {
-            super(HongsException.NOTICE, desc );
-            this.setLocalizedSection("default");
-            this.setLocalizedOptions(prms);
-        }
-
-        public Wrong  setLocalizedSegment(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public String getLocalizedSegment() {
-            return name;
-        }
-
-        @Override
-        public String getLocalizedMessage() {
-            CoreLocale trns = CoreLocale.getInstance(getLocalizedSection());
-            String [ ] rep1 = getLocalizedOptions( );
-            Map<String, String> rep2 = new HashMap();
-            for( int i = 0; i < rep1.length; i ++  ) {
-                rep2.put(String.valueOf(i), rep1[i]);
-            }
-            if ( null != name ) {
-                rep2.put("_" , trns.translate(name));
-            }
-            return trns.translate(getDesc( ), rep2 );
-        }
-    }
-
-    public static class Wrongs extends HongsException {
-        protected final Map<String, Wrong> wrongs;
-
-        public Wrongs(Map<String, Wrong> wrongs) {
-            super(0x1100 , "fore.form.invalid"); // 0x1100 对应 HTTP 400 错误
-            this.setLocalizedSection("default");
-            this.wrongs = wrongs;
-        }
-
-        public Map<String, Wrong > getWrongs() {
-            return wrongs;
-        }
-
-        public Map<String, String> getErrors() throws HongsException {
-            Map<String, String> errors = new LinkedHashMap();
-            for (Map.Entry et : wrongs.entrySet()) {
-                Wrong  w = (Wrong )  et.getValue();
-                String n = (String)  et.getKey ( );
-                String e = w.getLocalizedMessage();
-                errors.put(n, e);
-            }
-            return errors;
-        }
-
-        public Map<String, Object> getErrmap() throws HongsException {
-            Map<String, Object> errors = new LinkedHashMap();
-            for (Map.Entry et : wrongs.entrySet()) {
-                Wrong  w = (Wrong )  et.getValue();
-                String n = (String)  et.getKey ( );
-                String e = w.getLocalizedMessage();
-                Dict.setParam(errors, e, n);
-            }
-            return errors;
-        }
-
-        @Override
-        public String getLocalizedMessage() {
-            StringBuilder sb = new StringBuilder();
-            try {
-                for (Map.Entry<String, String> et : getErrors().entrySet()) {
-                    sb.append(et.getValue()).append("\r\n");
-                }
-            } catch (HongsException ex) {
-                throw new HongsError.Common ( ex );
-            }
-            return sb.toString().trim();
-        }
-
-        /**
-         * 转换为响应数据结构
-         * @param mode 0错误消息 1单层Map 2复合Map
-         * @return
-         * @throws HongsException
-         */
-        public Map toReply(byte mode) throws HongsException {
-            Map data = new HashMap();
-            data.put( "ok" , false );
-            if (mode != 1 && mode != 2 ) {
-                data.put("err", "Er400");
-                data.put("msg", this.getLocalizedMessage());
-            } else {
-                Map errs;
-                if (mode == 2) {
-                    errs = this.getErrmap();
-                } else {
-                    errs = this.getErrors();
-                }
-                data.put("errs", errs  );
-                data.put("err", "Er400");
-                data.put("msg", CoreLocale.getInstance().translate("fore.form.invalid"));
-            }
-            return data;
         }
     }
 

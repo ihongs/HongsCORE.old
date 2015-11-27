@@ -59,7 +59,7 @@
 
     $.extend($.fn.fileinput.defaults, $.fn.fileinputLocales.en);
 
-    var initialPreview = function(opts, vals) {
+    var initialPreview = function(opts, vals, name) {
         var f;
         switch (opts.previewFileType) {
             case "image":
@@ -91,7 +91,7 @@
 
         var i = 0 , j = vals.length;
         for ( ; i < j ; i ++ ) {
-            vals[i] = f(vals[ i ] );
+            vals[i] = f(vals[i])+'<input type="hidden" name="'+name+'" value="'+vals[i]+'"/>';
         }
         return vals;
     };
@@ -153,7 +153,7 @@
             // 初始配置
             attr = that.attr("data-value");
             if (attr) {
-                opts.initialPreview = initialPreview(opts, attr.split(","));
+                opts.initialPreview = initialPreview(opts, attr.split(","), that.attr("name"));
             }
 
             that.removeClass("input-file");
@@ -178,7 +178,7 @@
 
             attr = that.attr("data-value");
             if (attr) {
-                opts.initialPreview  = initialPreview(opts, attr.split(","));
+                opts.initialPreview  = initialPreview(opts, attr.split(","), that.attr("name"));
             }
 
             that.fileinput("refresh" , opts);

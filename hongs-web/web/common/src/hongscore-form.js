@@ -55,7 +55,7 @@ function HsForm(opts, context) {
         n = loadArr[i].name ;
         v = loadArr[i].value;
         if ( n === idKey && v === "0" ) continue;
-        formBox.find("[name='"   +n+"']").val(v);
+        formBox.find("[name='"+n+"']" ).not(".form-ignore").val(v);
         formBox.find("[data-fn='"+n+"']").val(v);
         formBox.find("[data-pn='"+n+"']").val(v);
     }
@@ -109,7 +109,8 @@ HsForm.prototype = {
     },
     fillEnum : function(enam) {
         var fds, fns, fts, i, n, t, v;
-        fds = this.formBox.find("[data-fn],select[name]");
+        fds = this.formBox.find("[data-fn],select[name]")
+                          .not ('.form-ignore');
         fns = {}; fts = {};
         for(i = 0; i < fds.length; i ++) {
             n = jQuery(fds[i]).attr("name");
@@ -130,9 +131,9 @@ HsForm.prototype = {
                 v  =  enam[n];
             }
 
-                i = this.formBox.find('[name="'   +n+'"]');
+                i = this.formBox.find('[name="'   +n+'"]').not(".form-ignore");
             if (i.length === 0 ) {
-                i = this.formBox.find('[data-fn="'+n+'"]');
+                i = this.formBox.find('[data-fn="'+n+'"]').not(".form-ignore");
             }
 
             // 按名称填充
@@ -160,7 +161,8 @@ HsForm.prototype = {
     },
     fillInfo : function(info) {
         var fds, fns, fts, fvs, i, n, t, v;
-        fds = this.formBox.find("[data-fn],input[name],select[name],textarea[name]");
+        fds = this.formBox.find("[data-fn],input[name],select[name],textarea[name]")
+                          .not ('.form-ignore');
         fns = {}; fts = {}; fvs = {};
         for(i = 0 ; i < fds.length ; i ++ ) {
             n = jQuery(fds[i]).attr("name");
@@ -185,9 +187,9 @@ HsForm.prototype = {
                 v  =  fvs [n];
             }
 
-                i = this.formBox.find('[name="'   +n+'"]');
+                i = this.formBox.find('[name="'   +n+'"]').not(".form-ignore");
             if (i.length === 0 ) {
-                i = this.formBox.find('[data-fn="'+n+'"]');
+                i = this.formBox.find('[data-fn="'+n+'"]').not(".form-ignore");
             if (typeof(fts[n]) === "undefined") {
                 fts[n] = "_review";
             }}
@@ -516,7 +518,9 @@ HsForm.prototype = {
         this.verified();
         var vali = true;
         var inps = {  };
-        this.formBox.find("input,select,textarea,[data-fn]").each(
+        this.formBox.find("input,select,textarea,[data-fn]")
+                    .not (".form-ignore")
+                    .each(
         function() {
             var inp = jQuery(this);
             var nam = inp.attr("name")||inp.attr("data-fn" );
@@ -545,7 +549,8 @@ HsForm.prototype = {
         }
 
         if (typeof inp == "string") {
-            inp = this.formBox.find('[name="' + inp + '"],[data-fn="' + inp + '"]');
+            inp = this.formBox.find('[name="'+inp+'"],[data-fn="'+inp+'"]')
+                              .not ('.form-ignore');
         } else {
             inp = jQuery(inp);
         }
@@ -578,7 +583,8 @@ HsForm.prototype = {
         }
 
         if (typeof inp == "string") {
-            inp = this.formBox.find('[name="'+inp+'"],[data-fn="'+inp+'"]');
+            inp = this.formBox.find('[name="'+inp+'"],[data-fn="'+inp+'"]')
+                              .not ('.form-ignore');
         } else {
             inp = jQuery(inp);
         }
@@ -765,7 +771,9 @@ HsForm.prototype = {
             };
             if (! url) url = inp.attr("data-verify");
             url = url.replace(/\$\{(.*?)\}/g,function(x, n) {
-                return obj.find("[name='"+n+"']").val( ) || "";
+                return obj.find("[name='"+n+"']")
+                          .not ( ".form-ignore" )
+                          .val ( ) || "";
             });
             jQuery.hsAjax({
                 "url": url,
@@ -814,7 +822,7 @@ HsForm.prototype = {
         },
         "[data-repeat]" : function(val, inp) {
             var fn = inp.attr("data-repeat");
-            var fd = this.formBox.find(  "[name=" + fn + "]"  );
+            var fd = this.formBox.find("[name="+fn+"],[data-fn="+fn+"]").not(".form-ignore");
             if (fd.val( ) != val) {
                 return this.geterror(inp, "form.is.not.repeat");
             }
@@ -822,7 +830,7 @@ HsForm.prototype = {
         },
         "[data-relate]" : function(val, inp) {
             var fn = inp.attr("data-relate");
-            var fd = this.formBox.find(  "[name=" + fn + "]"  );
+            var fd = this.formBox.find("[name="+fn+"],[data-fn="+fn+"]").not(".form-ignore");
             if (fd.val( ) != "" ) {
                 this.validate(fn);
             }

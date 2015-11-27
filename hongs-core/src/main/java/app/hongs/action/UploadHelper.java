@@ -3,6 +3,7 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.util.Dict;
 import app.hongs.util.Tool;
+import app.hongs.vali.Wrong;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -83,14 +84,14 @@ public class UploadHelper {
         return  MimeUtil.getMimeTypes(file).toString();
     }
 
-    private void chkTypeOrExtn(String type, String extn) throws VerifyHelper.Wrong {
+    private void chkTypeOrExtn(String type, String extn) throws Wrong {
         /**
          * 检查文件类型
          */
         if (this.allowTypes != null
         && !this.allowTypes.contains(type)) {
             // 文件类型不对
-            throw new VerifyHelper.Wrong("fore.form.unallowed.types", this.allowTypes.toString());
+            throw new Wrong("fore.form.unallowed.types", this.allowTypes.toString());
         }
 
         /**
@@ -99,7 +100,7 @@ public class UploadHelper {
         if (this.allowExtns != null
         && !this.allowExtns.contains(extn)) {
             // 扩展名不对
-            throw new VerifyHelper.Wrong("fore.form.unallowed.extns", this.allowExtns.toString());
+            throw new Wrong("fore.form.unallowed.extns", this.allowExtns.toString());
         }
     }
 
@@ -133,7 +134,7 @@ public class UploadHelper {
      * @return
      * @throws app.hongs.action.VerifyHelper.Wrong
      */
-    public File upload(InputStream xis, String type, String extn, String fame) throws VerifyHelper.Wrong {
+    public File upload(InputStream xis, String type, String extn, String fame) throws Wrong {
         chkTypeOrExtn(type, extn);
         setResultName(fame, extn);
 
@@ -146,7 +147,7 @@ public class UploadHelper {
             Streams.copy(bis, bos, true);
             return  file;
         } catch (IOException ex) {
-            throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");
+            throw new Wrong(ex, "fore.form.upload.failed");
         }
     }
 
@@ -158,7 +159,7 @@ public class UploadHelper {
      * @return
      * @throws app.hongs.action.VerifyHelper.Wrong
      */
-    public File upload(InputStream xis, String type, String extn) throws VerifyHelper.Wrong {
+    public File upload(InputStream xis, String type, String extn) throws Wrong {
         return  upload(xis, type, extn, Core.getUniqueId());
     }
 
@@ -169,7 +170,7 @@ public class UploadHelper {
      * @return
      * @throws app.hongs.action.VerifyHelper.Wrong
      */
-    public File upload(String path, String fame) throws VerifyHelper.Wrong {
+    public File upload(String path, String fame) throws Wrong {
         if (fame == null) {
             fame  = Core.getUniqueId( );
         }
@@ -204,9 +205,9 @@ public class UploadHelper {
                     }
                 }   fs.close();
             } catch (FileNotFoundException ex ) {
-                throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");
+                throw new Wrong(ex, "fore.form.upload.failed");
             } catch (IOException ex ) {
-                throw new VerifyHelper.Wrong(ex, "fore.form.upload.failed");
+                throw new Wrong(ex, "fore.form.upload.failed");
             }
 
             file = new File(path+".tmp");
@@ -238,7 +239,21 @@ public class UploadHelper {
      * @return
      * @throws app.hongs.action.VerifyHelper.Wrong
      */
-    public File upload(String fame) throws VerifyHelper.Wrong {
+    public File upload(String fame) throws Wrong {
+        /*
+         * 如果直接给的路径
+         * 则从路径中取名称
+         */
+        int i  = fame.lastIndexOf('/'  );
+        if (i != -1) {
+            int j  = fame.indexOf('.',i);
+            if (j != -1) {
+                fame = fame.substring(i,j);
+            } else {
+                fame = fame.substring(i  );
+            }
+        }
+
         return upload(Core.DATA_PATH + "/upload/" + fame, fame);
     }
 
@@ -248,7 +263,7 @@ public class UploadHelper {
      * @param uploads
      * @throws app.hongs.action.VerifyHelper.Wrong
      */
-    public static void upload(Map<String, Object> request, UploadHelper... uploads) throws VerifyHelper.Wrong {
+    public static void upload(Map<String, Object> request, UploadHelper... uploads) throws Wrong {
         for(UploadHelper upload : uploads) {
             String v = null;
             String n = upload.uploadName != null ? upload.uploadName : "file";
@@ -270,11 +285,9 @@ public class UploadHelper {
      * @return
      */
     public static String upname(String id) {
-        int l = Core.SERVER_ID.length();
-        if (id.length( )  >=  l+8) {
-            id = id.substring(0  , l  ) // 服务核心ID
-           +"/"+ id.substring(l  , l+4) // 前4位36进制时间戳
-           +"/"+ id.substring(l+4, l+8) // 后4位36进制时间戳
+        if (id.length() >= 8) {
+            id = id.substring(0, 4) // 前4位36进制时间戳
+           +"/"+ id.substring(4, 8) // 后4位36进制时间戳
            +"/"+ id;
         }
         return   id;

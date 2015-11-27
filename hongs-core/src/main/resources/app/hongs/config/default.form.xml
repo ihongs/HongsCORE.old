@@ -17,11 +17,10 @@
         <value code="date">date</value>
         <value code="time">date</value>
         <value code="datetime">date</value>
+        <!-- Pick -->
+        <value code="pick">fork</value>
         <!-- Form -->
         <value code="form">form</value>
-        <!-- Pick -->
-        <value code="pick">pick</value>
-        <value code="picker">pick</value>
         <!-- Enum -->
         <value code="enum">enum</value>
         <value code="select">enum</value>

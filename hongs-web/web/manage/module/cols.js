@@ -47,6 +47,9 @@ function loadConf(modal, field) {
                 } else {
                     $(this).prop("checked", field.find(name).prop(attr));
                 }
+            } else
+            if (attr === "text") {
+                $(this).val(field.find(name).text());
             } else {
                 $(this).val(field.find(name).attr(attr));
             }
@@ -101,6 +104,9 @@ function saveConf(modal, field) {
                 } else {
                     field.find(name).prop(attr, $(this).prop("checked"));
                 }
+            } else
+            if (attr === "text") {
+                field.find(name).text($(this).val());
             } else {
                 field.find(name).attr(attr, $(this).val());
             }

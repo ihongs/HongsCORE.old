@@ -476,8 +476,9 @@ extends HashMap<String, Object>
     if (s2.length() > 4) s2 = s2.substring(s2.length() - 4);
     if (s3.length() > 4) s3 = s3.substring(s3.length() - 4);
 
-    return new StringBuilder(  )
-        .append(svid).append(s1).append(s2).append(s3)
+    return new StringBuilder()
+        .append( s1 ).append( s2 )
+        .append( s3 ).append(svid)
         .toString( ).replace(' ', '0');
   }
 

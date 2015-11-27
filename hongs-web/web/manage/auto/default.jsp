@@ -47,7 +47,7 @@
         <script type="text/javascript" src="common/src/hongscore.js"></script>
         <script type="text/javascript" src="common/src/hongscore-list.js"></script>
         <script type="text/javascript" src="common/src/hongscore-form.js"></script>
-        <script type="text/javascript" src="common/src/hongscore-pick.js"></script>
+        <script type="text/javascript" src="common/src/hongscore-fork.js"></script>
         <script type="text/javascript" src="common/src/hongscore-date.js"></script>
         <script type="text/javascript" src="common/src/hongscore-file.js"></script>
         <script type="text/javascript">

@@ -112,7 +112,7 @@
                         <div class="radio"    data-fn="<%=name%>" data-ft="_radio"></div>
                     <%} else if ("enum".equals(type) || "select".equals(type)) {%>
                         <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>><option value="">--<%=lang.translate("fore.select.lebel")%>--</option></select>
-                    <%} else if ("form".equals(type) || "picker".equals(type)) {%>
+                    <%} else if ("pick".equals(type)) {%>
                         <%
                             String vk = info.containsKey("data-vk") ? (String) info.get("data-vk") :  "id" ;
                             String tk = info.containsKey("data-tk") ? (String) info.get("data-tk") : "name";
