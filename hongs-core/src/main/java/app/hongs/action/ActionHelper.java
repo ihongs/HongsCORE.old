@@ -322,10 +322,10 @@ public class ActionHelper implements Cloneable
 
                 // 提取扩展
                 String extn;
-                String name = fis.getName();
-                int pos  = name.lastIndexOf( '.' );
+                String name = fis.getName().replaceAll("[\r\n]", "");
+                int pos  = name.lastIndexOf('.');
                 if (pos  > 1) {
-                    extn = name.substring(pos + 1);
+                    extn = name.substring(1+pos);
                 }
                 else {
                     extn = "";
@@ -356,7 +356,7 @@ public class ActionHelper implements Cloneable
 
                 // 记录类型名称等
                 try(FileWriter fw = new FileWriter(info)) {
-                    fw.write(name.replaceAll("[\r\n]","")+"\r\n"+ type +"\r\n"+ size);
+                    fw.write(name+ "\r\n" + type + "\r\n" +size);
                 }
             }
 
