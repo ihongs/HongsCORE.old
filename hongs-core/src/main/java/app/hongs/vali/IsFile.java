@@ -78,7 +78,7 @@ public class IsFile extends Rule {
         return u.getResultHref();
     }
 
-    private void stores(String href, String path) throws Wrong {
+    protected void stores(String href, String path) throws Wrong {
         URL url = null;
         try {
             url = new URL(href);
