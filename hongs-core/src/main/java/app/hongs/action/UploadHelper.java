@@ -34,6 +34,10 @@ public class UploadHelper {
     private Set<String> allowTypes = null;
     private Set<String> allowExtns = null;
 
+    public UploadHelper setUploadName(String name) {
+        this.uploadName = name;
+        return this;
+    }
     public UploadHelper setUploadPath(String path) {
         this.uploadPath = path;
         return this;
@@ -42,9 +46,20 @@ public class UploadHelper {
         this.uploadHref = href;
         return this;
     }
-    public UploadHelper setUploadName(String name) {
-        this.uploadName = name;
-        return this;
+    public UploadHelper setUploadLink(String href) {
+        ActionHelper helper = Core.getInstance(ActionHelper.class);
+        String hp = helper.getRequest().getProtocol(  );
+        String hn = helper.getRequest().getServerName();
+        int    pt = helper.getRequest().getServerPort();
+        String hu = hp +"://"+ hn;
+        if (pt != 80 && pt != 443) {
+            hu += ":" + pt ;
+        }
+            hu += Core.BASE_HREF ;
+        if (!href.startsWith("/")) {
+            hu += "/" ;
+        }
+        return setUploadHref(hu + href);
     }
     public UploadHelper setAllowTypes(String... type) {
         this.allowTypes = new HashSet(Arrays.asList(type));
@@ -105,8 +120,11 @@ public class UploadHelper {
     }
 
     private void setResultName(String fame, String extn) {
-        String famc = upname(fame) + "." + extn;
-        this.resultName = famc;
+        String famc = upname(fame);
+        if (extn != null && !extn.equals("")) {
+            famc +=  "."  +  extn ;
+        }
+        this.resultName   =  famc ;
     }
 
     public String getResultPath() {
@@ -114,7 +132,7 @@ public class UploadHelper {
         if (this.uploadPath != null) {
             path = this.uploadPath + "/" + path;
         }
-        return path;
+        return getUploadPath( path );
     }
 
     public String getResultHref() {
@@ -139,7 +157,7 @@ public class UploadHelper {
         setResultName(fame, extn);
 
         try {
-            String path = this.getUploadPath(this.getResultPath(  ) );
+            String path = this.getResultPath();
             File   file = new File(path);
             /**/FileOutputStream fos = new /**/FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos );
@@ -216,7 +234,7 @@ public class UploadHelper {
         chkTypeOrExtn(type, extn);
         setResultName(fame, extn);
 
-        String disp = this.getUploadPath (this.getResultPath ( ) );
+        String disp = this.getResultPath();
         File   dist = new File(disp);
         // 原始文件与目标文件不一样才需要移动
         if(!dist.getAbsolutePath().equals(file.getAbsolutePath())) {
@@ -243,15 +261,27 @@ public class UploadHelper {
         /*
          * 如果直接给的路径
          * 则从路径中取名称
+         * 如果路径没有改变
+         * 则不变更
+         * 否则拷贝
          */
         int i  = fame.lastIndexOf('/'  );
         if (i != -1) {
+            String name, extn = "";
             int j  = fame.indexOf('.',i);
-            if (j != -1) {
-                fame = fame.substring(i,j);
+            if (j == -1) {
+                name = fame.substring(i + 1);
             } else {
-                fame = fame.substring(i  );
+                extn = fame.substring(j + 1);
+                name = fame.substring(i + 1 , j);
             }
+            setResultName(name, extn);
+            String href = getResultHref();
+            String path = getResultPath();
+            if  (  fame.equals (href)) {
+                return new File(path); // 不变
+            }
+            return upload(fame, null); // 拷贝
         }
 
         return upload(Core.DATA_PATH + "/upload/" + fame, fame);

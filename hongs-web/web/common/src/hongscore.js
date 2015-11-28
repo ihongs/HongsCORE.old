@@ -70,6 +70,9 @@ function H$() {
  * @return {Object}
  */
 function hsResponObj(rst, qut, pus) {
+    if (self.HsEXIT) {
+        throw new Exception("Exit!");
+    }
     if (typeof(rst.responseText) !== "undefined") {
         rst  = rst.responseText;
     }
@@ -139,8 +142,9 @@ function hsResponObj(rst, qut, pus) {
                 if (rst.ref) {
                     location.assign(rst.ref);
                 } else {
-                    location.reload();
+                    location.reload( );
                 }
+                /**/self.HsEXIT = true;
                 throw new Exception("Exit!");
             }
         }

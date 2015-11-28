@@ -58,7 +58,7 @@
     (function($) {
         function setPieOption(a, legendData, seriesData) {
             var b  = a[1].replace(/([A-Z])/g, "$1 ")
-                         .replace(/ \d*$/, "")+"B";
+                         .replace(/ \d*$/, "") +"B";
             legendData.push(a[2]+"("+b+")");
             seriesData.push({
                     name  : a[2]+"("+b+")" ,
@@ -408,7 +408,11 @@
                         chart = ec.init(box, et);
                         chart.setOption(opts);
 
-                        setInterval(function() {
+                        var itr = setInterval(function() {
+                            if (!context.is(":visible")) {
+                                clearInterval(itr);
+                                return;
+                            }
                             $.hsAjax({
                                 url: "manage/info/retrieve.act?rb=run_info",
                                 dataType: "json",
