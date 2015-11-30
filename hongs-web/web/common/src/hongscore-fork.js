@@ -10,7 +10,9 @@
  * 在表单选项区域添加:
  * <ul data-ft="_fork" data-fn="my_example" required="required"></ul>
  * <button type="button" data-toggle="hsFork" data-target="@" data-href="my_example/fork.html">Pick It!</button>
- */
+ *
+ *注: 2015/11/30 原 hsPick 更名为 hsFork(Hong's Foreign Key kit)
+ **/
 
 /**
  * 选择控件
@@ -20,7 +22,7 @@
  * @param {Function} fil 填充函数
  * @returns {jQuery}
  */
-jQuery.fn.hsFork = function(url, tip, box, fil) {
+jQuery.fn.hsPick = function(url, tip, box, fil) {
     if (fil == undefined
     &&  typeof url == "function") {
         fil  = url;
@@ -67,7 +69,7 @@ jQuery.fn.hsFork = function(url, tip, box, fil) {
     } else {
         box.find("li").each(function() {
             var opt = jQuery(this);
-            var val = opt.find(".pickval").val( );
+            var val = opt.find(".pickval").val ();
             var txt = opt.find(".picktxt").text();
             v[val] = txt;
         });
@@ -221,7 +223,6 @@ jQuery.fn.hsFork = function(url, tip, box, fil) {
 
     return tip;
 };
-jQuery.fn.hsPick = jQuery.fn.hsFork;
 
 /**
  * 表单填充选项
@@ -231,11 +232,11 @@ jQuery.fn.hsPick = jQuery.fn.hsFork;
  * @param {String} t
  * @returns {undefined}
  */
-function hsFormFillFork(box, v, n, t) {
+function hsFormFillPick(box, v, n, t) {
     // 注意: 绑定当前函数用于选择后的填充
-    box.data("pickFunc", hsFormFillFork);
+    box.data("pickFunc", hsFormFillPick);
 
-    var btn = box.siblings("[data-toggle=hsPick]");
+    var btn = box.siblings("[data-toggle=hsPick],[data-toggle=hsFork]");
     var mul = /(\[\]|\.\.|\.$)/.test(n); // a[b][]|a[][b]|a.b.|a..b 均表示多选
 
     if (t == "info") {
@@ -329,7 +330,6 @@ function hsFormFillFork(box, v, n, t) {
         }
     }
 }
-hsFormFillPick = hsFormFillFork;
 
 /**
  * 列表填充选择
@@ -338,10 +338,10 @@ hsFormFillPick = hsFormFillFork;
  * @param {String} n
  * @returns {undefined}
  */
-function hsListFillFork(cel, v, n) {
-    var box = cel.closest(".pickbox");
-    var mul = box.hasClass("pickmul");
+function hsListFillPick(cel, v, n) {
+    var box = cel.closest(".pickbox,.forkbox");
     var dat = box.data("pickData") || {};
+    var mul = box.hasClass("pickmul");
 
     // 单选还是多选
     if (! mul) {
@@ -360,11 +360,10 @@ function hsListFillFork(cel, v, n) {
         cel.find(".checkone").prop("checked", true).change( );
     }
 }
-hsListFillPick = hsListFillFork;
 
 (function($) {
     $(document)
-    .on("click", "[data-toggle=hsFork],[data-toggle=hsPick]",
+    .on("click", "[data-toggle=hsPick],[data-toggle=hsFork]",
     function() {
         var url = $(this).attr("data-href") || $(this).attr("href");
         var box = $(this).attr("data-target");
@@ -392,3 +391,8 @@ hsListFillPick = hsListFillFork;
         return false;
     });
 })(jQuery);
+
+// 2015/11/30 原 hsPick 更名为 hsFork
+jQuery.fn.hsFork = jQuery.fn.hsPick;
+hsFormFillFork = hsFormFillPick;
+hsListFillFork = hsListFillPick;
