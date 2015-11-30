@@ -124,7 +124,7 @@
                                     + ( info.containsKey("form"   ) ? (String) info.get("form"   ) : /**/ ak )
                                     + "list4select.html";
                         %>
-                        <ul class="pickbox" data-ft="_pick" data-fn="<%=name%>" data-ak="<%=ak%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
+                        <ul class="pickbox" data-ft="_fork" data-fn="<%=name%>" data-ak="<%=ak%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
                         <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=al%>"><%=lang.translate("fore.select.lebel", disp)%></button>
                     <%} else {%>
                         <input class="form-control" <%="type=\""+type+"\" name=\""+name+"\" "+rqrd%>/>
@@ -146,7 +146,7 @@
     context.hsForm({
         loadUrl: "<%=_module%>/<%=_entity%>/retrieve.act?id=\${id}&md=\${md}",
         saveUrl: "<%=_module%>/<%=_entity%>/<%=_action%>.act",
-        _fill__pick: hsFormFillPick
+        _fill__fork: hsFormFillFork
     });
 })( jQuery );
 </script>
