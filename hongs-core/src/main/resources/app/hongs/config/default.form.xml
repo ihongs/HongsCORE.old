@@ -17,10 +17,11 @@
         <value code="date">date</value>
         <value code="time">date</value>
         <value code="datetime">date</value>
-        <!-- Pick -->
-        <value code="pick">fork</value>
         <!-- Form -->
         <value code="form">form</value>
+        <!-- Fork -->
+        <value code="fork">fork</value>
+        <value code="pick">fork</value>
         <!-- Enum -->
         <value code="enum">enum</value>
         <value code="select">enum</value>
@@ -76,11 +77,15 @@
             <param name="type"></param>
             <param name="extn"></param>
         </field>
-        <field name="enum" disp="枚举" type="enum,select">
+        <field name="enum" disp="枚举" type="enum,select,check,radio">
             <param name="conf"></param>
             <param name="enum">demo-enum</param>
         </field>
-        <field name="form" disp="表单" type="form,picker">
+        <field name="form" disp="表单" type="form">
+            <param name="conf"></param>
+            <param name="form">demo-form</param>
+        </field>
+        <field name="form" disp="外键" type="fork">
             <param name="conf"></param>
             <param name="form">demo-form</param>
         </field>
