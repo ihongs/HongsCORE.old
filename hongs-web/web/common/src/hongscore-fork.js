@@ -2,14 +2,14 @@
 /**
  * 组合选择工具之用法:
  * 在选择列表配置添加:
- * data-data-0="_fill__pick:(hsListFillPick)"
+ * data-data-0="_fill__fork:(hsListFillFork)"
  * 在选择列表头部添加:
- * <td data-ft="_pick"><input type="checkbox" class="checkall"/></td>
+ * <td data-ft="_fork"><input type="checkbox" class="checkall"/></td>
  * 在表单配置区域添加:
- * data-data-0="_fill__pick:(hsFormFillPick)"
+ * data-data-0="_fill__fork:(hsFormFillFork)"
  * 在表单选项区域添加:
- * <ul data-ft="_pick" data-fn="my_example" required="required"></ul>
- * <button type="button" data-toggle="hsPick" data-target="@" data-href="my_example/list4select.html">Pick It!</button>
+ * <ul data-ft="_fork" data-fn="my_example" required="required"></ul>
+ * <button type="button" data-toggle="hsFork" data-target="@" data-href="my_example/fork.html">Pick It!</button>
  */
 
 /**
@@ -20,7 +20,7 @@
  * @param {Function} fil 填充函数
  * @returns {jQuery}
  */
-jQuery.fn.hsPick = function(url, tip, box, fil) {
+jQuery.fn.hsFork = function(url, tip, box, fil) {
     if (fil == undefined
     &&  typeof url == "function") {
         fil  = url;
@@ -100,7 +100,7 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
             var msg  = box.data("unpickedError" );
             if (msg != "!") {
                 alert( msg  ?  hsGetLang(  msg  ):
-                      hsGetLang("pick.unpicked"));
+                      hsGetLang("fork.unpicked"));
                 return;
             }
         }
@@ -221,6 +221,7 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
 
     return tip;
 };
+jQuery.fn.hsPick = jQuery.fn.hsFork;
 
 /**
  * 表单填充选项
@@ -230,9 +231,9 @@ jQuery.fn.hsPick = function(url, tip, box, fil) {
  * @param {String} t
  * @returns {undefined}
  */
-function hsFormFillPick(box, v, n, t) {
+function hsFormFillFork(box, v, n, t) {
     // 注意: 绑定当前函数用于选择后的填充
-    box.data("pickFunc", hsFormFillPick);
+    box.data("pickFunc", hsFormFillFork);
 
     var btn = box.siblings("[data-toggle=hsPick]");
     var mul = /(\[\]|\.\.|\.$)/.test(n); // a[b][]|a[][b]|a.b.|a..b 均表示多选
@@ -328,6 +329,7 @@ function hsFormFillPick(box, v, n, t) {
         }
     }
 }
+hsFormFillPick = hsFormFillFork;
 
 /**
  * 列表填充选择
@@ -336,7 +338,7 @@ function hsFormFillPick(box, v, n, t) {
  * @param {String} n
  * @returns {undefined}
  */
-function hsListFillPick(cel, v, n) {
+function hsListFillFork(cel, v, n) {
     var box = cel.closest(".pickbox");
     var mul = box.hasClass("pickmul");
     var dat = box.data("pickData") || {};
@@ -358,10 +360,11 @@ function hsListFillPick(cel, v, n) {
         cel.find(".checkone").prop("checked", true).change( );
     }
 }
+hsListFillPick = hsListFillFork;
 
 (function($) {
     $(document)
-    .on("click", "[data-toggle=hsPick]",
+    .on("click", "[data-toggle=hsFork],[data-toggle=hsPick]",
     function() {
         var url = $(this).attr("data-href") || $(this).attr("href");
         var box = $(this).attr("data-target");
