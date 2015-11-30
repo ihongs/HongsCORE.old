@@ -113,7 +113,7 @@
                         <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>>
                             <option value="">--<%=lang.translate("fore.select.lebel")%>--</option>
                         </select>
-                    <%} else if ("pick".equals(type)) {%>
+                    <%} else if ("pick".equals(type) ||   "fork".equals(type)) {%>
                         <%
                             String vk = info.containsKey("data-vk") ? (String) info.get("data-vk") :  "id" ;
                             String tk = info.containsKey("data-tk") ? (String) info.get("data-tk") : "name";

@@ -106,9 +106,7 @@
                     <th data-fn="<%=name%>" data-ft="_file" <%=ob%> class="<%=oc%>"><%=disp%></th>
                 <%} else if ("enum".equals(type) || "select".equals(type) || "check".equals(type) || "radio".equals(type)) {%>
                     <th data-fn="<%=name%>_disp" <%=ob%> class="<%=oc%>"><%=disp%></th>
-                <%} else if ("form".equals(type)) {%>
-                    <th data-fn="<%=name%>.<%=info.get("data-tk")%>" <%=ob%> class="<%=oc%>"><%=disp%></th>
-                <%} else if ("pick".equals(type)) {%>
+                <%} else if ("pick".equals(type) ||   "fork".equals(type) ||  "form".equals(type)) {%>
                     <th data-fn="<%=info.get("data-ak")%>.<%=info.get("data-tk")%>" <%=ob%> class="<%=oc%>"><%=disp%></th>
                 <%} else if (!"primary".equals(info.get("primary")) && !"foreign".equals(info.get("foreign"))) {%>
                     <th data-fn="<%=name%>" <%=ob%> class="<%=oc%>"><%=disp%></th>
