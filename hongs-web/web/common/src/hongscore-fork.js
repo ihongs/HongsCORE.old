@@ -339,9 +339,9 @@ function hsFormFillPick(box, v, n, t) {
  * @returns {undefined}
  */
 function hsListFillPick(cel, v, n) {
-    var box = cel.closest(".pickbox,.forkbox");
-    var dat = box.data("pickData") || {};
+    var box = cel.closest(".pickbox");
     var mul = box.hasClass("pickmul");
+    var dat = box.data("pickData") || {};
 
     // 单选还是多选
     if (! mul) {
