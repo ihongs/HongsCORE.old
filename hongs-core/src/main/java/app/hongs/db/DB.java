@@ -1590,7 +1590,7 @@ public class DB
    * 如果指定数据库配置中有指定dbClass, 务必添加方法:
    * </p>
    * <pre>
- public static XxxDB getLogger()
+ public static XxxDB getInstance()
     throws HongsException
  {
     return new XxxDB();
@@ -1673,7 +1673,7 @@ public class DB
    * 如果指定数据库配置中有指定dbClass, 务必添加方法:
    * </p>
    * <pre>
- public static XxxDB getLogger()
+ public static XxxDB getInstance()
     throws HongsException
  {
     return new XxxDB();
