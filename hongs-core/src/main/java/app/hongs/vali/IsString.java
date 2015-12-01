@@ -22,6 +22,10 @@ public class IsString extends Rule {
             throw new Wrong("fore.form.lt.maxlength", Integer.toString(len));
         }
 
+        if (str.length() == 0) {
+            return str;
+        }
+
         // 正则匹配
         Map<String,String> pats = FormSet.getInstance().getEnum("__patts__");
         String patt  = Synt.declare(params.get("pattern"), "");

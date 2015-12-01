@@ -6,6 +6,6 @@ package app.hongs.vali;
 public class Rase extends Rule {
     @Override
     public Object verify(Object value) {
-        return SKIP ;
+        return INVAL;
     }
 }

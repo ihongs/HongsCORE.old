@@ -4,19 +4,22 @@ import app.hongs.HongsException;
 import java.util.Map;
 
 public abstract class Rule {
-    public Map params = null;
-    public Map values = null;
-    public Vali helper;
+    /**
+     * 返回此对象将被抛弃
+     */
+    public static final Object INVAL = new Object();
 
-    public static final Object SKIP = new Object();
+    public Map  values = null;
+    public Map  params = null;
+    public Veri helper ;
 
-    public void setParams(Map params) {
-        this.params = params;
-    }
-    public void setValues(Map values) {
+    public void setValues(Map  values) {
         this.values = values;
     }
-    public void setHelper(Vali helper) {
+    public void setParams(Map  params) {
+        this.params = params;
+    }
+    public void setHelper(Veri helper) {
         this.helper = helper;
     }
 

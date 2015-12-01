@@ -30,9 +30,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.imageio.ImageIO;
 
-import net.coobird.thumbnailator.Thumbnails;
-
 import eu.medsea.mimeutil.MimeUtil;
+
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.Thumbnails.Builder;
 
 /**
  * 通用上传动作
@@ -78,13 +79,12 @@ public class FileAction {
 
     @Action("image/upload")
     public void uploadImage(ActionHelper helper) throws HongsException {
-        String v = null;
         CoreConfig c = CoreConfig.getInstance();
-        String t , e , u , p;
+        String t , e , p , u , v = null;
         t = c.getProperty("fore.upload.image.types", "image/jpeg,image/png,image/gif,image/bmp");
         e = c.getProperty("fore.upload.image.extns", "jpeg,jpg,png,gif,bmp");
-        u = c.getProperty("core.upload.image.path" , "upload/image");
-        p = c.getProperty("core.upload.image.href" , "upload/image");
+        p = c.getProperty("core.upload.image.path" , "upload/image");
+        u = c.getProperty("core.upload.image.href" , "upload/image");
 
         UploadHelper h = new UploadHelper();
         h.setAllowTypes(t.split(","));
@@ -94,65 +94,70 @@ public class FileAction {
         h.upload(v);
         u = h.getResultHref();
 
+        // 补全 URL
+        if (!u.startsWith("http:") && !u.startsWith("https:")) {
+            u = helper.getRequest().getServerName() + Core.BASE_HREF +"/"+ u;
+        }
+
         Map m = new HashMap();
-        m.put("href", u);
-        helper.reply( m);
+        m.put("id" , v);
+        m.put("url", u);
+        helper.reply(m);
     }
 
     @Action("image/output")
     public void outputImage(ActionHelper helper) throws HongsException {
         String id = helper.getParameter("id");
         String tp = helper.getParameter("tp");
-        String dp = helper.getParameter("dp");
         int     w = Synt.declare(helper.getParameter("w"), 0);
         int     h = Synt.declare(helper.getParameter("h"), 0);
+        String wh = w+"x"+h;
 
         if (id == null || "".equals(id)) {
             helper.error400("Param id required");
             return;
         }
 
-        // 检查类型参数
-        CoreConfig c = CoreConfig.getInstance  (    );
-        String t = c.getProperty("fore.upload.image.extns", "jpg,png,gif,bmp");
-        List<String> ts = Arrays.asList(t.split(","));
-        if (!ts.contains(tp)) {
-            helper.error400("Wrong value '"+tp+"' for param 'tp', must be "+t);
+        CoreConfig c = CoreConfig.getInstance();
+        String e , p , v;
+        e = c.getProperty("fore.upload.image.extns", "jpeg,jpg,png,gif,bmp");
+        p = c.getProperty("core.upload.image.path" , "upload/image");
+        v = c.getProperty("core.upload.image.save" , "");
+
+        List<String> es = Arrays.asList(e.split(","));
+        List<String> vs = Arrays.asList(v.split(","));
+        if (!es.contains(tp)) {
+            helper.error400("Wrong value '"+ tp +"' for param tp, must be "+ e);
             return;
         }
         if (tp == null || "".equals(tp)) {
-            tp = ts.get(0);
-        }
-        if (dp == null || "".equals(dp)) {
-            dp = "upload/image";
+            tp =  es.get(0);
         }
 
         // 文件基本路径
-        String fp = Core.BASE_PATH + "/" + dp + "/" + UploadHelper.upname (id);
+        String fp = Core.BASE_PATH +"/"+ p +"/"+ UploadHelper.upname(id);
 
         // 检查原始文件
         File sf = null;
-        for (int i = 0, j = ts.size(); i < j; i ++) {
-            sf = new File(fp +"."+ ts.get(i));
+        for (int i = 0, j = es.size(); i < j; i ++) {
+            sf = new File(fp +"."+ es.get(i));
             if (sf.exists()) {
                 break ;
             }
             if (i == j - 1 ) {
-                helper.error400("Image file '"+tp+"' not exists");
+                helper.error400("Image file '"+ tp +"' not exists");
                 return;
             }
         }
 
         // 计算图片尺寸
-        if (w == 0 && h == 0) {
-            // Nothing todo...
-        } else  {
+        if (w != 0 || h != 0) {
         if (w == 0 || h == 0) {
             Image img;
             try {
                 img = ImageIO.read(sf);
-            } catch (IOException e) {
-                throw new HongsException.Common(e);
+            } catch (IOException ex) {
+                throw new HongsException.Common(ex);
             }
             if (w != 0) {
                 h  = (int) (((float) w) / img.getWidth (null) * img.getHeight(null));
@@ -188,17 +193,18 @@ public class FileAction {
             }
         }
 
-        // 生成缩略文件
         try {
-            Thumbnails.of/**/(sf)
-                      .size(w, h)
-                      .outputFormat(tp)
-                      .toFile(df);
-        } catch (IOException  ex) {
+            Builder<File> bf = Thumbnails.of(sf).size(w,h).outputFormat(tp);
+            if (!vs.contains(wh)) {
+                bf.toOutputStream( helper.getResponse().getOutputStream() );
+                return;
+            } else {
+                bf.toFile  ( df );
+            }
+        } catch (IOException ex ) {
             throw new HongsException.Common(ex);
         }
 
-        // 输出到客户端
         outputFile( df , helper.getResponse() );
     }
 

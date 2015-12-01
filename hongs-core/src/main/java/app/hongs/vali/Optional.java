@@ -10,7 +10,7 @@ public class Optional extends Rule {
              rule.setValues(values);
              value = rule.verify(value);
          }   catch (Wrong w) {
-             return SKIP ;
+             return INVAL;
          }
          return value;
      }

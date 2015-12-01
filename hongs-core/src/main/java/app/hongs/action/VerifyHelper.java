@@ -9,10 +9,10 @@ import app.hongs.vali.Optional;
 import app.hongs.vali.Repeated;
 import app.hongs.vali.Required;
 import app.hongs.vali.Rule;
-import app.hongs.vali.Vali;
-import static app.hongs.vali.Rule.SKIP;
+import app.hongs.vali.Veri;
 import app.hongs.vali.Wrong;
 import app.hongs.vali.Wrongs;
+import static app.hongs.vali.Rule.INVAL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,7 +39,7 @@ import java.util.Map;
  * error.Ex10f6=执行规则方法时发生异常
  * </pre>
  */
-public class VerifyHelper implements Vali {
+public class VerifyHelper implements Veri {
 
     private final Map<String, List<Rule>> rules;
     private boolean update;
@@ -205,14 +205,14 @@ public class VerifyHelper implements Vali {
 
             data = verify(rulez, data, name, valuez, wrongz);
 
-            if (data != SKIP) {
+            if (data != INVAL) {
                 Dict.setParam( valuez, data, name );
             } else if (prompt && !wrongz.isEmpty()) {
                 break;
             }
         }
 
-        if (! wrongz.isEmpty()) {
+        if (!wrongz.isEmpty()) {
             throw new Wrongs(wrongz);
         }
 
@@ -236,14 +236,14 @@ public class VerifyHelper implements Vali {
                 // 设置字段标签
                 w.setLocalizedSegment( (String) rule.params.get("__disp__") );
                 failed(wrongz, w , name);
-                data =  SKIP;
+                data =  INVAL;
                 break;
             } catch (Wrongs w) {
                 failed(wrongz, w , name);
-                data =  SKIP;
+                data =  INVAL;
                 break;
             }
-            if (data == SKIP ) {
+            if (data == INVAL) {
                 break;
             }
 
@@ -288,10 +288,10 @@ public class VerifyHelper implements Vali {
 
                 String name3 = name + "." + (i3 ++);
                 data3 = verify(rulez, data3, name3, values, wrongz);
-                if (data3 !=  SKIP ) {
+                if (data3 !=  INVAL) {
                     data2.add(data3);
                 } else if (prompt && !wrongz.isEmpty()) {
-                    return SKIP;
+                    return INVAL;
                 }
             }
         } else if (data instanceof Map) {
@@ -311,10 +311,10 @@ public class VerifyHelper implements Vali {
 
                 String name3 = name +"."+ ( (String) e3.getKey( ) );
                 data3 = verify(rulez, data3, name3, values, wrongz);
-                if (data3 !=  SKIP ) {
+                if (data3 !=  INVAL) {
                     data2.add(data3);
                 } else if (prompt && !wrongz.isEmpty()) {
-                    return SKIP;
+                    return INVAL;
                 }
             }
         }
@@ -325,13 +325,13 @@ public class VerifyHelper implements Vali {
         if (n != 0 && c < n) {
             failed(wrongz, new Wrong("fore.form.lt.minrepeat", String.valueOf(n), String.valueOf(c))
                     .setLocalizedSegment((String) params.get("__disp__")), name);
-            return SKIP;
+            return INVAL;
         }
         n = Synt.declare(params.get("maxrepeat"), 0);
         if (n != 0 && c > n) {
             failed(wrongz, new Wrong("fore.form.gt.maxrepeat", String.valueOf(n), String.valueOf(c))
                     .setLocalizedSegment((String) params.get("__disp__")), name);
-            return SKIP;
+            return INVAL;
         }
 
         return data2;

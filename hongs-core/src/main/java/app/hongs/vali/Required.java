@@ -7,8 +7,8 @@ public class Required extends Rule {
     @Override
     public Object verify(Object value) throws Wrong {
         if (value  ==  null ) {
-            if (helper.isUpdate( )) {
-                return SKIP;
+            if (helper.isUpdate()) {
+                return INVAL;
             }
             throw new Wrong("fore.form.required");
         }

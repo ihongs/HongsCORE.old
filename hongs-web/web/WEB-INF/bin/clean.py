@@ -3,7 +3,7 @@
 
 # 过期文件清理工具
 # 用于清理超过一定时间的日志、临时文件
-# 作者: kevein.hongs@gmail.com
+# 作者: kevin.hongs@gmail.com
 # 修改: 2015/10/17
 
 import os
@@ -76,7 +76,7 @@ if  __name__ == "__main__":
         print "Another options:"
         print "  -p --print            Just print files"
         print "  -e --empty            Remove empty dir"
-        print "  -n --name             File name regexp"
+        print "  -n --name REGEXP      File name regexp"
         print "  -x --deny             Exclude names"
         print "  -h --help             Show this msg"
 
