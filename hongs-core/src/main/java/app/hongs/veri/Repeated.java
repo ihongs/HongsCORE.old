@@ -1,4 +1,4 @@
-package app.hongs.vali;
+package app.hongs.veri;
 
 import java.util.Arrays;
 import java.util.Collection;

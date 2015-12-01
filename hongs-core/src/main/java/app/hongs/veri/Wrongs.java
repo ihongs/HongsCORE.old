@@ -1,4 +1,4 @@
-package app.hongs.vali;
+package app.hongs.veri;
 
 import app.hongs.CoreLocale;
 import app.hongs.HongsError;

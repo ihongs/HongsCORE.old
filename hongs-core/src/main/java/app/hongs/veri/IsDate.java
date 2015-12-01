@@ -1,4 +1,4 @@
-package app.hongs.vali;
+package app.hongs.veri;
 
 public class IsDate extends Rule {
     @Override

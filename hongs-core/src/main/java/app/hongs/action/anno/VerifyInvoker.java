@@ -6,7 +6,7 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.VerifyHelper;
-import app.hongs.vali.Wrongs;
+import app.hongs.veri.Wrongs;
 import app.hongs.util.Synt;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;

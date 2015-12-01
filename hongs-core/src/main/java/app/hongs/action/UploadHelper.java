@@ -3,7 +3,7 @@ package app.hongs.action;
 import app.hongs.Core;
 import app.hongs.util.Dict;
 import app.hongs.util.Tool;
-import app.hongs.vali.Wrong;
+import app.hongs.veri.Wrong;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
