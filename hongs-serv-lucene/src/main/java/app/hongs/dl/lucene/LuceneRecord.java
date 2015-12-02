@@ -500,8 +500,8 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
      * @param rd
      * @param total 总数限制
      * @param begin 起始位置
-     * @param end   结束位置(不含), 给定 0 则取到底
-     * @return      首位为实际总数, 取出请使用 poll
+     * @param end   结束位置(不含), 给定 0 则取到最后
+     * @return      首位为实际总数, 请用 .poll() 取出
      * @throws HongsException
      */
     public LinkedList getAll(Map rd, int total, int begin, int end) throws HongsException {
