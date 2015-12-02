@@ -90,24 +90,26 @@ public class UserAction {
                 .setUploadPath("upload/member/head")
                 .setAllowExtns("jpg", "png", "gif" )
                 .setAllowTypes("image/jpeg", "image/png", "image/gif");
-            File fo   = uh.upload(rd.get("head").toString());
-            String fn = uh.getResultPath();
-            String fu = uh.getResultHref();
-            rd.put("head", fu);
+            File fo = uh.upload(rd.get("head").toString());
 
             // 缩略头像
-            if ( fo  != null ) {
-            try {
-                String fm = fn.replaceFirst("\\.[^\\.]+$" , "");
-                if ( ! fn.endsWith(".jpg")) {
-                    Thumbnails.of(fn).scale(1.00).outputFormat("jpg").toFile(fm +".jpg");
+            if ( fo == null) {
+                rd.put("head", "");
+            } else {
+                String fn = uh.getResultPath();
+                String fu = uh.getResultHref();
+                rd.put("head", fu);
+                try {
+                    String fm = fn.replaceFirst("\\.[^\\.]+$" , "");
+                    if ( ! fn.endsWith(".jpg")) {
+                        Thumbnails.of(fn).scale(1.00).outputFormat("jpg").toFile(fm +".jpg");
+                    }
+                    Thumbnails.of(fn).size(96, 96).outputFormat("jpg").toFile(fm +"_lg.jpg");
+                    Thumbnails.of(fn).size(64, 64).outputFormat("jpg").toFile(fm +"_md.jpg");
+                    Thumbnails.of(fn).size(32, 32).outputFormat("jpg").toFile(fm +"_sm.jpg");
+                } catch (IOException  ex) {
+                    throw new HongsException.Common(ex);
                 }
-                Thumbnails.of(fn).size(96, 96).outputFormat("jpg").toFile(fm +"_lg.jpg");
-                Thumbnails.of(fn).size(64, 64).outputFormat("jpg").toFile(fm +"_md.jpg");
-                Thumbnails.of(fn).size(32, 32).outputFormat("jpg").toFile(fm +"_sm.jpg");
-            } catch (IOException  ex) {
-                throw new HongsException.Common(ex);
-            }
             }
         }
 
