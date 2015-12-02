@@ -5,6 +5,7 @@ import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
+import app.hongs.action.FormSet;
 import app.hongs.action.VerifyHelper;
 import app.hongs.veri.Wrongs;
 import app.hongs.util.Synt;
@@ -62,6 +63,13 @@ public class VerifyInvoker implements FilterInvoker {
                 form = s.substring(i + 1);
             if (conf.length() == 0)
                 conf = s.substring(0 , i);
+            try {
+                new FormSet( conf );
+            } catch (HongsException ex) {
+                if (ex.getCode() == 0x10e8) {
+                    conf = conf +"/"+ form;
+                }
+            }
         }
 
         // 执行校验

@@ -233,7 +233,7 @@ public class Form extends Model {
                 if (k.equals("datalist")) {
                     anum = docm.createElement("enum");
                     root.appendChild ( anum );
-                    anum.setAttribute("name", k );
+                    anum.setAttribute("name", item.getAttribute("name"));
                     Object x = Data.toObject( v );
                     List de = new ArrayList(/**/);
                     List dl = Synt.declare(x, de);

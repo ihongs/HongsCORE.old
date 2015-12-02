@@ -3,6 +3,7 @@ package app.hongs.action.anno;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
+import app.hongs.action.FormSet;
 import app.hongs.action.SupplyHelper;
 import app.hongs.util.Synt;
 import java.lang.annotation.Annotation;
@@ -60,6 +61,13 @@ public class SupplyInvoker implements FilterInvoker {
                 form = s.substring(i + 1);
             if (conf.length() == 0)
                 conf = s.substring(0 , i);
+            try {
+                new FormSet( conf );
+            } catch (HongsException ex) {
+                if (ex.getCode() == 0x10e8) {
+                    conf = conf +"/"+ form;
+                }
+            }
         }
 
         // 填充数据
