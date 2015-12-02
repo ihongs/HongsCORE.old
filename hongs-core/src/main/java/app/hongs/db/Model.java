@@ -707,21 +707,21 @@ implements IRecord
     int page = 1;
     if (rd.containsKey(Cnst.PN_KEY))
     {
-      page = Integer.parseInt((String)rd.get(Cnst.PN_KEY));
+      page = Synt.declare(rd.get(Cnst.PN_KEY), 1);
     }
 
     // 获取分页, 默认查总页数
     int pags = 0;
     if (rd.containsKey(Cnst.GN_KEY))
     {
-      pags = Integer.parseInt((String)rd.get(Cnst.GN_KEY));
+      pags = Synt.declare(rd.get(Cnst.GN_KEY), 0);
     }
 
     // 获取行数, 默认依从配置
     int rows;
     if (rd.containsKey(Cnst.RN_KEY))
     {
-      rows = Integer.parseInt((String)rd.get(Cnst.RN_KEY));
+      rows = Synt.declare(rd.get(Cnst.RN_KEY), 0);
     }
     else
     {
