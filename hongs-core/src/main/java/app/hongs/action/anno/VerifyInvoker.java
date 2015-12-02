@@ -49,7 +49,7 @@ public class VerifyInvoker implements FilterInvoker {
             mods = act.endsWith("/update") || (null != id && !"".equals(id))
                    ? ( byte ) 1 : ( byte ) 0;
         }
-        boolean prp = mode != 1 && mode != 2;
+        boolean prp = mode <= 0 ;
         boolean upd = mods == 1 ;
 
         // 识别路径
