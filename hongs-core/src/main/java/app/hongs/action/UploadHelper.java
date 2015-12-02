@@ -2,6 +2,7 @@ package app.hongs.action;
 
 import app.hongs.Core;
 import app.hongs.util.Dict;
+import app.hongs.util.Synt;
 import app.hongs.util.Tool;
 import app.hongs.veri.Wrong;
 import java.io.BufferedInputStream;
@@ -22,6 +23,9 @@ import java.util.Set;
 import org.apache.commons.fileupload.util.Streams;
 import eu.medsea.mimeutil.MimeUtil;
 import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 文件上传助手
@@ -289,16 +293,16 @@ public class UploadHelper {
      * 因文件系统对目录下的文件数量有限制
      * 故按照文件ID组成规则拆解成多级目录
      * 以使单个目录内的文件不会超出额定值
-     * @param id
+     * @param fame
      * @return
      */
-    public static String upname(String id) {
-        if (id.length() >= 8) {
-            id = id.substring(0, 4) // 前4位36进制时间戳
-           +"/"+ id.substring(4, 8) // 后4位36进制时间戳
-           +"/"+ id;
+    public static String upname(String fame) {
+        if (fame.length() >= 8) {
+            fame = fame.substring(0, 4) // 前4位36进制时间戳
+           +"/"+ fame.substring(4, 8) // 后4位36进制时间戳
+           +"/"+ fame;
         }
-        return   id;
+        return   fame;
     }
 
     /**
@@ -309,14 +313,39 @@ public class UploadHelper {
      */
     public static void upload(Map<String, Object> request, UploadHelper... uploads) throws Wrong {
         for(UploadHelper upload : uploads) {
-            String v = null;
-            String n = upload.uploadName != null ? upload.uploadName : "file";
-            v = Dict.getParam(request, v, n);
-            if (v  !=  null) {
-                upload.upload(v);
-                v = upload.getResultHref(  );
-                Dict.setParam(request, v, n);
+            String n =   upload.uploadName != null? upload.uploadName: "file";
+            Object v = Dict.getParam(request, null, n);
+            String u ;
+            File   f ;
+
+            //** 单个文件 **/
+
+            if(!(v instanceof Collection)
+            && !(v instanceof Map   )   ) {
+                 u = Synt.declare (v, "");
+                 f = upload.upload(u);
+                if (f != null) {
+                    u  = upload.getResultHref(   );
+                    Dict.setParam(request, u , n );
+                } else {
+                    Dict.setParam(request, "", n );
+                }
+                continue;
             }
+
+            //** 多个文件 **/
+
+            List s = new ArrayList( );
+            List a = Synt.declare (v, List.class );
+            n = n.replaceFirst("(\\.|\\[\\])$","");
+            for (Object x : a) {
+                 u = Synt.declare (x, "");
+                 f = upload.upload(u);
+                if (f != null) {
+                    s.add(upload.getResultHref( ));
+                }
+            }
+            Dict.setParam(request, s, n );
         }
     }
 

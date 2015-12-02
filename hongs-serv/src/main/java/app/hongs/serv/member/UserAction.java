@@ -1,6 +1,5 @@
 package app.hongs.serv.member;
 
-import app.hongs.Cnst;
 import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
@@ -10,17 +9,13 @@ import app.hongs.action.UploadHelper;
 import app.hongs.action.anno.Action;
 import app.hongs.action.anno.CommitSuccess;
 import app.hongs.db.DB;
-import app.hongs.db.FetchCase;
-import app.hongs.db.Table;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.coobird.thumbnailator.Thumbnails;
 
 /**
@@ -90,18 +85,19 @@ public class UserAction {
 
         if (rd.containsKey("head")) {
             // 上传头像
-            UploadHelper.upload(rd,
-                new UploadHelper()
-                    .setUploadName("head")
-                    .setUploadHref("upload/member/head")
-                    .setUploadPath("upload/member/head")
-                    .setAllowExtns("jpg", "png", "gif" )
-                    .setAllowTypes("image/jpeg", "image/png", "image/gif")
-            );
+            UploadHelper uh = new UploadHelper()
+                .setUploadHref("upload/member/head")
+                .setUploadPath("upload/member/head")
+                .setAllowExtns("jpg", "png", "gif" )
+                .setAllowTypes("image/jpeg", "image/png", "image/gif");
+            File fo   = uh.upload(rd.get("head").toString());
+            String fn = uh.getResultPath();
+            String fu = uh.getResultHref();
+            rd.put("head", fu);
 
             // 缩略头像
+            if ( fo  != null ) {
             try {
-                String fn = Core.BASE_PATH +"/"+ rd.get("head").toString();
                 String fm = fn.replaceFirst("\\.[^\\.]+$" , "");
                 if ( ! fn.endsWith(".jpg")) {
                     Thumbnails.of(fn).scale(1.00).outputFormat("jpg").toFile(fm +".jpg");
@@ -111,6 +107,7 @@ public class UserAction {
                 Thumbnails.of(fn).size(32, 32).outputFormat("jpg").toFile(fm +"_sm.jpg");
             } catch (IOException  ex) {
                 throw new HongsException.Common(ex);
+            }
             }
         }
 
