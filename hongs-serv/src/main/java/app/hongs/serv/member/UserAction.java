@@ -1,6 +1,5 @@
 package app.hongs.serv.member;
 
-import app.hongs.Core;
 import app.hongs.CoreLocale;
 import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
