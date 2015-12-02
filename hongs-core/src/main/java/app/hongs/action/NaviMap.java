@@ -102,12 +102,12 @@ public class NaviMap
   /**
    * 页面层级信息
    */
-  public Map<String, Map> menus;
+  public Map<String, Map > menus;
 
   /**
    * 全部分组信息
    */
-  public Map<String, Map> roles;
+  public Map<String, Map > roles;
 
   /**
    * 全部动作
