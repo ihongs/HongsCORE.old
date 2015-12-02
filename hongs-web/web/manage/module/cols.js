@@ -200,6 +200,7 @@ function drawFlds(fields, area, wdgt, pre, suf) {
                 continue;
             }
             if (k === "datalist") {
+                input.empty();
                 var datalist = JSON.parse(field["datalist"]) || [];
                 var selected = JSON.parse(field["selected"]) || [];
                 for(var i = 0; i < datalist.length; i ++ ) {

@@ -90,7 +90,7 @@
                             if (info.containsKey("maxlength")) extr += " maxlength=\""+info.get("maxlength").toString()+"\"";
                             if (info.containsKey("pattern")) extr += " pattern=\""+info.get("pattern").toString()+"\"";
                         %>
-                        <input class="form-control" type="text" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
+                        <input class="form-control" type="<%=type%>" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
                     <%} else if ("number".equals(type) || "range".equals(type)) {%>
                         <%
                             String extr = "";
@@ -98,7 +98,7 @@
                             if (info.containsKey("min")) extr += " min=\""+info.get("min").toString()+"\"";
                             if (info.containsKey("max")) extr += " max=\""+info.get("max").toString()+"\"";
                         %>
-                        <input class="form-control" type="number" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
+                        <input class="form-control" type="<%=type%>" name="<%=name%>" value="" <%=rqrd%><%=extr%>/>
                     <%} else if ("date".equals(type)) {%>
                         <input class="form-control input-date" type="text" name="<%=name%>" value="" data-toggle="datetimepicker" <%=rqrd%>/>
                     <%} else if ("time".equals(type)) {%>
