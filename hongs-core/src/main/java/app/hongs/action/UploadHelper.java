@@ -19,8 +19,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import eu.medsea.mimeutil.MimeUtil;
 import org.apache.commons.fileupload.util.Streams;
+import eu.medsea.mimeutil.MimeUtil;
+import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
 
 /**
  * 文件上传助手
@@ -34,6 +35,10 @@ public class UploadHelper {
     private Set<String> allowTypes = null;
     private Set<String> allowExtns = null;
 
+    static {
+        MimeUtil.registerMimeDetector(MagicMimeMimeDetector.class.getName());
+    }
+    
     public UploadHelper setUploadName(String name) {
         this.uploadName = name;
         return this;
@@ -70,35 +75,6 @@ public class UploadHelper {
         return this;
     }
 
-    private String getUploadPath(String path) {
-        Map m = new HashMap();
-        m.put("BASE_PATH", Core.BASE_PATH);
-        m.put("CORE_PATH", Core.CORE_PATH);
-        m.put("CONF_PATH", Core.CONF_PATH);
-        m.put("DATA_PATH", Core.DATA_PATH);
-        path = Tool.inject(path, m);
-        if (! new File(path).isAbsolute()) {
-            path = Core.BASE_PATH+"/"+path;
-        }
-        return path;
-    }
-
-    private String getUploadExtn(File file) {
-        String name = file.getName(   );
-        int pos = name.lastIndexOf('.');
-        if (pos > 1) {
-          return  name.substring(pos+1);
-        }
-        else {
-          return  "";
-        }
-    }
-
-    private String getUploadType(File file) {
-        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-        return  MimeUtil.getMimeTypes(file).toString();
-    }
-
     private void chkTypeOrExtn(String type, String extn) throws Wrong {
         /**
          * 检查文件类型
@@ -127,12 +103,25 @@ public class UploadHelper {
         this.resultName   =  famc ;
     }
 
+    private String getResultPath(String path) {
+        Map m = new HashMap();
+        m.put("BASE_PATH", Core.BASE_PATH);
+        m.put("CORE_PATH", Core.CORE_PATH);
+        m.put("CONF_PATH", Core.CONF_PATH);
+        m.put("DATA_PATH", Core.DATA_PATH);
+        path = Tool.inject(path, m);
+        if (! new File(path).isAbsolute()) {
+            path = Core.BASE_PATH+"/"+path;
+        }
+        return path;
+    }
+
     public String getResultPath() {
         String path = this.resultName;
         if (this.uploadPath != null) {
             path = this.uploadPath + "/" + path;
         }
-        return getUploadPath( path );
+        return getResultPath( path );
     }
 
     public String getResultHref() {
@@ -150,9 +139,12 @@ public class UploadHelper {
      * @param extn
      * @param fame 指定文件ID
      * @return
-     * @throws app.hongs.action.VerifyHelper.Wrong
+     * @throws Wrong
      */
     public File upload(InputStream xis, String type, String extn, String fame) throws Wrong {
+        if (extn.contains( "." )) {
+            extn = MimeUtil.getExtension(extn);
+        }
         chkTypeOrExtn(type, extn);
         setResultName(fame, extn);
 
@@ -175,7 +167,7 @@ public class UploadHelper {
      * @param type
      * @param extn
      * @return
-     * @throws app.hongs.action.VerifyHelper.Wrong
+     * @throws Wrong
      */
     public File upload(InputStream xis, String type, String extn) throws Wrong {
         return  upload(xis, type, extn, Core.getUniqueId());
@@ -186,21 +178,21 @@ public class UploadHelper {
      * @param path
      * @param fame 指定文件ID
      * @return
-     * @throws app.hongs.action.VerifyHelper.Wrong
+     * @throws Wrong
      */
     public File upload(String path, String fame) throws Wrong {
         if (fame == null) {
             fame  = Core.getUniqueId( );
         }
-        path = this.getUploadPath(path);
+        path = this.getResultPath(path);
         File file = new File(path);
         File temp = null;
         String type;
         String extn;
 
         if (file.exists()) {
-            extn = getUploadExtn( file );
-            type = getUploadType( file );
+            extn = MimeUtil.getExtension(file);
+            type = MimeUtil.getMimeTypes(file).toString();
         } else {
             temp = new File(path+".tnp");
 
@@ -255,7 +247,7 @@ public class UploadHelper {
      * 检查已上传的文件并从临时目录移到目标目录
      * @param fame 指定文件ID
      * @return
-     * @throws app.hongs.action.VerifyHelper.Wrong
+     * @throws Wrong
      */
     public File upload(String fame) throws Wrong {
         /*
@@ -277,7 +269,7 @@ public class UploadHelper {
             }
             setResultName(name, extn);
             String href = getResultHref();
-            String path = getResultPath();
+            String path = UploadHelper.this.getResultPath();
             if  (  fame.equals (href)) {
                 return new File(path); // 不变
             }
@@ -285,25 +277,6 @@ public class UploadHelper {
         }
 
         return upload(Core.DATA_PATH + "/upload/" + fame, fame);
-    }
-
-    /**
-     * 批量处理上传数据
-     * @param request
-     * @param uploads
-     * @throws app.hongs.action.VerifyHelper.Wrong
-     */
-    public static void upload(Map<String, Object> request, UploadHelper... uploads) throws Wrong {
-        for(UploadHelper upload : uploads) {
-            String v = null;
-            String n = upload.uploadName != null ? upload.uploadName : "file";
-            v = Dict.getParam(request, v, n);
-            if (v  !=  null) {
-                upload.upload(v);
-                v = upload.getResultHref(  );
-                Dict.setParam(request, v, n);
-            }
-        }
     }
 
     /**
@@ -321,6 +294,25 @@ public class UploadHelper {
            +"/"+ id;
         }
         return   id;
+    }
+
+    /**
+     * 批量处理上传数据
+     * @param request
+     * @param uploads
+     * @throws Wrong
+     */
+    public static void upload(Map<String, Object> request, UploadHelper... uploads) throws Wrong {
+        for(UploadHelper upload : uploads) {
+            String v = null;
+            String n = upload.uploadName != null ? upload.uploadName : "file";
+            v = Dict.getParam(request, v, n);
+            if (v  !=  null) {
+                upload.upload(v);
+                v = upload.getResultHref(  );
+                Dict.setParam(request, v, n);
+            }
+        }
     }
 
 }

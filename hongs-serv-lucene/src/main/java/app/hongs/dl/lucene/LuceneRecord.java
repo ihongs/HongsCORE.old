@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -228,9 +229,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             gn = CoreConfig.getInstance().getProperty("fore.pags.for.page", Cnst.GN_DEF);
         }
 
-        // 获取页码, 依此计算分页
-        if (gn < 1) gn = 1; // 链数不得少于 1
+        // 获取页码, 计算查询区间
         int pn = Synt.declare(rd.get(Cnst.PN_KEY), 1);
+        if (pn < 1) pn = 1;
+        if (gn < 1) gn = 1;
         int minPn = pn - (gn / 2 );
         if (minPn < 1)   minPn = 1;
         int maxPn = gn + minPn - 1;
@@ -238,39 +240,10 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         int minRn = rn * (pn - 1 );
         int maxRn = rn + minRn;
 
-        // 查询列表
-        List list = new ArrayList();
-        int rc, pc;
-        initial( );
-        try {
-            Query q = getQuery(rd);
-            Sort  s = getSort (rd);
-                      ignFlds (rd);
-
-            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("LuceneRecord.retrieve: "+q.toString()+" Sort: "+s.toString()+" Page: "+pn+" Rows: "+rn);
-            }
-
-            TopDocs tops = finder.search(q, limit, s);
-
-            if (maxRn > tops.totalHits) {
-                maxRn = tops.totalHits;
-            }
-
-            ScoreDoc[] scos = tops.scoreDocs;
-            ScoreDoc   sco  ;
-            Document   doc  ;
-            for(int i = minRn; i < maxRn; i ++) {
-                sco =  scos[i];
-                doc = reader.document(sco.doc );
-                list.add(/**/doc2Map (/**/doc));
-            }
-
-            rc = scos.length;
-            pc = (int) Math.ceil((double)rc / rn);
-        } catch (IOException ex) {
-            throw new HongsException.Common ( ex);
-        }
+        // 获取列表
+        LinkedList list = getAll(rd, limit, minRn, maxRn);
+        int rc = (int) list.pop ( /* rowscount */);
+        int pc = (int) Math.ceil((double) rc / rn);
 
         // 记录分页
         Map  resp = new HashMap();
@@ -280,9 +253,9 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         page.put("page", pn);
         page.put("pags", gn);
         page.put("rows", rn);
-        page.put("rowscount", rc);
         page.put("pagecount", pc);
-        page.put("uncertain", pc > maxPn);
+        page.put("rowscount", rc);
+        page.put("uncertain", rc == limit); // 为 true 表示总数不确定
         if (rc == 0) {
             page.put("err", 1);
         } else
@@ -290,7 +263,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             page.put("err", 2);
         }
 
-        return resp;
+        return  resp;
     }
 
     /**
@@ -337,97 +310,6 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             del(id);
         }
         return ids.size();
-    }
-
-    /**
-     * 获取单个文档
-     * @param rd
-     * @return
-     * @throws HongsException
-     */
-    public Map getOne(Map rd) throws HongsException {
-        initial();
-        try {
-            Query q = getQuery(rd);
-            Sort  s = getSort (rd);
-                      ignFlds (rd);
-
-            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("LuceneRecord.getOne: "+q.toString()+" Sort: "+s.toString());
-            }
-
-            TopDocs  tops;
-            if (s != null) {
-                tops = finder.search(q, 1, s);
-            } else {
-                tops = finder.search(q, 1);
-            }
-
-            if (tops.totalHits > 0) {
-                ScoreDoc[] scos  = tops.scoreDocs;
-                ScoreDoc   sco   = scos[ 0 ] /**/;
-                Document   doc   = reader.document(sco.doc);
-                return doc2Map(doc);
-            }
-
-            return new HashMap(   );
-        } catch (IOException ex) {
-            throw new HongsException.Common( ex );
-        }
-    }
-
-    /**
-     * 获取全部文档
-     * @param rd
-     * @return
-     * @throws HongsException
-     */
-    public List getAll(Map rd) throws HongsException {
-        initial();
-        try {
-            Query q = getQuery(rd);
-            Sort  s = getSort (rd);
-                      ignFlds (rd);
-
-            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
-                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString());
-            }
-
-            int n  = 1000;
-            TopDocs  tops;
-            if (s != null) {
-                tops = finder.search(q, n, s);
-            } else {
-                tops = finder.search(q, n);
-            }
-
-            List list = new ArrayList();
-
-            while(tops.totalHits > 0) {
-                ScoreDoc[] scos  = tops.scoreDocs;
-                ScoreDoc   sco   = null;
-                Document   doc   ;
-                for(int i = 0; i < scos.length;i++) {
-                    sco =  scos[i];
-                    doc = reader.document(sco.doc );
-                    list.add(/**/doc2Map (/**/doc));
-                }
-
-                if (n != scos.length) {
-                    break;
-                }
-
-                if (s != null) {
-                    tops = finder.searchAfter(sco, q, n, s);
-                } else {
-                    tops = finder.searchAfter(sco, q, n);
-                }
-            }
-
-            return  list;
-        } catch (IOException ex) {
-            throw new HongsException.Common(ex);
-        }
     }
 
     /**
@@ -529,6 +411,132 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
             return doc2Map( doc );
         } else {
             return new HashMap( );
+        }
+    }
+
+    /**
+     * 获取单个文档
+     * @param rd
+     * @return
+     * @throws HongsException
+     */
+    public Map getOne(Map rd) throws HongsException {
+        initial();
+        try {
+            Query q = getQuery(rd);
+            Sort  s = getSort (rd);
+                      ignFlds (rd);
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+                CoreLogger.debug("LuceneRecord.getOne: "+q.toString()+" Sort: "+s.toString());
+            }
+
+            TopDocs  tops;
+            if (s != null) {
+                tops = finder.search(q, 1, s);
+            } else {
+                tops = finder.search(q, 1);
+            }
+
+            if (tops.totalHits > 0) {
+                ScoreDoc[] scos  = tops.scoreDocs;
+                ScoreDoc   sco   = scos[ 0 ] /**/;
+                Document   doc   = reader.document(sco.doc);
+                return doc2Map(doc);
+            }
+
+            return new HashMap(   );
+        } catch (IOException ex) {
+            throw new HongsException.Common( ex );
+        }
+    }
+
+    /**
+     * 获取全部文档
+     * @param rd
+     * @return
+     * @throws HongsException
+     */
+    public LinkedList getAll(Map rd) throws HongsException {
+        initial();
+        try {
+            Query q = getQuery(rd);
+            Sort  s = getSort (rd);
+                      ignFlds (rd);
+            int   n = 1000;
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString());
+            }
+
+            TopDocs    tops = finder.search (q,n,s);
+            LinkedList list = new LinkedList(/***/);
+
+            while(tops.totalHits > 0) {
+                ScoreDoc[] scos  = tops.scoreDocs  ;
+                ScoreDoc   sco   = null;
+                Document   doc   ;
+                for(int i = 0; i < scos.length;i++) {
+                    sco =  scos[i];
+                    doc = reader.document(sco.doc );
+                    list.add(/**/doc2Map (/**/doc));
+                }
+
+                if (scos.length != n) {
+                    break;
+                }
+
+                tops = finder.searchAfter(sco, q, n, s);
+            }
+
+            return  list;
+        } catch (IOException ex) {
+            throw new HongsException.Common(ex);
+        }
+    }
+
+    /**
+     * 获取部分文档
+     * @param rd
+     * @param total 总数限制
+     * @param begin 起始位置
+     * @param end   结束位置(不含), 给定 0 则取到底
+     * @return      末位为实际总数, 请用 pop() 取出
+     * @throws HongsException
+     */
+    public LinkedList getAll(Map rd, int total, int begin, int end) throws HongsException {
+        initial( );
+        try {
+            Query q = getQuery(rd);
+            Sort  s = getSort (rd);
+                      ignFlds (rd);
+
+            if (0 < Core.DEBUG && 8 != (8 & Core.DEBUG)) {
+                CoreLogger.debug("LuceneRecord.getAll: "+q.toString()+" Sort: "+s.toString()
+                                                +" limit: "+total+" range: "+begin+","+end );
+            }
+
+            TopDocs    tops = finder.search (q, total, s);
+            LinkedList list = new LinkedList( );
+
+            if (end  > tops.totalHits || end<1) {
+                end  = tops.totalHits;
+            }
+
+            ScoreDoc[] scos = tops.scoreDocs ;
+            ScoreDoc   sco  ;
+            Document   doc  ;
+            for(int i = begin ; i < end ; i ++) {
+                sco =  scos[i];
+                doc = reader.document(sco.doc );
+                list.add(/**/doc2Map (/**/doc));
+            }
+
+            list.add(scos.length); // 总数量
+
+            return  list;
+        } catch (IOException ex ) {
+            throw new HongsException.Common(ex);
         }
     }
 
@@ -1097,7 +1105,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
                   ? Synt.declset ( xb )
                   : new LinkedHashSet();
 
-        List<SortField> of = new ArrayList();
+        List<SortField> of = new LinkedList();
 
         for (String fn: ob) {
             // 相关

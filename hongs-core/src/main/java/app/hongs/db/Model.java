@@ -562,6 +562,27 @@ implements IRecord
     return this.table.fetchLess(caze);
   }
 
+  public Map  getOne(Map rd)
+    throws HongsException
+  {
+    return this.getOne(rd, null);
+  }
+
+  public Map  getOne(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    if (rd == null) {
+        rd = new HashMap();
+    }
+
+    // 调用filter进行过滤
+    caze = caze != null ? caze.clone() : new FetchCase();
+    caze.setOption("MODEL_METHOD", "getOne");
+    this.filter(caze , rd);
+
+    return this.table.fetchLess(caze);
+  }
+
   public List getAll(Map rd)
     throws HongsException
   {
@@ -571,6 +592,10 @@ implements IRecord
   public List getAll(Map rd, FetchCase caze)
     throws HongsException
   {
+    if (rd == null) {
+        rd = new HashMap();
+    }
+
     // 调用filter进行过滤
     caze = caze != null ? caze.clone() : new FetchCase();
     caze.setOption("MODEL_METHOD", "getAll");
@@ -593,7 +618,7 @@ implements IRecord
   }
 
   /**
-   * 获取信息(调用get)
+   * 获取信息
    *
    * @param rd
    * @param caze

@@ -26,14 +26,14 @@ import java.util.Set;
  * <pre>
  * pid          获取pid 指定的一组节点
  * id[]         获取id[]指定的全部节点
- * with-path    附带路径, 1信息, 2仅ID
+ * md           4附带路径ID, 8附带路径信息
  * </pre>
  *
  * <h3>JS请求参数组合:</h3>
  * <pre>
  * 获取层级: ?pid=xxx
- * 获取节点: ?id=xxx&with-path=1
- * 查找节点: ?wd=xxx&with-path=2
+ * 获取节点: ?id=xxx&md=8
+ * 查找节点: ?wd=xxx&md=4
  * </pre>
  *
  * @author Hong
@@ -109,6 +109,53 @@ public class Mtree extends Model
 
   //** 标准动作方法 **/
 
+  @Override
+  public Map getInfo(Map rd, FetchCase caze)
+    throws HongsException
+  {
+    if (rd == null)
+    {
+      rd = new HashMap();
+    }
+
+    Map info = super.getInfo(rd, caze);
+
+    //** 附带路径 **/
+
+    if (info.isEmpty())
+    {
+        return info;
+    }
+
+    byte   pth = Synt.declare(rd.get("md"),(byte)  0 );
+    String pid = Synt.declare(rd.get(this.pidKey), "");
+    if (pid.length() == 0)
+    {
+        pid = this.rootId;
+    }
+
+    if (4 == (4 & pth))
+    {
+      String id = (String) info.get(this.table.primaryKey);
+      info.put("path", this.getParentIds(id, pid));
+    }
+    else
+    if (8 == (8 & pth))
+    {
+      String id = (String) info.get(this.table.primaryKey);
+      info.put("path", this.getParents  (id, pid));
+    }
+
+    return info;
+  }
+
+  @Override
+  public Map getInfo(Map rd)
+    throws HongsException
+  {
+    return this.getInfo(rd, null);
+  }
+
   /**
    * 获取列表
    *
@@ -177,59 +224,58 @@ public class Mtree extends Model
 
     //** 查询列表 **/
 
-    Map  data = new HashMap();
-    List list;
-    if (!rd.containsKey(Cnst.PN_KEY)
-    &&  !rd.containsKey(Cnst.GN_KEY)
-    &&  !rd.containsKey(Cnst.RN_KEY))
+    if (! rd.containsKey( Cnst.PN_KEY )
+    &&  ! rd.containsKey( Cnst.GN_KEY )
+    &&  ! rd.containsKey( Cnst.RN_KEY ))
     {
-      list = super.getAll (rd , caze);
-      data.put("list", list);
+      rd.put(Cnst.RN_KEY, 0); // 默认不分页
     }
-    else
-    {
-      data = super.getList(rd , caze);
-      list = (List) data.get( "list");
-    }
+    Map  data = super.getList(rd, caze);
+    List list = (List) data.get("list");
 
     //** 附带路径 **/
 
-    int    pth = Synt.declare(rd.get("with-path"), 0 );
+    if (list.isEmpty())
+    {
+        return data;
+    }
+
+    byte   pth = Synt.declare(rd.get("md"),(byte)  0 );
     String pid = Synt.declare(rd.get(this.pidKey), "");
     if (pid.length() == 0)
     {
         pid = this.rootId;
     }
 
-    if (pth == 2)
+    if (4 == (4 & pth))
     {
-      List path = this.getParentIds(pid);
+      //List path = this.getParentIds(pid);
 
       Iterator it = list.iterator();
       while (it.hasNext())
       {
         Map info = (Map)it.next();
         String id = (String)info.get(this.table.primaryKey);
-        List subPath = new ArrayList(path);
+        List subPath = new ArrayList( /* path */ );
         info.put("path", subPath);
 
         subPath.addAll(this.getParentIds(id, pid));
       }
     }
     else
-    if (pth == 1)
+    if (8 == (8 & pth))
     {
-      List path = this.getParents(pid);
+      //List path = this.getParents(pid);
 
       Iterator it = list.iterator();
       while (it.hasNext())
       {
         Map info = (Map)it.next();
         String id = (String)info.get(this.table.primaryKey);
-        List subPath = new ArrayList(path);
+        List subPath = new ArrayList( /* path */ );
         info.put("path", subPath);
 
-        subPath.addAll(this.getParents(id, pid));
+        subPath.addAll(this.getParents  (id, pid));
       }
     }
 
