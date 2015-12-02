@@ -38,7 +38,7 @@ public class UploadHelper {
     static {
         MimeUtil.registerMimeDetector(MagicMimeMimeDetector.class.getName());
     }
-    
+
     public UploadHelper setUploadName(String name) {
         this.uploadName = name;
         return this;
@@ -250,6 +250,11 @@ public class UploadHelper {
      * @throws Wrong
      */
     public File upload(String fame) throws Wrong {
+        if (fame == null || fame.length( ) == 0) {
+            setResultName("", null);
+            return  null;
+        }
+
         /*
          * 如果直接给的路径
          * 则从路径中取名称
