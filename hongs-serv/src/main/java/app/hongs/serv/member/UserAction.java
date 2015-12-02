@@ -94,11 +94,11 @@ public class UserAction {
 
             // 缩略头像
             if ( fo == null) {
-                rd.put("head", "");
+                 rd.put("head", "");
             } else {
                 String fn = uh.getResultPath();
                 String fu = uh.getResultHref();
-                rd.put("head", fu);
+                 rd.put("head", fu);
                 try {
                     String fm = fn.replaceFirst("\\.[^\\.]+$" , "");
                     if ( ! fn.endsWith(".jpg")) {
