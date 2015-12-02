@@ -88,9 +88,9 @@ public class UserAction {
             UploadHelper uh = new UploadHelper()
                 .setUploadHref("upload/member/head")
                 .setUploadPath("upload/member/head")
-                .setAllowExtns("jpg", "png", "gif" )
-                .setAllowTypes("image/jpeg", "image/png", "image/gif");
-            File fo = uh.upload(rd.get("head").toString());
+                .setAllowTypes("image/jpeg", "image/png", "image/gif")
+                .setAllowExtns("jpeg", "jpg", "png", "gif");
+            File fo = uh.upload(rd.get("head").toString( ));
 
             // 缩略头像
             if ( fo == null) {
