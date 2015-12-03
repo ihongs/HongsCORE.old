@@ -113,9 +113,9 @@ public class ActsAction
     else
     if (errno >= 0x110a && errno <= 0x110e )
     {
-        Throwable  tx  = te ;
-                   te  = ta ;
-                   ta  = tx ;
+        Throwable  tx  = ta ;
+                   ta  = te ;
+                   te  = tx ;
     }
     else
     if (errno >= 0x40   && errno <= 0x49   )
