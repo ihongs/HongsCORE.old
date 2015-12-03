@@ -544,7 +544,7 @@ public class DB
             this.connection.setAutoCommit(false);
         }
     } catch (SQLException ex) {
-        throw new HongsError(0x42, ex);
+        throw new HongsError(0x3a, ex);
     }
   }
 
@@ -563,7 +563,7 @@ public class DB
             connection.commit(  );
         }
     } catch (SQLException ex) {
-        throw new HongsError(0x43, ex);
+        throw new HongsError(0x3b, ex);
     }
   }
 
@@ -582,7 +582,7 @@ public class DB
             connection.rollback();
         }
     } catch (SQLException ex) {
-        throw new HongsError(0x44, ex);
+        throw new HongsError(0x3c, ex);
     }
   }
 

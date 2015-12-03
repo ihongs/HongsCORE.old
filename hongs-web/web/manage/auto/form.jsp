@@ -110,9 +110,7 @@
                     <%} else if ("radio".equals(type)) {%>
                         <div class="radio"    data-fn="<%=name%>" data-ft="_radio" data-vk="<%=info.get("data-vk")%>" data-tk="<%=info.get("data-tk")%>"></div>
                     <%} else if ("enum".equals(type) || "select".equals(type)) {%>
-                        <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>>
-                            <option value="">--<%=lang.translate("fore.select.lebel")%>--</option>
-                        </select>
+                        <select class="form-control" name="<%=name%>" <%=rqrd%> <%=rptd%>></select>
                     <%} else if ("pick".equals(type) ||   "fork".equals(type)) {%>
                         <%
                             String vk = info.containsKey("data-vk") ? (String) info.get("data-vk") :  "id" ;
@@ -122,7 +120,7 @@
                             String al = info.containsKey("data-al") ? (String) info.get("data-al") :
                                       ( info.containsKey("conf"   ) ? (String) info.get("conf"   ) : _module )
                                     + ( info.containsKey("form"   ) ? (String) info.get("form"   ) : /**/ ak )
-                                    + "list4select.html";
+                                    + "list4fork.html";
                         %>
                         <ul class="pickbox" data-ft="_fork" data-fn="<%=name%>" data-ak="<%=ak%>" data-tk="<%=tk%>" data-vk="<%=vk%>" <%=rqrd%>></ul>
                         <button type="button" class="btn btn-default form-control" data-toggle="hsPick" data-target="@" data-href="<%=al%>"><%=lang.translate("fore.select.lebel", disp)%></button>

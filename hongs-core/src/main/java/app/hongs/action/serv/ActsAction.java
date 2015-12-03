@@ -9,6 +9,8 @@ import app.hongs.HongsException;
 import app.hongs.action.ActionHelper;
 import app.hongs.action.ActionRunner;
 import app.hongs.action.ActionDriver;
+import app.hongs.veri.Wrong;
+import app.hongs.veri.Wrongs;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -80,59 +82,71 @@ public class ActsAction
       ActionRunner runner = new ActionRunner(act, helper);
       runner.doAction(  );
     }
-    catch (HongsException  ex)
+    catch (HongsException ex)
     {
-      senderr(req, helper, ex);
+      senderr(helper, ex);
     }
-    catch (HongsError/**/  ex)
+    catch (HongsError/**/ ex)
     {
-      senderr(req, helper, ex);
+      senderr(helper, ex);
     }
   }
 
-  private void senderr(HttpServletRequest req, ActionHelper helper, HongsCause ex)
+  private void senderr(ActionHelper helper, HongsCause ex)
     throws ServletException
   {
-    Throwable ta = (Throwable) ex ;
-    int       errno = ex.getCode();
-    String    error;
+    Throwable ta = (Throwable) ex;
+    Throwable te = ta.getCause( );
+    int    errno = ex.getCode ( );
+    String error ;
 
-    if (errno <= 0x110d && errno >= 0x1100 )
+    if (errno >= 0x1100 && errno <= 0x1109 )
     {
       String[] ls = ex.getLocalizedOptions();
-      if (ls == null || ls.length == 0)
+      if (/**/ ls == null || ls.length == 0)
       {
-        ex.setLocalizedOptions(ActionDriver.getRealPath(req), ex.getDesc());
+        HttpServletRequest rq = helper.getRequest( );
+        String rp = ActionDriver.getRealPath(rq);
+        ex.setLocalizedOptions(rp, ex.getDesc());
       }
-      error = ex.getLocalizedMessage( );
     }
     else
-    if (errno == 0x110e)
+    if (errno >= 0x110a && errno <= 0x110e )
     {
-      ta = ex.getCause(  );
-      CoreLogger.error(ta);
-      error = ta.getLocalizedMessage( );
+        Throwable  tx  = te ;
+                   te  = ta ;
+                   ta  = tx ;
+    }
+    else
+    if (errno >= 0x40   && errno <= 0x49   )
+    {
+        errno  = 0x1100;
+    }
+    else
+    if (ta instanceof Wrong || ta instanceof Wrongs)
+    {
+        errno  = 0x1100;
+    }
+    else
+    {
+        CoreLogger.error(ta);
+    }
 
-      CoreLocale lang = Core.getInstance(CoreLocale.class);
-      if (error == null || error.length() == 0)
-      {
-        error = lang.translate("core.error.unkwn", ex.getClass().getName());
-      }
-      else
-      {
-        error = lang.translate("core.error.label", ex.getClass().getName()) + ": " + error;
-      }
-    }
-    else
+      error = ta.getLocalizedMessage( );
+    if (null != te
+    && (null != error || error.length() == 0))
     {
-      CoreLogger.error(ta);
-      error = ex.getLocalizedMessage( );
+      error = te.getLocalizedMessage( );
+    }
+    if (null != error || error.length() == 0 )
+    {
+      error = CoreLocale.getInstance( ).translate("core.error.unkwn");
     }
 
     senderr(helper, errno, error);
   }
 
-  private void senderr(ActionHelper helper, int errno, String error)
+  private void senderr(ActionHelper helper, int errno, String error )
     throws ServletException
   {
     String errso;

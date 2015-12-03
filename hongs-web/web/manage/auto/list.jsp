@@ -129,7 +129,7 @@
     context.hsList({
         loadUrl : "<%=_module%>/<%=_entity%>/retrieve.act?md=2",
         openUrls: [
-            ['.create', '<%=_module%>/<%=_entity%>/form.html?id=0', '@'],
+            ['.create', '<%=_module%>/<%=_entity%>/form.html?id=0&md=0', '@'],
             ['.update', '<%=_module%>/<%=_entity%>/form4edit.html?md=1&id={ID}', '@'],
             ['.review', '<%=_module%>/<%=_entity%>/form4view.html?md=1&id={ID}', '@']
         ],

@@ -31,7 +31,7 @@ import org.json.simple.parser.ParseException;
  *
  * <h3>错误代码</h3>
  * <pre>
- * 0x40 解析JSON数据失败
+ * 0x41 解析JSON数据失败
  * </pre>
  *
  * @author Hongs
@@ -52,7 +52,7 @@ public class Data
     }
     catch (ParseException ex)
     {
-      throw new HongsError(0x40, "Can not parse data by json", ex);
+      throw new HongsError(0x41, "Can not parse data by json", ex);
     }
   }
 

@@ -10,12 +10,15 @@ import app.hongs.action.anno.CommitSuccess;
 import app.hongs.db.DB;
 import app.hongs.util.Dict;
 import app.hongs.util.Synt;
+import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Positions;
 
 /**
  * 用户动作接口
@@ -89,26 +92,35 @@ public class UserAction {
                 .setUploadPath("upload/member/head")
                 .setAllowTypes("image/jpeg", "image/png", "image/gif")
                 .setAllowExtns("jpeg", "jpg", "png", "gif");
-            File fo = uh.upload(rd.get("head").toString( ));
+            File fo  = uh.upload(rd.get("head").toString());
 
             // 缩略头像
-            if ( fo == null) {
-                 rd.put("head", "");
-            } else {
+            if ( fo != null) {
                 String fn = uh.getResultPath();
                 String fu = uh.getResultHref();
-                 rd.put("head", fu);
+                String fm = fn.replaceFirst("\\.[^\\.]+$", ""/**/);
+                       fu = fu.replaceFirst("\\.[^\\.]+$", ".jpg");
                 try {
-                    String fm = fn.replaceFirst("\\.[^\\.]+$" , "");
-                    if ( ! fn.endsWith(".jpg")) {
-                        Thumbnails.of(fn).scale(1.00).outputFormat("jpg").toFile(fm +".jpg");
+                    Image img = ImageIO.read(new File(fn));
+                    int w = img.getWidth (null);
+                    int h = img.getHeight(null);
+                    if (w > h) {
+                        w = h;
+                    } else {
+                        h = w;
                     }
+                    Thumbnails.of(fn).sourceRegion(Positions.CENTER, w, h)
+                                     .size(w , h ).outputFormat("jpg").toFile(fm +".jpg");
+                    fn = fm +".jpg";
                     Thumbnails.of(fn).size(96, 96).outputFormat("jpg").toFile(fm +"_lg.jpg");
                     Thumbnails.of(fn).size(64, 64).outputFormat("jpg").toFile(fm +"_md.jpg");
                     Thumbnails.of(fn).size(32, 32).outputFormat("jpg").toFile(fm +"_sm.jpg");
                 } catch (IOException  ex) {
                     throw new HongsException.Common(ex);
                 }
+                rd.put("head", fu);
+            } else {
+                rd.put("head", "");
             }
         }
 

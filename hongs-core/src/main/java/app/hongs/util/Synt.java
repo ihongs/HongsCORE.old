@@ -138,7 +138,7 @@ public class Synt {
             if (val instanceof Map ) {
             } else {
                 // 其他类型均无法转换为 Map
-                throw new HongsError(0x46, "'" + val + "' can not be cast to Map");
+                throw new HongsError(0x43, "'" + val + "' can not be cast to Map");
             }
         } else {
             /**
@@ -169,7 +169,7 @@ public class Synt {
                       try {
                         val = Integer.parseInt(((String) val).trim());
                       } catch (NumberFormatException ex) {
-                        throw new HongsError(0x46, "'" + val + "' can not be cast to int");
+                        throw new HongsError(0x43, "'" + val + "' can not be cast to int");
                       }
                     }
                 } else if (Byte.class.isAssignableFrom(cls)) {
@@ -180,7 +180,7 @@ public class Synt {
                       try {
                         val = Byte.parseByte(((String) val).trim());
                       } catch (NumberFormatException ex) {
-                        throw new HongsError(0x46, "'" + val + "' can not be cast to byte");
+                        throw new HongsError(0x43, "'" + val + "' can not be cast to byte");
                       }
                     }
                 } else if (Short.class.isAssignableFrom(cls)) {
@@ -191,7 +191,7 @@ public class Synt {
                       try {
                         val = Short.parseShort(((String) val).trim());
                       } catch (NumberFormatException ex) {
-                        throw new HongsError(0x46, "'" + val + "' can not be cast to short");
+                        throw new HongsError(0x43, "'" + val + "' can not be cast to short");
                       }
                     }
                 } else if (Long.class.isAssignableFrom(cls)) {
@@ -202,7 +202,7 @@ public class Synt {
                       try {
                         val = Long.parseLong(((String) val).trim());
                       } catch (NumberFormatException ex) {
-                        throw new HongsError(0x46, "'" + val + "' can not be cast to long");
+                        throw new HongsError(0x43, "'" + val + "' can not be cast to long");
                       }
                     }
                 } else if (Float.class.isAssignableFrom(cls)) {
@@ -213,7 +213,7 @@ public class Synt {
                       try {
                         val = Float.parseFloat(((String) val).trim());
                       } catch (NumberFormatException ex) {
-                        throw new HongsError(0x46, "'" + val + "' can not be cast to float");
+                        throw new HongsError(0x43, "'" + val + "' can not be cast to float");
                       }
                     }
                 } else {
@@ -224,7 +224,7 @@ public class Synt {
                       try {
                         val = Double.parseDouble(((String) val).trim());
                       } catch (NumberFormatException ex) {
-                        throw new HongsError(0x46, "'" + val + "' can not be cast to double");
+                        throw new HongsError(0x43, "'" + val + "' can not be cast to double");
                       }
                     }
                 }
@@ -240,7 +240,7 @@ public class Synt {
                     if (FAKE.matcher(str).matches()) {
                         val = false;
                     } else {
-                        throw new HongsError(0x46, "'" + str + "' can not be cast to boolean");
+                        throw new HongsError(0x43, "'" + str + "' can not be cast to boolean");
                     }
                 }
             }
@@ -249,7 +249,7 @@ public class Synt {
         try {
             return (T) val;
         }   catch  (ClassCastException ex) {
-            throw new HongsError(0x46, ex);
+            throw new HongsError(0x43, ex);
         }
     }
 

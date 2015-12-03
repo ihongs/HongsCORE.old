@@ -730,7 +730,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             writer.commit(  );
         } catch (IOException ex) {
-            throw new HongsError(0x43, ex);
+            throw new HongsError(0x3b, ex);
         }
     }
 
@@ -747,7 +747,7 @@ public class LuceneRecord implements IRecord, ITrnsct, Core.Destroy {
         try {
             writer.rollback();
         } catch (IOException ex) {
-            throw new HongsError(0x44, ex);
+            throw new HongsError(0x3c, ex);
         }
     }
 

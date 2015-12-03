@@ -155,7 +155,7 @@ public class Dict
   {
     if (map == null)
     {
-      throw new HongsError(0x47, "`map` can not be null" );
+      throw new HongsError(0x45, "`map` can not be null" );
     }
 
     return get(map, def, keys, 0);
@@ -171,15 +171,15 @@ public class Dict
   {
     if (map == null)
     {
-      throw new HongsError(0x48, "`map` can not be null" );
+      throw new HongsError(0x46, "`map` can not be null" );
     }
     if (keys.length ==  0)
     {
-      throw new HongsError(0x49,"`keys` can not be empty");
+      throw new HongsError(0x47,"`keys` can not be empty");
     }
     if (keys[0] == null || keys[0] instanceof Integer)
     {
-      throw new HongsError(0x45,"first key can not be null or integer");
+      throw new HongsError(0x48,"first key can not be null or integer");
     }
 
     put(map, val, keys, 0);
@@ -232,8 +232,8 @@ public class Dict
     try {
       return Synt.declare(get(map, def, keys), def);
     } catch (HongsError er) {
-      if (er.getCode( ) ==  0x46) {
-        er = new HongsError(0x46, "Wrong type for key '"+Arrays.toString(keys)+"'", er.getCause());
+      if (er.getCode( ) ==  0x43) {
+        er = new HongsError(0x43, "Wrong type for key '"+Arrays.toString(keys)+"'", er.getCause());
       }
       throw er;
     }
@@ -252,8 +252,8 @@ public class Dict
     try {
       return Synt.declare(get(map,null, keys), cls);
     } catch (HongsError er) {
-      if (er.getCode()  ==  0x46) {
-        er = new HongsError(0x46, "Wrong type for key '"+Arrays.toString(keys)+"'", er.getCause());
+      if (er.getCode()  ==  0x43) {
+        er = new HongsError(0x43, "Wrong type for key '"+Arrays.toString(keys)+"'", er.getCause());
       }
       throw er;
     }

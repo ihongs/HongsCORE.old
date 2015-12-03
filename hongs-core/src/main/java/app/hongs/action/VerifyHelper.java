@@ -142,7 +142,7 @@ public class VerifyHelper implements Veri {
                 rule = "Is"+c.toUpperCase()+ n ;
             }
             if (! rule.contains(".") ) {
-                rule = "app.hongs.vali." + rule;
+                rule = "app.hongs.veri." + rule;
             }
 
             Rule inst;
