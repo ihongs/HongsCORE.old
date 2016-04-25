@@ -1,3 +1,5 @@
+此项目因源码仓库维护不当，导致提交了一些 jar,zip 等格式的大文件，既无法下拉，也无法上推。在尝试了一些方法后仍无法完美解决，另起炉灶 https://github.com/ihongs/HongsCORE.new 。此项目也将在不久后移除。
+
 # HongsCORE framework for Java
 
 * 文档版本: 15.09.20
